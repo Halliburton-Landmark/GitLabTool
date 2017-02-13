@@ -1,5 +1,7 @@
 package com.ystrazhko.git.ui.javafx;
 
+import com.ystrazhko.git.services.LoginService;
+
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -18,6 +20,8 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 class LoginWindow {
+
+    private LoginService _loginService;
 
     LoginWindow(Stage primaryStage) {
         primaryStage.setTitle("GitLab Welcome");
