@@ -23,7 +23,8 @@ class LoginWindow {
 
     private LoginService _loginService;
 
-    LoginWindow(Stage primaryStage) {
+    LoginWindow(Stage primaryStage, LoginService loginService) {
+        setLoginService(loginService);
         primaryStage.setTitle("GitLab Welcome");
         final GridPane grid = new GridPane();
         grid.setAlignment(Pos.CENTER);
@@ -61,12 +62,23 @@ class LoginWindow {
             @Override
             public void handle(ActionEvent e) {
                 actiontarget.setFill(Color.FIREBRICK);
-                actiontarget.setText("Sign in button pressed");
+                String name = userTextField.getText();
+                String password = pwBox.getText();
+                actiontarget.setText(String.valueOf(getLoginService().login(name, password) != null));
+                System.out.println();
             }
         });
 
         final Scene scene = new Scene(grid, 300, 275);
         primaryStage.setScene(scene);
         primaryStage.show();
+    }
+
+    private LoginService getLoginService() {
+        return _loginService;
+    }
+
+    private void setLoginService(LoginService loginService) {
+        _loginService = loginService;
     }
 }
