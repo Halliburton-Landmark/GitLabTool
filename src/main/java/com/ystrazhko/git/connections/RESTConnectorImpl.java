@@ -12,33 +12,50 @@ import javax.net.ssl.HttpsURLConnection;
 
 class RESTConnectorImpl implements RESTConnector {
 
+    /**
+     * Sends post
+     *
+     * @param suffixForUrl suffix for adding to main url
+     * @param params
+     * @param header the data to be added to header of request.
+     *               if the header is not needed to pass null
+     * @param reguest - for example: "GET" or "POST"
+     *
+     * @return
+     */
     @Override
-    public Object sendPost(String suffixForUrl, Map<String, String> params) {
+    public Object sendPost(String suffixForUrl, Map<String, String> params, Map<String, String> header, String reguest) {
         try {
-            String url = URL_MAIN_PART + suffixForUrl;
-            URL obj = new URL(url);
+            URL obj = new URL(URL_MAIN_PART + suffixForUrl);
             HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
 
-            // add reuqest header
-            con.setRequestMethod("POST");
+            // add request header
+            if (header != null) {
+                for (Map.Entry<String, String> entry : header.entrySet()) {
+                    con.setRequestProperty(entry.getKey(), entry.getValue());
+                }
+            }
+            con.setRequestMethod(reguest);
 
-            String urlParameters = formParameters(params);
+            if (params != null) {
+                String urlParameters = formParameters(params);
+                // Send post request
+                con.setDoOutput(true);
 
-            // Send post request
-            con.setDoOutput(true);
-            DataOutputStream wr = new DataOutputStream(con.getOutputStream());
-            wr.writeBytes(urlParameters);
-            wr.flush();
-            wr.close();
+                DataOutputStream wr = new DataOutputStream(con.getOutputStream());
+                wr.writeBytes(urlParameters);
+                wr.flush();
+                wr.close();
+            }
 
             int responseCode = con.getResponseCode();
-            System.out.println("\nSending 'POST' request to URL : " + url);
+            System.out.println("\nSending '" + reguest +"' request to URL : " + obj.toString());
             System.out.println("Response Code : " + responseCode);
 
             BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-            String inputLine;
             StringBuffer response = new StringBuffer();
 
+            String inputLine;
             while ((inputLine = in.readLine()) != null) {
                 response.append(inputLine);
             }
