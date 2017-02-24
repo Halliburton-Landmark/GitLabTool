@@ -18,12 +18,7 @@ public class LoginServiceImpl implements LoginService {
         HashMap<String, String> params = new HashMap<>();
         params.put("login", name);
         params.put("password", password);
-        String json = (String) getConnector().sendPost("/session", params, null, "POST");
-
-        ((GroupsUserService) ServiceProvider.getInstance().getService
-                  (GroupsUserServiceImpl.class.getName())).getGroups(json);
-
-        return json;
+        return getConnector().sendPost("/session", params, null, "POST");
     }
 
     private RESTConnector getConnector() {

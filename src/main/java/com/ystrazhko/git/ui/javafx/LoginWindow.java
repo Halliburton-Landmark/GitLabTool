@@ -1,6 +1,9 @@
 package com.ystrazhko.git.ui.javafx;
 
+import com.ystrazhko.git.services.GroupsUserService;
+import com.ystrazhko.git.services.GroupsUserServiceImpl;
 import com.ystrazhko.git.services.LoginService;
+import com.ystrazhko.git.services.ServiceProvider;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -64,7 +67,13 @@ class LoginWindow {
                 actiontarget.setFill(Color.FIREBRICK);
                 String name = userTextField.getText();
                 String password = pwBox.getText();
-                actiontarget.setText(String.valueOf(getLoginService().login(name, password) != null));
+
+                Object json = getLoginService().login(name, password);
+                actiontarget.setText(String.valueOf(json != null));
+
+                ((GroupsUserService) ServiceProvider.getInstance().getService
+                        (GroupsUserServiceImpl.class.getName())).getGroups(json.toString());
+
                 System.out.println();
             }
         });
