@@ -10,21 +10,32 @@ import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import com.ystrazhko.git.util.RequestType;
+
 class RESTConnectorImpl implements RESTConnector {
 
+    @Override
+    public Object sendPost(String suffixForUrl, Map<String, String> params, Map<String, String> header) {
+        return sendRequest(suffixForUrl, params,header, RequestType.POST);
+    }
+
+    @Override
+    public Object sendGet(String suffixForUrl, Map<String, String> params, Map<String, String> header) {
+        return sendRequest(suffixForUrl, params,header, RequestType.GET);
+    }
+
     /**
-     * Sends post
+     * Sends request
      *
-     * @param suffixForUrl suffix for adding to main url
-     * @param params
+     * @param suffixForUrl suffix for adding to main URL
+     * @param params for request
      * @param header the data to be added to header of request.
      *               if the header is not needed to pass null
-     * @param reguest - for example: "GET" or "POST"
+     * @param reguest - for example: RequestType.GET or RequestType.POST etc.
      *
-     * @return
+     * @return string with data or null, if an error occurred in the request
      */
-    @Override
-    public Object sendPost(String suffixForUrl, Map<String, String> params, Map<String, String> header, String reguest) {
+    private Object sendRequest(String suffixForUrl, Map<String, String> params, Map<String, String> header, RequestType reguest) {
         try {
             URL obj = new URL(URL_MAIN_PART + suffixForUrl);
             HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
@@ -35,7 +46,7 @@ class RESTConnectorImpl implements RESTConnector {
                     con.setRequestProperty(entry.getKey(), entry.getValue());
                 }
             }
-            con.setRequestMethod(reguest);
+            con.setRequestMethod(reguest.toString());
 
             if (params != null) {
                 String urlParameters = formParameters(params);
@@ -92,8 +103,4 @@ class RESTConnectorImpl implements RESTConnector {
             throw new UnsupportedOperationException(e);
         }
     }
-
-
-
-
 }

@@ -1,12 +1,10 @@
 package com.ystrazhko.git.services;
 
-import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.ystrazhko.git.connections.RESTConnector;
+import com.ystrazhko.git.util.JSONParser;
 
 public class GroupsUserServiceImpl implements GroupsUserService {
     private RESTConnector _connector;
@@ -20,12 +18,10 @@ public class GroupsUserServiceImpl implements GroupsUserService {
 
     @Override
     public Object getGroups(String userData) {
-        if ((_userData = parseJSON(userData)) != null) {
+        if ((_userData = JSONParser.parseToMap(userData)) != null) {
             HashMap<String, String> header = new HashMap<>();
             header.put(PRIVATE_TOKEN_KEY, _userData.get("private_token").toString());
-
-            String json = (String) getConnector().sendPost("/groups", null, header, "GET");
-            return json;
+            return getConnector().sendGet("/groups", null, header);
         }
 
         return null;
@@ -37,11 +33,5 @@ public class GroupsUserServiceImpl implements GroupsUserService {
 
     private void setConnector(RESTConnector connector) {
         _connector = connector;
-    }
-
-    //from json to map<String, Object>
-    private Map<String, Object> parseJSON(String data) {
-        Type mapType = new TypeToken<Map<String, Object>>() {}.getType();
-        return new Gson().fromJson(data, mapType);
     }
 }
