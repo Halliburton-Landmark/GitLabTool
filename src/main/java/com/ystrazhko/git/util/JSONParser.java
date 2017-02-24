@@ -9,6 +9,9 @@ import com.google.gson.reflect.TypeToken;
 
 public class JSONParser {
 
+    private static final Gson _gson = new Gson();
+    private static final Type _mapType = new TypeToken<Map<String, Object>>() {}.getType();
+
     /**
      * Parses from json to map
      *
@@ -16,12 +19,10 @@ public class JSONParser {
      * @return Map<String, Object> or null, if json equals null
      */
     public static Map<String, Object> parseToMap(String json) {
-        if (json != null) {
-            Type mapType = new TypeToken<Map<String, Object>>() {}.getType();
-            return new Gson().fromJson(json, mapType);
+        if (json != null && isJSONValid(json)) {
+            return _gson.fromJson(json, _mapType);
         }
         return null;
-
     }
 
     /**
@@ -32,8 +33,17 @@ public class JSONParser {
      */
     public static String parseToJson(Map<String, Object> data) {
         if (data != null && data != Collections.EMPTY_MAP) {
-            return new Gson().toJson(data);
+            return _gson.toJson(data);
         }
         return null;
+    }
+
+    private static boolean isJSONValid(String string) {
+        try {
+            _gson.fromJson(string, _mapType);
+            return true;
+        } catch(com.google.gson.JsonSyntaxException ex) {
+            return false;
+        }
     }
 }
