@@ -70,7 +70,7 @@ class LoginWindow {
 
                 Object json = getLoginService().login(name, password);
                 actiontarget.setText(String.valueOf(json != null));
-
+                //debug code
                 ((GroupsUserService) ServiceProvider.getInstance().getService
                         (GroupsUserServiceImpl.class.getName())).getGroups(json.toString());
 

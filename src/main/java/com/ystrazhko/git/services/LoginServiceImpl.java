@@ -18,7 +18,7 @@ public class LoginServiceImpl implements LoginService {
         HashMap<String, String> params = new HashMap<>();
         params.put("login", name);
         params.put("password", password);
-        return getConnector().sendPost("/session", params, null, "POST");
+        return getConnector().sendPost("/session", params, null);
     }
 
     private RESTConnector getConnector() {
