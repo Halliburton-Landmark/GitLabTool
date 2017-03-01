@@ -1,7 +1,6 @@
 package com.ystrazhko.git.ui.javafx;
 
 import com.ystrazhko.git.services.GroupsUserService;
-import com.ystrazhko.git.services.GroupsUserServiceImpl;
 import com.ystrazhko.git.services.LoginService;
 import com.ystrazhko.git.services.ServiceProvider;
 
@@ -72,7 +71,7 @@ class LoginWindow {
                 actiontarget.setText(String.valueOf(json != null));
                 //debug code
                 ((GroupsUserService) ServiceProvider.getInstance().getService
-                        (GroupsUserServiceImpl.class.getName())).getGroups(json.toString());
+                        (GroupsUserService.class.getName())).getGroups(json.toString());
 
                 System.out.println();
             }
