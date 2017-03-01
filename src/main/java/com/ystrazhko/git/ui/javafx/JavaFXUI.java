@@ -1,7 +1,6 @@
 package com.ystrazhko.git.ui.javafx;
 
 import com.ystrazhko.git.services.LoginService;
-import com.ystrazhko.git.services.LoginServiceImpl;
 import com.ystrazhko.git.services.ServiceProvider;
 import com.ystrazhko.git.ui.UserInterface;
 
@@ -18,7 +17,7 @@ public class JavaFXUI extends Application implements UserInterface {
     @Override
     public void start(Stage primaryStage) throws Exception {
         new LoginWindow(primaryStage,
-                (LoginService) ServiceProvider.getInstance().getService(LoginServiceImpl.class.getName()));
+                (LoginService) ServiceProvider.getInstance().getService(LoginService.class.getName()));
     }
 
 }

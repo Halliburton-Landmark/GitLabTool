@@ -24,8 +24,9 @@ public class ServiceProvider {
 
     private ServiceProvider() {
         _services = new HashMap<>();
-        _services.put(LoginServiceImpl.class.getName(),
+        _services.put(LoginService.class.getName(),
                 new LoginServiceImpl(new RESTConnectorFactory().getRESTConnector()));
-
+        _services.put(GroupsUserService.class.getName(),
+                new GroupsUserServiceImpl(new RESTConnectorFactory().getRESTConnector()));
     }
 }
