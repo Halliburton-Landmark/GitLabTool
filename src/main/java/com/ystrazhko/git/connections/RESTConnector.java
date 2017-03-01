@@ -11,7 +11,7 @@ public interface RESTConnector {
      * @param suffixForUrl suffix for adding to main URL
      * @param params for request
      * @param header the data to be added to header of request.
-     *               if the header is not needed to pass null
+     *               if the header is not needed then pass null
      * @return String with data or null, if an error occurred in the request
      */
     Object sendPost(String suffixForUrl, Map<String, String> params, Map<String, String> header);
@@ -22,7 +22,7 @@ public interface RESTConnector {
      * @param suffixForUrl suffix for adding to main URL
      * @param params for request
      * @param header the data to be added to header of request.
-     *               if the header is not needed to pass null
+     *               if the header is not needed then pass null
      * @return String with data or null, if an error occurred in the request
      */
     Object sendGet(String suffixForUrl, Map<String, String> params, Map<String, String> header);
