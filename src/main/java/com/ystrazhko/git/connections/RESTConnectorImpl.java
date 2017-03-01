@@ -30,7 +30,7 @@ class RESTConnectorImpl implements RESTConnector {
      * @param suffixForUrl suffix for adding to main URL
      * @param params for request
      * @param header the data to be added to header of request.
-     *               if the header is not needed to pass null
+     *               if the header is not needed then pass null
      * @param reguest - for example: RequestType.GET or RequestType.POST etc.
      *
      * @return string with data or null, if an error occurred in the request
@@ -40,12 +40,7 @@ class RESTConnectorImpl implements RESTConnector {
             URL obj = new URL(URL_MAIN_PART + suffixForUrl);
             HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
 
-            // add request header
-            if (header != null) {
-                for (Map.Entry<String, String> entry : header.entrySet()) {
-                    con.setRequestProperty(entry.getKey(), entry.getValue());
-                }
-            }
+            setHTTPRequestHeader(header, con);
             con.setRequestMethod(reguest.toString());
 
             if (params != null) {
@@ -80,6 +75,12 @@ class RESTConnectorImpl implements RESTConnector {
         }
 
         return null;
+    }
+
+    private void setHTTPRequestHeader(Map<String, String> header, HttpsURLConnection con) {
+        if (header != null) {
+            header.entrySet().forEach(e -> con.setRequestProperty(e.getKey(), e.getValue()));
+        }
     }
 
     private String formParameters(Map<String, String> params) {

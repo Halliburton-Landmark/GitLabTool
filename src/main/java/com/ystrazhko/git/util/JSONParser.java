@@ -19,10 +19,15 @@ public class JSONParser {
      * @return Map<String, Object> or null, if json equals null
      */
     public static Map<String, Object> parseToMap(String json) {
-        if (json != null && isJSONValid(json)) {
-            return _gson.fromJson(json, _mapType);
+        if (json == null) {
+            return null;
         }
-        return null;
+
+        try {
+            return _gson.fromJson(json, _mapType);
+        } catch(com.google.gson.JsonSyntaxException ex) {
+            return null;
+        }
     }
 
     /**
@@ -36,14 +41,5 @@ public class JSONParser {
             return _gson.toJson(data);
         }
         return null;
-    }
-
-    private static boolean isJSONValid(String string) {
-        try {
-            _gson.fromJson(string, _mapType);
-            return true;
-        } catch(com.google.gson.JsonSyntaxException ex) {
-            return false;
-        }
     }
 }
