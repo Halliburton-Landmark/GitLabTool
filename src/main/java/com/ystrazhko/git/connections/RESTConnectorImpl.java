@@ -10,35 +10,58 @@ import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import com.ystrazhko.git.util.RequestType;
+
 class RESTConnectorImpl implements RESTConnector {
 
     @Override
-    public Object sendPost(String suffixForUrl, Map<String, String> params) {
+    public Object sendPost(String suffixForUrl, Map<String, String> params, Map<String, String> header) {
+        return sendRequest(suffixForUrl, params,header, RequestType.POST);
+    }
+
+    @Override
+    public Object sendGet(String suffixForUrl, Map<String, String> params, Map<String, String> header) {
+        return sendRequest(suffixForUrl, params,header, RequestType.GET);
+    }
+
+    /**
+     * Sends request
+     *
+     * @param suffixForUrl suffix for adding to main URL
+     * @param params for request
+     * @param header the data to be added to header of request.
+     *               if the header is not needed then pass null
+     * @param reguest - for example: RequestType.GET or RequestType.POST etc.
+     *
+     * @return string with data or null, if an error occurred in the request
+     */
+    private Object sendRequest(String suffixForUrl, Map<String, String> params, Map<String, String> header, RequestType reguest) {
         try {
-            String url = URL_MAIN_PART + suffixForUrl;
-            URL obj = new URL(url);
+            URL obj = new URL(URL_MAIN_PART + suffixForUrl);
             HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
 
-            // add reuqest header
-            con.setRequestMethod("POST");
+            setHTTPRequestHeader(header, con);
+            con.setRequestMethod(reguest.toString());
 
-            String urlParameters = formParameters(params);
+            if (params != null) {
+                String urlParameters = formParameters(params);
+                // Send post request
+                con.setDoOutput(true);
 
-            // Send post request
-            con.setDoOutput(true);
-            DataOutputStream wr = new DataOutputStream(con.getOutputStream());
-            wr.writeBytes(urlParameters);
-            wr.flush();
-            wr.close();
+                DataOutputStream wr = new DataOutputStream(con.getOutputStream());
+                wr.writeBytes(urlParameters);
+                wr.flush();
+                wr.close();
+            }
 
             int responseCode = con.getResponseCode();
-            System.out.println("\nSending 'POST' request to URL : " + url);
+            System.out.println("\nSending '" + reguest +"' request to URL : " + obj.toString());
             System.out.println("Response Code : " + responseCode);
 
             BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-            String inputLine;
             StringBuffer response = new StringBuffer();
 
+            String inputLine;
             while ((inputLine = in.readLine()) != null) {
                 response.append(inputLine);
             }
@@ -52,6 +75,12 @@ class RESTConnectorImpl implements RESTConnector {
         }
 
         return null;
+    }
+
+    private void setHTTPRequestHeader(Map<String, String> header, HttpsURLConnection con) {
+        if (header != null) {
+            header.entrySet().forEach(e -> con.setRequestProperty(e.getKey(), e.getValue()));
+        }
     }
 
     private String formParameters(Map<String, String> params) {
@@ -75,8 +104,4 @@ class RESTConnectorImpl implements RESTConnector {
             throw new UnsupportedOperationException(e);
         }
     }
-
-
-
-
 }
