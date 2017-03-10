@@ -19,8 +19,6 @@ public class GroupsUserServiceImpl implements GroupsUserService {
 
     @Override
     public Object getGroups(String userData) {
-//        User user = null;
-//        user = gson.fromJson((String) userData, User.class);
         if ((_userData = JSONParser.parseToMap(userData)) != null) {
             PRIVATE_TOKEN_VALUE = _userData.get("private_token").toString();
             HashMap<String, String> header = new HashMap<>();
