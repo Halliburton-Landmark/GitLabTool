@@ -66,14 +66,20 @@ class LoginWindow {
                 actiontarget.setFill(Color.FIREBRICK);
                 String name = userTextField.getText();
                 String password = pwBox.getText();
-
+                try {
                 Object json = getLoginService().login(name, password);
-                actiontarget.setText(String.valueOf(json != null));
+                actiontarget.setText("Successful connection");
+
                 //debug code
                 ((GroupsUserService) ServiceProvider.getInstance().getService
                         (GroupsUserService.class.getName())).getGroups(json.toString());
 
-                System.out.println();
+                } catch (Exception exception) {
+                    System.err.println("!ERROR: " + exception.getMessage());
+                    String message = exception.getMessage();
+                    message = message.substring(message.indexOf("HTTP"), message.indexOf(" for"));
+                    actiontarget.setText(message);
+                }
             }
         });
 
