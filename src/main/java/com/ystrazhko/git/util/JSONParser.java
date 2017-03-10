@@ -11,7 +11,6 @@ public class JSONParser {
 
     private static final Gson _gson = new Gson();
     private static final Type _mapType = new TypeToken<Map<String, Object>>() {}.getType();
-
     /**
      * Parses from json to map
      *
