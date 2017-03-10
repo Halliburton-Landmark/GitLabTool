@@ -1,16 +1,17 @@
 package com.ystrazhko.git.ui.javafx;
 
+import java.util.Collection;
 import java.util.List;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonIOException;
-import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.ystrazhko.git.entities.Group;
+import com.ystrazhko.git.entities.User;
 import com.ystrazhko.git.services.GroupsUserService;
 import com.ystrazhko.git.services.LoginService;
 import com.ystrazhko.git.services.ProjectService;
 import com.ystrazhko.git.services.ServiceProvider;
+import com.ystrazhko.git.util.JSONParser;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -73,24 +74,20 @@ class LoginWindow {
             public void handle(ActionEvent e) {
                 actiontarget.setFill(Color.FIREBRICK);
                 Gson gson = new Gson();
-                String name = userTextField.getText();
-                String password = pwBox.getText();
+                String name = "LyskaL"; //userTextField.getText();
+                String password = "2569_LyudA1"; //pwBox.getText();
 
                 Object jsonUser = getLoginService().login(name, password);
                 actiontarget.setText(String.valueOf(jsonUser != null));
                 //debug code
                 String jsonGroup = (String) ((GroupsUserService) ServiceProvider.getInstance().getService
                         (GroupsUserService.class.getName())).getGroups(jsonUser.toString());
+                // test parser
+                User user = JSONParser.parseToObject(jsonUser, User.class);
+                Collection<Group> groups = JSONParser.parseToListObjects(jsonGroup, new TypeToken<List<Group>>(){}.getType());
+                Group group = (Group) groups.toArray()[0];
 
-                List<Group> groups = null;
-                try {
-                    groups = gson.fromJson(jsonGroup, new TypeToken<List<Group>>(){}.getType());
-                } catch (JsonSyntaxException | JsonIOException exeption) {
-                    exeption.printStackTrace();
-                }
-                Group group = groups.get(0);
-
-                Object jsonProject = ((ProjectService)ServiceProvider.getInstance().getService(
+                Object jsonProjects = ((ProjectService)ServiceProvider.getInstance().getService(
                         ProjectService.class.getName())).getProjects(String.valueOf(group.getId()));
             }
         });
