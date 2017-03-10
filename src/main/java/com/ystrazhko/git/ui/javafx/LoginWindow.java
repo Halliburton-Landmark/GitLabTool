@@ -3,7 +3,6 @@ package com.ystrazhko.git.ui.javafx;
 import java.util.Collection;
 import java.util.List;
 
-import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.ystrazhko.git.entities.Group;
 import com.ystrazhko.git.entities.User;
@@ -73,9 +72,8 @@ class LoginWindow {
             @Override
             public void handle(ActionEvent e) {
                 actiontarget.setFill(Color.FIREBRICK);
-                Gson gson = new Gson();
-                String name = "LyskaL"; //userTextField.getText();
-                String password = "2569_LyudA1"; //pwBox.getText();
+                String name = userTextField.getText();
+                String password = pwBox.getText();
 
                 Object jsonUser = getLoginService().login(name, password);
                 actiontarget.setText(String.valueOf(jsonUser != null));
