@@ -44,11 +44,12 @@ public class JSONParser {
     }
 
     /**
+     * Parses from json to object of T class
      *
+     * @param json string of json with data object
+     * @param classObject type object
      *
-     * @param json
-     * @param classObject
-     * @return
+     * @return T object or null, if transferred incorrect data
      */
     public static <T> T parseToObject(Object json, Class<T> classObject) {
         if(classObject == null || json == null) {
@@ -62,12 +63,14 @@ public class JSONParser {
     }
 
     /**
+     * Parses from json to collection of object's T class
      *
-     * @param json
-     * @param typeClass
-     * @return
+     * @param json string of json with data objects
+     * @param typeClass type of objects collection
+     *
+     * @return collection of object's T class or null, if transferred incorrect data
      */
-    public static <T> Collection<T> parseToListObjects(Object json, Type typeClass) {
+    public static <T> Collection<T> parseToCollectionObjects(Object json, Type typeClass) {
         if(typeClass == null || json == null) {
             return null;
         }
