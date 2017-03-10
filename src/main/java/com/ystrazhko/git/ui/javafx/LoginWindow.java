@@ -84,7 +84,7 @@ class LoginWindow {
                         (GroupsUserService.class.getName())).getGroups(jsonUser.toString());
                 // test parser
                 User user = JSONParser.parseToObject(jsonUser, User.class);
-                Collection<Group> groups = JSONParser.parseToListObjects(jsonGroup, new TypeToken<List<Group>>(){}.getType());
+                Collection<Group> groups = JSONParser.parseToCollectionObjects(jsonGroup, new TypeToken<List<Group>>(){}.getType());
                 Group group = (Group) groups.toArray()[0];
 
                 Object jsonProjects = ((ProjectService)ServiceProvider.getInstance().getService(
