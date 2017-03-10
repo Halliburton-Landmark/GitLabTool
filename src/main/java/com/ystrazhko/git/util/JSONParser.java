@@ -1,6 +1,7 @@
 package com.ystrazhko.git.util;
 
 import java.lang.reflect.Type;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
@@ -41,4 +42,40 @@ public class JSONParser {
         }
         return null;
     }
+
+    /**
+     *
+     *
+     * @param json
+     * @param classObject
+     * @return
+     */
+    public static <T> T parseToObject(Object json, Class<T> classObject) {
+        if(classObject == null || json == null) {
+            return null;
+        }
+        try {
+            return  _gson.fromJson((String) json, classObject);
+        } catch(com.google.gson.JsonSyntaxException ex) {
+            return null;
+        }
+    }
+
+    /**
+     *
+     * @param json
+     * @param typeClass
+     * @return
+     */
+    public static <T> Collection<T> parseToListObjects(Object json, Type typeClass) {
+        if(typeClass == null || json == null) {
+            return null;
+        }
+        try {
+            return  _gson.fromJson((String) json, typeClass);
+        } catch(com.google.gson.JsonSyntaxException ex) {
+            return null;
+        }
+    }
+
 }
