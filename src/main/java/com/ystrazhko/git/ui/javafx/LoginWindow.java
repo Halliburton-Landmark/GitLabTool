@@ -73,14 +73,14 @@ class LoginWindow {
             public void handle(ActionEvent e) {
                 actiontarget.setFill(Color.FIREBRICK);
                 Gson gson = new Gson();
-                String name = "LyskaL";
-                String password = "2569_LyudA1";
+                String name = userTextField.getText();
+                String password = pwBox.getText();
 
                 Object jsonUser = getLoginService().login(name, password);
                 actiontarget.setText(String.valueOf(jsonUser != null));
                 //debug code
-                String jsonGroup = (String) ((GroupsUserService) ServiceProvider.getInstance().getService(
-                        GroupsUserService.class.getName())).getGroups(jsonUser.toString());
+                String jsonGroup = (String) ((GroupsUserService) ServiceProvider.getInstance().getService
+                        (GroupsUserService.class.getName())).getGroups(jsonUser.toString());
 
                 List<Group> groups = null;
                 try {
@@ -92,8 +92,6 @@ class LoginWindow {
 
                 Object jsonProject = ((ProjectService)ServiceProvider.getInstance().getService(
                         ProjectService.class.getName())).getProjects(String.valueOf(group.getId()));
-
-                System.out.println(jsonProject);
             }
         });
 
