@@ -37,7 +37,7 @@ public class Group {
     /** Allow users to request member access **/
     private final boolean request_access_enabled;
 
-    /** The full name of the group **/
+    /** The full path of the group **/
     private final String full_name;
 
     /** The full path of the group **/
@@ -49,18 +49,18 @@ public class Group {
     /**
      * Constructor to create an instance of the class.
      *
-     * @param id
-     * @param name
-     * @param path
-     * @param description
-     * @param lfs_enabled
-     * @param visibility
-     * @param avatar_url
-     * @param web_url
-     * @param request_access_enabled
-     * @param full_name
-     * @param full_path
-     * @param parent_id
+     * @param id the id of the group
+     * @param name the name of the group
+     * @param path the path of the group
+     * @param description the group's description
+     * @param lfs_enabled enable/disable Large File Storage (LFS) for the projects in this group
+     * @param visibility Gets the group's visibility. Can be private, internal, or public
+     * @param avatar_url the avatar's URL
+     * @param web_url the web's URL
+     * @param request_access_enabled allow users to request member access
+     * @param full_name the full path of the group
+     * @param full_path the full path of the group
+     * @param parent_id the parent group id for creating nested group
      */
     public Group(int id, String name, String path, String description, boolean lfs_enabled, String visibility,
             String avatar_url, String web_url, boolean request_access_enabled, String full_name, String full_path,
