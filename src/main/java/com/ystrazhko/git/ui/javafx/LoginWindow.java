@@ -76,9 +76,7 @@ class LoginWindow {
 
                 } catch (Exception exception) {
                     System.err.println("!ERROR: " + exception.getMessage());
-                    String message = exception.getMessage();
-                    message = message.substring(message.indexOf("HTTP"), message.indexOf(" for"));
-                    actiontarget.setText(message);
+                    actiontarget.setText(exception.getMessage());
                 }
             }
         });
