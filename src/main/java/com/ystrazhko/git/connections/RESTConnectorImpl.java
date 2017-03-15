@@ -10,9 +10,12 @@ import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import com.ystrazhko.git.exceptions.ExceptionProvider;
 import com.ystrazhko.git.util.RequestType;
 
 class RESTConnectorImpl implements RESTConnector {
+
+    private static final ExceptionProvider _provider = ExceptionProvider.getInstance();
 
     @Override
     public Object sendPost(String suffixForUrl, Map<String, String> params, Map<String, String> header) {
@@ -71,8 +74,9 @@ class RESTConnectorImpl implements RESTConnector {
             System.out.println(response.toString());
             return response.toString();
         } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
+            _provider.throwException(e);
         }
+        return null;
     }
 
     private void setHTTPRequestHeader(Map<String, String> header, HttpsURLConnection con) {
