@@ -19,7 +19,6 @@ public class User {
     /** The id of the user **/
     private final int id;
 
-    /**  **/
     private final String state;
 
     /** The avatar's URL **/
@@ -49,16 +48,13 @@ public class User {
     /** The user of the email **/
     private final String email;
 
-    /**  **/
     private final int color_scheme_id;
 
     /** The limit projects each user can create **/
     private final int projects_limit;
 
-    /**  **/
     private final String current_sign_in_at;
 
-    /**  **/
     private final String[] identities;
 
     /** The user can create groups **/
@@ -67,7 +63,6 @@ public class User {
     /** The user can create projects **/
     private final boolean can_create_project;
 
-    /**  **/
     private final boolean two_factor_enabled;
 
     /** The private token of the user **/
@@ -76,27 +71,27 @@ public class User {
     /**
      * Constructor to create an instance of the class.
      *
-     * @param name
-     * @param username
-     * @param id
+     * @param name the name of the user
+     * @param username the username of the user
+     * @param id the id of the user
      * @param state
-     * @param avatar_url
-     * @param created_at
-     * @param is_admin
-     * @param bio
-     * @param skype
-     * @param linkedin
-     * @param twitter
-     * @param website_url
-     * @param email
+     * @param avatar_url the avatar's URL
+     * @param created_at the created date
+     * @param is_admin the user is admin
+     * @param bio the user's biography
+     * @param skype the Skype ID
+     * @param linkedin the LinkedIn
+     * @param twitter the Twitter account
+     * @param website_url the Website URL
+     * @param email the user of the email
      * @param color_scheme_id
-     * @param projects_limit
+     * @param projects_limit the limit projects each user can create
      * @param current_sign_in_at
      * @param identities
-     * @param can_create_group
-     * @param can_create_project
+     * @param can_create_group the user can create groups
+     * @param can_create_project the user can create projects
      * @param two_factor_enabled
-     * @param private_token
+     * @param private_token the private token of the user
      */
     public User(String name, String username, int id, String state, String avatar_url, String created_at,
             boolean is_admin, String bio, String skype, String linkedin, String twitter, String website_url,
@@ -127,43 +122,38 @@ public class User {
     }
 
     /**
-     * Gets the
+     * Gets the name of the user
      *
-     * @return
+     * @return the name of the user
      */
     public String getName() {
         return name;
     }
 
     /**
-     * Gets the
+     * Gets the username of the user
      *
-     * @return
+     * @return the username of the user
      */
     public String getUsername() {
         return username;
     }
 
     /**
-     * Gets the
+     * Gets the id of the user
      *
-     * @return
+     * @return the id of the user
      */
     public int getId() {
         return id;
     }
 
-    /**
-     * Gets the
-     *
-     * @return
-     */
     public String getState() {
         return state;
     }
 
     /**
-     * Gets the
+     * Gets the avatar's URL
      *
      * @return
      */
@@ -172,144 +162,124 @@ public class User {
     }
 
     /**
-     * Gets the
+     * Gets the created date
      *
-     * @return
+     * @return the created date
      */
     public String getCreated_at() {
         return created_at;
     }
 
     /**
-     * Gets the
+     * Gets the user is admin
      *
-     * @return
+     * @return the user is admin
      */
     public boolean isIs_admin() {
         return is_admin;
     }
 
     /**
-     * Gets the
+     * Gets the user's biography
      *
-     * @return
+     * @return the user's biography
      */
     public String getBio() {
         return bio;
     }
 
     /**
-     * Gets the
+     * Gets the Skype ID
      *
-     * @return
+     * @return the Skype ID
      */
     public String getSkype() {
         return skype;
     }
 
     /**
-     * Gets the
+     * Gets the LinkedIn
      *
-     * @return
+     * @return the LinkedIn
      */
     public String getLinkedin() {
         return linkedin;
     }
 
     /**
-     * Gets the
+     * Gets the Twitter account
      *
-     * @return
+     * @return the Twitter account
      */
     public String getTwitter() {
         return twitter;
     }
 
     /**
-     * Gets the
+     * Gets the Website URL
      *
-     * @return
+     * @return the Website URL
      */
     public String getWebsite_url() {
         return website_url;
     }
 
     /**
-     * Gets the
+     * Gets the user of the email
      *
-     * @return
+     * @return the user of the email
      */
     public String getEmail() {
         return email;
     }
 
-    /**
-     * Gets the
-     *
-     * @return
-     */
     public int getColor_scheme_id() {
         return color_scheme_id;
     }
 
     /**
-     * Gets the
+     * Gets the limit projects each user can create
      *
-     * @return
+     * @return the limit projects each user can create
      */
     public int getProjects_limit() {
         return projects_limit;
     }
 
-    /**
-     * Gets the
-     *
-     * @return
-     */
     public String getCurrent_sign_in_at() {
         return current_sign_in_at;
     }
 
-    /**
-     * Gets the
-     *
-     * @return
-     */
     public String[] getIdentities() {
         return identities;
     }
 
     /**
-     * Gets the
+     * Gets the user can create groups
      *
-     * @return
+     * @return the user can create groups
      */
     public boolean isCan_create_group() {
         return can_create_group;
     }
 
     /**
-     * Gets the
+     * Gets the user can create projects
      *
-     * @return
+     * @return the user can create projects
      */
     public boolean isCan_create_project() {
         return can_create_project;
     }
 
-    /**
-     * Gets the
-     *
-     * @return
-     */
     public boolean isTwo_factor_enabled() {
         return two_factor_enabled;
     }
 
     /**
-     * Gets the
+     * Gets the private token of the user
      *
-     * @return
+     * @return the private token of the user
      */
     public String getPrivate_token() {
         return private_token;
