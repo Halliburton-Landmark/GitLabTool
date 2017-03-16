@@ -1,8 +1,16 @@
 package com.ystrazhko.git.ui.javafx;
 
+import java.util.Collection;
+import java.util.List;
+
+import com.google.gson.reflect.TypeToken;
+import com.ystrazhko.git.entities.Group;
+import com.ystrazhko.git.entities.User;
 import com.ystrazhko.git.services.GroupsUserService;
 import com.ystrazhko.git.services.LoginService;
+import com.ystrazhko.git.services.ProjectService;
 import com.ystrazhko.git.services.ServiceProvider;
+import com.ystrazhko.git.util.JSONParser;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -67,13 +75,18 @@ class LoginWindow {
                 String name = userTextField.getText();
                 String password = pwBox.getText();
 
-                Object json = getLoginService().login(name, password);
-                actiontarget.setText(String.valueOf(json != null));
+                Object jsonUser = getLoginService().login(name, password);
+                actiontarget.setText(String.valueOf(jsonUser != null));
                 //debug code
-                ((GroupsUserService) ServiceProvider.getInstance().getService
-                        (GroupsUserService.class.getName())).getGroups(json.toString());
+                String jsonGroup = (String) ((GroupsUserService) ServiceProvider.getInstance().getService
+                        (GroupsUserService.class.getName())).getGroups(jsonUser.toString());
+                // test parser
+                User user = JSONParser.parseToObject(jsonUser, User.class);
+                Collection<Group> groups = JSONParser.parseToCollectionObjects(jsonGroup, new TypeToken<List<Group>>(){}.getType());
+                Group group = (Group) groups.toArray()[0];
 
-                System.out.println();
+                Object jsonProjects = ((ProjectService)ServiceProvider.getInstance().getService(
+                        ProjectService.class.getName())).getProjects(String.valueOf(group.getId()));
             }
         });
 
