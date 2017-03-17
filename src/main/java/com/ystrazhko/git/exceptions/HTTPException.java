@@ -30,12 +30,12 @@ public class HTTPException extends RuntimeException {
     }
 
     /**
-     * Creates exception on the basis of other exception
+     * Creates exception on the basis of other exception with a default message.
      *
      * @param exception nested of exception
      */
     public HTTPException(Throwable exception) {
-        super(exception);
+        super(DEFAULT_MESSAGE, exception);
     }
 
     /**

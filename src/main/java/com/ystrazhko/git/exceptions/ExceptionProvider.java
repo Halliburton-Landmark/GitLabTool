@@ -5,16 +5,14 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 /**
- *
+ * Class for error handling.
+ * Processes the passed exception and gives the necessary message to the user.
  *
  * @author Lyska Lyudmila
- *
  */
 public class ExceptionProvider {
-    /** **/
     private static ExceptionProvider _exceptionProvider;
 
-    /** **/
     private final Map<String, String> _exceptions;
 
     static {
@@ -28,18 +26,18 @@ public class ExceptionProvider {
     }
 
     /**
+     * Gets instance the ExceptionProvider
      *
-     *
-     * @return
+     * @return ExceptionProvider.
      */
     public static ExceptionProvider getInstance() {
         return _exceptionProvider;
     }
 
     /**
+     * Processes the passed exception and gives the necessary message to the user.
      *
-     *
-     * @param exception
+     * @param exception received exception
      */
     public void throwException(Throwable exception) {
         if (exception == null) {
