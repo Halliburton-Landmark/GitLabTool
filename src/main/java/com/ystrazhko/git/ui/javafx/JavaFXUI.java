@@ -16,6 +16,7 @@ public class JavaFXUI extends Application implements UserInterface {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        new WelcomeWindow().show();
         new LoginWindow(primaryStage,
                 (LoginService) ServiceProvider.getInstance().getService(LoginService.class.getName()));
     }
