@@ -1,5 +1,6 @@
 package com.ystrazhko.git.ui.javafx;
 
+import com.ystrazhko.git.exceptions.HTTPException;
 import com.ystrazhko.git.services.GroupsUserService;
 import com.ystrazhko.git.services.LoginService;
 import com.ystrazhko.git.services.ServiceProvider;
@@ -74,9 +75,11 @@ class LoginWindow {
                 ((GroupsUserService) ServiceProvider.getInstance().getService
                         (GroupsUserService.class.getName())).getGroups(json.toString());
 
+                } catch (HTTPException httpException) {
+                    System.err.println("!ERROR: " + httpException.getMessage());
+                    actiontarget.setText(httpException.getMessage());
                 } catch (Exception exception) {
-                    System.err.println("!ERROR: " + exception.getMessage());
-                    actiontarget.setText(exception.getMessage());
+                    exception.printStackTrace();
                 }
             }
         });
