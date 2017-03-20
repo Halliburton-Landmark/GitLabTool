@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.google.gson.reflect.TypeToken;
 import com.ystrazhko.git.entities.Group;
+import com.ystrazhko.git.entities.Project;
 import com.ystrazhko.git.entities.User;
 import com.ystrazhko.git.exceptions.HTTPException;
 import com.ystrazhko.git.services.GroupsUserService;
@@ -73,8 +74,11 @@ class LoginWindow {
             @Override
             public void handle(ActionEvent e) {
                 actiontarget.setFill(Color.FIREBRICK);
-                String name = userTextField.getText();
-                String password = pwBox.getText();
+                /*String name = userTextField.getText();
+                String password = pwBox.getText();*/
+
+                String name = "LyskaL";
+                String password = "2569_LyudA1";
                 try {
                     Object jsonUser = getLoginService().login(name, password);
                     actiontarget.setText("Successful connection");
@@ -88,7 +92,8 @@ class LoginWindow {
                     Group group = (Group) groups.toArray()[0];
                     Object jsonProjects = ((ProjectService)ServiceProvider.getInstance().getService(
                             ProjectService.class.getName())).getProjects(String.valueOf(group.getId()));
-
+                    Collection<Project> pr = JSONParser.parseToCollectionObjects(jsonProjects, new TypeToken<List<Project>>(){}.getType());
+                    System.err.println(pr.toString());
                 } catch (HTTPException httpException) {
                     System.err.println("!ERROR: " + httpException.getMessage());
                     actiontarget.setText(httpException.getMessage());
