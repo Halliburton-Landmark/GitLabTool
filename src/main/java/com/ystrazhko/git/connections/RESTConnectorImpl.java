@@ -10,12 +10,16 @@ import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
 
-import com.ystrazhko.git.exceptions.ExceptionProvider;
+import com.ystrazhko.git.exceptions.HTTPExceptionProvider;
 import com.ystrazhko.git.util.RequestType;
 
 class RESTConnectorImpl implements RESTConnector {
 
-    private static final ExceptionProvider _provider = ExceptionProvider.getInstance();
+    private final HTTPExceptionProvider _exceptionProvider;
+
+    RESTConnectorImpl(HTTPExceptionProvider provider) {
+        this._exceptionProvider = provider;
+    }
 
     @Override
     public Object sendPost(String suffixForUrl, Map<String, String> params, Map<String, String> header) {
@@ -34,17 +38,17 @@ class RESTConnectorImpl implements RESTConnector {
      * @param params for request
      * @param header the data to be added to header of request.
      *               if the header is not needed then pass null
-     * @param reguest - for example: RequestType.GET or RequestType.POST etc.
+     * @param request - for example: RequestType.GET or RequestType.POST etc.
      *
      * @return string with data or null, if an error occurred in the request
      */
-    private Object sendRequest(String suffixForUrl, Map<String, String> params, Map<String, String> header, RequestType reguest) {
+    private Object sendRequest(String suffixForUrl, Map<String, String> params, Map<String, String> header, RequestType request) {
         try {
             URL obj = new URL(URL_MAIN_PART + suffixForUrl);
             HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
 
             setHTTPRequestHeader(header, con);
-            con.setRequestMethod(reguest.toString());
+            con.setRequestMethod(request.toString());
 
             if (params != null) {
                 String urlParameters = formParameters(params);
@@ -58,11 +62,11 @@ class RESTConnectorImpl implements RESTConnector {
             }
 
             int responseCode = con.getResponseCode();
-            System.out.println("\nSending '" + reguest +"' request to URL : " + obj.toString());
+            System.out.println("\nSending '" + request +"' request to URL : " + obj.toString());
             System.out.println("Response Code : " + responseCode);
 
             BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-            StringBuffer response = new StringBuffer();
+            StringBuilder response = new StringBuilder();
 
             String inputLine;
             while ((inputLine = in.readLine()) != null) {
@@ -74,7 +78,7 @@ class RESTConnectorImpl implements RESTConnector {
             System.out.println(response.toString());
             return response.toString();
         } catch (Exception e) {
-            _provider.throwException(e);
+            _exceptionProvider.throwException(e);
         }
         return null;
     }

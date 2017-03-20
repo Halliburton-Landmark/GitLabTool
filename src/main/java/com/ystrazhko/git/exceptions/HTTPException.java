@@ -8,7 +8,7 @@ package com.ystrazhko.git.exceptions;
  */
 public class HTTPException extends RuntimeException {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 5330689541238440285L;
 
     private static final String DEFAULT_MESSAGE = "An unknown error occurred!";
 
