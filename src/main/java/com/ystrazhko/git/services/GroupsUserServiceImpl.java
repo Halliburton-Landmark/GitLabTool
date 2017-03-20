@@ -10,7 +10,8 @@ public class GroupsUserServiceImpl implements GroupsUserService {
     private RESTConnector _connector;
     private Map<String, Object> _userData;
 
-    private static final String PRIVATE_TOKEN_KEY = "PRIVATE-TOKEN";
+    public static final String PRIVATE_TOKEN_KEY = "PRIVATE-TOKEN";
+    public static String PRIVATE_TOKEN_VALUE;
 
     public GroupsUserServiceImpl(RESTConnector connector) {
         setConnector(connector);
@@ -19,8 +20,9 @@ public class GroupsUserServiceImpl implements GroupsUserService {
     @Override
     public Object getGroups(String userData) {
         if ((_userData = JSONParser.parseToMap(userData)) != null) {
+            PRIVATE_TOKEN_VALUE = _userData.get("private_token").toString();
             HashMap<String, String> header = new HashMap<>();
-            header.put(PRIVATE_TOKEN_KEY, _userData.get("private_token").toString());
+            header.put(PRIVATE_TOKEN_KEY, PRIVATE_TOKEN_VALUE);
             return getConnector().sendGet("/groups", null, header);
         }
 

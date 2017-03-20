@@ -28,5 +28,7 @@ public class ServiceProvider {
                 new LoginServiceImpl(new RESTConnectorFactory().getRESTConnector()));
         _services.put(GroupsUserService.class.getName(),
                 new GroupsUserServiceImpl(new RESTConnectorFactory().getRESTConnector()));
+        _services.put(ProjectService.class.getName(),
+                new ProjectServiceImpl(new RESTConnectorFactory().getRESTConnector()));
     }
 }
