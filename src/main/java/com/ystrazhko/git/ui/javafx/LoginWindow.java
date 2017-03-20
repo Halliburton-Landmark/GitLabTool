@@ -6,6 +6,7 @@ import java.util.List;
 import com.google.gson.reflect.TypeToken;
 import com.ystrazhko.git.entities.Group;
 import com.ystrazhko.git.entities.User;
+import com.ystrazhko.git.exceptions.HTTPException;
 import com.ystrazhko.git.services.GroupsUserService;
 import com.ystrazhko.git.services.LoginService;
 import com.ystrazhko.git.services.ProjectService;
@@ -74,19 +75,26 @@ class LoginWindow {
                 actiontarget.setFill(Color.FIREBRICK);
                 String name = userTextField.getText();
                 String password = pwBox.getText();
+                try {
+                    Object jsonUser = getLoginService().login(name, password);
+                    actiontarget.setText("Successful connection");
 
-                Object jsonUser = getLoginService().login(name, password);
-                actiontarget.setText(String.valueOf(jsonUser != null));
-                //debug code
-                String jsonGroup = (String) ((GroupsUserService) ServiceProvider.getInstance().getService
-                        (GroupsUserService.class.getName())).getGroups(jsonUser.toString());
-                // test parser
-                User user = JSONParser.parseToObject(jsonUser, User.class);
-                Collection<Group> groups = JSONParser.parseToCollectionObjects(jsonGroup, new TypeToken<List<Group>>(){}.getType());
-                Group group = (Group) groups.toArray()[0];
+                    //debug code
+                    String jsonGroup = (String) ((GroupsUserService) ServiceProvider.getInstance().getService
+                            (GroupsUserService.class.getName())).getGroups(jsonUser.toString());
+                    // test parser
+                    User user = JSONParser.parseToObject(jsonUser, User.class);
+                    Collection<Group> groups = JSONParser.parseToCollectionObjects(jsonGroup, new TypeToken<List<Group>>(){}.getType());
+                    Group group = (Group) groups.toArray()[0];
+                    Object jsonProjects = ((ProjectService)ServiceProvider.getInstance().getService(
+                            ProjectService.class.getName())).getProjects(String.valueOf(group.getId()));
 
-                Object jsonProjects = ((ProjectService)ServiceProvider.getInstance().getService(
-                        ProjectService.class.getName())).getProjects(String.valueOf(group.getId()));
+                } catch (HTTPException httpException) {
+                    System.err.println("!ERROR: " + httpException.getMessage());
+                    actiontarget.setText(httpException.getMessage());
+                } catch (Exception exception) {
+                    exception.printStackTrace();
+                }
             }
         });
 
