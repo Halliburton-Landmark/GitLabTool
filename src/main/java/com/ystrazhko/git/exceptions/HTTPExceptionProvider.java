@@ -22,7 +22,7 @@ public class HTTPExceptionProvider {
 
     private HTTPExceptionProvider() {
         _exceptions = new HashMap<>();
-        _exceptions.put("401", "You entered a incorrect data!");
+        _exceptions.put("401", "Your user name or password is incorrect");
         _exceptions.put("404", "Page not found");
     }
 
