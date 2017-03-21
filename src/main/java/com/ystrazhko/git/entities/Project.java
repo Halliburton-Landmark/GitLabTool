@@ -5,11 +5,10 @@ import com.google.gson.annotations.SerializedName;
 /**
  * Class keeps data about project.
  *
- * You cannot change the name field to the class, otherwise JSONRarser can't parse from json string to object this
- * class.
+ * You cannot change the name field to the class, otherwise
+ * JSONRarser can't parse from json string to object this class.
  *
  * @author Lyska Lyudmila
- *
  */
 public class Project {
     private int id;
