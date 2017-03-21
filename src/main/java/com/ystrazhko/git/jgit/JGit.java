@@ -19,8 +19,8 @@ import com.ystrazhko.git.util.JSONParser;
 /**
  * Class for work with Git:
  *
+ * [+] clone a group, project or URL of repository;
  * - create repository;
- * [+] clone a group, project or URL of repository; [+]
  * - commit;
  * - push.
  *
@@ -47,19 +47,14 @@ public class JGit {
      *
      * @param group for clone
      * @param localPath the path to where will clone all the projects of the group
-     * @return true - group was cloned successfully, false - if failed to perform action
      */
-    public boolean clone(Group group, String localPath) {
+    public void clone(Group group, String localPath) {
         if (group == null || localPath == null) {
-            return false;
+            return;
         }
-
         for (Project project : getProjects(group)) {
-            if (!clone(project.getHttp_url_to_repo(), localPath + "/" + project.getName())) {
-                return false;
-            }
+            clone(project.getHttp_url_to_repo(), localPath + "/" + project.getName());
         }
-        return true;
     }
 
     /**
@@ -67,17 +62,12 @@ public class JGit {
      *
      * @param project for clone
      * @param localPath the path to where will clone the project
-     * @return true - project was cloned successfully, false - if failed to perform action
      */
-    public boolean clone(Project project, String localPath) {
+    public void clone(Project project, String localPath) {
         if (project == null || localPath == null) {
-            return false;
+            return;
         }
-
-        if (!clone(project.getHttp_url_to_repo(), localPath + "/" + project.getName())) {
-            return false;
-        }
-        return true;
+        clone(project.getHttp_url_to_repo(), localPath + "/" + project.getName());
     }
 
     /**
@@ -85,21 +75,18 @@ public class JGit {
      *
      * @param linkClone for clone
      * @param localPath the path to where will clone the project
-     * @return true - project was cloned successfully, false - if failed to perform action
      */
-    public boolean clone(String linkClone, String localPath) {
+    public void clone(String linkClone, String localPath) {
         if (linkClone == null || localPath == null) {
-            return false;
+            return;
         }
         try {
             Git.cloneRepository().setURI(linkClone).setDirectory(new File(localPath)).call();
-            return true;
         } catch (InvalidRemoteException | TransportException e) {
             System.err.println("!ERROR: " + e.getMessage());
         } catch (GitAPIException e) {
             System.err.println("!ERROR: " + e.getMessage());
         }
-        return false;
     }
 
 
