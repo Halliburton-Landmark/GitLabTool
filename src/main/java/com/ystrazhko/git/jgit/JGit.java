@@ -53,7 +53,7 @@ public class JGit {
             return;
         }
         for (Project project : getProjects(group)) {
-            clone(project.getHttp_url_to_repo(), localPath + "/" + project.getName());
+            clone(project, localPath);
         }
     }
 
