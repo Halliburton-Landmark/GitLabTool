@@ -2,6 +2,8 @@ package com.ystrazhko.git.jgit;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.List;
 
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.ConcurrentRefUpdateException;
@@ -14,11 +16,21 @@ import org.eclipse.jgit.api.errors.UnmergedPathsException;
 import org.eclipse.jgit.api.errors.WrongRepositoryStateException;
 import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.transport.CredentialsProvider;
-import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
+
+import com.google.gson.reflect.TypeToken;
+import com.ystrazhko.git.entities.Group;
+import com.ystrazhko.git.entities.Project;
+import com.ystrazhko.git.services.ProjectService;
+import com.ystrazhko.git.services.ServiceProvider;
+import com.ystrazhko.git.util.JSONParser;
 
 /**
+ * Class for work with Git:
  *
+ * - create repository;
+ * - clone a group, project or URL of repository;
+ * - commit;
+ * - push.
  *
  * @author Lyska Lyudmila
  */
@@ -26,38 +38,75 @@ public class JGit {
 
     private static final JGit _jgit;
     private Git _git;
-    private CredentialsProvider _credentials;
-    private boolean _isRememberCredentials;
 
     static {
         _jgit = new JGit();
     }
 
-    private JGit() {
-        _credentials = null;
-    }
-
+    /**
+     * Gets instance's the class
+     *
+     * @return instance
+     */
     public static JGit getInstance() {
         return _jgit;
     }
 
-    public boolean createRepository(String localPath) {
-        try {
-            Repository rep = new FileRepository(localPath + "/.git");
-            rep.create();
-            _git = new Git(rep);
-            return true;
-        } catch (IOException e) {
-            System.err.println("!ERROR: " + e.getMessage());
+    /**
+     * Clones all projects from the group
+     *
+     * @param group for clone
+     * @param localPath the path to where will clone all the projects of the group
+     * @return true - group was cloned successfully, false - if failed to perform action
+     */
+    public boolean clone(Group group, String localPath) {
+        if (group == null || localPath == null) {
             return false;
         }
+
+        Object jsonProjects = ((ProjectService) ServiceProvider.getInstance()
+                .getService(ProjectService.class.getName())).getProjects(String.valueOf(group.getId()));
+        Collection<Project> projects = JSONParser.parseToCollectionObjects(jsonProjects,
+                new TypeToken<List<Project>>() {
+                }.getType());
+
+        for (Project project : projects) {
+            if (!clone(project.getHttp_url_to_repo(), localPath + "/" + project.getName())) {
+                return false;
+            }
+        }
+        return true;
     }
 
-    public boolean clone(String linkClone, String localPath) {
-        if (!createRepository(localPath)) {
+    /**
+     * Clones the project
+     *
+     * @param project for clone
+     * @param localPath the path to where will clone the project
+     * @return true - project was cloned successfully, false - if failed to perform action
+     */
+    public boolean clone(Project project, String localPath) {
+        if (project == null || localPath == null) {
             return false;
         }
 
+        if (!clone(project.getHttp_url_to_repo(), localPath + "/" + project.getName())) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Clones the URL
+     *
+     * @param linkClone for clone
+     * @param localPath the path to where will clone the project
+     * @return true - project was cloned successfully, false - if failed to perform action
+     */
+    public boolean clone(String linkClone, String localPath) {
+        if (linkClone == null || localPath == null) {
+            return false;
+        }
         try {
             Git.cloneRepository().setURI(linkClone).setDirectory(new File(localPath)).call();
             return true;
@@ -69,12 +118,25 @@ public class JGit {
         return false;
     }
 
-    public boolean commit(String linkClone, String localPath, String message) {
+    ////////////////////////////////////////////////// TODO \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+    public boolean createRepository(String localPath) {
+        try {
+            Repository rep = new FileRepository(localPath + "/.git");
+            // rep.create();
+            _git = new Git(rep);
+            return true;
+        } catch (IOException e) {
+            System.err.println("!ERROR: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean commit(String message) {
         try {
             _git.commit().setMessage(message).call();
             return true;
-        } catch (NoHeadException | NoMessageException | UnmergedPathsException
-                        | ConcurrentRefUpdateException| WrongRepositoryStateException e) {
+        } catch (NoHeadException | NoMessageException | UnmergedPathsException | ConcurrentRefUpdateException
+                | WrongRepositoryStateException e) {
             System.err.println("!ERROR: " + e.getMessage());
         } catch (GitAPIException e) {
             System.err.println("!ERROR: " + e.getMessage());
@@ -82,48 +144,16 @@ public class JGit {
         return false;
     }
 
-    public boolean commitAndPush(String linkClone, String localPath, String message) {
-        if (!commit(linkClone, localPath, message)) {
-            return false;
-        }
-        return push();
-    }
-
-    public boolean commitAndPush(String linkClone, String localPath, String message,
-                                 String login, String password, boolean isRemember) {
-        if (!commit(linkClone, localPath, message)) {
+    public boolean commitAndPush(String message) {
+        if (!commit(message)) {
             return false;
         }
         return push();
     }
 
     public boolean push() {
-        return push(null, null, false);
-    }
-
-    public boolean push(String login, String password, boolean isRemember) {
-        //use stored credentials
-        if (_isRememberCredentials) {
-            return pushWithCredentials(_credentials);
-        }
-
-        if (login == null && password == null) {
-            return false;
-        }
-
-        if(isRemember) {
-            // if need to store new credentials
-            _isRememberCredentials = isRemember;
-            _credentials = new UsernamePasswordCredentialsProvider(login, password);
-            return pushWithCredentials(_credentials);
-        } else {
-            return pushWithCredentials(new UsernamePasswordCredentialsProvider(login, password));
-        }
-    }
-
-    private boolean pushWithCredentials(CredentialsProvider credentials) {
         try {
-            _git.push().setCredentialsProvider( credentials ).call();
+            _git.push().call();
             return true;
         } catch (InvalidRemoteException | TransportException e) {
             System.err.println("!ERROR: " + e.getMessage());

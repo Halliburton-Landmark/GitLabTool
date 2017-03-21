@@ -3,14 +3,15 @@ package com.ystrazhko.git.ui.javafx;
 import java.util.Collection;
 import java.util.List;
 
+import org.eclipse.jgit.transport.CredentialsProvider;
+import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
+
 import com.google.gson.reflect.TypeToken;
 import com.ystrazhko.git.entities.Group;
-import com.ystrazhko.git.entities.Project;
 import com.ystrazhko.git.entities.User;
 import com.ystrazhko.git.exceptions.HTTPException;
 import com.ystrazhko.git.services.GroupsUserService;
 import com.ystrazhko.git.services.LoginService;
-import com.ystrazhko.git.services.ProjectService;
 import com.ystrazhko.git.services.ServiceProvider;
 import com.ystrazhko.git.util.JSONParser;
 
@@ -88,12 +89,18 @@ class LoginWindow {
                             (GroupsUserService.class.getName())).getGroups(jsonUser.toString());
                     // test parser
                     User user = JSONParser.parseToObject(jsonUser, User.class);
+                    CredentialsProvider.setDefault(new UsernamePasswordCredentialsProvider(name, password));
+
                     Collection<Group> groups = JSONParser.parseToCollectionObjects(jsonGroup, new TypeToken<List<Group>>(){}.getType());
                     Group group = (Group) groups.toArray()[0];
-                    Object jsonProjects = ((ProjectService)ServiceProvider.getInstance().getService(
-                            ProjectService.class.getName())).getProjects(String.valueOf(group.getId()));
-                    Collection<Project> pr = JSONParser.parseToCollectionObjects(jsonProjects, new TypeToken<List<Project>>(){}.getType());
-                    System.err.println(pr.toString());
+
+
+//                    if(JGit.getInstance().clone(group, "C:/Users/h185170/Documents/GitLab_Workspace")) {
+//                        System.out.println("SUCCESSFULLY");
+//                    } else {
+//                        System.err.println("VERY BAD!");
+//                    }
+
                 } catch (HTTPException httpException) {
                     System.err.println("!ERROR: " + httpException.getMessage());
                     actiontarget.setText(httpException.getMessage());
