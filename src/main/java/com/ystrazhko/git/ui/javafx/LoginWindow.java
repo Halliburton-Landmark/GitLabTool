@@ -8,8 +8,8 @@ import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 
 import com.google.gson.reflect.TypeToken;
 import com.ystrazhko.git.entities.Group;
-import com.ystrazhko.git.entities.User;
 import com.ystrazhko.git.exceptions.HTTPException;
+import com.ystrazhko.git.jgit.JGit;
 import com.ystrazhko.git.services.GroupsUserService;
 import com.ystrazhko.git.services.LoginService;
 import com.ystrazhko.git.services.ServiceProvider;
@@ -75,31 +75,23 @@ class LoginWindow {
             @Override
             public void handle(ActionEvent e) {
                 actiontarget.setFill(Color.FIREBRICK);
-                /*String name = userTextField.getText();
-                String password = pwBox.getText();*/
-
-                String name = "LyskaL";
-                String password = "2569_LyudA1";
+                String name = userTextField.getText();
+                String password = pwBox.getText();
                 try {
                     Object jsonUser = getLoginService().login(name, password);
-                    actiontarget.setText("Successful connection");
+                    CredentialsProvider.setDefault(new UsernamePasswordCredentialsProvider(name, password));
+                    actiontarget.setText("Successful authorization");
 
                     //debug code
                     String jsonGroup = (String) ((GroupsUserService) ServiceProvider.getInstance().getService
                             (GroupsUserService.class.getName())).getGroups(jsonUser.toString());
-                    // test parser
-                    User user = JSONParser.parseToObject(jsonUser, User.class);
-                    CredentialsProvider.setDefault(new UsernamePasswordCredentialsProvider(name, password));
-
                     Collection<Group> groups = JSONParser.parseToCollectionObjects(jsonGroup, new TypeToken<List<Group>>(){}.getType());
-                    Group group = (Group) groups.toArray()[0];
 
-
-//                    if(JGit.getInstance().clone(group, "C:/Users/h185170/Documents/GitLab_Workspace")) {
-//                        System.out.println("SUCCESSFULLY");
-//                    } else {
-//                        System.err.println("VERY BAD!");
-//                    }
+                    if(JGit.getInstance().clone((Group) groups.toArray()[0], "C:/Users/h185170/Documents/GitLab_Workspace")) {
+                        System.out.println("SUCCESSFULLY");
+                    } else {
+                        System.err.println("VERY BAD! :(");
+                    }
 
                 } catch (HTTPException httpException) {
                     System.err.println("!ERROR: " + httpException.getMessage());
