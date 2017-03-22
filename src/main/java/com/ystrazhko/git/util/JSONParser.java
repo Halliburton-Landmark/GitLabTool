@@ -77,6 +77,7 @@ public class JSONParser {
         try {
             return  _gson.fromJson((String) json, typeClass);
         } catch(com.google.gson.JsonSyntaxException ex) {
+            ex.printStackTrace();
             return null;
         }
     }
