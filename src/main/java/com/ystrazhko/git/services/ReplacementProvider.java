@@ -10,7 +10,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 /**
- *
+ * Class for work with mass changes in cloned files.
  *
  * @author Lyska Lyudmila
  */
@@ -23,19 +23,21 @@ public class ReplacementProvider {
     }
 
     /**
+     * Gets instance's the class
      *
-     * @return
+     * @return instance
      */
     public static ReplacementProvider getInstance() {
         return _replacementProvider;
     }
 
     /**
+     * Replaces text in certain files
      *
-     * @param groupFolderPath
-     * @param fileName
-     * @param fromText
-     * @param toText
+     * @param groupFolderPath the path to the folder that stores all cloned projects
+     * @param fileName the file in that to want making the change
+     * @param fromText string for replace
+     * @param toText new string
      */
     public void replacementTextInFiles(String groupFolderPath, String fileName, String fromText, String toText) {
         Collection<File> listOfFolders = getAllFilesInFolder(groupFolderPath);
