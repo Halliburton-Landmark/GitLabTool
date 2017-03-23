@@ -9,7 +9,6 @@ import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import com.google.gson.reflect.TypeToken;
 import com.ystrazhko.git.entities.Group;
 import com.ystrazhko.git.exceptions.HTTPException;
-import com.ystrazhko.git.jgit.JGit;
 import com.ystrazhko.git.services.GroupsUserService;
 import com.ystrazhko.git.services.LoginService;
 import com.ystrazhko.git.services.ServiceProvider;
@@ -87,11 +86,7 @@ class LoginWindow {
                             (GroupsUserService.class.getName())).getGroups(jsonUser.toString());
                     Collection<Group> groups = JSONParser.parseToCollectionObjects(jsonGroup, new TypeToken<List<Group>>(){}.getType());
 
-                    if(JGit.getInstance().clone((Group) groups.toArray()[0], "C:/Users/h185170/Documents/GitLab_Workspace")) {
-                        System.out.println("SUCCESSFULLY");
-                    } else {
-                        System.err.println("VERY BAD! :(");
-                    }
+                   //JGit.getInstance().clone((Group) groups.toArray()[0], "C:/Users/h185170/Documents/GitLab_Workspace");
 
                 } catch (HTTPException httpException) {
                     System.err.println("!ERROR: " + httpException.getMessage());
