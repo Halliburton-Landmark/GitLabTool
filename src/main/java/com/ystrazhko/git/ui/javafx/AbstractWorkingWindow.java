@@ -11,6 +11,7 @@ abstract class AbstractWorkingWindow extends Stage {
         super();
         Parent root = FXMLLoader.load(getClass().getClassLoader().getResource("AbstractWorkingWindow.fxml"));
         Scene scene = new Scene(root);
+        scene.getStylesheets().add(getClass().getClassLoader().getResource("style.css").toExternalForm());
         setScene(scene);
         setHeight(800);
         setWidth(1200);

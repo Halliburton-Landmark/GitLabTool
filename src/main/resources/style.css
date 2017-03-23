@@ -1,0 +1,7 @@
+#userHBox {
+    -fx-background-color: slateblue;
+}
+
+#userId {
+	-fx-text-fill: white;
+}
