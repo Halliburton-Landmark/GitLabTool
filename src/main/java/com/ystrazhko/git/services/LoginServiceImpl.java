@@ -3,6 +3,7 @@ package com.ystrazhko.git.services;
 import java.util.HashMap;
 
 import com.ystrazhko.git.connections.RESTConnector;
+import com.ystrazhko.git.entities.User;
 
 public class LoginServiceImpl implements LoginService {
 
@@ -19,6 +20,11 @@ public class LoginServiceImpl implements LoginService {
         params.put("login", name);
         params.put("password", password);
         return getConnector().sendPost("/session", params, null);
+    }
+
+    @Override
+    public User getCurrentUser() {
+        return null;
     }
 
     private RESTConnector getConnector() {
