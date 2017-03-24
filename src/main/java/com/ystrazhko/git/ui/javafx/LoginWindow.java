@@ -86,8 +86,6 @@ class LoginWindow {
                             (GroupsUserService.class.getName())).getGroups(jsonUser.toString());
                     Collection<Group> groups = JSONParser.parseToCollectionObjects(jsonGroup, new TypeToken<List<Group>>(){}.getType());
 
-                   //JGit.getInstance().clone((Group) groups.toArray()[0], "C:/Users/h185170/Documents/GitLab_Workspace");
-
                 } catch (HTTPException httpException) {
                     System.err.println("!ERROR: " + httpException.getMessage());
                     actiontarget.setText(httpException.getMessage());

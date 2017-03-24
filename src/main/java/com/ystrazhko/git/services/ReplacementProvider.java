@@ -8,6 +8,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Optional;
 
 /**
  * Class for work with mass changes in cloned files.
@@ -76,49 +77,51 @@ public class ReplacementProvider {
     }
 
     private void replaceText(File file, String fromText, String toText) {
-        if (file == null || fromText == null || toText == null) {
+        if (fromText == null || toText == null) {
             return;
         }
 
-        String text = readFile(file);
-        if (text == null) {
+        Optional<String> text = readFile(file);
+        if (!text.isPresent()) {
             return;
         }
 
-        if(!text.contains(fromText)) {
+        String textFromFile = text.get();
+        if(!textFromFile.contains(fromText)) {
             return;
         }
-        text = text.replace(fromText, toText);
-        writeFile(file, text);
+
+        textFromFile = textFromFile.replace(fromText, toText);
+        writeFile(file, textFromFile);
     }
 
-    private String readFile(File file) {
+    private Optional<String> readFile(File file) {
         try {
             BufferedReader br = new BufferedReader(new FileReader(file));
-            String line;
             StringBuilder textFile = new StringBuilder();
 
-            while ((line = br.readLine()) != null) {
+            String line = br.readLine();
+            while (line != null) {
                 textFile.append(line);
-                textFile.append("\n");
+
+                if((line = br.readLine()) != null) {
+                    textFile.append("\n");
+                }
             }
 
             br.close();
-            return textFile.toString();
+            return Optional.of(textFile.toString());
 
         } catch (FileNotFoundException e) {
             System.err.println("ERROR: " + e.getMessage());
-            return null;
+            return Optional.empty();
         } catch (IOException e) {
             System.err.println("ERROR: " + e.getMessage());
-            return null;
+            return Optional.empty();
         }
     }
 
     private boolean writeFile(File file, String data) {
-        if (file == null || data == null) {
-            return false;
-        }
         try {
             FileWriter fw = new FileWriter(file);
             fw.write(data);
