@@ -4,11 +4,14 @@ import java.util.HashMap;
 
 import com.ystrazhko.git.connections.RESTConnector;
 import com.ystrazhko.git.entities.User;
+import com.ystrazhko.git.util.JSONParser;
+import org.eclipse.jgit.transport.CredentialsProvider;
+import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 
 public class LoginServiceImpl implements LoginService {
 
     private RESTConnector _connector;
-
+    private User _currentUser;
 
     public LoginServiceImpl(RESTConnector connector) {
         setConnector(connector);
@@ -19,12 +22,15 @@ public class LoginServiceImpl implements LoginService {
         HashMap<String, String> params = new HashMap<>();
         params.put("login", name);
         params.put("password", password);
-        return getConnector().sendPost("/session", params, null);
+        Object userJson = getConnector().sendPost("/session", params, null);
+        _currentUser = JSONParser.parseToObject(userJson, User.class);
+        CredentialsProvider.setDefault(new UsernamePasswordCredentialsProvider(name, password));
+        return _currentUser;
     }
 
     @Override
     public User getCurrentUser() {
-        return null;
+        return _currentUser;
     }
 
     private RESTConnector getConnector() {
