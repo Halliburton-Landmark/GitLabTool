@@ -3,6 +3,7 @@ package com.ystrazhko.git.exceptions;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 
 /**
  * Class for HTTP error handling.
@@ -45,31 +46,32 @@ public class HTTPExceptionProvider {
             return;
         }
 
-        String code = getCodeException(exception);
-        if (code == null) {
-            throw new RuntimeException(exception);
-        }
-        String message =  getMessageException(code);
-        if (message == null) {
-            throw new HTTPException(exception);
-        }
+        String code = getCodeException(exception).orElseThrow(() -> new RuntimeException(exception));
+        String message =  getMessageException(code).orElseThrow(() -> new HTTPException(exception));
         throw new HTTPException(message, exception);
     }
 
-    private String getCodeException(Throwable exception) {
+    private Optional<String> getCodeException(Throwable exception) {
         String message = exception.getMessage();
+
+        int codeIndex = message.indexOf("code: ");
+
+        if (codeIndex == -1) {
+            return Optional.empty();
+        }
+
         // find code
-        message = message.substring(message.indexOf("code: "), message.indexOf("for"));
+        message = message.substring(codeIndex, message.indexOf("for"));
         // delete all except digits
-        return message.replaceAll("\\D", "");
+        return Optional.of(message.replaceAll("\\D", ""));
     }
 
-    private String getMessageException(String code) {
+    private Optional<String> getMessageException(String code) {
         for (Entry<String, String> exception : _exceptions.entrySet()) {
             if (exception.getKey().equals(code)) {
-                return exception.getValue();
+                return Optional.of(exception.getValue());
             }
         }
-        return null;
+        return Optional.empty();
     }
 }
