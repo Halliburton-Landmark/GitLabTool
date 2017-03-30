@@ -1,14 +1,16 @@
 package com.ystrazhko.git.services;
 
+import com.ystrazhko.git.entities.User;
+
 public interface GroupsUserService {
 
     /**
      * Gets user's groups
      *
-     * @param userData json with data about user
-     * @return json with data about groups of  user<br>
+     * @param user User with groups
+     * @return List of groups for user <br>
      * null, if an error occurred during the request
      */
-    Object getGroups(String userData);
+    Object getGroups(User user);
 
 }
