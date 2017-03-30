@@ -55,7 +55,7 @@ public class User {
 
     private final String current_sign_in_at;
 
-    private final String[] identities;
+    private final Object identities;
 
     /** The user can create groups **/
     private final boolean can_create_group;
@@ -94,9 +94,9 @@ public class User {
      * @param private_token the private token of the user
      */
     public User(String name, String username, int id, String state, String avatar_url, String created_at,
-            boolean is_admin, String bio, String skype, String linkedin, String twitter, String website_url,
-            String email, int color_scheme_id, int projects_limit, String current_sign_in_at, String[] identities,
-            boolean can_create_group, boolean can_create_project, boolean two_factor_enabled, String private_token) {
+                boolean is_admin, String bio, String skype, String linkedin, String twitter, String website_url,
+                String email, int color_scheme_id, int projects_limit, String current_sign_in_at, Object identities,
+                boolean can_create_group, boolean can_create_project, boolean two_factor_enabled, String private_token) {
         super();
         this.name = name;
         this.username = username;
@@ -250,7 +250,7 @@ public class User {
         return current_sign_in_at;
     }
 
-    public String[] getIdentities() {
+    public Object getIdentities() {
         return identities;
     }
 
