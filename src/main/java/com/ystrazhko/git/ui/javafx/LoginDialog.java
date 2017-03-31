@@ -1,34 +1,18 @@
 package com.ystrazhko.git.ui.javafx;
 
-import java.util.Collection;
-import java.util.List;
-
-import javafx.scene.control.*;
-import javafx.util.Pair;
-import org.eclipse.jgit.transport.CredentialsProvider;
-import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
-
-import com.google.gson.reflect.TypeToken;
-import com.ystrazhko.git.entities.Group;
-import com.ystrazhko.git.exceptions.HTTPException;
-import com.ystrazhko.git.jgit.JGit;
-import com.ystrazhko.git.services.GroupsUserService;
-import com.ystrazhko.git.services.LoginService;
-import com.ystrazhko.git.services.ServiceProvider;
-import com.ystrazhko.git.util.JSONParser;
-
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Scene;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
+import javafx.scene.control.PasswordField;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
-import javafx.stage.Stage;
+import javafx.util.Pair;
 
 class LoginDialog extends Dialog<Pair<String, String>> {
 
@@ -70,4 +54,4 @@ class LoginDialog extends Dialog<Pair<String, String>> {
             return null;
         });
     }
- }
+}
