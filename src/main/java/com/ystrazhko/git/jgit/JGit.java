@@ -1,13 +1,18 @@
 package com.ystrazhko.git.jgit;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
+import org.eclipse.jgit.errors.NoWorkTreeException;
+import org.eclipse.jgit.lib.Repository;
 
 import com.google.gson.reflect.TypeToken;
 import com.ystrazhko.git.entities.Group;
@@ -19,10 +24,7 @@ import com.ystrazhko.git.util.JSONParser;
 /**
  * Class for work with Git:
  *
- * [+] clone a group, project or URL of repository;
- * - create repository;
- * - commit;
- * - push.
+ * [+] clone a group, project or URL of repository; - create repository; - commit; - push.
  *
  * @author Lyska Lyudmila
  */
@@ -89,11 +91,66 @@ public class JGit {
         }
     }
 
+    /**
+     * Gets status project
+     *
+     * @param projectPath the path to where will clone the project
+     * @return Optional<Status> of project
+     */
+    public Optional<Status> getStatusProject(String projectPath) {
+        try {
+            Git git = Git.open(new File(projectPath));
+            Repository repository = git.getRepository();
 
-    //debug code
+            Status status = new Git(repository).status().call();
+            if (status != null) {
+
+                System.out.println("\nStatus " + projectPath + " repository: ");
+                System.out.println("Added: " + status.getAdded());
+                System.out.println("Changed: " + status.getChanged());
+                System.out.println("Conflicting: " + status.getConflicting());
+                System.out.println("ConflictingStageState: " + status.getConflictingStageState());
+                System.out.println("IgnoredNotInIndex: " + status.getIgnoredNotInIndex());
+                System.out.println("Missing: " + status.getMissing());
+                System.out.println("Modified: " + status.getModified());
+                System.out.println("Removed: " + status.getRemoved());
+                System.out.println("Untracked: " + status.getUntracked());
+                System.out.println("UntrackedFolders: " + status.getUntrackedFolders());
+
+                repository.close();
+                return Optional.of(status);
+            }
+        } catch (IOException | NoWorkTreeException | GitAPIException e) {
+            System.err.println("!ERROR: " + e.getMessage());
+        }
+        return Optional.empty();
+    }
+
+    /**
+     * Adds untracked files for commit
+     *
+     * @param files names of files that need to add
+     * @param projectPath the path to where will clone the project
+     */
+    public void addUntrackedFileForCommit(Collection<String> files, String projectPath) {
+        if (files == null || projectPath == null) {
+            return;
+        }
+        try {
+            Git git = Git.open(new File(projectPath));
+            for (String nameFile : files) {
+                git.add().addFilepattern(nameFile).call();
+            }
+        } catch (Exception e) {
+            System.err.println("!ERROR: " + e.getMessage());
+        }
+    }
+
+    // debug code
     private Collection<Project> getProjects(Group group) {
         Object jsonProjects = ((ProjectService) ServiceProvider.getInstance()
-                     .getService(ProjectService.class.getName())).getProjects(String.valueOf(group.getId()));
-        return JSONParser.parseToCollectionObjects(jsonProjects,new TypeToken<List<Project>>() {}.getType());
+                .getService(ProjectService.class.getName())).getProjects(String.valueOf(group.getId()));
+        return JSONParser.parseToCollectionObjects(jsonProjects, new TypeToken<List<Project>>() {
+        }.getType());
     }
 }
