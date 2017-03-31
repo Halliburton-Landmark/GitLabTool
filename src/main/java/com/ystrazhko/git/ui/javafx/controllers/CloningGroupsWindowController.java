@@ -91,6 +91,7 @@ public class CloningGroupsWindowController {
             cloningStatusDialog(true, ALERT_SUCCESSFUL_HEADER, ALERT_SUCCESSFUL_MESSAGE);
             stage.close();
         } catch (JGitInternalException ex) {
+            //TODO: catching should be moved to service and added return value with status of cloning
             cloningStatusDialog(false, ALERT_FAIL_HEADER, ex.getLocalizedMessage());
         }
     }
