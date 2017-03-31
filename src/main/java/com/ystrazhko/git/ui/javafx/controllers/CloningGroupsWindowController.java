@@ -14,14 +14,20 @@ import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.DirectoryChooser;
-import javafx.stage.Window;
+import javafx.stage.Stage;
 import javafx.util.Callback;
+import org.eclipse.jgit.api.errors.JGitInternalException;
 
 import java.io.File;
 import java.util.List;
 
 public class CloningGroupsWindowController {
     private static final String FOLDER_CHOOSER_DIALOG = "Destination folder";
+    private static final String CLONING_STATUS_ALERT_TITLE = "Cloning status";
+    private static final String ALERT_SUCCESSFUL_HEADER = "Operation finished";
+    private static final String ALERT_FAIL_HEADER = "Operation failed";
+    private static final String ALERT_SUCCESSFUL_MESSAGE = "Cloning process was successful";
+
 
     private LoginService _loginService =
             (LoginService) ServiceProvider.getInstance().getService(LoginService.class.getName());
@@ -36,7 +42,13 @@ public class CloningGroupsWindowController {
     private ListView<Group> projectsList;
 
     @FXML
-    public Button okButton;
+    private Button okButton;
+
+    @FXML
+    private Button cancelButton;
+
+    @FXML
+    private Button browseButton;
 
     @FXML
     public void initialize() {
@@ -55,12 +67,11 @@ public class CloningGroupsWindowController {
 
     @FXML
     public void onBrowseButton(ActionEvent actionEvent) throws Exception {
-        Node source = (Node) actionEvent.getSource();
-        Window theStage = source.getScene().getWindow();
+        Stage stage = (Stage) browseButton.getScene().getWindow();
 
         DirectoryChooser chooser = new DirectoryChooser();
         chooser.setTitle(FOLDER_CHOOSER_DIALOG);
-        File selectedDirectory = chooser.showDialog(theStage);
+        File selectedDirectory = chooser.showDialog(stage);
         if (selectedDirectory != null) {
             folderPath.setText(selectedDirectory.getCanonicalPath());
         }
@@ -68,17 +79,42 @@ public class CloningGroupsWindowController {
 
     @FXML
     public void onOkButton(ActionEvent actionEvent) throws Exception {
-        String destinationPath = folderPath.getText();
+        Stage stage = (Stage) okButton.getScene().getWindow();
 
+        String destinationPath = folderPath.getText();
         List<Group> selectedGroups = projectsList.getSelectionModel().getSelectedItems();
-        for (Group groupItem : selectedGroups) {
-            JGit.getInstance().clone(groupItem, destinationPath);
+        try {
+            for (Group groupItem : selectedGroups) {
+                JGit.getInstance().clone(groupItem, destinationPath);
+            }
+
+            cloningStatusDialog(true, ALERT_SUCCESSFUL_HEADER, ALERT_SUCCESSFUL_MESSAGE);
+            stage.close();
+        } catch (JGitInternalException ex) {
+            cloningStatusDialog(false, ALERT_FAIL_HEADER, ex.getLocalizedMessage());
         }
     }
 
     @FXML
     public void onCancelButton(ActionEvent actionEvent) throws Exception {
+        Stage stage = (Stage) cancelButton.getScene().getWindow();
 
+        stage.close();
+    }
+
+    private void cloningStatusDialog(boolean isSuccessful, String header, String content) {
+        Alert.AlertType alertType;
+        if (isSuccessful) {
+            alertType = Alert.AlertType.INFORMATION;
+        } else {
+            alertType = Alert.AlertType.ERROR;
+        }
+        Alert alert = new Alert(alertType);
+        alert.setTitle(CLONING_STATUS_ALERT_TITLE);
+        alert.setHeaderText(header);
+        alert.setContentText(content);
+
+        alert.showAndWait();
     }
 
     private void configureListView(ListView listView) {
