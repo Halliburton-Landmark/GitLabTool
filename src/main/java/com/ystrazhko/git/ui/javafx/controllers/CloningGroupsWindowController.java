@@ -8,7 +8,6 @@ import com.ystrazhko.git.services.ServiceProvider;
 import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.*;
@@ -21,6 +20,7 @@ import org.eclipse.jgit.api.errors.JGitInternalException;
 import java.io.File;
 import java.util.List;
 
+@SuppressWarnings("unchecked")
 public class CloningGroupsWindowController {
     private static final String FOLDER_CHOOSER_DIALOG = "Destination folder";
     private static final String CLONING_STATUS_ALERT_TITLE = "Cloning status";
@@ -66,7 +66,7 @@ public class CloningGroupsWindowController {
     }
 
     @FXML
-    public void onBrowseButton(ActionEvent actionEvent) throws Exception {
+    public void onBrowseButton() throws Exception {
         Stage stage = (Stage) browseButton.getScene().getWindow();
 
         DirectoryChooser chooser = new DirectoryChooser();
@@ -78,7 +78,7 @@ public class CloningGroupsWindowController {
     }
 
     @FXML
-    public void onOkButton(ActionEvent actionEvent) throws Exception {
+    public void onOkButton() throws Exception {
         Stage stage = (Stage) okButton.getScene().getWindow();
 
         String destinationPath = folderPath.getText();
@@ -96,7 +96,7 @@ public class CloningGroupsWindowController {
     }
 
     @FXML
-    public void onCancelButton(ActionEvent actionEvent) throws Exception {
+    public void onCancelButton() throws Exception {
         Stage stage = (Stage) cancelButton.getScene().getWindow();
 
         stage.close();
@@ -122,7 +122,8 @@ public class CloningGroupsWindowController {
         listView.setCellFactory(new Callback<ListView<Group>, ListCell<Group>>() {
             @Override
             public ListCell<Group> call(ListView<Group> p) {
-                ListCell<Group> cell = new ListCell<Group>() {
+
+                return new ListCell<Group>() {
                     @Override
                     protected void updateItem(Group item, boolean bln) {
                         super.updateItem(item, bln);
@@ -132,8 +133,6 @@ public class CloningGroupsWindowController {
                         }
                     }
                 };
-
-                return cell;
             }
         });
 
