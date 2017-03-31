@@ -1,18 +1,17 @@
 package com.ystrazhko.git.ui.javafx.controllers;
 
 import com.ystrazhko.git.entities.Group;
+import com.ystrazhko.git.jgit.JGit;
 import com.ystrazhko.git.services.GroupsUserService;
 import com.ystrazhko.git.services.LoginService;
 import com.ystrazhko.git.services.ServiceProvider;
+import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
-import javafx.scene.control.SelectionMode;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Window;
@@ -22,6 +21,8 @@ import java.io.File;
 import java.util.List;
 
 public class CloningGroupsWindowController {
+    private static final String FOLDER_CHOOSER_DIALOG = "Destination folder";
+
     private LoginService _loginService =
             (LoginService) ServiceProvider.getInstance().getService(LoginService.class.getName());
 
@@ -35,12 +36,21 @@ public class CloningGroupsWindowController {
     private ListView<Group> projectsList;
 
     @FXML
+    public Button okButton;
+
+    @FXML
     public void initialize() {
         List<Group> userGroups = (List<Group>) _groupsService.getGroups(_loginService.getCurrentUser());
         ObservableList<Group> myObservableList = FXCollections.observableList(userGroups);
 
         configureListView(projectsList);
         projectsList.setItems(myObservableList);
+
+        BooleanBinding booleanBinding =
+                projectsList.getSelectionModel().selectedItemProperty().isNull().or(
+                        folderPath.textProperty().isEqualTo(""));
+
+        okButton.disableProperty().bind(booleanBinding);
     }
 
     @FXML
@@ -49,7 +59,7 @@ public class CloningGroupsWindowController {
         Window theStage = source.getScene().getWindow();
 
         DirectoryChooser chooser = new DirectoryChooser();
-        chooser.setTitle("Destination folder");
+        chooser.setTitle(FOLDER_CHOOSER_DIALOG);
         File selectedDirectory = chooser.showDialog(theStage);
         if (selectedDirectory != null) {
             folderPath.setText(selectedDirectory.getCanonicalPath());
@@ -58,7 +68,12 @@ public class CloningGroupsWindowController {
 
     @FXML
     public void onOkButton(ActionEvent actionEvent) throws Exception {
+        String destinationPath = folderPath.getText();
 
+        List<Group> selectedGroups = projectsList.getSelectionModel().getSelectedItems();
+        for (Group groupItem : selectedGroups) {
+            JGit.getInstance().clone(groupItem, destinationPath);
+        }
     }
 
     @FXML
