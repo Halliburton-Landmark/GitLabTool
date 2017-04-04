@@ -55,7 +55,7 @@ public class JGit {
             return;
         }
         for (Project project : getProjects(group)) {
-            clone(project, localPath);
+            clone(project, localPath + "/" + group.getName());
         }
     }
 
