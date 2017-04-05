@@ -9,13 +9,18 @@ import javax.xml.bind.Marshaller;
 import java.io.*;
 
 public class StorageServiceImpl implements StorageService {
+    private static final String USER_HOME_PROPERTY = "user.home";
+    private static final String WORKSPACE_DIRECTORY_PROPERTY = ".SolutionTool";
+    private static final String PATH_SEPARATOR = "\\";
+    private static final String PROPERTY_FILENAME = "properties.xml";
+
     private RESTConnector _connector;
     private String _workingDirectory;
 
 
     public StorageServiceImpl(RESTConnector connector) {
         setConnector(connector);
-        _workingDirectory = System.getProperty("user.home") + "\\.SolutionTool";
+        _workingDirectory = System.getProperty(USER_HOME_PROPERTY) + PATH_SEPARATOR + WORKSPACE_DIRECTORY_PROPERTY;
     }
 
     private RESTConnector getConnector() {
@@ -45,7 +50,8 @@ public class StorageServiceImpl implements StorageService {
     }
 
     private String getPropFile(String server, String username) throws IOException {
-        File propFile = new File(_workingDirectory + "\\" + server + "\\" + username + "\\properties.xml");
+        File propFile = new File(_workingDirectory + PATH_SEPARATOR + server + PATH_SEPARATOR + username +
+                PATH_SEPARATOR + PROPERTY_FILENAME);
         File parentDor = propFile.getParentFile();
 
         if (propFile.exists()) {
