@@ -1,6 +1,7 @@
 package com.ystrazhko.git.ui.javafx.controllers;
 
 import com.ystrazhko.git.entities.Group;
+import com.ystrazhko.git.entities.Properties;
 import com.ystrazhko.git.jgit.JGit;
 import com.ystrazhko.git.services.GroupsUserService;
 import com.ystrazhko.git.services.LoginService;
@@ -88,6 +89,7 @@ public class CloningGroupsWindowController {
                 JGit.getInstance().clone(groupItem, destinationPath);
             }
 
+            Properties.getInstance().setClonedGroups(selectedGroups, destinationPath);
             cloningStatusDialog(true, ALERT_SUCCESSFUL_HEADER, ALERT_SUCCESSFUL_MESSAGE);
             stage.close();
         } catch (JGitInternalException ex) {

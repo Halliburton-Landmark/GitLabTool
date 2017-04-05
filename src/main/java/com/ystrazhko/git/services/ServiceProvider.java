@@ -30,5 +30,7 @@ public class ServiceProvider {
                 new GroupsUserServiceImpl(new RESTConnectorFactory().getRESTConnector()));
         _services.put(ProjectService.class.getName(),
                 new ProjectServiceImpl(new RESTConnectorFactory().getRESTConnector()));
+        _services.put(StorageService.class.getName(),
+                new StorageServiceImpl(new RESTConnectorFactory().getRESTConnector()));
     }
 }
