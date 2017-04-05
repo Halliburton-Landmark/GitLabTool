@@ -1,12 +1,16 @@
 package com.ystrazhko.git.services;
 
 import com.ystrazhko.git.connections.RESTConnector;
-import com.ystrazhko.git.entities.Properties;
+import com.ystrazhko.git.entities.Group;
+import com.ystrazhko.git.Properties.Properties;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 import java.io.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class StorageServiceImpl implements StorageService {
     private static final String USER_HOME_PROPERTY = "user.home";
@@ -34,8 +38,7 @@ public class StorageServiceImpl implements StorageService {
     @Override
     public boolean updateStorage(String server, String username) {
         try {
-            String currentPath = getPropFile(server, username);
-            File file = new File(currentPath);
+            File file = getPropFile(server, username);
 
             JAXBContext jaxbContext = JAXBContext.newInstance(Properties.class);
             Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
@@ -49,13 +52,27 @@ public class StorageServiceImpl implements StorageService {
         }
     }
 
-    private String getPropFile(String server, String username) throws IOException {
+    @Override
+    public Map<Group, String> loadStorage(String server, String username) {
+        try {
+            File file = getPropFile(server, username);
+            JAXBContext jaxbContext = JAXBContext.newInstance(Properties.class);
+            Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+
+            return ((Properties) jaxbUnmarshaller.unmarshal(file)).getGroupPathMap();
+        } catch (IOException | JAXBException e) {
+            e.printStackTrace();
+            return new HashMap<Group, String>();
+        }
+    }
+
+    private File getPropFile(String server, String username) throws IOException {
         File propFile = new File(_workingDirectory + PATH_SEPARATOR + server + PATH_SEPARATOR + username +
                 PATH_SEPARATOR + PROPERTY_FILENAME);
         File parentDor = propFile.getParentFile();
 
         if (propFile.exists()) {
-            return propFile.getCanonicalPath();
+            return new File(propFile.getCanonicalPath());
         }
 
         if (!parentDor.exists()) {
@@ -63,6 +80,6 @@ public class StorageServiceImpl implements StorageService {
         }
         propFile.createNewFile();
 
-        return propFile.getCanonicalPath();
+        return new File(propFile.getCanonicalPath());
     }
 }
