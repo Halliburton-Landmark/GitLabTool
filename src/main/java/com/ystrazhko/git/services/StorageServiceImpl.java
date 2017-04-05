@@ -15,7 +15,7 @@ public class StorageServiceImpl implements StorageService {
 
     public StorageServiceImpl(RESTConnector connector) {
         setConnector(connector);
-        _workingDirectory = System.getProperty("user.home") + "\\SolutionTool";
+        _workingDirectory = System.getProperty("user.home") + "\\.SolutionTool";
     }
 
     private RESTConnector getConnector() {
