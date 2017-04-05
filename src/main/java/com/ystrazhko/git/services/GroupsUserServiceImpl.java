@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 import com.google.gson.reflect.TypeToken;
 import com.ystrazhko.git.connections.RESTConnector;
 import com.ystrazhko.git.entities.Group;
-import com.ystrazhko.git.entities.Properties;
+import com.ystrazhko.git.Properties.Properties;
 import com.ystrazhko.git.entities.User;
 import com.ystrazhko.git.jgit.JGit;
 import com.ystrazhko.git.statuses.CloningStatus;
@@ -52,6 +52,17 @@ public class GroupsUserServiceImpl implements GroupsUserService {
     }
 
     @Override
+    public Group getGroupById(int idGroup) {
+        //TODO valid id group
+        String sendString = "/groups/" + idGroup;
+        HashMap<String, String> header = new HashMap<>();
+        header.put(GroupsUserServiceImpl.PRIVATE_TOKEN_KEY, GroupsUserServiceImpl.PRIVATE_TOKEN_VALUE);
+
+        Object uparsedGroup = getConnector().sendGet(sendString, null, header);
+        return JSONParser.parseToObject(uparsedGroup, Group.class);
+    }
+
+    @Override
     public Map<Group, CloningStatus> cloneGroups(List<Group> groups, String destinationPath) {
         Map<Group, CloningStatus> statusMap = new HashMap<>();
         for (Group groupItem : groups) {
@@ -65,7 +76,7 @@ public class GroupsUserServiceImpl implements GroupsUserService {
                 .collect(Collectors.toList());
 
         //TODO: fix issue with empty groups
-        Properties.getInstance().setClonedGroups(clonedGroups, destinationPath);
+        Properties.getInstance().updateClonedGroups(clonedGroups, destinationPath);
         return statusMap;
     }
 

@@ -1,5 +1,6 @@
-package com.ystrazhko.git.entities;
+package com.ystrazhko.git.Properties;
 
+import com.ystrazhko.git.entities.Group;
 import com.ystrazhko.git.services.LoginService;
 import com.ystrazhko.git.services.ServiceProvider;
 import com.ystrazhko.git.services.StorageService;
@@ -7,6 +8,7 @@ import com.ystrazhko.git.xml.MapAdapter;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -18,11 +20,17 @@ import java.util.stream.Collectors;
  */
 @XmlRootElement
 public class Properties {
-    private static Properties _instance;
     private static final String MOCK_SERVERNAME = "gitlab.com";
+    private static final String PATH_SEPARATOR = "\\";
 
+    private static Properties _instance;
+
+
+    /**
+     * Already cloned groups (groupId, localpath)
+     */
     @XmlJavaTypeAdapter(MapAdapter.class)
-    private Map<Integer, String> clonedProjects;
+    private Map<Group, String> _groupPathMap;
 
     private StorageService _storageService =
             (StorageService) ServiceProvider.getInstance().getService(StorageService.class.getName());
@@ -43,12 +51,29 @@ public class Properties {
 
     }
 
-    public void setClonedGroups(List<Group> clonedGroups, String localParentPath) {
-        clonedProjects = clonedGroups.stream().collect(
-                Collectors.toMap(x -> x.getId(), x -> localParentPath + "\\" + x.getName()));
+    public void setGroupPathMap(Map<Group, String> map) {
+        this._groupPathMap = map;
+    }
+
+    public Map<Group, String> getGroupPathMap() {
+        return _groupPathMap;
+    }
+
+    public void updateClonedGroups(List<Group> groups, String localParentPath) {
+        _groupPathMap = groups.stream().collect(
+                Collectors.toMap(x -> x, x -> localParentPath + PATH_SEPARATOR + x.getName()));
 
         String username = _loginService.getCurrentUser().getUsername();
         _storageService.updateStorage(MOCK_SERVERNAME, username);
     }
+
+    public List<Group> getClonedGroups() {
+        String username = _loginService.getCurrentUser().getUsername();
+        if (_groupPathMap == null) {
+            setGroupPathMap(_storageService.loadStorage(MOCK_SERVERNAME, username));
+        }
+        return _groupPathMap.entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList());
+    }
+
 
 }

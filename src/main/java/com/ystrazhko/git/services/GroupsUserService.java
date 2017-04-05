@@ -35,4 +35,12 @@ public interface GroupsUserService {
      * @return Groups and their cloning statuses
      */
     Map<Group, CloningStatus> cloneGroups(List<Group> groups, String destinationPath);
+
+    /**
+     * Gets group by id
+     *
+     * @param idGroup Id of group
+     * @return Group
+     */
+    Group getGroupById(int idGroup);
 }
