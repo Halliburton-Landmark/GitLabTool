@@ -1,22 +1,36 @@
 package com.ystrazhko.git.xml;
 
-import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 
-/**
- * Created by H185176 on 05.04.2017.
- */
-public class MapElements {
+
+class MapElements {
     @XmlElement
-    public Integer groupId;
+    private Integer groupId;
+
     @XmlElement
-    public String localPath;
+    private String localPath;
 
     private MapElements() {
     }
 
-    public MapElements(Integer key, String value) {
+    MapElements(Integer key, String value) {
         this.groupId = key;
         this.localPath = value;
+    }
+
+    String getLocalPath() {
+        return localPath;
+    }
+
+    void setLocalPath(String localPath) {
+        this.localPath = localPath;
+    }
+
+    Integer getGroupId() {
+        return groupId;
+    }
+
+    void setGroupId(Integer groupId) {
+        this.groupId = groupId;
     }
 }

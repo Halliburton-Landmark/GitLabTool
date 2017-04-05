@@ -37,11 +37,11 @@ public class StorageServiceImpl implements StorageService {
             jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
             jaxbMarshaller.marshal(Properties.getInstance(), file);
 
+            return true;
         } catch (IOException | JAXBException e) {
             e.printStackTrace();
+            return false;
         }
-
-        return false;
     }
 
     private String getPropFile(String server, String username) throws IOException {

@@ -1,5 +1,6 @@
 package com.ystrazhko.git.entities;
 
+import com.ystrazhko.git.services.LoginService;
 import com.ystrazhko.git.services.ServiceProvider;
 import com.ystrazhko.git.services.StorageService;
 import com.ystrazhko.git.xml.MapAdapter;
@@ -11,17 +12,24 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * Created by H185176 on 04.04.2017.
+ * Class keeps data about properties.
+ *
+ * @author Pavlo Pidhorniy
  */
 @XmlRootElement
 public class Properties {
     private static Properties _instance;
+    private static final String MOCK_SERVERNAME = "gitlab.com";
 
     @XmlJavaTypeAdapter(MapAdapter.class)
     private Map<Integer, String> clonedProjects;
 
     private StorageService _storageService =
             (StorageService) ServiceProvider.getInstance().getService(StorageService.class.getName());
+
+    private LoginService _loginService =
+            (LoginService) ServiceProvider.getInstance().getService(LoginService.class.getName());
+
 
     public static Properties getInstance() {
         if (_instance == null) {
@@ -38,7 +46,9 @@ public class Properties {
     public void setClonedGroups(List<Group> clonedGroups, String localParentPath) {
         clonedProjects = clonedGroups.stream().collect(
                 Collectors.toMap(x -> x.getId(), x -> localParentPath + "\\" + x.getName()));
-        _storageService.updateStorage("gitlab", "podgpavel1");
+
+        String username = _loginService.getCurrentUser().getUsername();
+        _storageService.updateStorage(MOCK_SERVERNAME, username);
     }
 
 }

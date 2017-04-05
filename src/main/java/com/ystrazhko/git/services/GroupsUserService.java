@@ -18,7 +18,21 @@ public interface GroupsUserService {
      */
     Object getGroups(User user);
 
+    /**
+     * Clones user's group
+     *
+     * @param group           Group for cloning
+     * @param destinationPath Local path of workspace
+     * @return Cloning status
+     */
     CloningStatus cloneGroup(Group group, String destinationPath);
 
+    /**
+     * Clones list of user's groups
+     *
+     * @param groups          List of groups for cloning
+     * @param destinationPath Local path of workspace
+     * @return Groups and their cloning statuses
+     */
     Map<Group, CloningStatus> cloneGroups(List<Group> groups, String destinationPath);
 }
