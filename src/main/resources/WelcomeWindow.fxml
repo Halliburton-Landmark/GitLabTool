@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/8.0.112" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.ystrazhko.git.ui.javafx.controllers.WelcomeWindowController">
+<BorderPane fx:controller="com.lgc.solutiontool.git.ui.javafx.controllers.WelcomeWindowController" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/8.0.112" xmlns:fx="http://javafx.com/fxml/1">
     <top>
         <HBox id="userHBox" alignment="TOP_RIGHT">
             <Label id="userId" text="User Name" textFill="WHITE" />
