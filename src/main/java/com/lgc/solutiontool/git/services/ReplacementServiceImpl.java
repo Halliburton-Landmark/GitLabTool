@@ -42,7 +42,7 @@ class ReplacementServiceImpl implements ReplacementService {
         if (Files.exists(path, LinkOption.NOFOLLOW_LINKS)) {
             Collection<Path> listProjects = getAllElementsInFolder(path);
             if (!listProjects.isEmpty()) {
-                replaceTextInFiles(listProjects, fileName, fromText, toText);
+                replaceText(listProjects, fileName, fromText, toText);
             }
         } else {
             System.err.println("!ERROR: The file/directory " + path.getFileName() + " does not exist");
@@ -50,10 +50,15 @@ class ReplacementServiceImpl implements ReplacementService {
     }
 
     @Override
-    public void replaceTextInFiles(Collection<Path> pathsProjects, String fileName, String fromText, String toText) {
+    public void replaceTextInFiles(Collection<String> pathsProjects, String fileName, String fromText, String toText) {
         if (pathsProjects == null || pathsProjects.isEmpty() || fileName == null) {
             return;
         }
+        Collection<Path> projects = getPaths(pathsProjects);
+        replaceText(projects, fileName, fromText, toText);
+    }
+
+    private void replaceText(Collection<Path> projects, String fileName, String fromText, String toText) {
         if (fromText == null || toText == null) {
             return;
         }
@@ -61,7 +66,7 @@ class ReplacementServiceImpl implements ReplacementService {
             return;
         }
 
-        for (Path project : pathsProjects) {
+        for (Path project : projects) {
             try {
                 if(project == null) {
                     continue;
@@ -128,6 +133,14 @@ class ReplacementServiceImpl implements ReplacementService {
         } catch (IOException e) {
             System.err.println("!ERROR:" + e.getMessage());
         }
+    }
+
+    private Collection<Path> getPaths(Collection<String> projects) {
+        Collection<Path> paths = new ArrayList<>();
+        for (String string : projects) {
+            paths.add(Paths.get(string));
+        }
+        return paths;
     }
 
 }
