@@ -1,5 +1,6 @@
 package com.lgc.solutiontool.git.services;
 
+import java.nio.file.Path;
 import java.util.Collection;
 
 /**
@@ -27,5 +28,5 @@ public interface ReplacementService {
      * @param fromText string for replace
      * @param toText new string
      */
-    public void replaceTextInFiles(Collection<String> pathsProjects, String fileName, String fromText, String toText);
+    public void replaceTextInFiles(Collection<Path> pathsProjects, String fileName, String fromText, String toText);
 }
