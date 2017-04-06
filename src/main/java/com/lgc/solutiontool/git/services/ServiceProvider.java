@@ -32,5 +32,6 @@ public class ServiceProvider {
                 new ProjectServiceImpl(new RESTConnectorFactory().getRESTConnector()));
         _services.put(StorageService.class.getName(),
                 new StorageServiceImpl(new RESTConnectorFactory().getRESTConnector()));
+        _services.put(ReplacementService.class.getName(), new ReplacementServiceImpl());
     }
 }
