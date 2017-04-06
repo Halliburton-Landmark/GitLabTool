@@ -3,21 +3,29 @@ package com.ystrazhko.git.services;
 import java.util.HashMap;
 
 import com.ystrazhko.git.connections.RESTConnector;
+import com.ystrazhko.git.connections.Token.PrivateToken;
 
 public class ProjectServiceImpl implements ProjectService {
     private RESTConnector _connector;
 
+    private static String privateTokenKey;
+    private static  String privateTokenValue;
     public ProjectServiceImpl(RESTConnector connector) {
         setConnector(connector);
     }
 
     @Override
     public Object getProjects(String idGroup) {
-        //TODO valid id group
-        String sendString = "/groups/" + idGroup + "/projects";
-        HashMap<String, String> header = new HashMap<>();
-        header.put(GroupsUserServiceImpl.PRIVATE_TOKEN_KEY, GroupsUserServiceImpl.PRIVATE_TOKEN_VALUE);
-        return getConnector().sendGet(sendString, null, header);
+        privateTokenValue = PrivateToken.getInstance().getPrivateTokenValue();
+        privateTokenKey = PrivateToken.getInstance().getPrivateTokenKey();
+        if (privateTokenValue != null) {
+            //TODO valid id group
+            String sendString = "/groups/" + idGroup + "/projects";
+            HashMap<String, String> header = new HashMap<>();
+            header.put(privateTokenKey, privateTokenValue);
+            return getConnector().sendGet(sendString, null, header);
+        }
+        return null;
     }
 
     private RESTConnector getConnector() {

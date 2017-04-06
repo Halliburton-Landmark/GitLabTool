@@ -1,4 +1,4 @@
-package com.ystrazhko.git.Properties;
+package com.ystrazhko.git.properties;
 
 import com.ystrazhko.git.entities.Group;
 import com.ystrazhko.git.services.LoginService;
@@ -19,17 +19,17 @@ import java.util.stream.Collectors;
  * @author Pavlo Pidhorniy
  */
 @XmlRootElement
-public class Properties {
+public class ProgramProperties {
     private static final String MOCK_SERVERNAME = "gitlab.com";
     private static final String PATH_SEPARATOR = "\\";
 
-    private static Properties _instance;
+    private static ProgramProperties _instance;
 
 
     /**
      * Already cloned groups (groupId, localpath)
      */
-    @XmlJavaTypeAdapter(MapAdapter.class)
+
     private Map<Group, String> _groupPathMap;
 
     private StorageService _storageService =
@@ -39,18 +39,19 @@ public class Properties {
             (LoginService) ServiceProvider.getInstance().getService(LoginService.class.getName());
 
 
-    public static Properties getInstance() {
+    public static ProgramProperties getInstance() {
         if (_instance == null) {
-            _instance = new Properties();
+            _instance = new ProgramProperties();
         }
 
         return _instance;
     }
 
-    private Properties() {
+    private ProgramProperties() {
 
     }
 
+    @XmlJavaTypeAdapter(MapAdapter.class)
     public void setGroupPathMap(Map<Group, String> map) {
         this._groupPathMap = map;
     }
@@ -68,6 +69,7 @@ public class Properties {
     }
 
     public List<Group> getClonedGroups() {
+
         String username = _loginService.getCurrentUser().getUsername();
         if (_groupPathMap == null) {
             setGroupPathMap(_storageService.loadStorage(MOCK_SERVERNAME, username));

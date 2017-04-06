@@ -2,7 +2,7 @@ package com.ystrazhko.git.services;
 
 import com.ystrazhko.git.connections.RESTConnector;
 import com.ystrazhko.git.entities.Group;
-import com.ystrazhko.git.Properties.Properties;
+import com.ystrazhko.git.properties.ProgramProperties;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -40,10 +40,10 @@ public class StorageServiceImpl implements StorageService {
         try {
             File file = getPropFile(server, username);
 
-            JAXBContext jaxbContext = JAXBContext.newInstance(Properties.class);
+            JAXBContext jaxbContext = JAXBContext.newInstance(ProgramProperties.class);
             Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
             jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-            jaxbMarshaller.marshal(Properties.getInstance(), file);
+            jaxbMarshaller.marshal(ProgramProperties.getInstance(), file);
 
             return true;
         } catch (IOException | JAXBException e) {
@@ -56,10 +56,10 @@ public class StorageServiceImpl implements StorageService {
     public Map<Group, String> loadStorage(String server, String username) {
         try {
             File file = getPropFile(server, username);
-            JAXBContext jaxbContext = JAXBContext.newInstance(Properties.class);
+            JAXBContext jaxbContext = JAXBContext.newInstance(ProgramProperties.class);
             Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 
-            return ((Properties) jaxbUnmarshaller.unmarshal(file)).getGroupPathMap();
+            return ((ProgramProperties) jaxbUnmarshaller.unmarshal(file)).getGroupPathMap();
         } catch (IOException | JAXBException e) {
             e.printStackTrace();
             return new HashMap<Group, String>();

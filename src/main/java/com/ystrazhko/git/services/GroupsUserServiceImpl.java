@@ -7,8 +7,9 @@ import java.util.stream.Collectors;
 
 import com.google.gson.reflect.TypeToken;
 import com.ystrazhko.git.connections.RESTConnector;
+import com.ystrazhko.git.connections.Token.PrivateToken;
 import com.ystrazhko.git.entities.Group;
-import com.ystrazhko.git.Properties.Properties;
+import com.ystrazhko.git.properties.ProgramProperties;
 import com.ystrazhko.git.entities.User;
 import com.ystrazhko.git.jgit.JGit;
 import com.ystrazhko.git.statuses.CloningStatus;
@@ -18,8 +19,8 @@ import org.eclipse.jgit.api.errors.JGitInternalException;
 public class GroupsUserServiceImpl implements GroupsUserService {
     private RESTConnector _connector;
 
-    public static final String PRIVATE_TOKEN_KEY = "PRIVATE-TOKEN";
-    public static String PRIVATE_TOKEN_VALUE;
+    public static String privateTokenKey;
+    public static String privateTokenValue;
 
     public GroupsUserServiceImpl(RESTConnector connector) {
         setConnector(connector);
@@ -27,10 +28,11 @@ public class GroupsUserServiceImpl implements GroupsUserService {
 
     @Override
     public Object getGroups(User user) {
-        PRIVATE_TOKEN_VALUE = user.getPrivate_token();
-        if (PRIVATE_TOKEN_VALUE != null) {
+        privateTokenValue = PrivateToken.getInstance().getPrivateTokenValue();
+        privateTokenKey = PrivateToken.getInstance().getPrivateTokenKey();
+        if (privateTokenValue != null) {
             HashMap<String, String> header = new HashMap<>();
-            header.put(PRIVATE_TOKEN_KEY, PRIVATE_TOKEN_VALUE);
+            header.put(privateTokenKey, privateTokenValue);
             Object userProjects = getConnector().sendGet("/groups", null, header);
 
             return JSONParser.parseToCollectionObjects(userProjects, new TypeToken<List<Group>>() {
@@ -54,12 +56,17 @@ public class GroupsUserServiceImpl implements GroupsUserService {
     @Override
     public Group getGroupById(int idGroup) {
         //TODO valid id group
-        String sendString = "/groups/" + idGroup;
-        HashMap<String, String> header = new HashMap<>();
-        header.put(GroupsUserServiceImpl.PRIVATE_TOKEN_KEY, GroupsUserServiceImpl.PRIVATE_TOKEN_VALUE);
+        privateTokenValue = PrivateToken.getInstance().getPrivateTokenValue();
+        privateTokenKey = PrivateToken.getInstance().getPrivateTokenKey();
+        if (privateTokenValue != null) {
+            String sendString = "/groups/" + idGroup;
+            HashMap<String, String> header = new HashMap<>();
+            header.put(privateTokenKey, privateTokenValue);
 
-        Object uparsedGroup = getConnector().sendGet(sendString, null, header);
-        return JSONParser.parseToObject(uparsedGroup, Group.class);
+            Object uparsedGroup = getConnector().sendGet(sendString, null, header);
+            return JSONParser.parseToObject(uparsedGroup, Group.class);
+        }
+        return null;
     }
 
     @Override
@@ -76,7 +83,7 @@ public class GroupsUserServiceImpl implements GroupsUserService {
                 .collect(Collectors.toList());
 
         //TODO: fix issue with empty groups
-        Properties.getInstance().updateClonedGroups(clonedGroups, destinationPath);
+        ProgramProperties.getInstance().updateClonedGroups(clonedGroups, destinationPath);
         return statusMap;
     }
 

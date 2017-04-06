@@ -3,6 +3,7 @@ package com.ystrazhko.git.services;
 import java.util.HashMap;
 
 import com.ystrazhko.git.connections.RESTConnector;
+import com.ystrazhko.git.connections.Token.PrivateToken;
 import com.ystrazhko.git.entities.User;
 import com.ystrazhko.git.util.JSONParser;
 import org.eclipse.jgit.transport.CredentialsProvider;
@@ -25,6 +26,7 @@ public class LoginServiceImpl implements LoginService {
         Object userJson = getConnector().sendPost("/session", params, null);
         _currentUser = JSONParser.parseToObject(userJson, User.class);
         CredentialsProvider.setDefault(new UsernamePasswordCredentialsProvider(name, password));
+        PrivateToken.getInstance().setPrivateTokenValue(_currentUser.getPrivate_token());
         return _currentUser;
     }
 

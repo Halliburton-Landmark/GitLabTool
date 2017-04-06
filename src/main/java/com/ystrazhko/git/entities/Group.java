@@ -130,6 +130,8 @@ public class Group {
         this.shared_projects = shared_projects;
     }
 
+    public Group(){}
+
     public int getId() {
         return id;
     }

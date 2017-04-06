@@ -20,18 +20,18 @@ public class MapAdapter extends XmlAdapter<MapElements[], Map<Group, String>> {
     public MapElements[] marshal(Map<Group, String> arg0) throws Exception {
         MapElements[] mapElements = new MapElements[arg0.size()];
         int i = 0;
-        for (Map.Entry<Group, String> entry : arg0.entrySet())
+        for (Map.Entry<Group, String> entry : arg0.entrySet()) {
             mapElements[i++] = new MapElements(entry.getKey().getId(), entry.getValue());
-
+        }
         return mapElements;
     }
 
     @Override
     public Map<Group, String> unmarshal(MapElements[] arg0) throws Exception {
-        Map<Group, String> r = new HashMap<>();
+        Map<Group, String> objMap = new HashMap<>();
         for (MapElements mapelement : arg0) {
-            r.put(_groupsService.getGroupById(mapelement.getGroupId()), mapelement.getLocalPath());
+            objMap.put( _groupsService.getGroupById(mapelement.getGroupId()), mapelement.getLocalPath());
         }
-        return r;
+        return objMap;
     }
 }
