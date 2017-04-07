@@ -175,7 +175,8 @@ public class JGit {
             }
         }
 
-        if (isUnsuccessfulOperation(unsuccessfulCommit, "commit")) {
+        if (unsuccessfulCommit.isEmpty()) {
+            logUnsuccessfulOperationInfo(unsuccessfulCommit, "push");
             return false;
         }
         return true;
@@ -207,7 +208,8 @@ public class JGit {
             }
         }
 
-        if (isUnsuccessfulOperation(unsuccessfulPush, "commit and push")) {
+        if (unsuccessfulPush.isEmpty()) {
+            logUnsuccessfulOperationInfo(unsuccessfulPush, "push");
             return false;
         }
         return true;
@@ -238,7 +240,8 @@ public class JGit {
             }
         }
 
-        if (isUnsuccessfulOperation(unsuccessfulPush, "push")) {
+        if (unsuccessfulPush.isEmpty()) {
+            logUnsuccessfulOperationInfo(unsuccessfulPush, "push");
             return false;
         }
         return true;
@@ -299,6 +302,9 @@ public class JGit {
     }
 
     private Optional<Git> getGitForRepository(String path) {
+        if (path == null) {
+            Optional.empty();
+        }
         try {
             Git git = Git.open(new File(path + "/.git"));
             return Optional.of(git);
@@ -323,16 +329,11 @@ public class JGit {
         return Collections.emptyList();
     }
 
-    private boolean isUnsuccessfulOperation (List<Path> files, String nameOperation) {
-        if (files.size() > 0) {
-            System.err.println("Unsuccessful " + nameOperation + " " + files.size() + " projects: ");
-            for (Path file : files) {
-                System.err.println(file);
-            }
-            return true;
+    private void logUnsuccessfulOperationInfo(List<Path> files, String nameOperation) {
+        System.err.println("Unsuccessful " + nameOperation + " " + files.size() + " projects: ");
+        for (Path file : files) {
+            System.err.println(file);
         }
-
-        return false;
     }
 
     // debug code
