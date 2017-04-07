@@ -2,13 +2,14 @@ package com.lgc.solutiontool.git.jgit;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-import com.lgc.solutiontool.git.entities.Project;
-import com.lgc.solutiontool.git.services.ProjectService;
-import com.lgc.solutiontool.git.services.ServiceProvider;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -19,6 +20,9 @@ import org.eclipse.jgit.lib.Repository;
 
 import com.google.gson.reflect.TypeToken;
 import com.lgc.solutiontool.git.entities.Group;
+import com.lgc.solutiontool.git.entities.Project;
+import com.lgc.solutiontool.git.services.ProjectService;
+import com.lgc.solutiontool.git.services.ServiceProvider;
 import com.lgc.solutiontool.git.util.JSONParser;
 
 /**
@@ -98,11 +102,9 @@ public class JGit {
      * @return Optional<Status> of project
      */
     public Optional<Status> getStatusProject(String projectPath) {
-        try {
-            Git git = Git.open(new File(projectPath));
+        try (Git git = Git.open(new File(projectPath))) {
             Repository repository = git.getRepository();
-
-            Status status = new Git(repository).status().call();
+            Status status = git.status().call();
             if (status != null) {
 
                 System.out.println("\nStatus " + projectPath + " repository: ");
@@ -144,6 +146,207 @@ public class JGit {
         } catch (Exception e) {
             System.err.println("!ERROR: " + e.getMessage());
         }
+    }
+
+    /**
+     * Commit of all the projects in the group
+     *
+     * @param groupFolderPath the path to cloned of the group
+     * @param message for commit
+     * @return true - if the operation is completed successfully,
+     * false - if an error occurred during execution
+     * ! Projects that failed to commit will be displayed in the console.
+     */
+    public boolean commit (String groupFolderPath, String message) {
+        Optional<List<Path>> optionProjects = getFileInFolder(groupFolderPath);
+        if (!optionProjects.isPresent()) {
+            return false;
+        }
+
+        List<Path> projects = optionProjects.get();
+        if (projects.size() == 0) {
+            return false;
+        }
+
+        List<Path> unsuccessfulCommit = new ArrayList<>();
+        for (Path path : projects) {
+            if(path == null) { // TODO path validator
+                unsuccessfulCommit.add(path);
+                continue;
+            }
+            if(!commit(path, message)) {
+                unsuccessfulCommit.add(path);
+            }
+        }
+
+        if (isUnsuccessfulOperation(unsuccessfulCommit, "commit")) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Commit and push of all the projects in the group
+     *
+     * @param groupFolderPath the path to cloned of the group
+     * @param message for commit
+     * @return true - if the operation is completed successfully,
+     * false - if an error occurred during execution
+     * ! Projects that failed to commit or to push will be displayed in the console.
+     */
+    public boolean commitAndPush (String groupFolderPath, String message) {
+        Optional<List<Path>> optionProjects = getFileInFolder(groupFolderPath);
+        if (!optionProjects.isPresent()) {
+            return false;
+        }
+
+        List<Path> projects = optionProjects.get();
+        if (projects.size() == 0) {
+            return false;
+        }
+
+        List<Path> unsuccessfulPush = new ArrayList<>();
+        for (Path path : projects) {
+            if(path == null) { // TODO path validator
+                unsuccessfulPush.add(path);
+                continue;
+            }
+            if(!commitAndPush(path, message)) {
+                unsuccessfulPush.add(path);
+            }
+        }
+
+        if (isUnsuccessfulOperation(unsuccessfulPush, "commit and push")) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Push of all the projects in the group
+     *
+     * @param groupFolderPath the path to cloned of the group
+     * @return true - if the operation is completed successfully,
+     * false - if an error occurred during execution
+     * ! Projects that failed to push will be displayed in the console.
+     */
+    public boolean push (String groupFolderPath) {
+        Optional<List<Path>> optionProjects = getFileInFolder(groupFolderPath);
+        if (!optionProjects.isPresent()) {
+            return false;
+        }
+
+        List<Path> projects = optionProjects.get();
+        if (projects.size() == 0) {
+            return false;
+        }
+
+        List<Path> unsuccessfulPush = new ArrayList<>();
+        for (Path path : projects) {
+            if(path == null) { // TODO path validator
+                unsuccessfulPush.add(path);
+                continue;
+            }
+            if(!push(path)) {
+                unsuccessfulPush.add(path);
+            }
+        }
+
+        if (isUnsuccessfulOperation(unsuccessfulPush, "push")) {
+            return false;
+        }
+        return true;
+    }
+
+    private boolean commit (Path projectPath, String message) {
+        if (projectPath == null) {
+            return false;
+        }
+        try {
+            Optional<Git> opGit = getGitForRepository(projectPath.toString());
+            if (!opGit.isPresent()) {
+                return false;
+            }
+            opGit.get().commit().setAll(true).setMessage(message).call();
+            // TODO get a status of operation and showing to the console. Also, return a result.
+            return true;
+        } catch (Exception e) {
+            System.err.println("!ERROR: " + e.getMessage());
+        }
+        return false;
+    }
+
+    private boolean commitAndPush(Path projectPath, String message) {
+        if (projectPath == null) {
+            return false;
+        }
+        try {
+            if(!commit(projectPath, message)) {
+               return false;
+            }
+            if(push(projectPath)) {
+                return true;
+            }
+        } catch (Exception e) {
+            System.err.println("!ERROR: " + e.getMessage());
+        }
+        return false;
+    }
+
+    private boolean push(Path projectPath) {
+        if (projectPath == null) {
+            return false;
+        }
+
+        Optional<Git> opGit = getGitForRepository(projectPath.toString());
+        if (!opGit.isPresent()) {
+            return false;
+        }
+        try {
+            opGit.get().push().call();
+            // TODO get a status of operation and showing to the console. Also, return a result.
+            return true;
+        } catch (GitAPIException e) {
+            System.err.println("!ERROR: " + e.getMessage());
+        }
+        return false;
+    }
+
+    private Optional<Git> getGitForRepository(String path) {
+        try {
+            Git git = Git.open(new File(path + "/.git"));
+            return Optional.of(git);
+        } catch (IOException e) {
+            System.err.println("!ERROR: " + e.getMessage());
+        }
+        return Optional.empty();
+    }
+
+    private Optional<List<Path>> getFileInFolder(String groupFolderPath){
+        try {
+            List<Path> foundFolders = new ArrayList<>();
+            for (Path file : Files.newDirectoryStream(Paths.get(groupFolderPath))) {
+                if (file != null) {
+                    foundFolders.add(file);
+                }
+            }
+            return Optional.of(foundFolders);
+        } catch (IOException e) {
+            System.err.println("!ERROR: " + e.getMessage());
+        }
+        return Optional.empty();
+    }
+
+    private boolean isUnsuccessfulOperation (List<Path> files, String nameOperation) {
+        if (files.size() > 0) {
+            System.err.println("Unsuccessful " + nameOperation + " " + files.size() + " projects: ");
+            for (Path file : files) {
+                System.err.println(file);
+            }
+            return true;
+        }
+
+        return false;
     }
 
     // debug code
