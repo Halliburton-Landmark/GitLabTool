@@ -34,17 +34,16 @@ public class MainWindowController {
     private ListView projectsList;
 
     @FXML
-    private Label groupLabel;
-
+    private Label groupId;
     @FXML
-    private Label userLabel;
+    private Label userId;
 
     public void beforeShowing() {
-        String username = _loginService.getCurrentUser().getUsername();
-        userLabel.setText(HEDER_USER_TITLE + username);
+        String username = _loginService.getCurrentUser().getName();
+        userId.setText(username);
 
         String currentGroupname = getSelectedGroup().getName();
-        groupLabel.setText(HEDER_GROUP_TITLE + currentGroupname);
+        groupId.setText(HEDER_GROUP_TITLE + currentGroupname);
 
         configureListView(projectsList);
 
