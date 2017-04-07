@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -158,13 +159,8 @@ public class JGit {
      * ! Projects that failed to commit will be displayed in the console.
      */
     public boolean commit (String groupFolderPath, String message) {
-        Optional<List<Path>> optionProjects = getFileInFolder(groupFolderPath);
-        if (!optionProjects.isPresent()) {
-            return false;
-        }
-
-        List<Path> projects = optionProjects.get();
-        if (projects.size() == 0) {
+        List<Path> projects = getFilesInFolder(groupFolderPath);
+        if (projects == Collections.EMPTY_LIST || projects.size() == 0) {
             return false;
         }
 
@@ -195,13 +191,8 @@ public class JGit {
      * ! Projects that failed to commit or to push will be displayed in the console.
      */
     public boolean commitAndPush (String groupFolderPath, String message) {
-        Optional<List<Path>> optionProjects = getFileInFolder(groupFolderPath);
-        if (!optionProjects.isPresent()) {
-            return false;
-        }
-
-        List<Path> projects = optionProjects.get();
-        if (projects.size() == 0) {
+        List<Path> projects = getFilesInFolder(groupFolderPath);
+        if (projects == Collections.EMPTY_LIST || projects.size() == 0) {
             return false;
         }
 
@@ -231,13 +222,8 @@ public class JGit {
      * ! Projects that failed to push will be displayed in the console.
      */
     public boolean push (String groupFolderPath) {
-        Optional<List<Path>> optionProjects = getFileInFolder(groupFolderPath);
-        if (!optionProjects.isPresent()) {
-            return false;
-        }
-
-        List<Path> projects = optionProjects.get();
-        if (projects.size() == 0) {
+        List<Path> projects = getFilesInFolder(groupFolderPath);
+        if (projects == Collections.EMPTY_LIST || projects.size() == 0) {
             return false;
         }
 
@@ -322,7 +308,7 @@ public class JGit {
         return Optional.empty();
     }
 
-    private Optional<List<Path>> getFileInFolder(String groupFolderPath){
+    private List<Path> getFilesInFolder(String groupFolderPath){
         try {
             List<Path> foundFolders = new ArrayList<>();
             for (Path file : Files.newDirectoryStream(Paths.get(groupFolderPath))) {
@@ -330,11 +316,11 @@ public class JGit {
                     foundFolders.add(file);
                 }
             }
-            return Optional.of(foundFolders);
+            return foundFolders;
         } catch (IOException e) {
             System.err.println("!ERROR: " + e.getMessage());
         }
-        return Optional.empty();
+        return Collections.emptyList();
     }
 
     private boolean isUnsuccessfulOperation (List<Path> files, String nameOperation) {
