@@ -91,6 +91,8 @@ public class WelcomeWindowController {
         Parent root = loader.load();
         Stage stage = new Stage(StageStyle.DECORATED);
         stage.setScene(new Scene(root));
+        stage.setHeight(800);
+        stage.setWidth(1200);
 
         MainWindowController controller = loader.getController();
         controller.setSelectedGroup(selectedGroup);
