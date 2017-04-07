@@ -9,6 +9,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.stage.Modality;
@@ -44,9 +45,9 @@ public class WelcomeWindowController {
         stage.setScene(new Scene(root));
 
 
-
         stage.show();
     }
+
 
     private void configureListView(ListView listView) {
         //config displayable string
@@ -74,5 +75,27 @@ public class WelcomeWindowController {
 
         configureListView(groupList);
         groupList.setItems(myObservableList);
+    }
+
+    public void onLoadSelectedGroupspace(ActionEvent actionEvent) throws IOException {
+        Group selectedGroup = (Group) groupList.getSelectionModel().getSelectedItem();
+
+        if (selectedGroup == null) {
+            //TODO: delete alert and make a disabled button when group is not selected
+            Alert alert = new Alert(Alert.AlertType.INFORMATION, "Please select a group");
+            alert.showAndWait();
+            return;
+        }
+        FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("MainWindow.fxml"));
+
+        Parent root = loader.load();
+        Stage stage = new Stage(StageStyle.DECORATED);
+        stage.setScene(new Scene(root));
+
+        MainWindowController controller = loader.getController();
+        controller.setSelectedGroup(selectedGroup);
+        controller.beforeShowing();
+
+        stage.show();
     }
 }

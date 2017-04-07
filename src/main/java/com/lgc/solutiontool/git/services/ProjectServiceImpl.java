@@ -1,29 +1,39 @@
 package com.lgc.solutiontool.git.services;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 
+import com.google.gson.reflect.TypeToken;
 import com.lgc.solutiontool.git.connections.RESTConnector;
 import com.lgc.solutiontool.git.connections.Token.PrivateToken;
+import com.lgc.solutiontool.git.entities.Group;
+import com.lgc.solutiontool.git.entities.Project;
+import com.lgc.solutiontool.git.util.JSONParser;
 
 public class ProjectServiceImpl implements ProjectService {
     private RESTConnector _connector;
 
     private static String privateTokenKey;
-    private static  String privateTokenValue;
+    private static String privateTokenValue;
+
     public ProjectServiceImpl(RESTConnector connector) {
         setConnector(connector);
     }
 
     @Override
-    public Object getProjects(String idGroup) {
+    public Collection<Project> getProjects(Group group) {
         privateTokenValue = PrivateToken.getInstance().getPrivateTokenValue();
         privateTokenKey = PrivateToken.getInstance().getPrivateTokenKey();
         if (privateTokenValue != null) {
             //TODO valid id group
-            String sendString = "/groups/" + idGroup + "/projects";
+            String sendString = "/groups/" + group.getId() + "/projects";
             HashMap<String, String> header = new HashMap<>();
             header.put(privateTokenKey, privateTokenValue);
-            return getConnector().sendGet(sendString, null, header);
+            Object jsonProjects = getConnector().sendGet(sendString, null, header);
+
+            return JSONParser.parseToCollectionObjects(jsonProjects, new TypeToken<List<Project>>() {
+            }.getType());
         }
         return null;
     }
