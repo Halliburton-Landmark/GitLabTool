@@ -3,7 +3,7 @@ package com.lgc.solutiontool.git.services;
 import java.util.HashMap;
 
 import com.lgc.solutiontool.git.connections.RESTConnector;
-import com.lgc.solutiontool.git.connections.Token.PrivateToken;
+import com.lgc.solutiontool.git.connections.token.PrivateToken;
 
 public class ProjectServiceImpl implements ProjectService {
     private RESTConnector _connector;

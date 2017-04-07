@@ -3,7 +3,7 @@ package com.lgc.solutiontool.git.services;
 import java.util.HashMap;
 
 import com.lgc.solutiontool.git.connections.RESTConnector;
-import com.lgc.solutiontool.git.connections.Token.PrivateToken;
+import com.lgc.solutiontool.git.connections.token.PrivateToken;
 import com.lgc.solutiontool.git.entities.User;
 import com.lgc.solutiontool.git.util.JSONParser;
 import org.eclipse.jgit.transport.CredentialsProvider;

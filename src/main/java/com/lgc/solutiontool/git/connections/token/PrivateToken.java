@@ -1,4 +1,4 @@
-package com.lgc.solutiontool.git.connections.Token;
+package com.lgc.solutiontool.git.connections.token;
 
 public class PrivateToken {
     private static final String PRIVATE_TOKEN_KEY = "PRIVATE-TOKEN";
