@@ -28,6 +28,12 @@ class MapElements {
         this.localPath = value;
     }
 
+    /*
+     * JAXB library need a no arg constructor for marshalling
+     */
+    private MapElements() {
+    }
+
     /**
      * Gets a local path of cloned group
      *
