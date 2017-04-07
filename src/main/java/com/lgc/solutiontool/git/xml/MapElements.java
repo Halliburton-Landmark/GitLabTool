@@ -2,7 +2,14 @@ package com.lgc.solutiontool.git.xml;
 
 import javax.xml.bind.annotation.XmlElement;
 
-
+/**
+ * Additional class for MapAdapter
+ * <p>
+ * Represents element of map and their behavior
+ * Uses only with JAXB library
+ *
+ * @author Pavlo Pidhornyi
+ */
 class MapElements {
     @XmlElement
     private Integer groupId;
@@ -10,27 +17,33 @@ class MapElements {
     @XmlElement
     private String localPath;
 
-    private MapElements() {
-    }
-
+    /**
+     * Constructor to create an instance of the object.
+     *
+     * @param key   groupID value (key for cloned group)
+     * @param value path of local group (value for cloned group)
+     */
     MapElements(Integer key, String value) {
         this.groupId = key;
         this.localPath = value;
     }
 
+    /**
+     * Gets a local path of cloned group
+     *
+     * @return local path
+     */
     String getLocalPath() {
         return localPath;
     }
 
-    void setLocalPath(String localPath) {
-        this.localPath = localPath;
-    }
-
+    /**
+     * Gets a groupId of cloned group
+     *
+     * @return group id
+     */
     Integer getGroupId() {
         return groupId;
     }
 
-    void setGroupId(Integer groupId) {
-        this.groupId = groupId;
-    }
 }

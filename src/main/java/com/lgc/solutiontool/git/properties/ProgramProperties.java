@@ -27,9 +27,8 @@ public class ProgramProperties {
 
 
     /**
-     * Already cloned groups (groupId, localpath)
+     * Already cloned groups (group, localpath)
      */
-
     private Map<Group, String> _groupPathMap;
 
     private StorageService _storageService =
@@ -38,7 +37,11 @@ public class ProgramProperties {
     private LoginService _loginService =
             (LoginService) ServiceProvider.getInstance().getService(LoginService.class.getName());
 
-
+    /**
+     * Gets instance's the class
+     *
+     * @return instance
+     */
     public static ProgramProperties getInstance() {
         if (_instance == null) {
             _instance = new ProgramProperties();
@@ -51,15 +54,28 @@ public class ProgramProperties {
 
     }
 
+    /**
+     * Sets the map with groups and their local paths
+     *
+     * @param map map with groups and their local paths
+     */
     @XmlJavaTypeAdapter(MapAdapter.class)
     public void setGroupPathMap(Map<Group, String> map) {
         this._groupPathMap = map;
     }
 
+    /**
+     * Gets the map with groups and their local paths
+     *
+     * @return map with groups and their local paths
+     */
     public Map<Group, String> getGroupPathMap() {
         return _groupPathMap;
     }
 
+    /**
+     * Updates local storage using the current properties
+     */
     public void updateClonedGroups(List<Group> groups, String localParentPath) {
         _groupPathMap = groups.stream().collect(
                 Collectors.toMap(x -> x, x -> localParentPath + PATH_SEPARATOR + x.getName()));
@@ -68,8 +84,12 @@ public class ProgramProperties {
         _storageService.updateStorage(MOCK_SERVERNAME, username);
     }
 
+    /**
+     * Gets a list with currently cloned groups
+     *
+     * @return list with groups
+     */
     public List<Group> getClonedGroups() {
-
         String username = _loginService.getCurrentUser().getUsername();
         if (_groupPathMap == null) {
             setGroupPathMap(_storageService.loadStorage(MOCK_SERVERNAME, username));

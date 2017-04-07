@@ -8,13 +8,14 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 import java.util.HashMap;
 import java.util.Map;
 
-
+/**
+ * Adapts a custom map for marshaling to xml.
+ * Used for JAXB library
+ */
 public class MapAdapter extends XmlAdapter<MapElements[], Map<Group, String>> {
+
     private GroupsUserService _groupsService =
             (GroupsUserService) ServiceProvider.getInstance().getService(GroupsUserService.class.getName());
-
-    public MapAdapter() {
-    }
 
     @Override
     public MapElements[] marshal(Map<Group, String> arg0) throws Exception {
@@ -30,7 +31,7 @@ public class MapAdapter extends XmlAdapter<MapElements[], Map<Group, String>> {
     public Map<Group, String> unmarshal(MapElements[] arg0) throws Exception {
         Map<Group, String> objMap = new HashMap<>();
         for (MapElements mapelement : arg0) {
-            objMap.put( _groupsService.getGroupById(mapelement.getGroupId()), mapelement.getLocalPath());
+            objMap.put(_groupsService.getGroupById(mapelement.getGroupId()), mapelement.getLocalPath());
         }
         return objMap;
     }
