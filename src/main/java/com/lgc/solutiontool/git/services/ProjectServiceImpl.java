@@ -6,10 +6,10 @@ import java.util.List;
 
 import com.google.gson.reflect.TypeToken;
 import com.lgc.solutiontool.git.connections.RESTConnector;
-import com.lgc.solutiontool.git.connections.Token.PrivateToken;
 import com.lgc.solutiontool.git.entities.Group;
 import com.lgc.solutiontool.git.entities.Project;
 import com.lgc.solutiontool.git.util.JSONParser;
+import com.lgc.solutiontool.git.connections.token.PrivateToken;
 
 public class ProjectServiceImpl implements ProjectService {
     private RESTConnector _connector;

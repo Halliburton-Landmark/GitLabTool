@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 
 import com.google.gson.reflect.TypeToken;
 import com.lgc.solutiontool.git.connections.RESTConnector;
-import com.lgc.solutiontool.git.connections.Token.PrivateToken;
+import com.lgc.solutiontool.git.connections.token.PrivateToken;
 import com.lgc.solutiontool.git.entities.Group;
 import com.lgc.solutiontool.git.jgit.JGit;
 import com.lgc.solutiontool.git.properties.ProgramProperties;
@@ -19,8 +19,8 @@ import org.eclipse.jgit.api.errors.JGitInternalException;
 public class GroupsUserServiceImpl implements GroupsUserService {
     private RESTConnector _connector;
 
-    public static String privateTokenKey;
-    public static String privateTokenValue;
+    private static String privateTokenKey;
+    private static String privateTokenValue;
 
     public GroupsUserServiceImpl(RESTConnector connector) {
         setConnector(connector);
