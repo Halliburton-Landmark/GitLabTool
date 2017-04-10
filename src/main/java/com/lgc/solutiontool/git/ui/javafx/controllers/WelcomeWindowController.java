@@ -3,6 +3,7 @@ package com.lgc.solutiontool.git.ui.javafx.controllers;
 import com.lgc.solutiontool.git.properties.ProgramProperties;
 import com.lgc.solutiontool.git.entities.Group;
 import javafx.application.Platform;
+import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -10,7 +11,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
@@ -39,6 +39,9 @@ public class WelcomeWindowController {
     public void initialize() {
         configureListView(groupList);
         new Thread(this::updateClonedGroups).start();
+
+        BooleanBinding booleanBinding = groupList.getSelectionModel().selectedItemProperty().isNull();
+        onLoadSelectedGroupspaceButton.disableProperty().bind(booleanBinding);
     }
 
     @FXML
@@ -97,15 +100,7 @@ public class WelcomeWindowController {
     public void onLoadSelectedGroupspace(ActionEvent actionEvent) throws IOException {
         Group selectedGroup = (Group) groupList.getSelectionModel().getSelectedItem();
 
-        if (selectedGroup == null) {
-            //TODO: delete alert and make a disabled button when group is not selected
-            Alert alert = new Alert(Alert.AlertType.INFORMATION, "Please select a group");
-            alert.showAndWait();
-            return;
-        }
-
         FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("MainWindow.fxml"));
-
         Parent root = loader.load();
         Stage stage = new Stage(StageStyle.DECORATED);
         stage.setScene(new Scene(root));
