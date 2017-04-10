@@ -28,11 +28,12 @@ import java.util.List;
  */
 public class WelcomeWindowController {
     private static final String WINDOW_TITLE = "Cloning window";
-    @FXML
-    public ListView groupList;
 
     @FXML
-    public Button onLoadSelectedGroupspaceButton;
+    private ListView groupList;
+
+    @FXML
+    private Button onLoadSelectedGroupspaceButton;
 
     @FXML
     public void initialize() {
