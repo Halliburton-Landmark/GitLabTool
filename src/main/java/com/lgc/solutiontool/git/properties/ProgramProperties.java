@@ -9,6 +9,7 @@ import com.lgc.solutiontool.git.xml.MapAdapter;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -92,9 +93,14 @@ public class ProgramProperties {
     public List<Group> getClonedGroups() {
         String username = _loginService.getCurrentUser().getUsername();
         if (_groupPathMap == null) {
-            setGroupPathMap(_storageService.loadStorage(MOCK_SERVERNAME, username));
+            Map<Group, String> storage = _storageService.loadStorage(MOCK_SERVERNAME, username);
+            setGroupPathMap(storage);
         }
-        return _groupPathMap.entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList());
+        if (!_groupPathMap.isEmpty()) {
+            return _groupPathMap.entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList());
+        } else {
+            return new ArrayList<>();
+        }
     }
 
 

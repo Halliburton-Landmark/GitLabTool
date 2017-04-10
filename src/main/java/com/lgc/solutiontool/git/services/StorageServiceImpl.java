@@ -47,7 +47,6 @@ public class StorageServiceImpl implements StorageService {
 
             return true;
         } catch (IOException | JAXBException e) {
-            e.printStackTrace();
             return false;
         }
     }
@@ -58,11 +57,10 @@ public class StorageServiceImpl implements StorageService {
             File file = getPropFile(server, username);
             JAXBContext jaxbContext = JAXBContext.newInstance(ProgramProperties.class);
             Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-
-            return ((ProgramProperties) jaxbUnmarshaller.unmarshal(file)).getGroupPathMap();
+            Object unmarshallObj = jaxbUnmarshaller.unmarshal(file);
+            return ((ProgramProperties) unmarshallObj).getGroupPathMap();
         } catch (IOException | JAXBException e) {
-            e.printStackTrace();
-            return new HashMap<Group, String>();
+            return new HashMap<>();
         }
     }
 

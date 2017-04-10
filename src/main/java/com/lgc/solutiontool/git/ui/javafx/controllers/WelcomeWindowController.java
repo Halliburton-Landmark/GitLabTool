@@ -6,7 +6,6 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -18,7 +17,6 @@ import javafx.scene.control.ListView;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import javafx.stage.WindowEvent;
 import javafx.util.Callback;
 
 import java.io.IOException;
@@ -36,7 +34,11 @@ public class WelcomeWindowController {
     @FXML
     public Button onLoadSelectedGroupspaceButton;
 
-    public Stage welcomeWindow;
+    @FXML
+    public void initialize() {
+        configureListView(groupList);
+        new Thread(this::updateClonedGroups).start();
+    }
 
     @FXML
     public void onCreateGroupspace(ActionEvent actionEvent) throws IOException {
@@ -52,11 +54,21 @@ public class WelcomeWindowController {
         stage.setTitle(WINDOW_TITLE);
         stage.setResizable(false);
         stage.setScene(new Scene(root));
-
+        stage.setOnHidden(we -> updateClonedGroups());
 
         stage.show();
     }
 
+    private void updateClonedGroups() {
+        List<Group> userGroups = ProgramProperties.getInstance().getClonedGroups();
+        ObservableList<Group> groupsObservableList = FXCollections.observableList(userGroups);
+
+        groupList.getItems().clear();
+        groupList.getSelectionModel().clearSelection();
+
+        groupList.setItems(groupsObservableList);
+
+    }
 
     private void configureListView(ListView listView) {
         //config displayable string
@@ -66,9 +78,11 @@ public class WelcomeWindowController {
 
                 return new ListCell<Group>() {
                     @Override
-                    protected void updateItem(Group item, boolean bln) {
-                        super.updateItem(item, bln);
-                        if (item != null) {
+                    protected void updateItem(Group item, boolean empty) {
+                        super.updateItem(item, empty);
+                        if (empty || item == null) {
+                            setText(null);
+                        } else {
                             String itemText = item.getName() + " (@" + item.getPath() + ") ";
                             setText(itemText);
                         }
@@ -78,14 +92,7 @@ public class WelcomeWindowController {
         });
     }
 
-    public void loadLocalGroups(ActionEvent actionEvent) {
-        List<Group> userGroups = ProgramProperties.getInstance().getClonedGroups();
-        ObservableList<Group> myObservableList = FXCollections.observableList(userGroups);
-
-        configureListView(groupList);
-        groupList.setItems(myObservableList);
-    }
-
+    @FXML
     public void onLoadSelectedGroupspace(ActionEvent actionEvent) throws IOException {
         Group selectedGroup = (Group) groupList.getSelectionModel().getSelectedItem();
 
@@ -95,6 +102,7 @@ public class WelcomeWindowController {
             alert.showAndWait();
             return;
         }
+
         FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("MainWindow.fxml"));
 
         Parent root = loader.load();
@@ -110,19 +118,10 @@ public class WelcomeWindowController {
         Stage previousStage = (Stage) onLoadSelectedGroupspaceButton.getScene().getWindow();
         previousStage.close();
 
-        stage.setOnHiding(new EventHandler<WindowEvent>() {
-            @Override
-            public void handle(WindowEvent event) {
-                Platform.runLater(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        previousStage.show();
-                        stage.close();
-                    }
-                });
-            }
-        });
+        stage.setOnHiding(event -> Platform.runLater(() -> {
+            previousStage.show();
+            stage.close();
+        }));
         stage.show();
     }
 }
