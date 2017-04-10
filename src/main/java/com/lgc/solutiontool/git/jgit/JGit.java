@@ -6,9 +6,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-import com.lgc.solutiontool.git.entities.Project;
-import com.lgc.solutiontool.git.services.ProjectService;
-import com.lgc.solutiontool.git.services.ServiceProvider;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -19,6 +16,9 @@ import org.eclipse.jgit.lib.Repository;
 
 import com.google.gson.reflect.TypeToken;
 import com.lgc.solutiontool.git.entities.Group;
+import com.lgc.solutiontool.git.entities.Project;
+import com.lgc.solutiontool.git.services.ProjectService;
+import com.lgc.solutiontool.git.services.ServiceProvider;
 import com.lgc.solutiontool.git.util.JSONParser;
 
 /**
@@ -144,6 +144,24 @@ public class JGit {
         } catch (Exception e) {
             System.err.println("!ERROR: " + e.getMessage());
         }
+    }
+
+    /**
+     * Makes pull of the project
+     *
+     * @param projectPath the path cloned the project
+     * @return true - if the operation is completed successfully,
+     * false - if an error occurred during execution
+     */
+    public boolean pull (String projectPath) {
+        try {
+            Git git = Git.open(new File(projectPath));
+            git.pull().call();
+            return true; // TODO get status pull
+        } catch (IOException | GitAPIException e) {
+            System.err.println("!ERROR: " + e.getMessage());
+        }
+        return false;
     }
 
     // debug code
