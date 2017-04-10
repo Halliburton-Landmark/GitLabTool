@@ -71,6 +71,7 @@ public class GroupsUserServiceImpl implements GroupsUserService {
 
     @Override
     public Map<Group, CloningStatus> cloneGroups(List<Group> groups, String destinationPath) {
+        //TODO: add path validation
         Map<Group, CloningStatus> statusMap = new HashMap<>();
         for (Group groupItem : groups) {
             CloningStatus status = cloneGroup(groupItem, destinationPath);
