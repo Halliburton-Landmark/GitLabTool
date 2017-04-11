@@ -1,5 +1,6 @@
 package com.lgc.solutiontool.git.services;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -71,6 +72,10 @@ public class GroupsUserServiceImpl implements GroupsUserService {
 
     @Override
     public Map<Group, CloningStatus> cloneGroups(List<Group> groups, String destinationPath) {
+        if (groups == null || destinationPath == null) {
+            return Collections.emptyMap();
+        }
+
         //TODO: add path validation
         Map<Group, CloningStatus> statusMap = new HashMap<>();
         for (Group groupItem : groups) {

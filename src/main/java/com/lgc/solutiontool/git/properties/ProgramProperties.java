@@ -78,6 +78,9 @@ public class ProgramProperties {
      * Updates local storage using the current properties
      */
     public void updateClonedGroups(List<Group> groups, String localParentPath) {
+        if (groups == null || localParentPath == null) {
+            return;
+        }
         _groupPathMap = groups.stream().collect(
                 Collectors.toMap(x -> x, x -> localParentPath + PATH_SEPARATOR + x.getName()));
 

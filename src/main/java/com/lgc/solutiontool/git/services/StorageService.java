@@ -5,6 +5,11 @@ import com.lgc.solutiontool.git.entities.Group;
 
 import java.util.Map;
 
+/**
+ * Class for work with program storage.
+ *
+ * @author Pavlo Pidhornyi
+ */
 public interface StorageService {
 
     /**
