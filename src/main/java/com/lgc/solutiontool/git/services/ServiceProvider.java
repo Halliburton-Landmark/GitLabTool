@@ -31,5 +31,7 @@ public class ServiceProvider {
         _services.put(ProjectService.class.getName(),
                 new ProjectServiceImpl(new RESTConnectorFactory().getRESTConnector()));
         _services.put(ReplacementService.class.getName(), new ReplacementServiceImpl());
+        _services.put(PomXMLService.class.getName(), new PomXMLServiceImpl());
+
     }
 }
