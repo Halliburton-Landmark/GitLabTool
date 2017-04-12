@@ -48,7 +48,7 @@
                     <Insets right="10.0"/>
                 </padding>
             </Label>
-            <TextField fx:id="folderPath" editable="false"/>
+            <TextField fx:id="folderPath"/>
             <Button fx:id="browseButton" mnemonicParsing="false" onAction="#onBrowseButton" text="Browse">
                 <HBox.margin>
                     <Insets left="10.0"/>
