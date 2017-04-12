@@ -302,12 +302,11 @@ public class JGit {
     }
 
     private Optional<Git> getGitForRepository(String path) {
-        if (path == null) {
-            Optional.empty();
-        }
         try {
             Git git = Git.open(new File(path + "/.git"));
-            return Optional.of(git);
+            if (git != null) {
+                return Optional.of(git);
+            }
         } catch (IOException e) {
             System.err.println("!ERROR: " + e.getMessage());
         }
