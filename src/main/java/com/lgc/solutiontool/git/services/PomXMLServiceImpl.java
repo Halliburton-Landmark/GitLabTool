@@ -244,7 +244,7 @@ public class PomXMLServiceImpl implements PomXMLService {
         }
     }
 
-    private static boolean isCompliteValue(Pattern replace, String param) {
+    private boolean isCompliteValue(Pattern replace, String param) {
         if (param == null) {
             return false;
         }

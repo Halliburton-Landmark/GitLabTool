@@ -38,7 +38,6 @@ public class PomXMLManager {
             return;
         }
         updateModelFile(path);
-
     }
 
     /**
