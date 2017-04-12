@@ -156,8 +156,10 @@ public class JGit {
     public boolean pull (String projectPath) {
         try {
             Git git = Git.open(new File(projectPath));
-            git.pull().call();
-            return true; // TODO get status pull
+            if (git != null) {
+                git.pull().call();
+                return true; // TODO get status pull
+            }
         } catch (IOException | GitAPIException e) {
             System.err.println("!ERROR: " + e.getMessage());
         }
