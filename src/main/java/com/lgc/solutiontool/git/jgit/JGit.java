@@ -175,7 +175,7 @@ public class JGit {
             }
         }
 
-        if (unsuccessfulCommit.isEmpty()) {
+        if (!unsuccessfulCommit.isEmpty()) {
             logUnsuccessfulOperationInfo(unsuccessfulCommit, "push");
             return false;
         }
@@ -208,7 +208,7 @@ public class JGit {
             }
         }
 
-        if (unsuccessfulPush.isEmpty()) {
+        if (!unsuccessfulPush.isEmpty()) {
             logUnsuccessfulOperationInfo(unsuccessfulPush, "push");
             return false;
         }
@@ -240,7 +240,7 @@ public class JGit {
             }
         }
 
-        if (unsuccessfulPush.isEmpty()) {
+        if (!unsuccessfulPush.isEmpty()) {
             logUnsuccessfulOperationInfo(unsuccessfulPush, "push");
             return false;
         }
