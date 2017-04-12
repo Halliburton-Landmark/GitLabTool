@@ -4,7 +4,7 @@ import com.lgc.solutiontool.git.services.GroupsUserService;
 import com.lgc.solutiontool.git.services.LoginService;
 import com.lgc.solutiontool.git.services.ServiceProvider;
 import com.lgc.solutiontool.git.entities.Group;
-import com.lgc.solutiontool.git.jgit.JGit;
+import com.lgc.solutiontool.git.statuses.CloningStatus;
 import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -15,18 +15,17 @@ import javafx.scene.input.MouseEvent;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import javafx.util.Callback;
-import org.eclipse.jgit.api.errors.JGitInternalException;
 
 import java.io.File;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("unchecked")
 public class CloningGroupsWindowController {
     private static final String FOLDER_CHOOSER_DIALOG = "Destination folder";
-    private static final String CLONING_STATUS_ALERT_TITLE = "Cloning status";
-    private static final String ALERT_SUCCESSFUL_HEADER = "Operation finished";
-    private static final String ALERT_FAIL_HEADER = "Operation failed";
-    private static final String ALERT_SUCCESSFUL_MESSAGE = "Cloning process was successful";
+    private static final String CLONING_STATUS_ALERT_TITLE = "Cloning info";
+    private static final String CLONING_STATUS_ALERT_HEADER = "Cloning statuses:";
 
 
     private LoginService _loginService =
@@ -80,20 +79,17 @@ public class CloningGroupsWindowController {
     @FXML
     public void onOkButton() throws Exception {
         Stage stage = (Stage) okButton.getScene().getWindow();
-
         String destinationPath = folderPath.getText();
         List<Group> selectedGroups = projectsList.getSelectionModel().getSelectedItems();
-        try {
-            for (Group groupItem : selectedGroups) {
-                JGit.getInstance().clone(groupItem, destinationPath);
-            }
 
-            cloningStatusDialog(true, ALERT_SUCCESSFUL_HEADER, ALERT_SUCCESSFUL_MESSAGE);
-            stage.close();
-        } catch (JGitInternalException ex) {
-            //TODO: catching should be moved to service and added return value with status of cloning
-            cloningStatusDialog(false, ALERT_FAIL_HEADER, ex.getLocalizedMessage());
-        }
+        Map<Group, CloningStatus> statuses = _groupsService.cloneGroups(selectedGroups, destinationPath);
+
+        String dialogMessage = statuses.entrySet().stream()
+                .map(x -> x.getKey().getName() + "  -  " + x.getValue().getMessage())
+                .collect(Collectors.joining("\n"));
+        cloningStatusDialog(dialogMessage);
+
+        stage.close();
     }
 
     @FXML
@@ -103,16 +99,10 @@ public class CloningGroupsWindowController {
         stage.close();
     }
 
-    private void cloningStatusDialog(boolean isSuccessful, String header, String content) {
-        Alert.AlertType alertType;
-        if (isSuccessful) {
-            alertType = Alert.AlertType.INFORMATION;
-        } else {
-            alertType = Alert.AlertType.ERROR;
-        }
-        Alert alert = new Alert(alertType);
+    private void cloningStatusDialog(String content) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(CLONING_STATUS_ALERT_TITLE);
-        alert.setHeaderText(header);
+        alert.setHeaderText(CLONING_STATUS_ALERT_HEADER);
         alert.setContentText(content);
 
         alert.showAndWait();

@@ -148,9 +148,7 @@ public class JGit {
 
     // debug code
     private Collection<Project> getProjects(Group group) {
-        Object jsonProjects = ((ProjectService) ServiceProvider.getInstance()
-                .getService(ProjectService.class.getName())).getProjects(String.valueOf(group.getId()));
-        return JSONParser.parseToCollectionObjects(jsonProjects, new TypeToken<List<Project>>() {
-        }.getType());
+        return ((ProjectService) ServiceProvider.getInstance()
+                .getService(ProjectService.class.getName())).getProjects(group);
     }
 }
