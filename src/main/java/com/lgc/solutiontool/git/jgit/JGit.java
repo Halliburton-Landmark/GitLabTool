@@ -10,21 +10,26 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.MergeResult;
+import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
+import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.errors.NoWorkTreeException;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 
-import com.google.gson.reflect.TypeToken;
 import com.lgc.solutiontool.git.entities.Group;
 import com.lgc.solutiontool.git.entities.Project;
 import com.lgc.solutiontool.git.services.ProjectService;
 import com.lgc.solutiontool.git.services.ServiceProvider;
-import com.lgc.solutiontool.git.util.JSONParser;
 
 /**
  * Class for work with Git:
@@ -107,19 +112,6 @@ public class JGit {
             Repository repository = git.getRepository();
             Status status = git.status().call();
             if (status != null) {
-
-                System.out.println("\nStatus " + projectPath + " repository: ");
-                System.out.println("Added: " + status.getAdded());
-                System.out.println("Changed: " + status.getChanged());
-                System.out.println("Conflicting: " + status.getConflicting());
-                System.out.println("ConflictingStageState: " + status.getConflictingStageState());
-                System.out.println("IgnoredNotInIndex: " + status.getIgnoredNotInIndex());
-                System.out.println("Missing: " + status.getMissing());
-                System.out.println("Modified: " + status.getModified());
-                System.out.println("Removed: " + status.getRemoved());
-                System.out.println("Untracked: " + status.getUntracked());
-                System.out.println("UntrackedFolders: " + status.getUntrackedFolders());
-
                 repository.close();
                 return Optional.of(status);
             }
@@ -150,13 +142,36 @@ public class JGit {
     }
 
     /**
+     * Makes pull of the project
+     *
+     * @param projectPath the path cloned the project
+     * @return JGitStatus pull result
+     */
+    public JGitStatus pull (String projectPath) {
+        try {
+            Optional<Git> optGit = getGitForRepository(projectPath);
+            if (!optGit.isPresent()) {
+                return JGitStatus.FAILED;
+            }
+            // check which files were changed to avoid conflicts
+            if (isContinueMakePull(projectPath)) {
+                PullResult pullResult = optGit.get().pull().call();
+                MergeResult mer = pullResult.getMergeResult();
+                return JGitStatus.getStatus(mer.getMergeStatus().toString());
+            }
+        } catch (GitAPIException e) {
+            System.err.println("!ERROR: " + e.getMessage());
+        }
+        return JGitStatus.FAILED;
+    }
+
+    /**
      * Commit of all the projects in the group
      *
      * @param groupFolderPath the path to cloned of the group
      * @param message for commit
-     * @return true - if the operation is completed successfully,
-     * false - if an error occurred during execution
-     * ! Projects that failed to commit will be displayed in the console.
+     * @return true - if the operation is completed successfully, false - if an error occurred during execution !
+     *         Projects that failed to commit will be displayed in the console.
      */
     public boolean commit (String groupFolderPath, String message) {
         List<Path> projects = getFilesInFolder(groupFolderPath);
@@ -219,9 +234,8 @@ public class JGit {
      * Push of all the projects in the group
      *
      * @param groupFolderPath the path to cloned of the group
-     * @return true - if the operation is completed successfully,
-     * false - if an error occurred during execution
-     * ! Projects that failed to push will be displayed in the console.
+     * @return true - if the operation is completed successfully, false - if an error occurred during execution !
+     *         Projects that failed to push will be displayed in the console.
      */
     public boolean push (String groupFolderPath) {
         List<Path> projects = getFilesInFolder(groupFolderPath);
@@ -304,9 +318,7 @@ public class JGit {
     private Optional<Git> getGitForRepository(String path) {
         try {
             Git git = Git.open(new File(path + "/.git"));
-            if (git != null) {
-                return Optional.of(git);
-            }
+            return Optional.ofNullable(git);
         } catch (IOException e) {
             System.err.println("!ERROR: " + e.getMessage());
         }
@@ -333,6 +345,59 @@ public class JGit {
         for (Path file : files) {
             System.err.println(file);
         }
+    }
+
+    // Check if we will have conflicts after the pull command
+    private boolean isContinueMakePull(String projectPath) {
+        Optional<Git> optGit = getGitForRepository(projectPath);
+        if (!optGit.isPresent()) {
+            return false;
+        }
+        Optional<List<DiffEntry>> optListDiffs = getListModifyFilesInLocalRepository(optGit.get());
+        if (!optListDiffs.isPresent()) {
+            return false;
+        }
+        Optional<Status> optStatus = getStatusProject(projectPath);
+        if (!optStatus.isPresent()) {
+            return false;
+        }
+        return !isHaveCoincidences(optListDiffs.get(), optStatus.get().getModified());
+    }
+
+    // Get the list of modified files in the local repository
+    private Optional<List<DiffEntry>> getListModifyFilesInLocalRepository(Git git) {
+        try {
+            Repository repo = git.getRepository();
+            git.fetch().call();
+
+            ObjectId fetchHead = repo.resolve("FETCH_HEAD^{tree}");
+            ObjectReader reader = repo.newObjectReader();
+
+            CanonicalTreeParser newTreeIter = new CanonicalTreeParser();
+            newTreeIter.reset(reader, fetchHead);
+
+            return Optional.ofNullable(git.diff().setNewTree(newTreeIter).call());
+        } catch (IOException e) {
+            System.err.println("!ERROR: " + e.getMessage());
+        }  catch (GitAPIException e) {
+            System.err.println("!ERROR: " + e.getMessage());
+        }
+        return Optional.empty();
+    }
+
+    // Check changed files in the local repository have coincidences with modified files in working directory
+    private boolean isHaveCoincidences(List<DiffEntry> diffFiles, Set<String> modifiedFiles) {
+        if (diffFiles == null || modifiedFiles == null) {
+            return false;
+        }
+        for (String file : modifiedFiles) {
+            for (DiffEntry diffFile : diffFiles) {
+                if (diffFile.toString().equals(file)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     // debug code
