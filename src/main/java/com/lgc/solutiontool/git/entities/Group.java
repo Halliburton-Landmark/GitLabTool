@@ -2,191 +2,261 @@ package com.lgc.solutiontool.git.entities;
 
 /**
  * Class keeps data about group.
- *
+ * <p>
  * You cannot change the name field to the class,
  * otherwise JSONRarser can't parse from json string to object this class.
  *
  * @author Lyska Lyudmila
- *
  */
 public class Group {
-    /** The id of the group **/
-    private final int id;
+    /**
+     * The id of the group
+     **/
+    private int id;
 
-    /** The name of the group **/
-    private final String name;
+    /**
+     * The name of the group
+     **/
+    private String name;
 
-    /** The path of the group **/
-    private final String path;
+    /**
+     * The path of the group
+     **/
+    private String path;
 
-    /** The group's description **/
-    private final String description;
+    /**
+     * The group's description
+     **/
+    private String description;
 
-    /** Enable/disable Large File Storage (LFS) for the projects in this group **/
-    private final boolean lfs_enabled;
+    /**
+     * The visibility level
+     **/
+    private Object visibility_level;
 
-    /** Gets the group's visibility. Can be private, internal, or public **/
-    private final String visibility;
+    /**
+     * The ldap cn
+     **/
+    private Object ldap_cn;
 
-    /** The avatar's URL **/
-    private final String avatar_url;
+    /**
+     * The ldap access
+     **/
+    private Object ldap_access;
 
-    /** The web's URL **/
-    private final String web_url;
+    /**
+     * Enable/disable Large File Storage (LFS) for the projects in this group
+     **/
+    private boolean lfs_enabled;
 
-    /** Allow users to request member access **/
-    private final boolean request_access_enabled;
+    /**
+     * The avatar's URL
+     **/
+    private Object avatar_url;
 
-    /** The full path of the group **/
-    private final String full_name;
+    /**
+     * The web's URL
+     **/
+    private String web_url;
 
-    /** The full path of the group **/
-    private final String full_path;
+    /**
+     * Allow users to request member access
+     **/
+    private boolean request_access_enabled;
 
-    /** The parent group id for creating nested group **/
-    private final String parent_id;
+    /**
+     * The full path of the group
+     **/
+    private String full_name;
+
+    /**
+     * The full path of the group
+     **/
+    private String full_path;
+
+    /**
+     * The parent group id for creating nested group
+     **/
+    private Object parent_id;
+
+    /**
+     * Projects in group
+     **/
+    private Object[] projects;
+
+    /**
+     * Shared projects in group
+     **/
+    private Object[] shared_projects;
 
     /**
      * Constructor to create an instance of the class.
      *
-     * @param id the id of the group
-     * @param name the name of the group
-     * @param path the path of the group
-     * @param description the group's description
-     * @param lfs_enabled enable/disable Large File Storage (LFS) for the projects in this group
-     * @param visibility Gets the group's visibility. Can be private, internal, or public
-     * @param avatar_url the avatar's URL
-     * @param web_url the web's URL
+     * @param id                     the id of the group
+     * @param name                   the name of the group
+     * @param path                   the path of the group
+     * @param description            the group's description
+     * @param visibility_level       the visibility level
+     * @param ldap_cn                the ldap cn
+     * @param ldap_access            the ldap access
+     * @param lfs_enabled            enable/disable Large File Storage (LFS) for the projects in this group
+     * @param avatar_url             the avatar's URL
+     * @param web_url                the web's URL
      * @param request_access_enabled allow users to request member access
-     * @param full_name the full path of the group
-     * @param full_path the full path of the group
-     * @param parent_id the parent group id for creating nested group
+     * @param full_name              the full path of the group
+     * @param full_path              the full path of the group
+     * @param parent_id              the parent group id for creating nested group
      */
-    public Group(int id, String name, String path, String description, boolean lfs_enabled, String visibility,
-            String avatar_url, String web_url, boolean request_access_enabled, String full_name, String full_path,
-            String parent_id) {
+    public Group(int id, String name, String path, String description, Object visibility_level, Object ldap_cn, Object ldap_access, boolean lfs_enabled,
+                 Object avatar_url, String web_url, boolean request_access_enabled, String full_name, String full_path,
+                 Object parent_id, Object[] projects, Object[] shared_projects) {
 
         super();
         this.id = id;
         this.name = name;
         this.path = path;
         this.description = description;
+        this.visibility_level = visibility_level;
+        this.ldap_cn = ldap_cn;
+        this.ldap_access = ldap_access;
         this.lfs_enabled = lfs_enabled;
-        this.visibility = visibility;
         this.avatar_url = avatar_url;
         this.web_url = web_url;
         this.request_access_enabled = request_access_enabled;
         this.full_name = full_name;
         this.full_path = full_path;
         this.parent_id = parent_id;
+        this.projects = projects;
+        this.shared_projects = shared_projects;
     }
 
-    /**
-     * Gets the id of the group
-     *
-     * @return the id
-     */
+    public Group(){}
+
     public int getId() {
         return id;
     }
 
-    /**
-     * Gets the name of the group
-     *
-     * @return the name
-     */
+    public void setId(int id) {
+        this.id = id;
+    }
+
     public String getName() {
         return name;
     }
 
-    /**
-     * Gets the path of the group
-     *
-     * @return the path
-     */
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public String getPath() {
         return path;
     }
 
-    /**
-     * Gets the group's description
-     *
-     * @return the group's description
-     */
+    public void setPath(String path) {
+        this.path = path;
+    }
+
     public String getDescription() {
         return description;
     }
 
-    /**
-     * Gets enable/disable Large File Storage (LFS) for the projects in this group
-     *
-     * @return enable/disable
-     */
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Object getVisibility_level() {
+        return visibility_level;
+    }
+
+    public void setVisibility_level(Object visibility_level) {
+        this.visibility_level = visibility_level;
+    }
+
+    public Object getLdap_cn() {
+        return ldap_cn;
+    }
+
+    public void setLdap_cn(Object ldap_cn) {
+        this.ldap_cn = ldap_cn;
+    }
+
+    public Object getLdap_access() {
+        return ldap_access;
+    }
+
+    public void setLdap_access(Object ldap_access) {
+        this.ldap_access = ldap_access;
+    }
+
     public boolean isLfs_enabled() {
         return lfs_enabled;
     }
 
-    /**
-     * Gets the group's visibility.
-     *
-     * @return the visibility
-     */
-    public String getVisibility() {
-        return visibility;
+    public void setLfs_enabled(boolean lfs_enabled) {
+        this.lfs_enabled = lfs_enabled;
     }
 
-    /**
-     * Gets the avatar's URL
-     *
-     * @return the avatar's URL
-     */
-    public String getAvatar_url() {
+    public Object getAvatar_url() {
         return avatar_url;
     }
 
-    /**
-     * Gets the web's URL
-     *
-     * @return the web's URL
-     */
+    public void setAvatar_url(Object avatar_url) {
+        this.avatar_url = avatar_url;
+    }
+
     public String getWeb_url() {
         return web_url;
     }
 
-    /**
-     * Gets allow users to request member access
-     *
-     * @return allow users to request member access
-     */
+    public void setWeb_url(String web_url) {
+        this.web_url = web_url;
+    }
+
     public boolean isRequest_access_enabled() {
         return request_access_enabled;
     }
 
-    /**
-     * Gets the full name of the group
-     *
-     * @return the full name
-     */
+    public void setRequest_access_enabled(boolean request_access_enabled) {
+        this.request_access_enabled = request_access_enabled;
+    }
+
     public String getFull_name() {
         return full_name;
     }
 
-    /**
-     * Gets the full path of the group
-     *
-     * @return the full path
-     */
+    public void setFull_name(String full_name) {
+        this.full_name = full_name;
+    }
+
     public String getFull_path() {
         return full_path;
     }
 
-    /**
-     * Gets the parent group id
-     *
-     * @return the parent group id
-     */
-    public String getParent_id() {
+    public void setFull_path(String full_path) {
+        this.full_path = full_path;
+    }
+
+    public Object getParent_id() {
         return parent_id;
     }
 
+    public void setParent_id(Object parent_id) {
+        this.parent_id = parent_id;
+    }
+
+    public Object[] getProjects() {
+        return projects;
+    }
+
+    public void setProjects(Object[] projects) {
+        this.projects = projects;
+    }
+
+    public Object[] getShared_projects() {
+        return shared_projects;
+    }
+
+    public void setShared_projects(Object[] shared_projects) {
+        this.shared_projects = shared_projects;
+    }
 }

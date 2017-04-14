@@ -1,13 +1,18 @@
 package com.lgc.solutiontool.git.services;
 
+import com.lgc.solutiontool.git.entities.Group;
+import com.lgc.solutiontool.git.entities.Project;
+
+import java.util.Collection;
+
 public interface ProjectService {
 
     /**
      * Gets projects' group
      *
-     * @param idGroup id of group
-     * @return json with data about projects' of group<br>
+     * @param group Group
+     * @return Collection with projects' of group<br>
      * null, if an error occurred during the request
      */
-    Object getProjects(String idGroup);
+    Collection<Project> getProjects(Group group);
 }
