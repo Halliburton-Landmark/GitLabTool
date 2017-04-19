@@ -33,7 +33,7 @@ public class WelcomeWindowController {
     private ListView groupList;
 
     @FXML
-    private Button onLoadSelectedGroupspaceButton;
+    private Button onLoadSelectedGroup;
 
     @FXML
     public void initialize() {
@@ -41,11 +41,11 @@ public class WelcomeWindowController {
         new Thread(this::updateClonedGroups).start();
 
         BooleanBinding booleanBinding = groupList.getSelectionModel().selectedItemProperty().isNull();
-        onLoadSelectedGroupspaceButton.disableProperty().bind(booleanBinding);
+        onLoadSelectedGroup.disableProperty().bind(booleanBinding);
     }
 
     @FXML
-    public void onCreateGroupspace(ActionEvent actionEvent) throws IOException {
+    public void onCloneGroups(ActionEvent actionEvent) throws IOException {
         URL cloningGroupsWindowUrl = getClass().getClassLoader().getResource("CloningGroupsWindow.fxml");
         if (cloningGroupsWindowUrl == null) {
             return;
@@ -97,7 +97,7 @@ public class WelcomeWindowController {
     }
 
     @FXML
-    public void onLoadSelectedGroupspace(ActionEvent actionEvent) throws IOException {
+    public void onLoadSelectedGroup(ActionEvent actionEvent) throws IOException {
         Group selectedGroup = (Group) groupList.getSelectionModel().getSelectedItem();
 
         FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("MainWindow.fxml"));
@@ -111,7 +111,7 @@ public class WelcomeWindowController {
         controller.setSelectedGroup(selectedGroup);
         controller.beforeShowing();
 
-        Stage previousStage = (Stage) onLoadSelectedGroupspaceButton.getScene().getWindow();
+        Stage previousStage = (Stage) onLoadSelectedGroup.getScene().getWindow();
         previousStage.close();
 
         stage.setOnHiding(event -> Platform.runLater(() -> {
