@@ -65,13 +65,8 @@ public class WelcomeWindowController {
 
     private void updateClonedGroups() {
         List<Group> userGroups = ProgramProperties.getInstance().getClonedGroups();
-        ObservableList<Group> groupsObservableList = FXCollections.observableList(userGroups);
 
-        groupList.getItems().clear();
-        groupList.getSelectionModel().clearSelection();
-
-        groupList.setItems(groupsObservableList);
-
+        groupList.setItems(FXCollections.observableList(userGroups));
     }
 
     private void configureListView(ListView listView) {
