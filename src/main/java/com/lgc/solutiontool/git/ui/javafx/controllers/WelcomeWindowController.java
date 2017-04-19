@@ -4,6 +4,8 @@ import com.lgc.solutiontool.git.properties.ProgramProperties;
 import com.lgc.solutiontool.git.entities.Group;
 import javafx.application.Platform;
 import javafx.beans.binding.BooleanBinding;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -14,6 +16,11 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.Tooltip;
+import javafx.scene.layout.VBox;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -79,19 +86,7 @@ public class WelcomeWindowController {
         listView.setCellFactory(new Callback<ListView<Group>, ListCell<Group>>() {
             @Override
             public ListCell<Group> call(ListView<Group> p) {
-
-                return new ListCell<Group>() {
-                    @Override
-                    protected void updateItem(Group item, boolean empty) {
-                        super.updateItem(item, empty);
-                        if (empty || item == null) {
-                            setText(null);
-                        } else {
-                            String itemText = item.getName() + " (@" + item.getPath() + ") ";
-                            setText(itemText);
-                        }
-                    }
-                };
+                return new GroupListCell();
             }
         });
     }
@@ -119,5 +114,30 @@ public class WelcomeWindowController {
             stage.close();
         }));
         stage.show();
+    }
+
+    private class GroupListCell extends ListCell<Group> {
+        final Tooltip tooltip = new Tooltip();
+
+        @Override
+        public void updateItem(Group item, boolean empty) {
+            super.updateItem(item, empty);
+            if (empty || item == null) {
+                setGraphic(null);
+                setTooltip(null);
+            } else {
+                Text groupNameText = new Text(item.getName());
+                groupNameText.setFont(Font.font(Font.getDefault().getFamily(), 14));
+
+                String localPath = ProgramProperties.getInstance().getClonedLocalPath(item);
+                Text localPathText = new Text(localPath);
+
+                VBox vboxItem = new VBox(groupNameText, localPathText);
+                setGraphic(vboxItem);
+
+                tooltip.setText(item.getName() + " (" + localPath + ")");
+                setTooltip(tooltip);
+            }
+        }
     }
 }

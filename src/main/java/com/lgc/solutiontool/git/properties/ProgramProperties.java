@@ -106,5 +106,18 @@ public class ProgramProperties {
         }
     }
 
+    /**
+     * Gets a local path of cloned group
+     *
+     * @return path of cloned group or empty string if group is not cloned
+     */
+    //TODO: Group entity should have a localPath field. After that, we can list of groups instead of map (with group and localPath).
+    public String getClonedLocalPath(Group group) {
+        if (_groupPathMap == null || _groupPathMap.isEmpty()) {
+            return "";
+        }
+
+        return _groupPathMap.get(group);
+    }
 
 }
