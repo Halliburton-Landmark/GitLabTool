@@ -81,8 +81,10 @@ public class ProgramProperties {
         if (groups == null || localParentPath == null) {
             return;
         }
-        _groupPathMap = groups.stream().collect(
-                Collectors.toMap(x -> x, x -> localParentPath + PATH_SEPARATOR + x.getName()));
+        //TODO: Careful testing this change
+        _groupPathMap.putAll(groups.stream().collect(
+                Collectors.toMap(x -> x, x -> localParentPath + PATH_SEPARATOR + x.getName())
+        ));
 
         String username = _loginService.getCurrentUser().getUsername();
         _storageService.updateStorage(MOCK_SERVERNAME, username);
