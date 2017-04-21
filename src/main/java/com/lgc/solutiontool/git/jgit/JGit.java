@@ -50,7 +50,9 @@ import com.lgc.solutiontool.git.services.ServiceProvider;
 /**
  * Class for work with Git:
  *
- * [+] clone a group, project or URL of repository; - create repository; - commit; - push.
+ * - clone a group, project or URL of repository;
+ * - pull, commit and push of projects;
+ * - create, delete and switch to branch.
  *
  * @author Lyska Lyudmila
  */
