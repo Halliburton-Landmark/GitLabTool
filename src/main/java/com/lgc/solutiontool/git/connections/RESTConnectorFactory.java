@@ -4,18 +4,19 @@ import com.lgc.solutiontool.git.exceptions.HTTPExceptionProvider;
 
 public class RESTConnectorFactory {
 	
+	private static RESTConnectorFactory instance;
+	
 	private RESTConnector restConnector;
 	
 	private RESTConnectorFactory() {
 		restConnector = new RESTConnectorImpl(HTTPExceptionProvider.getInstance());
 	}
 	
-	private static class RESTConnectorFactoryHolder {
-		private final static RESTConnectorFactory INSTANCE = new RESTConnectorFactory();
-	}
-	
 	public static RESTConnectorFactory getInstance() {
-		return RESTConnectorFactoryHolder.INSTANCE;
+		if (instance == null) {
+			instance = new RESTConnectorFactory();
+		}
+		return instance;
 	}
 
     public RESTConnector getRESTConnector() {
