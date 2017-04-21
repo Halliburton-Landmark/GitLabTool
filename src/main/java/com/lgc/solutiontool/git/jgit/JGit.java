@@ -13,7 +13,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.eclipse.jgit.api.CheckoutCommand;
-import org.eclipse.jgit.api.CommitCommand;
 import org.eclipse.jgit.api.CreateBranchCommand;
 import org.eclipse.jgit.api.CreateBranchCommand.SetupUpstreamMode;
 import org.eclipse.jgit.api.Git;
@@ -213,14 +212,14 @@ public class JGit {
      * If the passed committer or author is {null} we take the value from the current user.
      * Projects that failed to commit will be displayed in the UI console.
      *
-     * @return
+     * @return status SUCCESSFUL is if committed successfully, otherwise is FAILED.
      */
-    public boolean commit (String groupFolderPath, String message, boolean setAll,
+    public JGitStatus commit (String groupFolderPath, String message, boolean setAll,
                            String nameCommitter, String emailCommitter,
                            String nameAuthor, String emailAuthor) {
         List<Path> projects = getFilesInFolder(groupFolderPath);
         if (projects == Collections.EMPTY_LIST || projects.size() == 0) {
-            return false;
+            return JGitStatus.FAILED;
         }
 
         List<Path> unsuccessfulCommit = new ArrayList<>();
@@ -229,16 +228,17 @@ public class JGit {
                 unsuccessfulCommit.add(path);
                 continue;
             }
-            if(!commit(path, message, setAll, nameCommitter, emailCommitter, nameAuthor, emailAuthor)) {
+            if(commit(path, message, setAll, nameCommitter, emailCommitter,
+                      nameAuthor, emailAuthor).equals(JGitStatus.FAILED)) {
                 unsuccessfulCommit.add(path);
             }
         }
 
         if (!unsuccessfulCommit.isEmpty()) {
-            logUnsuccessfulOperationInfo(unsuccessfulCommit, "push");
-            return false;
+            logUnsuccessfulOperationInfo(unsuccessfulCommit, "commit");
+            return JGitStatus.FAILED;
         }
-        return true;
+        return JGitStatus.SUCCESSFUL;
     }
 
     /**
@@ -430,32 +430,30 @@ public class JGit {
         return JGitStatus.FAILED;
     }
 
-    private boolean commit (Path projectPath, String message, boolean setAll,
+    private JGitStatus commit (Path projectPath, String message, boolean setAll,
                             String nameCommitter, String emailCommitter,
                             String nameAuthor, String emailAuthor) {
         if (projectPath == null || message == null) {
-            return false;
+            return JGitStatus.FAILED;
         }
         Optional<Git> opGit = getGitForRepository(projectPath.toString());
         if (!opGit.isPresent()) {
-            return false;
+            return JGitStatus.FAILED;
         }
         Git git = opGit.get();
         PersonIdent author = getPersonIdent(nameAuthor, emailAuthor);
         PersonIdent comitter = getPersonIdent(nameCommitter, emailCommitter);
         try {
-            CommitCommand command = git.commit();
-            RevCommit commit = command.setAll(setAll)
-                                      .setMessage(message)
-                                      .setAuthor(author)
-                                      .setCommitter(comitter)
-                                      .call();
-            System.err.println(commit.getId());
-            return true;
+            git.commit().setAll(setAll)
+                        .setMessage(message)
+                        .setAuthor(author)
+                        .setCommitter(comitter)
+                        .call();
+            return JGitStatus.SUCCESSFUL;
         } catch (Exception e) {
             System.err.println("!ERROR: " + e.getMessage());
         }
-        return false;
+        return JGitStatus.FAILED;
     }
 
     private PersonIdent getPersonIdent(String name, String email) {
@@ -473,7 +471,8 @@ public class JGit {
             return false;
         }
         try {
-            if(!commit(projectPath, message, setAll, nameCommitter, emailCommitter, nameAuthor, emailAuthor)) {
+            if(commit(projectPath, message, setAll, nameCommitter, emailCommitter,
+                      nameAuthor, emailAuthor).equals(JGitStatus.FAILED)) {
                return false;
             }
             if(push(projectPath)) {
