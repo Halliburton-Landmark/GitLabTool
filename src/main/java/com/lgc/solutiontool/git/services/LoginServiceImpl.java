@@ -19,12 +19,12 @@ public class LoginServiceImpl implements LoginService {
     }
 
     @Override
-    public Object login(String name, String password) {
+    public Object login(String serverURL, String name, String password) {
         HashMap<String, String> params = new HashMap<>();
         params.put("login", name);
         params.put("password", password);
+        getConnector().setUrlMainPart(serverURL);
         Object userJson = getConnector().sendPost("/session", params, null);
-//        Object userJson = getConnector().sendPost("/", params, null);
         _currentUser = JSONParser.parseToObject(userJson, User.class);
         CredentialsProvider.setDefault(new UsernamePasswordCredentialsProvider(name, password));
         PrivateToken.getInstance().setPrivateTokenValue(_currentUser.getPrivate_token());
@@ -43,15 +43,5 @@ public class LoginServiceImpl implements LoginService {
     private void setConnector(RESTConnector connector) {
         _connector = connector;
     }
-
-	@Override
-	public void setServerUrl(String url) {
-		getConnector().setUrlMainPart(url);
-	}
-
-	@Override
-	public String getServerUrl() {
-		return getConnector().getUrlMainPart();
-	}
 
 }

@@ -16,7 +16,7 @@ import com.lgc.solutiontool.git.util.RequestType;
 class RESTConnectorImpl implements RESTConnector {
 
     private final HTTPExceptionProvider _exceptionProvider;
-    private String URL_MAIN_PART;
+    private String urlMainPart;
 
     RESTConnectorImpl(HTTPExceptionProvider provider) {
         this._exceptionProvider = provider;
@@ -45,7 +45,7 @@ class RESTConnectorImpl implements RESTConnector {
      */
     private Object sendRequest(String suffixForUrl, Map<String, String> params, Map<String, String> header, RequestType request) {
         try {
-            URL obj = new URL(URL_MAIN_PART + suffixForUrl);
+            URL obj = new URL(urlMainPart + suffixForUrl);
             HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
 
             setHTTPRequestHeader(header, con);
@@ -114,12 +114,12 @@ class RESTConnectorImpl implements RESTConnector {
 
 	@Override
 	public void setUrlMainPart(String url) {
-		URL_MAIN_PART = url;
+		urlMainPart = url;
 	}
 
 	@Override
 	public String getUrlMainPart() {
-		return URL_MAIN_PART;
+		return urlMainPart;
 	}
 	
 }

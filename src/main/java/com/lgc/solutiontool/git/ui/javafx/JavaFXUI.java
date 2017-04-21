@@ -40,7 +40,6 @@ public class JavaFXUI extends Application implements UserInterface {
     private void showloginDialog() {
         LoginDialog ld = new LoginDialog();
         DialogDTO dialogParams = ld.showAndWait().orElseThrow(() -> new RuntimeException("Error in LoginDialog"));
-        _loginService.setServerUrl(dialogParams.getServerURL());
-        _loginService.login(dialogParams.getLogin(), dialogParams.getPassword());
+        _loginService.login(dialogParams.getServerURL(), dialogParams.getLogin(), dialogParams.getPassword());
     }
 }
