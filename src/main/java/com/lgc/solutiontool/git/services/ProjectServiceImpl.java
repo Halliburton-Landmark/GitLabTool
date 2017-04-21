@@ -9,7 +9,7 @@ import com.lgc.solutiontool.git.connections.RESTConnector;
 import com.lgc.solutiontool.git.entities.Group;
 import com.lgc.solutiontool.git.entities.Project;
 import com.lgc.solutiontool.git.util.JSONParser;
-import com.lgc.solutiontool.git.connections.token.PrivateToken;
+import com.lgc.solutiontool.git.connections.token.CurrentUser;
 
 public class ProjectServiceImpl implements ProjectService {
     private RESTConnector _connector;
@@ -23,8 +23,8 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public Collection<Project> getProjects(Group group) {
-        privateTokenValue = PrivateToken.getInstance().getPrivateTokenValue();
-        privateTokenKey = PrivateToken.getInstance().getPrivateTokenKey();
+        privateTokenValue = CurrentUser.getInstance().getPrivateTokenValue();
+        privateTokenKey = CurrentUser.getInstance().getPrivateTokenKey();
         if (privateTokenValue != null) {
             //TODO valid id group
             String sendString = "/groups/" + group.getId() + "/projects";

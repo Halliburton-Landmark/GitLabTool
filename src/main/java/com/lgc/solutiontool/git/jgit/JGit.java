@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import org.eclipse.jgit.api.CommitCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.api.PullResult;
@@ -23,11 +24,15 @@ import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.errors.NoWorkTreeException;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectReader;
+import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 
+import com.lgc.solutiontool.git.connections.token.CurrentUser;
 import com.lgc.solutiontool.git.entities.Group;
 import com.lgc.solutiontool.git.entities.Project;
+import com.lgc.solutiontool.git.entities.User;
 import com.lgc.solutiontool.git.services.ProjectService;
 import com.lgc.solutiontool.git.services.ServiceProvider;
 
@@ -169,11 +174,20 @@ public class JGit {
      * Commit of all the projects in the group
      *
      * @param groupFolderPath the path to cloned of the group
-     * @param message for commit
-     * @return true - if the operation is completed successfully, false - if an error occurred during execution !
-     *         Projects that failed to commit will be displayed in the console.
+     * @param message         a message for commit. The commit message can not be {null}.
+     * @param setAll          if set to true the commit command automatically stages files that have been
+     *                        modified and deleted, but new files not known by the repository are not affected.
+     * @param nameCommitter   the name committer for this commit.
+     * @param emailCommitter  the email committer for this commit.
+     * @param nameAuthor      the name author for this commit.
+     * @param emailAuthor     the email author for this commit.
+     *
+     * If the passed committer or author is {null} we take the value from the current user.
+     * @return
      */
-    public boolean commit (String groupFolderPath, String message) {
+    public boolean commit (String groupFolderPath, String message, boolean setAll,
+                           String nameCommitter, String emailCommitter,
+                           String nameAuthor, String emailAuthor) {
         List<Path> projects = getFilesInFolder(groupFolderPath);
         if (projects == Collections.EMPTY_LIST || projects.size() == 0) {
             return false;
@@ -185,7 +199,7 @@ public class JGit {
                 unsuccessfulCommit.add(path);
                 continue;
             }
-            if(!commit(path, message)) {
+            if(!commit(path, message, setAll, nameCommitter, emailCommitter, nameAuthor, emailAuthor)) {
                 unsuccessfulCommit.add(path);
             }
         }
@@ -201,12 +215,20 @@ public class JGit {
      * Commit and push of all the projects in the group
      *
      * @param groupFolderPath the path to cloned of the group
-     * @param message for commit
-     * @return true - if the operation is completed successfully,
-     * false - if an error occurred during execution
-     * ! Projects that failed to commit or to push will be displayed in the console.
+     * @param message         a message for commit. The commit message can not be {null}.
+     * @param setAll          if set to true the commit command automatically stages files that have been
+     *                        modified and deleted, but new files not known by the repository are not affected.
+     * @param nameCommitter   the name committer for this commit.
+     * @param emailCommitter  the email committer for this commit.
+     * @param nameAuthor      the name author for this commit.
+     * @param emailAuthor     the email author for this commit.
+     *
+     * If the passed committer or author is {null} we take the value from the current user.
+     * Projects that failed to commit or to push will be displayed in the console.
      */
-    public boolean commitAndPush (String groupFolderPath, String message) {
+    public boolean commitAndPush (String groupFolderPath, String message, boolean setAll,
+                                  String nameCommitter, String emailCommitter,
+                                  String nameAuthor, String emailAuthor) {
         List<Path> projects = getFilesInFolder(groupFolderPath);
         if (projects == Collections.EMPTY_LIST || projects.size() == 0) {
             return false;
@@ -218,7 +240,7 @@ public class JGit {
                 unsuccessfulPush.add(path);
                 continue;
             }
-            if(!commitAndPush(path, message)) {
+            if(!commitAndPush(path, message, setAll, nameCommitter, emailCommitter, nameAuthor, emailAuthor)) {
                 unsuccessfulPush.add(path);
             }
         }
@@ -261,17 +283,28 @@ public class JGit {
         return true;
     }
 
-    private boolean commit (Path projectPath, String message) {
-        if (projectPath == null) {
+    private boolean commit (Path projectPath, String message, boolean setAll,
+                            String nameCommitter, String emailCommitter,
+                            String nameAuthor, String emailAuthor) {
+
+        if (projectPath == null || message == null) {
             return false;
         }
+        Optional<Git> opGit = getGitForRepository(projectPath.toString());
+        if (!opGit.isPresent()) {
+            return false;
+        }
+        Git git = opGit.get();
+        PersonIdent author = getPersonIdent(nameAuthor, emailAuthor);
+        PersonIdent comitter = getPersonIdent(nameCommitter, emailCommitter);
         try {
-            Optional<Git> opGit = getGitForRepository(projectPath.toString());
-            if (!opGit.isPresent()) {
-                return false;
-            }
-            opGit.get().commit().setAll(true).setMessage(message).call();
-            // TODO get a status of operation and showing to the console. Also, return a result.
+            CommitCommand command = git.commit();
+            RevCommit commit = command.setAll(setAll)
+                                      .setMessage(message)
+                                      .setAuthor(author)
+                                      .setCommitter(comitter)
+                                      .call();
+            System.err.println(commit.getId());
             return true;
         } catch (Exception e) {
             System.err.println("!ERROR: " + e.getMessage());
@@ -279,12 +312,22 @@ public class JGit {
         return false;
     }
 
-    private boolean commitAndPush(Path projectPath, String message) {
+    private PersonIdent getPersonIdent(String name, String email) {
+        if (name != null || email != null) { // TODO valid data
+            return new PersonIdent(name, email);
+        }
+        User currentUser = CurrentUser.getInstance().getCurrentUser();
+        return new PersonIdent(currentUser.getUsername(), currentUser.getEmail());
+    }
+
+    private boolean commitAndPush(Path projectPath, String message, boolean setAll,
+                                  String nameCommitter, String emailCommitter,
+                                  String nameAuthor, String emailAuthor) {
         if (projectPath == null) {
             return false;
         }
         try {
-            if(!commit(projectPath, message)) {
+            if(!commit(projectPath, message, setAll, nameCommitter, emailCommitter, nameAuthor, emailAuthor)) {
                return false;
             }
             if(push(projectPath)) {
