@@ -325,8 +325,11 @@ public class JGit {
         }
         try {
             CreateBranchCommand create = optGit.get().branchCreate();
-            Ref res = create.setUpstreamMode(SetupUpstreamMode.TRACK).setName(nameBranch)
-                    .setStartPoint(optGit.get().getRepository().getFullBranch()).setForce(force).call();
+            Ref res = create.setUpstreamMode(SetupUpstreamMode.TRACK)
+                            .setName(nameBranch)
+                            .setStartPoint(optGit.get().getRepository().getFullBranch())
+                            .setForce(force)
+                            .call();
             System.out.println("!CREATE NEW BRANCH: " + res.getName());
             return JGitStatus.SUCCESSFUL;
         } catch (GitAPIException | IOException e) {
