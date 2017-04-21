@@ -33,9 +33,10 @@
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
             </rowConstraints>
             <children>
-                <Button maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onCreateGroupspace" prefHeight="28.0" text="Create Groupspace" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                <Button maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" fx:id="onLoadSelectedGroupspaceButton" onAction="#onLoadSelectedGroupspace" text="Load Selected Groupspace" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                <Button maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Import Groupspace from Disk" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                <Button maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onCloneGroups" prefHeight="28.0" text="Clone groups" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                <Button maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" fx:id="onLoadSelectedGroup"
+                        onAction="#onLoadSelectedGroup" text="Load selected group" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                <Button maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Import cloned group from disk" GridPane.columnIndex="1" GridPane.rowIndex="5" />
             </children>
         </GridPane>
     </center>
