@@ -1,8 +1,10 @@
 package com.lgc.solutiontool.git.ui.javafx.controllers;
 
-import com.lgc.solutiontool.git.properties.ProgramProperties;
 import com.lgc.solutiontool.git.entities.Group;
-import javafx.application.Platform;
+import com.lgc.solutiontool.git.properties.ProgramProperties;
+import com.lgc.solutiontool.git.services.LoginService;
+import com.lgc.solutiontool.git.services.ServiceProvider;
+import com.lgc.solutiontool.git.ui.ViewKeys;
 import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -12,6 +14,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.stage.Modality;
@@ -28,12 +31,17 @@ import java.util.List;
  */
 public class WelcomeWindowController {
     private static final String WINDOW_TITLE = "Cloning window";
+    @FXML
+    private Label userId;
 
     @FXML
     private ListView groupList;
 
     @FXML
     private Button onLoadSelectedGroupspaceButton;
+
+    private LoginService _loginService =
+            (LoginService) ServiceProvider.getInstance().getService(LoginService.class.getName());
 
     @FXML
     public void initialize() {
@@ -42,11 +50,13 @@ public class WelcomeWindowController {
 
         BooleanBinding booleanBinding = groupList.getSelectionModel().selectedItemProperty().isNull();
         onLoadSelectedGroupspaceButton.disableProperty().bind(booleanBinding);
+
+        userId.setText(_loginService.getCurrentUser().getName());
     }
 
     @FXML
     public void onCreateGroupspace(ActionEvent actionEvent) throws IOException {
-        URL cloningGroupsWindowUrl = getClass().getClassLoader().getResource("CloningGroupsWindow.fxml");
+        URL cloningGroupsWindowUrl = getClass().getClassLoader().getResource(ViewKeys.CLONING_GROUPS_WINDOW.getPath());
         if (cloningGroupsWindowUrl == null) {
             return;
         }
@@ -98,26 +108,19 @@ public class WelcomeWindowController {
 
     @FXML
     public void onLoadSelectedGroupspace(ActionEvent actionEvent) throws IOException {
+        URL modularWindow = getClass().getClassLoader().getResource(ViewKeys.MODULAR_CONTAINER.getPath());
+        if (modularWindow == null) {
+            return;
+        }
+
+        FXMLLoader fxmlLoader = new FXMLLoader(modularWindow);
+        Parent root = fxmlLoader.load();
+
+        ModularController myControllerHandle = fxmlLoader.getController();
         Group selectedGroup = (Group) groupList.getSelectionModel().getSelectedItem();
-
-        FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("MainWindow.fxml"));
-        Parent root = loader.load();
-        Stage stage = new Stage(StageStyle.DECORATED);
-        stage.setScene(new Scene(root));
-        stage.setHeight(800);
-        stage.setWidth(1200);
-
-        MainWindowController controller = loader.getController();
-        controller.setSelectedGroup(selectedGroup);
-        controller.beforeShowing();
+        myControllerHandle.loadMainWindow(selectedGroup);
 
         Stage previousStage = (Stage) onLoadSelectedGroupspaceButton.getScene().getWindow();
-        previousStage.close();
-
-        stage.setOnHiding(event -> Platform.runLater(() -> {
-            previousStage.show();
-            stage.close();
-        }));
-        stage.show();
+        previousStage.setScene(new Scene(root));
     }
 }

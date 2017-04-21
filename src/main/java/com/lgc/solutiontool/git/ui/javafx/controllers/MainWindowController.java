@@ -21,7 +21,6 @@ import java.util.List;
 
 public class MainWindowController {
     private static final String HEDER_GROUP_TITLE = "Current group: ";
-    private static final String HEDER_USER_TITLE = "Current user: ";
     private Group selectedGroup;
 
     private LoginService _loginService =
@@ -34,7 +33,8 @@ public class MainWindowController {
     private ListView projectsList;
 
     @FXML
-    private Label groupId;
+    private Label leftLabel;
+
     @FXML
     private Label userId;
 
@@ -43,13 +43,11 @@ public class MainWindowController {
         userId.setText(username);
 
         String currentGroupname = getSelectedGroup().getName();
-        groupId.setText(HEDER_GROUP_TITLE + currentGroupname);
+        leftLabel.setText(HEDER_GROUP_TITLE + currentGroupname);
 
         configureListView(projectsList);
 
-        List<Project> groupProjects = (List<Project>) _projectService.getProjects(selectedGroup);
-        ObservableList<Project> projectsObservableList = FXCollections.observableList(groupProjects);
-        projectsList.setItems(projectsObservableList);
+        new Thread(this::updateProjectList).start();
     }
 
     public Group getSelectedGroup() {
@@ -58,6 +56,12 @@ public class MainWindowController {
 
     public void setSelectedGroup(Group selectedGroup) {
         this.selectedGroup = selectedGroup;
+    }
+
+    private void updateProjectList() {
+        List<Project> groupProjects = (List<Project>) _projectService.getProjects(selectedGroup);
+        ObservableList<Project> projectsObservableList = FXCollections.observableList(groupProjects);
+        projectsList.setItems(projectsObservableList);
     }
 
     private void configureListView(ListView listView) {

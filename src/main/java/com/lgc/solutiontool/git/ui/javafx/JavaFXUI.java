@@ -3,13 +3,16 @@ package com.lgc.solutiontool.git.ui.javafx;
 import com.lgc.solutiontool.git.services.LoginService;
 import com.lgc.solutiontool.git.services.ServiceProvider;
 import com.lgc.solutiontool.git.ui.UserInterface;
+import com.lgc.solutiontool.git.ui.ViewKeys;
+import com.lgc.solutiontool.git.ui.javafx.controllers.ModularController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
 import javafx.stage.Stage;
 import javafx.util.Pair;
+
+import java.net.URL;
 
 public class JavaFXUI extends Application implements UserInterface {
 
@@ -23,17 +26,27 @@ public class JavaFXUI extends Application implements UserInterface {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+
+        URL modularWindow = getClass().getClassLoader().getResource(ViewKeys.MODULAR_CONTAINER.getPath());
+        if (modularWindow == null) {
+            return;
+        }
+
         showloginDialog();
-        Parent root = FXMLLoader.load(getClass().getClassLoader().getResource("WelcomeWindow.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(modularWindow);
+        Parent root = fxmlLoader.load();
+
+        ModularController modularController = fxmlLoader.getController();
+        modularController.loadWelcomeWindow();
+
         Scene scene = new Scene(root);
-        scene.getStylesheets().add(getClass().getClassLoader().getResource("style.css").toExternalForm());
+
         primaryStage.setTitle("Solution Tool for GitLab");
         primaryStage.setScene(scene);
         primaryStage.setHeight(800);
         primaryStage.setWidth(1200);
         primaryStage.show();
-        Label userLabel = (Label) scene.lookup("#userId");
-        userLabel.setText(_loginService.getCurrentUser().getName());
+
     }
 
     private void showloginDialog() {
