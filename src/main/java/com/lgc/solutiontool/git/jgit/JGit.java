@@ -383,6 +383,8 @@ public class JGit {
      * @param nameBranch   the name of the branch for delete
      * @param force        false - a check will be performed whether the branch to be deleted is already
      *                     merged into the current branch and deletion will be refused in this case.
+     * @return JGitStatus: SUCCESSFUL - if a new branch was created,
+     *                     FAILED - if the branch could not be created.
      */
     public JGitStatus deleteBranch(String projectPath, String nameBranch, boolean force) {
         Optional<Git> optGit = getGitForRepository(projectPath);
