@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
  */
 @XmlRootElement
 public class ProgramProperties {
-    private static final String MOCK_SERVERNAME = "gitlab.com";
     private static final String PATH_SEPARATOR = "\\";
 
     private static ProgramProperties _instance;
@@ -85,7 +84,7 @@ public class ProgramProperties {
                 Collectors.toMap(x -> x, x -> localParentPath + PATH_SEPARATOR + x.getName()));
 
         String username = _loginService.getCurrentUser().getUsername();
-        _storageService.updateStorage(MOCK_SERVERNAME, username);
+        _storageService.updateStorage(trimmedServerUrl(_loginService.getServerUrl()), username);
     }
 
     /**
@@ -96,7 +95,7 @@ public class ProgramProperties {
     public List<Group> getClonedGroups() {
         String username = _loginService.getCurrentUser().getUsername();
         if (_groupPathMap == null) {
-            Map<Group, String> storage = _storageService.loadStorage(MOCK_SERVERNAME, username);
+        	Map<Group, String> storage = _storageService.loadStorage(trimmedServerUrl(_loginService.getServerUrl()), username);
             setGroupPathMap(storage);
         }
         if (!_groupPathMap.isEmpty()) {
@@ -104,6 +103,16 @@ public class ProgramProperties {
         } else {
             return new ArrayList<>();
         }
+    }
+    
+    // TODO: remove it to some utility service
+    private String trimmedServerUrl(String url) {
+    	if (!url.contains("/")) {
+    		return url;
+    	}
+    	String protocol = url.contains("https://") ? "https://" : "http://";
+    	String resultedURL = url.substring(url.indexOf(protocol) + protocol.length(), url.indexOf("/api/v3"));
+    	return resultedURL;
     }
 
 

@@ -25,13 +25,13 @@ public class ServiceProvider {
     private ServiceProvider() {
         _services = new HashMap<>();
         _services.put(LoginService.class.getName(),
-                new LoginServiceImpl(new RESTConnectorFactory().getRESTConnector()));
+                new LoginServiceImpl(RESTConnectorFactory.getInstance().getRESTConnector()));
         _services.put(GroupsUserService.class.getName(),
-                new GroupsUserServiceImpl(new RESTConnectorFactory().getRESTConnector()));
+                new GroupsUserServiceImpl(RESTConnectorFactory.getInstance().getRESTConnector()));
         _services.put(ProjectService.class.getName(),
-                new ProjectServiceImpl(new RESTConnectorFactory().getRESTConnector()));
+                new ProjectServiceImpl(RESTConnectorFactory.getInstance().getRESTConnector()));
         _services.put(StorageService.class.getName(),
-                new StorageServiceImpl(new RESTConnectorFactory().getRESTConnector()));
+                new StorageServiceImpl(RESTConnectorFactory.getInstance().getRESTConnector()));
         _services.put(ReplacementService.class.getName(), new ReplacementServiceImpl());
     }
 }

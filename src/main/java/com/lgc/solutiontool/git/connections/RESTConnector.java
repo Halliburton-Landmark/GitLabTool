@@ -27,4 +27,7 @@ public interface RESTConnector {
      */
     Object sendGet(String suffixForUrl, Map<String, String> params, Map<String, String> header);
 
+    void setUrlMainPart(String url);
+    
+    String getUrlMainPart();
 }

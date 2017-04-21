@@ -24,6 +24,7 @@ public class LoginServiceImpl implements LoginService {
         params.put("login", name);
         params.put("password", password);
         Object userJson = getConnector().sendPost("/session", params, null);
+//        Object userJson = getConnector().sendPost("/", params, null);
         _currentUser = JSONParser.parseToObject(userJson, User.class);
         CredentialsProvider.setDefault(new UsernamePasswordCredentialsProvider(name, password));
         PrivateToken.getInstance().setPrivateTokenValue(_currentUser.getPrivate_token());
@@ -42,5 +43,15 @@ public class LoginServiceImpl implements LoginService {
     private void setConnector(RESTConnector connector) {
         _connector = connector;
     }
+
+	@Override
+	public void setServerUrl(String url) {
+		getConnector().setUrlMainPart(url);
+	}
+
+	@Override
+	public String getServerUrl() {
+		return getConnector().getUrlMainPart();
+	}
 
 }

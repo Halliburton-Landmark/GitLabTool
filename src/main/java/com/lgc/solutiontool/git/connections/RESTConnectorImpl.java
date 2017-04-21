@@ -16,6 +16,7 @@ import com.lgc.solutiontool.git.util.RequestType;
 class RESTConnectorImpl implements RESTConnector {
 
     private final HTTPExceptionProvider _exceptionProvider;
+    private String URL_MAIN_PART;
 
     RESTConnectorImpl(HTTPExceptionProvider provider) {
         this._exceptionProvider = provider;
@@ -110,4 +111,15 @@ class RESTConnectorImpl implements RESTConnector {
             throw new UnsupportedOperationException(e);
         }
     }
+
+	@Override
+	public void setUrlMainPart(String url) {
+		URL_MAIN_PART = url;
+	}
+
+	@Override
+	public String getUrlMainPart() {
+		return URL_MAIN_PART;
+	}
+	
 }
