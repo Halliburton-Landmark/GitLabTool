@@ -7,6 +7,18 @@ package com.lgc.solutiontool.git.jgit;
  */
 public enum JGitStatus {
 
+    SUCCESSFUL {
+        @Override
+        public String toString() {
+          return "Successful";
+        }
+
+        @Override
+        public boolean isSuccessful() {
+          return true;
+        }
+    },
+
     FAST_FORWARD {
       @Override
       public String toString() {
@@ -19,18 +31,10 @@ public enum JGitStatus {
       }
     },
 
-    FAST_FORWARD_SQUASHED {
-      @Override
-      public String toString() {
-        return "Fast-forward-squashed";
-      }
-
-      @Override
-      public boolean isSuccessful() {
-        return true;
-      }
-    },
-
+    /**
+     * All the changes from the branch you’re trying to merge have already been merged
+     * to the branch you’re currently on.
+     */
     ALREADY_UP_TO_DATE {
       @Override
       public String toString() {
@@ -43,6 +47,9 @@ public enum JGitStatus {
       }
     },
 
+    /**
+     * Operation failed
+     */
     FAILED {
       @Override
       public String toString() {
@@ -55,6 +62,9 @@ public enum JGitStatus {
       }
     },
 
+    /**
+     *
+     */
     MERGED {
       @Override
       public String toString() {
@@ -67,30 +77,10 @@ public enum JGitStatus {
       }
     },
 
-    MERGED_SQUASHED {
-      @Override
-      public String toString() {
-        return "Merged-squashed";
-      }
-
-      @Override
-      public boolean isSuccessful() {
-        return true;
-      }
-    },
-
-    MERGED_SQUASHED_NOT_COMMITTED {
-      @Override
-      public String toString() {
-        return "Merged-squashed-not-committed";
-      }
-
-      @Override
-      public boolean isSuccessful() {
-        return true;
-      }
-    },
-
+    /**
+     * There are conflicts in the local repository.
+     * It is necessary to fix and merge them.
+     */
     CONFLICTING {
       @Override
       public String toString() {
@@ -103,27 +93,18 @@ public enum JGitStatus {
       }
     },
 
-    ABORTED {
+    /**
+     * The repository has unsaved changes that can lead to conflicts.
+     */
+    CONFLICTS {
       @Override
       public String toString() {
-        return "Aborted";
+        return "Conflicts";
       }
 
       @Override
       public boolean isSuccessful() {
         return false;
-      }
-    },
-
-    MERGED_NOT_COMMITTED {
-      @Override
-    public String toString() {
-        return "Merged-not-committed";
-      }
-
-      @Override
-      public boolean isSuccessful() {
-        return true;
       }
     },
 
@@ -131,23 +112,6 @@ public enum JGitStatus {
       @Override
       public String toString() {
         return "Not-yet-supported";
-      }
-
-      @Override
-      public boolean isSuccessful() {
-        return false;
-      }
-    },
-
-    /**
-     * Status representing a checkout conflict, meaning that nothing could
-     * be merged, as the pre-scan for the trees already failed for certain
-     * files (i.e. local modifications prevent checkout of files).
-     */
-    CHECKOUT_CONFLICT {
-      @Override
-    public String toString() {
-        return "Checkout Conflict";
       }
 
       @Override
