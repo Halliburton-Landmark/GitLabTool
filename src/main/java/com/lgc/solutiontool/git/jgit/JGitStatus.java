@@ -94,7 +94,7 @@ public enum JGitStatus {
     },
 
     /**
-     * The repository has unsaved changes that can lead to conflicts.
+     * The branch has unsaved changes that can lead to conflicts.
      */
     CONFLICTS {
       @Override

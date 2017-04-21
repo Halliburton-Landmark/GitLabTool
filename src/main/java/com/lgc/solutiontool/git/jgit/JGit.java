@@ -13,7 +13,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.eclipse.jgit.api.CheckoutCommand;
-import org.eclipse.jgit.api.CheckoutResult;
 import org.eclipse.jgit.api.CreateBranchCommand;
 import org.eclipse.jgit.api.CreateBranchCommand.SetupUpstreamMode;
 import org.eclipse.jgit.api.Git;
@@ -293,71 +292,78 @@ public class JGit {
     }
 
     /**
+     * Gets all the branch names that are in the local repository
      *
-     * @param projectPath
-     * @return
+     * @param projectPath the path to cloned of the project
+     * @return a list short names of branches
      */
     public List<String> getBranches(String projectPath) {
         return getListShortNamesOfBranches(getRefs(projectPath));
     }
 
     /**
+     * Create a new branch in the local repository.
      *
-     * @param projectPath
-     * @param nameBranch
-     * @param force
+     * @param projectPath  the path to cloned of the project
+     * @param nameBranch   the name of the branch
+     * @param force        if <code>true</code> and the branch with the given name
+     *                     already exists, the start-point of an existing branch will be
+     *                     set to a new start-point; if false, the existing branch will
+     *                     not be changed
+     * @return JGitStatus: SUCCESSFUL - if a new branch was created,
+     *                     FAILED - if the branch could not be created.
      */
-    public void createBranch(String projectPath, String nameBranch, boolean force) {
+    public JGitStatus createBranch(String projectPath, String nameBranch, boolean force) {
         Optional<Git> optGit = getGitForRepository(projectPath);
         if (!optGit.isPresent() || nameBranch == null) { // TODO valid name
-            return;
+            return JGitStatus.FAILED;
         }
-        if (getBranches(projectPath).contains(nameBranch)) {
+        if (!force && getBranches(projectPath).contains(nameBranch)) {
             System.err.println("!ERROR: a branch with the same name already exists");
-            return;
+            return JGitStatus.FAILED;
         }
         try {
             CreateBranchCommand create = optGit.get().branchCreate();
             Ref res = create.setUpstreamMode(SetupUpstreamMode.TRACK).setName(nameBranch)
                     .setStartPoint(optGit.get().getRepository().getFullBranch()).setForce(force).call();
-            System.out.println("!CREATE BRANCH: " + res.getName());
+            System.out.println("!CREATE NEW BRANCH: " + res.getName());
+            return JGitStatus.SUCCESSFUL;
         } catch (GitAPIException | IOException e) {
             System.err.println("!ERROR: " + e.getMessage());
         }
+        return JGitStatus.FAILED;
     }
 
     /**
+     * Switch to another branch (already existing).
      *
-     * @param projectPath
-     * @param nameBranch
+     * @param projectPath  the path to cloned of the project
+     * @param nameBranch   the name of the branch to which to switch
+     *
+     * @return JGitStatus: SUCCESSFUL - if a new branch was created,
+     *                     FAILED - if the branch could not be created,
+     *                     CONFLICTS - if the branch has unsaved changes that can lead to conflicts.
      */
     public JGitStatus switchTo(String projectPath, String nameBranch) {
         Optional<Git> optGit = getGitForRepository(projectPath);
         if (!optGit.isPresent() || nameBranch == null) { // TODO valid name
             return JGitStatus.FAILED;
         }
-
         if (!getBranches(projectPath).contains(nameBranch)) {
             System.err.println("!ERROR: a branch with this name does not exist.");
             return JGitStatus.FAILED;
         }
+        Git git = optGit.get();
         try {
-            Git git = optGit.get();
             if (isCurrentBranch(git, nameBranch)) {
                 return JGitStatus.FAILED;
             }
             if (isConflictsBetweenTwoBranches(git.getRepository(), git.getRepository().getFullBranch(),
                     Constants.R_HEADS + nameBranch)) {
-                System.out.println(optGit.get().getRepository().getFullBranch());
                 return JGitStatus.CONFLICTS;
             }
-            System.out.println(optGit.get().getRepository().getFullBranch());
-
             CheckoutCommand command = git.checkout();
-            Ref ref = command.setName(nameBranch).setStartPoint("origin/" + nameBranch).setForce(true).call();
-            CheckoutResult result = command.getResult();
-
-            System.out.println("Result: " + result.getStatus()); // TODO return this status (Ok, Yes)
+            Ref ref = command.setName(nameBranch).setStartPoint("origin/" + nameBranch).call();
             System.out.println("!Switch to branch: " + ref.getName()); // TODO data to the UI console
             return JGitStatus.SUCCESSFUL;
         } catch (IOException | GitAPIException e) {
@@ -367,27 +373,31 @@ public class JGit {
     }
 
     /**
+     * Removes a branch by name.
      *
-     * @param projectPath
-     * @param nameBranch
-     * @param force
+     * @param projectPath  the path to cloned of the project
+     * @param nameBranch   the name of the branch for delete
+     * @param force        false - a check will be performed whether the branch to be deleted is already
+     *                     merged into the current branch and deletion will be refused in this case.
      */
-    public void deleteBranch(String projectPath, String nameBranch, boolean force) {
+    public JGitStatus deleteBranch(String projectPath, String nameBranch, boolean force) {
         Optional<Git> optGit = getGitForRepository(projectPath);
         if (!optGit.isPresent() || nameBranch == null) {
-            return;
+            return JGitStatus.FAILED;
         }
         Git git = optGit.get();
         if (isCurrentBranch(git, nameBranch)) {
             System.err.println("!ERROR: The current branch can not be deleted.");
-            return;
+            return JGitStatus.FAILED;
         }
         try {
             git.branchDelete().setBranchNames(nameBranch).setForce(force).call();
             System.out.println("!Branch \"" + nameBranch + "\" deleted from the " + projectPath);
+            return JGitStatus.SUCCESSFUL;
         } catch (GitAPIException e) {
             System.err.println("!ERROR: " + e.getMessage());
         }
+        return JGitStatus.FAILED;
     }
 
     private boolean commit(Path projectPath, String message) {
