@@ -84,7 +84,7 @@ public class ProgramProperties {
                 Collectors.toMap(x -> x, x -> localParentPath + PATH_SEPARATOR + x.getName()));
 
         String username = _loginService.getCurrentUser().getUsername();
-        _storageService.updateStorage(trimmedServerUrl(_loginService.getServerUrl()), username);
+        _storageService.updateStorage(trimmedServerUrl(_loginService.getServerURL()), username);
     }
 
     /**
@@ -95,7 +95,7 @@ public class ProgramProperties {
     public List<Group> getClonedGroups() {
         String username = _loginService.getCurrentUser().getUsername();
         if (_groupPathMap == null) {
-        	Map<Group, String> storage = _storageService.loadStorage(trimmedServerUrl(_loginService.getServerUrl()), username);
+        	Map<Group, String> storage = _storageService.loadStorage(trimmedServerUrl(_loginService.getServerURL()), username);
             setGroupPathMap(storage);
         }
         if (!_groupPathMap.isEmpty()) {

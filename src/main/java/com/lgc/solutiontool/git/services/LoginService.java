@@ -8,4 +8,6 @@ public interface LoginService {
 
     User getCurrentUser();
     
+    String getServerURL();
+    
 }

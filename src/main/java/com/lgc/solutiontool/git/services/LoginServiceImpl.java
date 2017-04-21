@@ -44,4 +44,11 @@ public class LoginServiceImpl implements LoginService {
         _connector = connector;
     }
 
+	@Override
+	public String getServerURL() {
+		return getConnector().getUrlMainPart();
+	}
+    
+    
+
 }
