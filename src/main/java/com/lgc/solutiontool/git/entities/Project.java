@@ -1,5 +1,9 @@
 package com.lgc.solutiontool.git.entities;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import com.google.gson.annotations.SerializedName;
 
 /**
@@ -49,14 +53,30 @@ public class Project {
     private boolean only_allow_merge_if_build_succeeds;
     private boolean only_allow_merge_if_all_discussions_are_resolved;
     private boolean request_access_enabled;
-    /** **/
+
+    /** Path to the cloned project **/
     private String _pathToClonedProject;
 
+    /**
+     * Sets path to the cloned project
+     * @param path to the project
+     */
     public void setPathToClonedProject(String path) {
-        //TODO valid
-        _pathToClonedProject = path;
+        if (path == null) {
+            return;
+        }
+        Path pathToProject = Paths.get(path);
+        if (Files.exists(pathToProject) && Files.isDirectory(pathToProject)) {
+            // TODO project must have /.git() folder.
+            // The implementation of the method will be in the JGit class
+            _pathToClonedProject = path;
+        }
     }
 
+    /**
+     * Gets path to the cloned project
+     * @return path to the cloned project
+     */
     public String getPathToClonedProject() {
         return _pathToClonedProject;
     }

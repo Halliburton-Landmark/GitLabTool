@@ -1,5 +1,8 @@
 package com.lgc.solutiontool.git.entities;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collection;
 
 /**
@@ -99,19 +102,44 @@ public class Group {
 
     public Group(){}
 
+    /**
+     * Gets status of clone
+     *
+     * @return status
+     */
     public boolean isCloned() {
         return _isCloned;
     }
 
+    /**
+     * Sets status the group (group is cloned or not)
+     *
+     * @param status
+     */
     public void setClonedStatus(boolean status) {
         _isCloned = status;
     }
 
+    /**
+     * Sets path to the cloned group
+     *
+     * @param path to the group
+     */
     public void setPathToClonedGroup(String path) {
-        //TODO valid
-        _pathToClonedGroup = path;
+        if (path == null) {
+            return;
+        }
+        Path pathToGroup = Paths.get(path);
+        if (Files.exists(pathToGroup) && Files.isDirectory(pathToGroup)) {
+            _pathToClonedGroup = path;
+        }
     }
 
+    /**
+     * Gets path to the cloned group
+     *
+     * @return path to the group
+     */
     public String getPathToClonedGroup() {
         return _pathToClonedGroup;
     }
@@ -124,11 +152,9 @@ public class Group {
         return name;
     }
 
-
     public String getPath() {
         return path;
     }
-
 
     public String getDescription() {
         return description;
