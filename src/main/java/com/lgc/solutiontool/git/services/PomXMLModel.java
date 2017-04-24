@@ -15,13 +15,12 @@ import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
 import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
 
 /**
- * The class contains a model of a pom.xml file.
- * When you create an object, the data is read from a file.
- * The class can return the pom.xml model and write the modified model to a file.
+ * The class contains a model of a pom.xml file. When you create an object, the data is read from a file. The class can
+ * return the pom.xml model and write the modified model to a file.
  *
  * @author Lyudmila Lyska
  */
-public class PomXMLManager {
+public class PomXMLModel {
 
     private Optional<Model> _originalModel;
     private static final String FILE_NAME = "pom.xml";
@@ -31,17 +30,19 @@ public class PomXMLManager {
      *
      * @param pomXmlPath path to a pom.xml file of a cloned project
      */
-    public PomXMLManager(String pomXmlPath) {
-        Path path = Paths.get(pomXmlPath);
-        if (!isCorrectPath(path)) {
-            _originalModel = Optional.empty();
-            return;
+    public PomXMLModel(String pomXmlPath) {
+        if (pomXmlPath != null) {
+            Path path = Paths.get(pomXmlPath);
+            if (isCorrectPath(path)) {
+                updateModelFile(path);
+            }
         }
-        updateModelFile(path);
+        _originalModel = Optional.empty();
     }
 
     /**
      * Gets model of a xml file
+     *
      * @return model
      */
     public Optional<Model> getModelFile() {
@@ -80,8 +81,9 @@ public class PomXMLManager {
 
     private boolean isCorrectPath(Path path) {
         boolean exists = Files.exists(path);
+        boolean isFile = Files.isReadable(path);
         boolean isExtensionCorrectly = FILE_NAME.equals(path.getFileName().toString()) ? true : false;
-        return exists & isExtensionCorrectly;
+        return exists & isFile & isExtensionCorrectly;
     }
 
 }
