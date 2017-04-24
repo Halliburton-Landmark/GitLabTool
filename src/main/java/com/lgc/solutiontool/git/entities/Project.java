@@ -78,8 +78,8 @@ public class Project {
      * @param path to the project
      */
     public void setPathToClonedProject(String path) {
-        if (path == null) {
-            return;
+        if (path == null || path.isEmpty()) {
+            throw new IllegalArgumentException("Invalid value passed");
         }
         Path pathToProject = Paths.get(path);
         if (Files.exists(pathToProject) && Files.isDirectory(pathToProject)) {

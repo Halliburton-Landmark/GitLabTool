@@ -126,8 +126,8 @@ public class Group {
      * @param path to the group
      */
     public void setPathToClonedGroup(String path) {
-        if (path == null) {
-            return;
+        if (path == null || path.isEmpty()) {
+            throw new IllegalArgumentException("Invalid value passed");
         }
         Path pathToGroup = Paths.get(path);
         if (Files.exists(pathToGroup) && Files.isDirectory(pathToGroup)) {
