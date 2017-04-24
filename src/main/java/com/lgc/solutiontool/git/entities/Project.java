@@ -56,7 +56,23 @@ public class Project {
 
     /** Path to the cloned project **/
     private String _pathToClonedProject;
+    private boolean _isCloned;
 
+    /**
+     * Gets status of clone
+     * @return status
+     */
+    public boolean isCloned() {
+        return _isCloned;
+    }
+
+    /**
+     * Sets status the project (project is cloned or not)
+     * @param status
+     */
+    public void setClonedStatus(boolean status) {
+        _isCloned = status;
+    }
     /**
      * Sets path to the cloned project
      * @param path to the project
