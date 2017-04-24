@@ -8,6 +8,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 
@@ -31,6 +32,7 @@ public class JavaFXUI extends Application implements UserInterface {
         primaryStage.setScene(scene);
         primaryStage.setHeight(800);
         primaryStage.setWidth(1200);
+        primaryStage.getIcons().add(new Image(getClass().getClassLoader().getResource("icons/gitlab.png").toExternalForm()));
         primaryStage.show();
         Label userLabel = (Label) scene.lookup("#userId");
         userLabel.setText(_loginService.getCurrentUser().getName());
@@ -38,6 +40,9 @@ public class JavaFXUI extends Application implements UserInterface {
 
     private void showloginDialog() {
         LoginDialog ld = new LoginDialog();
+        Stage stage = (Stage) ld.getDialogPane().getScene().getWindow();
+        stage.getIcons().add(new Image(getClass().getClassLoader().getResource("icons/gitlab.png").toExternalForm()));
+
         Pair<String, String> loginAndPassword = ld.showAndWait().orElseThrow(() -> new RuntimeException("Error in LoginDialog"));
         _loginService.login(loginAndPassword.getKey(), loginAndPassword.getValue());
     }
