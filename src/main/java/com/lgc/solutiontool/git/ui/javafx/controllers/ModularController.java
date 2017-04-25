@@ -2,7 +2,7 @@ package com.lgc.solutiontool.git.ui.javafx.controllers;
 
 import com.lgc.solutiontool.git.entities.Group;
 import com.lgc.solutiontool.git.ui.ViewKeys;
-import com.lgc.solutiontool.git.ui.toolbar.ToolbarItems;
+import com.lgc.solutiontool.git.ui.toolbar.ToolbarManager;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -40,7 +40,7 @@ public class ModularController {
         viewPane.getChildren().clear();
         viewPane.getChildren().add(node);
 
-        toolbar.getItems().addAll(ToolbarItems.getInstance().getToolbarItems(ViewKeys.WELCOME_WINDOW.getKey()));
+        toolbar.getItems().addAll(ToolbarManager.getInstance().getToolbarItems(ViewKeys.WELCOME_WINDOW.getKey()));
     }
 
     public void loadMainWindow(Group selectedGroup) throws IOException {
@@ -59,7 +59,7 @@ public class ModularController {
         viewPane.getChildren().clear();
         viewPane.getChildren().add(node);
 
-        toolbar.getItems().addAll(ToolbarItems.getInstance().getToolbarItems(ViewKeys.MAIN_WINDOW.getKey()));
+        toolbar.getItems().addAll(ToolbarManager.getInstance().getToolbarItems(ViewKeys.MAIN_WINDOW.getKey()));
     }
 
 }
