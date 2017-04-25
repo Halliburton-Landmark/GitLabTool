@@ -3,7 +3,7 @@ package com.lgc.solutiontool.git.ui.javafx;
 import com.lgc.solutiontool.git.services.LoginService;
 import com.lgc.solutiontool.git.services.ServiceProvider;
 import com.lgc.solutiontool.git.ui.UserInterface;
-import com.lgc.solutiontool.git.ui.ViewKeys;
+import com.lgc.solutiontool.git.ui.ViewKey;
 import com.lgc.solutiontool.git.ui.javafx.controllers.ModularController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -27,7 +27,7 @@ public class JavaFXUI extends Application implements UserInterface {
     @Override
     public void start(Stage primaryStage) throws Exception {
 
-        URL modularWindow = getClass().getClassLoader().getResource(ViewKeys.MODULAR_CONTAINER.getPath());
+        URL modularWindow = getClass().getClassLoader().getResource(ViewKey.MODULAR_CONTAINER.getPath());
         if (modularWindow == null) {
             return;
         }

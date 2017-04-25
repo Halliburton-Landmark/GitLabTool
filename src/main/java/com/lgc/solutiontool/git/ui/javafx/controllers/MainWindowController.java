@@ -6,6 +6,8 @@ import com.lgc.solutiontool.git.entities.Project;
 import com.lgc.solutiontool.git.services.LoginService;
 import com.lgc.solutiontool.git.services.ProjectService;
 import com.lgc.solutiontool.git.services.ServiceProvider;
+import com.lgc.solutiontool.git.ui.toolbar.ToolbarManager;
+import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -21,6 +23,7 @@ import java.util.List;
 
 public class MainWindowController {
     private static final String HEDER_GROUP_TITLE = "Current group: ";
+
     private Group selectedGroup;
 
     private LoginService _loginService =
@@ -46,6 +49,9 @@ public class MainWindowController {
         leftLabel.setText(HEDER_GROUP_TITLE + currentGroupname);
 
         configureListView(projectsList);
+
+        BooleanBinding booleanBinding = projectsList.getSelectionModel().selectedItemProperty().isNull();
+        ToolbarManager.getInstance().getAllButtonsForCurrentView().forEach(x -> x.disableProperty().bind(booleanBinding));
 
         new Thread(this::updateProjectList).start();
     }

@@ -1,7 +1,7 @@
 package com.lgc.solutiontool.git.ui.javafx.controllers;
 
 import com.lgc.solutiontool.git.entities.Group;
-import com.lgc.solutiontool.git.ui.ViewKeys;
+import com.lgc.solutiontool.git.ui.ViewKey;
 import com.lgc.solutiontool.git.ui.toolbar.ToolbarManager;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -14,6 +14,8 @@ import java.io.IOException;
 
 public class ModularController {
 
+    private static final String CSS_PATH = "css/style.css";
+
     @FXML
     public Pane consolePane;
 
@@ -25,11 +27,12 @@ public class ModularController {
 
     @FXML
     public void initialize() {
-        toolbar.getStylesheets().add(getClass().getClassLoader().getResource("css/style.css").toExternalForm());
+        toolbar.getStylesheets().add(getClass().getClassLoader().getResource(CSS_PATH).toExternalForm());
     }
 
     public void loadWelcomeWindow() throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource(ViewKeys.WELCOME_WINDOW.getPath()));
+        toolbar.getItems().addAll(ToolbarManager.getInstance().createToolbarItems(ViewKey.WELCOME_WINDOW.getKey()));
+        FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource(ViewKey.WELCOME_WINDOW.getPath()));
         Node node = loader.load();
 
         AnchorPane.setTopAnchor(node, 0.0);
@@ -39,12 +42,12 @@ public class ModularController {
 
         viewPane.getChildren().clear();
         viewPane.getChildren().add(node);
-
-        toolbar.getItems().addAll(ToolbarManager.getInstance().getToolbarItems(ViewKeys.WELCOME_WINDOW.getKey()));
     }
 
     public void loadMainWindow(Group selectedGroup) throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource(ViewKeys.MAIN_WINDOW.getPath()));
+        toolbar.getItems().addAll(ToolbarManager.getInstance().createToolbarItems(ViewKey.MAIN_WINDOW.getKey()));
+
+        FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource(ViewKey.MAIN_WINDOW.getPath()));
         Node node = loader.load();
 
         MainWindowController controller = loader.getController();
@@ -58,8 +61,6 @@ public class ModularController {
 
         viewPane.getChildren().clear();
         viewPane.getChildren().add(node);
-
-        toolbar.getItems().addAll(ToolbarManager.getInstance().getToolbarItems(ViewKeys.MAIN_WINDOW.getKey()));
     }
 
 }

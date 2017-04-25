@@ -4,7 +4,9 @@ import com.lgc.solutiontool.git.entities.Group;
 import com.lgc.solutiontool.git.properties.ProgramProperties;
 import com.lgc.solutiontool.git.services.LoginService;
 import com.lgc.solutiontool.git.services.ServiceProvider;
-import com.lgc.solutiontool.git.ui.ViewKeys;
+import com.lgc.solutiontool.git.ui.ViewKey;
+import com.lgc.solutiontool.git.ui.toolbar.ToolbarButtons;
+import com.lgc.solutiontool.git.ui.toolbar.ToolbarManager;
 import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -50,13 +52,17 @@ public class WelcomeWindowController {
 
         BooleanBinding booleanBinding = groupList.getSelectionModel().selectedItemProperty().isNull();
         onLoadSelectedGroupspaceButton.disableProperty().bind(booleanBinding);
+        ToolbarManager.getInstance().getAllButtonsForCurrentView().stream()
+                .filter(x -> x.getId().equals(ToolbarButtons.REMOVE_GROUP_BUTTON.getId())
+                        || x.getId().equals(ToolbarButtons.SELECT_GROUP_BUTTON.getId()))
+                .forEach(x -> x.disableProperty().bind(booleanBinding));
 
         userId.setText(_loginService.getCurrentUser().getName());
     }
 
     @FXML
     public void onCreateGroupspace(ActionEvent actionEvent) throws IOException {
-        URL cloningGroupsWindowUrl = getClass().getClassLoader().getResource(ViewKeys.CLONING_GROUPS_WINDOW.getPath());
+        URL cloningGroupsWindowUrl = getClass().getClassLoader().getResource(ViewKey.CLONING_GROUPS_WINDOW.getPath());
         if (cloningGroupsWindowUrl == null) {
             return;
         }
@@ -108,7 +114,7 @@ public class WelcomeWindowController {
 
     @FXML
     public void onLoadSelectedGroupspace(ActionEvent actionEvent) throws IOException {
-        URL modularWindow = getClass().getClassLoader().getResource(ViewKeys.MODULAR_CONTAINER.getPath());
+        URL modularWindow = getClass().getClassLoader().getResource(ViewKey.MODULAR_CONTAINER.getPath());
         if (modularWindow == null) {
             return;
         }

@@ -5,7 +5,7 @@ package com.lgc.solutiontool.git.ui;
  *
  * @author Pavlo Pidhorniy
  */
-public enum ViewKeys {
+public enum ViewKey {
 
     WELCOME_WINDOW("welcomeWindow", "fxml/WelcomeWindow.fxml"),
     MAIN_WINDOW("mainWindow", "fxml/MainWindow.fxml"),
@@ -34,7 +34,7 @@ public enum ViewKeys {
     }
 
 
-    private ViewKeys(final String selectedKey, final String selectedPath) {
+    private ViewKey(final String selectedKey, final String selectedPath) {
         this.key = selectedKey;
         this.path = selectedPath;
     }

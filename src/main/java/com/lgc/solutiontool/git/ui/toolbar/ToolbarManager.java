@@ -1,7 +1,6 @@
 package com.lgc.solutiontool.git.ui.toolbar;
 
-
-import com.lgc.solutiontool.git.ui.ViewKeys;
+import com.lgc.solutiontool.git.ui.ViewKey;
 import com.lgc.solutiontool.git.ui.javafx.controllers.ModularController;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -16,10 +15,13 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
+ * Class for managing an toolbar with buttons
  *
+ * @author Pavlo Pidhorniy
  */
 public class ToolbarManager {
     private static final String HOME_BUTTON_ICON_URL = "icons/home.png";
@@ -34,6 +36,11 @@ public class ToolbarManager {
     private ToolbarManager() {
     }
 
+    /**
+     * Gets instance's the class
+     *
+     * @return instance
+     */
     public static ToolbarManager getInstance() {
         if (instance == null) {
             instance = new ToolbarManager();
@@ -41,15 +48,23 @@ public class ToolbarManager {
         return instance;
     }
 
-    public List<Node> getToolbarItems(String windowId) throws IOException {
+    /**
+     * Create buttons for toolbar
+     * Important note: invoke before create a child view in {@link ModularController}
+     *
+     * @param windowId Id of view where should be created toolbar
+     * @return List of nodes with buttons
+     */
+    public List<Node> createToolbarItems(String windowId) {
+
         items = new ArrayList<>();
 
-        if (!windowId.equals(ViewKeys.WELCOME_WINDOW.getKey())) {
+        if (!windowId.equals(ViewKey.WELCOME_WINDOW.getKey())) {
             items.add(createHomeButton());
         }
 
         for (ToolbarButtons button : ToolbarButtons.values()) {
-            if (button.getWindowKey().equals(windowId)) {
+            if (button.getViewKey().equals(windowId)) {
                 items.add(createButton(button.getId(), button.getIconUrl(), button.getText(), button.getTooltip()));
             }
         }
@@ -57,26 +72,55 @@ public class ToolbarManager {
         return items;
     }
 
-    public Button getButton(String key) {
+    /**
+     * Returns button by its identifier
+     *
+     * @param buttonId Id of button
+     * @return Existing button with chosen id or empty button if id does not matches
+     */
+    public Button getButtonById(String buttonId) {
         if (items == null) {
             return new Button();
         }
 
+        return items.stream()
+                .filter(x -> x instanceof Button) //only buttons
+                .filter(x -> x.getId().equals(buttonId)) //match by Id
+                .findFirst() //first match
+                .map(node -> (Button) node) //cast to button
+                .orElseGet(Button::new); //result or new Button
+    }
+
+    /**
+     * Returns all existing buttons on current view (if buttons has been created)
+     *
+     * @return all buttons from current view
+     */
+    public List<Button> getAllButtonsForCurrentView() {
+        if (items == null) {
+            return Collections.emptyList();
+        }
+
+        List<Button> buttons = new ArrayList<>();
         for (Node node : items) {
+            //work only with buttons
             if (!(node instanceof Button)) {
                 continue;
             }
 
-            Button button = (Button) node;
-            if (button.getId().equals(key)) {
-                return button;
+            //except homeButton
+            Button buttonNode = (Button) node;
+            if (buttonNode.getId().equals(HOME_BUTTON_ID)) {
+                continue;
             }
+
+            buttons.add(buttonNode);
         }
 
-        return new Button();
+        return buttons;
     }
 
-    private Button createHomeButton(){
+    private Button createHomeButton() {
         Image homeImage = new Image(getClass().getClassLoader().getResource(HOME_BUTTON_ICON_URL).toExternalForm());
         Button homeButton = new Button(HOME_BUTTON_TEXT, new ImageView(homeImage));
         homeButton.setTooltip(new Tooltip(HOME_BUTTON_TOOLTIP));
@@ -101,7 +145,7 @@ public class ToolbarManager {
     }
 
     private void showWelcomePage(Button showWelcomButton) throws IOException {
-        URL modularWindow = getClass().getClassLoader().getResource(ViewKeys.MODULAR_CONTAINER.getPath());
+        URL modularWindow = getClass().getClassLoader().getResource(ViewKey.MODULAR_CONTAINER.getPath());
         if (modularWindow == null) {
             return;
         }
