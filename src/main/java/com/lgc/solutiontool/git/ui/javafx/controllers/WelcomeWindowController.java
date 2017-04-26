@@ -58,25 +58,37 @@ public class WelcomeWindowController {
                 .forEach(x -> x.disableProperty().bind(booleanBinding));
 
         userId.setText(_loginService.getCurrentUser().getName());
+
+        configureToolbarCommands();
     }
 
     @FXML
-    public void onCreateGroupspace(ActionEvent actionEvent) throws IOException {
+    public void onCreateGroupspace(ActionEvent actionEvent) {
         URL cloningGroupsWindowUrl = getClass().getClassLoader().getResource(ViewKey.CLONING_GROUPS_WINDOW.getPath());
         if (cloningGroupsWindowUrl == null) {
             return;
         }
 
-        Parent root = FXMLLoader.load(cloningGroupsWindowUrl);
-        Stage stage = new Stage();
-        stage.initModality(Modality.APPLICATION_MODAL);
-        stage.initStyle(StageStyle.DECORATED);
-        stage.setTitle(WINDOW_TITLE);
-        stage.setResizable(false);
-        stage.setScene(new Scene(root));
-        stage.setOnHidden(we -> updateClonedGroups());
+        try {
+            Parent root = FXMLLoader.load(cloningGroupsWindowUrl);
+            Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.initStyle(StageStyle.DECORATED);
+            stage.setTitle(WINDOW_TITLE);
+            stage.setResizable(false);
+            stage.setScene(new Scene(root));
+            stage.setOnHidden(we -> updateClonedGroups());
 
-        stage.show();
+            stage.show();
+        } catch (IOException e) {
+            System.out.println("Could not load fxml resource: IOException");
+            e.printStackTrace();
+        }
+    }
+
+    private void configureToolbarCommands() {
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.SELECT_GROUP_BUTTON.getId()).setOnAction(this::onLoadSelectedGroupspace);
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.CLONE_GROUP_BUTTON.getId()).setOnAction(this::onCreateGroupspace);
     }
 
     private void updateClonedGroups() {
@@ -113,20 +125,27 @@ public class WelcomeWindowController {
     }
 
     @FXML
-    public void onLoadSelectedGroupspace(ActionEvent actionEvent) throws IOException {
+    public void onLoadSelectedGroupspace(ActionEvent actionEvent) {
         URL modularWindow = getClass().getClassLoader().getResource(ViewKey.MODULAR_CONTAINER.getPath());
         if (modularWindow == null) {
             return;
         }
 
-        FXMLLoader fxmlLoader = new FXMLLoader(modularWindow);
-        Parent root = fxmlLoader.load();
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(modularWindow);
+            Parent root = fxmlLoader.load();
 
-        ModularController myControllerHandle = fxmlLoader.getController();
-        Group selectedGroup = (Group) groupList.getSelectionModel().getSelectedItem();
-        myControllerHandle.loadMainWindow(selectedGroup);
+            ModularController myControllerHandle = fxmlLoader.getController();
+            Group selectedGroup = (Group) groupList.getSelectionModel().getSelectedItem();
 
-        Stage previousStage = (Stage) onLoadSelectedGroupspaceButton.getScene().getWindow();
-        previousStage.setScene(new Scene(root));
+            myControllerHandle.loadMainWindow(selectedGroup);
+
+            Stage previousStage = (Stage) onLoadSelectedGroupspaceButton.getScene().getWindow();
+            previousStage.setScene(new Scene(root));
+
+        } catch (IOException e) {
+            System.out.println("Could not load fxml resource: IOException");
+            e.printStackTrace();
+        }
     }
 }
