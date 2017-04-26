@@ -1,11 +1,11 @@
 package com.lgc.solutiontool.git.services;
 
+import java.util.List;
+import java.util.Map;
+
 import com.lgc.solutiontool.git.entities.Group;
 import com.lgc.solutiontool.git.entities.User;
 import com.lgc.solutiontool.git.statuses.CloningStatus;
-
-import java.util.List;
-import java.util.Map;
 
 public interface GroupsUserService {
 
@@ -23,9 +23,8 @@ public interface GroupsUserService {
      *
      * @param group           Group for cloning
      * @param destinationPath Local path of workspace
-     * @return Cloning status
      */
-    CloningStatus cloneGroup(Group group, String destinationPath);
+    Group cloneGroup(Group group, String destinationPath);
 
     /**
      * Clones list of user's groups
