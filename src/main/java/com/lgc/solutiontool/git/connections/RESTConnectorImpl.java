@@ -12,6 +12,7 @@ import javax.net.ssl.HttpsURLConnection;
 
 import com.lgc.solutiontool.git.exceptions.HTTPExceptionProvider;
 import com.lgc.solutiontool.git.util.RequestType;
+import com.lgc.solutiontool.git.util.URLManager;
 
 class RESTConnectorImpl implements RESTConnector {
 
@@ -113,8 +114,10 @@ class RESTConnectorImpl implements RESTConnector {
     }
 
 	@Override
-	public void setUrlMainPart(String url) {
-		urlMainPart = url;
+	public void setUrlMainPart(String urlMainPart) {
+		if (urlMainPart != null && URLManager.isURLValid(urlMainPart)) {
+			this.urlMainPart = urlMainPart;
+		}
 	}
 
 	@Override

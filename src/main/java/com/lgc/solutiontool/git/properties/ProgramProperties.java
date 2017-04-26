@@ -4,6 +4,7 @@ import com.lgc.solutiontool.git.entities.Group;
 import com.lgc.solutiontool.git.services.LoginService;
 import com.lgc.solutiontool.git.services.ServiceProvider;
 import com.lgc.solutiontool.git.services.StorageService;
+import com.lgc.solutiontool.git.util.URLManager;
 import com.lgc.solutiontool.git.xml.MapAdapter;
 
 import javax.xml.bind.annotation.XmlRootElement;
@@ -84,7 +85,7 @@ public class ProgramProperties {
                 Collectors.toMap(x -> x, x -> localParentPath + PATH_SEPARATOR + x.getName()));
 
         String username = _loginService.getCurrentUser().getUsername();
-        _storageService.updateStorage(trimmedServerUrl(_loginService.getServerURL()), username);
+        _storageService.updateStorage(URLManager.trimServerURL(_loginService.getServerURL()), username);
     }
 
     /**
@@ -95,7 +96,7 @@ public class ProgramProperties {
     public List<Group> getClonedGroups() {
         String username = _loginService.getCurrentUser().getUsername();
         if (_groupPathMap == null) {
-        	Map<Group, String> storage = _storageService.loadStorage(trimmedServerUrl(_loginService.getServerURL()), username);
+        	Map<Group, String> storage = _storageService.loadStorage(URLManager.trimServerURL(_loginService.getServerURL()), username);
             setGroupPathMap(storage);
         }
         if (!_groupPathMap.isEmpty()) {
@@ -105,15 +106,4 @@ public class ProgramProperties {
         }
     }
     
-    // TODO: remove it to some utility service
-    private String trimmedServerUrl(String url) {
-    	if (!url.contains("/")) {
-    		return url;
-    	}
-    	String protocol = url.contains("https://") ? "https://" : "http://";
-    	String resultedURL = url.substring(url.indexOf(protocol) + protocol.length(), url.indexOf("/api/v3"));
-    	return resultedURL;
-    }
-
-
 }

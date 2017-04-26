@@ -1,6 +1,7 @@
 package com.lgc.solutiontool.git.ui.javafx;
 
 import com.lgc.solutiontool.git.ui.javafx.dto.DialogDTO;
+import com.lgc.solutiontool.git.util.URLManager;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -63,9 +64,9 @@ class LoginDialog extends Dialog<DialogDTO> {
 
         getDialogPane().setContent(grid);
         setResultConverter(dialogButton -> {
-        	String urlMainPart = "https://" + comboBox.getValue() + "/api/v3";
+        	String serverURL = URLManager.modifyServerURL(comboBox.getValue());
         	return dialogButton == loginButtonType 
-        			? new DialogDTO(userTextField.getText(), pwBox.getText(), urlMainPart)
+        			? new DialogDTO(userTextField.getText(), pwBox.getText(), serverURL)
         			: null;
         });
     }
