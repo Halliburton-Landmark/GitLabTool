@@ -27,7 +27,7 @@ public class URLManager {
 	 * @param urlMainPart - main part of URL
 	 * @return modified URL
 	 */
-	public static String modifyServerURL(String urlMainPart) {
+	public static String completeServerURL(String urlMainPart) {
 		return HTTPS + urlMainPart + URL_SUFFIX;
 	}
 	

@@ -64,7 +64,7 @@ class LoginDialog extends Dialog<DialogDTO> {
 
         getDialogPane().setContent(grid);
         setResultConverter(dialogButton -> {
-        	String serverURL = URLManager.modifyServerURL(comboBox.getValue());
+        	String serverURL = URLManager.completeServerURL(comboBox.getValue());
         	return dialogButton == loginButtonType 
         			? new DialogDTO(userTextField.getText(), pwBox.getText(), serverURL)
         			: null;
