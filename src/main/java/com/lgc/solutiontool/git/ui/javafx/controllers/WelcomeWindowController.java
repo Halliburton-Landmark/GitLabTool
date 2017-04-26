@@ -9,16 +9,15 @@ import com.lgc.solutiontool.git.ui.toolbar.ToolbarButtons;
 import com.lgc.solutiontool.git.ui.toolbar.ToolbarManager;
 import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
+import javafx.scene.control.*;
+import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -40,7 +39,7 @@ public class WelcomeWindowController {
     private ListView groupList;
 
     @FXML
-    private Button onLoadSelectedGroupspaceButton;
+    private Button onLoadSelectedGroup;
 
     private LoginService _loginService =
             (LoginService) ServiceProvider.getInstance().getService(LoginService.class.getName());
@@ -51,7 +50,8 @@ public class WelcomeWindowController {
         new Thread(this::updateClonedGroups).start();
 
         BooleanBinding booleanBinding = groupList.getSelectionModel().selectedItemProperty().isNull();
-        onLoadSelectedGroupspaceButton.disableProperty().bind(booleanBinding);
+
+        onLoadSelectedGroup.disableProperty().bind(booleanBinding);
         ToolbarManager.getInstance().getAllButtonsForCurrentView().stream()
                 .filter(x -> x.getId().equals(ToolbarButtons.REMOVE_GROUP_BUTTON.getId())
                         || x.getId().equals(ToolbarButtons.SELECT_GROUP_BUTTON.getId()))
@@ -63,8 +63,9 @@ public class WelcomeWindowController {
     }
 
     @FXML
-    public void onCreateGroupspace(ActionEvent actionEvent) {
+    public void onCloneGroups(ActionEvent actionEvent) {
         URL cloningGroupsWindowUrl = getClass().getClassLoader().getResource(ViewKey.CLONING_GROUPS_WINDOW.getPath());
+
         if (cloningGroupsWindowUrl == null) {
             return;
         }
@@ -88,18 +89,13 @@ public class WelcomeWindowController {
 
     private void configureToolbarCommands() {
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.SELECT_GROUP_BUTTON.getId()).setOnAction(this::onLoadSelectedGroupspace);
-        ToolbarManager.getInstance().getButtonById(ToolbarButtons.CLONE_GROUP_BUTTON.getId()).setOnAction(this::onCreateGroupspace);
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.CLONE_GROUP_BUTTON.getId()).setOnAction(this::onCloneGroups);
     }
 
     private void updateClonedGroups() {
         List<Group> userGroups = ProgramProperties.getInstance().getClonedGroups();
-        ObservableList<Group> groupsObservableList = FXCollections.observableList(userGroups);
 
-        groupList.getItems().clear();
-        groupList.getSelectionModel().clearSelection();
-
-        groupList.setItems(groupsObservableList);
-
+        groupList.setItems(FXCollections.observableList(userGroups));
     }
 
     private void configureListView(ListView listView) {
@@ -107,19 +103,7 @@ public class WelcomeWindowController {
         listView.setCellFactory(new Callback<ListView<Group>, ListCell<Group>>() {
             @Override
             public ListCell<Group> call(ListView<Group> p) {
-
-                return new ListCell<Group>() {
-                    @Override
-                    protected void updateItem(Group item, boolean empty) {
-                        super.updateItem(item, empty);
-                        if (empty || item == null) {
-                            setText(null);
-                        } else {
-                            String itemText = item.getName() + " (@" + item.getPath() + ") ";
-                            setText(itemText);
-                        }
-                    }
-                };
+                return new GroupListCell();
             }
         });
     }
@@ -140,12 +124,38 @@ public class WelcomeWindowController {
 
             myControllerHandle.loadMainWindow(selectedGroup);
 
-            Stage previousStage = (Stage) onLoadSelectedGroupspaceButton.getScene().getWindow();
+            Stage previousStage = (Stage) onLoadSelectedGroup.getScene().getWindow();
             previousStage.setScene(new Scene(root));
 
         } catch (IOException e) {
             System.out.println("Could not load fxml resource: IOException");
             e.printStackTrace();
+        }
+
+    }
+
+    private class GroupListCell extends ListCell<Group> {
+        final Tooltip tooltip = new Tooltip();
+
+        @Override
+        public void updateItem(Group item, boolean empty) {
+            super.updateItem(item, empty);
+            if (empty || item == null) {
+                setGraphic(null);
+                setTooltip(null);
+            } else {
+                Text groupNameText = new Text(item.getName());
+                groupNameText.setFont(Font.font(Font.getDefault().getFamily(), 14));
+
+                String localPath = ProgramProperties.getInstance().getClonedLocalPath(item);
+                Text localPathText = new Text(localPath);
+
+                VBox vboxItem = new VBox(groupNameText, localPathText);
+                setGraphic(vboxItem);
+
+                tooltip.setText(item.getName() + " (" + localPath + ")");
+                setTooltip(tooltip);
+            }
         }
     }
 }

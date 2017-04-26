@@ -47,9 +47,9 @@
             </rowConstraints>
 
             <Button maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false"
-                    onAction="#onCreateGroupspace" prefHeight="28.0" text="Create Groupspace"
+                    onAction="#onCloneGroups" prefHeight="28.0" text="Create Groupspace"
                     GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-            <Button fx:id="onLoadSelectedGroupspaceButton" maxHeight="1.7976931348623157E308"
+            <Button fx:id="onLoadSelectedGroup" maxHeight="1.7976931348623157E308"
                     maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onLoadSelectedGroupspace"
                     text="Load Selected Groupspace" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
             <Button maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false"
