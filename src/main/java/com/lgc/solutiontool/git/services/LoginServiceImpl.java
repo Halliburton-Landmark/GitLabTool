@@ -20,10 +20,11 @@ public class LoginServiceImpl implements LoginService {
     }
 
     @Override
-    public Object login(String name, String password) {
+    public Object login(String serverURL, String name, String password) {
         HashMap<String, String> params = new HashMap<>();
         params.put("login", name);
         params.put("password", password);
+        getConnector().setUrlMainPart(serverURL);
         Object userJson = getConnector().sendPost("/session", params, null);
 
         _currentUser = CurrentUser.getInstance();
@@ -44,5 +45,12 @@ public class LoginServiceImpl implements LoginService {
     private void setConnector(RESTConnector connector) {
         _connector = connector;
     }
+
+	@Override
+	public String getServerURL() {
+		return getConnector().getUrlMainPart();
+	}
+    
+    
 
 }
