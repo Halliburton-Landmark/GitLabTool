@@ -12,10 +12,12 @@ import javax.net.ssl.HttpsURLConnection;
 
 import com.lgc.solutiontool.git.exceptions.HTTPExceptionProvider;
 import com.lgc.solutiontool.git.util.RequestType;
+import com.lgc.solutiontool.git.util.URLManager;
 
 class RESTConnectorImpl implements RESTConnector {
 
     private final HTTPExceptionProvider _exceptionProvider;
+    private String urlMainPart;
 
     RESTConnectorImpl(HTTPExceptionProvider provider) {
         this._exceptionProvider = provider;
@@ -44,7 +46,7 @@ class RESTConnectorImpl implements RESTConnector {
      */
     private Object sendRequest(String suffixForUrl, Map<String, String> params, Map<String, String> header, RequestType request) {
         try {
-            URL obj = new URL(URL_MAIN_PART + suffixForUrl);
+            URL obj = new URL(urlMainPart + suffixForUrl);
             HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
 
             setHTTPRequestHeader(header, con);
@@ -110,4 +112,17 @@ class RESTConnectorImpl implements RESTConnector {
             throw new UnsupportedOperationException(e);
         }
     }
+
+	@Override
+	public void setUrlMainPart(String urlMainPart) {
+		if (urlMainPart != null && URLManager.isURLValid(urlMainPart)) {
+			this.urlMainPart = urlMainPart;
+		}
+	}
+
+	@Override
+	public String getUrlMainPart() {
+		return urlMainPart;
+	}
+	
 }
