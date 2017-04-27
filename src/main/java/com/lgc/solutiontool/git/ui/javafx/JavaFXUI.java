@@ -5,12 +5,13 @@ import com.lgc.solutiontool.git.services.ServiceProvider;
 import com.lgc.solutiontool.git.ui.UserInterface;
 import com.lgc.solutiontool.git.ui.ViewKey;
 import com.lgc.solutiontool.git.ui.javafx.controllers.ModularController;
+import com.lgc.solutiontool.git.ui.javafx.dto.DialogDTO;
+
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import javafx.util.Pair;
 
 import java.net.URL;
 
@@ -51,7 +52,7 @@ public class JavaFXUI extends Application implements UserInterface {
 
     private void showloginDialog() {
         LoginDialog ld = new LoginDialog();
-        Pair<String, String> loginAndPassword = ld.showAndWait().orElseThrow(() -> new RuntimeException("Error in LoginDialog"));
-        _loginService.login(loginAndPassword.getKey(), loginAndPassword.getValue());
+        DialogDTO dialogParams = ld.showAndWait().orElseThrow(() -> new RuntimeException("Error in LoginDialog"));
+        _loginService.login(dialogParams.getServerURL(), dialogParams.getLogin(), dialogParams.getPassword());
     }
 }
