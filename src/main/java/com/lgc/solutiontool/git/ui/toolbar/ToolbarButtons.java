@@ -5,6 +5,7 @@ import com.lgc.solutiontool.git.ui.ViewKey;
 /**
  * Enum-helper which contains data for creating buttons
  * Uses for {@link ToolbarManager)
+ * For adding a new button to toolbar you need to add a new Enum item.
  * <p>
  * Note: Follow the naming rules for buttonId - subgroup_comandId
  * (it necessary for dividing toolbar into subgroups)

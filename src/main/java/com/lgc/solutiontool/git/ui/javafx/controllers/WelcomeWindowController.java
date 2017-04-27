@@ -50,12 +50,8 @@ public class WelcomeWindowController {
         configureListView(groupList);
         new Thread(this::updateClonedGroups).start();
 
-        BooleanBinding booleanBinding = groupList.getSelectionModel().selectedItemProperty().isNull();
-
-        ToolbarManager.getInstance().getAllButtonsForCurrentView().stream()
-                .filter(x -> x.getId().equals(ToolbarButtons.REMOVE_GROUP_BUTTON.getId())
-                        || x.getId().equals(ToolbarButtons.SELECT_GROUP_BUTTON.getId()))
-                .forEach(x -> x.disableProperty().bind(booleanBinding));
+        BooleanBinding groupListBooleanBinding = groupList.getSelectionModel().selectedItemProperty().isNull();
+        configureToolbarEnablers(groupListBooleanBinding);
 
         userId.setText(_loginService.getCurrentUser().getName());
 
@@ -87,6 +83,13 @@ public class WelcomeWindowController {
         }
     }
 
+    private void configureToolbarEnablers(BooleanBinding booleanBinding){
+        ToolbarManager.getInstance().getAllButtonsForCurrentView().stream()
+                .filter(x -> x.getId().equals(ToolbarButtons.REMOVE_GROUP_BUTTON.getId())
+                        || x.getId().equals(ToolbarButtons.SELECT_GROUP_BUTTON.getId()))
+                .forEach(x -> x.disableProperty().bind(booleanBinding));
+    }
+
     private void configureToolbarCommands() {
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.SELECT_GROUP_BUTTON.getId()).setOnAction(this::onLoadSelectedGroupspace);
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.CLONE_GROUP_BUTTON.getId()).setOnAction(this::onCloneGroups);
@@ -112,6 +115,7 @@ public class WelcomeWindowController {
     public void onLoadSelectedGroupspace(ActionEvent actionEvent) {
         URL modularWindow = getClass().getClassLoader().getResource(ViewKey.MODULAR_CONTAINER.getPath());
         if (modularWindow == null) {
+            System.out.println("ERROR: Could not load fxml resource");
             return;
         }
 

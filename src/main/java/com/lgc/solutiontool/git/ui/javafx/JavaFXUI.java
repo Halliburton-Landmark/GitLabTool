@@ -32,6 +32,7 @@ public class JavaFXUI extends Application implements UserInterface {
 
         URL modularWindow = getClass().getClassLoader().getResource(ViewKey.MODULAR_CONTAINER.getPath());
         if (modularWindow == null) {
+            System.out.println("ERROR: Could not load fxml resource");
             return;
         }
 

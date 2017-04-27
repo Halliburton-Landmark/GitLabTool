@@ -53,6 +53,7 @@ public class MainWindowController {
         BooleanBinding booleanBinding = projectsList.getSelectionModel().selectedItemProperty().isNull();
         ToolbarManager.getInstance().getAllButtonsForCurrentView().forEach(x -> x.disableProperty().bind(booleanBinding));
 
+        //TODO: Additional thread should be placed to services
         new Thread(this::updateProjectList).start();
 
         configureToolbarCommands();
