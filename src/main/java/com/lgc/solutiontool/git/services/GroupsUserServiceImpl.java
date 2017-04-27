@@ -1,5 +1,8 @@
 package com.lgc.solutiontool.git.services;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -45,25 +48,12 @@ public class GroupsUserServiceImpl implements GroupsUserService {
     }
 
     @Override
-    public Group cloneGroup(Group group, String destinationPath) {
+    public Group cloneGroup(Group group, String destinationPath, Consumer<Integer> onSuccess, BiConsumer<Integer, String> onError) {
         try {
             if (group.getProjects() == null) {
                 group = getGroupById(group.getId());
             }
-            JGit.getInstance().clone(group, destinationPath,
-                    // TODO
-                    new Consumer<Integer>() {
-                        @Override
-                        public void accept(Integer percents) {
-                            System.out.println("Progress: " + percents);
-                        }
-                    },
-                    new BiConsumer<Integer, String>() {
-                        @Override
-                        public void accept(Integer percents, String message) {
-                            System.out.println("Error: " + message + ". Progress: " + percents);
-                        }
-                    });
+            JGit.getInstance().clone(group, destinationPath, onSuccess, onError);
         } catch (JGitInternalException ex) {
             System.out.println("!Error: " + ex.getMessage());
         }
@@ -87,15 +77,20 @@ public class GroupsUserServiceImpl implements GroupsUserService {
     }
 
     @Override
-    public Map<Group, CloningStatus> cloneGroups(List<Group> groups, String destinationPath) {
+    public Map<Group, CloningStatus> cloneGroups(List<Group> groups, String destinationPath, Consumer<Integer> onSuccess, BiConsumer<Integer, String> onError) {
         if (groups == null || destinationPath == null) {
             return Collections.emptyMap();
         }
 
-        //TODO: add path validation
+        // path validation
+        Path path = Paths.get(destinationPath);
+        if (Files.exists(path) && Files.isDirectory(path)) {
+            return Collections.emptyMap();
+        }
+
         Map<Group, CloningStatus> statusMap = new HashMap<>();
         for (Group groupItem : groups) {
-            Group clonedGroup = cloneGroup(groupItem, destinationPath);
+            Group clonedGroup = cloneGroup(groupItem, destinationPath, onSuccess, onError);
             statusMap.put(clonedGroup, getStatus(clonedGroup));
         }
 

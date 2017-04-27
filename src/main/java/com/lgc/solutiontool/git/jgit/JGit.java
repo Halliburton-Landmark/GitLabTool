@@ -92,10 +92,14 @@ public class JGit {
         for (Project project : projects) {
             currentProgress += aStepInProgress;
             if (!clone(project, localPath + "/" + group.getName())) {
-                onError.accept(currentProgress, "Cloning error of the " + project.getName() + " project");
-                continue;
+                if(onError != null) {
+                    onError.accept(currentProgress, "Cloning error of the " + project.getName() + " project");
+                    continue;
+                }
             }
-            onSuccess.accept(currentProgress);
+            if(onSuccess != null) {
+                onSuccess.accept(currentProgress);
+            }
         }
         group.setClonedStatus(true);
         group.setPathToClonedGroup(localPath);
@@ -206,6 +210,8 @@ public class JGit {
      * @param emailCommitter the email committer for this commit.
      * @param nameAuthor     the name author for this commit.
      * @param emailAuthor    the email author for this commit.
+     * @param onSuccess      the method for tracking the success progress of cloning
+     * @param onError        the method for tracking the errors during cloning
      *
      * If the passed committer or author is {null} we take the value from the current user.
      * Projects that failed to commit will be displayed in the UI console.
@@ -214,26 +220,30 @@ public class JGit {
      */
     public JGitStatus commit (Group group, String message, boolean setAll,
                               String nameCommitter, String emailCommitter,
-                              String nameAuthor, String emailAuthor) {
+                              String nameAuthor, String emailAuthor,
+                              Consumer<Integer> onSuccess, BiConsumer<Integer, String> onError) {
         if (group == null || message == null) {
             return JGitStatus.FAILED;
         }
-        Collection<Project> projects = group.getProjects();
-        if (projects == null) {
+        Collection<Project> projects = getChangedProjects(group);
+        if (projects.isEmpty() || projects == null) {
             return JGitStatus.FAILED;
         }
 
-        Collection<Project> unsuccessfulCommit = new ArrayList<>();
+        int aStepInProgress = 100 / projects.size();
+        int currentProgress = 0;
         for (Project pr : projects) {
+            currentProgress += aStepInProgress;
             if(commit(pr, message, setAll, nameCommitter, emailCommitter,
                       nameAuthor, emailAuthor).equals(JGitStatus.FAILED)) {
-                unsuccessfulCommit.add(pr);
+                if (onError != null) {
+                    onError.accept(currentProgress, "Failed to commit " + pr.getName() + " project");
+                    continue;
+                }
             }
-        }
-
-        if (!unsuccessfulCommit.isEmpty()) {
-            logUnsuccessfulOperationInfo(unsuccessfulCommit, "commit");
-            return JGitStatus.FAILED;
+            if (onSuccess != null) {
+                onSuccess.accept(currentProgress);
+            }
         }
         return JGitStatus.SUCCESSFUL;
     }
@@ -249,6 +259,8 @@ public class JGit {
      * @param emailCommitter the email committer for this commit.
      * @param nameAuthor     the name author for this commit.
      * @param emailAuthor    the email author for this commit.
+     * @param onSuccess      the method for tracking the success progress of cloning.
+     * @param onError        the method for tracking the errors during cloning.
      *
      * If the passed committer or author is {null} we take the value from the current user.
      * Projects that failed to commit or to push will be displayed in the console.
@@ -257,25 +269,29 @@ public class JGit {
      */
     public boolean commitAndPush (Group group, String message, boolean setAll,
                                   String nameCommitter, String emailCommitter,
-                                  String nameAuthor, String emailAuthor) {
+                                  String nameAuthor, String emailAuthor,
+                                  Consumer<Integer> onSuccess, BiConsumer<Integer, String> onError) {
         if (group == null || message == null) {
             return false;
         }
-
-        Collection<Project> projects = group.getProjects();
-        if (projects == null) {
+        Collection<Project> projects = getChangedProjects(group);
+        if (projects.isEmpty() || projects == null) {
             return false;
         }
 
-        Collection<Project> unsuccessfulPush = new ArrayList<>();
+        int aStepInProgress = 100 / projects.size();
+        int currentProgress = 0;
         for (Project pr : projects) {
+            currentProgress += aStepInProgress;
             if(commitAndPush(pr, message, setAll, nameCommitter, emailCommitter, nameAuthor, emailAuthor).equals(JGitStatus.FAILED)) {
-                unsuccessfulPush.add(pr);
+                if (onError != null) {
+                    onError.accept(currentProgress, "Failed to commit and push " + pr.getName() + " project");
+                    continue;
+                }
             }
-        }
-        if (!unsuccessfulPush.isEmpty()) {
-            logUnsuccessfulOperationInfo(unsuccessfulPush, "push");
-            return false;
+            if (onSuccess != null) {
+                onSuccess.accept(currentProgress);
+            }
         }
         return true;
     }
@@ -284,27 +300,34 @@ public class JGit {
      * Push of all the projects in the group
      *
      * @param group the cloned group
+     * @param onSuccess the method for tracking the success progress of cloning
+     * @param onError the method for tracking the errors during cloning
      * @return true  - if the operation is completed successfully,
      *         false - if an error occurred during execution
      * !Projects that failed to push will be displayed in the UI console.
      */
-    public boolean push (Group group) {
+    public boolean push (Group group, Consumer<Integer> onSuccess, BiConsumer<Integer, String> onError) {
         if (group == null) {
             return false;
         }
         Collection<Project> projects = group.getProjects();
-        if (projects == null) {
+        if (projects.isEmpty() || projects == null) {
             return false;
         }
-        Collection<Project> unsuccessfulPush = new ArrayList<>();
+
+        int aStepInProgress = 100 / projects.size();
+        int currentProgress = 0;
         for (Project pr : projects) {
+            currentProgress += aStepInProgress;
             if(push(pr).equals(JGitStatus.FAILED)) {
-                unsuccessfulPush.add(pr);
+                if (onError != null) {
+                    onError.accept(currentProgress, "Failed to push " + pr.getName() + " project");
+                    continue;
+                }
             }
-        }
-        if (!unsuccessfulPush.isEmpty()) {
-            logUnsuccessfulOperationInfo(unsuccessfulPush, "push");
-            return false;
+            if (onSuccess != null) {
+                onSuccess.accept(currentProgress);
+            }
         }
         return true;
     }
@@ -467,7 +490,6 @@ public class JGit {
     private boolean clone(String linkClone, String localPath) {
         try {
             Git.cloneRepository().setURI(linkClone).setDirectory(new File(localPath)).call();
-
             return true;
         } catch (InvalidRemoteException | TransportException e) {
             System.err.println("!ERROR: " + e.getMessage());
@@ -477,7 +499,7 @@ public class JGit {
         return false;
     }
 
-    public JGitStatus commit (Project project, String message, boolean setAll,
+    private JGitStatus commit (Project project, String message, boolean setAll,
                                String nameCommitter, String emailCommitter,
                                String nameAuthor, String emailAuthor) {
         if (project == null) {
@@ -533,38 +555,27 @@ public class JGit {
         if (project == null) {
             return JGitStatus.FAILED;
         }
-
         Optional<Git> opGit = getGitForRepository(project.getPathToClonedProject());
-        if (!opGit.isPresent()) {
-            return JGitStatus.FAILED;
-        }
-        try {
-            opGit.get().push().call();
-            // TODO get a status of operation and showing to the console. Also, return a result.
-            return JGitStatus.SUCCESSFUL;
-        } catch (GitAPIException e) {
-            System.err.println("!ERROR: " + e.getMessage());
+        if (opGit.isPresent()) {
+            try {
+                opGit.get().push().call();
+                return JGitStatus.SUCCESSFUL;
+            } catch (GitAPIException e) {
+                System.err.println("!ERROR: " + e.getMessage());
+            }
         }
         return JGitStatus.FAILED;
     }
 
     private Optional<Git> getGitForRepository(String path) {
-        if (path == null) {
-            return Optional.empty();
-        }
-        try {
-            return Optional.ofNullable(Git.open(new File(path + "/.git")));
-        } catch (IOException e) {
-            System.err.println("!ERROR: " + e.getMessage());
+        if (path != null) {
+            try {
+                return Optional.ofNullable(Git.open(new File(path + "/.git")));
+            } catch (IOException e) {
+                System.err.println("!ERROR: " + e.getMessage());
+            }
         }
         return Optional.empty();
-    }
-
-    private void logUnsuccessfulOperationInfo(Collection<Project> projects, String nameOperation) {
-        System.err.println("Unsuccessful " + nameOperation + " " + projects.size() + " projects: ");
-        for (Project project : projects) {
-            System.err.println(project.getName());
-        }
     }
 
     // Check if we will have conflicts after the pull command
@@ -574,11 +585,8 @@ public class JGit {
             return false;
         }
         Optional<List<DiffEntry>> optListDiffs = getListModifyFilesInLocalRepository(optGit.get());
-        if (!optListDiffs.isPresent()) {
-            return false;
-        }
         Optional<Status> optStatus = getStatusProject(project);
-        if (!optStatus.isPresent()) {
+        if (!optListDiffs.isPresent() || !optStatus.isPresent()) {
             return false;
         }
         return !isHaveCoincidences(optListDiffs.get(), optStatus.get().getModified());
@@ -696,4 +704,36 @@ public class JGit {
         }
         return false;
     }
+
+    private boolean isRepositoryChanged(Project pr) {
+        if (pr == null) {
+            return false;
+        }
+        Optional<Git> optGit = getGitForRepository(pr.getPathToClonedProject());
+        if (!optGit.isPresent()) {
+            return false;
+        }
+        try {
+            List<DiffEntry> diffEntries = optGit.get().diff().call();
+            return !diffEntries.isEmpty();
+        } catch (GitAPIException e) {
+            System.err.println("!ERROR: " + e.getMessage());
+        }
+        return false;
+    }
+
+    private Collection<Project> getChangedProjects(Group group) {
+        Collection<Project> projects = group.getProjects();
+        if (projects == null) {
+            return Collections.emptyList();
+        }
+        Collection<Project> modifProjects = new ArrayList<>();
+        for (Project project : projects) {
+            if (isRepositoryChanged(project)) {
+                modifProjects.add(project);
+            }
+        }
+        return modifProjects;
+    }
+
 }
