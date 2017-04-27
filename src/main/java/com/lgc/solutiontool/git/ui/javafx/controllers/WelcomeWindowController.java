@@ -12,9 +12,13 @@ import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
@@ -38,9 +42,6 @@ public class WelcomeWindowController {
     @FXML
     private ListView groupList;
 
-    @FXML
-    private Button onLoadSelectedGroup;
-
     private LoginService _loginService =
             (LoginService) ServiceProvider.getInstance().getService(LoginService.class.getName());
 
@@ -51,7 +52,6 @@ public class WelcomeWindowController {
 
         BooleanBinding booleanBinding = groupList.getSelectionModel().selectedItemProperty().isNull();
 
-        onLoadSelectedGroup.disableProperty().bind(booleanBinding);
         ToolbarManager.getInstance().getAllButtonsForCurrentView().stream()
                 .filter(x -> x.getId().equals(ToolbarButtons.REMOVE_GROUP_BUTTON.getId())
                         || x.getId().equals(ToolbarButtons.SELECT_GROUP_BUTTON.getId()))
@@ -124,7 +124,8 @@ public class WelcomeWindowController {
 
             myControllerHandle.loadMainWindow(selectedGroup);
 
-            Stage previousStage = (Stage) onLoadSelectedGroup.getScene().getWindow();
+
+            Stage previousStage = (Stage) ((Node) actionEvent.getTarget()).getScene().getWindow();
             previousStage.setScene(new Scene(root));
 
         } catch (IOException e) {
