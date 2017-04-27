@@ -65,7 +65,7 @@ public class JSONParser {
      * @return T object or null, if transferred incorrect data
      */
     public static <T> T parseToObject(Object json, Class<T> classObject) {
-        if (classObject != null || json != null) {
+        if (classObject != null && json != null) {
             try {
                 return _gson.fromJson((String) json, classObject);
             } catch (JsonSyntaxException ex) {
@@ -84,7 +84,7 @@ public class JSONParser {
      * @return collection of object's T class or null, if transferred incorrect data
      */
     public static <T> Collection<T> parseToCollectionObjects(Object json, Type typeClass) {
-        if (typeClass != null || json != null) {
+        if (typeClass != null && json != null) {
             try {
                 return _gson.fromJson((String) json, typeClass);
             } catch (JsonSyntaxException ex) {
