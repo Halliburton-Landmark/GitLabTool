@@ -6,7 +6,6 @@ import com.lgc.solutiontool.git.entities.Project;
 import com.lgc.solutiontool.git.services.LoginService;
 import com.lgc.solutiontool.git.services.ProjectService;
 import com.lgc.solutiontool.git.services.ServiceProvider;
-import com.lgc.solutiontool.git.ui.toolbar.ToolbarButtons;
 import com.lgc.solutiontool.git.ui.toolbar.ToolbarManager;
 import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
@@ -68,8 +67,6 @@ public class MainWindowController {
     }
 
     private void configureToolbarCommands() {
-//        ToolbarManager.getInstance().getButtonById(ToolbarButtons..getId()).setOnAction(this::onLoadSelectedGroupspace);
-//        ToolbarManager.getInstance().getButtonById(ToolbarButtons.CLONE_GROUP_BUTTON.getId()).setOnAction(this::onCreateGroupspace);
     }
 
     private void updateProjectList() {
