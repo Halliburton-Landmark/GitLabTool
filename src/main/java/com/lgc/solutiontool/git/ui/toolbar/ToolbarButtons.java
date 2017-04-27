@@ -20,7 +20,8 @@ public enum ToolbarButtons {
     REMOVE_REPO_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "repo_removeRepo", "icons/main/remove.png", "Remove repository", "Remove repository"),
     EDIT_REPO_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "repo_editRepo", "icons/main/edit.png", "Edit repository", "Edit repository"),
     NEW_BRANCH_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "branch_newBranch", "icons/main/new_branch.png", "New branch", "Create new branch"),
-    SWITCH_BRANCH_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "branch_switchBranch", "icons/main/switch.png", "Switch branch", "Switch to another branch");
+    SWITCH_BRANCH_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "branch_switchBranch", "icons/main/switch.png", "Switch branch", "Switch to another branch"),
+    DELETE_BRANCH_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "branch_deleteBranch", "icons/main/remove.png", "Remove branch", "Remove branch");
 
     private final String viewKey;
     private final String id;
