@@ -1,8 +1,15 @@
 package com.lgc.solutiontool.git.ui.javafx;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.lgc.solutiontool.git.services.ServiceProvider;
+import com.lgc.solutiontool.git.services.StorageService;
 import com.lgc.solutiontool.git.ui.javafx.dto.DialogDTO;
 import com.lgc.solutiontool.git.util.URLManager;
 
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -20,6 +27,9 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 
 class LoginDialog extends Dialog<DialogDTO> {
+	
+	private StorageService storageService =
+            (StorageService) ServiceProvider.getInstance().getService(StorageService.class.getName());
 	
 	LoginDialog() {
         setTitle("GitLab Welcome");
@@ -54,11 +64,17 @@ class LoginDialog extends Dialog<DialogDTO> {
         final Text repositoryText = new Text("Service: ");
         grid.add(repositoryText, 0, 3);
         
-        ObservableList<String> options = FXCollections.observableArrayList(
-        		"gitlab.com",
-        		"gitlab.lgc.com"
-        		);
+        ObservableList<String> options = getBoxOptions();	
         final ComboBox<String> comboBox = new ComboBox<>(options);
+        comboBox.valueProperty().addListener(new ChangeListener<String>() {
+			@SuppressWarnings("rawtypes")
+			@Override
+			public void changed(ObservableValue ov, String t, String t1) {
+				if (t1.equals("Other...")) {
+					// TODO: open server selection window here
+				} 
+			} 
+        });
         comboBox.setValue(options.get(0));
         grid.add(comboBox, 1, 3, 1, 1);
 
@@ -70,4 +86,14 @@ class LoginDialog extends Dialog<DialogDTO> {
         			: null;
         });
     }
+	
+	
+	private ObservableList<String> getBoxOptions() {
+		List<String> servers = new ArrayList<>(); 
+        storageService.loadServers().getServers().forEach((e) -> {
+        	servers.add(e.getName());
+        });
+        ObservableList<String> options = FXCollections.observableArrayList(servers);
+        return options;
+	}
 }
