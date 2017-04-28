@@ -5,7 +5,6 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map.Entry;
@@ -357,18 +356,5 @@ public class PomXMLServiceImpl implements PomXMLService {
             System.err.println("!ERROR: " + e.getMessage());
         }
         return null;
-    }
-
-    public static void main(String[] args) {
-        Project pr = new Project();
-        pr.setClonedStatus(true);
-
-        Collection<Project> prs = new ArrayList<>();
-        prs.add(pr);
-
-        PomXMLService service = (PomXMLService) ServiceProvider.getInstance().getService(PomXMLService.class.getName());
-        service.removeRepository(null, "8574_our");
-
-        System.err.println();
     }
 }
