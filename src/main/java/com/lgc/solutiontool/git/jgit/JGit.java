@@ -74,10 +74,12 @@ public class JGit {
     /**
      * Clones all projects from the group
      *
-     * @param group for clone
-     * @param localPath localPath the path to where will clone all the projects of the group
-     * @param onSuccess method for tracking the success progress of cloning
-     * @param onError method for tracking the errors during cloning
+     * @param group      group for clone
+     * @param localPath  localPath the path to where will clone all the projects of the group
+     * @param onSuccess  method for tracking the success progress of cloning,
+     *                   where <Integer> is a percentage of progress.
+     * @param onError    method for tracking the errors during cloning,
+     *                   where <Integer> is a percentage of progress, <String> error message.
      */
     public void clone(Group group, String localPath, Consumer<Integer> onSuccess, BiConsumer<Integer, String> onError) {
         if (group == null || localPath == null) {
@@ -210,8 +212,10 @@ public class JGit {
      * @param emailCommitter the email committer for this commit.
      * @param nameAuthor     the name author for this commit.
      * @param emailAuthor    the email author for this commit.
-     * @param onSuccess      the method for tracking the success progress of cloning
-     * @param onError        the method for tracking the errors during cloning
+     * @param onSuccess      method for tracking the success progress of cloning,
+     *                       where <Integer> is a percentage of progress.
+     * @param onError        method for tracking the errors during cloning,
+     *                       where <Integer> is a percentage of progress, <String> error message.
      *
      * If the passed committer or author is {null} we take the value from the current user.
      * Projects that failed to commit will be displayed in the UI console.
@@ -259,8 +263,10 @@ public class JGit {
      * @param emailCommitter the email committer for this commit.
      * @param nameAuthor     the name author for this commit.
      * @param emailAuthor    the email author for this commit.
-     * @param onSuccess      the method for tracking the success progress of cloning.
-     * @param onError        the method for tracking the errors during cloning.
+     * @param onSuccess      method for tracking the success progress of cloning,
+     *                       where <Integer> is a percentage of progress.
+     * @param onError        method for tracking the errors during cloning,
+     *                       where <Integer> is a percentage of progress, <String> error message.
      *
      * If the passed committer or author is {null} we take the value from the current user.
      * Projects that failed to commit or to push will be displayed in the console.
@@ -299,11 +305,14 @@ public class JGit {
     /**
      * Push of all the projects in the group
      *
-     * @param group the cloned group
-     * @param onSuccess the method for tracking the success progress of cloning
-     * @param onError the method for tracking the errors during cloning
-     * @return true  - if the operation is completed successfully,
-     *         false - if an error occurred during execution
+     * @param group      the cloned group
+     * @param onSuccess  method for tracking the success progress of cloning,
+     *                   where <Integer> is a percentage of progress.
+     * @param onError    method for tracking the errors during cloning,
+     *                   where <Integer> is a percentage of progress, <String> error message.
+     * @return true   -  if the operation is completed successfully,
+     *         false  -  if an error occurred during execution
+     *
      * !Projects that failed to push will be displayed in the UI console.
      */
     public boolean push (Group group, Consumer<Integer> onSuccess, BiConsumer<Integer, String> onError) {

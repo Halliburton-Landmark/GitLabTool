@@ -23,11 +23,13 @@ public interface GroupsUserService {
     /**
      * Clones user's group
      *
-     * @param group           Group for cloning
-     * @param destinationPath Local path of workspace
-     * @param onSuccess method for tracking the success progress of cloning
-+    * @param onError method for tracking the errors during cloning
-+    * @return cloned group
+     * @param group           Group for cloning.
+     * @param destinationPath Local path of workspace.
+     * @param onSuccess       method for tracking the success progress of cloning,
+     *                        where <Integer> is a percentage of progress.
+     * @param onError         method for tracking the errors during cloning,
+                              where <Integer> is a percentage of progress, <String> error message.
+     * @return cloned group
      */
     Group cloneGroup(Group group, String destinationPath, Consumer<Integer> onSuccess, BiConsumer<Integer, String> onError);
 
@@ -36,8 +38,10 @@ public interface GroupsUserService {
      *
      * @param groups          List of groups for cloning
      * @param destinationPath Local path of workspace
-     * @param onSuccess method for tracking the success progress of cloning
-     * @param onError method for tracking the errors during cloning
+     * @param onSuccess       method for tracking the success progress of cloning,
+     *                        where <Integer> is a percentage of progress.
+     * @param onError         method for tracking the errors during cloning,
+                              where <Integer> is a percentage of progress, <String> error message.
      * @return Groups and their cloning statuses
      */
     Map<Group, CloningStatus> cloneGroups(List<Group> groups, String destinationPath, Consumer<Integer> onSuccess, BiConsumer<Integer, String> onError);
