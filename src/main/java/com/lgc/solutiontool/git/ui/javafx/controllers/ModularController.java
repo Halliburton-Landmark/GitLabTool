@@ -6,6 +6,7 @@ import com.lgc.solutiontool.git.ui.toolbar.ToolbarManager;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
+import javafx.scene.control.SplitPane;
 import javafx.scene.control.ToolBar;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
@@ -24,6 +25,7 @@ public class ModularController {
 
     @FXML
     public ToolBar toolbar;
+    public SplitPane parentPane;
 
     @FXML
     public void initialize() {
@@ -42,6 +44,8 @@ public class ModularController {
 
         viewPane.getChildren().clear();
         viewPane.getChildren().add(node);
+        
+        parentPane.getItems().remove(consolePane);
     }
 
     public void loadMainWindow(Group selectedGroup) throws IOException {
