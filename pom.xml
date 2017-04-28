@@ -24,6 +24,13 @@
 			<version>2.5</version>
 		</dependency>
 
+		<!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-dependency-plugin -->
+		<dependency>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-dependency-plugin</artifactId>
+			<version>3.0.0</version>
+		</dependency>
+		
 		<!-- jUnit and EasyMock -->
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>

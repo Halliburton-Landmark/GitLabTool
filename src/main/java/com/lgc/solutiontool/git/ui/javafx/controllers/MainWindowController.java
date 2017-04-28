@@ -6,6 +6,8 @@ import com.lgc.solutiontool.git.entities.Project;
 import com.lgc.solutiontool.git.services.LoginService;
 import com.lgc.solutiontool.git.services.ProjectService;
 import com.lgc.solutiontool.git.services.ServiceProvider;
+import com.lgc.solutiontool.git.ui.toolbar.ToolbarManager;
+import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -21,7 +23,7 @@ import java.util.List;
 
 public class MainWindowController {
     private static final String HEDER_GROUP_TITLE = "Current group: ";
-    private static final String HEDER_USER_TITLE = "Current user: ";
+
     private Group selectedGroup;
 
     private LoginService _loginService =
@@ -34,7 +36,8 @@ public class MainWindowController {
     private ListView projectsList;
 
     @FXML
-    private Label groupId;
+    private Label leftLabel;
+
     @FXML
     private Label userId;
 
@@ -43,13 +46,17 @@ public class MainWindowController {
         userId.setText(username);
 
         String currentGroupname = getSelectedGroup().getName();
-        groupId.setText(HEDER_GROUP_TITLE + currentGroupname);
+        leftLabel.setText(HEDER_GROUP_TITLE + currentGroupname);
 
         configureListView(projectsList);
 
-        List<Project> groupProjects = (List<Project>) _projectService.getProjects(selectedGroup);
-        ObservableList<Project> projectsObservableList = FXCollections.observableList(groupProjects);
-        projectsList.setItems(projectsObservableList);
+        BooleanBinding booleanBinding = projectsList.getSelectionModel().selectedItemProperty().isNull();
+        ToolbarManager.getInstance().getAllButtonsForCurrentView().forEach(x -> x.disableProperty().bind(booleanBinding));
+
+        //TODO: Additional thread should be placed to services
+        new Thread(this::updateProjectList).start();
+
+        configureToolbarCommands();
     }
 
     public Group getSelectedGroup() {
@@ -58,6 +65,15 @@ public class MainWindowController {
 
     public void setSelectedGroup(Group selectedGroup) {
         this.selectedGroup = selectedGroup;
+    }
+
+    private void configureToolbarCommands() {
+    }
+
+    private void updateProjectList() {
+        List<Project> groupProjects = (List<Project>) _projectService.getProjects(selectedGroup);
+        ObservableList<Project> projectsObservableList = FXCollections.observableList(groupProjects);
+        projectsList.setItems(projectsObservableList);
     }
 
     private void configureListView(ListView listView) {
