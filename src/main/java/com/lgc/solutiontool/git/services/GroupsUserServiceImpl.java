@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 
 import com.google.gson.reflect.TypeToken;
 import com.lgc.solutiontool.git.connections.RESTConnector;
-import com.lgc.solutiontool.git.connections.token.PrivateToken;
+import com.lgc.solutiontool.git.connections.token.CurrentUser;
 import com.lgc.solutiontool.git.entities.Group;
 import com.lgc.solutiontool.git.jgit.JGit;
 import com.lgc.solutiontool.git.properties.ProgramProperties;
@@ -29,8 +29,8 @@ public class GroupsUserServiceImpl implements GroupsUserService {
 
     @Override
     public Object getGroups(User user) {
-        privateTokenValue = PrivateToken.getInstance().getPrivateTokenValue();
-        privateTokenKey = PrivateToken.getInstance().getPrivateTokenKey();
+        privateTokenValue = CurrentUser.getInstance().getPrivateTokenValue();
+        privateTokenKey = CurrentUser.getInstance().getPrivateTokenKey();
         if (privateTokenValue != null) {
             HashMap<String, String> header = new HashMap<>();
             header.put(privateTokenKey, privateTokenValue);
@@ -57,8 +57,8 @@ public class GroupsUserServiceImpl implements GroupsUserService {
     @Override
     public Group getGroupById(int idGroup) {
         //TODO valid id group
-        privateTokenValue = PrivateToken.getInstance().getPrivateTokenValue();
-        privateTokenKey = PrivateToken.getInstance().getPrivateTokenKey();
+        privateTokenValue = CurrentUser.getInstance().getPrivateTokenValue();
+        privateTokenKey = CurrentUser.getInstance().getPrivateTokenKey();
         if (privateTokenValue != null) {
             String sendString = "/groups/" + idGroup;
             HashMap<String, String> header = new HashMap<>();

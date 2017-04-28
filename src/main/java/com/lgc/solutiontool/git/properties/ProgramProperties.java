@@ -4,6 +4,7 @@ import com.lgc.solutiontool.git.entities.Group;
 import com.lgc.solutiontool.git.services.LoginService;
 import com.lgc.solutiontool.git.services.ServiceProvider;
 import com.lgc.solutiontool.git.services.StorageService;
+import com.lgc.solutiontool.git.util.URLManager;
 import com.lgc.solutiontool.git.xml.MapAdapter;
 
 import javax.xml.bind.annotation.XmlRootElement;
@@ -21,7 +22,6 @@ import java.util.stream.Collectors;
  */
 @XmlRootElement
 public class ProgramProperties {
-    private static final String MOCK_SERVERNAME = "gitlab.com";
     private static final String PATH_SEPARATOR = "\\";
 
     private static ProgramProperties _instance;
@@ -81,11 +81,13 @@ public class ProgramProperties {
         if (groups == null || localParentPath == null) {
             return;
         }
-        _groupPathMap = groups.stream().collect(
-                Collectors.toMap(x -> x, x -> localParentPath + PATH_SEPARATOR + x.getName()));
+        //TODO: Careful testing this change
+        _groupPathMap.putAll(groups.stream().collect(
+                Collectors.toMap(x -> x, x -> localParentPath + PATH_SEPARATOR + x.getName())
+        ));
 
         String username = _loginService.getCurrentUser().getUsername();
-        _storageService.updateStorage(MOCK_SERVERNAME, username);
+        _storageService.updateStorage(URLManager.trimServerURL(_loginService.getServerURL()), username);
     }
 
     /**
@@ -96,7 +98,7 @@ public class ProgramProperties {
     public List<Group> getClonedGroups() {
         String username = _loginService.getCurrentUser().getUsername();
         if (_groupPathMap == null) {
-            Map<Group, String> storage = _storageService.loadStorage(MOCK_SERVERNAME, username);
+        	Map<Group, String> storage = _storageService.loadStorage(URLManager.trimServerURL(_loginService.getServerURL()), username);
             setGroupPathMap(storage);
         }
         if (!_groupPathMap.isEmpty()) {
@@ -106,5 +108,18 @@ public class ProgramProperties {
         }
     }
 
+    /**
+     * Gets a local path of cloned group
+     *
+     * @return path of cloned group or empty string if group is not cloned
+     */
+    //TODO: Group entity should have a localPath field. After that, we can list of groups instead of map (with group and localPath).
+    public String getClonedLocalPath(Group group) {
+        if (_groupPathMap == null || _groupPathMap.isEmpty()) {
+            return "";
+        }
+
+        return _groupPathMap.get(group);
+    }
 
 }

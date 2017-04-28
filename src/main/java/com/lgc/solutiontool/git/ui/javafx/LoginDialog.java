@@ -1,9 +1,15 @@
 package com.lgc.solutiontool.git.ui.javafx;
 
+import com.lgc.solutiontool.git.ui.javafx.dto.DialogDTO;
+import com.lgc.solutiontool.git.util.URLManager;
+
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
@@ -12,11 +18,10 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
-import javafx.util.Pair;
 
-class LoginDialog extends Dialog<Pair<String, String>> {
-
-    LoginDialog() {
+class LoginDialog extends Dialog<DialogDTO> {
+	
+	LoginDialog() {
         setTitle("GitLab Welcome");
         final GridPane grid = new GridPane();
         grid.setAlignment(Pos.CENTER);
@@ -45,13 +50,24 @@ class LoginDialog extends Dialog<Pair<String, String>> {
 
         final Text actiontarget = new Text();
         grid.add(actiontarget, 1, 6);
+        
+        final Text repositoryText = new Text("Service: ");
+        grid.add(repositoryText, 0, 3);
+        
+        ObservableList<String> options = FXCollections.observableArrayList(
+        		"gitlab.com",
+        		"gitlab.lgc.com"
+        		);
+        final ComboBox<String> comboBox = new ComboBox<>(options);
+        comboBox.setValue(options.get(0));
+        grid.add(comboBox, 1, 3, 1, 1);
 
         getDialogPane().setContent(grid);
         setResultConverter(dialogButton -> {
-            if (dialogButton == loginButtonType) {
-                return new Pair<>(userTextField.getText(), pwBox.getText());
-            }
-            return null;
+        	String serverURL = URLManager.completeServerURL(comboBox.getValue());
+        	return dialogButton == loginButtonType 
+        			? new DialogDTO(userTextField.getText(), pwBox.getText(), serverURL)
+        			: null;
         });
     }
 }
