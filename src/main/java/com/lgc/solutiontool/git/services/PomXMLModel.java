@@ -30,13 +30,16 @@ public class PomXMLModel {
      * @param pomXmlPath path to a pom.xml file of a cloned project
      */
     public PomXMLModel(String pomXmlPath) {
-        if (pomXmlPath != null) {
-            Path path = Paths.get(pomXmlPath);
-            if (isCorrectPath(path)) {
-                updateModelFile(path);
-            }
+        if (pomXmlPath == null) {
+            System.err.println("!ERROR: Could not create file model, passed invalid data.");
+            return;
         }
-        _originalModel = null;
+        Path path = Paths.get(pomXmlPath);
+        if (isCorrectPath(path)) {
+            updateModelFile(path);
+        } else {
+            System.err.println("!ERROR: Could not create file model. Invalid file path.");
+        }
     }
 
     /**

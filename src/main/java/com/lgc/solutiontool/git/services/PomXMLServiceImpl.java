@@ -1,5 +1,11 @@
 package com.lgc.solutiontool.git.services;
 
+import java.io.IOException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map.Entry;
@@ -22,11 +28,16 @@ public class PomXMLServiceImpl implements PomXMLService {
 
     private static final String RELEASE_NAME_KEY = "releaseName";
     private static final String REPOSITORY_LAYOUT = "p2";
+    private static final String POM_NAME = "pom.xml";
+
+    private void errorNotValidDataInLog() {
+        System.err.println("!ERROR: Not valid data was submitted. Cannot modify the pom.xml files."); // TODO replaced by log
+    }
 
     @Override
     public void changeParentVersion(Collection<Project> projects, String newVersion) {
         if (projects == null || !isValidString(newVersion)) {
-            System.err.println("Not valid data was submitted. Cannot modify the pom.xml files."); // TODO replaced by log
+            errorNotValidDataInLog();
             return;
         }
         for (Project project : projects) {
@@ -38,7 +49,7 @@ public class PomXMLServiceImpl implements PomXMLService {
                 model.writeToFile();
                 System.out.println("The pom.xml file was changed successfully."); // TODO replaced by log
             } else {
-                System.out.println("Error in changing the pom.xml file."); // TODO replaced by log
+                System.err.println("!ERROR in changing the pom.xml file."); // TODO replaced by log
             }
         }
     }
@@ -46,7 +57,7 @@ public class PomXMLServiceImpl implements PomXMLService {
     @Override
     public void changeGroupName(Collection<Project> projects, String oldName, String newName) {
         if (projects == null || !isValidString(newName) || !isValidString(oldName)) {
-            System.err.println("Not valid data was submitted. Cannot modify the pom.xml files."); // TODO replaced by log
+            errorNotValidDataInLog();
             return;
         }
         for (Project project : projects) {
@@ -58,7 +69,7 @@ public class PomXMLServiceImpl implements PomXMLService {
                 model.writeToFile();
                 System.out.println("The pom.xml file was changed successfully."); // TODO replaced by log
             } else {
-                System.out.println("Error in changing the pom.xml file."); // TODO replaced by log
+                System.err.println("!ERROR in changing the pom.xml file."); // TODO replaced by log
             }
         }
     }
@@ -66,7 +77,7 @@ public class PomXMLServiceImpl implements PomXMLService {
     @Override
     public void changeReleaseName(Collection<Project> projects, String newName) {
         if (projects == null || !isValidString(newName)) {
-            System.err.println("Not valid data was submitted. Cannot modify the pom.xml files."); // TODO replaced by log
+            errorNotValidDataInLog();
             return;
         }
         for (Project project : projects) {
@@ -78,7 +89,7 @@ public class PomXMLServiceImpl implements PomXMLService {
                 model.writeToFile();
                 System.out.println("The pom.xml file was changed successfully."); // TODO replaced by log
             } else {
-                System.out.println("Error in changing the pom.xml file."); // TODO replaced by log
+                System.err.println("!ERROR in changing the pom.xml file."); // TODO replaced by log
             }
         }
     }
@@ -86,7 +97,7 @@ public class PomXMLServiceImpl implements PomXMLService {
     @Override
     public void addRepository(Collection<Project> projects, String id, String url) {
         if (projects == null || !isValidString(id) || !isValidString(url)) {
-            System.err.println("Not valid data was submitted. Cannot modify the pom.xml files."); // TODO replaced by log
+            errorNotValidDataInLog();
             return;
         }
         for (Project project : projects) {
@@ -98,7 +109,7 @@ public class PomXMLServiceImpl implements PomXMLService {
                 model.writeToFile();
                 System.out.println("The pom.xml file was changed successfully."); // TODO replaced by log
             } else {
-                System.out.println("Error in changing the pom.xml file."); // TODO replaced by log
+                System.err.println("!ERROR in changing the pom.xml file."); // TODO replaced by log
             }
         }
     }
@@ -106,7 +117,7 @@ public class PomXMLServiceImpl implements PomXMLService {
     @Override
     public void removeRepository(Collection<Project> projects, String id) {
         if (projects == null || !isValidString(id)) {
-            System.err.println("Not valid data was submitted. Cannot modify the pom.xml files."); // TODO replaced by log
+            errorNotValidDataInLog();
             return;
         }
         for (Project project : projects) {
@@ -118,7 +129,7 @@ public class PomXMLServiceImpl implements PomXMLService {
                 model.writeToFile();
                 System.out.println("The pom.xml file was changed successfully."); // TODO replaced by log
             } else {
-                System.out.println("Error in changing the pom.xml file."); // TODO replaced by log
+                System.err.println("!ERROR in changing the pom.xml file."); // TODO replaced by log
             }
         }
     }
@@ -126,7 +137,7 @@ public class PomXMLServiceImpl implements PomXMLService {
     @Override
     public void modifyRepository(Collection<Project> projects, String oldId, String newId, String newUrl) {
         if (projects == null || !isValidString(oldId) || !isValidString(newId) || !isValidString(newUrl)) {
-            System.err.println("Not valid data was submitted. Cannot modify the pom.xml files."); // TODO replaced by log
+            errorNotValidDataInLog();
             return;
         }
         for (Project project : projects) {
@@ -143,7 +154,7 @@ public class PomXMLServiceImpl implements PomXMLService {
                 pomModel.writeToFile();
                 System.out.println("The pom.xml file was changed successfully."); // TODO replaced by log
             } else {
-                System.out.println("Error in changing the pom.xml file."); // TODO replaced by log
+                System.err.println("!ERROR in changing the pom.xml file."); // TODO replaced by log
             }
         }
     }
@@ -322,11 +333,42 @@ public class PomXMLServiceImpl implements PomXMLService {
     }
 
     private PomXMLModel getModel(Project project) {
-        String pathToPomXML = ""; // TODO: project.getPathToClonedProject()
+        String pathToPomXML = findPathToPomXMLFile(project);
         return new PomXMLModel(pathToPomXML);
     }
 
     private boolean isValidString(String value) {
         return value != null && !value.isEmpty();
+    }
+
+    private String findPathToPomXMLFile(Project pr) {
+        String pathToProject = pr.getPathToClonedProject();
+        if (pathToProject == null) {
+            return null;
+        }
+        Path projectPath = Paths.get(pr.getPathToClonedProject());
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(projectPath)) {
+            for (Path file : stream) {
+                if (Files.isRegularFile(file) && file.getName(file.getNameCount()-1).toString().equals(POM_NAME)) {
+                    return file.toString();
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("!ERROR: " + e.getMessage());
+        }
+        return null;
+    }
+
+    public static void main(String[] args) {
+        Project pr = new Project();
+        pr.setClonedStatus(true);
+
+        Collection<Project> prs = new ArrayList<>();
+        prs.add(pr);
+
+        PomXMLService service = (PomXMLService) ServiceProvider.getInstance().getService(PomXMLService.class.getName());
+        service.removeRepository(null, "8574_our");
+
+        System.err.println();
     }
 }
