@@ -124,7 +124,10 @@ public class JSONParserTest {
 
     @Test
     public void parseToCollectionIncorrectDataTest() {
-
-
+        Assert.assertNull(JSONParser.parseToCollectionObjects(null, typeListGroups));
+        Assert.assertNull(JSONParser.parseToCollectionObjects(groupsJson, null));
+        Assert.assertNull(JSONParser.parseToCollectionObjects(null, null));
+        Assert.assertNull(JSONParser.parseToCollectionObjects("76437 jhj 31", typeListGroups));
+        Assert.assertNull(JSONParser.parseToCollectionObjects("{}", typeListGroups));
     }
 }
