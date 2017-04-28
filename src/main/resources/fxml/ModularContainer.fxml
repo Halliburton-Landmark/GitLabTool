@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+<BorderPane id="background" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+            prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.112"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.lgc.solutiontool.git.ui.javafx.controllers.ModularController">
+    <top>
+        <VBox BorderPane.alignment="CENTER">
+            <MenuBar>
+                <Menu mnemonicParsing="false" text="File"/>
+                <Menu mnemonicParsing="false" text="Edit"/>
+                <Menu mnemonicParsing="false" text="Help"/>
+            </MenuBar>
+
+            <ToolBar fx:id="toolbar" style="-fx-background-color: #D7DBE3;">
+            </ToolBar>
+        </VBox>
+    </top>
+
+    <center>
+        <SplitPane dividerPositions="0.8" orientation="VERTICAL">
+            <AnchorPane fx:id="viewPane"/>
+            <Pane fx:id="consolePane" style="-fx-background-color: #D7DBE3;">
+                <Label alignment="CENTER" text="Console mock" textFill="#000000d7">
+                    <font>
+                        <Font size="18.0"/>
+                    </font>
+                </Label>
+            </Pane>
+        </SplitPane>
+    </center>
+</BorderPane>
