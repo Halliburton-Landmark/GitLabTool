@@ -7,7 +7,6 @@ import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Optional;
 
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
@@ -22,7 +21,7 @@ import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
  */
 public class PomXMLModel {
 
-    private Optional<Model> _originalModel;
+    private Model _originalModel;
     private static final String FILE_NAME = "pom.xml";
 
     /**
@@ -37,7 +36,7 @@ public class PomXMLModel {
                 updateModelFile(path);
             }
         }
-        _originalModel = Optional.empty();
+        _originalModel = null;
     }
 
     /**
@@ -45,7 +44,7 @@ public class PomXMLModel {
      *
      * @return model
      */
-    public Optional<Model> getModelFile() {
+    public Model getModelFile() {
         return _originalModel;
     }
 
@@ -53,12 +52,13 @@ public class PomXMLModel {
      * Writes the model in the pom.xml
      */
     public void writeToFile() {
-        if (!_originalModel.isPresent()) {
+        if (_originalModel == null) {
+            System.err.println("!ERROR: The file can not be written to. The model is not defined.");
             return;
         }
-        try (Writer fileWriter = new FileWriter(_originalModel.get().getPomFile())) {
+        try (Writer fileWriter = new FileWriter(_originalModel.getPomFile())) {
             MavenXpp3Writer pomWriter = new MavenXpp3Writer();
-            pomWriter.write(fileWriter, _originalModel.get());
+            pomWriter.write(fileWriter, _originalModel);
         } catch (Exception e) {
             System.err.println("!ERROR: " + e.getMessage());
         }
@@ -70,20 +70,20 @@ public class PomXMLModel {
             Model model = mavenreader.read(reader);
             if (model != null) {
                 model.setPomFile(path.toFile());
-                _originalModel = Optional.of(model);
+                _originalModel = model;
                 return;
             }
         } catch (IOException | XmlPullParserException e) {
             System.err.println("!ERROR: " + e.getMessage());
         }
-        _originalModel = Optional.empty();
+        _originalModel = null;
     }
 
     private boolean isCorrectPath(Path path) {
         boolean exists = Files.exists(path);
         boolean isFile = Files.isReadable(path);
         boolean isExtensionCorrectly = FILE_NAME.equals(path.getFileName().toString()) ? true : false;
-        return exists & isFile & isExtensionCorrectly;
+        return exists && isFile && isExtensionCorrectly;
     }
 
 }

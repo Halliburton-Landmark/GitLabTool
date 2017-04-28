@@ -3,7 +3,6 @@ package com.lgc.solutiontool.git.services;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
@@ -134,10 +133,14 @@ public class PomXMLServiceImpl implements PomXMLService {
             if (project == null) {
                 continue;
             }
-            PomXMLModel model = getModel(project);
-            List<Repository> rep = model.getModelFile().get().getRepositories();
+            PomXMLModel pomModel = getModel(project);
+            Model model = pomModel.getModelFile();
+            if (model == null) {
+                continue;
+            }
+            List<Repository> rep = model.getRepositories();
             if (modifyRepository(rep, oldId, newId, newUrl)) {
-                model.writeToFile();
+                pomModel.writeToFile();
                 System.out.println("The pom.xml file was changed successfully."); // TODO replaced by log
             } else {
                 System.out.println("Error in changing the pom.xml file."); // TODO replaced by log
@@ -146,9 +149,9 @@ public class PomXMLServiceImpl implements PomXMLService {
     }
 
     private boolean changeParentVersion(PomXMLModel pomMng, String newVersion) {
-        Optional<Model> model = pomMng.getModelFile();
-        if (model.isPresent()) {
-            Parent parent = model.get().getParent();
+        Model model = pomMng.getModelFile();
+        if (model != null) {
+            Parent parent = model.getParent();
             if (parent != null) {
                 parent.setVersion(newVersion);
                 return true;
@@ -158,21 +161,20 @@ public class PomXMLServiceImpl implements PomXMLService {
     }
 
     private boolean changeGroupName(PomXMLModel pomMng, String oldName, String newName) {
-        Optional<Model> optModel = pomMng.getModelFile();
-        if (!optModel.isPresent()) {
+        Model model = pomMng.getModelFile();
+        if (model == null) {
             return false;
         }
-        Model xmlModel = optModel.get();
-        boolean properties = changeGroupNameInProperties(xmlModel.getProperties(), oldName, newName);
-        boolean repositories = changeGroupNameInRepositories(xmlModel.getRepositories(), oldName, newName);
-        boolean scm = changeGroupNameInScm(xmlModel.getScm(), oldName, newName);
+        boolean properties = changeGroupNameInProperties(model.getProperties(), oldName, newName);
+        boolean repositories = changeGroupNameInRepositories(model.getRepositories(), oldName, newName);
+        boolean scm = changeGroupNameInScm(model.getScm(), oldName, newName);
         return properties | repositories | scm;
     }
 
     private boolean changeReleaseName(PomXMLModel pomMng, String newName) {
-        Optional<Model> optModel = pomMng.getModelFile();
-        if (optModel.isPresent()) {
-            Properties pr = optModel.get().getProperties();
+        Model model = pomMng.getModelFile();
+        if (model != null) {
+            Properties pr = model.getProperties();
             if (pr != null) {
                 pr.put(RELEASE_NAME_KEY, newName);
                 return true;
@@ -247,12 +249,12 @@ public class PomXMLServiceImpl implements PomXMLService {
     }
 
     private boolean addRepository(PomXMLModel pomMng, String id, String url) {
-        Optional<Model> optModel = pomMng.getModelFile();
-        if (!optModel.isPresent()) {
+        Model model = pomMng.getModelFile();
+        if (model == null) {
             return false;
         }
 
-        List<Repository> reps = optModel.get().getRepositories();
+        List<Repository> reps = model.getRepositories();
         Repository repository = new Repository();
         repository.setId(id);
         repository.setUrl(url);
@@ -282,11 +284,11 @@ public class PomXMLServiceImpl implements PomXMLService {
     }
 
     private boolean removeRepository(PomXMLModel pomMng, String id) {
-        Optional<Model> model = pomMng.getModelFile();
-        if (!model.isPresent()) {
+        Model model = pomMng.getModelFile();
+        if (model == null) {
             return false;
         }
-        List<Repository> reps = model.get().getRepositories();
+        List<Repository> reps = model.getRepositories();
         Repository remRep = null;
         for (Repository repository : reps) {
             if (id.equals(repository.getId())) {
