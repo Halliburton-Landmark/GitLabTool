@@ -25,11 +25,9 @@ public class JSONParserTest {
 
     private static final Type typeListGroups = new TypeToken<List<Group>>() {}.getType();
     private static final String groupsJson = "[" + groupJson + ", " + groupJson + "]";
-    private static final Map<String, Object> groupMap;
-    private static final Group group;
 
-    static {
-        groupMap = new HashMap<>();
+    private Map<String, Object> getGroupMap() {
+        Map<String, Object> groupMap = new HashMap<>();
         groupMap.put("id", 1348279);
         groupMap.put("name", "apitest_group");
         groupMap.put("path", "apitest_group");
@@ -40,9 +38,15 @@ public class JSONParserTest {
                 + "\":\"https://gitlab.com/apitest_group/test.git\",\"web_url\":"
                 + "\"https://gitlab.com/apitest_group/test\"}]");
 
-        group = new Group();
+        return groupMap;
+    }
+
+    private Group getTestingGroup() {
+        Group group = new Group();
         group.setClonedStatus(true);
         group.setPathToClonedGroup("."); //TODO
+
+        return group;
     }
 
     @Test
@@ -68,27 +72,27 @@ public class JSONParserTest {
 
     @Test
     public void parseToJsonFromMapCorrectDataTest() {
-        String result = JSONParser.parseToJson(groupMap);
+        String result = JSONParser.parseMapToJson(getGroupMap());
         Assert.assertNotNull(result);
         Assert.assertTrue(result.contains("\"path\":\"apitest_group\""));
-        Assert.assertNotNull(JSONParser.parseToJson(Collections.emptyMap()));
+        Assert.assertNotNull(JSONParser.parseMapToJson(Collections.emptyMap()));
     }
 
     @Test
     public void parseToJsonFromMapIncorrectDataTest() {
-        Assert.assertNull(JSONParser.parseToJson(null));
+        Assert.assertNull(JSONParser.parseMapToJson(null));
     }
 
     @Test
     public void parseToJsonFromObjectCorrectDataTest() {
-        String result = JSONParser.parseToJson(group);
+        String result = JSONParser.parseObjectToJson(getTestingGroup());
         Assert.assertNotNull(result);
         Assert.assertTrue(result.contains("\"_isCloned\":true"));
     }
 
     @Test
     public void parseToJsonFromObjectIncorrectDataTest() {
-        String result = JSONParser.parseToJson(null);
+        String result = JSONParser.parseObjectToJson(null);
         Assert.assertNull(result);
     }
 
