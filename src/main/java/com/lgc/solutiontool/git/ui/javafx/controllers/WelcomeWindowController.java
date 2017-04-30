@@ -152,7 +152,7 @@ public class WelcomeWindowController {
                 Text groupNameText = new Text(item.getName());
                 groupNameText.setFont(Font.font(Font.getDefault().getFamily(), 14));
 
-                String localPath = ProgramProperties.getInstance().getClonedLocalPath(item);
+                String localPath = item.getPathToClonedGroup();
                 Text localPathText = new Text(localPath);
 
                 VBox vboxItem = new VBox(groupNameText, localPathText);

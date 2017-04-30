@@ -24,13 +24,10 @@ import java.util.List;
 public class MainWindowController {
     private static final String HEDER_GROUP_TITLE = "Current group: ";
 
-    private Group selectedGroup;
+    private Group _selectedGroup;
 
     private LoginService _loginService =
             (LoginService) ServiceProvider.getInstance().getService(LoginService.class.getName());
-
-    private ProjectService _projectService =
-            (ProjectService) ServiceProvider.getInstance().getService(ProjectService.class.getName());
 
     @FXML
     private ListView projectsList;
@@ -60,18 +57,18 @@ public class MainWindowController {
     }
 
     public Group getSelectedGroup() {
-        return selectedGroup;
+        return _selectedGroup;
     }
 
     public void setSelectedGroup(Group selectedGroup) {
-        this.selectedGroup = selectedGroup;
+        this._selectedGroup = selectedGroup;
     }
 
     private void configureToolbarCommands() {
     }
 
     private void updateProjectList() {
-        List<Project> groupProjects = (List<Project>) _projectService.getProjects(selectedGroup);
+        List<Project> groupProjects = (List<Project>) _selectedGroup.getProjects();
         ObservableList<Project> projectsObservableList = FXCollections.observableList(groupProjects);
         projectsList.setItems(projectsObservableList);
     }

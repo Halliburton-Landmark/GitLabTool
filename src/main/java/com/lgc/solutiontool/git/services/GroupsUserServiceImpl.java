@@ -84,7 +84,7 @@ public class GroupsUserServiceImpl implements GroupsUserService {
 
         // path validation
         Path path = Paths.get(destinationPath);
-        if (Files.exists(path) && Files.isDirectory(path)) {
+        if (!Files.exists(path) && !Files.isDirectory(path)) {
             return Collections.emptyMap();
         }
 
@@ -99,8 +99,7 @@ public class GroupsUserServiceImpl implements GroupsUserService {
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
 
-        //TODO: fix issue with empty groups
-        ProgramProperties.getInstance().updateClonedGroups(clonedGroups, destinationPath);
+        ProgramProperties.getInstance().updateClonedGroups(clonedGroups);
         return statusMap;
     }
 

@@ -86,14 +86,15 @@ public class JGit {
             return;
         }
         Collection<Project> projects = group.getProjects();
-        if (projects == null) {
+        if (projects == null || projects.isEmpty()) {
             return;
         }
+        String groupPath = localPath + "/" + group.getName();
         int aStepInProgress = 100 / projects.size();
         int currentProgress = 0;
         for (Project project : projects) {
             currentProgress += aStepInProgress;
-            if (!clone(project, localPath + "/" + group.getName())) {
+            if (!clone(project, groupPath)) {
                 if(onError != null) {
                     onError.accept(currentProgress, "Cloning error of the " + project.getName() + " project");
                     continue;
@@ -104,7 +105,7 @@ public class JGit {
             }
         }
         group.setClonedStatus(true);
-        group.setPathToClonedGroup(localPath);
+        group.setPathToClonedGroup(groupPath);
     }
 
     /**
