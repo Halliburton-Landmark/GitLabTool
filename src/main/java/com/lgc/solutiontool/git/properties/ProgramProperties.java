@@ -20,32 +20,29 @@ import java.util.List;
 @XmlRootElement
 public class ProgramProperties {
 
-    private static ProgramProperties _instance;
+	private static ProgramProperties _instance;
 
-    private List<Group> _clonedGroups;
+	private List<Group> _clonedGroups;
 
-    private StorageService _storageService =
-            (StorageService) ServiceProvider.getInstance().getService(StorageService.class.getName());
+	private StorageService _storageService = (StorageService) ServiceProvider.getInstance()
+			.getService(StorageService.class.getName());
 
-    private LoginService _loginService =
-            (LoginService) ServiceProvider.getInstance().getService(LoginService.class.getName());
+	private LoginService _loginService = (LoginService) ServiceProvider.getInstance()
+			.getService(LoginService.class.getName());
 
-    /**
-     * Gets instance's the class
-     *
-     * @return instance
-     */
-    public static ProgramProperties getInstance() {
-        if (_instance == null) {
-            _instance = new ProgramProperties();
-        }
-
-        return _instance;
-    }
-
-    private ProgramProperties() {
-
+	/**
+	 * Gets instance's the class
+	 *
+	 * @return instance
+	 */
+	public static ProgramProperties getInstance() {
+		if (_instance == null) {
+			_instance = new ProgramProperties();
+		}
+		return _instance;
 	}
+
+	private ProgramProperties() {}
 
 	@XmlJavaTypeAdapter(XMLAdapter.class)
 	public void setClonedGroups(List<Group> groups) {
@@ -54,36 +51,37 @@ public class ProgramProperties {
 		}
 	}
 
-    /**
-     * Updates local storage using the current properties
-     */
-    public void updateClonedGroups(List<Group> groups) {
-        if (groups == null || groups.isEmpty()) {
-            return;
-        }
-        
+	/**
+	 * Updates local storage using the current properties
+	 */
+	public void updateClonedGroups(List<Group> groups) {
+		if (groups == null || groups.isEmpty()) {
+			return;
+		}
+
 		if (_clonedGroups == null || _clonedGroups.isEmpty()) {
 			setClonedGroups(groups);
 		} else {
 			_clonedGroups.addAll(groups);
 		}
 
-        String username = _loginService.getCurrentUser().getUsername();
-        _storageService.updateStorage(URLManager.trimServerURL(_loginService.getServerURL()), username);
-    }
+		String username = _loginService.getCurrentUser().getUsername();
+		_storageService.updateStorage(URLManager.trimServerURL(_loginService.getServerURL()), username);
+	}
 
-    /**
-     * Gets a list with currently cloned groups
-     *
-     * @return list with groups
-     */
-    public List<Group> getClonedGroups() {
+	/**
+	 * Gets a list with currently cloned groups
+	 *
+	 * @return list with groups
+	 */
+	public List<Group> getClonedGroups() {
 		if (_clonedGroups == null) {
 			String username = _loginService.getCurrentUser().getUsername();
-			List<Group> groups = _storageService.loadStorage(URLManager.trimServerURL(_loginService.getServerURL()), username);
+			List<Group> groups = _storageService.loadStorage(URLManager.trimServerURL(_loginService.getServerURL()),
+					username);
 			setClonedGroups(groups);
 		}
 		return _clonedGroups;
-    }
+	}
 
 }
