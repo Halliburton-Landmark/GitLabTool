@@ -8,9 +8,11 @@ import com.lgc.solutiontool.git.ui.javafx.controllers.ModularController;
 import com.lgc.solutiontool.git.ui.javafx.dto.DialogDTO;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 import java.net.URL;
@@ -47,8 +49,9 @@ public class JavaFXUI extends Application implements UserInterface {
 
         primaryStage.setTitle("Solution Tool for GitLab");
         primaryStage.setScene(scene);
-        primaryStage.setHeight(800);
-        primaryStage.setWidth(1200);
+        Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
+        primaryStage.setHeight(primaryScreenBounds.getMaxY() / 1.5);
+        primaryStage.setWidth(primaryScreenBounds.getMaxX() / 1.5);
         primaryStage.getIcons().add(appIcon);
         primaryStage.show();
 
