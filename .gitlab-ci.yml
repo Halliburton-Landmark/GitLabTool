@@ -1,4 +1,4 @@
-image: kaiwinter/docker-java8-maven
+image: strazhkoe/ubuntu-java8-maven
 job1:
  script:
  - "mvn install -B"
