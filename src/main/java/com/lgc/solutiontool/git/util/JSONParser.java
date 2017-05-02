@@ -36,7 +36,7 @@ public class JSONParser {
      * @param data map with data
      * @return json or null, if map equals null
      */
-    public static String parseToJson(Map<String, Object> data) {
+    public static String parseMapToJson(Map<String, Object> data) {
         if (data != null) {
             return _gson.toJson(data);
         }
@@ -49,7 +49,7 @@ public class JSONParser {
      * @param obj object that will be parsed to json
      * @return json or null if invalid data
      */
-    public static String parseToJson(Object obj) {
+    public static String parseObjectToJson(Object obj) {
         if (obj != null) {
             return _gson.toJson(obj);
         }
