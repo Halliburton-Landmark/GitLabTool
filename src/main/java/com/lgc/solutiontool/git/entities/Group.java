@@ -37,7 +37,7 @@ public class Group {
     /**
      * The visibility level
      **/
-    private Object visibility_level;
+    private int visibility_level;
 
     /**
      * The ldap cn
