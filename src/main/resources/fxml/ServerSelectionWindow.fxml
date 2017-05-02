@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.BorderPane?>
+
+<BorderPane prefHeight="180.0" prefWidth="280.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.lgc.solutiontool.git.ui.javafx.controllers.ServerSelectionWindowController">
+	<bottom>
+		<GridPane prefHeight="166.0" prefWidth="280.0" BorderPane.alignment="CENTER">
+			<columnConstraints>
+				<ColumnConstraints hgrow="SOMETIMES" maxWidth="135.0" minWidth="10.0" prefWidth="60.0" />
+				<ColumnConstraints hgrow="SOMETIMES" maxWidth="230.0" minWidth="10.0" prefWidth="170.0" />
+				<ColumnConstraints hgrow="SOMETIMES" maxWidth="230.0" minWidth="10.0" prefWidth="53.0" />
+			</columnConstraints>
+			<rowConstraints>
+				<RowConstraints maxHeight="99.0" minHeight="10.0" prefHeight="88.0" vgrow="SOMETIMES" />
+				<RowConstraints maxHeight="93.0" minHeight="10.0" prefHeight="35.0" vgrow="SOMETIMES" />
+				<RowConstraints maxHeight="71.0" minHeight="10.0" prefHeight="43.0" vgrow="SOMETIMES" />
+			</rowConstraints>
+			<children>
+				<Button fx:id="okButton" mnemonicParsing="false" onAction="#onOkButton" text="Ok" textAlignment="CENTER" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="1">
+					<GridPane.margin>
+						<Insets right="10.0" />
+					</GridPane.margin>
+				</Button>
+				<Label fx:id="server" text="Server:" GridPane.rowIndex="1">
+					<GridPane.margin>
+						<Insets left="10.0" />
+					</GridPane.margin>
+				</Label>
+				<TextField fx:id="serverTextField" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+				<Label text="Please, type the server name" textAlignment="CENTER" GridPane.columnSpan="3" GridPane.halignment="CENTER" />
+			</children>
+		</GridPane>
+	</bottom>
+</BorderPane>

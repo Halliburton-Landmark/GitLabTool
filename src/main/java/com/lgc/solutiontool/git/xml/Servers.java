@@ -19,6 +19,10 @@ public class Servers {
 		servers.add(new Server("Other..."));
 	}
 	
+	public Servers(List<Server> servers) {
+		this.servers = servers;
+	}
+	
 	@XmlElement(name = "server")
 	private List<Server> servers = null;
 	

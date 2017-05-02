@@ -9,7 +9,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class Server {
 	
 	private String name;
-	private String url;
 	
 	public Server() {}
 	
@@ -17,22 +16,12 @@ public class Server {
 		this.name = name;
 	}
 	
-	public Server(String name, String url) {
-		this.name = name;
-		this.url = url;
-	}
 	
 	public String getName() {
 		return name;
 	}
 	public void setName(String name) {
 		this.name = name;
-	}
-	public String getUrl() {
-		return url;
-	}
-	public void setUrl(String url) {
-		this.url = url;
 	}
 	
 }
