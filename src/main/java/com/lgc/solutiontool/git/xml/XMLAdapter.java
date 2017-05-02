@@ -15,7 +15,7 @@ public class XMLAdapter extends XmlAdapter<XMLElements[], List<Group>> {
 		XMLElements[] mapElements = new XMLElements[groups.size()];
 		int i = 0;
 		for (Group group : groups) {
-			String jsonGroup = JSONParser.parseToJson(group);
+			String jsonGroup = JSONParser.parseObjectToJson(group);
 			if (jsonGroup != null) {
 				mapElements[i++] = new XMLElements(jsonGroup);
 			}
