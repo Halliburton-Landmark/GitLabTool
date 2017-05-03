@@ -62,7 +62,6 @@ public class GroupsUserServiceImpl implements GroupsUserService {
 
     @Override
     public Group getGroupById(int idGroup) {
-        //TODO valid id group
         privateTokenValue = CurrentUser.getInstance().getPrivateTokenValue();
         privateTokenKey = CurrentUser.getInstance().getPrivateTokenKey();
         if (privateTokenValue != null) {
