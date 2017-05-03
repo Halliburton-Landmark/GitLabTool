@@ -14,8 +14,8 @@ public class Servers {
 	
 	public Servers() {
 		servers = new ArrayList<>();
-		servers.add(new Server("gitlab.com"));
-		servers.add(new Server("gitlab.lgc.com"));
+		servers.add(new Server("gitlab.com", "v3"));
+		servers.add(new Server("gitlab.lgc.com", "v3"));
 		servers.add(new Server("Other..."));
 	}
 	

@@ -7,18 +7,17 @@ import java.util.List;
 import com.lgc.solutiontool.git.services.ServiceProvider;
 import com.lgc.solutiontool.git.services.StorageService;
 import com.lgc.solutiontool.git.ui.ViewKey;
+import com.lgc.solutiontool.git.ui.javafx.controllers.ServerInputWindowController;
 import com.lgc.solutiontool.git.ui.javafx.dto.DialogDTO;
 import com.lgc.solutiontool.git.util.URLManager;
 
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
@@ -30,7 +29,6 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
-import javafx.stage.Stage;
 
 class LoginDialog extends Dialog<DialogDTO> {
 	
@@ -72,17 +70,16 @@ class LoginDialog extends Dialog<DialogDTO> {
         
         ObservableList<String> options = getBoxOptions();	
         final ComboBox<String> comboBox = new ComboBox<>(options);
-        comboBox.valueProperty().addListener(new ChangeListener<String>() {
-			@SuppressWarnings("rawtypes")
-			@Override
-			public void changed(ObservableValue ov, String t, String t1) {
-				if (t1.equals("Other...")) {
-					try {
-						openServerSelectionWindow();
-					} catch (IOException e) {
-						return;
-					}
-				} 
+        comboBox.valueProperty().addListener((observableValue, oldValue, currentValue) -> {
+        	if (currentValue.equals("Other...")) {
+				try {
+					openServerInputWindow();
+					Platform.runLater(() -> {
+						modifyComboBoxItems(comboBox, options);
+					});
+				} catch (IOException e) {
+					return;
+				}
 			} 
         });
         comboBox.setValue(options.get(0));
@@ -107,15 +104,22 @@ class LoginDialog extends Dialog<DialogDTO> {
         return options;
 	}
 	
-	private void openServerSelectionWindow() throws IOException {
+	private void modifyComboBoxItems(ComboBox<String> comboBox, ObservableList<String> options) {
+		ObservableList<String> boxOptions = getBoxOptions();
+		boxOptions.forEach(e -> {
+			if (!options.contains(e)) {
+				comboBox.getItems().add(options.size() - 1, e);
+			}
+		});
+		comboBox.setValue(boxOptions.get(boxOptions.size() - 2));
+	}
+	
+	private void openServerInputWindow() throws IOException {
 		FXMLLoader fxmlLoader = new FXMLLoader(
-				getClass().getClassLoader().getResource(ViewKey.SERVER_SELECTION_WINDOW.getPath()));
+				getClass().getClassLoader().getResource(ViewKey.SERVER_INPUT_WINDOW.getPath()));
 		Parent root = fxmlLoader.load();
-		Scene scene = new Scene(root);
-		Stage stage = new Stage();
-		stage.setScene(scene);
-		stage.setTitle("Server selection");
-		stage.show();
+		ServerInputWindowController controller = (ServerInputWindowController) fxmlLoader.getController();
+		controller.loadServerInputWindow(root);
 	}
 	
 }

@@ -16,8 +16,15 @@ public class URLManager {
     	if (!url.contains("/")) {
     		return url;
     	}
-    	String protocol = url.contains(HTTPS) ? HTTPS : HTTP;
-    	String resultedURL = url.substring(url.indexOf(protocol) + protocol.length(), url.indexOf(URL_SUFFIX));
+    	String protocol = url.contains(HTTPS) ? HTTPS : url.contains(HTTP) ? HTTP : null;
+    	
+    	String resultedURL = url;
+    	if (protocol != null) {
+    		resultedURL = resultedURL.substring(url.indexOf(protocol) + protocol.length());
+    	}
+    	if (url.contains(URL_SUFFIX)) {
+    		resultedURL = resultedURL.substring(0, resultedURL.indexOf(URL_SUFFIX));
+    	}
     	return resultedURL;
     }
 	

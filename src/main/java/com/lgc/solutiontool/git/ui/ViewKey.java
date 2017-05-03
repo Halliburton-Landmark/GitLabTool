@@ -11,7 +11,7 @@ public enum ViewKey {
     MAIN_WINDOW("mainWindow", "fxml/MainWindow.fxml"),
     MODULAR_CONTAINER("modularContainer", "fxml/ModularContainer.fxml"),
     CLONING_GROUPS_WINDOW("cloningGroupsWindow", "fxml/CloningGroupsWindow.fxml"),
-	SERVER_SELECTION_WINDOW("serverSelectionWindow", "fxml/ServerSelectionWindow.fxml");
+	SERVER_INPUT_WINDOW("serverInputWindow", "fxml/ServerInputWindow.fxml");
 
     private final String key;
     private final String path;
