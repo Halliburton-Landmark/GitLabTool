@@ -1,25 +1,31 @@
 package com.lgc.solutiontool.git.ui.javafx.controllers;
 
+import java.io.File;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import com.lgc.solutiontool.git.entities.Group;
 import com.lgc.solutiontool.git.services.GroupsUserService;
 import com.lgc.solutiontool.git.services.LoginService;
 import com.lgc.solutiontool.git.services.ServiceProvider;
-import com.lgc.solutiontool.git.entities.Group;
 import com.lgc.solutiontool.git.statuses.CloningStatus;
+
 import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.control.SelectionMode;
+import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import javafx.util.Callback;
-
-import java.io.File;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @SuppressWarnings("unchecked")
 public class CloningGroupsWindowController {
@@ -28,10 +34,10 @@ public class CloningGroupsWindowController {
     private static final String CLONING_STATUS_ALERT_HEADER = "Cloning statuses:";
 
 
-    private LoginService _loginService =
+    private final LoginService _loginService =
             (LoginService) ServiceProvider.getInstance().getService(LoginService.class.getName());
 
-    private GroupsUserService _groupsService =
+    private final GroupsUserService _groupsService =
             (GroupsUserService) ServiceProvider.getInstance().getService(GroupsUserService.class.getName());
 
     @FXML
@@ -82,7 +88,7 @@ public class CloningGroupsWindowController {
         String destinationPath = folderPath.getText();
         List<Group> selectedGroups = projectsList.getSelectionModel().getSelectedItems();
 
-        Map<Group, CloningStatus> statuses = _groupsService.cloneGroups(selectedGroups, destinationPath);
+        Map<Group, CloningStatus> statuses = _groupsService.cloneGroups(selectedGroups, destinationPath, null, null);
 
         String dialogMessage = statuses.entrySet().stream()
                 .map(x -> x.getKey().getName() + "  -  " + x.getValue().getMessage())
