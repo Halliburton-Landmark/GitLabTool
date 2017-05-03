@@ -87,6 +87,9 @@ public class JGit {
         }
         Collection<Project> projects = group.getProjects();
         if (projects == null || projects.isEmpty()) {
+            if(onError != null) {
+                onError.accept(100, "Cloning error. There are no projects in " + group.getName() + " group.");
+            }
             return;
         }
         String groupPath = localPath + "/" + group.getName();
