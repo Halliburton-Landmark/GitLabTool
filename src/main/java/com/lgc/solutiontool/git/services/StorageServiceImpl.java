@@ -1,15 +1,17 @@
 package com.lgc.solutiontool.git.services;
 
-import com.lgc.solutiontool.git.entities.Group;
-import com.lgc.solutiontool.git.properties.ProgramProperties;
+import java.io.File;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-import java.io.*;
-import java.util.Collections;
-import java.util.List;
+
+import com.lgc.solutiontool.git.entities.Group;
+import com.lgc.solutiontool.git.properties.ProgramProperties;
 
 public class StorageServiceImpl implements StorageService {
     private static final String USER_HOME_PROPERTY = "user.home";
@@ -17,7 +19,7 @@ public class StorageServiceImpl implements StorageService {
     private static final String PATH_SEPARATOR = "\\";
     private static final String PROPERTY_FILENAME = "properties.xml";
 
-    private String _workingDirectory;
+    private final String _workingDirectory;
 
 
     public StorageServiceImpl() {
@@ -47,7 +49,8 @@ public class StorageServiceImpl implements StorageService {
             JAXBContext jaxbContext = JAXBContext.newInstance(ProgramProperties.class);
             Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
             Object unmarshallObj = jaxbUnmarshaller.unmarshal(file);
-            return ((ProgramProperties) unmarshallObj).getClonedGroups();
+            List<Group> list = ((ProgramProperties) unmarshallObj).getClonedGroups();
+            return list == null ? Collections.emptyList() : list;
         } catch (IOException | JAXBException e) {
             return Collections.emptyList();
         }
