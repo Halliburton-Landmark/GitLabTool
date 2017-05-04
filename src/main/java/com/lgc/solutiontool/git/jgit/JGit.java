@@ -76,35 +76,35 @@ public class JGit {
     }
 
     /**
+     * Gets branches of project a certain type
      *
-     *
-     * @param pr
-     * @param brType
-     * @return
+     * @param project cloned project
+     * @param brType  type branch
+     * @return a list of branches
      */
-    public List<String> getBranches(Project pr, BranchType brType) {
-        if (pr == null || brType == null) {
+    public List<String> getBranches(Project project, BranchType brType) {
+        if (project == null || brType == null) {
             throw new IllegalArgumentException("Wrong parameters for obtaining branches.");
         }
         ListMode mode = brType.equals(BranchType.LOCAL) ? null : ListMode.valueOf(brType.toString());
-        return getListShortNamesOfBranches(getRefs(pr, mode));
+        return getListShortNamesOfBranches(getRefs(project, mode));
     }
 
     /**
+     * Gets branches of project
      *
-     *
-     * @param prs
-     * @param brType
-     * @param onlyGeneral
-     * @return
+     * @param projects    cloned project
+     * @param brType      type branch
+     * @param onlyGeneral if value is <true> return only general branches of projects, if <false> return all branches.
+     * @return a list of branches
      */
-    public Set<String> getBranches(List<Project> prs, BranchType brType, boolean onlyGeneral) {
-        if (prs == null || brType == null) {
+    public Set<String> getBranches(List<Project> projects, BranchType brType, boolean onlyGeneral) {
+        if (projects == null || brType == null) {
             throw new IllegalArgumentException("Wrong parameters for obtaining branches.");
         }
         ListMode mode = brType.equals(BranchType.LOCAL) ? null : ListMode.valueOf(brType.toString());
         Set<String> branches = new HashSet<>();
-        prs.stream().forEach((pr) -> {
+        projects.stream().forEach((pr) -> {
             if (!pr.isCloned()) {
                 System.err.println(pr.getName() + ERROR_MSG_NOT_CLONED);
                 return;
@@ -635,7 +635,7 @@ public class JGit {
         return JGitStatus.FAILED;
     }
 
-    private Optional<Git> getGitForRepository(String path) {
+    Optional<Git> getGitForRepository(String path) {
         if (path != null) {
             try {
                 return Optional.ofNullable(Git.open(new File(path + "/.git")));
