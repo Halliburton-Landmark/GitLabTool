@@ -1,5 +1,9 @@
 package com.lgc.solutiontool.git.ui.javafx.controllers;
 
+import java.io.IOException;
+import java.net.URL;
+import java.util.List;
+
 import com.lgc.solutiontool.git.entities.Group;
 import com.lgc.solutiontool.git.properties.ProgramProperties;
 import com.lgc.solutiontool.git.services.LoginService;
@@ -7,6 +11,7 @@ import com.lgc.solutiontool.git.services.ServiceProvider;
 import com.lgc.solutiontool.git.ui.ViewKey;
 import com.lgc.solutiontool.git.ui.toolbar.ToolbarButtons;
 import com.lgc.solutiontool.git.ui.toolbar.ToolbarManager;
+
 import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
@@ -27,10 +32,6 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Callback;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.List;
-
 /**
  * @author Yevhen Strazhko
  */
@@ -42,7 +43,7 @@ public class WelcomeWindowController {
     @FXML
     private ListView groupList;
 
-    private LoginService _loginService =
+    private final LoginService _loginService =
             (LoginService) ServiceProvider.getInstance().getService(LoginService.class.getName());
 
     @FXML
@@ -96,9 +97,10 @@ public class WelcomeWindowController {
     }
 
     private void updateClonedGroups() {
-        List<Group> userGroups = ProgramProperties.getInstance().getClonedGroups();
-
-        groupList.setItems(FXCollections.observableList(userGroups));
+        List<Group> userGroups = ProgramProperties.getInstance().loadClonedGroups();
+        if(userGroups != null) {
+            groupList.setItems(FXCollections.observableList(userGroups));
+        }
     }
 
     private void configureListView(ListView listView) {

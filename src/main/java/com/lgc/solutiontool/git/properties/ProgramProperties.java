@@ -1,16 +1,16 @@
 package com.lgc.solutiontool.git.properties;
 
+import java.util.List;
+
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
 import com.lgc.solutiontool.git.entities.Group;
 import com.lgc.solutiontool.git.services.LoginService;
 import com.lgc.solutiontool.git.services.ServiceProvider;
 import com.lgc.solutiontool.git.services.StorageService;
 import com.lgc.solutiontool.git.util.URLManager;
 import com.lgc.solutiontool.git.xml.XMLAdapter;
-
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-
-import java.util.List;
 
 /**
  * Class keeps data about properties.
@@ -24,10 +24,10 @@ public class ProgramProperties {
 
 	private List<Group> _clonedGroups;
 
-	private StorageService _storageService = (StorageService) ServiceProvider.getInstance()
+	private final StorageService _storageService = (StorageService) ServiceProvider.getInstance()
 			.getService(StorageService.class.getName());
 
-	private LoginService _loginService = (LoginService) ServiceProvider.getInstance()
+	private final LoginService _loginService = (LoginService) ServiceProvider.getInstance()
 			.getService(LoginService.class.getName());
 
 	/**
@@ -51,6 +51,15 @@ public class ProgramProperties {
 		}
 	}
 
+  /**
+   * Gets a list of cloned groups
+   *
+   * @return list of cloned groups
+   */
+    public List<Group> getClonedGroups() {
+        return _clonedGroups;
+    }
+
 	/**
 	 * Updates local storage using the current properties
 	 */
@@ -70,18 +79,12 @@ public class ProgramProperties {
 	}
 
 	/**
-	 * Gets a list with currently cloned groups
-	 *
-	 * @return list with groups
+	 * Loads a list with currently cloned groups
 	 */
-	public List<Group> getClonedGroups() {
-		if (_clonedGroups == null) {
+	public List<Group> loadClonedGroups() {
 			String username = _loginService.getCurrentUser().getUsername();
-			List<Group> groups = _storageService.loadStorage(URLManager.trimServerURL(_loginService.getServerURL()),
-					username);
+			List<Group> groups = _storageService.loadStorage(URLManager.trimServerURL(_loginService.getServerURL()),username);
 			setClonedGroups(groups);
-		}
-		return _clonedGroups;
+			return getClonedGroups();
 	}
-
 }
