@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.ToolBar?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
 <BorderPane id="background" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
@@ -9,10 +12,7 @@
             fx:controller="com.lgc.solutiontool.git.ui.javafx.controllers.ModularController">
     <top>
         <VBox BorderPane.alignment="CENTER">
-            <MenuBar>
-                <Menu mnemonicParsing="false" text="File"/>
-                <Menu mnemonicParsing="false" text="Edit"/>
-                <Menu mnemonicParsing="false" text="Help"/>
+            <MenuBar fx:id="menuBar">
             </MenuBar>
 
             <ToolBar fx:id="toolbar" style="-fx-background-color: #D7DBE3;">

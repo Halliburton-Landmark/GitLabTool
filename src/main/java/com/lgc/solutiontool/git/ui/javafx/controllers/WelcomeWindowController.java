@@ -5,6 +5,7 @@ import com.lgc.solutiontool.git.properties.ProgramProperties;
 import com.lgc.solutiontool.git.services.LoginService;
 import com.lgc.solutiontool.git.services.ServiceProvider;
 import com.lgc.solutiontool.git.ui.ViewKey;
+import com.lgc.solutiontool.git.ui.icon.AppIconHolder;
 import com.lgc.solutiontool.git.ui.toolbar.ToolbarButtons;
 import com.lgc.solutiontool.git.ui.toolbar.ToolbarManager;
 import javafx.beans.binding.BooleanBinding;
@@ -19,6 +20,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Tooltip;
+import javafx.scene.image.Image;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
@@ -61,6 +63,7 @@ public class WelcomeWindowController {
     @FXML
     public void onCloneGroups(ActionEvent actionEvent) {
         URL cloningGroupsWindowUrl = getClass().getClassLoader().getResource(ViewKey.CLONING_GROUPS_WINDOW.getPath());
+        Image appIcon = AppIconHolder.getInstance().getAppIcoImage();
 
         if (cloningGroupsWindowUrl == null) {
             return;
@@ -75,6 +78,7 @@ public class WelcomeWindowController {
             stage.setResizable(false);
             stage.setScene(new Scene(root));
             stage.setOnHidden(we -> updateClonedGroups());
+            stage.getIcons().add(appIcon);
 
             stage.show();
         } catch (IOException e) {
@@ -83,7 +87,7 @@ public class WelcomeWindowController {
         }
     }
 
-    private void configureToolbarEnablers(BooleanBinding booleanBinding){
+    private void configureToolbarEnablers(BooleanBinding booleanBinding) {
         ToolbarManager.getInstance().getAllButtonsForCurrentView().stream()
                 .filter(x -> x.getId().equals(ToolbarButtons.REMOVE_GROUP_BUTTON.getId())
                         || x.getId().equals(ToolbarButtons.SELECT_GROUP_BUTTON.getId()))
