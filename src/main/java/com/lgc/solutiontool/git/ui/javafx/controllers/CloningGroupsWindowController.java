@@ -1,31 +1,27 @@
 package com.lgc.solutiontool.git.ui.javafx.controllers;
 
-import java.io.File;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 import com.lgc.solutiontool.git.entities.Group;
 import com.lgc.solutiontool.git.services.GroupsUserService;
 import com.lgc.solutiontool.git.services.LoginService;
 import com.lgc.solutiontool.git.services.ServiceProvider;
 import com.lgc.solutiontool.git.statuses.CloningStatus;
-
+import com.lgc.solutiontool.git.ui.icon.AppIconHolder;
 import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
-import javafx.scene.control.SelectionMode;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import javafx.util.Callback;
+
+import java.io.File;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("unchecked")
 public class CloningGroupsWindowController {
@@ -110,6 +106,10 @@ public class CloningGroupsWindowController {
         alert.setTitle(CLONING_STATUS_ALERT_TITLE);
         alert.setHeaderText(CLONING_STATUS_ALERT_HEADER);
         alert.setContentText(content);
+
+        Image appIcon = AppIconHolder.getInstance().getAppIcoImage();
+        Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+        stage.getIcons().add(appIcon);
 
         alert.showAndWait();
     }
