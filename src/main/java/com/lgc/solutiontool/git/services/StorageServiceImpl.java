@@ -1,38 +1,29 @@
 package com.lgc.solutiontool.git.services;
 
-import com.lgc.solutiontool.git.connections.RESTConnector;
-import com.lgc.solutiontool.git.entities.Group;
-import com.lgc.solutiontool.git.properties.ProgramProperties;
+import java.io.File;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-import java.io.*;
-import java.util.HashMap;
-import java.util.Map;
+
+import com.lgc.solutiontool.git.entities.Group;
+import com.lgc.solutiontool.git.properties.ProgramProperties;
 
 public class StorageServiceImpl implements StorageService {
     private static final String USER_HOME_PROPERTY = "user.home";
     private static final String WORKSPACE_DIRECTORY_PROPERTY = ".SolutionTool";
-    private static final String PATH_SEPARATOR = "\\";
+    private static final String PATH_SEPARATOR = File.separator;
     private static final String PROPERTY_FILENAME = "properties.xml";
 
-    private RESTConnector _connector;
-    private String _workingDirectory;
+    private final String _workingDirectory;
 
 
-    public StorageServiceImpl(RESTConnector connector) {
-        setConnector(connector);
+    public StorageServiceImpl() {
         _workingDirectory = System.getProperty(USER_HOME_PROPERTY) + PATH_SEPARATOR + WORKSPACE_DIRECTORY_PROPERTY;
-    }
-
-    private RESTConnector getConnector() {
-        return _connector;
-    }
-
-    private void setConnector(RESTConnector connector) {
-        _connector = connector;
     }
 
     @Override
@@ -52,15 +43,16 @@ public class StorageServiceImpl implements StorageService {
     }
 
     @Override
-    public Map<Group, String> loadStorage(String server, String username) {
+    public List<Group> loadStorage(String server, String username) {
         try {
             File file = getPropFile(server, username);
             JAXBContext jaxbContext = JAXBContext.newInstance(ProgramProperties.class);
             Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
             Object unmarshallObj = jaxbUnmarshaller.unmarshal(file);
-            return ((ProgramProperties) unmarshallObj).getGroupPathMap();
+            List<Group> list = ((ProgramProperties) unmarshallObj).getClonedGroups();
+            return list == null ? Collections.emptyList() : list;
         } catch (IOException | JAXBException e) {
-            return new HashMap<>();
+            return Collections.emptyList();
         }
     }
 

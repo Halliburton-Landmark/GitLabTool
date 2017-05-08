@@ -30,8 +30,7 @@ public class ServiceProvider {
                 new GroupsUserServiceImpl(RESTConnectorFactory.getInstance().getRESTConnector()));
         _services.put(ProjectService.class.getName(),
                 new ProjectServiceImpl(RESTConnectorFactory.getInstance().getRESTConnector()));
-        _services.put(StorageService.class.getName(),
-                new StorageServiceImpl(RESTConnectorFactory.getInstance().getRESTConnector()));
+        _services.put(StorageService.class.getName(),new StorageServiceImpl());
         _services.put(ReplacementService.class.getName(), new ReplacementServiceImpl());
         _services.put(PomXMLService.class.getName(), new PomXMLServiceImpl());
 
