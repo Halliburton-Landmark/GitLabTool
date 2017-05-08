@@ -16,7 +16,7 @@ import com.lgc.solutiontool.git.properties.ProgramProperties;
 public class StorageServiceImpl implements StorageService {
     private static final String USER_HOME_PROPERTY = "user.home";
     private static final String WORKSPACE_DIRECTORY_PROPERTY = ".SolutionTool";
-    private static final String PATH_SEPARATOR = "\\";
+    private static final String PATH_SEPARATOR = File.separator;
     private static final String PROPERTY_FILENAME = "properties.xml";
 
     private final String _workingDirectory;
