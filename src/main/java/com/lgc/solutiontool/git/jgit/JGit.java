@@ -87,14 +87,18 @@ public class JGit {
             return;
         }
         Collection<Project> projects = group.getProjects();
-        if (projects == null) {
+        if (projects == null || projects.isEmpty()) {
+            if(onError != null) {
+                onError.accept(100, "Cloning error. There are no projects in " + group.getName() + " group.");
+            }
             return;
         }
+        String groupPath = localPath + File.separator + group.getName();
         int aStepInProgress = 100 / projects.size();
         int currentProgress = 0;
         for (Project project : projects) {
             currentProgress += aStepInProgress;
-            if (!clone(project, localPath + "/" + group.getName())) {
+            if (!clone(project, groupPath)) {
                 if(onError != null) {
                     onError.accept(currentProgress, "Cloning error of the " + project.getName() + " project");
                     continue;
@@ -105,7 +109,7 @@ public class JGit {
             }
         }
         group.setClonedStatus(true);
-        group.setPathToClonedGroup(localPath);
+        group.setPathToClonedGroup(groupPath);
     }
 
     /**
@@ -488,7 +492,7 @@ public class JGit {
     }
 
     private boolean clone(Project project, String localPath) {
-        String path = localPath + "/" + project.getName();
+        String path = localPath + File.separator + project.getName();
         if (clone(project.getHttp_url_to_repo(), path)) {
             project.setClonedStatus(true);
             project.setPathToClonedProject(path);
