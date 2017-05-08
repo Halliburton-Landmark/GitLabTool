@@ -34,6 +34,6 @@ public class ServiceProvider {
                 new StorageServiceImpl(RESTConnectorFactory.getInstance().getRESTConnector()));
         _services.put(ReplacementService.class.getName(), new ReplacementServiceImpl());
         _services.put(PomXMLService.class.getName(), new PomXMLServiceImpl());
-
+        _services.put(ProjectTypeService.class.getName(), new ProjectTypeServiceImpl());
     }
 }

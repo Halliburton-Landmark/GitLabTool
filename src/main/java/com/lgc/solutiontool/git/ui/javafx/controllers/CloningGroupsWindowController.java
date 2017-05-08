@@ -1,27 +1,36 @@
 package com.lgc.solutiontool.git.ui.javafx.controllers;
 
+import java.io.File;
+import java.util.List;
+import java.util.Map;
+import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
+
 import com.lgc.solutiontool.git.entities.Group;
+import com.lgc.solutiontool.git.entities.Project;
 import com.lgc.solutiontool.git.services.GroupsUserService;
 import com.lgc.solutiontool.git.services.LoginService;
+import com.lgc.solutiontool.git.services.ProjectTypeService;
 import com.lgc.solutiontool.git.services.ServiceProvider;
 import com.lgc.solutiontool.git.statuses.CloningStatus;
 import com.lgc.solutiontool.git.ui.icon.AppIconHolder;
+
 import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.control.SelectionMode;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import javafx.util.Callback;
-
-import java.io.File;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @SuppressWarnings("unchecked")
 public class CloningGroupsWindowController {
@@ -84,7 +93,8 @@ public class CloningGroupsWindowController {
         String destinationPath = folderPath.getText();
         List<Group> selectedGroups = projectsList.getSelectionModel().getSelectedItems();
 
-        Map<Group, CloningStatus> statuses = _groupsService.cloneGroups(selectedGroups, destinationPath, null, null);
+        Map<Group, CloningStatus> statuses = _groupsService.cloneGroups(selectedGroups, destinationPath,
+                new SuccessfulOperationHandler(), new ErrorOperationHandler());
 
         String dialogMessage = statuses.entrySet().stream()
                 .map(x -> x.getKey().getName() + "  -  " + x.getValue().getMessage())
@@ -160,5 +170,37 @@ public class CloningGroupsWindowController {
                 }
             }
         });
+    }
+
+    /**
+     *
+     * @author Lyudmila Lyska
+     */
+    class SuccessfulOperationHandler implements BiConsumer<Integer, Project> {
+
+        @Override
+        public void accept(Integer percentage, Project project) {
+            System.out.println("Progress: " + percentage + "%"); // TODO: in log or UI console
+
+            ProjectTypeService prTypeService = (ProjectTypeService) ServiceProvider.getInstance()
+                    .getService(ProjectTypeService.class.getName());
+            project.setProjectType(prTypeService.getTypeProject(project));
+        }
+
+    }
+
+    /**
+     *
+     * @author Lyudmila Lyska
+     */
+    class ErrorOperationHandler implements BiConsumer<Integer, String> {
+
+        @Override
+        public void accept(Integer percentage, String message) {
+            // TODO: in log or UI console
+            System.err.println("!ERROR: " + message);
+            System.out.println("Progress: " + percentage + "%");
+        }
+
     }
 }

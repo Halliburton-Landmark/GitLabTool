@@ -3,8 +3,11 @@ package com.lgc.solutiontool.git.entities;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Set;
 
 import com.google.gson.annotations.SerializedName;
+import com.lgc.solutiontool.git.project.nature.operation.Operation;
+import com.lgc.solutiontool.git.project.nature.projecttype.ProjectType;
 
 /**
  * Class keeps data about project.
@@ -57,6 +60,33 @@ public class Project {
     /** Path to the cloned project **/
     private String _pathToClonedProject;
     private boolean _isCloned;
+    private ProjectType _type;
+
+    /**
+     *
+     * @param type
+     */
+    public void setProjectType(ProjectType type) {
+        if (type == null) {
+            throw new IllegalArgumentException("Invalid value passed");
+        }
+        _type = type;
+    }
+
+    /**
+     *
+     */
+    public ProjectType getProjectType() {
+        return _type;
+    }
+
+    /**
+     *
+     * @return
+     */
+    public Set<Operation> getAvailableOperations() {
+        return _type.getAvailableOperations();
+    }
 
     /**
      * Gets status of clone
