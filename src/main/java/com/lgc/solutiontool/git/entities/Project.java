@@ -63,8 +63,8 @@ public class Project {
     private ProjectType _type;
 
     /**
-     *
-     * @param type
+     * Sets a project type
+     * @param type project type
      */
     public void setProjectType(ProjectType type) {
         if (type == null) {
@@ -74,15 +74,15 @@ public class Project {
     }
 
     /**
-     *
+     * Gets a type of the project
      */
     public ProjectType getProjectType() {
         return _type;
     }
 
     /**
-     *
-     * @return
+     * Gets available operations for this project
+     * @return set of operations
      */
     public Set<Operation> getAvailableOperations() {
         return _type.getAvailableOperations();

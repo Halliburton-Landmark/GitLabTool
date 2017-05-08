@@ -94,7 +94,7 @@ public class CloningGroupsWindowController {
         List<Group> selectedGroups = projectsList.getSelectionModel().getSelectedItems();
 
         Map<Group, CloningStatus> statuses = _groupsService.cloneGroups(selectedGroups, destinationPath,
-                new SuccessfulOperationHandler(), new ErrorOperationHandler());
+                new SuccessfulOperationHandler(), new UnsuccessfulOperationHandler());
 
         String dialogMessage = statuses.entrySet().stream()
                 .map(x -> x.getKey().getName() + "  -  " + x.getValue().getMessage())
@@ -173,6 +173,7 @@ public class CloningGroupsWindowController {
     }
 
     /**
+     * Handler for successful operation.
      *
      * @author Lyudmila Lyska
      */
@@ -182,6 +183,7 @@ public class CloningGroupsWindowController {
         public void accept(Integer percentage, Project project) {
             System.out.println("Progress: " + percentage + "%"); // TODO: in log or UI console
 
+            // Determine the project type
             ProjectTypeService prTypeService = (ProjectTypeService) ServiceProvider.getInstance()
                     .getService(ProjectTypeService.class.getName());
             project.setProjectType(prTypeService.getTypeProject(project));
@@ -190,10 +192,11 @@ public class CloningGroupsWindowController {
     }
 
     /**
+     * Handler for unsuccessful operation
      *
      * @author Lyudmila Lyska
      */
-    class ErrorOperationHandler implements BiConsumer<Integer, String> {
+    class UnsuccessfulOperationHandler implements BiConsumer<Integer, String> {
 
         @Override
         public void accept(Integer percentage, String message) {

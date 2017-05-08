@@ -7,6 +7,7 @@ import java.util.Set;
 import com.lgc.solutiontool.git.project.nature.operation.Operation;
 
 /**
+ * The class stores the minimum information required for types of projects
  *
  * @author Lyudmila Lyska
  */

@@ -9,22 +9,26 @@ import java.util.Set;
 import com.lgc.solutiontool.git.project.nature.operation.Operation;
 
 /**
+ * Implementation of type for DSG projects
  *
  * @author Lyudmila Lyska
  */
 public class DSGProjectType extends ProjectTypeImpl {
 
+    public static final String TYPE_NAME = "com.lgc.dsg";
+    private static final String STRUCTURE_OF_POM_FILE = "/pom.xml";
+    private static final String STRUCTURE_OF_PLUGINS_POM = "/plugins/pom.xml";
+
     public DSGProjectType() {
         super();
-
-        setId("com.lgc.dsg");
+        setId(TYPE_NAME);
 
         Set<Operation> operations = getAvailableOperations();
         operations.addAll(Arrays.asList(Operation.values()));
 
         Set<String> structures = getStructures();
-        structures.add("/pom.xml");
-        structures.add("/plugins/pom.xml");
+        structures.add(STRUCTURE_OF_POM_FILE);
+        structures.add(STRUCTURE_OF_PLUGINS_POM);
 
     }
 

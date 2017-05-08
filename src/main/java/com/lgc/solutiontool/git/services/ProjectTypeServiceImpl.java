@@ -9,7 +9,7 @@ import com.lgc.solutiontool.git.project.nature.projecttype.ProjectType;
 import com.lgc.solutiontool.git.project.nature.projecttype.UnknownProjectType;
 
 /**
- *
+ * Service for working with a type of projects
  *
  * @author Lyudmila Lyska
  */

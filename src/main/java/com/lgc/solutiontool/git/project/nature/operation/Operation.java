@@ -3,6 +3,7 @@ package com.lgc.solutiontool.git.project.nature.operation;
 import java.util.EnumSet;
 
 /**
+ * Types of operations for projects
  *
  * @author Lyudmila Lyska
  */
@@ -17,6 +18,9 @@ public enum Operation {
      */
     public static EnumSet<Operation> GIT_OPERATIONS;
 
+    /**
+     * Set of minimum operations available for all projects
+     */
     public static EnumSet<Operation> MIN_OPERATIONS;
 
     static {
