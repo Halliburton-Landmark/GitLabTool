@@ -2,39 +2,29 @@ package com.lgc.solutiontool.git.services;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Collections;
+import java.util.List;
 
 import javax.xml.bind.JAXBException;
 
-import com.lgc.solutiontool.git.connections.RESTConnector;
 import com.lgc.solutiontool.git.entities.Group;
 import com.lgc.solutiontool.git.properties.ProgramProperties;
 import com.lgc.solutiontool.git.util.XMLParser;
 import com.lgc.solutiontool.git.xml.Servers;
 
+
 public class StorageServiceImpl implements StorageService {
     private static final String USER_HOME_PROPERTY = "user.home";
     private static final String WORKSPACE_DIRECTORY_PROPERTY = ".SolutionTool";
     private static final String SETTINGS_DIRECTORY_PROPERTY = ".settings";
-    private static final String PATH_SEPARATOR = "\\";
+    private static final String PATH_SEPARATOR = File.separator;
     private static final String PROPERTY_FILENAME = "properties.xml";
     private static final String SERVERS_FILENAME = "servers.xml";
 
-    private RESTConnector _connector;
-    private String _workingDirectory;
+    private final String _workingDirectory;
 
-    public StorageServiceImpl(RESTConnector connector) {
-        setConnector(connector);
+    public StorageServiceImpl() {
         _workingDirectory = System.getProperty(USER_HOME_PROPERTY) + PATH_SEPARATOR + WORKSPACE_DIRECTORY_PROPERTY;
-    }
-
-    private RESTConnector getConnector() {
-        return _connector;
-    }
-
-    private void setConnector(RESTConnector connector) {
-        _connector = connector;
     }
 
     @Override
@@ -49,12 +39,13 @@ public class StorageServiceImpl implements StorageService {
     }
 
     @Override
-    public Map<Group, String> loadStorage(String server, String username) {
+    public List<Group> loadStorage(String server, String username) {
         try {
             File file = getPropFile(server, username);
-            return XMLParser.loadObject(file, ProgramProperties.class).getGroupPathMap();
+            List<Group> list = XMLParser.loadObject(file, ProgramProperties.class).getClonedGroups();
+            return list == null ? Collections.emptyList() : list;
         } catch (IOException | JAXBException e) {
-            return new HashMap<>();
+            return Collections.emptyList();
         }
     }
 

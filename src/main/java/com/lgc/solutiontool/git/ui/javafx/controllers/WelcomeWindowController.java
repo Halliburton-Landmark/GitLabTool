@@ -1,12 +1,18 @@
 package com.lgc.solutiontool.git.ui.javafx.controllers;
 
+import java.io.IOException;
+import java.net.URL;
+import java.util.List;
+
 import com.lgc.solutiontool.git.entities.Group;
 import com.lgc.solutiontool.git.properties.ProgramProperties;
 import com.lgc.solutiontool.git.services.LoginService;
 import com.lgc.solutiontool.git.services.ServiceProvider;
 import com.lgc.solutiontool.git.ui.ViewKey;
+import com.lgc.solutiontool.git.ui.icon.AppIconHolder;
 import com.lgc.solutiontool.git.ui.toolbar.ToolbarButtons;
 import com.lgc.solutiontool.git.ui.toolbar.ToolbarManager;
+
 import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
@@ -19,6 +25,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Tooltip;
+import javafx.scene.image.Image;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
@@ -26,10 +33,6 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Callback;
-
-import java.io.IOException;
-import java.net.URL;
-import java.util.List;
 
 /**
  * @author Yevhen Strazhko
@@ -42,7 +45,7 @@ public class WelcomeWindowController {
     @FXML
     private ListView groupList;
 
-    private LoginService _loginService =
+    private final LoginService _loginService =
             (LoginService) ServiceProvider.getInstance().getService(LoginService.class.getName());
 
     @FXML
@@ -61,6 +64,7 @@ public class WelcomeWindowController {
     @FXML
     public void onCloneGroups(ActionEvent actionEvent) {
         URL cloningGroupsWindowUrl = getClass().getClassLoader().getResource(ViewKey.CLONING_GROUPS_WINDOW.getPath());
+        Image appIcon = AppIconHolder.getInstance().getAppIcoImage();
 
         if (cloningGroupsWindowUrl == null) {
             return;
@@ -75,6 +79,7 @@ public class WelcomeWindowController {
             stage.setResizable(false);
             stage.setScene(new Scene(root));
             stage.setOnHidden(we -> updateClonedGroups());
+            stage.getIcons().add(appIcon);
 
             stage.show();
         } catch (IOException e) {
@@ -83,7 +88,7 @@ public class WelcomeWindowController {
         }
     }
 
-    private void configureToolbarEnablers(BooleanBinding booleanBinding){
+    private void configureToolbarEnablers(BooleanBinding booleanBinding) {
         ToolbarManager.getInstance().getAllButtonsForCurrentView().stream()
                 .filter(x -> x.getId().equals(ToolbarButtons.REMOVE_GROUP_BUTTON.getId())
                         || x.getId().equals(ToolbarButtons.SELECT_GROUP_BUTTON.getId()))
@@ -96,9 +101,10 @@ public class WelcomeWindowController {
     }
 
     private void updateClonedGroups() {
-        List<Group> userGroups = ProgramProperties.getInstance().getClonedGroups();
-
-        groupList.setItems(FXCollections.observableList(userGroups));
+        List<Group> userGroups = ProgramProperties.getInstance().loadClonedGroups();
+        if(userGroups != null) {
+            groupList.setItems(FXCollections.observableList(userGroups));
+        }
     }
 
     private void configureListView(ListView listView) {
@@ -152,7 +158,7 @@ public class WelcomeWindowController {
                 Text groupNameText = new Text(item.getName());
                 groupNameText.setFont(Font.font(Font.getDefault().getFamily(), 14));
 
-                String localPath = ProgramProperties.getInstance().getClonedLocalPath(item);
+                String localPath = item.getPathToClonedGroup();
                 Text localPathText = new Text(localPath);
 
                 VBox vboxItem = new VBox(groupNameText, localPathText);
