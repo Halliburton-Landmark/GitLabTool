@@ -11,26 +11,26 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "servers")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Servers {
-	
-	public Servers() {
-		servers = new ArrayList<>();
-		servers.add(new Server("gitlab.com", "v3"));
-		servers.add(new Server("gitlab.lgc.com", "v3"));
-		servers.add(new Server("Other..."));
-	}
-	
-	public Servers(List<Server> servers) {
-		this.servers = servers;
-	}
-	
-	@XmlElement(name = "server")
-	private List<Server> servers = null;
-	
-	public List<Server> getServers() {
-		return servers;
-	}
 
-	public void setServers(List<Server> servers) {
-		this.servers = servers;
-	}
+    public Servers() {
+        servers = new ArrayList<>();
+        servers.add(new Server("gitlab.com", "v3"));
+        servers.add(new Server("gitlab.lgc.com", "v3"));
+        servers.add(new Server("Other..."));
+    }
+
+    public Servers(List<Server> servers) {
+        this.servers = servers;
+    }
+
+    @XmlElement(name = "server")
+    private List<Server> servers = null;
+
+    public List<Server> getServers() {
+        return servers;
+    }
+
+    public void setServers(List<Server> servers) {
+        this.servers = servers;
+    }
 }

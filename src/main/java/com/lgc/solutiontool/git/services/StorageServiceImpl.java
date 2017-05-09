@@ -24,7 +24,6 @@ public class StorageServiceImpl implements StorageService {
     private RESTConnector _connector;
     private String _workingDirectory;
 
-
     public StorageServiceImpl(RESTConnector connector) {
         setConnector(connector);
         _workingDirectory = System.getProperty(USER_HOME_PROPERTY) + PATH_SEPARATOR + WORKSPACE_DIRECTORY_PROPERTY;
@@ -59,42 +58,42 @@ public class StorageServiceImpl implements StorageService {
         }
     }
 
-	@Override
-	public boolean updateServers(Servers servers) {
-		try {
-			File file = getServersFile();
-			XMLParser.saveObject(file, servers);
-			return true;
-		} catch (IOException | JAXBException e) {
+    @Override
+    public boolean updateServers(Servers servers) {
+        try {
+            File file = getServersFile();
+            XMLParser.saveObject(file, servers);
+            return true;
+        } catch (IOException | JAXBException e) {
             return false;
         }
-	}
+    }
 
-	@Override
-	public Servers loadServers() {
-		try {
-			File file = getServersFile();
+    @Override
+    public Servers loadServers() {
+        try {
+            File file = getServersFile();
             return XMLParser.loadObject(file, Servers.class);
         } catch (IOException | JAXBException e) {
-        	updateServers(new Servers());
+            updateServers(new Servers());
             return loadServers();
         }
-	}
-	
+    }
+
     private File getPropFile(String server, String username) throws IOException {
         File propFile = new File(_workingDirectory + PATH_SEPARATOR + server + PATH_SEPARATOR + username
                 + PATH_SEPARATOR + PROPERTY_FILENAME);
         return getFile(propFile);
     }
-    
-	private File getServersFile() throws IOException {
-		File serverFile = new File(_workingDirectory + PATH_SEPARATOR + SETTINGS_DIRECTORY_PROPERTY 
-				+ PATH_SEPARATOR + SERVERS_FILENAME);
-		return getFile(serverFile);
-	}
-    
+
+    private File getServersFile() throws IOException {
+        File serverFile = new File(
+                _workingDirectory + PATH_SEPARATOR + SETTINGS_DIRECTORY_PROPERTY + PATH_SEPARATOR + SERVERS_FILENAME);
+        return getFile(serverFile);
+    }
+
     private File getFile(File file) throws IOException {
-    	File parentDor = file.getParentFile();
+        File parentDor = file.getParentFile();
 
         if (file.exists()) {
             return new File(file.getCanonicalPath());
@@ -107,5 +106,5 @@ public class StorageServiceImpl implements StorageService {
 
         return new File(file.getCanonicalPath());
     }
-    
+
 }

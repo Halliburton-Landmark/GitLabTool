@@ -71,55 +71,53 @@ class LoginDialog extends Dialog<DialogDTO> {
         ObservableList<String> options = getBoxOptions();	
         final ComboBox<String> comboBox = new ComboBox<>(options);
         comboBox.valueProperty().addListener((observableValue, oldValue, currentValue) -> {
-        	if (currentValue.equals("Other...")) {
-				try {
-					openServerInputWindow();
-					Platform.runLater(() -> {
-						modifyComboBoxItems(comboBox, options);
-					});
-				} catch (IOException e) {
-					return;
-				}
-			} 
+            if (currentValue.equals("Other...")) {
+                try {
+                    openServerInputWindow();
+                    Platform.runLater(() -> {
+                        modifyComboBoxItems(comboBox, options);
+                    });
+                } catch (IOException e) {
+                    return;
+                }
+            }
         });
         comboBox.setValue(options.get(0));
         grid.add(comboBox, 1, 3, 1, 1);
 
         getDialogPane().setContent(grid);
         setResultConverter(dialogButton -> {
-        	String serverURL = URLManager.completeServerURL(comboBox.getValue());
-        	return dialogButton == loginButtonType 
-        			? new DialogDTO(userTextField.getText(), pwBox.getText(), serverURL)
-        			: null;
+            String serverURL = URLManager.completeServerURL(comboBox.getValue());
+            return dialogButton == loginButtonType ? new DialogDTO(userTextField.getText(), pwBox.getText(), serverURL)
+                    : null;
         });
     }
-	
-	
-	private ObservableList<String> getBoxOptions() {
-		List<String> servers = new ArrayList<>(); 
+
+    private ObservableList<String> getBoxOptions() {
+        List<String> servers = new ArrayList<>();
         storageService.loadServers().getServers().forEach((e) -> {
-        	servers.add(e.getName());
+            servers.add(e.getName());
         });
         ObservableList<String> options = FXCollections.observableArrayList(servers);
         return options;
-	}
-	
-	private void modifyComboBoxItems(ComboBox<String> comboBox, ObservableList<String> options) {
-		ObservableList<String> boxOptions = getBoxOptions();
-		boxOptions.forEach(e -> {
-			if (!options.contains(e)) {
-				comboBox.getItems().add(options.size() - 1, e);
-			}
-		});
-		comboBox.setValue(boxOptions.get(boxOptions.size() - 2));
-	}
-	
-	private void openServerInputWindow() throws IOException {
-		FXMLLoader fxmlLoader = new FXMLLoader(
-				getClass().getClassLoader().getResource(ViewKey.SERVER_INPUT_WINDOW.getPath()));
-		Parent root = fxmlLoader.load();
-		ServerInputWindowController controller = (ServerInputWindowController) fxmlLoader.getController();
-		controller.loadServerInputWindow(root);
-	}
-	
+    }
+
+    private void modifyComboBoxItems(ComboBox<String> comboBox, ObservableList<String> options) {
+        ObservableList<String> boxOptions = getBoxOptions();
+        boxOptions.forEach(e -> {
+            if (!options.contains(e)) {
+                comboBox.getItems().add(options.size() - 1, e);
+            }
+        });
+        comboBox.setValue(boxOptions.get(boxOptions.size() - 2));
+    }
+
+    private void openServerInputWindow() throws IOException {
+        FXMLLoader fxmlLoader = new FXMLLoader(
+                getClass().getClassLoader().getResource(ViewKey.SERVER_INPUT_WINDOW.getPath()));
+        Parent root = fxmlLoader.load();
+        ServerInputWindowController controller = (ServerInputWindowController) fxmlLoader.getController();
+        controller.loadServerInputWindow(root);
+    }
+
 }
