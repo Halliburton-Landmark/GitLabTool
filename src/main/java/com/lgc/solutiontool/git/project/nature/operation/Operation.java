@@ -14,7 +14,7 @@ public enum Operation {
     REPLACEMENT_TEXT_IN_FILE;
 
     /**
-     * Set of operations for working with a git
+     * Set of operations for working with git only. It does not contain non-git operations such as CHANGE_POM_FILE
      */
     public static EnumSet<Operation> GIT_OPERATIONS;
 

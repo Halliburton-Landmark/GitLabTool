@@ -109,7 +109,7 @@ public class Project {
      */
     public void setPathToClonedProject(String path) {
         if (path == null || path.isEmpty()) {
-            throw new IllegalArgumentException("Invalid value passed");
+            throw new IllegalArgumentException("ERROR: Incorrect data. Value is null.");
         }
         Path pathToProject = Paths.get(path);
         if (Files.exists(pathToProject) && Files.isDirectory(pathToProject)) {
