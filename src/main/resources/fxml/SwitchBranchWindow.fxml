@@ -4,12 +4,13 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <GridPane hgap="10.0" maxHeight="Infinity" maxWidth="Infinity" vgap="10.0" xmlns="http://javafx.com/javafx/8"
-          xmlns:fx="http://javafx.com/fxml/1" fx:controller="fxml.SwitchBranchWindow">
+          xmlns:fx="http://javafx.com/fxml/1"
+          fx:controller="com.lgc.solutiontool.git.ui.javafx.controllers.SwitchBranchWindow">
     <columnConstraints>
         <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="120.0"/>
         <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0"/>
         <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0"/>
-        <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="150.0"/>
+        <ColumnConstraints hgrow="ALWAYS" maxWidth="200" minWidth="10.0" prefWidth="150.0"/>
     </columnConstraints>
     <rowConstraints>
         <RowConstraints maxHeight="1.7976931348623157E308" minHeight="10.0" prefHeight="100.0" vgrow="ALWAYS"/>
@@ -18,19 +19,26 @@
         <RowConstraints maxHeight="30.0" minHeight="10.0" prefHeight="10.0" vgrow="SOMETIMES"/>
     </rowConstraints>
     <children>
-        <VBox GridPane.rowSpan="3">
+        <AnchorPane GridPane.rowSpan="3">
             <children>
-                <ListView maxHeight="1.7976931348623157E308"/>
-                <Label text="Total project: 3"/>
+                <ListView maxHeight="Infinity" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="0.0"
+                          AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
+                <Label maxHeight="20.0" text="Total project: 3" AnchorPane.bottomAnchor="0.0"/>
             </children>
-        </VBox>
-        <VBox GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowSpan="3">
+        </AnchorPane>
+        <AnchorPane GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowSpan="3">
             <children>
-                <TextField/>
-                <ListView/>
-                <Label text="Total branches: 1650"/>
+                <TextField AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
+                <ListView AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                          AnchorPane.topAnchor="30.0">
+                    <opaqueInsets>
+                        <Insets/>
+                    </opaqueInsets>
+                </ListView>
+                <Label maxHeight="20.0" text="Total branches: 1650" AnchorPane.bottomAnchor="0.0"
+                       AnchorPane.leftAnchor="0.0"/>
             </children>
-        </VBox>
+        </AnchorPane>
         <VBox spacing="20.0" GridPane.columnIndex="3" GridPane.rowSpan="3">
             <children>
                 <Button mnemonicParsing="false" text="Load remote branches"/>
@@ -46,11 +54,15 @@
                     </children>
                 </VBox>
                 <CheckBox mnemonicParsing="false" text="Match in all branches"/>
-                <Button mnemonicParsing="false" text="Update list"/>
+                <Button mnemonicParsing="false" text="Update list">
+                    <VBox.margin>
+                        <Insets/>
+                    </VBox.margin>
+                </Button>
             </children>
         </VBox>
         <HBox alignment="TOP_RIGHT" maxHeight="50.0" prefHeight="100.0" prefWidth="200.0" spacing="20.0"
-              GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="3">
+              style="-fx-background-color: ;" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="3">
             <children>
                 <Button mnemonicParsing="false" text="Apply"/>
                 <Button mnemonicParsing="false" text="Cancel"/>
