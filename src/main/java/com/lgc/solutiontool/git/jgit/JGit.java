@@ -148,7 +148,7 @@ public class JGit {
             FeedbackUtil.sendError(onError, 100, errorMsg);
             return;
         }
-        String groupPath = localPath + "/" + group.getName();
+        String groupPath = localPath + File.separator + group.getName();
 
         int aStepInProgress = 100 / projects.size();
         int currentProgress = 0;
@@ -549,7 +549,7 @@ public class JGit {
     }
 
     private boolean clone(Project project, String localPath) {
-        String path = localPath + "/" + project.getName();
+        String path = localPath + File.separator + project.getName();
         if (clone(project.getHttp_url_to_repo(), path)) {
             project.setClonedStatus(true);
             project.setPathToClonedProject(path);

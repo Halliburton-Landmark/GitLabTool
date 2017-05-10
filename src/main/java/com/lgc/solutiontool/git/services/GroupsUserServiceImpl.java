@@ -83,7 +83,7 @@ public class GroupsUserServiceImpl implements GroupsUserService {
 
         // path validation
         Path path = Paths.get(destinationPath);
-        if (!Files.exists(path) && !Files.isDirectory(path)) {
+        if (!Files.exists(path) || !Files.isDirectory(path)) {
             return Collections.emptyMap();
         }
 

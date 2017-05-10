@@ -4,6 +4,7 @@ import com.lgc.solutiontool.git.services.LoginService;
 import com.lgc.solutiontool.git.services.ServiceProvider;
 import com.lgc.solutiontool.git.ui.UserInterface;
 import com.lgc.solutiontool.git.ui.ViewKey;
+import com.lgc.solutiontool.git.ui.icon.AppIconHolder;
 import com.lgc.solutiontool.git.ui.javafx.controllers.ModularController;
 import com.lgc.solutiontool.git.ui.javafx.dto.DialogDTO;
 import javafx.application.Application;
@@ -30,7 +31,7 @@ public class JavaFXUI extends Application implements UserInterface {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        appIcon = new Image(getClass().getClassLoader().getResource("icons/gitlab.png").toExternalForm());
+        appIcon = AppIconHolder.getInstance().getAppIcoImage();
 
         URL modularWindow = getClass().getClassLoader().getResource(ViewKey.MODULAR_CONTAINER.getPath());
         if (modularWindow == null) {
