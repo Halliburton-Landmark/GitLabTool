@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.eclipse.jgit.api.errors.JGitInternalException;
@@ -17,6 +16,7 @@ import com.google.gson.reflect.TypeToken;
 import com.lgc.solutiontool.git.connections.RESTConnector;
 import com.lgc.solutiontool.git.connections.token.CurrentUser;
 import com.lgc.solutiontool.git.entities.Group;
+import com.lgc.solutiontool.git.entities.Project;
 import com.lgc.solutiontool.git.entities.User;
 import com.lgc.solutiontool.git.jgit.JGit;
 import com.lgc.solutiontool.git.properties.ProgramProperties;
@@ -48,7 +48,7 @@ public class GroupsUserServiceImpl implements GroupsUserService {
     }
 
     @Override
-    public Group cloneGroup(Group group, String destinationPath, Consumer<Integer> onSuccess, BiConsumer<Integer, String> onError) {
+    public Group cloneGroup(Group group, String destinationPath, BiConsumer<Integer, Project> onSuccess, BiConsumer<Integer, String> onError) {
         try {
             if (group.getProjects() == null) {
                 group = getGroupById(group.getId());
@@ -76,7 +76,7 @@ public class GroupsUserServiceImpl implements GroupsUserService {
     }
 
     @Override
-    public Map<Group, CloningStatus> cloneGroups(List<Group> groups, String destinationPath, Consumer<Integer> onSuccess, BiConsumer<Integer, String> onError) {
+    public Map<Group, CloningStatus> cloneGroups(List<Group> groups, String destinationPath, BiConsumer<Integer, Project> onSuccess, BiConsumer<Integer, String> onError) {
         if (groups == null || destinationPath == null) {
             return Collections.emptyMap();
         }

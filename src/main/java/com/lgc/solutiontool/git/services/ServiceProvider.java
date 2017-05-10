@@ -1,3 +1,4 @@
+
 package com.lgc.solutiontool.git.services;
 
 import java.util.HashMap;
@@ -30,9 +31,9 @@ public class ServiceProvider {
                 new GroupsUserServiceImpl(RESTConnectorFactory.getInstance().getRESTConnector()));
         _services.put(ProjectService.class.getName(),
                 new ProjectServiceImpl(RESTConnectorFactory.getInstance().getRESTConnector()));
-        _services.put(StorageService.class.getName(),new StorageServiceImpl());
+        _services.put(StorageService.class.getName(), new StorageServiceImpl());
         _services.put(ReplacementService.class.getName(), new ReplacementServiceImpl());
         _services.put(PomXMLService.class.getName(), new PomXMLServiceImpl());
-
+        _services.put(ProjectTypeService.class.getName(), new ProjectTypeServiceImpl());
     }
 }

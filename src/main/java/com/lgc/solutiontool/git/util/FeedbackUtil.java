@@ -28,6 +28,19 @@ public class FeedbackUtil {
      *
      * @param onSuccess method for tracking the successful operations.
      * @param progress  a percentage of progress
+     * @param project   cloned project
+     */
+    public static <T, U> void sendSuccess(BiConsumer<T, U> onSuccess, T progress, U project) {
+        if (onSuccess != null) {
+            onSuccess.accept(progress, project);
+        }
+    }
+
+    /**
+     * Report about successful operation.
+     *
+     * @param onSuccess method for tracking the successful operations.
+     * @param progress  a percentage of progress
      */
     public static <T> void sendSuccess(Consumer<T> onSuccess, T progress) {
         if (onSuccess != null) {
