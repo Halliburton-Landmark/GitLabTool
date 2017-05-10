@@ -15,13 +15,6 @@ public interface ProjectTypeService {
      * @param project a cloned project
      * @return project type
      */
-    ProjectType getTypeProject(Project project);
+    ProjectType getProjectType(Project project);
 
-    /**
-     * Checks existence of a type
-     *
-     * @param idType type id
-     * @return true - if a type with it name already exist, false - otherwise
-     */
-    boolean isTypeExist(String idType);
 }

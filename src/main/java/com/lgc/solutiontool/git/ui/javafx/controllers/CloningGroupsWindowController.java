@@ -186,7 +186,7 @@ public class CloningGroupsWindowController {
             // Determine the project type
             ProjectTypeService prTypeService = (ProjectTypeService) ServiceProvider.getInstance()
                     .getService(ProjectTypeService.class.getName());
-            project.setProjectType(prTypeService.getTypeProject(project));
+            project.setProjectType(prTypeService.getProjectType(project));
         }
 
     }

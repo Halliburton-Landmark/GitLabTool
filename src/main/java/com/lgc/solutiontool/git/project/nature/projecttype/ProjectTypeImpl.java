@@ -1,6 +1,6 @@
 package com.lgc.solutiontool.git.project.nature.projecttype;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -18,17 +18,11 @@ abstract class ProjectTypeImpl implements ProjectType {
     private final Set<String> _structures;
 
     public ProjectTypeImpl() {
-        Operation[] minOperations = Operation.MIN_OPERATIONS.toArray(new Operation[]{});
-        _operations = new HashSet<>();
-        _operations.addAll(Arrays.asList(minOperations));
-
+        _operations = new HashSet<>(Operation.MIN_OPERATIONS);
         _structures = new HashSet<>();
     }
 
     protected void setId(String id) {
-        if (id == null) {
-            throw new IllegalArgumentException("The type id has already been set and cannot be changed");
-        }
         if (id == null || id.isEmpty()) {
             throw new IllegalArgumentException("Invalid id = {" + id + "}");
         }
@@ -41,6 +35,10 @@ abstract class ProjectTypeImpl implements ProjectType {
 
     @Override
     public Set<Operation> getAvailableOperations() {
+        return Collections.unmodifiableSet(_operations);
+    }
+
+    protected Set<Operation> getModifiableOperations() {
         return _operations;
     }
 

@@ -23,7 +23,7 @@ public class DSGProjectType extends ProjectTypeImpl {
         super();
         setId(TYPE_NAME);
 
-        Set<Operation> operations = getAvailableOperations();
+        Set<Operation> operations = getModifiableOperations();
         operations.addAll(Arrays.asList(Operation.values()));
 
         Set<String> structures = getStructures();

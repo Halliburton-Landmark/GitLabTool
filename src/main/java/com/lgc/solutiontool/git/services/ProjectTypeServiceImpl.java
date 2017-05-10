@@ -24,7 +24,7 @@ public class ProjectTypeServiceImpl implements ProjectTypeService {
     }
 
     @Override
-    public ProjectType getTypeProject(Project project) {
+    public ProjectType getProjectType(Project project) {
         if (project == null) {
             throw new IllegalArgumentException("Invalid data. Project is null.");
         }
@@ -35,18 +35,6 @@ public class ProjectTypeServiceImpl implements ProjectTypeService {
             }
         }
         return UNKNOWN_TYPE;
-    }
-
-    @Override
-    public boolean isTypeExist(String idType) {
-        if (idType != null && !idType.isEmpty()) {
-            for (ProjectType projectType : _types) {
-                if (projectType.getId().equals(idType)) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
 }
