@@ -95,10 +95,10 @@ public class JGit {
      *
      * @param projects    cloned project
      * @param brType      type branch
-     * @param onlyGeneral if value is <true> return only general branches of projects, if <false> return all branches.
+     * @param onlyCommon if value is <true> return only common branches of projects, if <false> return all branches.
      * @return a list of branches
      */
-    public Set<String> getBranches(List<Project> projects, BranchType brType, boolean onlyGeneral) {
+    public Set<String> getBranches(List<Project> projects, BranchType brType, boolean onlyCommon) {
         if (projects == null || brType == null) {
             throw new IllegalArgumentException("Wrong parameters for obtaining branches.");
         }
@@ -110,7 +110,7 @@ public class JGit {
                 return;
             }
             List<String> shortNamesBranches = getListShortNamesOfBranches(getRefs(pr, mode));
-            mergeCollections(branches, shortNamesBranches, onlyGeneral);
+            mergeCollections(branches, shortNamesBranches, onlyCommon);
         });
         return branches;
     }

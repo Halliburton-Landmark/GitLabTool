@@ -4,19 +4,18 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
- *
+ * The class responsible for sending messages to the user about the progress of the operation.
  *
  * @author Lyudmila Lyska
  */
 public class FeedbackUtil {
 
     /**
+     * Report an error during the operation.
      *
-     *
-     * @param <U>
-     * @param onError
-     * @param progress
-     * @param message
+     * @param onError  method for tracking the unsuccessful operations.
+     * @param progress a percentage of progress
+     * @param message  error message
      */
     public static <T, U> void sendError(BiConsumer<T, U> onError, T progress, U message) {
         if (onError != null) {
@@ -25,10 +24,10 @@ public class FeedbackUtil {
     }
 
     /**
+     * Report about successful operation.
      *
-     *
-     * @param onSuccess
-     * @param progress
+     * @param onSuccess method for tracking the successful operations.
+     * @param progress  a percentage of progress
      */
     public static <T> void sendSuccess(Consumer<T> onSuccess, T progress) {
         if (onSuccess != null) {
