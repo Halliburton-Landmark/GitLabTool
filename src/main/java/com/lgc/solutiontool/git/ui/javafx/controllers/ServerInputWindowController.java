@@ -8,6 +8,7 @@ import javax.net.ssl.HttpsURLConnection;
 
 import com.lgc.solutiontool.git.services.ServiceProvider;
 import com.lgc.solutiontool.git.services.StorageService;
+import com.lgc.solutiontool.git.ui.icon.AppIconHolder;
 import com.lgc.solutiontool.git.util.RequestType;
 import com.lgc.solutiontool.git.util.URLManager;
 import com.lgc.solutiontool.git.xml.Server;
@@ -20,13 +21,14 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 public class ServerInputWindowController {
 
-    private final String WRONG_INPUT_MESSAGE = "Wrong input! Please, try again";
-    private final String WRONG_SERVER_ADDRESS_MESSAGE = "Wrong URL! Please, try another one";
-    private final String SERVER_ALREADY_EXIST_MESSAGE = "Such server already exist!";
+    private final String WRONG_INPUT_MESSAGE = "Wrong input! Please try again";
+    private final String WRONG_SERVER_ADDRESS_MESSAGE = "Please enter an URL of existing \nGitLab server";
+    private final String SERVER_ALREADY_EXIST_MESSAGE = "This server already exist!";
 
     private StorageService storageService = (StorageService) ServiceProvider.getInstance()
             .getService(StorageService.class.getName());
@@ -62,6 +64,8 @@ public class ServerInputWindowController {
         Stage stage = new Stage();
         stage.setScene(scene);
         stage.setTitle("Server selection");
+        Image appIcon = AppIconHolder.getInstance().getAppIcoImage();
+        stage.getIcons().add(appIcon);
         stage.showAndWait();
     }
 
