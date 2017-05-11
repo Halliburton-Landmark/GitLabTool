@@ -78,16 +78,16 @@ public class ServerInputWindowController {
 
     @FXML
     public void onOkButton() throws Exception {
-        showMessage(VERIFYING_MESSAGE, "green");
+        showMessage(VERIFYING_MESSAGE, Color.GREEN);
         getStage().getScene().setCursor(Cursor.WAIT);
 
         if (!isInputValid(serverTextField.getText())) {
-            showMessage(WRONG_INPUT_MESSAGE, "red");
+            showMessage(WRONG_INPUT_MESSAGE, Color.RED);
             getStage().getScene().setCursor(Cursor.DEFAULT);
             return;
         }
         if (isServerAlreadyExists(serverTextField.getText())) {
-            showMessage(SERVER_ALREADY_EXIST_MESSAGE, "red");
+            showMessage(SERVER_ALREADY_EXIST_MESSAGE, Color.RED);
             getStage().getScene().setCursor(Cursor.DEFAULT);
             return;
         }
@@ -101,11 +101,11 @@ public class ServerInputWindowController {
                 });
             } else if (responseCode >= HttpStatus.SC_INTERNAL_SERVER_ERROR) {
                 Platform.runLater(() -> {
-                    showMessage(WRONG_SERVER_ADDRESS_MESSAGE, "red");
+                    showMessage(WRONG_SERVER_ADDRESS_MESSAGE, Color.RED);
                 });
             } else {
                 Platform.runLater(() -> {
-                    showMessage(NO_INTERNET_CONNECTION_MESSAGE, "red");
+                    showMessage(NO_INTERNET_CONNECTION_MESSAGE, Color.RED);
                 });
             }
             getStage().getScene().setCursor(Cursor.DEFAULT);
@@ -122,9 +122,9 @@ public class ServerInputWindowController {
         storageService.updateServers(new Servers(servers));
     }
 
-    private void showMessage(String msg, String color) {
+    private void showMessage(String msg, Color color) {
         message.setText(msg);
-        message.setTextFill(Color.web(color));
+        message.setTextFill(Color.web(color.toString()));
         message.setVisible(true);
     }
 
@@ -141,7 +141,7 @@ public class ServerInputWindowController {
     public void setAPIVersion() {
         // TODO: manage API version from ComboBox
     }
-    
+
     private Stage getStage() {
         return (Stage) okButton.getScene().getWindow();
     }
