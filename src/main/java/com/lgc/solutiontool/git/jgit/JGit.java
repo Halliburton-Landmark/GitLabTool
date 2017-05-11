@@ -19,15 +19,12 @@ import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.api.errors.InvalidRemoteException;
-import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.dircache.DirCache;
 import org.eclipse.jgit.dircache.DirCacheCheckout;
 import org.eclipse.jgit.errors.AmbiguousObjectException;
 import org.eclipse.jgit.errors.IncorrectObjectTypeException;
 import org.eclipse.jgit.errors.MissingObjectException;
-import org.eclipse.jgit.errors.NoWorkTreeException;
 import org.eclipse.jgit.errors.RevisionSyntaxException;
 import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.Constants;
@@ -82,16 +79,16 @@ public class JGit {
      * @param onError    method for tracking the errors during cloning,
      *                   where <Integer> is a percentage of progress, <String> error message.
      */
-    public void clone(Group group, String localPath, BiConsumer<Integer, Project> onSuccess, BiConsumer<Integer, String> onError) {
+    public boolean clone(Group group, String localPath, BiConsumer<Integer, Project> onSuccess, BiConsumer<Integer, String> onError) {
         if (group == null || localPath == null) {
-            return;
+            throw new IllegalArgumentException("Incorrect data: group is " + group + ", localPath is " + localPath);
         }
         Collection<Project> projects = group.getProjects();
         if (projects == null || projects.isEmpty()) {
             if(onError != null) {
                 onError.accept(100, "Cloning error. There are no projects in " + group.getName() + " group.");
             }
-            return;
+            return false;
         }
         String groupPath = localPath + File.separator + group.getName();
         int aStepInProgress = 100 / projects.size();
@@ -110,6 +107,7 @@ public class JGit {
         }
         group.setClonedStatus(true);
         group.setPathToClonedGroup(groupPath);
+        return true;
     }
 
     /**
@@ -126,8 +124,8 @@ public class JGit {
         if (path == null) {
             return Optional.empty();
         }
-        try (Git git = Git.open(new File(path))) {
-            Repository repository = git.getRepository();
+        try {
+            Git git = getGitForRepository(path).get();
             Status status = git.status().call();
             if (status != null) {
                 // debug code
@@ -141,11 +139,9 @@ public class JGit {
                 System.out.println("Modified: " + status.getModified());
                 System.out.println("Untracked: " + status.getUntracked());
                 System.out.println("Untracked Folders: " + status.getUntrackedFolders());
-
-                repository.close();
                 return Optional.of(status);
             }
-        } catch (IOException | NoWorkTreeException | GitAPIException e) {
+        } catch (GitAPIException e) {
             System.err.println("!ERROR: " + e.getMessage());
         }
         return Optional.empty();
@@ -157,22 +153,26 @@ public class JGit {
      * @param files names of files that need to add
      * @param project the cloned project
      */
-    public void addUntrackedFileForCommit(Collection<String> files, Project project) {
+    public boolean addUntrackedFileForCommit(Collection<String> files, Project project) {
         if (files == null || project == null) {
-            return;
+            throw new IllegalArgumentException("Incorrect data: project is " + project + ", files is " + files);
         }
         String path = project.getPathToClonedProject();
-        try {
-            Optional<Git> opGit = getGitForRepository(path);
-            if (!opGit.isPresent()) {
-                return;
-            }
-            for (String nameFile : files) {
-                opGit.get().add().addFilepattern(nameFile).call();
-            }
-        } catch (Exception e) {
-            System.err.println("!ERROR: " + e.getMessage());
+        Optional<Git> opGit = getGitForRepository(path);
+        if (!opGit.isPresent()) {
+            return false;
         }
+        files.stream().forEach((file) -> {
+            if (file != null) {
+                try {
+                    opGit.get().add().addFilepattern(file).call();
+                } catch (GitAPIException e) {
+                    System.err.println("Could not add the " + file + " file");
+                    System.err.println("!ERROR: " + e.getMessage());
+                }
+            }
+        });
+        return true;
     }
 
     /**
@@ -183,7 +183,7 @@ public class JGit {
      */
     public JGitStatus pull (Project project) {
         if (project == null) {
-            return JGitStatus.FAILED;
+            throw new IllegalArgumentException("Incorrect data: project is null");
         }
         String path = project.getPathToClonedProject();
         if (path == null) {
@@ -232,7 +232,7 @@ public class JGit {
                               String nameAuthor, String emailAuthor,
                               Consumer<Integer> onSuccess, BiConsumer<Integer, String> onError) {
         if (group == null || message == null) {
-            return JGitStatus.FAILED;
+            throw new IllegalArgumentException("Incorrect data: group is " + group + ", message is " + message);
         }
         Collection<Project> projects = getChangedProjects(group);
         if (projects.isEmpty() || projects == null) {
@@ -503,14 +503,16 @@ public class JGit {
 
     private boolean clone(String linkClone, String localPath) {
         try {
-            Git.cloneRepository().setURI(linkClone).setDirectory(new File(localPath)).call();
-            return true;
-        } catch (InvalidRemoteException | TransportException e) {
-            System.err.println("!ERROR: " + e.getMessage());
+            return cloneRepository(linkClone, localPath);
         } catch (GitAPIException e) {
             System.err.println("!ERROR: " + e.getMessage());
         }
         return false;
+    }
+
+    protected boolean cloneRepository(String linkClone, String localPath) throws GitAPIException {
+        Git.cloneRepository().setURI(linkClone).setDirectory(new File(localPath)).call();
+        return true;
     }
 
     private JGitStatus commit (Project project, String message, boolean setAll,
@@ -581,7 +583,7 @@ public class JGit {
         return JGitStatus.FAILED;
     }
 
-    private Optional<Git> getGitForRepository(String path) {
+    protected Optional<Git> getGitForRepository(String path) {
         if (path != null) {
             try {
                 return Optional.ofNullable(Git.open(new File(path + "/.git")));
@@ -593,7 +595,7 @@ public class JGit {
     }
 
     // Check if we will have conflicts after the pull command
-    private boolean isContinueMakePull(Project project) {
+    protected boolean isContinueMakePull(Project project) {
         Optional<Git> optGit = getGitForRepository(project.getPathToClonedProject());
         if (!optGit.isPresent()) {
             return false;
