@@ -5,9 +5,11 @@ import com.lgc.solutiontool.git.entities.Group;
 import com.lgc.solutiontool.git.entities.Project;
 import com.lgc.solutiontool.git.services.LoginService;
 import com.lgc.solutiontool.git.services.ServiceProvider;
+import com.lgc.solutiontool.git.ui.SelectionsProvider;
 import com.lgc.solutiontool.git.ui.toolbar.ToolbarManager;
 import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -18,6 +20,7 @@ import javafx.scene.control.SelectionMode;
 import javafx.scene.input.MouseEvent;
 import javafx.util.Callback;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MainWindowController {
@@ -117,6 +120,18 @@ public class MainWindowController {
                         lv.getSelectionModel().select(index);
                     }
                 }
+            }
+        });
+
+        listView.getSelectionModel().getSelectedItems().addListener(new ListChangeListener() {
+            @Override
+            public void onChanged(ListChangeListener.Change change) {
+                SelectionsProvider.getInstance().setSelectionItems("mainWindow_projectsList",
+                        listView.getSelectionModel().getSelectedItems());
+
+                CurrentSelection.getInstance().setSelectedProjects(
+                        new ArrayList<Project>(listView.getSelectionModel().getSelectedItems()));
+                System.out.println(listView.getSelectionModel().getSelectedItems());
             }
         });
     }

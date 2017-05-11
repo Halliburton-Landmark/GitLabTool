@@ -1,6 +1,7 @@
 package com.lgc.solutiontool.git.ui.javafx.controllers;
 
 import com.lgc.solutiontool.git.entities.Group;
+import com.lgc.solutiontool.git.entities.Project;
 import com.lgc.solutiontool.git.ui.ViewKey;
 import com.lgc.solutiontool.git.ui.icon.AppIconHolder;
 import com.lgc.solutiontool.git.ui.mainmenu.MainMenuItems;
@@ -23,6 +24,7 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 
 public class ModularController {
 
@@ -122,13 +124,14 @@ public class ModularController {
 
     private void showSwitchBranchWindow() {
         try {
+
+
             URL switchBranchWindowUrl = getClass().getClassLoader().getResource(ViewKey.SWITCH_BRANCH_WINDOW.getPath());
             FXMLLoader loader = new FXMLLoader(switchBranchWindowUrl);
+            Parent root = loader.load();;
+
             SwitchBranchWindowController controller = loader.getController();
 
-            Parent root = null;
-
-            root = loader.load();
             Scene scene = new Scene(root);
             Stage stage = new Stage();
             stage.setScene(scene);
