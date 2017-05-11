@@ -1,5 +1,8 @@
 package com.lgc.solutiontool.git.project.nature.projecttype;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -49,7 +52,30 @@ abstract class ProjectTypeImpl implements ProjectType {
 
     @Override
     public boolean hasOperation(Operation operation) {
-        return _operations.contains(operation);
+        if (operation != null) {
+            return _operations.contains(operation);
+        }
+        return false;
+    }
+
+    @Override
+    public boolean isProjectCorrespondsType(String projectPath) {
+        if (projectPath == null || projectPath.isEmpty()) {
+            return false;
+        }
+        for (String structure : getStructures()) {
+            if (structure != null) {
+                Path path = Paths.get(projectPath + structure);
+                if (!isPathCorrespondsToType(path)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    protected boolean isPathCorrespondsToType(Path path) {
+        return Files.exists(path);
     }
 
 }

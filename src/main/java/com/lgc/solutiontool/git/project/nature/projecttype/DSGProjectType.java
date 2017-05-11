@@ -2,7 +2,6 @@ package com.lgc.solutiontool.git.project.nature.projecttype;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Set;
 
@@ -33,14 +32,8 @@ public class DSGProjectType extends ProjectTypeImpl {
     }
 
     @Override
-    public boolean isProjectCorrespondsType(String projectPath) {
-        for (String structure : getStructures()) {
-            Path path = Paths.get(projectPath + structure);
-            if (!(Files.exists(path) && Files.isRegularFile(path))) {
-                return false;
-            }
-        }
-        return true;
+    protected boolean isPathCorrespondsToType(Path path) {
+        return Files.exists(path) && Files.isRegularFile(path);
     }
 
 }

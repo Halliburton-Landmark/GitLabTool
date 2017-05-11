@@ -21,6 +21,7 @@ public class ProjectTypeServiceImpl implements ProjectTypeService {
     public ProjectTypeServiceImpl() {
         _types = new HashSet<>();
         _types.add(new DSGProjectType());
+        _types.add(UNKNOWN_TYPE);
     }
 
     @Override
