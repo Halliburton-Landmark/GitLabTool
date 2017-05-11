@@ -296,11 +296,14 @@ public class JGit {
         int currentProgress = 0;
         for (Project pr : projects) {
             currentProgress += aStepInProgress;
-            if (projects == null || !pr.isCloned()) {
+            if (pr == null) {
+                continue;
+            }
+            if (!pr.isCloned()) {
                 FeedbackUtil.sendError(onError, currentProgress, pr.getName() + ERROR_MSG_NOT_CLONED);
                 continue;
             }
-            if(commit(pr, message, setAll, nameCommitter, emailCommitter,
+            if(commitProject(pr, message, setAll, nameCommitter, emailCommitter,
                       nameAuthor, emailAuthor).equals(JGitStatus.FAILED)) {
                 FeedbackUtil.sendError(onError, currentProgress, "Failed to commit " + pr.getName() + " project");
                 continue;
@@ -569,11 +572,11 @@ public class JGit {
         return true;
     }
 
-    private JGitStatus commit (Project project, String message, boolean setAll,
+    public JGitStatus commitProject (Project project, String message, boolean setAll,
                                String nameCommitter, String emailCommitter,
                                String nameAuthor, String emailAuthor) {
         if (project == null) {
-            return JGitStatus.FAILED;
+            throw new IllegalArgumentException("Incorrect data! Project is null");
         }
         Optional<Git> opGit = getGitForRepository(project.getPathToClonedProject());
         if (!opGit.isPresent()) {
@@ -599,15 +602,19 @@ public class JGit {
         if (name != null || email != null) { // TODO valid data
             return new PersonIdent(name, email);
         }
-        User currentUser = CurrentUser.getInstance().getCurrentUser();
+        User currentUser = getUserData();
         return new PersonIdent(currentUser.getName(), currentUser.getEmail());
+    }
+
+    protected User getUserData() {
+        return CurrentUser.getInstance().getCurrentUser();
     }
 
     private JGitStatus commitAndPush(Project project, String message, boolean setAll,
                                      String nameCommitter, String emailCommitter,
                                      String nameAuthor, String emailAuthor) {
         try {
-            if(commit(project, message, setAll, nameCommitter, emailCommitter,
+            if(commitProject(project, message, setAll, nameCommitter, emailCommitter,
                       nameAuthor, emailAuthor).equals(JGitStatus.FAILED)) {
                 return JGitStatus.FAILED;
             }

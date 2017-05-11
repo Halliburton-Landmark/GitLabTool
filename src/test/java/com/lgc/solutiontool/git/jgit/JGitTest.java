@@ -8,32 +8,39 @@ import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.jgit.api.AddCommand;
+import org.eclipse.jgit.api.CommitCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.api.PullCommand;
 import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.StatusCommand;
+import org.eclipse.jgit.api.errors.AbortedByHookException;
 import org.eclipse.jgit.api.errors.CanceledException;
+import org.eclipse.jgit.api.errors.ConcurrentRefUpdateException;
 import org.eclipse.jgit.api.errors.DetachedHeadException;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidConfigurationException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.NoFilepatternException;
 import org.eclipse.jgit.api.errors.NoHeadException;
+import org.eclipse.jgit.api.errors.NoMessageException;
 import org.eclipse.jgit.api.errors.RefNotAdvertisedException;
 import org.eclipse.jgit.api.errors.RefNotFoundException;
 import org.eclipse.jgit.api.errors.TransportException;
+import org.eclipse.jgit.api.errors.UnmergedPathsException;
 import org.eclipse.jgit.api.errors.WrongRepositoryStateException;
 import org.eclipse.jgit.dircache.DirCache;
 import org.eclipse.jgit.errors.NoWorkTreeException;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.revwalk.RevCommit;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.lgc.solutiontool.git.entities.Group;
 import com.lgc.solutiontool.git.entities.Project;
+import com.lgc.solutiontool.git.entities.User;
 import com.lgc.solutiontool.git.util.JSONParser;
 
 
@@ -64,6 +71,7 @@ public class JGitTest {
         _listProjects.add(_projectCorrect);
         _listProjects.add(null);
         _listProjects.add(_projectCorrect);
+        _listProjects.add(new Project());
     }
 
     private final String CORRECT_PATH = "/path";
@@ -350,12 +358,110 @@ public class JGitTest {
         _jGit.commit(null, "__", false, null, null, null, null, null, null);
     }
 
-    @Test
-    public void commitCorrectDataTest() {
-        //_jGit.commit(null, "__", false, null, null, null, null, null, null);
-
-
+    @Test(expected=IllegalArgumentException.class)
+    public void commitProjectIsNullTest() {
+        _jGit.commitProject(null, "_", false, null, null, null, null);
     }
 
+    @Test
+    public void commitProjectIncorrectDataTest() {
+        _jGitMock = new JGit() {
+            @Override
+            protected Optional<Git> getGitForRepository(String path) {
+                return Optional.empty();
+            }
+        };
+        JGitStatus result = _jGitMock.commitProject(_projectCorrect, "_", false, null, null, null, null);
+        Assert.assertEquals(result, JGitStatus.FAILED);
 
+        _jGitMock = new JGit() {
+            @Override
+            protected Optional<Git> getGitForRepository(String path) {
+                return Optional.of(_gitMock);
+            }
+
+            @Override
+            protected User getUserData() {
+                User user = new User("Lyudmila", "ld@email.com");
+                return user;
+            }
+        };
+
+        CommitCommand commitCommand = new CommitCommand(_repositoryMock) {
+            @Override
+            public RevCommit call() throws GitAPIException, NoHeadException, NoMessageException, UnmergedPathsException,
+                    ConcurrentRefUpdateException, WrongRepositoryStateException, AbortedByHookException {
+                throw _gitExceptionMock;
+            }
+        };
+        Mockito.when(_gitMock.commit()).thenReturn(commitCommand);
+
+        result = _jGitMock.commitProject(_projectCorrect, "_", false, null, null, null, null);
+        Assert.assertEquals(result, JGitStatus.FAILED);
+    }
+
+    @Test
+    public void commitProjectCorrectDataTest() {
+        _jGitMock = new JGit() {
+            @Override
+            protected Optional<Git> getGitForRepository(String path) {
+                return Optional.of(_gitMock);
+            }
+
+            @Override
+            protected User getUserData() {
+                User user = new User("Lyudmila", "ld@email.com");
+                return user;
+            }
+        };
+
+        CommitCommand commitCommand = new CommitCommand(_repositoryMock) {
+            @Override
+            public RevCommit call() throws GitAPIException, NoHeadException, NoMessageException, UnmergedPathsException,
+                    ConcurrentRefUpdateException, WrongRepositoryStateException, AbortedByHookException {
+                return mock(RevCommit.class);
+            }
+        };
+        Mockito.when(_gitMock.commit()).thenReturn(commitCommand);
+        JGitStatus result = _jGitMock.commitProject(_projectCorrect, "_", false, null, null, null, null);
+        Assert.assertEquals(result, JGitStatus.SUCCESSFUL);
+    }
+
+    @Test
+    public void commitProjectsCorrectDataTest() {
+        _jGitMock = new JGit() {
+            @Override
+            protected Optional<Git> getGitForRepository(String path) {
+                return Optional.of(_gitMock);
+            }
+
+            @Override
+            protected User getUserData() {
+                User user = new User("Lyudmila", "ld@email.com");
+                return user;
+            }
+        };
+        CommitCommand commitCommand = new CommitCommand(_repositoryMock) {
+            @Override
+            public RevCommit call() throws GitAPIException, NoHeadException, NoMessageException, UnmergedPathsException,
+                    ConcurrentRefUpdateException, WrongRepositoryStateException, AbortedByHookException {
+                return mock(RevCommit.class);
+            }
+        };
+        Mockito.when(_gitMock.commit()).thenReturn(commitCommand);
+        JGitStatus result = _jGitMock.commit(_listProjects, "_", false, null, null, null, null, null, null);
+        Assert.assertEquals(result, JGitStatus.SUCCESSFUL);
+    }
+
+    @Test
+    public void commitProjectsIncorrectDataTest() {
+        _jGitMock = new JGit() {
+            @Override
+            protected Optional<Git> getGitForRepository(String path) {
+                return Optional.empty();
+            }
+        };
+        JGitStatus result = _jGitMock.commit(_listProjects, "_", false, null, null, null, null, null, null);
+        Assert.assertEquals(result, JGitStatus.SUCCESSFUL);
+    }
 }
