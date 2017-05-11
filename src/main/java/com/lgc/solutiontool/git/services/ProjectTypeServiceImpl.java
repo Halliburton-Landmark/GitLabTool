@@ -20,8 +20,7 @@ public class ProjectTypeServiceImpl implements ProjectTypeService {
 
     public ProjectTypeServiceImpl() {
         _types = new HashSet<>();
-        _types.add(new DSGProjectType());
-        _types.add(UNKNOWN_TYPE);
+        initProjectTypes();
     }
 
     @Override
@@ -30,12 +29,23 @@ public class ProjectTypeServiceImpl implements ProjectTypeService {
             throw new IllegalArgumentException("Invalid data. Project is null.");
         }
         String path = project.getPathToClonedProject();
-        for (ProjectType projectType : _types) {
-            if (projectType.isProjectCorrespondsType(path)) {
-                return projectType;
+        if (path != null) {
+            for (ProjectType projectType : _types) {
+                if (projectType.isProjectCorrespondsType(path)) {
+                    return projectType;
+                }
             }
         }
         return UNKNOWN_TYPE;
+    }
+
+    protected void initProjectTypes() {
+        _types.add(new DSGProjectType());
+        _types.add(UNKNOWN_TYPE);
+    }
+
+    protected Set<ProjectType> getSetProjectTypes() {
+        return _types;
     }
 
 }
