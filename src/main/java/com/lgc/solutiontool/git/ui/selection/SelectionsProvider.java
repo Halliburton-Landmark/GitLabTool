@@ -1,9 +1,6 @@
-package com.lgc.solutiontool.git.ui;
+package com.lgc.solutiontool.git.ui.selection;
 
 import com.lgc.solutiontool.git.entities.Project;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableArray;
-import javafx.collections.ObservableList;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 
 public class SelectionsProvider {
-    private static final String MAIN_WINDOW_PROJECTS = "mainWindow_projectsList";
 
     private static SelectionsProvider _instance;
 
@@ -28,11 +24,11 @@ public class SelectionsProvider {
         return _listItemsMap.get(listViewId);
     }
 
-    public void setSelectionItems(String listViewId, List items){
-        if(_listItemsMap.containsKey(listViewId)){
+    public void setSelectionItems(String listViewId, List items) {
+        if (_listItemsMap.containsKey(listViewId)) {
             _listItemsMap.get(listViewId).clear();
             _listItemsMap.get(listViewId).addAll(items);
-        }else{
+        } else {
             _listItemsMap.put(listViewId, items);
         }
     }
@@ -40,7 +36,7 @@ public class SelectionsProvider {
 
     private SelectionsProvider() {
         _listItemsMap = new HashMap<>();
-        _listItemsMap.put(MAIN_WINDOW_PROJECTS, new ArrayList<Project>());
+        _listItemsMap.put(ListViewKey.MAIN_WINDOW_PROJECTS.getKey(), new ArrayList<Project>());
 
     }
 }

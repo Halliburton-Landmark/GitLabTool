@@ -2,13 +2,14 @@ package com.lgc.solutiontool.git.ui.javafx.controllers;
 
 
 import com.lgc.solutiontool.git.entities.Project;
-import com.lgc.solutiontool.git.ui.SelectionsProvider;
+import com.lgc.solutiontool.git.ui.selection.ListViewKey;
+import com.lgc.solutiontool.git.ui.selection.SelectionsProvider;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
+import javafx.scene.Node;
+import javafx.scene.control.*;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
@@ -19,16 +20,19 @@ import java.util.List;
 public class SwitchBranchWindowController {
 
     @FXML
-    public ListView currentProjects;
+    public ListView currentProjectsListView;
+
+    @FXML
+    public Label projectsCount;
 
     @FXML
     public void initialize() {
-        configureProjectsListView(currentProjects);
+        configureProjectsListView(currentProjectsListView);
 
         List<?> selectedProjects = SelectionsProvider.getInstance().getSelectionItems("mainWindow_projectsList");
-        setProjectListItems(selectedProjects, currentProjects);
+        setProjectListItems(selectedProjects, currentProjectsListView);
 
-
+        projectsCount.setText("Total projects: " + currentProjectsListView.getItems().size());
     }
 
     private void setProjectListItems(List items, ListView<Project> listView) {
@@ -37,7 +41,7 @@ public class SwitchBranchWindowController {
         }
 
         if (items.get(0) instanceof Project) {
-            currentProjects.setItems(FXCollections.observableArrayList(items));
+            currentProjectsListView.setItems(FXCollections.observableArrayList(items));
         }
     }
 
@@ -47,6 +51,43 @@ public class SwitchBranchWindowController {
             @Override
             public ListCell<Project> call(ListView<Project> p) {
                 return new SwitchBranchWindowController.GroupListCell();
+            }
+        });
+
+        //setup selection
+        listView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        listView.addEventFilter(MouseEvent.MOUSE_PRESSED, evt -> {
+            Node node = evt.getPickResult().getIntersectedNode();
+
+            while (node != null && node != listView && !(node instanceof ListCell)) {
+                node = node.getParent();
+            }
+
+            if (node instanceof ListCell) {
+                evt.consume();
+
+                ListCell cell = (ListCell) node;
+                ListView lv = cell.getListView();
+
+                lv.requestFocus();
+
+                if (!cell.isEmpty()) {
+                    int index = cell.getIndex();
+                    if (cell.isSelected()) {
+                        lv.getSelectionModel().clearSelection(index);
+                    } else {
+                        lv.getSelectionModel().select(index);
+                    }
+                }
+            }
+        });
+
+        listView.getSelectionModel().getSelectedItems().addListener(new ListChangeListener() {
+            @Override
+            public void onChanged(ListChangeListener.Change change) {
+                projectsCount.setText("Total projects: " + listView.getItems().size());
+                SelectionsProvider.getInstance().setSelectionItems(ListViewKey.MAIN_WINDOW_PROJECTS.getKey(),
+                        listView.getSelectionModel().getSelectedItems());
             }
         });
     }
