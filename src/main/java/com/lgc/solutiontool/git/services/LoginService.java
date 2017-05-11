@@ -7,7 +7,7 @@ public interface LoginService {
     Object login(String serverURL, String name, String password);
 
     User getCurrentUser();
-    
+
     String getServerURL();
-    
+
 }

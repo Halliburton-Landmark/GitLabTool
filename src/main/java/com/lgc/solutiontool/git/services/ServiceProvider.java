@@ -33,6 +33,6 @@ public class ServiceProvider {
         _services.put(StorageService.class.getName(),new StorageServiceImpl());
         _services.put(ReplacementService.class.getName(), new ReplacementServiceImpl());
         _services.put(PomXMLService.class.getName(), new PomXMLServiceImpl());
-
+        _services.put(NetworkService.class.getName(), new NetworkServiceImpl());
     }
 }

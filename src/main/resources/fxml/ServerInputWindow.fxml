@@ -34,7 +34,7 @@
 				</Label>
 				<TextField fx:id="serverTextField" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="1" />
 				<Label text="Please enter a GitLab server URL" textAlignment="CENTER" GridPane.columnSpan="3" GridPane.halignment="CENTER" />
-            <Label fx:id="message" alignment="CENTER" contentDisplay="CENTER" text="Wrong input! Please, try again" textAlignment="CENTER" textFill="#fc0202" GridPane.columnSpan="3" GridPane.rowIndex="3">
+            <Label fx:id="message" alignment="CENTER" contentDisplay="CENTER" text="" textAlignment="CENTER" textFill="#fc0202" GridPane.columnSpan="3" GridPane.rowIndex="3">
                <GridPane.margin>
                   <Insets left="10.0" />
                </GridPane.margin></Label>

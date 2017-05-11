@@ -1,19 +1,17 @@
 package com.lgc.solutiontool.git.ui.javafx.controllers;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.List;
 
-import javax.net.ssl.HttpsURLConnection;
-
+import com.lgc.solutiontool.git.services.NetworkService;
 import com.lgc.solutiontool.git.services.ServiceProvider;
 import com.lgc.solutiontool.git.services.StorageService;
 import com.lgc.solutiontool.git.ui.icon.AppIconHolder;
-import com.lgc.solutiontool.git.util.RequestType;
 import com.lgc.solutiontool.git.util.URLManager;
 import com.lgc.solutiontool.git.xml.Server;
 import com.lgc.solutiontool.git.xml.Servers;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -22,6 +20,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 public class ServerInputWindowController {
@@ -29,9 +28,13 @@ public class ServerInputWindowController {
     private final String WRONG_INPUT_MESSAGE = "Wrong input! Please try again";
     private final String WRONG_SERVER_ADDRESS_MESSAGE = "Please enter an URL of existing \nGitLab server";
     private final String SERVER_ALREADY_EXIST_MESSAGE = "This server already exist!";
+    private final String VERIFYING_MESSAGE = "URL is verifying. Please wait...";
+    private final int SERVICE_UNAVAILABLE_ERROR_CODE = 503;
 
     private StorageService storageService = (StorageService) ServiceProvider.getInstance()
             .getService(StorageService.class.getName());
+    private NetworkService networkService = (NetworkService) ServiceProvider.getInstance()
+            .getService(NetworkService.class.getName());
 
     @FXML
     private Label server;
@@ -66,18 +69,36 @@ public class ServerInputWindowController {
         stage.setTitle("Server selection");
         Image appIcon = AppIconHolder.getInstance().getAppIcoImage();
         stage.getIcons().add(appIcon);
+        stage.initModality(Modality.APPLICATION_MODAL);
         stage.showAndWait();
     }
 
     @FXML
     public void onOkButton() throws Exception {
-        message.setVisible(false);
+        showMessage(VERIFYING_MESSAGE);
 
-        if (isInputValid() && !isServerAlreadyExists() && isValidResponseCode()) {
-            updateServersList();
-            Stage stage = (Stage) okButton.getScene().getWindow();
-            stage.close();
+        if (!isInputValid(serverTextField.getText())) {
+            showMessage(WRONG_INPUT_MESSAGE);
+            return;
         }
+        if (isServerAlreadyExists(serverTextField.getText())) {
+            showMessage(SERVER_ALREADY_EXIST_MESSAGE);
+            return;
+        }
+        
+        networkService.runURLVerification(serverTextField.getText(), (responseCode) -> {
+            if (responseCode > 0 && responseCode != SERVICE_UNAVAILABLE_ERROR_CODE) {
+                Platform.runLater(() -> {
+                    updateServersList();
+                    Stage stage = (Stage) okButton.getScene().getWindow();
+                    stage.close();
+                });
+            } else {
+                Platform.runLater(() -> {
+                    showMessage(WRONG_SERVER_ADDRESS_MESSAGE);
+                });
+            }
+        });
     }
 
     private void updateServersList() {
@@ -90,56 +111,23 @@ public class ServerInputWindowController {
         storageService.updateServers(new Servers(servers));
     }
 
-    private boolean isInputValid() {
-        String url = serverTextField.getText();
-        if (URLManager.isURLValid(url)) {
-            return true;
-        } else {
-            message.setText(WRONG_INPUT_MESSAGE);
-            message.setVisible(true);
-            return false;
-        }
+    private void showMessage(String msg) {
+        message.setText(msg);
+        message.setVisible(true);
     }
 
-    private boolean isValidResponseCode() {
-        String url = URLManager.trimServerURL(serverTextField.getText());
-        int responseCode = getServerResponseCode(url);
-        if (responseCode > 0 && responseCode != 503) {
-            return true;
-        } else {
-            message.setText(WRONG_SERVER_ADDRESS_MESSAGE);
-            message.setVisible(true);
-            return false;
-        }
+    private boolean isInputValid(String inputURL) {
+        return URLManager.isURLValid(inputURL);
     }
 
-    private boolean isServerAlreadyExists() {
-        String url = URLManager.trimServerURL(serverTextField.getText());
+    private boolean isServerAlreadyExists(String inputURL) {
+        String url = URLManager.trimServerURL(inputURL);
         List<Server> servers = storageService.loadServers().getServers();
-        if (servers.contains(new Server(url, api.getValue()))) {
-            message.setText(SERVER_ALREADY_EXIST_MESSAGE);
-            message.setVisible(true);
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    private int getServerResponseCode(String url) {
-        int responseCode = -1;
-        try {
-            // handshake
-            URL obj = new URL(URLManager.completeServerURL(url));
-            HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
-            con.setRequestMethod(RequestType.GET.toString());
-            responseCode = con.getResponseCode();
-        } catch (Exception e) {
-            return -1;
-        }
-        return responseCode;
+        return servers.contains(new Server(url, api.getValue()));
     }
 
     public void setAPIVersion() {
         // TODO: manage API version from ComboBox
     }
+    
 }
