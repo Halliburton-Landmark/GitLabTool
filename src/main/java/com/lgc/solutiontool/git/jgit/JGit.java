@@ -77,11 +77,12 @@ public class JGit {
      * @param group      group for clone
      * @param localPath  localPath the path to where will clone all the projects of the group
      * @param onSuccess  method for tracking the success progress of cloning,
-     *                   where <Integer> is a percentage of progress.
+     *                   where <Integer> is a percentage of progress,
+     *                   <Project> is a cloned project.
      * @param onError    method for tracking the errors during cloning,
      *                   where <Integer> is a percentage of progress, <String> error message.
      */
-    public void clone(Group group, String localPath, Consumer<Integer> onSuccess, BiConsumer<Integer, String> onError) {
+    public void clone(Group group, String localPath, BiConsumer<Integer, Project> onSuccess, BiConsumer<Integer, String> onError) {
         if (group == null || localPath == null) {
             return;
         }
@@ -104,7 +105,7 @@ public class JGit {
                 }
             }
             if(onSuccess != null) {
-                onSuccess.accept(currentProgress);
+                onSuccess.accept(currentProgress, project);
             }
         }
         group.setClonedStatus(true);
