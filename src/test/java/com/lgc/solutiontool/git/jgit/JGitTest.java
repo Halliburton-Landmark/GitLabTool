@@ -42,6 +42,7 @@ public class JGitTest {
     private final JGit _jGit = JGit.getInstance();
     private static final Project _projectCorrect;
     private static final Project _projectIncorrect = new Project();
+    private static final List<Project> _listProjects;
     // mocks
     private static JGit _jGitMock;
     private static final Git _gitMock = mock(Git.class);
@@ -59,6 +60,10 @@ public class JGitTest {
         _projectCorrect.setPathToClonedProject(".path");
         _projectCorrect.setClonedStatus(true);
 
+        _listProjects = new ArrayList<>();
+        _listProjects.add(_projectCorrect);
+        _listProjects.add(null);
+        _listProjects.add(_projectCorrect);
     }
 
     private final String CORRECT_PATH = "/path";
@@ -78,9 +83,11 @@ public class JGitTest {
         _jGit.clone(new Group(), null, null, null);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void cloneGroupIncorrectDataExceptionTest() {
-        _jGit.clone(null, null, null, null);
+        Group group = new Group();
+        group.setClonedStatus(true);
+        Assert.assertFalse(_jGit.clone(group, ".", null, null));
     }
 
     @Test
@@ -159,7 +166,6 @@ public class JGitTest {
             }
         };
         Mockito.when(_gitMock.status()).thenReturn(statusCommandMock);
-
         Assert.assertFalse(_jGitMock.getStatusProject(null).isPresent());
         Assert.assertFalse(_jGitMock.getStatusProject(_projectIncorrect).isPresent());
         Assert.assertFalse(_jGitMock.getStatusProject(_projectCorrect).isPresent());
@@ -172,6 +178,10 @@ public class JGitTest {
         };
         Mockito.when(_gitMock.status()).thenReturn(statusCommandMock);
         Assert.assertFalse(_jGitMock.getStatusProject(_projectCorrect).isPresent());
+
+        _projectIncorrect.setClonedStatus(true);
+        Assert.assertFalse(_jGitMock.getStatusProject(_projectIncorrect).isPresent());
+        _projectIncorrect.setClonedStatus(false);
     }
 
     @Test
@@ -206,7 +216,7 @@ public class JGitTest {
                 return Optional.empty();
             }
         };
-        Assert.assertFalse(_jGitMock.addUntrackedFileForCommit(new ArrayList<>(), _projectCorrect));
+        Assert.assertTrue(_jGitMock.addUntrackedFileForCommit(new ArrayList<>(), _projectCorrect));
 
         _jGitMock = new JGit() {
             @Override
@@ -321,12 +331,31 @@ public class JGitTest {
     }
 
     @Test(expected=IllegalArgumentException.class)
-    public void commitGroupIsNullTest() {
-        _jGit.commit(null, "__", false, null, null, null, null, null, null);
+    public void commitMessageIsNullTest() {
+        _jGit.commit(_listProjects, null, false, null, null, null, null, null, null);
     }
 
     @Test(expected=IllegalArgumentException.class)
-    public void commitMessageIsNullTest() {
-        _jGit.commit(new Group(), null, false, null, null, null, null, null, null);
+    public void commitMessageIsEmptyTest() {
+        _jGit.commit(_listProjects, "", false, null, null, null, null, null, null);
     }
+
+    @Test(expected=IllegalArgumentException.class)
+    public void commitProjectsIsEmptyTest() {
+        _jGit.commit(new ArrayList<>(), "__", false, null, null, null, null, null, null);
+    }
+
+    @Test(expected=IllegalArgumentException.class)
+    public void commitProjectsIsNullTest() {
+        _jGit.commit(null, "__", false, null, null, null, null, null, null);
+    }
+
+    @Test
+    public void commitCorrectDataTest() {
+        //_jGit.commit(null, "__", false, null, null, null, null, null, null);
+
+
+    }
+
+
 }
