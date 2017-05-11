@@ -1,9 +1,12 @@
 package com.lgc.solutiontool.git.services;
 
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.function.Consumer;
 
 import javax.net.ssl.HttpsURLConnection;
+
+import org.apache.http.HttpStatus;
 
 import com.lgc.solutiontool.git.util.RequestType;
 import com.lgc.solutiontool.git.util.URLManager;
@@ -20,6 +23,8 @@ public class NetworkServiceImpl implements NetworkService {
             connection.setReadTimeout(10000); // timeout after 10 seconds
             connection.setRequestMethod(RequestType.GET.toString());
             responseCode = connection.getResponseCode();
+        } catch (SocketTimeoutException e1) {
+            return HttpStatus.SC_GATEWAY_TIMEOUT;
         } catch (Exception e) {
             return -1;
         }

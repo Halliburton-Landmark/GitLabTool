@@ -13,6 +13,7 @@ import com.lgc.solutiontool.git.xml.Servers;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.scene.Cursor;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -20,8 +21,10 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
+import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.apache.http.HttpStatus;
 
 public class ServerInputWindowController {
 
@@ -29,7 +32,7 @@ public class ServerInputWindowController {
     private final String WRONG_SERVER_ADDRESS_MESSAGE = "Please enter an URL of existing \nGitLab server";
     private final String SERVER_ALREADY_EXIST_MESSAGE = "This server already exist!";
     private final String VERIFYING_MESSAGE = "URL is verifying. Please wait...";
-    private final int SERVICE_UNAVAILABLE_ERROR_CODE = 503;
+    private final String NO_INTERNET_CONNECTION_MESSAGE = "No Internet connection";
 
     private StorageService storageService = (StorageService) ServiceProvider.getInstance()
             .getService(StorageService.class.getName());
@@ -75,29 +78,37 @@ public class ServerInputWindowController {
 
     @FXML
     public void onOkButton() throws Exception {
-        showMessage(VERIFYING_MESSAGE);
+        showMessage(VERIFYING_MESSAGE, "green");
+        getStage().getScene().setCursor(Cursor.WAIT);
 
         if (!isInputValid(serverTextField.getText())) {
-            showMessage(WRONG_INPUT_MESSAGE);
+            showMessage(WRONG_INPUT_MESSAGE, "red");
+            getStage().getScene().setCursor(Cursor.DEFAULT);
             return;
         }
         if (isServerAlreadyExists(serverTextField.getText())) {
-            showMessage(SERVER_ALREADY_EXIST_MESSAGE);
+            showMessage(SERVER_ALREADY_EXIST_MESSAGE, "red");
+            getStage().getScene().setCursor(Cursor.DEFAULT);
             return;
         }
         
         networkService.runURLVerification(serverTextField.getText(), (responseCode) -> {
-            if (responseCode > 0 && responseCode != SERVICE_UNAVAILABLE_ERROR_CODE) {
+            
+            if (responseCode > 0 && responseCode < HttpStatus.SC_INTERNAL_SERVER_ERROR) {
                 Platform.runLater(() -> {
                     updateServersList();
-                    Stage stage = (Stage) okButton.getScene().getWindow();
-                    stage.close();
+                    getStage().close();
+                });
+            } else if (responseCode >= HttpStatus.SC_INTERNAL_SERVER_ERROR) {
+                Platform.runLater(() -> {
+                    showMessage(WRONG_SERVER_ADDRESS_MESSAGE, "red");
                 });
             } else {
                 Platform.runLater(() -> {
-                    showMessage(WRONG_SERVER_ADDRESS_MESSAGE);
+                    showMessage(NO_INTERNET_CONNECTION_MESSAGE, "red");
                 });
             }
+            getStage().getScene().setCursor(Cursor.DEFAULT);
         });
     }
 
@@ -111,8 +122,9 @@ public class ServerInputWindowController {
         storageService.updateServers(new Servers(servers));
     }
 
-    private void showMessage(String msg) {
+    private void showMessage(String msg, String color) {
         message.setText(msg);
+        message.setTextFill(Color.web(color));
         message.setVisible(true);
     }
 
@@ -130,4 +142,7 @@ public class ServerInputWindowController {
         // TODO: manage API version from ComboBox
     }
     
+    private Stage getStage() {
+        return (Stage) okButton.getScene().getWindow();
+    }
 }
