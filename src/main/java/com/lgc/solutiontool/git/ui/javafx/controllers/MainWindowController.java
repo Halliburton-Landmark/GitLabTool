@@ -4,7 +4,6 @@ package com.lgc.solutiontool.git.ui.javafx.controllers;
 import com.lgc.solutiontool.git.entities.Group;
 import com.lgc.solutiontool.git.entities.Project;
 import com.lgc.solutiontool.git.services.LoginService;
-import com.lgc.solutiontool.git.services.ProjectService;
 import com.lgc.solutiontool.git.services.ServiceProvider;
 import com.lgc.solutiontool.git.ui.toolbar.ToolbarManager;
 import javafx.beans.binding.BooleanBinding;
@@ -49,6 +48,7 @@ public class MainWindowController {
 
         BooleanBinding booleanBinding = projectsList.getSelectionModel().selectedItemProperty().isNull();
         ToolbarManager.getInstance().getAllButtonsForCurrentView().forEach(x -> x.disableProperty().bind(booleanBinding));
+
 
         //TODO: Additional thread should be placed to services
         new Thread(this::updateProjectList).start();
