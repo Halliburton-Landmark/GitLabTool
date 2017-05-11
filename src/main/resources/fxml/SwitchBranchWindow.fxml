@@ -18,61 +18,49 @@
         <RowConstraints maxHeight="1.7976931348623157E308" minHeight="10.0" prefHeight="100.0" vgrow="ALWAYS"/>
         <RowConstraints maxHeight="30.0" minHeight="10.0" prefHeight="10.0" vgrow="SOMETIMES"/>
     </rowConstraints>
-    <children>
-        <AnchorPane GridPane.rowSpan="3">
-            <children>
-                <ListView maxHeight="Infinity" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="0.0"
-                          AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
-                <Label maxHeight="20.0" text="Total project: 3" AnchorPane.bottomAnchor="0.0"/>
-            </children>
-        </AnchorPane>
-        <AnchorPane GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowSpan="3">
-            <children>
-                <TextField AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
-                <ListView AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-                          AnchorPane.topAnchor="30.0">
-                    <opaqueInsets>
-                        <Insets/>
-                    </opaqueInsets>
-                </ListView>
-                <Label maxHeight="20.0" text="Total branches: 1650" AnchorPane.bottomAnchor="0.0"
-                       AnchorPane.leftAnchor="0.0"/>
-            </children>
-        </AnchorPane>
-        <VBox spacing="20.0" GridPane.columnIndex="3" GridPane.rowSpan="3">
-            <children>
-                <Button mnemonicParsing="false" text="Load remote branches"/>
-                <VBox>
-                    <children>
-                        <RadioButton mnemonicParsing="false" text="Local">
-                            <toggleGroup>
-                                <ToggleGroup fx:id="branchesFilter"/>
-                            </toggleGroup>
-                        </RadioButton>
-                        <RadioButton mnemonicParsing="false" text="Remote" toggleGroup="$branchesFilter"/>
-                        <RadioButton mnemonicParsing="false" text="Remote + Local" toggleGroup="$branchesFilter"/>
-                    </children>
-                </VBox>
-                <CheckBox mnemonicParsing="false" text="Match in all branches"/>
-                <Button mnemonicParsing="false" text="Update list">
-                    <VBox.margin>
-                        <Insets/>
-                    </VBox.margin>
-                </Button>
-            </children>
-        </VBox>
-        <HBox alignment="TOP_RIGHT" maxHeight="50.0" prefHeight="100.0" prefWidth="200.0" spacing="20.0"
-              style="-fx-background-color: ;" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="3">
-            <children>
-                <Button mnemonicParsing="false" text="Apply"/>
-                <Button mnemonicParsing="false" text="Cancel"/>
-            </children>
-        </HBox>
-    </children>
     <opaqueInsets>
         <Insets/>
     </opaqueInsets>
     <padding>
         <Insets bottom="15.0" left="15.0" right="15.0" top="15.0"/>
     </padding>
+    <AnchorPane GridPane.rowSpan="3">
+        <ListView maxHeight="Infinity" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="0.0"
+                  AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
+        <Label maxHeight="20.0" text="Total project: 3" AnchorPane.bottomAnchor="0.0"/>
+    </AnchorPane>
+    <AnchorPane GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowSpan="3">
+        <TextField AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
+        <ListView AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                  AnchorPane.topAnchor="30.0">
+            <opaqueInsets>
+                <Insets/>
+            </opaqueInsets>
+        </ListView>
+        <Label maxHeight="20.0" text="Total branches: 1650" AnchorPane.bottomAnchor="0.0"
+               AnchorPane.leftAnchor="0.0"/>
+    </AnchorPane>
+    <VBox spacing="20.0" GridPane.columnIndex="3" GridPane.rowSpan="3">
+        <Button mnemonicParsing="false" text="Load remote branches"/>
+        <VBox>
+            <RadioButton mnemonicParsing="false" text="Local">
+                <toggleGroup>
+                    <ToggleGroup fx:id="branchesFilter"/>
+                </toggleGroup>
+            </RadioButton>
+            <RadioButton mnemonicParsing="false" text="Remote" toggleGroup="$branchesFilter"/>
+            <RadioButton mnemonicParsing="false" text="Remote + Local" toggleGroup="$branchesFilter"/>
+        </VBox>
+        <CheckBox mnemonicParsing="false" text="Match in all branches"/>
+        <Button mnemonicParsing="false" text="Update list">
+            <VBox.margin>
+                <Insets/>
+            </VBox.margin>
+        </Button>
+    </VBox>
+    <HBox alignment="TOP_RIGHT" maxHeight="50.0" prefHeight="100.0" prefWidth="200.0" spacing="20.0"
+          style="-fx-background-color: ;" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="3">
+        <Button mnemonicParsing="false" text="Apply"/>
+        <Button mnemonicParsing="false" text="Cancel"/>
+    </HBox>
 </GridPane>
