@@ -3,6 +3,8 @@ package com.lgc.solutiontool.git.ui.javafx.controllers;
 import java.io.IOException;
 import java.util.List;
 
+import org.apache.http.HttpStatus;
+
 import com.lgc.solutiontool.git.services.NetworkService;
 import com.lgc.solutiontool.git.services.ServiceProvider;
 import com.lgc.solutiontool.git.services.StorageService;
@@ -24,19 +26,18 @@ import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import org.apache.http.HttpStatus;
 
 public class ServerInputWindowController {
 
     private final String WRONG_INPUT_MESSAGE = "Wrong input! Please try again";
     private final String WRONG_SERVER_ADDRESS_MESSAGE = "Please enter an URL of existing \nGitLab server";
-    private final String SERVER_ALREADY_EXIST_MESSAGE = "This server already exist!";
+    private final String SERVER_ALREADY_EXISTS_MESSAGE = "This server already exists!";
     private final String VERIFYING_MESSAGE = "URL is verifying. Please wait...";
     private final String NO_INTERNET_CONNECTION_MESSAGE = "No Internet connection";
 
-    private StorageService storageService = (StorageService) ServiceProvider.getInstance()
+    private final StorageService storageService = (StorageService) ServiceProvider.getInstance()
             .getService(StorageService.class.getName());
-    private NetworkService networkService = (NetworkService) ServiceProvider.getInstance()
+    private final NetworkService networkService = (NetworkService) ServiceProvider.getInstance()
             .getService(NetworkService.class.getName());
 
     @FXML
@@ -77,38 +78,41 @@ public class ServerInputWindowController {
     }
 
     @FXML
-    public void onOkButton() throws Exception {
+    public void onOkButton() {
         showMessage(VERIFYING_MESSAGE, Color.GREEN);
         getStage().getScene().setCursor(Cursor.WAIT);
-
         if (!isInputValid(serverTextField.getText())) {
             showMessage(WRONG_INPUT_MESSAGE, Color.RED);
             getStage().getScene().setCursor(Cursor.DEFAULT);
             return;
         }
         if (isServerAlreadyExists(serverTextField.getText())) {
-            showMessage(SERVER_ALREADY_EXIST_MESSAGE, Color.RED);
+            showMessage(SERVER_ALREADY_EXISTS_MESSAGE, Color.RED);
             getStage().getScene().setCursor(Cursor.DEFAULT);
             return;
         }
-        
+
         networkService.runURLVerification(serverTextField.getText(), (responseCode) -> {
-            
-            if (responseCode > 0 && responseCode < HttpStatus.SC_INTERNAL_SERVER_ERROR) {
-                Platform.runLater(() -> {
-                    updateServersList();
-                    getStage().close();
-                });
-            } else if (responseCode >= HttpStatus.SC_INTERNAL_SERVER_ERROR) {
-                Platform.runLater(() -> {
-                    showMessage(WRONG_SERVER_ADDRESS_MESSAGE, Color.RED);
-                });
-            } else {
-                Platform.runLater(() -> {
-                    showMessage(NO_INTERNET_CONNECTION_MESSAGE, Color.RED);
-                });
+
+            try {
+                if (responseCode > 0 && responseCode <= HttpStatus.SC_UNAUTHORIZED) {
+                    Platform.runLater(() -> {
+                        updateServersList();
+                        getStage().close();
+                    });
+                } else if (responseCode < 0 || responseCode > HttpStatus.SC_UNAUTHORIZED) {
+                    Platform.runLater(() -> {
+                        showMessage(WRONG_SERVER_ADDRESS_MESSAGE, Color.RED);
+                    });
+                } else {
+                    Platform.runLater(() -> {
+                        showMessage(NO_INTERNET_CONNECTION_MESSAGE, Color.RED);
+                    });
+                }
+
+            } finally {
+                getStage().getScene().setCursor(Cursor.DEFAULT);
             }
-            getStage().getScene().setCursor(Cursor.DEFAULT);
         });
     }
 
@@ -138,7 +142,7 @@ public class ServerInputWindowController {
         return servers.contains(new Server(url, api.getValue()));
     }
 
-    public void setAPIVersion() {
+    private void setAPIVersion() { // private for now
         // TODO: manage API version from ComboBox
     }
 

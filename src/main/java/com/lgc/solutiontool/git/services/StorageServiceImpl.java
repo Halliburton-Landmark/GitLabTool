@@ -34,6 +34,7 @@ public class StorageServiceImpl implements StorageService {
             XMLParser.saveObject(file, ProgramProperties.getInstance());
             return true;
         } catch (IOException | JAXBException e) {
+            System.err.println(this.getClass().getName() + ".updateStorage: " + e.getMessage()); // TODO move to logger
             return false;
         }
     }
@@ -45,6 +46,7 @@ public class StorageServiceImpl implements StorageService {
             List<Group> list = XMLParser.loadObject(file, ProgramProperties.class).getClonedGroups();
             return list == null ? Collections.emptyList() : list;
         } catch (IOException | JAXBException e) {
+            System.err.println(this.getClass().getName() + ".loadStorage: " + e.getMessage()); // TODO move to logger
             return Collections.emptyList();
         }
     }
@@ -56,19 +58,26 @@ public class StorageServiceImpl implements StorageService {
             XMLParser.saveObject(file, servers);
             return true;
         } catch (IOException | JAXBException e) {
+            System.err.println(this.getClass().getName() + ".updateServers: " + e.getMessage()); // TODO move to logger
             return false;
         }
     }
 
     @Override
     public Servers loadServers() {
+        Servers servers = null;
         try {
             File file = getServersFile();
-            return XMLParser.loadObject(file, Servers.class);
+            servers = XMLParser.loadObject(file, Servers.class);
         } catch (IOException | JAXBException e) {
-            updateServers(new Servers());
-            return loadServers();
+            System.err.println(this.getClass().getName() + ".loadServers: " + e.getMessage()); // TODO move to logger
+        } finally {
+            if (servers == null) {
+                updateServers(new Servers());
+                servers = loadServers();
+            }
         }
+        return servers;
     }
 
     private File getPropFile(String server, String username) throws IOException {
@@ -84,14 +93,14 @@ public class StorageServiceImpl implements StorageService {
     }
 
     private File getFile(File file) throws IOException {
-        File parentDor = file.getParentFile();
+        File parentDirectory = file.getParentFile();
 
         if (file.exists()) {
             return new File(file.getCanonicalPath());
         }
 
-        if (!parentDor.exists()) {
-            parentDor.mkdirs();
+        if (!parentDirectory.exists()) {
+            parentDirectory.mkdirs();
         }
         file.createNewFile();
 

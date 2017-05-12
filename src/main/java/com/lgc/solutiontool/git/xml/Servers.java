@@ -12,6 +12,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Servers {
 
+    @XmlElement(name = "server")
+    private List<Server> servers = null;
+
     public Servers() {
         servers = new ArrayList<>();
         servers.add(new Server("gitlab.com", "v3"));
@@ -22,9 +25,6 @@ public class Servers {
     public Servers(List<Server> servers) {
         this.servers = servers;
     }
-
-    @XmlElement(name = "server")
-    private List<Server> servers = null;
 
     public List<Server> getServers() {
         return servers;
