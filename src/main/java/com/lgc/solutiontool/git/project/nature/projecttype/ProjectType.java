@@ -22,6 +22,8 @@ import com.lgc.solutiontool.git.project.nature.operation.Operation;
 */
 public interface ProjectType {
 
+    static final String ID_KEY = "id";
+
     /**
      * Gets id of type
      *
