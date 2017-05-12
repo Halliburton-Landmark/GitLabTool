@@ -10,6 +10,12 @@ import com.lgc.solutiontool.git.project.nature.projecttype.DSGProjectType;
 import com.lgc.solutiontool.git.project.nature.projecttype.ProjectType;
 import com.lgc.solutiontool.git.project.nature.projecttype.UnknownProjectType;
 
+
+/**
+ * Tests for the ProjectTypeServiceImpl service.
+ *
+ * @author Lyudmila Lyska
+ */
 public class ProjectTypeServiceImplTest {
 
     private static ProjectTypeServiceImpl _service = (ProjectTypeServiceImpl) ServiceProvider.getInstance()

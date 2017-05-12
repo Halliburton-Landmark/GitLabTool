@@ -3,6 +3,11 @@ package com.lgc.solutiontool.git.project.nature.projecttype;
 import org.junit.Assert;
 import org.junit.Test;
 
+/**
+ * Tests for the UnknownProjectType class.
+ *
+ * @author Lyudmila Lyska
+ */
 public class UnknownProjectTypeTest {
 
     private final UnknownProjectType _unknownProjectType = new UnknownProjectType();

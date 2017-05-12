@@ -8,6 +8,11 @@ import org.junit.Test;
 
 import com.lgc.solutiontool.git.project.nature.operation.Operation;
 
+/**
+ * Tests for the ProjectTypeImpl class.
+ *
+ * @author Lyudmila Lyska
+ */
 public class ProjectTypeImplTest {
 
     private ProjectTypeImpl _projectType = new ProjectTypeImpl() {};

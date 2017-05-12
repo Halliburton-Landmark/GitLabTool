@@ -10,6 +10,11 @@ import org.junit.Test;
 
 import com.lgc.solutiontool.git.project.nature.operation.Operation;
 
+/**
+ * Tests for the DSGProjectType class.
+ *
+ * @author Lyudmila Lyska
+ */
 public class DSGProjectTypeTest {
 
     private final DSGProjectType _dsgProjectType = new DSGProjectType() {

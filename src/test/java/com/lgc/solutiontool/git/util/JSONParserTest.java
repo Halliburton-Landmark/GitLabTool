@@ -13,6 +13,12 @@ import org.junit.Test;
 import com.google.gson.reflect.TypeToken;
 import com.lgc.solutiontool.git.entities.Group;
 
+
+/**
+ * Tests for the JSONParserTest.
+ *
+ * @author Lyudmila Lyska
+ */
 public class JSONParserTest {
 
     private static final String groupJson = "{\"id\":1348279,\"name\":\"apitest_group\",\"path\":\"apitest_group\","
