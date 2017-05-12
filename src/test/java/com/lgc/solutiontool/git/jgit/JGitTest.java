@@ -53,6 +53,8 @@ public class JGitTest {
     // mocks
     private static JGit _jGitMock;
     private static final Git _gitMock = mock(Git.class);
+    private static final JGit _correctJGitMock;
+    private static final JGit _emptyJGitMock;
     private static final GitAPIException _gitExceptionMock = mock(GitAPIException.class);
     private static final Repository _repositoryMock = mock(Repository.class);
     private static final DirCache _dirCachMock = mock(DirCache.class);
@@ -72,6 +74,30 @@ public class JGitTest {
         _listProjects.add(null);
         _listProjects.add(_projectCorrect);
         _listProjects.add(new Project());
+
+        _correctJGitMock = new JGit() {
+            @Override
+            protected Optional<Git> getGitForRepository(String path) {
+                return Optional.ofNullable(_gitMock);
+            }
+
+            @Override
+            protected boolean isContinueMakePull(Project project) {
+                return true;
+            }
+
+            @Override
+            protected User getUserData() {
+                User user = new User("Lyudmila", "ld@email.com");
+                return user;
+            }
+        };
+        _emptyJGitMock = new JGit() {
+            @Override
+            protected Optional<Git> getGitForRepository(String path) {
+                return Optional.empty();
+            }
+        };
     }
 
     private final String CORRECT_PATH = "/path";
@@ -140,13 +166,7 @@ public class JGitTest {
     }
 
     @Test
-    public void gitStatusCorrectDataTest() { // TODO
-        _jGitMock = new JGit() {
-            @Override
-            protected Optional<Git> getGitForRepository(String path) {
-                return Optional.ofNullable(_gitMock);
-            }
-        };
+    public void gitStatusCorrectDataTest() {
         StatusCommand statusCommandMock = new StatusCommand(_repositoryMock) {
             @Override
             public Status call() throws GitAPIException, NoWorkTreeException {
@@ -155,18 +175,11 @@ public class JGitTest {
         };
         Mockito.when(_gitMock.status()).thenReturn(statusCommandMock);
 
-        Assert.assertTrue(_jGitMock.getStatusProject(_projectCorrect).isPresent());
+        Assert.assertTrue(_correctJGitMock.getStatusProject(_projectCorrect).isPresent());
     }
 
     @Test
     public void gitStatusIncorrectDataTest() {
-        _jGitMock = new JGit() {
-            @Override
-            protected Optional<Git> getGitForRepository(String path) {
-                return Optional.ofNullable(_gitMock);
-            }
-        };
-
         StatusCommand statusCommandMock = new StatusCommand(_repositoryMock) {
             @Override
             public Status call() throws GitAPIException, NoWorkTreeException {
@@ -174,9 +187,9 @@ public class JGitTest {
             }
         };
         Mockito.when(_gitMock.status()).thenReturn(statusCommandMock);
-        Assert.assertFalse(_jGitMock.getStatusProject(null).isPresent());
-        Assert.assertFalse(_jGitMock.getStatusProject(_projectIncorrect).isPresent());
-        Assert.assertFalse(_jGitMock.getStatusProject(_projectCorrect).isPresent());
+        Assert.assertFalse(_correctJGitMock.getStatusProject(null).isPresent());
+        Assert.assertFalse(_correctJGitMock.getStatusProject(_projectIncorrect).isPresent());
+        Assert.assertFalse(_correctJGitMock.getStatusProject(_projectCorrect).isPresent());
 
         statusCommandMock = new StatusCommand(_repositoryMock) {
             @Override
@@ -185,10 +198,10 @@ public class JGitTest {
             }
         };
         Mockito.when(_gitMock.status()).thenReturn(statusCommandMock);
-        Assert.assertFalse(_jGitMock.getStatusProject(_projectCorrect).isPresent());
+        Assert.assertFalse(_correctJGitMock.getStatusProject(_projectCorrect).isPresent());
 
         _projectIncorrect.setClonedStatus(true);
-        Assert.assertFalse(_jGitMock.getStatusProject(_projectIncorrect).isPresent());
+        Assert.assertFalse(_correctJGitMock.getStatusProject(_projectIncorrect).isPresent());
         _projectIncorrect.setClonedStatus(false);
     }
 
@@ -205,7 +218,7 @@ public class JGitTest {
         List<String> files = new ArrayList<>();
         files.add("0");
         files.add(null);
-        Assert.assertTrue(_jGitMock.addUntrackedFileForCommit(files, _projectCorrect));
+        Assert.assertTrue(_correctJGitMock.addUntrackedFileForCommit(files, _projectCorrect));
     }
 
     @Test
@@ -217,25 +230,12 @@ public class JGitTest {
             }
         };
         Mockito.when(_gitMock.add()).thenReturn(addCommandMock);
+        Assert.assertTrue(_emptyJGitMock.addUntrackedFileForCommit(new ArrayList<>(), _projectCorrect));
 
-        _jGitMock = new JGit() {
-            @Override
-            protected Optional<Git> getGitForRepository(String path) {
-                return Optional.empty();
-            }
-        };
-        Assert.assertTrue(_jGitMock.addUntrackedFileForCommit(new ArrayList<>(), _projectCorrect));
-
-        _jGitMock = new JGit() {
-            @Override
-            protected Optional<Git> getGitForRepository(String path) {
-                return Optional.of(_gitMock);
-            }
-        };
         List<String> files = new ArrayList<>();
         files.add("0");
         files.add(null);
-        Assert.assertTrue(_jGitMock.addUntrackedFileForCommit(files, _projectCorrect));
+        Assert.assertTrue(_correctJGitMock.addUntrackedFileForCommit(files, _projectCorrect));
     }
 
     @Test(expected=IllegalArgumentException.class)
@@ -256,14 +256,7 @@ public class JGitTest {
     @Test
     public void pullIncorrectDataTest() {
         Assert.assertEquals(_jGit.pull(_projectIncorrect), JGitStatus.FAILED);
-
-        _jGitMock = new JGit() {
-            @Override
-            protected Optional<Git> getGitForRepository(String path) {
-                return Optional.empty();
-            }
-        };
-        Assert.assertEquals(_jGitMock.pull(_projectCorrect), JGitStatus.FAILED);
+        Assert.assertEquals(_emptyJGitMock.pull(_projectCorrect), JGitStatus.FAILED);
 
         _jGitMock = new JGit() {
             @Override
@@ -278,18 +271,6 @@ public class JGitTest {
         };
         Assert.assertEquals(_jGitMock.pull(_projectCorrect), JGitStatus.FAILED);
 
-        _jGitMock = new JGit() {
-            @Override
-            protected Optional<Git> getGitForRepository(String path) {
-                return Optional.of(_gitMock);
-            }
-
-            @Override
-            protected boolean isContinueMakePull(Project project) {
-                return true;
-            }
-        };
-
         PullCommand pullCommandMock =  new PullCommand(_repositoryMock) {
             @Override
             public PullResult call() throws GitAPIException, WrongRepositoryStateException,
@@ -299,23 +280,11 @@ public class JGitTest {
             }
         };
         Mockito.when(_gitMock.pull()).thenReturn(pullCommandMock);
-        Assert.assertEquals(_jGitMock.pull(_projectCorrect), JGitStatus.FAILED);
+        Assert.assertEquals(_correctJGitMock.pull(_projectCorrect), JGitStatus.FAILED);
     }
 
     @Test
     public void pullCorrectDataTest() {
-        _jGitMock = new JGit() {
-            @Override
-            protected Optional<Git> getGitForRepository(String path) {
-                return Optional.of(_gitMock);
-            }
-
-            @Override
-            protected boolean isContinueMakePull(Project project) {
-                return true;
-            }
-        };
-
         PullResult pullResultMock = mock(PullResult.class);
         PullCommand pullCommandMock =  new PullCommand(_repositoryMock) {
             @Override
@@ -334,8 +303,7 @@ public class JGitTest {
             }
         };
         Mockito.when(pullResultMock.getMergeResult()).thenReturn(mergeMock);
-        Assert.assertEquals(_jGitMock.pull(_projectCorrect), JGitStatus.FAST_FORWARD);
-
+        Assert.assertEquals(_correctJGitMock.pull(_projectCorrect), JGitStatus.FAST_FORWARD);
     }
 
     @Test(expected=IllegalArgumentException.class)
@@ -365,27 +333,8 @@ public class JGitTest {
 
     @Test
     public void commitProjectIncorrectDataTest() {
-        _jGitMock = new JGit() {
-            @Override
-            protected Optional<Git> getGitForRepository(String path) {
-                return Optional.empty();
-            }
-        };
-        JGitStatus result = _jGitMock.commitProject(_projectCorrect, "_", false, null, null, null, null);
+        JGitStatus result = _emptyJGitMock.commitProject(_projectCorrect, "_", false, null, null, null, null);
         Assert.assertEquals(result, JGitStatus.FAILED);
-
-        _jGitMock = new JGit() {
-            @Override
-            protected Optional<Git> getGitForRepository(String path) {
-                return Optional.of(_gitMock);
-            }
-
-            @Override
-            protected User getUserData() {
-                User user = new User("Lyudmila", "ld@email.com");
-                return user;
-            }
-        };
 
         CommitCommand commitCommand = new CommitCommand(_repositoryMock) {
             @Override
@@ -396,25 +345,12 @@ public class JGitTest {
         };
         Mockito.when(_gitMock.commit()).thenReturn(commitCommand);
 
-        result = _jGitMock.commitProject(_projectCorrect, "_", false, null, null, null, null);
+        result = _correctJGitMock.commitProject(_projectCorrect, "_", false, null, null, null, null);
         Assert.assertEquals(result, JGitStatus.FAILED);
     }
 
     @Test
     public void commitProjectCorrectDataTest() {
-        _jGitMock = new JGit() {
-            @Override
-            protected Optional<Git> getGitForRepository(String path) {
-                return Optional.of(_gitMock);
-            }
-
-            @Override
-            protected User getUserData() {
-                User user = new User("Lyudmila", "ld@email.com");
-                return user;
-            }
-        };
-
         CommitCommand commitCommand = new CommitCommand(_repositoryMock) {
             @Override
             public RevCommit call() throws GitAPIException, NoHeadException, NoMessageException, UnmergedPathsException,
@@ -423,24 +359,12 @@ public class JGitTest {
             }
         };
         Mockito.when(_gitMock.commit()).thenReturn(commitCommand);
-        JGitStatus result = _jGitMock.commitProject(_projectCorrect, "_", false, null, null, null, null);
+        JGitStatus result = _correctJGitMock.commitProject(_projectCorrect, "_", false, null, null, null, null);
         Assert.assertEquals(result, JGitStatus.SUCCESSFUL);
     }
 
     @Test
     public void commitProjectsCorrectDataTest() {
-        _jGitMock = new JGit() {
-            @Override
-            protected Optional<Git> getGitForRepository(String path) {
-                return Optional.of(_gitMock);
-            }
-
-            @Override
-            protected User getUserData() {
-                User user = new User("Lyudmila", "ld@email.com");
-                return user;
-            }
-        };
         CommitCommand commitCommand = new CommitCommand(_repositoryMock) {
             @Override
             public RevCommit call() throws GitAPIException, NoHeadException, NoMessageException, UnmergedPathsException,
@@ -449,19 +373,13 @@ public class JGitTest {
             }
         };
         Mockito.when(_gitMock.commit()).thenReturn(commitCommand);
-        JGitStatus result = _jGitMock.commit(_listProjects, "_", false, null, null, null, null, null, null);
+        JGitStatus result = _correctJGitMock.commit(_listProjects, "_", false, null, null, null, null, null, null);
         Assert.assertEquals(result, JGitStatus.SUCCESSFUL);
     }
 
     @Test
     public void commitProjectsIncorrectDataTest() {
-        _jGitMock = new JGit() {
-            @Override
-            protected Optional<Git> getGitForRepository(String path) {
-                return Optional.empty();
-            }
-        };
-        JGitStatus result = _jGitMock.commit(_listProjects, "_", false, null, null, null, null, null, null);
+        JGitStatus result = _emptyJGitMock.commit(_listProjects, "_", false, null, null, null, null, null, null);
         Assert.assertEquals(result, JGitStatus.SUCCESSFUL);
     }
 }
