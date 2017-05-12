@@ -3,7 +3,9 @@ package com.lgc.solutiontool.git.ui.javafx.controllers;
 
 import com.lgc.solutiontool.git.entities.Group;
 import com.lgc.solutiontool.git.entities.Project;
+import com.lgc.solutiontool.git.project.nature.projecttype.ProjectType;
 import com.lgc.solutiontool.git.services.LoginService;
+import com.lgc.solutiontool.git.services.ProjectTypeService;
 import com.lgc.solutiontool.git.services.ServiceProvider;
 import com.lgc.solutiontool.git.ui.selection.ListViewKey;
 import com.lgc.solutiontool.git.ui.selection.SelectionsProvider;
@@ -18,6 +20,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.util.Callback;
 
@@ -26,10 +30,17 @@ import java.util.List;
 public class MainWindowController {
     private static final String HEDER_GROUP_TITLE = "Current group: ";
 
+    private static final String UNKNOWN_PROJECT_ICON_URL = "icons/unknown_project_2.png";
+
+    private static final String DSG_PROJECT_ICON_URL = "icons/dsg_project.png";
+
     private Group _selectedGroup;
 
     private LoginService _loginService =
             (LoginService) ServiceProvider.getInstance().getService(LoginService.class.getName());
+
+    private ProjectTypeService _projectTypeService =
+            (ProjectTypeService) ServiceProvider.getInstance().getService(ProjectTypeService.class.getName());
 
     @FXML
     private ListView projectsList;
@@ -84,14 +95,30 @@ public class MainWindowController {
 
                 return new ListCell<Project>() {
                     @Override
-                    protected void updateItem(Project item, boolean bln) {
-                        super.updateItem(item, bln);
-                        if (item != null) {
-                            String itemText = item.getName();
-                            setText(itemText);
+                    protected void updateItem(Project item, boolean empty) {
+                        super.updateItem(item, empty);
+                        if (empty) {
+                            setGraphic(null);
+                            setText(null);
+                        } else {
+                            Image fxImage = getProjectIcon(item);
+                            ImageView imageView = new ImageView(fxImage);
+                            setGraphic(imageView);
+                            setText(item.getName());
                         }
                     }
                 };
+            }
+
+            private Image getProjectIcon(Project item){
+               ProjectType type = _projectTypeService.getProjectType(item);
+                Image projectIcon;
+                if(type.getId().equals("unknown")) {
+                    projectIcon = new Image(getClass().getClassLoader().getResource(UNKNOWN_PROJECT_ICON_URL).toExternalForm());
+               }else{
+                    projectIcon = new Image(getClass().getClassLoader().getResource(DSG_PROJECT_ICON_URL).toExternalForm());
+               }
+                return projectIcon;
             }
         });
 
