@@ -11,6 +11,7 @@ import java.util.Optional;
 import org.eclipse.jgit.api.AddCommand;
 import org.eclipse.jgit.api.CommitCommand;
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.ListBranchCommand;
 import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.api.PullCommand;
 import org.eclipse.jgit.api.PullResult;
@@ -34,6 +35,7 @@ import org.eclipse.jgit.api.errors.UnmergedPathsException;
 import org.eclipse.jgit.api.errors.WrongRepositoryStateException;
 import org.eclipse.jgit.dircache.DirCache;
 import org.eclipse.jgit.errors.NoWorkTreeException;
+import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.transport.PushResult;
@@ -47,7 +49,7 @@ import com.lgc.solutiontool.git.entities.User;
 import com.lgc.solutiontool.git.util.JSONParser;
 
 /**
- * Tests for theJGit class.
+ * Tests for the JGit class.
  *
  * @author Lyudmila Lyska
  */
@@ -65,6 +67,8 @@ public class JGitTest {
     private static final GitAPIException _gitExceptionMock = mock(GitAPIException.class);
     private static final Repository _repositoryMock = mock(Repository.class);
     private static final DirCache _dirCachMock = mock(DirCache.class);
+
+    private static final String NAME_BRANCH = "test_name";
 
     static {
         _projectCorrect = new Project() {
@@ -474,7 +478,45 @@ public class JGitTest {
         Mockito.when(_gitMock.push()).thenReturn(pushCommandMock);
         Assert.assertTrue(_correctJGitMock.commitAndPush(_listProjects, "__", false,
                 "Lyuda", "l@gmail.com", "Lyuda", "l@gmail.com", (progress) -> {}, (progress, message) -> {}));
+    }
 
+    @Test(expected=IllegalArgumentException.class)
+    public void createBranchProjectsIsNullTest() {
+        _jGit.createBranch(null, "__", false);
+    }
 
+    @Test(expected=IllegalArgumentException.class)
+    public void createBranchNameBranchIsNullTest() {
+        _jGit.createBranch(new Project(), null, false);
+    }
+
+    @Test(expected=IllegalArgumentException.class)
+    public void createBranchNameBranchIsEmptyTest() {
+        _jGit.createBranch(new Project(), "", false);
+    }
+
+    @Test
+    public void createBranchIncorrectDataTest() {
+        Assert.assertEquals(_jGit.createBranch(new Project(), "__", false), JGitStatus.FAILED);
+        Assert.assertEquals(_emptyJGitMock.createBranch(_projectCorrect, "__", false), JGitStatus.FAILED);
+
+        ListBranchCommand listCommandMock = new ListBranchCommand(_repositoryMock) {
+            @Override
+            public List<Ref> call() throws GitAPIException {
+                throw _gitExceptionMock;
+            }
+        };
+        Mockito.when(_gitMock.branchList()).thenReturn(listCommandMock);
+        Assert.assertEquals(_correctJGitMock.createBranch(_projectCorrect, NAME_BRANCH, false), JGitStatus.FAILED);
+
+        listCommandMock = new ListBranchCommand(_repositoryMock) {
+            @Override
+            public List<Ref> call() throws GitAPIException {
+                List<Ref> refs = new ArrayList<>();
+                refs.add(mock(Ref.class));
+                System.out.println(refs);
+                return refs;
+            }
+        };
     }
 }

@@ -413,8 +413,8 @@ public class JGit {
      *                     FAILED - if the branch could not be created.
      */
     public JGitStatus createBranch(Project project, String nameBranch, boolean force) {
-        if (project == null || nameBranch == null) {
-            return JGitStatus.FAILED;
+        if (project == null || nameBranch == null || nameBranch.isEmpty()) {
+            throw new IllegalArgumentException("Incorrect data: project is " + project + ", nameBranch is " + nameBranch);
         }
         if (!project.isCloned()) {
             System.err.println(project.getName() + ERROR_MSG_NOT_CLONED);
@@ -425,6 +425,10 @@ public class JGit {
             return JGitStatus.FAILED;
         }
         List<String> branches = getListShortNamesOfBranches(getRefs(project, null));
+        if (branches.isEmpty()) {
+            System.err.println("!ERROR: Failed to get list of branches");
+            return JGitStatus.FAILED;
+        }
         if (!force && branches.contains(nameBranch)) {
             System.err.println("!ERROR: a branch with the same name already exists");
             return JGitStatus.FAILED;
@@ -455,8 +459,8 @@ public class JGit {
      *                     CONFLICTS - if the branch has unsaved changes that can lead to conflicts.
      */
     public JGitStatus switchTo(Project project, String nameBranch) {
-        if (project == null || nameBranch == null) {
-            return JGitStatus.FAILED;
+        if (project == null || nameBranch == null || nameBranch.isEmpty()) {
+            throw new IllegalArgumentException("Incorrect data: project is " + project + ", nameBranch is " + nameBranch);
         }
         if (!project.isCloned()) {
             System.err.println(project.getName() + ERROR_MSG_NOT_CLONED);
