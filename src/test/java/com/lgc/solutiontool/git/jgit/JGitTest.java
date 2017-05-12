@@ -10,6 +10,7 @@ import java.util.Optional;
 
 import org.eclipse.jgit.api.AddCommand;
 import org.eclipse.jgit.api.CommitCommand;
+import org.eclipse.jgit.api.CreateBranchCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ListBranchCommand;
 import org.eclipse.jgit.api.MergeResult;
@@ -24,10 +25,12 @@ import org.eclipse.jgit.api.errors.ConcurrentRefUpdateException;
 import org.eclipse.jgit.api.errors.DetachedHeadException;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidConfigurationException;
+import org.eclipse.jgit.api.errors.InvalidRefNameException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.NoFilepatternException;
 import org.eclipse.jgit.api.errors.NoHeadException;
 import org.eclipse.jgit.api.errors.NoMessageException;
+import org.eclipse.jgit.api.errors.RefAlreadyExistsException;
 import org.eclipse.jgit.api.errors.RefNotAdvertisedException;
 import org.eclipse.jgit.api.errors.RefNotFoundException;
 import org.eclipse.jgit.api.errors.TransportException;
@@ -35,6 +38,7 @@ import org.eclipse.jgit.api.errors.UnmergedPathsException;
 import org.eclipse.jgit.api.errors.WrongRepositoryStateException;
 import org.eclipse.jgit.dircache.DirCache;
 import org.eclipse.jgit.errors.NoWorkTreeException;
+import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -509,14 +513,54 @@ public class JGitTest {
         Mockito.when(_gitMock.branchList()).thenReturn(listCommandMock);
         Assert.assertEquals(_correctJGitMock.createBranch(_projectCorrect, NAME_BRANCH, false), JGitStatus.FAILED);
 
+        Ref refMock = mock(Ref.class);
         listCommandMock = new ListBranchCommand(_repositoryMock) {
             @Override
             public List<Ref> call() throws GitAPIException {
                 List<Ref> refs = new ArrayList<>();
-                refs.add(mock(Ref.class));
-                System.out.println(refs);
+                refs.add(refMock);
                 return refs;
             }
         };
+        Mockito.when(refMock.getName()).thenReturn(Constants.R_REMOTES+NAME_BRANCH);
+        Mockito.when(_gitMock.branchList()).thenReturn(listCommandMock);
+        Assert.assertEquals(_correctJGitMock.createBranch(_projectCorrect, NAME_BRANCH, false), JGitStatus.FAILED);
+
+        CreateBranchCommand createBranchCommandMock = new CreateBranchCommand(_repositoryMock) {
+            @Override
+            public Ref call()
+                    throws GitAPIException, RefAlreadyExistsException, RefNotFoundException, InvalidRefNameException {
+                throw _gitExceptionMock;
+            }
+        };
+        Mockito.when(refMock.toString()).thenReturn(Constants.R_HEADS);
+        Mockito.when(refMock.getName()).thenReturn(Constants.R_HEADS+"Test");
+        Mockito.when(_gitMock.branchCreate()).thenReturn(createBranchCommandMock);
+        Assert.assertEquals(_correctJGitMock.createBranch(_projectCorrect, NAME_BRANCH, false), JGitStatus.FAILED);
+    }
+
+    @Test
+    public void createBranchCorrectDataTest() {
+        Ref refMock = mock(Ref.class);
+        ListBranchCommand listCommandMock = new ListBranchCommand(_repositoryMock) {
+            @Override
+            public List<Ref> call() throws GitAPIException {
+                List<Ref> refs = new ArrayList<>();
+                refs.add(refMock);
+                return refs;
+            }
+        };
+        Mockito.when(_gitMock.branchList()).thenReturn(listCommandMock);
+        CreateBranchCommand createBranchCommandMock = new CreateBranchCommand(_repositoryMock) {
+            @Override
+            public Ref call()
+                    throws GitAPIException, RefAlreadyExistsException, RefNotFoundException, InvalidRefNameException {
+                return refMock;
+            }
+        };
+        Mockito.when(refMock.toString()).thenReturn(Constants.R_HEADS);
+        Mockito.when(refMock.getName()).thenReturn(Constants.R_HEADS+"Test");
+        Mockito.when(_gitMock.branchCreate()).thenReturn(createBranchCommandMock);
+        Assert.assertEquals(_correctJGitMock.createBranch(_projectCorrect, NAME_BRANCH, true), JGitStatus.SUCCESSFUL);
     }
 }
