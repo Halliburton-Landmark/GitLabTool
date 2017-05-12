@@ -338,13 +338,16 @@ public class JGit {
                                   String nameCommitter, String emailCommitter,
                                   String nameAuthor, String emailAuthor,
                                   Consumer<Integer> onSuccess, BiConsumer<Integer, String> onError) {
-        if (message == null || projects == null || projects.isEmpty()) {
+        if (message == null || projects == null || projects.isEmpty() || message.isEmpty()) {
             throw new IllegalArgumentException("Incorrect data: projects is " + projects + ", message is " + message);
         }
         int aStepInProgress = 100 / projects.size();
         int currentProgress = 0;
         for (Project pr : projects) {
             currentProgress += aStepInProgress;
+            if (pr == null) {
+                continue;
+            }
             if (!pr.isCloned()) {
                 FeedbackUtil.sendError(onError, currentProgress, pr.getName() + ERROR_MSG_NOT_CLONED);
                 continue;
@@ -374,14 +377,16 @@ public class JGit {
      * !Projects that failed to push will be displayed in the UI console.
      */
     public boolean push (List<Project> projects, Consumer<Integer> onSuccess, BiConsumer<Integer, String> onError) {
-        if (projects.isEmpty() || projects == null) {
-            // TODO: add log
-            return false;
+        if (projects == null || projects.isEmpty()) {
+            throw new IllegalArgumentException("Incorrect data: projects is " + projects);
         }
         int aStepInProgress = 100 / projects.size();
         int currentProgress = 0;
         for (Project pr : projects) {
             currentProgress += aStepInProgress;
+            if (pr == null) {
+                continue;
+            }
             if (!pr.isCloned()) {
                 FeedbackUtil.sendError(onError, currentProgress, pr.getName() + ERROR_MSG_NOT_CLONED);
                 continue;
@@ -572,6 +577,17 @@ public class JGit {
         return true;
     }
 
+    /**
+     *
+     * @param project
+     * @param message
+     * @param setAll
+     * @param nameCommitter
+     * @param emailCommitter
+     * @param nameAuthor
+     * @param emailAuthor
+     * @return
+     */
     public JGitStatus commitProject (Project project, String message, boolean setAll,
                                String nameCommitter, String emailCommitter,
                                String nameAuthor, String emailAuthor) {
@@ -599,7 +615,7 @@ public class JGit {
     }
 
     private PersonIdent getPersonIdent(String name, String email) {
-        if (name != null || email != null) { // TODO valid data
+        if (name != null && email != null) {
             return new PersonIdent(name, email);
         }
         User currentUser = getUserData();
@@ -613,22 +629,14 @@ public class JGit {
     private JGitStatus commitAndPush(Project project, String message, boolean setAll,
                                      String nameCommitter, String emailCommitter,
                                      String nameAuthor, String emailAuthor) {
-        try {
-            if(commitProject(project, message, setAll, nameCommitter, emailCommitter,
-                      nameAuthor, emailAuthor).equals(JGitStatus.FAILED)) {
-                return JGitStatus.FAILED;
-            }
-            return push(project);
-        } catch (Exception e) {
-            System.err.println("!ERROR: " + e.getMessage());
+        if (commitProject(project, message, setAll, nameCommitter, emailCommitter, nameAuthor, emailAuthor)
+                .equals(JGitStatus.FAILED)) {
+            return JGitStatus.FAILED;
         }
-        return JGitStatus.FAILED;
+        return push(project);
     }
 
     private JGitStatus push(Project project) {
-        if (project == null) {
-            return JGitStatus.FAILED;
-        }
         Optional<Git> opGit = getGitForRepository(project.getPathToClonedProject());
         if (opGit.isPresent()) {
             try {

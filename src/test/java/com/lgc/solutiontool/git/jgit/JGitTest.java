@@ -4,6 +4,7 @@ import static org.mockito.Mockito.mock;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,6 +14,7 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.api.PullCommand;
 import org.eclipse.jgit.api.PullResult;
+import org.eclipse.jgit.api.PushCommand;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.StatusCommand;
 import org.eclipse.jgit.api.errors.AbortedByHookException;
@@ -34,6 +36,7 @@ import org.eclipse.jgit.dircache.DirCache;
 import org.eclipse.jgit.errors.NoWorkTreeException;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.transport.PushResult;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -43,7 +46,11 @@ import com.lgc.solutiontool.git.entities.Project;
 import com.lgc.solutiontool.git.entities.User;
 import com.lgc.solutiontool.git.util.JSONParser;
 
-
+/**
+ * Tests for theJGit class.
+ *
+ * @author Lyudmila Lyska
+ */
 public class JGitTest {
 
     private final JGit _jGit = JGit.getInstance();
@@ -51,10 +58,10 @@ public class JGitTest {
     private static final Project _projectIncorrect = new Project();
     private static final List<Project> _listProjects;
     // mocks
-    private static JGit _jGitMock;
-    private static final Git _gitMock = mock(Git.class);
     private static final JGit _correctJGitMock;
     private static final JGit _emptyJGitMock;
+
+    private static final Git _gitMock = mock(Git.class);
     private static final GitAPIException _gitExceptionMock = mock(GitAPIException.class);
     private static final Repository _repositoryMock = mock(Repository.class);
     private static final DirCache _dirCachMock = mock(DirCache.class);
@@ -258,7 +265,7 @@ public class JGitTest {
         Assert.assertEquals(_jGit.pull(_projectIncorrect), JGitStatus.FAILED);
         Assert.assertEquals(_emptyJGitMock.pull(_projectCorrect), JGitStatus.FAILED);
 
-        _jGitMock = new JGit() {
+        JGit jGitMock = new JGit() {
             @Override
             protected Optional<Git> getGitForRepository(String path) {
                 return Optional.of(_gitMock);
@@ -269,7 +276,7 @@ public class JGitTest {
                 return false;
             }
         };
-        Assert.assertEquals(_jGitMock.pull(_projectCorrect), JGitStatus.FAILED);
+        Assert.assertEquals(jGitMock.pull(_projectCorrect), JGitStatus.FAILED);
 
         PullCommand pullCommandMock =  new PullCommand(_repositoryMock) {
             @Override
@@ -359,12 +366,13 @@ public class JGitTest {
             }
         };
         Mockito.when(_gitMock.commit()).thenReturn(commitCommand);
-        JGitStatus result = _correctJGitMock.commitProject(_projectCorrect, "_", false, null, null, null, null);
+        JGitStatus result = _correctJGitMock.commitProject(
+                _projectCorrect, "_", false, "Lyuda", "l@gmail.com", "Lyuda", "l@gmail.com");
         Assert.assertEquals(result, JGitStatus.SUCCESSFUL);
     }
 
     @Test
-    public void commitProjectsCorrectDataTest() {
+    public void commitAllProjectsCorrectDataTest() {
         CommitCommand commitCommand = new CommitCommand(_repositoryMock) {
             @Override
             public RevCommit call() throws GitAPIException, NoHeadException, NoMessageException, UnmergedPathsException,
@@ -373,13 +381,100 @@ public class JGitTest {
             }
         };
         Mockito.when(_gitMock.commit()).thenReturn(commitCommand);
-        JGitStatus result = _correctJGitMock.commit(_listProjects, "_", false, null, null, null, null, null, null);
+        JGitStatus result = _correctJGitMock.commit(
+                _listProjects, "_", false, "Lyuda", "l@gmail.com", "Lyuda", "l@gmail.com", null, null);
         Assert.assertEquals(result, JGitStatus.SUCCESSFUL);
     }
 
     @Test
-    public void commitProjectsIncorrectDataTest() {
+    public void commitAllProjectsIncorrectDataTest() {
         JGitStatus result = _emptyJGitMock.commit(_listProjects, "_", false, null, null, null, null, null, null);
         Assert.assertEquals(result, JGitStatus.SUCCESSFUL);
+    }
+
+    @Test(expected=IllegalArgumentException.class)
+    public void pushProjectsIsNullTest() {
+        _jGit.push(null, null, null);
+    }
+
+    @Test(expected=IllegalArgumentException.class)
+    public void pushProjectsIsEmptyTest() {
+        _jGit.push(new ArrayList<>(), null, null);
+    }
+
+    @Test
+    public void pushIncorrectDataTest() {
+        Assert.assertTrue(_emptyJGitMock.push(_listProjects, null, null));
+
+        PushCommand pushCommandMock = new PushCommand(_repositoryMock) {
+            @Override
+            public Iterable<PushResult> call() throws GitAPIException, InvalidRemoteException, TransportException {
+                throw _gitExceptionMock;
+            }
+        };
+        Mockito.when(_gitMock.push()).thenReturn(pushCommandMock);
+        Assert.assertTrue(_correctJGitMock.push(_listProjects, null, null));
+    }
+
+    @Test
+    public void pushCorrectDataTest() {
+        PushCommand pushCommandMock = new PushCommand(_repositoryMock) {
+            @Override
+            public Iterable<PushResult> call() throws GitAPIException, InvalidRemoteException, TransportException {
+                return Arrays.asList(mock(PushResult.class));
+            }
+        };
+        Mockito.when(_gitMock.push()).thenReturn(pushCommandMock);
+        Assert.assertTrue(_correctJGitMock.push(_listProjects, (progress) -> {}, (progress, message) -> {}));
+    }
+
+    @Test(expected=IllegalArgumentException.class)
+    public void commitAndPushProjectsIsNullTest() {
+        _jGit.commitAndPush(null, "_", false, null, null, null, null, null, null);
+    }
+
+    @Test(expected=IllegalArgumentException.class)
+    public void commitAndPushMessageIsNullTest() {
+        _jGit.commitAndPush(_listProjects, null, false, null, null, null, null, null, null);
+    }
+
+    @Test(expected=IllegalArgumentException.class)
+    public void commitAndPushProjectsIsEmptyTest() {
+        _jGit.commitAndPush(new ArrayList<>(), "_", false, null, null, null, null, null, null);
+    }
+
+    @Test(expected=IllegalArgumentException.class)
+    public void commitAndPushMessageIsEmptyTest() {
+        _jGit.commitAndPush(_listProjects, "", false, null, null, null, null, null, null);
+    }
+
+    @Test
+    public void commitAndPushIncorrectDataTest() {
+        Assert.assertTrue(_emptyJGitMock.commitAndPush(
+                _listProjects, "__", false, null, null, null, null, null, null));
+    }
+
+    @Test
+    public void commitAndPushCorrectDataTest() {
+        CommitCommand commitCommand = new CommitCommand(_repositoryMock) {
+            @Override
+            public RevCommit call() throws GitAPIException, NoHeadException, NoMessageException, UnmergedPathsException,
+                    ConcurrentRefUpdateException, WrongRepositoryStateException, AbortedByHookException {
+                return mock(RevCommit.class);
+            }
+        };
+        Mockito.when(_gitMock.commit()).thenReturn(commitCommand);
+
+        PushCommand pushCommandMock = new PushCommand(_repositoryMock) {
+            @Override
+            public Iterable<PushResult> call() throws GitAPIException, InvalidRemoteException, TransportException {
+                return Arrays.asList(mock(PushResult.class));
+            }
+        };
+        Mockito.when(_gitMock.push()).thenReturn(pushCommandMock);
+        Assert.assertTrue(_correctJGitMock.commitAndPush(_listProjects, "__", false,
+                "Lyuda", "l@gmail.com", "Lyuda", "l@gmail.com", (progress) -> {}, (progress, message) -> {}));
+
+
     }
 }
