@@ -1,15 +1,12 @@
 package com.lgc.solutiontool.git.properties;
 
-import java.util.Collection;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import com.lgc.solutiontool.git.entities.Group;
-import com.lgc.solutiontool.git.entities.Project;
 import com.lgc.solutiontool.git.services.LoginService;
-import com.lgc.solutiontool.git.services.ProjectTypeService;
 import com.lgc.solutiontool.git.services.ServiceProvider;
 import com.lgc.solutiontool.git.services.StorageService;
 import com.lgc.solutiontool.git.util.URLManager;
@@ -32,9 +29,6 @@ public class ProgramProperties {
 
     private final LoginService _loginService = (LoginService) ServiceProvider.getInstance()
             .getService(LoginService.class.getName());
-
-    private final ProjectTypeService _projectTypeService = (ProjectTypeService) ServiceProvider.getInstance()
-            .getService(ProjectTypeService.class.getName());
 
     /**
      * Gets instance's the class
@@ -92,22 +86,7 @@ public class ProgramProperties {
         String username = _loginService.getCurrentUser().getUsername();
         List<Group> groups = _storageService.loadStorage(URLManager.trimServerURL(_loginService.getServerURL()),
                 username);
-        setProjectsType(groups);
         setClonedGroups(groups);
         return getClonedGroups();
-    }
-
-    /**
-     * Sets type project to all group projects
-     *
-     * @param groups cloned group
-     */
-    public void setProjectsType(List<Group> groups) {
-        groups.stream().forEach((group) -> {
-            Collection<Project> projects = group.getProjects();
-            projects.stream().forEach((project) -> {
-                project.setProjectType(_projectTypeService.getProjectType(project));
-            });
-        });
     }
 }
