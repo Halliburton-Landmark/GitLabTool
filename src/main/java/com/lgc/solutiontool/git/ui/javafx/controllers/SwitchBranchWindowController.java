@@ -2,19 +2,21 @@ package com.lgc.solutiontool.git.ui.javafx.controllers;
 
 
 import com.lgc.solutiontool.git.entities.Project;
+import com.lgc.solutiontool.git.jgit.BranchType;
+import com.lgc.solutiontool.git.jgit.JGit;
 import com.lgc.solutiontool.git.ui.selection.ListViewKey;
 import com.lgc.solutiontool.git.ui.selection.SelectionsProvider;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
 import javafx.scene.control.*;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.util.Callback;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class SwitchBranchWindowController {
@@ -26,6 +28,15 @@ public class SwitchBranchWindowController {
     public Label projectsCount;
 
     @FXML
+    public ToggleGroup branchesFilter;
+
+    @FXML
+    public ListView branchesListView;
+
+    @FXML
+    public CheckBox commonMatchongCheckBox;
+
+    @FXML
     public void initialize() {
         configureProjectsListView(currentProjectsListView);
 
@@ -34,6 +45,45 @@ public class SwitchBranchWindowController {
 
         projectsCount.setText("Total projects: " + currentProjectsListView.getItems().size());
     }
+
+    public void onUpdateList(ActionEvent actionEvent) {
+        List<Project> selectedProjects = currentProjectsListView.getSelectionModel().getSelectedItems();
+
+        RadioButton selecteRB = (RadioButton) branchesFilter.getSelectedToggle();
+        String branchTypeText = selecteRB.getText();
+
+        Boolean isCommonMatching = commonMatchongCheckBox.isSelected();
+
+        BranchType branchType;
+        switch (branchTypeText) {
+            case "Remote":
+                branchType = BranchType.REMOTE;
+                break;
+            case "Local":
+                branchType = BranchType.LOCAL;
+                break;
+            case "Remote + Local":
+                branchType = BranchType.ALL;
+                break;
+            default:
+                branchType = BranchType.LOCAL;
+        }
+
+        List<String> allBranches = new ArrayList<String>();
+        allBranches.addAll(JGit.getInstance().getBranches(selectedProjects, branchType, isCommonMatching));
+        branchesListView.setItems(FXCollections.observableArrayList(allBranches));
+    }
+
+
+    public void onApplyButton(ActionEvent actionEvent) {
+        List<Project> selectedProjects = currentProjectsListView.getSelectionModel().getSelectedItems();
+        String selectedBranch = (String)branchesListView.getSelectionModel().getSelectedItem();
+
+        for(Project project: selectedProjects) {
+            JGit.getInstance().switchTo(project,selectedBranch);
+        }
+    }
+
 
     private void setProjectListItems(List items, ListView<Project> listView) {
         if (items == null || items.isEmpty()) {
@@ -91,6 +141,7 @@ public class SwitchBranchWindowController {
             }
         });
     }
+
 
     private class GroupListCell extends ListCell<Project> {
         HBox hbox = new HBox();
