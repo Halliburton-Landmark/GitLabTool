@@ -56,31 +56,31 @@ public class SwitchBranchWindowController {
 
         //setup selection
         listView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        listView.addEventFilter(MouseEvent.MOUSE_PRESSED, evt -> {
-            Node node = evt.getPickResult().getIntersectedNode();
-
-            while (node != null && node != listView && !(node instanceof ListCell)) {
-                node = node.getParent();
-            }
-
-            if (node instanceof ListCell) {
-                evt.consume();
-
-                ListCell cell = (ListCell) node;
-                ListView lv = cell.getListView();
-
-                lv.requestFocus();
-
-                if (!cell.isEmpty()) {
-                    int index = cell.getIndex();
-                    if (cell.isSelected()) {
-                        lv.getSelectionModel().clearSelection(index);
-                    } else {
-                        lv.getSelectionModel().select(index);
-                    }
-                }
-            }
-        });
+//        listView.addEventFilter(MouseEvent.MOUSE_PRESSED, evt -> {
+//            Node node = evt.getPickResult().getIntersectedNode();
+//
+//            while (node != null && node != listView && !(node instanceof ListCell)) {
+//                node = node.getParent();
+//            }
+//
+//            if (node instanceof ListCell) {
+//                evt.consume();
+//
+//                ListCell cell = (ListCell) node;
+//                ListView lv = cell.getListView();
+//
+//                lv.requestFocus();
+//
+//                if (!cell.isEmpty()) {
+//                    int index = cell.getIndex();
+//                    if (cell.isSelected()) {
+//                        lv.getSelectionModel().clearSelection(index);
+//                    } else {
+//                        lv.getSelectionModel().select(index);
+//                    }
+//                }
+//            }
+//        });
 
         listView.getSelectionModel().getSelectedItems().addListener(new ListChangeListener() {
             @Override
