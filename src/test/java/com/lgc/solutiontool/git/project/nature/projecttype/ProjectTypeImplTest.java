@@ -79,20 +79,6 @@ public class ProjectTypeImplTest {
     }
 
     @Test
-    public void projectTypeOperationsTest() {
-        ProjectTypeImpl projectType = new ProjectTypeImpl() {};
-        Set<Operation> operations = projectType.getModifiableOperations();
-        Assert.assertNotNull(operations);
-        Assert.assertFalse(operations.isEmpty());
-        Assert.assertEquals(operations.size(), Operation.MIN_OPERATIONS.size());
-        Assert.assertTrue(operations.containsAll(Operation.MIN_OPERATIONS));
-
-        int oldSize = operations.size();
-        operations.add(Operation.CHANGE_POM_FILE);
-        Assert.assertTrue(oldSize < operations.size());
-    }
-
-    @Test
     public void projectTypeHasOperationTest() {
         ProjectTypeImpl projectType = new ProjectTypeImpl() {};
         Assert.assertTrue(projectType.hasOperation(Operation.REPLACEMENT_TEXT_IN_FILE));

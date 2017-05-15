@@ -32,7 +32,7 @@ public class DSGProjectTypeTest {
         final Set<Operation> ALL_OPERATIONS = new HashSet<>(Arrays.asList(Operation.values()));
 
         DSGProjectType dsgProjectType = getDSGType();
-        Set<Operation> operations = dsgProjectType.getModifiableOperations();
+        Set<Operation> operations = dsgProjectType.getAvailableOperations();
         Assert.assertNotNull(operations);
         Assert.assertFalse(operations.isEmpty());
         Assert.assertEquals(operations.size(), ALL_OPERATIONS.size());

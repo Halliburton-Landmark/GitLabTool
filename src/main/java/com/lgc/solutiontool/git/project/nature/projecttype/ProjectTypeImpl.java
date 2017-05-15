@@ -60,10 +60,6 @@ abstract class ProjectTypeImpl implements ProjectType {
         }
     }
 
-    protected Set<Operation> getModifiableOperations() {
-        return _operations;
-    }
-
     @Override
     public String getId() {
         return _id;
