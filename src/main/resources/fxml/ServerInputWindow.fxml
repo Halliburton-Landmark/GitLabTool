@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.BorderPane?>
+
+<BorderPane prefHeight="180.0" prefWidth="290.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.lgc.solutiontool.git.ui.javafx.controllers.ServerInputWindowController">
+	<bottom>
+		<GridPane prefHeight="210.0" prefWidth="280.0" BorderPane.alignment="CENTER">
+			<columnConstraints>
+				<ColumnConstraints hgrow="SOMETIMES" maxWidth="135.0" minWidth="10.0" prefWidth="106.0" />
+				<ColumnConstraints hgrow="SOMETIMES" maxWidth="230.0" minWidth="10.0" prefWidth="96.0" />
+				<ColumnConstraints hgrow="SOMETIMES" maxWidth="230.0" minWidth="10.0" prefWidth="79.0" />
+			</columnConstraints>
+			<rowConstraints>
+				<RowConstraints maxHeight="99.0" minHeight="10.0" prefHeight="33.0" vgrow="SOMETIMES" />
+				<RowConstraints maxHeight="93.0" minHeight="10.0" prefHeight="41.0" vgrow="SOMETIMES" />
+				<RowConstraints maxHeight="71.0" minHeight="10.0" prefHeight="42.0" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="71.0" minHeight="10.0" prefHeight="39.0" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="71.0" minHeight="10.0" prefHeight="36.0" vgrow="SOMETIMES" />
+			</rowConstraints>
+			<children>
+				<Button fx:id="okButton" mnemonicParsing="false" onAction="#onOkButton" text="Ok" defaultButton="true" textAlignment="CENTER" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="4">
+					<GridPane.margin>
+						<Insets right="10.0" />
+					</GridPane.margin>
+				</Button>
+				<Label fx:id="server" text="Server:" GridPane.rowIndex="1">
+					<GridPane.margin>
+						<Insets left="10.0" />
+					</GridPane.margin>
+				</Label>
+				<TextField fx:id="serverTextField" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="1" />
+				<Label text="Please enter a GitLab server URL" textAlignment="CENTER" GridPane.columnSpan="3" GridPane.halignment="CENTER" />
+            <Label fx:id="message" alignment="CENTER" contentDisplay="CENTER" text="" textAlignment="CENTER" textFill="#fc0202" GridPane.columnSpan="3" GridPane.rowIndex="3">
+               <GridPane.margin>
+                  <Insets left="10.0" />
+               </GridPane.margin></Label>
+            <Label text="API version:" GridPane.rowIndex="2">
+               <GridPane.margin>
+                  <Insets left="10.0" />
+               </GridPane.margin>
+            </Label>
+            <ComboBox fx:id="api" prefWidth="150.0" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="2" />
+			</children>
+         <padding>
+            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+         </padding>
+		</GridPane>
+	</bottom>
+   <padding>
+      <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+   </padding>
+</BorderPane>

@@ -2,10 +2,9 @@ package com.lgc.solutiontool.git.services;
 
 
 import com.lgc.solutiontool.git.entities.Group;
+import com.lgc.solutiontool.git.xml.Servers;
 
 import java.util.List;
-import java.util.Map;
-
 /**
  * Class for work with program storage.
  *
@@ -30,4 +29,19 @@ public interface StorageService {
      * @return Cloned groups
      */
     List<Group> loadStorage(String server, String username);
+    
+    /**
+     * Updates servers list in the file
+     * 
+     * @param servers to store in file
+     * @return <code>true</code> if file was updated successfully or <code>false</code> if not
+     */
+    boolean updateServers(Servers servers);
+    
+    /**
+     * Loads <code>Servers</code> instance from file that contains list of servers
+     * 
+     * @return instance of <code>Servers</code>
+     */
+    Servers loadServers();
 }
