@@ -495,7 +495,7 @@ public class JGitTest {
         };
         Mockito.when(refMock.getName()).thenReturn(Constants.R_REMOTES + NAME_BRANCH);
         Mockito.when(gitMock.branchList()).thenReturn(listCommandMock);
-        Assert.assertEquals(getJGitMock(gitMock).createBranch(getProject(true), NAME_BRANCH, false), JGitStatus.FAILED);
+        Assert.assertEquals(getJGitMock(gitMock).createBranch(getProject(true), NAME_BRANCH, false), JGitStatus.BRANCH_ALREADY_EXISTS);
 
         CreateBranchCommand createBranchCommandMock = new CreateBranchCommand(getRepository()) {
             @Override
