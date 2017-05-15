@@ -10,7 +10,8 @@ public enum ViewKey {
     WELCOME_WINDOW("welcomeWindow", "fxml/WelcomeWindow.fxml"),
     MAIN_WINDOW("mainWindow", "fxml/MainWindow.fxml"),
     MODULAR_CONTAINER("modularContainer", "fxml/ModularContainer.fxml"),
-    CLONING_GROUPS_WINDOW("cloningGroupsWindow", "fxml/CloningGroupsWindow.fxml");
+    CLONING_GROUPS_WINDOW("cloningGroupsWindow", "fxml/CloningGroupsWindow.fxml"),
+    SERVER_INPUT_WINDOW("serverInputWindow", "fxml/ServerInputWindow.fxml");
 
     private final String key;
     private final String path;

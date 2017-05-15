@@ -115,6 +115,40 @@ public enum JGitStatus {
       public boolean isSuccessful() {
         return false;
       }
+    },
+
+    /**
+     * The status indicates that the operation cannot be performed because the branch already exists
+     */
+    BRANCH_ALREADY_EXISTS {
+
+        @Override
+        public boolean isSuccessful() {
+            return false;
+        }
+
+        @Override
+        public String toString() {
+          return "Branch already exists";
+        }
+
+    },
+
+    /**
+     * The status indicates that the operation cannot be performed because the branch does not exist
+     */
+    BRANCH_DOES_NOT_EXIST {
+
+        @Override
+        public boolean isSuccessful() {
+            return false;
+        }
+
+        @Override
+        public String toString() {
+          return "Branch does not exist";
+        }
+
     };
 
     /**
