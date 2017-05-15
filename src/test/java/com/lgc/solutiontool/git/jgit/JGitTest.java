@@ -537,6 +537,34 @@ public class JGitTest {
                 JGitStatus.SUCCESSFUL);
     }
 
+    @Test(expected=IllegalArgumentException.class)
+    public void getBranchesProjectNullTest() {
+        JGit.getInstance().getBranches(null, BranchType.LOCAL);
+    }
+
+    @Test(expected=IllegalArgumentException.class)
+    public void getBranchesBranchTypeTest() {
+        JGit.getInstance().getBranches(new Project(), null);
+    }
+
+    @Test
+    public void getBranchesCorrectData() {
+        Ref refMock = mock(Ref.class);
+        Git gitMock = getGitMock();
+        ListBranchCommand listCommandMock = new ListBranchCommand(getRepository()) {
+            @Override
+            public List<Ref> call() throws GitAPIException {
+                List<Ref> refs = new ArrayList<>();
+                refs.add(refMock);
+                return refs;
+            }
+        };
+        Mockito.when(refMock.toString()).thenReturn(Constants.R_HEADS);
+        Mockito.when(refMock.getName()).thenReturn(Constants.R_HEADS + "Test");
+        Mockito.when(gitMock.branchList()).thenReturn(listCommandMock);
+        Assert.assertFalse(getJGitMock(gitMock).getBranches(getProject(true), BranchType.LOCAL).isEmpty());
+    }
+    /*************************************************************************************************/
     private Project getProject(boolean isCorrectProject) {
         if (!isCorrectProject) {
             return new Project();

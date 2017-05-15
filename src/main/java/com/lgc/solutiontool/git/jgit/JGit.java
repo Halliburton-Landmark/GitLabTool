@@ -83,6 +83,10 @@ public class JGit {
         if (project == null || brType == null) {
             throw new IllegalArgumentException("Wrong parameters for obtaining branches.");
         }
+        if (!project.isCloned()) {
+            System.err.println(project.getName() + ERROR_MSG_NOT_CLONED);
+            return Collections.emptyList();
+        }
         ListMode mode = brType.equals(BranchType.LOCAL) ? null : ListMode.valueOf(brType.toString());
         return getListShortNamesOfBranches(getRefs(project, mode));
     }
@@ -179,9 +183,6 @@ public class JGit {
             return Optional.empty();
         }
         String path = project.getPathToClonedProject();
-        if (path == null) {
-            return Optional.empty();
-        }
         try {
             Git git = getGitForRepository(path).get();
             Status status = git.status().call();
