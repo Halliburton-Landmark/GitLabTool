@@ -12,7 +12,6 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-import org.eclipse.jgit.api.CheckoutCommand;
 import org.eclipse.jgit.api.CreateBranchCommand;
 import org.eclipse.jgit.api.CreateBranchCommand.SetupUpstreamMode;
 import org.eclipse.jgit.api.Git;
@@ -422,8 +421,7 @@ public class JGit {
         }
         List<String> branches = getListShortNamesOfBranches(getRefs(project, null));
         if (!force && branches.contains(nameBranch)) {
-            System.err.println("!ERROR: a branch with the same name already exists");
-            return JGitStatus.FAILED;
+            return JGitStatus.BRANCH_ALREADY_EXISTS;
         }
         try {
             CreateBranchCommand create = optGit.get().branchCreate();
@@ -443,14 +441,16 @@ public class JGit {
     /**
      * Switch to another branch (already existing).
      *
-     * @param project      the cloned project
-     * @param nameBranch   the name of the branch to which to switch
+     * @param project         the cloned project
+     * @param nameBranch      the name of the branch to which to switch
+     * @param setCreateBranch if value is <true> to switch to a branch for it, a new local branch
+                              with the same name will be created, if <false> switch to an existing branch.
      *
      * @return JGitStatus: SUCCESSFUL - if a new branch was created,
      *                     FAILED - if the branch could not be created,
      *                     CONFLICTS - if the branch has unsaved changes that can lead to conflicts.
      */
-    public JGitStatus switchTo(Project project, String nameBranch) {
+    public JGitStatus switchTo(Project project, String nameBranch, boolean setCreateBranch) {
         if (project == null || nameBranch == null) {
             return JGitStatus.FAILED;
         }
@@ -463,9 +463,11 @@ public class JGit {
             return JGitStatus.FAILED;
         }
         List<String> branches = getListShortNamesOfBranches(getRefs(project, null));
-        if (!branches.contains(nameBranch)) {
-            System.err.println("!ERROR: a branch with this name does not exist.");
-            return JGitStatus.FAILED;
+        if (!branches.contains(nameBranch) && !setCreateBranch) {
+            return JGitStatus.BRANCH_DOES_NOT_EXIST;
+        }
+        if (branches.contains(nameBranch) && setCreateBranch) {
+            return JGitStatus.BRANCH_ALREADY_EXISTS;
         }
         Git git = optGit.get();
         try {
@@ -476,8 +478,11 @@ public class JGit {
                     Constants.R_HEADS + nameBranch)) {
                 return JGitStatus.CONFLICTS;
             }
-            CheckoutCommand command = git.checkout();
-            Ref ref = command.setName(nameBranch).setStartPoint("origin/" + nameBranch).call();
+            Ref ref = git.checkout()
+                         .setName(nameBranch)
+                         .setStartPoint("origin/" + nameBranch)
+                         .setCreateBranch(setCreateBranch)
+                         .call();
             System.out.println("!Switch to branch: " + ref.getName());
             return JGitStatus.SUCCESSFUL;
         } catch (IOException | GitAPIException e) {
