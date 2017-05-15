@@ -100,6 +100,7 @@ class LoginDialog extends Dialog<DialogDTO> {
             servers.add(e.getName());
         });
         ObservableList<String> options = FXCollections.observableArrayList(servers);
+        options.add("Other...");
         return options;
     }
 

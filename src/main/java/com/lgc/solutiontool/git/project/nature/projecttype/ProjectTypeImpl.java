@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.google.gson.annotations.SerializedName;
 import com.lgc.solutiontool.git.project.nature.operation.Operation;
 
 /**
@@ -17,9 +18,11 @@ import com.lgc.solutiontool.git.project.nature.operation.Operation;
  */
 abstract class ProjectTypeImpl implements ProjectType {
 
+    @SerializedName(ID_KEY)
     private String _id;
-    private final Set<Operation> _operations;
-    private final Set<String> _structures;
+
+    private transient final Set<Operation> _operations;
+    private transient final Set<String> _structures;
 
     public ProjectTypeImpl() {
         _operations = new HashSet<>(Operation.MIN_OPERATIONS);

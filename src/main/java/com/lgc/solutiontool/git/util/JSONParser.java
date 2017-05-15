@@ -5,13 +5,21 @@ import java.util.Collection;
 import java.util.Map;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
+import com.lgc.solutiontool.git.project.nature.projecttype.ProjectType;
 
 public class JSONParser {
 
-    private static final Gson _gson = new Gson();
+    private static final GsonBuilder _gsonBuilder = new GsonBuilder();
+    private static  Gson _gson;
     private static final Type _mapType = new TypeToken<Map<String, Object>>() {}.getType();
+
+    static {
+        _gsonBuilder.registerTypeAdapter(ProjectType.class, new ProjectTypeAdapter());
+        _gson = _gsonBuilder.create();
+    }
 
     /**
      * Parses from json to map
