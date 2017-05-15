@@ -105,6 +105,9 @@ public class JGit {
         ListMode mode = brType.equals(BranchType.LOCAL) ? null : ListMode.valueOf(brType.toString());
         Set<String> branches = new HashSet<>();
         projects.stream().forEach((pr) -> {
+            if (pr == null) {
+                return;
+            }
             if (!pr.isCloned()) {
                 System.err.println(pr.getName() + ERROR_MSG_NOT_CLONED);
                 return;
@@ -217,7 +220,9 @@ public class JGit {
         }
 
         Optional<Git> opGit = getGitForRepository(project.getPathToClonedProject());
-        if (opGit.isPresent()) {
+        if (!opGit.isPresent()) {
+            return false;
+        }
             files.stream().forEach((file) -> {
                 if (file != null) {
                     try {
@@ -228,7 +233,6 @@ public class JGit {
                     }
                 }
             });
-        }
         return true;
     }
 
@@ -501,13 +505,14 @@ public class JGit {
     }
 
     /**
+     * Gets current branch in repository
      *
-     * @param project
-     * @return
+     * @param project cloned project
+     * @return name branch
      */
     public Optional<String> getCurrentBranch(Project project) {
         if (project == null) {
-            return Optional.empty();
+            throw new IllegalArgumentException("Incorrect data: project is null");
         }
         if (!project.isCloned()) {
             System.err.println(project.getName() + ERROR_MSG_NOT_CLONED);
@@ -537,15 +542,15 @@ public class JGit {
      *                     FAILED - if the branch could not be created.
      */
     public JGitStatus deleteBranch(Project project, String nameBranch, boolean force) {
-        if (project == null || nameBranch == null) {
-            return JGitStatus.FAILED;
+        if (project == null || nameBranch == null || nameBranch.isEmpty()) {
+            throw new IllegalArgumentException("Incorrect data: project is " + project + ", nameBranch is " + nameBranch);
         }
         if (!project.isCloned()) {
             System.err.println(project.getName() + ERROR_MSG_NOT_CLONED);
             return JGitStatus.FAILED;
         }
         Optional<Git> optGit = getGitForRepository(project.getPathToClonedProject());
-        if (!optGit.isPresent() || nameBranch == null) {
+        if (!optGit.isPresent()) {
             return JGitStatus.FAILED;
         }
         Git git = optGit.get();

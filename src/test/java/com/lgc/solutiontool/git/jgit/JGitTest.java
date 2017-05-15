@@ -2,6 +2,7 @@ package com.lgc.solutiontool.git.jgit;
 
 import static org.mockito.Mockito.mock;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,11 +37,17 @@ import org.eclipse.jgit.api.errors.RefNotFoundException;
 import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.api.errors.UnmergedPathsException;
 import org.eclipse.jgit.api.errors.WrongRepositoryStateException;
+import org.eclipse.jgit.attributes.AttributesNodeProvider;
 import org.eclipse.jgit.dircache.DirCache;
 import org.eclipse.jgit.errors.NoWorkTreeException;
+import org.eclipse.jgit.lib.BaseRepositoryBuilder;
 import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.ObjectDatabase;
 import org.eclipse.jgit.lib.Ref;
+import org.eclipse.jgit.lib.RefDatabase;
+import org.eclipse.jgit.lib.ReflogReader;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.transport.PushResult;
 import org.junit.Assert;
@@ -203,6 +210,7 @@ public class JGitTest {
             }
         };
         Mockito.when(gitMock.add()).thenReturn(addCommandMock);
+        Assert.assertFalse(getJGitMock(null).addUntrackedFileForCommit(new ArrayList<>(), getProject(false)));
         Assert.assertTrue(getJGitMock(gitMock).addUntrackedFileForCommit(new ArrayList<>(), getProject(true)));
 
         List<String> files = new ArrayList<>();
@@ -485,14 +493,7 @@ public class JGitTest {
         Assert.assertEquals(getJGitMock(gitMock).createBranch(getProject(true), NAME_BRANCH, false), JGitStatus.FAILED);
 
         Ref refMock = mock(Ref.class);
-        listCommandMock = new ListBranchCommand(getRepository()) {
-            @Override
-            public List<Ref> call() throws GitAPIException {
-                List<Ref> refs = new ArrayList<>();
-                refs.add(refMock);
-                return refs;
-            }
-        };
+        listCommandMock = getListCommandMock(refMock);
         Mockito.when(refMock.getName()).thenReturn(Constants.R_REMOTES + NAME_BRANCH);
         Mockito.when(gitMock.branchList()).thenReturn(listCommandMock);
         Assert.assertEquals(getJGitMock(gitMock).createBranch(getProject(true), NAME_BRANCH, false), JGitStatus.BRANCH_ALREADY_EXISTS);
@@ -514,14 +515,7 @@ public class JGitTest {
     public void createBranchCorrectDataTest() {
         Ref refMock = mock(Ref.class);
         Git gitMock = getGitMock();
-        ListBranchCommand listCommandMock = new ListBranchCommand(getRepository()) {
-            @Override
-            public List<Ref> call() throws GitAPIException {
-                List<Ref> refs = new ArrayList<>();
-                refs.add(refMock);
-                return refs;
-            }
-        };
+        ListBranchCommand listCommandMock = getListCommandMock(refMock);
         Mockito.when(gitMock.branchList()).thenReturn(listCommandMock);
         CreateBranchCommand createBranchCommandMock = new CreateBranchCommand(getRepository()) {
             @Override
@@ -543,7 +537,7 @@ public class JGitTest {
     }
 
     @Test(expected=IllegalArgumentException.class)
-    public void getBranchesBranchTypeTest() {
+    public void getBranchesBranchTypeIsNullTest() {
         JGit.getInstance().getBranches(new Project(), null);
     }
 
@@ -551,19 +545,102 @@ public class JGitTest {
     public void getBranchesCorrectData() {
         Ref refMock = mock(Ref.class);
         Git gitMock = getGitMock();
-        ListBranchCommand listCommandMock = new ListBranchCommand(getRepository()) {
-            @Override
-            public List<Ref> call() throws GitAPIException {
-                List<Ref> refs = new ArrayList<>();
-                refs.add(refMock);
-                return refs;
-            }
-        };
+        ListBranchCommand listCommandMock = getListCommandMock(refMock);
         Mockito.when(refMock.toString()).thenReturn(Constants.R_HEADS);
         Mockito.when(refMock.getName()).thenReturn(Constants.R_HEADS + "Test");
         Mockito.when(gitMock.branchList()).thenReturn(listCommandMock);
+
         Assert.assertFalse(getJGitMock(gitMock).getBranches(getProject(true), BranchType.LOCAL).isEmpty());
+        Assert.assertFalse(getJGitMock(gitMock).getBranches(getProject(true), BranchType.REMOTE).isEmpty());
     }
+
+    @Test
+    public void getBranchesIncorrectData() {
+        Git gitMock = getGitMock();
+        Assert.assertTrue(getJGitMock(gitMock).getBranches(getProject(false), BranchType.REMOTE).isEmpty());
+
+    }
+
+    @Test(expected=IllegalArgumentException.class)
+    public void getBranchesWithParametersProjectNullTest() {
+        JGit.getInstance().getBranches(null, BranchType.LOCAL, false);
+    }
+
+    @Test(expected=IllegalArgumentException.class)
+    public void getBranchesWithParametersBranchTypeIsNullTest() {
+        JGit.getInstance().getBranches(new ArrayList<>(), null, false);
+    }
+
+    @Test
+    public void getBranchesWithParametersCorrectData() {
+        Assert.assertTrue(JGit.getInstance().getBranches(new ArrayList<>(), BranchType.LOCAL, false).isEmpty());
+        Assert.assertTrue(JGit.getInstance().getBranches(new ArrayList<>(), BranchType.REMOTE, false).isEmpty());
+
+        Ref refMock = mock(Ref.class);
+        Git gitMock = getGitMock();
+        ListBranchCommand listCommandMock = getListCommandMock(refMock);
+        Mockito.when(refMock.toString()).thenReturn(Constants.R_HEADS);
+        Mockito.when(refMock.getName()).thenReturn(Constants.R_HEADS + "Test");
+        Mockito.when(gitMock.branchList()).thenReturn(listCommandMock);
+
+        Assert.assertFalse(getJGitMock(gitMock).getBranches(getProjects(), BranchType.LOCAL, true).isEmpty());
+        Assert.assertFalse(getJGitMock(gitMock).getBranches(getProjects(), BranchType.ALL, false).isEmpty());
+    }
+
+    @Test(expected=IllegalArgumentException.class)
+    public void getCurrentBranchProjectIsNullTest() {
+        JGit.getInstance().getCurrentBranch(null);
+    }
+
+    @Test
+    public void getCurrentBranchIncorrectData() {
+        Assert.assertFalse(JGit.getInstance().getCurrentBranch(getProject(false)).isPresent());
+        Assert.assertFalse(getJGitMock(null).getCurrentBranch(getProject(true)).isPresent());
+
+        Git gitMock = getGitMock();
+        Repository repoMock = getRepo(null);
+        Mockito.when(gitMock.getRepository()).thenReturn(repoMock);
+        getJGitMock(gitMock).getCurrentBranch(getProject(true));
+        Assert.assertFalse(getJGitMock(gitMock).getCurrentBranch(getProject(true)).isPresent());
+    }
+
+    @Test
+    public void getCurrentBranchCorrectData() {
+        Git gitMock = getGitMock();
+        Repository repoMock = getRepo(NAME_BRANCH);
+        Mockito.when(gitMock.getRepository()).thenReturn(repoMock);
+        getJGitMock(gitMock).getCurrentBranch(getProject(true));
+        Assert.assertTrue(getJGitMock(gitMock).getCurrentBranch(getProject(true)).isPresent());
+    }
+
+    @Test(expected=IllegalArgumentException.class)
+    public void deleteBranchProjectIsNullTest() {
+        JGit.getInstance().deleteBranch(null, "", false);
+    }
+
+    @Test(expected=IllegalArgumentException.class)
+    public void deleteBranchNameBranchIsNullTest() {
+        JGit.getInstance().deleteBranch(getProject(false), null, false);
+    }
+
+    @Test(expected=IllegalArgumentException.class)
+    public void deleteBranchNameBranchIsEmptyTest() {
+        JGit.getInstance().deleteBranch(getProject(false), "", false);
+    }
+
+    @Test
+    public void deleteBranchIncorrectDataTest() {
+        Assert.assertEquals(JGit.getInstance().deleteBranch(getProject(false), NAME_BRANCH, false), JGitStatus.FAILED);
+        Assert.assertEquals(getJGitMock(null).deleteBranch(getProject(true), NAME_BRANCH, false), JGitStatus.FAILED);
+    }
+
+    @Test
+    public void deleteBranchCorrectDataTest() {
+
+
+
+    }
+
     /*************************************************************************************************/
     private Project getProject(boolean isCorrectProject) {
         if (!isCorrectProject) {
@@ -625,6 +702,116 @@ public class JGitTest {
 
     private Repository getRepository() {
         return mock(Repository.class);
+    }
+
+    private Repository getRepo(String nameBranch) {
+        BaseRepositoryBuilder<?, ?> buildMock = mock(BaseRepositoryBuilder.class);
+        if (nameBranch == null) {
+            return new Repository(buildMock) {
+
+                @Override
+                public String getBranch() throws IOException {
+                       throw new IOException();
+                }
+
+                @Override
+                public void scanForRepoChanges() throws IOException {
+                }
+
+                @Override
+                public void notifyIndexChanged() {
+                }
+
+                @Override
+                public ReflogReader getReflogReader(String refName) throws IOException {
+                    return null;
+                }
+
+                @Override
+                public RefDatabase getRefDatabase() {
+                    return null;
+                }
+
+                @Override
+                public ObjectDatabase getObjectDatabase() {
+                    return null;
+                }
+
+                @Override
+                public StoredConfig getConfig() {
+                    return null;
+                }
+
+                @Override
+                public AttributesNodeProvider createAttributesNodeProvider() {
+                    return null;
+                }
+
+                @Override
+                public void create(boolean bare) throws IOException {
+
+                }
+            };
+        }
+        Repository repoMock = new Repository(buildMock) {
+
+            @Override
+            public String getBranch() throws IOException {
+                   return nameBranch;
+            }
+
+            @Override
+            public void scanForRepoChanges() throws IOException {
+            }
+
+            @Override
+            public void notifyIndexChanged() {
+            }
+
+            @Override
+            public ReflogReader getReflogReader(String refName) throws IOException {
+                return null;
+            }
+
+            @Override
+            public RefDatabase getRefDatabase() {
+                return null;
+            }
+
+            @Override
+            public ObjectDatabase getObjectDatabase() {
+                return null;
+            }
+
+            @Override
+            public StoredConfig getConfig() {
+                return null;
+            }
+
+            @Override
+            public AttributesNodeProvider createAttributesNodeProvider() {
+                return null;
+            }
+
+            @Override
+            public void create(boolean bare) throws IOException {
+
+            }
+        };
+        return repoMock;
+    }
+
+
+    private ListBranchCommand getListCommandMock(Ref ref) {
+        ListBranchCommand listCommandMock = new ListBranchCommand(getRepository()) {
+            @Override
+            public List<Ref> call() throws GitAPIException {
+                List<Ref> refs = new ArrayList<>();
+                refs.add(ref);
+                return refs;
+            }
+        };
+        return listCommandMock;
     }
 
     private GitAPIException getGitAPIException() {
