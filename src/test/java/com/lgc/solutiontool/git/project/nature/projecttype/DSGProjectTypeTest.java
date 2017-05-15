@@ -17,19 +17,22 @@ import com.lgc.solutiontool.git.project.nature.operation.Operation;
  */
 public class DSGProjectTypeTest {
 
-    private final DSGProjectType _dsgProjectType = new DSGProjectType() {
-        @Override
-        protected boolean isPathCorrespondsToType(Path path) {
-            return true;
+    private DSGProjectType getDSGType() {
+        return new DSGProjectType() {
+            @Override
+            protected boolean isPathCorrespondsToType(Path path) {
+                return true;
+            };
         };
-    };
-
-    private final Set<Operation> ALL_OPERATIONS = new HashSet<>(Arrays.asList(Operation.values()));
+    }
 
 
     @Test
     public void projectTypeOperationsTest() {
-        Set<Operation> operations = _dsgProjectType.getModifiableOperations();
+        final Set<Operation> ALL_OPERATIONS = new HashSet<>(Arrays.asList(Operation.values()));
+
+        DSGProjectType dsgProjectType = getDSGType();
+        Set<Operation> operations = dsgProjectType.getModifiableOperations();
         Assert.assertNotNull(operations);
         Assert.assertFalse(operations.isEmpty());
         Assert.assertEquals(operations.size(), ALL_OPERATIONS.size());
@@ -38,27 +41,33 @@ public class DSGProjectTypeTest {
 
     @Test
     public void projectTypeStructureTest() {
-        Set<String> structures = _dsgProjectType.getStructures();
+        DSGProjectType dsgProjectType = getDSGType();
+        Set<String> structures = dsgProjectType.getStructures();
         Assert.assertNotNull(structures);
         Assert.assertFalse(structures.isEmpty());
         Assert.assertEquals(structures.size(), 2);
+
+
+        int oldSize = dsgProjectType.getStructures().size();
+        dsgProjectType.addStructure(null);
+        dsgProjectType.addStructure("");
+        Assert.assertEquals(oldSize, dsgProjectType.getStructures().size());
     }
 
     @Test
     public void isProjectCorrespondsTypeCorrectDataTest() {
+        DSGProjectType dsgProjectType = getDSGType();
         String path = "path/";
-        Assert.assertTrue(_dsgProjectType.isProjectCorrespondsType(path));
-        _dsgProjectType.getStructures().add(null);
-        Assert.assertTrue(_dsgProjectType.isProjectCorrespondsType(path));
+        Assert.assertTrue(dsgProjectType.isProjectCorrespondsType(path));
     }
 
     @Test
     public void isProjectCorrespondsTypeIncorrectDataTest() {
-        Assert.assertFalse(_dsgProjectType.isProjectCorrespondsType(null));
-        Assert.assertFalse(_dsgProjectType.isProjectCorrespondsType(""));
+        DSGProjectType dsgProjectType = getDSGType();
+        Assert.assertFalse(dsgProjectType.isProjectCorrespondsType(null));
+        Assert.assertFalse(dsgProjectType.isProjectCorrespondsType(""));
 
-
-        DSGProjectType dsgProjectType = new DSGProjectType() {
+        dsgProjectType = new DSGProjectType() {
             @Override
             protected boolean isPathCorrespondsToType(Path path) {
                 return false;

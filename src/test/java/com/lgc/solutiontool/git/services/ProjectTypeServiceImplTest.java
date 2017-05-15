@@ -18,20 +18,16 @@ import com.lgc.solutiontool.git.project.nature.projecttype.UnknownProjectType;
  */
 public class ProjectTypeServiceImplTest {
 
-    private static ProjectTypeServiceImpl _service = (ProjectTypeServiceImpl) ServiceProvider.getInstance()
-            .getService(ProjectTypeService.class.getName());
-
-    private static final Project _projectCorrect;
-
-    static {
-        _projectCorrect = new Project() {
+    private Project getCorrectProject() {
+        Project projectCorrect = new Project() {
             @Override
             protected boolean checkPath(Path pathToProject) {
                 return true;
             }
         };
-        _projectCorrect.setPathToClonedProject("/path");
-        _projectCorrect.setClonedStatus(true);
+        projectCorrect.setPathToClonedProject("/path");
+        projectCorrect.setClonedStatus(true);
+        return projectCorrect;
     }
 
     @Test
@@ -49,17 +45,20 @@ public class ProjectTypeServiceImplTest {
             }
         };
 
-        ProjectType type = service.getProjectType(_projectCorrect);
+        ProjectType type = service.getProjectType(getCorrectProject());
         Assert.assertTrue(type instanceof DSGProjectType);
-        type = _service.getProjectType(new Project());
+
+        service = new ProjectTypeServiceImpl();
+        type = service.getProjectType(new Project());
         Assert.assertTrue(type instanceof UnknownProjectType);
-        type = _service.getProjectType(_projectCorrect);
+        type = service.getProjectType(getCorrectProject());
         Assert.assertTrue(type instanceof UnknownProjectType);
     }
 
     @Test(expected=IllegalArgumentException.class)
     public void getProjectTypeProjectIsNullTest() {
-        _service.getProjectType(null);
+        ProjectTypeServiceImpl service = new ProjectTypeServiceImpl();
+        service.getProjectType(null);
     }
 
 }

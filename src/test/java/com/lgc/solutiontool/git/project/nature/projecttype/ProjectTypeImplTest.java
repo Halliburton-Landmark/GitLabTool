@@ -15,55 +15,73 @@ import com.lgc.solutiontool.git.project.nature.operation.Operation;
  */
 public class ProjectTypeImplTest {
 
-    private ProjectTypeImpl _projectType = new ProjectTypeImpl() {};
-    private final String _pomFile = "/pom.xml";
+    @Test(expected=UnsupportedOperationException.class)
+    public void projectTypeStructureExceptionTest() {
+        ProjectTypeImpl projectType = new ProjectTypeImpl() {};
+        projectType.getStructures().add("structure");
+    }
 
     @Test
     public void projectTypeStructureTest() {
-        Set<String> structures = _projectType.getStructures();
+        ProjectTypeImpl projectType = new ProjectTypeImpl() {};
+        String pomFile = "/pom.xml";
+
+        Set<String> structures = projectType.getStructures();
         Assert.assertNotNull(structures);
         Assert.assertTrue(structures.isEmpty());
 
-        structures.add(_pomFile);
+        projectType.addStructure(pomFile);
         Assert.assertFalse(structures.isEmpty());
         Assert.assertEquals(structures.size(), 1);
-        Assert.assertTrue(structures.contains(_pomFile));
+        Assert.assertTrue(structures.contains(pomFile));
+
+
+        int oldSize = projectType.getStructures().size();
+        projectType.addStructure(null);
+        projectType.addStructure("");
+        Assert.assertEquals(oldSize, projectType.getStructures().size());
     }
 
     @Test
     public void projectTypeIdCorrectDataTest() {
+        ProjectTypeImpl projectType = new ProjectTypeImpl() {};
         String id = "my_type";
 
-        Assert.assertNull(_projectType.getId());
-        _projectType.setId(id);
-        Assert.assertNotNull(_projectType.getId());
-        Assert.assertEquals(_projectType.getId(), id);
+        Assert.assertNull(projectType.getId());
+        projectType.setId(id);
+        Assert.assertNotNull(projectType.getId());
+        Assert.assertEquals(projectType.getId(), id);
     }
 
     @Test(expected=IllegalArgumentException.class)
     public void projectTypeIdIfNullTest() {
-        _projectType.setId(null);
+        ProjectTypeImpl projectType = new ProjectTypeImpl() {};
+        projectType.setId(null);
     }
 
     @Test(expected=IllegalArgumentException.class)
     public void projectTypeIdIfEmptyTest() {
-        _projectType.setId("");
+        ProjectTypeImpl projectType = new ProjectTypeImpl() {};
+        projectType.setId("");
     }
 
     @Test(expected=UnsupportedOperationException.class)
     public void projectTypeAvailableOperationsTest() {
-        Set<Operation> operations = _projectType.getAvailableOperations();
+        ProjectTypeImpl projectType = new ProjectTypeImpl() {};
+        Set<Operation> operations = projectType.getAvailableOperations();
         Assert.assertNotNull(operations);
         Assert.assertFalse(operations.isEmpty());
         Assert.assertEquals(operations.size(), Operation.MIN_OPERATIONS.size());
         Assert.assertTrue(operations.containsAll(Operation.MIN_OPERATIONS));
 
+        //Here expect the UnsupportedOperationException
         operations.add(Operation.CHANGE_POM_FILE);
     }
 
     @Test
     public void projectTypeOperationsTest() {
-        Set<Operation> operations = _projectType.getModifiableOperations();
+        ProjectTypeImpl projectType = new ProjectTypeImpl() {};
+        Set<Operation> operations = projectType.getModifiableOperations();
         Assert.assertNotNull(operations);
         Assert.assertFalse(operations.isEmpty());
         Assert.assertEquals(operations.size(), Operation.MIN_OPERATIONS.size());
@@ -76,29 +94,28 @@ public class ProjectTypeImplTest {
 
     @Test
     public void projectTypeHasOperationTest() {
-        Assert.assertTrue(_projectType.hasOperation(Operation.REPLACEMENT_TEXT_IN_FILE));
-        Assert.assertFalse(_projectType.hasOperation(null));
+        ProjectTypeImpl projectType = new ProjectTypeImpl() {};
+        Assert.assertTrue(projectType.hasOperation(Operation.REPLACEMENT_TEXT_IN_FILE));
+        Assert.assertFalse(projectType.hasOperation(null));
     }
 
     @Test
     public void isProjectCorrespondsTypeCorrectDataTest() {
         String path = "path/";
-        _projectType = new ProjectTypeImpl() {
+        ProjectTypeImpl projectType = new ProjectTypeImpl() {
             @Override
             protected boolean isPathCorrespondsToType(Path path) {
                 return true;
             }
         };
-
-        Assert.assertTrue(_projectType.isProjectCorrespondsType(path));
-        _projectType.getStructures().add(null);
-        Assert.assertTrue(_projectType.isProjectCorrespondsType(path));
+        Assert.assertTrue(projectType.isProjectCorrespondsType(path));
     }
 
     @Test
     public void isProjectCorrespondsTypeIncorrectDataTest() {
-        _projectType.isProjectCorrespondsType(null);
-        _projectType.isProjectCorrespondsType("");
+        ProjectTypeImpl projectType = new ProjectTypeImpl() {};
+        projectType.isProjectCorrespondsType(null);
+        projectType.isProjectCorrespondsType("");
     }
 
 }

@@ -3,6 +3,7 @@ package com.lgc.solutiontool.git.project.nature.projecttype;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -32,13 +33,31 @@ abstract class ProjectTypeImpl implements ProjectType {
         _id = id;
     }
 
+    protected void addStructure(String structure) {
+        if (structure != null && !structure.isEmpty()) {
+            _structures.add(structure);
+        }
+    }
+
     protected Set<String> getStructures() {
-        return _structures;
+        return Collections.unmodifiableSet(_structures);
     }
 
     @Override
     public Set<Operation> getAvailableOperations() {
         return Collections.unmodifiableSet(_operations);
+    }
+
+    protected void addOperation(Operation operation) {
+        if (operation != null) {
+            _operations.add(operation);
+        }
+    }
+
+    protected void addOperations(Collection<Operation> operations) {
+        if (operations != null && !operations.isEmpty()) {
+            _operations.addAll(operations);
+        }
     }
 
     protected Set<Operation> getModifiableOperations() {
@@ -64,11 +83,9 @@ abstract class ProjectTypeImpl implements ProjectType {
             return false;
         }
         for (String structure : getStructures()) {
-            if (structure != null) {
-                Path path = Paths.get(projectPath + structure);
-                if (!isPathCorrespondsToType(path)) {
-                    return false;
-                }
+            Path path = Paths.get(projectPath + structure);
+            if (!isPathCorrespondsToType(path)) {
+                return false;
             }
         }
         return true;

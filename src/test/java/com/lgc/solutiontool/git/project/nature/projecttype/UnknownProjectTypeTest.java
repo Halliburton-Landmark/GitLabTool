@@ -10,24 +10,26 @@ import org.junit.Test;
  */
 public class UnknownProjectTypeTest {
 
-    private final UnknownProjectType _unknownProjectType = new UnknownProjectType();
     private final String _nameType = "unknown";
 
     @Test
     public void idTest() {
-        Assert.assertNotNull(_unknownProjectType.getId());
-        Assert.assertEquals(_unknownProjectType.getId(), _nameType);
+        UnknownProjectType unknownProjectType = new UnknownProjectType();
+        Assert.assertNotNull(unknownProjectType.getId());
+        Assert.assertEquals(unknownProjectType.getId(), _nameType);
     }
 
     @Test
     public void isProjectCorrespondsTypeCorrectDataTest() {
-        Assert.assertTrue(_unknownProjectType.isProjectCorrespondsType("path/"));
+        UnknownProjectType unknownProjectType = new UnknownProjectType();
+        Assert.assertTrue(unknownProjectType.isProjectCorrespondsType("path/"));
     }
 
     @Test
     public void isProjectCorrespondsTypeIncorrectDataTest() {
-        Assert.assertFalse(_unknownProjectType.isProjectCorrespondsType(null));
-        Assert.assertFalse(_unknownProjectType.isProjectCorrespondsType(""));
+        UnknownProjectType unknownProjectType = new UnknownProjectType();
+        Assert.assertFalse(unknownProjectType.isProjectCorrespondsType(null));
+        Assert.assertFalse(unknownProjectType.isProjectCorrespondsType(""));
     }
 
 }
