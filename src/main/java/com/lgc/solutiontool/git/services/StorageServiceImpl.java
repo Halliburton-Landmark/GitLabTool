@@ -2,6 +2,9 @@ package com.lgc.solutiontool.git.services;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 
@@ -16,7 +19,6 @@ import com.lgc.solutiontool.git.xml.Servers;
 public class StorageServiceImpl implements StorageService {
     private static final String USER_HOME_PROPERTY = "user.home";
     private static final String WORKSPACE_DIRECTORY_PROPERTY = ".SolutionTool";
-    private static final String SETTINGS_DIRECTORY_PROPERTY = ".settings";
     private static final String PATH_SEPARATOR = File.separator;
     private static final String PROPERTY_FILENAME = "properties.xml";
     private static final String SERVERS_FILENAME = "servers.xml";
@@ -81,30 +83,28 @@ public class StorageServiceImpl implements StorageService {
     }
 
     private File getPropFile(String server, String username) throws IOException {
-        File propFile = new File(_workingDirectory + PATH_SEPARATOR + server + PATH_SEPARATOR + username
+        Path propertyFilePath = Paths.get(_workingDirectory + PATH_SEPARATOR + server + PATH_SEPARATOR + username
                 + PATH_SEPARATOR + PROPERTY_FILENAME);
-        return getFile(propFile);
+        return getFile(propertyFilePath);
     }
 
     private File getServersFile() throws IOException {
-        File serverFile = new File(
-                _workingDirectory + PATH_SEPARATOR + SETTINGS_DIRECTORY_PROPERTY + PATH_SEPARATOR + SERVERS_FILENAME);
-        return getFile(serverFile);
+        Path serversFilePath = Paths.get(_workingDirectory + PATH_SEPARATOR + SERVERS_FILENAME);
+        return getFile(serversFilePath);
     }
 
-    private File getFile(File file) throws IOException {
-        File parentDirectory = file.getParentFile();
-
-        if (file.exists()) {
-            return new File(file.getCanonicalPath());
+    private File getFile(Path path) throws IOException {
+        if (Files.exists(path)) {
+            return path.toFile();
+        } else {
+            File file = new File(path.toUri());
+            File parentDir = file.getParentFile();
+            if (!parentDir.exists()) {
+                parentDir.mkdirs();
+            }
+            file.createNewFile();
+            return file;
         }
-
-        if (!parentDirectory.exists()) {
-            parentDirectory.mkdirs();
-        }
-        file.createNewFile();
-
-        return new File(file.getCanonicalPath());
     }
 
 }
