@@ -1,25 +1,38 @@
 package com.lgc.solutiontool.git.ui.javafx.controllers;
 
 
+import com.lgc.solutiontool.git.entities.Branch;
 import com.lgc.solutiontool.git.entities.Project;
 import com.lgc.solutiontool.git.jgit.BranchType;
 import com.lgc.solutiontool.git.jgit.JGit;
-import com.lgc.solutiontool.git.ui.selection.ListViewKey;
+import com.lgc.solutiontool.git.ui.icon.LocalRemoteIconHolder;
 import com.lgc.solutiontool.git.ui.selection.SelectionsProvider;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.util.Callback;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
+@SuppressWarnings("unchecked")
 public class SwitchBranchWindowController {
+    private static final String LOCAL_KEY = "Local";
+    private static final String REMOTE_KEY = "Remote";
+
 
     @FXML
     public ListView currentProjectsListView;
@@ -34,16 +47,47 @@ public class SwitchBranchWindowController {
     public ListView branchesListView;
 
     @FXML
-    public CheckBox commonMatchongCheckBox;
+    public CheckBox commonMatchingCheckBox;
+
+    @FXML
+    public TextField searchField;
+
+    private List<Branch> currentBranches = new ArrayList<>();
 
     @FXML
     public void initialize() {
         configureProjectsListView(currentProjectsListView);
+        configureBranchesListView(branchesListView);
 
         List<?> selectedProjects = SelectionsProvider.getInstance().getSelectionItems("mainWindow_projectsList");
         setProjectListItems(selectedProjects, currentProjectsListView);
 
-        projectsCount.setText("Total projects: " + currentProjectsListView.getItems().size());
+
+        searchField.textProperty().addListener(new ChangeListener() {
+            public void changed(ObservableValue observable, Object oldValue, Object newValue) {
+                filterPlantList((String) oldValue, (String) newValue);
+            }
+        });
+
+        ObservableValue<String> obsString = new SimpleStringProperty("Total count: ");
+        projectsCount.textProperty().bind(Bindings.concat(obsString, Bindings.size((currentProjectsListView.getItems())).asString()));
+    }
+
+    private void filterPlantList(String oldValue, String newValue) {
+
+        ObservableList<Branch> filteredList = FXCollections.observableArrayList();
+        if (searchField == null || newValue.length() < oldValue.length()) {
+            branchesListView.setItems(FXCollections.observableArrayList(currentBranches));
+        } else {
+            newValue = newValue.toUpperCase();
+            for (Object plants : branchesListView.getItems()) {
+                String filterText = ((Branch) plants).getBranchName();
+                if (filterText.toUpperCase().contains(newValue)) {
+                    filteredList.add((Branch) plants);
+                }
+            }
+            branchesListView.setItems(filteredList);
+        }
     }
 
     public void onUpdateList(ActionEvent actionEvent) {
@@ -52,7 +96,7 @@ public class SwitchBranchWindowController {
         RadioButton selecteRB = (RadioButton) branchesFilter.getSelectedToggle();
         String branchTypeText = selecteRB.getText();
 
-        Boolean isCommonMatching = commonMatchongCheckBox.isSelected();
+        Boolean isCommonMatching = commonMatchingCheckBox.isSelected();
 
         BranchType branchType;
         switch (branchTypeText) {
@@ -69,21 +113,29 @@ public class SwitchBranchWindowController {
                 branchType = BranchType.LOCAL;
         }
 
-        List<String> allBranches = new ArrayList<String>();
-        allBranches.addAll(JGit.getInstance().getBranches(selectedProjects, branchType, isCommonMatching));
-        branchesListView.setItems(FXCollections.observableArrayList(allBranches));
+        List<Branch> allBranchesWithTypes = getBranches(selectedProjects, branchType, isCommonMatching);
+        currentBranches = allBranchesWithTypes;
+        branchesListView.setItems(FXCollections.observableArrayList(currentBranches));
+    }
+
+    private List<Branch> getBranches(List<Project> selectedProjects, BranchType branchType, Boolean isCommonMatching) {
+        Set<Branch> allBranchesWithTypes = JGit.getInstance().getBranches(selectedProjects, branchType, isCommonMatching);
+
+        List<Branch> list = new ArrayList(allBranchesWithTypes);
+        list.sort(Comparator.comparing(Branch::getBranchName));
+        return list;
     }
 
 
     public void onApplyButton(ActionEvent actionEvent) {
         List<Project> selectedProjects = currentProjectsListView.getSelectionModel().getSelectedItems();
-        String selectedBranch = (String)branchesListView.getSelectionModel().getSelectedItem();
+        Branch selectedBranch = (Branch) branchesListView.getSelectionModel().getSelectedItem();
+        String selectedBranchName = selectedBranch.getBranchName();
 
-        for(Project project: selectedProjects) {
-            JGit.getInstance().switchTo(project,selectedBranch);
+        for (Project project : selectedProjects) {
+            JGit.getInstance().switchTo(project, selectedBranchName);
         }
     }
-
 
     private void setProjectListItems(List items, ListView<Project> listView) {
         if (items == null || items.isEmpty()) {
@@ -106,42 +158,45 @@ public class SwitchBranchWindowController {
 
         //setup selection
         listView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-//        listView.addEventFilter(MouseEvent.MOUSE_PRESSED, evt -> {
-//            Node node = evt.getPickResult().getIntersectedNode();
-//
-//            while (node != null && node != listView && !(node instanceof ListCell)) {
-//                node = node.getParent();
-//            }
-//
-//            if (node instanceof ListCell) {
-//                evt.consume();
-//
-//                ListCell cell = (ListCell) node;
-//                ListView lv = cell.getListView();
-//
-//                lv.requestFocus();
-//
-//                if (!cell.isEmpty()) {
-//                    int index = cell.getIndex();
-//                    if (cell.isSelected()) {
-//                        lv.getSelectionModel().clearSelection(index);
-//                    } else {
-//                        lv.getSelectionModel().select(index);
-//                    }
-//                }
-//            }
-//        });
 
-        listView.getSelectionModel().getSelectedItems().addListener(new ListChangeListener() {
+    }
+
+    private void configureBranchesListView(ListView listView) {
+        //config displayable string with icon
+        listView.setCellFactory(new Callback<ListView<Branch>, ListCell<Branch>>() {
             @Override
-            public void onChanged(ListChangeListener.Change change) {
-                projectsCount.setText("Total projects: " + listView.getItems().size());
-                SelectionsProvider.getInstance().setSelectionItems(ListViewKey.MAIN_WINDOW_PROJECTS.getKey(),
-                        listView.getSelectionModel().getSelectedItems());
+            public ListCell<Branch> call(ListView<Branch> p) {
+
+                return new ListCell<Branch>() {
+                    @Override
+                    protected void updateItem(Branch item, boolean empty) {
+                        super.updateItem(item, empty);
+                        if (empty) {
+                            setGraphic(null);
+                            setText(null);
+                        } else {
+                            Image fxImage = getBranchIcon(item);
+                            ImageView imageView = new ImageView(fxImage);
+                            setGraphic(imageView);
+                            setText(item.getBranchName());
+                        }
+                    }
+                };
+            }
+
+            private Image getBranchIcon(Branch item) {
+
+                BranchType type = item.getBranchType();
+                Image branchIcon;
+                if (type == BranchType.LOCAL) {
+                    branchIcon = LocalRemoteIconHolder.getInstance().getLocalBranchIcoImage();
+                } else {
+                    branchIcon = LocalRemoteIconHolder.getInstance().getRemoteBranchIcoImage();
+                }
+                return branchIcon;
             }
         });
     }
-
 
     private class GroupListCell extends ListCell<Project> {
         HBox hbox = new HBox();
@@ -149,7 +204,7 @@ public class SwitchBranchWindowController {
         Pane pane = new Pane();
         Button button = new Button("x");
 
-        public GroupListCell() {
+        GroupListCell() {
             super();
 
             hbox.getChildren().addAll(label, pane, button);
