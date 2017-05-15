@@ -16,7 +16,7 @@ import com.lgc.solutiontool.git.project.nature.operation.Operation;
 public class ProjectTypeImplTest {
 
     @Test(expected=UnsupportedOperationException.class)
-    public void projectTypeStructureExceptionTest() {
+    public void projectTypeAddStructureToImmutableCollectionTest() {
         ProjectTypeImpl projectType = new ProjectTypeImpl() {};
         projectType.getStructures().add("structure");
     }
@@ -34,7 +34,11 @@ public class ProjectTypeImplTest {
         Assert.assertFalse(structures.isEmpty());
         Assert.assertEquals(structures.size(), 1);
         Assert.assertTrue(structures.contains(pomFile));
+    }
 
+    @Test
+    public void projectTypeAddStructureTest() {
+        ProjectTypeImpl projectType = new ProjectTypeImpl() {};
 
         int oldSize = projectType.getStructures().size();
         projectType.addStructure(null);
