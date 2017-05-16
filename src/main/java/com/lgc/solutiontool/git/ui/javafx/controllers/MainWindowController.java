@@ -24,12 +24,12 @@ import javafx.scene.control.SelectionMode;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
-import javafx.util.Callback;
 
 import java.util.List;
 
 public class MainWindowController {
     private static final String HEDER_GROUP_TITLE = "Current group: ";
+    private static final String DS_PROJECT_TYPE = "com.lgc.dsg";
 
     private Group _selectedGroup;
 
@@ -86,38 +86,7 @@ public class MainWindowController {
 
     private void configureListView(ListView listView) {
         //config displayable string
-        listView.setCellFactory(new Callback<ListView<Project>, ListCell<Project>>() {
-            @Override
-            public ListCell<Project> call(ListView<Project> p) {
-
-                return new ListCell<Project>() {
-                    @Override
-                    protected void updateItem(Project item, boolean empty) {
-                        super.updateItem(item, empty);
-                        if (empty) {
-                            setGraphic(null);
-                            setText(null);
-                        } else {
-                            Image fxImage = getProjectIcon(item);
-                            ImageView imageView = new ImageView(fxImage);
-                            setGraphic(imageView);
-                            setText(item.getName());
-                        }
-                    }
-                };
-            }
-
-            private Image getProjectIcon(Project item) {
-                ProjectType type = _projectTypeService.getProjectType(item);
-                Image projectIcon;
-                if (type.getId().equals("unknown")) {
-                    projectIcon = ProjectNatureIconHolder.getInstance().getUnknownProjectIcoImage();
-                } else {
-                    projectIcon = ProjectNatureIconHolder.getInstance().getDsProjectIcoImage();
-                }
-                return projectIcon;
-            }
-        });
+        listView.setCellFactory(p -> new MainWindowController.ProjectListCell());
 
         //setup selection
         listView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
@@ -154,5 +123,34 @@ public class MainWindowController {
                         listView.getSelectionModel().getSelectedItems());
             }
         });
+    }
+
+    private class ProjectListCell extends ListCell<Project> {
+        private static final String DS_PROJECT_TYPE = "com.lgc.dsg";
+
+        @Override
+        protected void updateItem(Project item, boolean empty) {
+            super.updateItem(item, empty);
+            setText(null);
+            setGraphic(null);
+
+            if (item != null && !empty) {
+                Image fxImage = getProjectIcon(item);
+                ImageView imageView = new ImageView(fxImage);
+
+                setGraphic(imageView);
+                setText(item.getName());
+            }
+        }
+
+        private Image getProjectIcon(Project item) {
+            ProjectType type = _projectTypeService.getProjectType(item);
+            Image projectIcon = ProjectNatureIconHolder.getInstance().getUnknownProjectIcoImage();
+
+            if (type.getId().equals(DS_PROJECT_TYPE)) {
+                projectIcon = ProjectNatureIconHolder.getInstance().getDsProjectIcoImage();
+            }
+            return projectIcon;
+        }
     }
 }

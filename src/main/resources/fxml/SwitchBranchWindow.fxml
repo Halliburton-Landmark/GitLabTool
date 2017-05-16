@@ -55,7 +55,7 @@
             <RadioButton mnemonicParsing="false" text="Remote" toggleGroup="$branchesFilter"/>
             <RadioButton mnemonicParsing="false" text="Remote + Local" toggleGroup="$branchesFilter"/>
         </VBox>
-        <CheckBox fx:id="commonMatchingCheckBox" mnemonicParsing="false" text="Match in all bra+nches"/>
+        <CheckBox fx:id="commonMatchingCheckBox" mnemonicParsing="false" text="Match in all branches"/>
         <Button mnemonicParsing="false" onAction="#onUpdateList" text="Update list">
             <VBox.margin>
                 <Insets/>
@@ -63,8 +63,8 @@
         </Button>
     </VBox>
     <HBox alignment="TOP_RIGHT" maxHeight="50.0" prefHeight="100.0" prefWidth="200.0" spacing="20.0"
-          style="-fx-background-color: ;" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="3">
+          GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="3">
         <Button onAction="#onApplyButton" mnemonicParsing="false" text="Apply"/>
-        <Button mnemonicParsing="false" text="Cancel"/>
+        <Button onAction="#onCancel" mnemonicParsing="false" text="Cancel"/>
     </HBox>
 </GridPane>

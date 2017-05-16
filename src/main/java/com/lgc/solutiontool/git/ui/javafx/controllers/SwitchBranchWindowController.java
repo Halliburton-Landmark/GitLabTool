@@ -14,12 +14,14 @@ import com.lgc.solutiontool.git.ui.selection.SelectionsProvider;
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+import javafx.stage.Stage;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -37,28 +39,28 @@ public class SwitchBranchWindowController {
     private List<Branch> currentBranches = new ArrayList<>();
 
     @FXML
-    public ListView currentProjectsListView;
+    private ListView currentProjectsListView;
 
     @FXML
-    public Label allProjectsCount;
+    private Label allProjectsCount;
 
     @FXML
-    public ToggleGroup branchesFilter;
+    private ToggleGroup branchesFilter;
 
     @FXML
-    public ListView branchesListView;
+    private ListView branchesListView;
 
     @FXML
-    public CheckBox commonMatchingCheckBox;
+    private CheckBox commonMatchingCheckBox;
 
     @FXML
-    public TextField searchField;
+    private TextField searchField;
 
     @FXML
-    public Label branchesCount;
+    private Label branchesCount;
 
     @FXML
-    public Label selectedProjectsCount;
+    private Label selectedProjectsCount;
 
     @FXML
     public void initialize() {
@@ -77,22 +79,26 @@ public class SwitchBranchWindowController {
                 Bindings.size((currentProjectsListView.getItems())).asString()));
     }
 
-    private void filterPlantList(String oldValue, String newValue) {
+    /*
+    Buttons
+    */
+    public void onApplyButton() {
+        List<Project> selectedProjects = currentProjectsListView.getSelectionModel().getSelectedItems();
+        Branch selectedBranch = (Branch) branchesListView.getSelectionModel().getSelectedItem();
+        String selectedBranchName = selectedBranch.getBranchName();
+        boolean isRemote = selectedBranch.getBranchType().equals(BranchType.REMOTE);
 
-        ObservableList<Branch> filteredList = FXCollections.observableArrayList();
-        if (searchField == null || newValue.length() < oldValue.length()) {
-            branchesListView.setItems(FXCollections.observableArrayList(currentBranches));
-        } else {
-            newValue = newValue.toUpperCase();
-            for (Object branch : branchesListView.getItems()) {
-                String filterText = ((Branch) branch).getBranchName();
-                if (filterText.toUpperCase().contains(newValue)) {
-                    filteredList.add((Branch) branch);
-                }
-            }
-            branchesListView.getItems().clear();
-            branchesListView.setItems(filteredList);
+        for (Project project : selectedProjects) {
+            JGit.getInstance().switchTo(project, selectedBranchName, isRemote);
         }
+
+        onUpdateList();
+    }
+
+    public void onCancel(ActionEvent actionEvent) {
+        Node source = (Node) actionEvent.getSource();
+        Stage stage = (Stage) source.getScene().getWindow();
+        stage.close();
     }
 
     public void onUpdateList() {
@@ -124,6 +130,23 @@ public class SwitchBranchWindowController {
                 Bindings.size((branchesListView.getItems())).asString()));
     }
 
+    private void filterPlantList(String oldValue, String newValue) {
+
+        ObservableList<Branch> filteredList = FXCollections.observableArrayList();
+        if (searchField == null || newValue.length() < oldValue.length()) {
+            branchesListView.setItems(FXCollections.observableArrayList(currentBranches));
+        } else {
+            newValue = newValue.toUpperCase();
+            for (Object branch : branchesListView.getItems()) {
+                String filterText = ((Branch) branch).getBranchName();
+                if (filterText.toUpperCase().contains(newValue)) {
+                    filteredList.add((Branch) branch);
+                }
+            }
+            branchesListView.getItems().clear();
+            branchesListView.setItems(filteredList);
+        }
+    }
 
     private List<Branch> getBranches(List<Project> selectedProjects, BranchType branchType, Boolean isCommonMatching) {
         Set<Branch> allBranchesWithTypes = JGit.getInstance().getBranches(selectedProjects,
@@ -146,20 +169,6 @@ public class SwitchBranchWindowController {
         });
 
         return list;
-    }
-
-
-    public void onApplyButton() {
-        List<Project> selectedProjects = currentProjectsListView.getSelectionModel().getSelectedItems();
-        Branch selectedBranch = (Branch) branchesListView.getSelectionModel().getSelectedItem();
-        String selectedBranchName = selectedBranch.getBranchName();
-        boolean isRemote = selectedBranch.getBranchType().equals(BranchType.REMOTE);
-
-        for (Project project : selectedProjects) {
-            JGit.getInstance().switchTo(project, selectedBranchName, isRemote);
-        }
-
-        onUpdateList();
     }
 
     private void setProjectListItems(List items, ListView<Project> listView) {
@@ -213,7 +222,6 @@ public class SwitchBranchWindowController {
     }
 
     private class ProjectListCell extends ListCell<Project> {
-
         private static final String DS_PROJECT_TYPE = "com.lgc.dsg";
 
         @Override

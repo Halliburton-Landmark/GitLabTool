@@ -32,6 +32,7 @@ public class ModularController {
     private static final String ABOUT_POPUP_TITLE = "About";
     private static final String ABOUT_POPUP_HEADER = "Solution tool for GitLab, powered by Luxoft";
     private static final String ABOUT_POPUP_CONTENT = "Contacts: Yurii Pitomets (yurii.pitomets2@halliburton.com)";
+    private static final String SWITCH_BRANCH_TITLE = "Switch branch";
 
     private static final String CSS_PATH = "css/style.css";
 
@@ -138,6 +139,8 @@ public class ModularController {
             Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
             stage.setHeight(primaryScreenBounds.getMaxY() / 1.5);
             stage.setWidth(primaryScreenBounds.getMaxX() / 1.5);
+            stage.getIcons().add(AppIconHolder.getInstance().getAppIcoImage());
+            stage.setTitle(SWITCH_BRANCH_TITLE);
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.show();
         } catch (IOException e) {

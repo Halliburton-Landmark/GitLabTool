@@ -9,8 +9,8 @@ import javafx.scene.image.ImageView;
  * @author Pavlo Pidhorniy
  */
 public class ProjectNatureIconHolder {
-    private static final String DS_PROJECT_ICON_URL = "icons/dsg_project.png";
-    private static final String UNKNOWN_PROJECT_ICON_URL = "icons/unknown_project_2.png";
+    private static final String DS_PROJECT_ICON_URL = "icons/project/dsg_project.png";
+    private static final String UNKNOWN_PROJECT_ICON_URL = "icons/project/unknown_project.png";
 
     private static ProjectNatureIconHolder instance = null;
 
