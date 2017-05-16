@@ -28,6 +28,13 @@ import java.util.Set;
 
 @SuppressWarnings("unchecked")
 public class SwitchBranchWindowController {
+    private static final String TOTAL_CAPTION = "Total count: ";
+    private static final String SELECTED_CAPTION = "Selected count: ";
+
+    private ProjectTypeService _projectTypeService =
+            (ProjectTypeService) ServiceProvider.getInstance().getService(ProjectTypeService.class.getName());
+
+    private List<Branch> currentBranches = new ArrayList<>();
 
     @FXML
     public ListView currentProjectsListView;
@@ -52,14 +59,6 @@ public class SwitchBranchWindowController {
 
     @FXML
     public Label selectedProjectsCount;
-
-    private List<Branch> currentBranches = new ArrayList<>();
-
-    private static final String TOTAL_CAPTION = "Total count: ";
-    private static final String SELECTED_CAPTION = "Selected count: ";
-
-    private ProjectTypeService _projectTypeService =
-            (ProjectTypeService) ServiceProvider.getInstance().getService(ProjectTypeService.class.getName());
 
     @FXML
     public void initialize() {
@@ -215,6 +214,8 @@ public class SwitchBranchWindowController {
 
     private class ProjectListCell extends ListCell<Project> {
 
+        private static final String DS_PROJECT_TYPE = "com.lgc.dsg";
+
         @Override
         protected void updateItem(Project item, boolean empty) {
             super.updateItem(item, empty);
@@ -232,10 +233,9 @@ public class SwitchBranchWindowController {
 
         private Image getProjectIcon(Project item) {
             ProjectType type = _projectTypeService.getProjectType(item);
-            Image projectIcon;
-            if (type.getId().equals("unknown")) {
-                projectIcon = ProjectNatureIconHolder.getInstance().getUnknownProjectIcoImage();
-            } else {
+            Image projectIcon = ProjectNatureIconHolder.getInstance().getUnknownProjectIcoImage();
+
+            if (type.getId().equals(DS_PROJECT_TYPE)) {
                 projectIcon = ProjectNatureIconHolder.getInstance().getDsProjectIcoImage();
             }
             return projectIcon;
