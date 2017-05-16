@@ -3,22 +3,47 @@ package com.lgc.solutiontool.git.entities;
 import com.lgc.solutiontool.git.jgit.BranchType;
 
 /**
- * Created by H185176 on 15.05.2017.
+ * Class keeps data about branch.
+ *
+ * @author Pavlo Pidhorniy
  */
 public class Branch {
+
+    /**
+     * The name of the branch
+     **/
     private String branchName;
 
+    /**
+     * The type of the branch
+     **/
     private BranchType branchType;
 
-    public Branch(String name, BranchType type){
+    /**
+     * Constructor to create an instance of the class.
+     *
+     * @param name the name of the branch
+     * @param type the type of the branch
+     */
+    public Branch(String name, BranchType type) {
         branchName = name;
         branchType = type;
     }
 
+    /**
+     * Gets name of branch
+     *
+     * @return status
+     */
     public String getBranchName() {
         return branchName;
     }
 
+    /**
+     * Gets type of branch
+     *
+     * @return status
+     */
     public BranchType getBranchType() {
         return branchType;
     }
