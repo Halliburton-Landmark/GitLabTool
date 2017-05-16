@@ -4,7 +4,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
 /**
- * Class for holding an main application icon
+ * Class for holding an branch status icon
  *
  * @author Pavlo Pidhorniy
  */

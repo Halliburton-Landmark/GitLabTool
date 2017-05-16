@@ -7,6 +7,7 @@ import com.lgc.solutiontool.git.project.nature.projecttype.ProjectType;
 import com.lgc.solutiontool.git.services.LoginService;
 import com.lgc.solutiontool.git.services.ProjectTypeService;
 import com.lgc.solutiontool.git.services.ServiceProvider;
+import com.lgc.solutiontool.git.ui.icon.ProjectNatureIconHolder;
 import com.lgc.solutiontool.git.ui.selection.ListViewKey;
 import com.lgc.solutiontool.git.ui.selection.SelectionsProvider;
 import com.lgc.solutiontool.git.ui.toolbar.ToolbarManager;
@@ -29,10 +30,6 @@ import java.util.List;
 
 public class MainWindowController {
     private static final String HEDER_GROUP_TITLE = "Current group: ";
-
-    private static final String UNKNOWN_PROJECT_ICON_URL = "icons/unknown_project_2.png";
-
-    private static final String DSG_PROJECT_ICON_URL = "icons/dsg_project.png";
 
     private Group _selectedGroup;
 
@@ -110,14 +107,14 @@ public class MainWindowController {
                 };
             }
 
-            private Image getProjectIcon(Project item){
-               ProjectType type = _projectTypeService.getProjectType(item);
+            private Image getProjectIcon(Project item) {
+                ProjectType type = _projectTypeService.getProjectType(item);
                 Image projectIcon;
-                if(type.getId().equals("unknown")) {
-                    projectIcon = new Image(getClass().getClassLoader().getResource(UNKNOWN_PROJECT_ICON_URL).toExternalForm());
-               }else{
-                    projectIcon = new Image(getClass().getClassLoader().getResource(DSG_PROJECT_ICON_URL).toExternalForm());
-               }
+                if (type.getId().equals("unknown")) {
+                    projectIcon = ProjectNatureIconHolder.getInstance().getUnknownProjectIcoImage();
+                } else {
+                    projectIcon = ProjectNatureIconHolder.getInstance().getDsProjectIcoImage();
+                }
                 return projectIcon;
             }
         });

@@ -5,24 +5,24 @@ import com.lgc.solutiontool.git.entities.Branch;
 import com.lgc.solutiontool.git.entities.Project;
 import com.lgc.solutiontool.git.jgit.BranchType;
 import com.lgc.solutiontool.git.jgit.JGit;
+import com.lgc.solutiontool.git.project.nature.projecttype.ProjectType;
+import com.lgc.solutiontool.git.services.ProjectTypeService;
+import com.lgc.solutiontool.git.services.ServiceProvider;
 import com.lgc.solutiontool.git.ui.icon.LocalRemoteIconHolder;
+import com.lgc.solutiontool.git.ui.icon.ProjectNatureIconHolder;
 import com.lgc.solutiontool.git.ui.selection.SelectionsProvider;
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.Priority;
-import javafx.util.Callback;
+import javafx.scene.input.MouseEvent;
 
 import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -33,7 +33,7 @@ public class SwitchBranchWindowController {
     public ListView currentProjectsListView;
 
     @FXML
-    public Label projectsCount;
+    public Label allProjectsCount;
 
     @FXML
     public ToggleGroup branchesFilter;
@@ -50,8 +50,16 @@ public class SwitchBranchWindowController {
     @FXML
     public Label branchesCount;
 
+    @FXML
+    public Label selectedProjectsCount;
+
     private List<Branch> currentBranches = new ArrayList<>();
+
     private static final String TOTAL_CAPTION = "Total count: ";
+    private static final String SELECTED_CAPTION = "Selected count: ";
+
+    private ProjectTypeService _projectTypeService =
+            (ProjectTypeService) ServiceProvider.getInstance().getService(ProjectTypeService.class.getName());
 
     @FXML
     public void initialize() {
@@ -63,7 +71,10 @@ public class SwitchBranchWindowController {
 
         searchField.textProperty().addListener((observable, oldValue, newValue) -> filterPlantList(oldValue, newValue));
 
-        projectsCount.textProperty().bind(Bindings.concat(TOTAL_CAPTION,
+        selectedProjectsCount.textProperty().bind(Bindings.concat(SELECTED_CAPTION,
+                Bindings.size((currentProjectsListView.getSelectionModel().getSelectedItems())).asString()));
+
+        allProjectsCount.textProperty().bind(Bindings.concat(TOTAL_CAPTION,
                 Bindings.size((currentProjectsListView.getItems())).asString()));
     }
 
@@ -74,12 +85,13 @@ public class SwitchBranchWindowController {
             branchesListView.setItems(FXCollections.observableArrayList(currentBranches));
         } else {
             newValue = newValue.toUpperCase();
-            for (Object plants : branchesListView.getItems()) {
-                String filterText = ((Branch) plants).getBranchName();
+            for (Object branch : branchesListView.getItems()) {
+                String filterText = ((Branch) branch).getBranchName();
                 if (filterText.toUpperCase().contains(newValue)) {
-                    filteredList.add((Branch) plants);
+                    filteredList.add((Branch) branch);
                 }
             }
+            branchesListView.getItems().clear();
             branchesListView.setItems(filteredList);
         }
     }
@@ -113,12 +125,27 @@ public class SwitchBranchWindowController {
                 Bindings.size((branchesListView.getItems())).asString()));
     }
 
+
     private List<Branch> getBranches(List<Project> selectedProjects, BranchType branchType, Boolean isCommonMatching) {
         Set<Branch> allBranchesWithTypes = JGit.getInstance().getBranches(selectedProjects,
                 branchType, isCommonMatching);
 
         List<Branch> list = new ArrayList(allBranchesWithTypes);
-        list.sort(Comparator.comparing(Branch::getBranchName));
+        Collections.sort(list, (o1, o2) -> {
+
+            String type1 = o1.getBranchType().name();
+            String type2 = o2.getBranchType().name();
+            int sComp = type1.compareTo(type2);
+
+            if (sComp != 0) {
+                return sComp;
+            } else {
+                String name1 = o1.getBranchName();
+                String name2 = o2.getBranchName();
+                return name1.compareTo(name2);
+            }
+        });
+
         return list;
     }
 
@@ -148,63 +175,45 @@ public class SwitchBranchWindowController {
 
     private void configureProjectsListView(ListView listView) {
         //config displayable string
-        listView.setCellFactory(p -> new GroupListCell());
+        listView.setCellFactory(p -> new ProjectListCell());
 
         //setup selection
         listView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+
+        //setup selection
+        listView.addEventFilter(MouseEvent.MOUSE_PRESSED, evt -> {
+            Node node = evt.getPickResult().getIntersectedNode();
+            while (node != null && node != listView && !(node instanceof ListCell)) {
+                node = node.getParent();
+            }
+
+            if (node instanceof ListCell) {
+                evt.consume();
+
+                ListCell cell = (ListCell) node;
+                ListView lv = cell.getListView();
+
+                lv.requestFocus();
+
+                if (!cell.isEmpty()) {
+                    int index = cell.getIndex();
+                    if (cell.isSelected()) {
+                        lv.getSelectionModel().clearSelection(index);
+                    } else {
+                        lv.getSelectionModel().select(index);
+                    }
+                }
+            }
+        });
 
     }
 
     private void configureBranchesListView(ListView listView) {
         //config displayable string with icon
-        listView.setCellFactory(new Callback<ListView<Branch>, ListCell<Branch>>() {
-            @Override
-            public ListCell<Branch> call(ListView<Branch> p) {
-
-                return new ListCell<Branch>() {
-                    @Override
-                    protected void updateItem(Branch item, boolean empty) {
-                        super.updateItem(item, empty);
-                        if (empty) {
-                            setGraphic(null);
-                            setText(null);
-                        } else {
-                            Image fxImage = getBranchIcon(item);
-                            ImageView imageView = new ImageView(fxImage);
-                            setGraphic(imageView);
-                            setText(item.getBranchName());
-                        }
-                    }
-                };
-            }
-
-            private Image getBranchIcon(Branch item) {
-
-                BranchType type = item.getBranchType();
-                Image branchIcon;
-                if (type == BranchType.LOCAL) {
-                    branchIcon = LocalRemoteIconHolder.getInstance().getLocalBranchIcoImage();
-                } else {
-                    branchIcon = LocalRemoteIconHolder.getInstance().getRemoteBranchIcoImage();
-                }
-                return branchIcon;
-            }
-        });
+        listView.setCellFactory(p -> new BranchListCell());
     }
 
-    private class GroupListCell extends ListCell<Project> {
-        HBox hbox = new HBox();
-        Label label = new Label("");
-        Pane pane = new Pane();
-        Button button = new Button("x");
-
-        GroupListCell() {
-            super();
-
-            hbox.getChildren().addAll(label, pane, button);
-            HBox.setHgrow(pane, Priority.ALWAYS);
-            button.setOnAction(event -> getListView().getItems().remove(getItem()));
-        }
+    private class ProjectListCell extends ListCell<Project> {
 
         @Override
         protected void updateItem(Project item, boolean empty) {
@@ -213,9 +222,52 @@ public class SwitchBranchWindowController {
             setGraphic(null);
 
             if (item != null && !empty) {
-                label.setText(item.getName());
-                setGraphic(hbox);
+                Image fxImage = getProjectIcon(item);
+                ImageView imageView = new ImageView(fxImage);
+
+                setGraphic(imageView);
+                setText(item.getName());
             }
+        }
+
+        private Image getProjectIcon(Project item) {
+            ProjectType type = _projectTypeService.getProjectType(item);
+            Image projectIcon;
+            if (type.getId().equals("unknown")) {
+                projectIcon = ProjectNatureIconHolder.getInstance().getUnknownProjectIcoImage();
+            } else {
+                projectIcon = ProjectNatureIconHolder.getInstance().getDsProjectIcoImage();
+            }
+            return projectIcon;
+        }
+    }
+
+    private class BranchListCell extends ListCell<Branch> {
+
+        @Override
+        protected void updateItem(Branch item, boolean empty) {
+            super.updateItem(item, empty);
+            setText(null);
+            setGraphic(null);
+
+            if (item != null && !empty) {
+                Image fxImage = getBranchIcon(item);
+                ImageView imageView = new ImageView(fxImage);
+                setGraphic(imageView);
+                setText(item.getBranchName());
+            }
+        }
+
+        private Image getBranchIcon(Branch item) {
+
+            BranchType type = item.getBranchType();
+            Image branchIcon;
+            if (type == BranchType.LOCAL) {
+                branchIcon = LocalRemoteIconHolder.getInstance().getLocalBranchIcoImage();
+            } else {
+                branchIcon = LocalRemoteIconHolder.getInstance().getRemoteBranchIcoImage();
+            }
+            return branchIcon;
         }
     }
 }
