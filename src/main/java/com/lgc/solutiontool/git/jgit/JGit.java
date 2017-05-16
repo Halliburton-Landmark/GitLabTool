@@ -476,6 +476,7 @@ public class JGit {
             return JGitStatus.FAILED;
         }
         List<String> branches = getListShortNamesOfBranches(getRefs(project, null));
+        System.out.println("branches ========================= " + branches);
         if (!branches.contains(nameBranch) && !setCreateBranch) {
             return JGitStatus.BRANCH_DOES_NOT_EXIST;
         }
@@ -483,12 +484,11 @@ public class JGit {
             return JGitStatus.BRANCH_ALREADY_EXISTS;
         }
         Git git = optGit.get();
+        if (isCurrentBranch(git, nameBranch)) {
+            return JGitStatus.FAILED;
+        }
         try {
-            if (isCurrentBranch(git, nameBranch)) {
-                return JGitStatus.FAILED;
-            }
-            if (isConflictsBetweenTwoBranches(git.getRepository(), git.getRepository().getFullBranch(),
-                    Constants.R_HEADS + nameBranch)) {
+            if (isConflictsBetweenTwoBranches(git.getRepository(), git.getRepository().getFullBranch(), Constants.R_HEADS + nameBranch)) {
                 return JGitStatus.CONFLICTS;
             }
             Ref ref = git.checkout()
@@ -740,9 +740,6 @@ public class JGit {
     }
 
     private List<String> getListShortNamesOfBranches(List<Ref> listRefs) {
-        if (listRefs == null || listRefs.isEmpty()) {
-            return Collections.emptyList();
-        }
         List<String> branches = new ArrayList<>();
         for (Ref ref : listRefs) {
             int length = (ref.toString().contains(Constants.R_HEADS)) ? Constants.R_HEADS.length() : Constants.R_REMOTES.length();
@@ -752,9 +749,6 @@ public class JGit {
     }
 
     private boolean isConflictsBetweenTwoBranches(Repository repo, String firstBranch, String secondBranch) {
-        if (repo == null) {
-            return false;
-        }
         try {
             Ref firstRef = repo.exactRef(firstBranch);
             Ref secondRef = repo.exactRef(secondBranch);
@@ -802,36 +796,4 @@ public class JGit {
         }
         return false;
     }
-
-    private boolean isRepositoryChanged(Project pr) {
-        if (pr == null) {
-            return false;
-        }
-        Optional<Git> optGit = getGitForRepository(pr.getPathToClonedProject());
-        if (!optGit.isPresent()) {
-            return false;
-        }
-        try {
-            List<DiffEntry> diffEntries = optGit.get().diff().call();
-            return !diffEntries.isEmpty();
-        } catch (GitAPIException e) {
-            System.err.println("!ERROR: " + e.getMessage());
-        }
-        return false;
-    }
-
-    private Collection<Project> getChangedProjects(Group group) {
-        Collection<Project> projects = group.getProjects();
-        if (projects == null) {
-            return Collections.emptyList();
-        }
-        Collection<Project> modifProjects = new ArrayList<>();
-        for (Project project : projects) {
-            if (isRepositoryChanged(project)) {
-                modifProjects.add(project);
-            }
-        }
-        return modifProjects;
-    }
-
 }
