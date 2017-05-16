@@ -47,7 +47,7 @@
     </AnchorPane>
     <VBox spacing="20.0" GridPane.columnIndex="3" GridPane.rowSpan="3">
         <VBox>
-            <RadioButton mnemonicParsing="false" text="Local">
+            <RadioButton selected="true" mnemonicParsing="false" text="Local">
                 <toggleGroup>
                     <ToggleGroup fx:id="branchesFilter"/>
                 </toggleGroup>

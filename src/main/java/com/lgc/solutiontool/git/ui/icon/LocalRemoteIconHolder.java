@@ -9,8 +9,8 @@ import javafx.scene.image.ImageView;
  * @author Pavlo Pidhorniy
  */
 public class LocalRemoteIconHolder {
-    private static final String LOCAL_BRANCH_ICON_URL = "icons/local_Branch.png";
-    private static final String REMOTE_BRANCH_ICON_URL = "icons/remote_Branch.png";
+    private static final String LOCAL_BRANCH_ICON_URL = "icons/branch/local_Branch.png";
+    private static final String REMOTE_BRANCH_ICON_URL = "icons/branch/remote_Branch.png";
 
     private static LocalRemoteIconHolder instance = null;
 
