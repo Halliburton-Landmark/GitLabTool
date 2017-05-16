@@ -6,6 +6,7 @@ import com.lgc.solutiontool.git.entities.Group;
 import com.lgc.solutiontool.git.entities.Project;
 import com.lgc.solutiontool.git.entities.User;
 import com.lgc.solutiontool.git.util.FeedbackUtil;
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.api.*;
 import org.eclipse.jgit.api.CreateBranchCommand.SetupUpstreamMode;
 import org.eclipse.jgit.api.ListBranchCommand.ListMode;
@@ -29,6 +30,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+
 /**
  * Class for work with Git:
  *
@@ -41,6 +43,7 @@ import java.util.stream.Collectors;
 public class JGit {
     private static final JGit _jgit;
     private final String ERROR_MSG_NOT_CLONED = " project is not cloned. The operation is impossible";
+    private static final String ORIGIN_HEADER = "origin/";
     static {
         _jgit = new JGit();
     }
@@ -399,10 +402,10 @@ public class JGit {
         if (!optGit.isPresent()) {
             return JGitStatus.FAILED;
         }
+
         List<Branch> branches = getListShortNamesOfBranches(getRefs(project, null));
         if (!force && branches.stream().map(Branch::getBranchName).collect(Collectors.toList()).contains(nameBranch)) {
-            System.err.println("!ERROR: a branch with the same name already exists");
-            return JGitStatus.FAILED;
+            return JGitStatus.BRANCH_ALREADY_EXISTS;
         }
         try {
             CreateBranchCommand create = optGit.get().branchCreate();
@@ -422,14 +425,16 @@ public class JGit {
     /**
      * Switch to another branch (already existing).
      *
-     * @param project      the cloned project
-     * @param nameBranch   the name of the branch to which to switch
+     * @param project         the cloned project
+     * @param nameBranch      the name of the branch to which to switch
+     * @param isRemoteBranch if value is <true> to switch to a branch for it, a new local branch
+                              with the same name will be created, if <false> switch to an existing branch.
      *
      * @return JGitStatus: SUCCESSFUL - if a new branch was created,
      *                     FAILED - if the branch could not be created,
      *                     CONFLICTS - if the branch has unsaved changes that can lead to conflicts.
      */
-    public JGitStatus switchTo(Project project, String nameBranch) {
+    public JGitStatus switchTo(Project project, String nameBranch, boolean isRemoteBranch) {
         if (project == null || nameBranch == null) {
             return JGitStatus.FAILED;
         }
@@ -442,9 +447,11 @@ public class JGit {
             return JGitStatus.FAILED;
         }
         List<Branch> branches = getListShortNamesOfBranches(getRefs(project, null));
-        if (!branches.stream().map(Branch::getBranchName).collect(Collectors.toList()).contains(nameBranch)) {
-            System.err.println("!ERROR: a branch with this name does not exist.");
-            return JGitStatus.FAILED;
+        if (!branches.stream().map(Branch::getBranchName).collect(Collectors.toList()).contains(nameBranch) && !isRemoteBranch) {
+            return JGitStatus.BRANCH_DOES_NOT_EXIST;
+        }
+        if (branches.stream().map(Branch::getBranchName).collect(Collectors.toList()).contains(nameBranch) && isRemoteBranch) {
+            return JGitStatus.BRANCH_ALREADY_EXISTS;
         }
         Git git = optGit.get();
         try {
@@ -455,8 +462,11 @@ public class JGit {
                     Constants.R_HEADS + nameBranch)) {
                 return JGitStatus.CONFLICTS;
             }
-            CheckoutCommand command = git.checkout();
-            Ref ref = command.setName(nameBranch).setStartPoint("origin/" + nameBranch).call();
+            Ref ref = git.checkout()
+                         .setName(nameBranch)
+                         .setStartPoint("origin/" + nameBranch)
+                         .setCreateBranch(isRemoteBranch)
+                         .call();
             System.out.println("!Switch to branch: " + ref.getName());
             return JGitStatus.SUCCESSFUL;
         } catch (IOException | GitAPIException e) {
@@ -700,7 +710,8 @@ public class JGit {
             if (ref.toString().contains(Constants.R_HEADS)) {
                 branches.add(new Branch(ref.getName().substring(length), BranchType.LOCAL));
             } else if (ref.toString().contains(Constants.R_REMOTES)) {
-                branches.add(new Branch(ref.getName().substring(length), BranchType.REMOTE));
+                String branchShortName = ref.getName().substring(length).replace(ORIGIN_HEADER, StringUtils.EMPTY);
+                branches.add(new Branch(branchShortName, BranchType.REMOTE));
             }
         }
         return branches;

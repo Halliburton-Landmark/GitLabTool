@@ -7,7 +7,7 @@
 <GridPane fx:controller="com.lgc.solutiontool.git.ui.javafx.controllers.CloningGroupsWindowController" hgap="14.0"
           maxHeight="+Infinity"
           maxWidth="+Infinity" minHeight="-Infinity" minWidth="-Infinity" vgap="10.0"
-          xmlns="http://javafx.com/javafx/8.0.112" xmlns:fx="http://javafx.com/fxml/1">
+          xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
     <columnConstraints>
         <ColumnConstraints hgrow="NEVER" maxWidth="-Infinity" minWidth="-Infinity"/>
         <ColumnConstraints halignment="CENTER" hgrow="ALWAYS" maxWidth="+Infinity" minWidth="-Infinity"/>

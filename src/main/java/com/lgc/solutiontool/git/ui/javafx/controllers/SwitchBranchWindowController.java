@@ -9,11 +9,9 @@ import com.lgc.solutiontool.git.ui.icon.LocalRemoteIconHolder;
 import com.lgc.solutiontool.git.ui.selection.SelectionsProvider;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -30,9 +28,6 @@ import java.util.Set;
 
 @SuppressWarnings("unchecked")
 public class SwitchBranchWindowController {
-    private static final String LOCAL_KEY = "Local";
-    private static final String REMOTE_KEY = "Remote";
-
 
     @FXML
     public ListView currentProjectsListView;
@@ -52,7 +47,11 @@ public class SwitchBranchWindowController {
     @FXML
     public TextField searchField;
 
+    @FXML
+    public Label branchesCount;
+
     private List<Branch> currentBranches = new ArrayList<>();
+    private static final String TOTAL_CAPTION = "Total count: ";
 
     @FXML
     public void initialize() {
@@ -62,15 +61,10 @@ public class SwitchBranchWindowController {
         List<?> selectedProjects = SelectionsProvider.getInstance().getSelectionItems("mainWindow_projectsList");
         setProjectListItems(selectedProjects, currentProjectsListView);
 
+        searchField.textProperty().addListener((observable, oldValue, newValue) -> filterPlantList(oldValue, newValue));
 
-        searchField.textProperty().addListener(new ChangeListener() {
-            public void changed(ObservableValue observable, Object oldValue, Object newValue) {
-                filterPlantList((String) oldValue, (String) newValue);
-            }
-        });
-
-        ObservableValue<String> obsString = new SimpleStringProperty("Total count: ");
-        projectsCount.textProperty().bind(Bindings.concat(obsString, Bindings.size((currentProjectsListView.getItems())).asString()));
+        projectsCount.textProperty().bind(Bindings.concat(TOTAL_CAPTION,
+                Bindings.size((currentProjectsListView.getItems())).asString()));
     }
 
     private void filterPlantList(String oldValue, String newValue) {
@@ -90,7 +84,7 @@ public class SwitchBranchWindowController {
         }
     }
 
-    public void onUpdateList(ActionEvent actionEvent) {
+    public void onUpdateList() {
         List<Project> selectedProjects = currentProjectsListView.getSelectionModel().getSelectedItems();
 
         RadioButton selecteRB = (RadioButton) branchesFilter.getSelectedToggle();
@@ -113,13 +107,15 @@ public class SwitchBranchWindowController {
                 branchType = BranchType.LOCAL;
         }
 
-        List<Branch> allBranchesWithTypes = getBranches(selectedProjects, branchType, isCommonMatching);
-        currentBranches = allBranchesWithTypes;
+        currentBranches = getBranches(selectedProjects, branchType, isCommonMatching);
         branchesListView.setItems(FXCollections.observableArrayList(currentBranches));
+        branchesCount.textProperty().bind(Bindings.concat(TOTAL_CAPTION,
+                Bindings.size((branchesListView.getItems())).asString()));
     }
 
     private List<Branch> getBranches(List<Project> selectedProjects, BranchType branchType, Boolean isCommonMatching) {
-        Set<Branch> allBranchesWithTypes = JGit.getInstance().getBranches(selectedProjects, branchType, isCommonMatching);
+        Set<Branch> allBranchesWithTypes = JGit.getInstance().getBranches(selectedProjects,
+                branchType, isCommonMatching);
 
         List<Branch> list = new ArrayList(allBranchesWithTypes);
         list.sort(Comparator.comparing(Branch::getBranchName));
@@ -127,14 +123,17 @@ public class SwitchBranchWindowController {
     }
 
 
-    public void onApplyButton(ActionEvent actionEvent) {
+    public void onApplyButton() {
         List<Project> selectedProjects = currentProjectsListView.getSelectionModel().getSelectedItems();
         Branch selectedBranch = (Branch) branchesListView.getSelectionModel().getSelectedItem();
         String selectedBranchName = selectedBranch.getBranchName();
+        boolean isRemote = selectedBranch.getBranchType().equals(BranchType.REMOTE);
 
         for (Project project : selectedProjects) {
-            JGit.getInstance().switchTo(project, selectedBranchName);
+            JGit.getInstance().switchTo(project, selectedBranchName, isRemote);
         }
+
+        onUpdateList();
     }
 
     private void setProjectListItems(List items, ListView<Project> listView) {
@@ -143,18 +142,13 @@ public class SwitchBranchWindowController {
         }
 
         if (items.get(0) instanceof Project) {
-            currentProjectsListView.setItems(FXCollections.observableArrayList(items));
+            listView.setItems(FXCollections.observableArrayList(items));
         }
     }
 
     private void configureProjectsListView(ListView listView) {
         //config displayable string
-        listView.setCellFactory(new Callback<ListView<Project>, ListCell<Project>>() {
-            @Override
-            public ListCell<Project> call(ListView<Project> p) {
-                return new SwitchBranchWindowController.GroupListCell();
-            }
-        });
+        listView.setCellFactory(p -> new GroupListCell());
 
         //setup selection
         listView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);

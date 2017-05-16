@@ -38,7 +38,7 @@
                 <Insets/>
             </opaqueInsets>
         </ListView>
-        <Label maxHeight="20.0" text="Total branches: 1650" AnchorPane.bottomAnchor="0.0"
+        <Label fx:id="branchesCount" maxHeight="20.0" text="Total branches: 1650" AnchorPane.bottomAnchor="0.0"
                AnchorPane.leftAnchor="0.0"/>
     </AnchorPane>
     <VBox spacing="20.0" GridPane.columnIndex="3" GridPane.rowSpan="3">
