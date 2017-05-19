@@ -81,8 +81,9 @@ class RESTConnectorImpl implements RESTConnector {
             return response.toString();
         } catch (Exception e) {
             _exceptionProvider.throwException(e);
+            return null;
         }
-        return null;
+//        return null;
     }
 
     private void setHTTPRequestHeader(Map<String, String> header, HttpsURLConnection con) {
@@ -113,16 +114,16 @@ class RESTConnectorImpl implements RESTConnector {
         }
     }
 
-	@Override
-	public void setUrlMainPart(String urlMainPart) {
-		if (urlMainPart != null && URLManager.isURLValid(urlMainPart)) {
-			this.urlMainPart = urlMainPart;
-		}
-	}
+    @Override
+    public void setUrlMainPart(String urlMainPart) {
+        if (urlMainPart != null && URLManager.isURLValid(urlMainPart)) {
+            this.urlMainPart = urlMainPart;
+        }
+    }
 
-	@Override
-	public String getUrlMainPart() {
-		return urlMainPart;
-	}
-	
+    @Override
+    public String getUrlMainPart() {
+        return urlMainPart;
+    }
+
 }
