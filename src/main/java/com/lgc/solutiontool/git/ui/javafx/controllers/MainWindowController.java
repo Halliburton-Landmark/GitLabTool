@@ -28,7 +28,6 @@ import java.util.List;
 
 public class MainWindowController {
     private static final String HEDER_GROUP_TITLE = "Current group: ";
-    private static final String DS_PROJECT_TYPE = "com.lgc.dsg";
 
     private Group _selectedGroup;
 
