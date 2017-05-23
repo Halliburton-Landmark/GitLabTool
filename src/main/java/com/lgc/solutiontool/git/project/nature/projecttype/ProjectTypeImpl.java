@@ -1,11 +1,11 @@
 package com.lgc.solutiontool.git.project.nature.projecttype;
 
+import com.google.gson.annotations.SerializedName;
+import com.lgc.solutiontool.git.project.nature.operation.Operation;
+
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-
-import com.google.gson.annotations.SerializedName;
-import com.lgc.solutiontool.git.project.nature.operation.Operation;
 
 /**
  * The class stores the minimum information required for types of projects
@@ -17,12 +17,16 @@ abstract class ProjectTypeImpl implements ProjectType {
     @SerializedName(ID_KEY)
     private String _id;
 
+    private String _projectIcoUrl;
+    private static final String DEFAULT_PROJECT_ICON_URL = "icons/project/unknown_project.png";
+
     private transient final Set<Operation> _operations;
     private transient final Set<String> _structures;
 
     public ProjectTypeImpl() {
         _operations = new HashSet<>(Operation.MIN_OPERATIONS);
         _structures = new HashSet<>();
+        _projectIcoUrl = DEFAULT_PROJECT_ICON_URL;
     }
 
     protected void setId(String id) {
@@ -30,6 +34,13 @@ abstract class ProjectTypeImpl implements ProjectType {
             throw new IllegalArgumentException("Invalid id = {" + id + "}");
         }
         _id = id;
+    }
+
+    protected void setImageUrl(String imageUrl) {
+        if (imageUrl == null || imageUrl.isEmpty()) {
+            throw new IllegalArgumentException("Invalid image url = {" + imageUrl + "}");
+        }
+        _projectIcoUrl = imageUrl;
     }
 
     protected Set<String> getStructures() {
@@ -48,6 +59,11 @@ abstract class ProjectTypeImpl implements ProjectType {
     @Override
     public String getId() {
         return _id;
+    }
+
+    @Override
+    public String getIconUrl(){
+        return _projectIcoUrl;
     }
 
     @Override

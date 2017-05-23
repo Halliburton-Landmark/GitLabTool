@@ -7,7 +7,6 @@ import com.lgc.solutiontool.git.project.nature.projecttype.ProjectType;
 import com.lgc.solutiontool.git.services.LoginService;
 import com.lgc.solutiontool.git.services.ProjectTypeService;
 import com.lgc.solutiontool.git.services.ServiceProvider;
-import com.lgc.solutiontool.git.ui.icon.ProjectNatureIconHolder;
 import com.lgc.solutiontool.git.ui.selection.ListViewKey;
 import com.lgc.solutiontool.git.ui.selection.SelectionsProvider;
 import com.lgc.solutiontool.git.ui.toolbar.ToolbarManager;
@@ -126,7 +125,6 @@ public class MainWindowController {
     }
 
     private class ProjectListCell extends ListCell<Project> {
-        private static final String DS_PROJECT_TYPE = "com.lgc.dsg";
 
         @Override
         protected void updateItem(Project item, boolean empty) {
@@ -145,12 +143,8 @@ public class MainWindowController {
 
         private Image getProjectIcon(Project item) {
             ProjectType type = _projectTypeService.getProjectType(item);
-            Image projectIcon = ProjectNatureIconHolder.getInstance().getUnknownProjectIcoImage();
 
-            if (type.getId().equals(DS_PROJECT_TYPE)) {
-                projectIcon = ProjectNatureIconHolder.getInstance().getDsProjectIcoImage();
-            }
-            return projectIcon;
+            return new Image(getClass().getClassLoader().getResource(type.getIconUrl()).toExternalForm());
         }
     }
 }
