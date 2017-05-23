@@ -9,6 +9,7 @@ import com.lgc.solutiontool.git.jgit.JGitStatus;
 import com.lgc.solutiontool.git.project.nature.projecttype.ProjectType;
 import com.lgc.solutiontool.git.services.ProjectTypeService;
 import com.lgc.solutiontool.git.services.ServiceProvider;
+import com.lgc.solutiontool.git.ui.icon.AppIconHolder;
 import com.lgc.solutiontool.git.ui.icon.LocalRemoteIconHolder;
 import com.lgc.solutiontool.git.ui.icon.ProjectNatureIconHolder;
 import com.lgc.solutiontool.git.ui.selection.SelectionsProvider;
@@ -25,11 +26,14 @@ import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("unchecked")
 public class SwitchBranchWindowController {
     private static final String TOTAL_CAPTION = "Total count: ";
     private static final String SELECTED_CAPTION = "Selected count: ";
+    private static final String SWITCHTO_STATUS_ALERT_TITLE = "Switch branch info";
+    private static final String SWITCHTO_STATUS_ALERT_HEADER = "Switch branch statuses:";
 
     private ProjectTypeService _projectTypeService =
             (ProjectTypeService) ServiceProvider.getInstance().getService(ProjectTypeService.class.getName());
@@ -86,10 +90,15 @@ public class SwitchBranchWindowController {
         String selectedBranchName = selectedBranch.getBranchName();
         boolean isRemote = selectedBranch.getBranchType().equals(BranchType.REMOTE);
 
+        Map<Project, JGitStatus> switchStatuses = new HashMap<>();
         for (Project project : selectedProjects) {
             JGitStatus status = JGit.getInstance().switchTo(project, selectedBranchName, isRemote);
-            System.out.println(status);
+            switchStatuses.put(project, status);
         }
+        String dialogMessage = switchStatuses.entrySet().stream()
+                .map(x -> x.getKey().getName() + "  -  " + x.getValue())
+                .collect(Collectors.joining("\n"));
+        switchToStatusDialog(dialogMessage);
 
         onUpdateList();
     }
@@ -218,6 +227,19 @@ public class SwitchBranchWindowController {
     private void configureBranchesListView(ListView listView) {
         //config displayable string with icon
         listView.setCellFactory(p -> new BranchListCell());
+    }
+
+    private void switchToStatusDialog(String content) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(SWITCHTO_STATUS_ALERT_TITLE);
+        alert.setHeaderText(SWITCHTO_STATUS_ALERT_HEADER);
+        alert.setContentText(content);
+
+        Image appIcon = AppIconHolder.getInstance().getAppIcoImage();
+        Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+        stage.getIcons().add(appIcon);
+
+        alert.showAndWait();
     }
 
     private class ProjectListCell extends ListCell<Project> {

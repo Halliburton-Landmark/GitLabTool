@@ -456,7 +456,7 @@ public class JGit {
         Git git = optGit.get();
         try {
             if (isCurrentBranch(git, nameBranchWithoutAlias)) {
-                return JGitStatus.FAILED;
+                return JGitStatus.BRANCH_CURRENTLY_CHECKED_OUT;
             }
             if (isConflictsBetweenTwoBranches(git.getRepository(), git.getRepository().getFullBranch(),
                     Constants.R_HEADS + nameBranchWithoutAlias)) {
