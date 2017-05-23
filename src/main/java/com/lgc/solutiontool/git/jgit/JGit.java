@@ -6,6 +6,7 @@ import com.lgc.solutiontool.git.entities.Group;
 import com.lgc.solutiontool.git.entities.Project;
 import com.lgc.solutiontool.git.entities.User;
 import com.lgc.solutiontool.git.util.FeedbackUtil;
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.api.*;
 import org.eclipse.jgit.api.CreateBranchCommand.SetupUpstreamMode;
 import org.eclipse.jgit.api.ListBranchCommand.ListMode;
@@ -42,6 +43,8 @@ import java.util.stream.Collectors;
 public class JGit {
     private static final JGit _jgit;
     private final String ERROR_MSG_NOT_CLONED = " project is not cloned. The operation is impossible";
+    private static final String ORIGIN_PREFIX = "origin/";
+
     static {
         _jgit = new JGit();
     }
@@ -444,7 +447,7 @@ public class JGit {
         if (!optGit.isPresent()) {
             return JGitStatus.FAILED;
         }
-        String nameBranchWithoutAlias = nameBranch.replace("origin/","");
+        String nameBranchWithoutAlias = nameBranch.replace(ORIGIN_PREFIX, StringUtils.EMPTY);
         List<Branch> branches = getListShortNamesOfBranches(getRefs(project, null));
         if (!branches.stream().map(Branch::getBranchName).collect(Collectors.toList()).contains(nameBranchWithoutAlias) && !isRemoteBranch) {
             return JGitStatus.BRANCH_DOES_NOT_EXIST;
@@ -464,7 +467,7 @@ public class JGit {
 
             Ref ref = git.checkout()
                          .setName(nameBranchWithoutAlias)
-                         .setStartPoint("origin/" + nameBranchWithoutAlias)
+                         .setStartPoint(ORIGIN_PREFIX + nameBranchWithoutAlias)
                          .setCreateBranch(isRemoteBranch)
                          .call();
             System.out.println("!Switch to branch: " + ref.getName());

@@ -11,7 +11,6 @@ import com.lgc.solutiontool.git.services.ProjectTypeService;
 import com.lgc.solutiontool.git.services.ServiceProvider;
 import com.lgc.solutiontool.git.ui.icon.AppIconHolder;
 import com.lgc.solutiontool.git.ui.icon.LocalRemoteIconHolder;
-import com.lgc.solutiontool.git.ui.icon.ProjectNatureIconHolder;
 import com.lgc.solutiontool.git.ui.selection.SelectionsProvider;
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
@@ -252,7 +251,9 @@ public class SwitchBranchWindowController {
             setGraphic(null);
 
             if (item != null && !empty) {
-                Image fxImage = getProjectIcon(item);
+                ProjectType type = _projectTypeService.getProjectType(item);
+
+                Image fxImage = new Image(getClass().getClassLoader().getResource(type.getIconUrl()).toExternalForm());
                 ImageView imageView = new ImageView(fxImage);
                 String itemText;
 
@@ -265,15 +266,6 @@ public class SwitchBranchWindowController {
             }
         }
 
-        private Image getProjectIcon(Project item) {
-            ProjectType type = _projectTypeService.getProjectType(item);
-            Image projectIcon = ProjectNatureIconHolder.getInstance().getUnknownProjectIcoImage();
-
-            if (type.getId().equals(DS_PROJECT_TYPE)) {
-                projectIcon = ProjectNatureIconHolder.getInstance().getDsProjectIcoImage();
-            }
-            return projectIcon;
-        }
     }
 
     private class BranchListCell extends ListCell<Branch> {

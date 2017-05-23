@@ -32,8 +32,8 @@ public enum JGitStatus {
     },
 
     /**
-     * All the changes from the branch you�re trying to merge have already been merged
-     * to the branch you�re currently on.
+     * All the changes from the branch you're trying to merge have already been merged
+     * to the branch you're currently on.
      */
     ALREADY_UP_TO_DATE {
       @Override
