@@ -43,7 +43,6 @@ import java.util.stream.Collectors;
 public class JGit {
     private static final JGit _jgit;
     private final String ERROR_MSG_NOT_CLONED = " project is not cloned. The operation is impossible";
-    private static final String ORIGIN_HEADER = "origin/";
     static {
         _jgit = new JGit();
     }
@@ -710,8 +709,7 @@ public class JGit {
             if (ref.toString().contains(Constants.R_HEADS)) {
                 branches.add(new Branch(ref.getName().substring(length), BranchType.LOCAL));
             } else if (ref.toString().contains(Constants.R_REMOTES)) {
-                String branchShortName = ref.getName().substring(length).replace(ORIGIN_HEADER, StringUtils.EMPTY);
-                branches.add(new Branch(branchShortName, BranchType.REMOTE));
+                branches.add(new Branch(ref.getName().substring(length), BranchType.REMOTE));
             }
         }
         return branches;
