@@ -6,7 +6,6 @@ import com.lgc.solutiontool.git.entities.Group;
 import com.lgc.solutiontool.git.entities.Project;
 import com.lgc.solutiontool.git.entities.User;
 import com.lgc.solutiontool.git.util.FeedbackUtil;
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.api.*;
 import org.eclipse.jgit.api.CreateBranchCommand.SetupUpstreamMode;
 import org.eclipse.jgit.api.ListBranchCommand.ListMode;
@@ -710,7 +709,7 @@ public class JGit {
             int length = (ref.toString().contains(Constants.R_HEADS)) ? Constants.R_HEADS.length() : Constants.R_REMOTES.length();
             if (ref.toString().contains(Constants.R_HEADS)) {
                 branches.add(new Branch(ref.getName().substring(length), BranchType.LOCAL));
-            } else if (ref.toString().contains(Constants.R_REMOTES)) {
+            } else {
                 branches.add(new Branch(ref.getName().substring(length), BranchType.REMOTE));
             }
         }
