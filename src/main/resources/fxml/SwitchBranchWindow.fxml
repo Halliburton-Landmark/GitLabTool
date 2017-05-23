@@ -55,7 +55,7 @@
             <RadioButton mnemonicParsing="false" text="Remote" toggleGroup="$branchesFilter"/>
             <RadioButton mnemonicParsing="false" text="Remote + Local" toggleGroup="$branchesFilter"/>
         </VBox>
-        <CheckBox fx:id="commonMatchingCheckBox" mnemonicParsing="false" text="Match in all branches"/>
+        <CheckBox fx:id="commonMatchingCheckBox" mnemonicParsing="false" text="Match in all projects"/>
         <Button mnemonicParsing="false" onAction="#onUpdateList" text="Update list">
             <VBox.margin>
                 <Insets/>
