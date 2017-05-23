@@ -57,31 +57,31 @@ public class JGit {
     }
 
     /**
-     * Gets branch of project a certain type
+     * Gets branches of project a certain type
      *
      * @param project cloned project
      * @param brType  type branch
-     * @return a list of branch
+     * @return a list of branches
      */
     public List<Branch> getBranches(Project project, BranchType brType) {
         if (project == null || brType == null) {
-            throw new IllegalArgumentException("Wrong parameters for obtaining branch.");
+            throw new IllegalArgumentException("Wrong parameters for obtaining branches.");
         }
         ListMode mode = brType.equals(BranchType.LOCAL) ? null : ListMode.valueOf(brType.toString());
         return getListShortNamesOfBranches(getRefs(project, mode));
     }
 
     /**
-     * Gets branch of project
+     * Gets branches of project
      *
      * @param projects    cloned project
      * @param brType      type branch
-     * @param onlyCommon if value is <true> return only common branch of projects, if <false> return all branch.
-     * @return a list of branch
+     * @param onlyCommon if value is <true> return only common branches of projects, if <false> return all branches.
+     * @return a list of branches
      */
     public Set<Branch> getBranches(List<Project> projects, BranchType brType, boolean onlyCommon) {
         if (projects == null || brType == null) {
-            throw new IllegalArgumentException("Wrong parameters for obtaining branch.");
+            throw new IllegalArgumentException("Wrong parameters for obtaining branches.");
         }
         ListMode mode = brType.equals(BranchType.LOCAL) ? null : ListMode.valueOf(brType.toString());
         Set<Branch> branches = new HashSet<>();
@@ -97,7 +97,7 @@ public class JGit {
     }
 
     private <T> void mergeCollections(Collection<T> first, Collection<T> second, boolean onlyGeneral) {
-        if (onlyGeneral && !first.isEmpty()) { // TODO: TEST IT (Can repository hasn't branch?)
+        if (onlyGeneral && !first.isEmpty()) { // TODO: TEST IT (Can repository hasn't branches?)
             first.retainAll(second);
         } else {
             first.addAll(second);
