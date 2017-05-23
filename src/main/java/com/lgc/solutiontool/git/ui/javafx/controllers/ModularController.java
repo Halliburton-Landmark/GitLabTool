@@ -1,7 +1,6 @@
 package com.lgc.solutiontool.git.ui.javafx.controllers;
 
 import com.lgc.solutiontool.git.entities.Group;
-import com.lgc.solutiontool.git.entities.Project;
 import com.lgc.solutiontool.git.ui.ViewKey;
 import com.lgc.solutiontool.git.ui.icon.AppIconHolder;
 import com.lgc.solutiontool.git.ui.mainmenu.MainMenuItems;
@@ -100,7 +99,7 @@ public class ModularController {
 
     private void initActionsToolBar(String windowId) {
         if (windowId.equals(ViewKey.WELCOME_WINDOW.getKey())) {
-
+            //TODO: add actions for removing group, importing from disk etc.
         } else if (windowId.equals(ViewKey.MAIN_WINDOW.getKey())) {
             Button switchBranch = ToolbarManager.getInstance().getButtonById(ToolbarButtons.SWITCH_BRANCH_BUTTON.getId());
             switchBranch.setOnAction(event -> showSwitchBranchWindow());

@@ -45,6 +45,9 @@ public class SelectionsProvider {
      * @return list of items
      */
     public List getSelectionItems(String listViewId) {
+        if (listViewId == null || listViewId.isEmpty()) {
+            throw new IllegalArgumentException("ERROR: Incorrect data. Value is null or empty.");
+        }
         return _listItemsMap.get(listViewId);
     }
 
@@ -55,6 +58,9 @@ public class SelectionsProvider {
      * @param items      items for adding
      */
     public void setSelectionItems(String listViewId, List items) {
+        if (listViewId == null || listViewId.isEmpty() || items == null) {
+            throw new IllegalArgumentException("ERROR: Incorrect data. Value is null or empty.");
+        }
         if (_listItemsMap.containsKey(listViewId)) {
             _listItemsMap.get(listViewId).clear();
             _listItemsMap.get(listViewId).addAll(items);
