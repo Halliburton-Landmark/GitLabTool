@@ -14,7 +14,7 @@ public class UnknownProjectType extends ProjectTypeImpl {
 
     @Override
     public boolean isProjectCorrespondsType(String projectPath) {
-        return true;
+        return projectPath == null || projectPath.isEmpty() ? false : true;
     }
 
 }

@@ -3,6 +3,10 @@ package com.lgc.solutiontool.git.project.nature.projecttype;
 import com.google.gson.annotations.SerializedName;
 import com.lgc.solutiontool.git.project.nature.operation.Operation;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -43,8 +47,14 @@ abstract class ProjectTypeImpl implements ProjectType {
         _projectIcoUrl = imageUrl;
     }
 
+    protected void addStructure(String structure) {
+        if (structure != null && !structure.isEmpty()) {
+            _structures.add(structure);
+        }
+    }
+
     protected Set<String> getStructures() {
-        return _structures;
+        return Collections.unmodifiableSet(_structures);
     }
 
     @Override
@@ -52,8 +62,16 @@ abstract class ProjectTypeImpl implements ProjectType {
         return Collections.unmodifiableSet(_operations);
     }
 
-    protected Set<Operation> getModifiableOperations() {
-        return _operations;
+    protected void addOperation(Operation operation) {
+        if (operation != null) {
+            _operations.add(operation);
+        }
+    }
+
+    protected void addOperations(Collection<Operation> operations) {
+        if (operations != null && !operations.isEmpty()) {
+            _operations.addAll(operations);
+        }
     }
 
     @Override
@@ -68,7 +86,28 @@ abstract class ProjectTypeImpl implements ProjectType {
 
     @Override
     public boolean hasOperation(Operation operation) {
-        return _operations.contains(operation);
+        if (operation != null) {
+            return _operations.contains(operation);
+        }
+        return false;
+    }
+
+    @Override
+    public boolean isProjectCorrespondsType(String projectPath) {
+        if (projectPath == null || projectPath.isEmpty()) {
+            return false;
+        }
+        for (String structure : getStructures()) {
+            Path path = Paths.get(projectPath + structure);
+            if (!isPathCorrespondsToType(path)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    protected boolean isPathCorrespondsToType(Path path) {
+        return Files.exists(path);
     }
 
 }
