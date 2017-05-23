@@ -445,25 +445,27 @@ public class JGit {
         if (!optGit.isPresent()) {
             return JGitStatus.FAILED;
         }
+        String nameBranchWithoutAlias = nameBranch.replace("origin/","");
         List<Branch> branches = getListShortNamesOfBranches(getRefs(project, null));
-        if (!branches.stream().map(Branch::getBranchName).collect(Collectors.toList()).contains(nameBranch) && !isRemoteBranch) {
+        if (!branches.stream().map(Branch::getBranchName).collect(Collectors.toList()).contains(nameBranchWithoutAlias) && !isRemoteBranch) {
             return JGitStatus.BRANCH_DOES_NOT_EXIST;
         }
-        if (branches.stream().map(Branch::getBranchName).collect(Collectors.toList()).contains(nameBranch) && isRemoteBranch) {
+        if (branches.stream().map(Branch::getBranchName).collect(Collectors.toList()).contains(nameBranchWithoutAlias) && isRemoteBranch) {
             return JGitStatus.BRANCH_ALREADY_EXISTS;
         }
         Git git = optGit.get();
         try {
-            if (isCurrentBranch(git, nameBranch)) {
+            if (isCurrentBranch(git, nameBranchWithoutAlias)) {
                 return JGitStatus.FAILED;
             }
             if (isConflictsBetweenTwoBranches(git.getRepository(), git.getRepository().getFullBranch(),
-                    Constants.R_HEADS + nameBranch)) {
+                    Constants.R_HEADS + nameBranchWithoutAlias)) {
                 return JGitStatus.CONFLICTS;
             }
+
             Ref ref = git.checkout()
-                         .setName(nameBranch)
-                         .setStartPoint("origin/" + nameBranch)
+                         .setName(nameBranchWithoutAlias)
+                         .setStartPoint("origin/" + nameBranchWithoutAlias)
                          .setCreateBranch(isRemoteBranch)
                          .call();
             System.out.println("!Switch to branch: " + ref.getName());

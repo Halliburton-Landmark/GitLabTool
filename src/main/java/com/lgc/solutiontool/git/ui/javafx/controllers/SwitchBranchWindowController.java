@@ -5,6 +5,7 @@ import com.lgc.solutiontool.git.entities.Branch;
 import com.lgc.solutiontool.git.entities.Project;
 import com.lgc.solutiontool.git.jgit.BranchType;
 import com.lgc.solutiontool.git.jgit.JGit;
+import com.lgc.solutiontool.git.jgit.JGitStatus;
 import com.lgc.solutiontool.git.project.nature.projecttype.ProjectType;
 import com.lgc.solutiontool.git.services.ProjectTypeService;
 import com.lgc.solutiontool.git.services.ServiceProvider;
@@ -23,10 +24,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @SuppressWarnings("unchecked")
 public class SwitchBranchWindowController {
@@ -89,7 +87,8 @@ public class SwitchBranchWindowController {
         boolean isRemote = selectedBranch.getBranchType().equals(BranchType.REMOTE);
 
         for (Project project : selectedProjects) {
-            JGit.getInstance().switchTo(project, selectedBranchName, isRemote);
+            JGitStatus status = JGit.getInstance().switchTo(project, selectedBranchName, isRemote);
+            System.out.println(status);
         }
 
         onUpdateList();
@@ -233,9 +232,14 @@ public class SwitchBranchWindowController {
             if (item != null && !empty) {
                 Image fxImage = getProjectIcon(item);
                 ImageView imageView = new ImageView(fxImage);
+                String itemText;
+
+                Optional<String> currentBranchName = JGit.getInstance().getCurrentBranch(item);
+                itemText = currentBranchName.map(s -> item.getName() + " (Current branch: " + s + ")").orElseGet(item::getName);
 
                 setGraphic(imageView);
-                setText(item.getName());
+                setText(itemText);
+                setTooltip(new Tooltip(itemText));
             }
         }
 
@@ -261,6 +265,7 @@ public class SwitchBranchWindowController {
             if (item != null && !empty) {
                 Image fxImage = getBranchIcon(item);
                 ImageView imageView = new ImageView(fxImage);
+
                 setGraphic(imageView);
                 setText(item.getBranchName());
             }
