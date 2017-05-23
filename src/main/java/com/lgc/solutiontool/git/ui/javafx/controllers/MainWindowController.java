@@ -141,7 +141,7 @@ public class MainWindowController {
         }
 
         private Image getProjectIcon(Project item) {
-            ProjectType type = _projectTypeService.getProjectType(item);
+            ProjectType type = item.getProjectType();
 
             return new Image(getClass().getClassLoader().getResource(type.getIconUrl()).toExternalForm());
         }

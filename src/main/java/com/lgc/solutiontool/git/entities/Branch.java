@@ -28,12 +28,8 @@ public class Branch {
      * @param type the type of the branch
      */
     public Branch(String name, BranchType type) {
-        if (name == null || name.isEmpty() || type == null) {
-            throw new IllegalArgumentException("ERROR: Incorrect data. Value is null or empty.");
-        }
-
-        branchName = name;
-        branchType = type;
+        setBranchName(name);
+        setBranchType(type);
     }
 
     /**

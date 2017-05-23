@@ -251,7 +251,7 @@ public class SwitchBranchWindowController {
             setGraphic(null);
 
             if (item != null && !empty) {
-                ProjectType type = _projectTypeService.getProjectType(item);
+                ProjectType type = item.getProjectType();
 
                 Image fxImage = new Image(getClass().getClassLoader().getResource(type.getIconUrl()).toExternalForm());
                 ImageView imageView = new ImageView(fxImage);
