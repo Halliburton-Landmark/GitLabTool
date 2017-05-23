@@ -28,6 +28,10 @@ public class Branch {
      * @param type the type of the branch
      */
     public Branch(String name, BranchType type) {
+        if (name == null || name.isEmpty() || type == null) {
+            throw new IllegalArgumentException("ERROR: Incorrect data. Value is null or empty.");
+        }
+
         branchName = name;
         branchType = type;
     }
@@ -50,14 +54,33 @@ public class Branch {
         return branchType;
     }
 
+    /**
+     * Sets type of branch
+     *
+     * @param bType type of branch
+     */
     private void setBranchType(BranchType bType) {
+        if (bType == null) {
+            throw new IllegalArgumentException("ERROR: Incorrect data. Value is null.");
+        }
         branchType = bType;
     }
 
-    private void setBranchName(BranchType bName) {
-        branchType = bName;
+    /**
+     * Sets name of branch
+     *
+     * @param bName name of branch
+     */
+    private void setBranchName(String bName) {
+        if (bName == null || bName.isEmpty()) {
+            throw new IllegalArgumentException("ERROR: Incorrect data. Value is null or empty.");
+        }
+        branchName = bName;
     }
 
+    /* (non-Javadoc)
+     * @see java.lang.hashCode();
+     */
     @Override
     public int hashCode() {
         return new HashCodeBuilder(17, 31).
@@ -65,6 +88,9 @@ public class Branch {
                 toHashCode();
     }
 
+    /* (non-Javadoc)
+     * @see java.lang.equals();
+     */
     @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof Branch))
@@ -72,9 +98,9 @@ public class Branch {
         if (obj == this)
             return true;
 
-        Branch rhs = (Branch) obj;
+        Branch anotherBranch = (Branch) obj;
         return new EqualsBuilder().
-                append(branchName, rhs.branchName).
+                append(branchName, anotherBranch.branchName).
                 isEquals();
     }
 }
