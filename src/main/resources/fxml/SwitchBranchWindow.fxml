@@ -42,7 +42,7 @@
                 <Insets/>
             </opaqueInsets>
         </ListView>
-        <Label fx:id="branchesCount" maxHeight="20.0" text="Total branches: 1650" AnchorPane.bottomAnchor="0.0"
+        <Label fx:id="branchesCount" maxHeight="20.0" AnchorPane.bottomAnchor="0.0"
                AnchorPane.leftAnchor="0.0"/>
     </AnchorPane>
     <VBox spacing="20.0" GridPane.columnIndex="3" GridPane.rowSpan="3">
@@ -55,7 +55,7 @@
             <RadioButton mnemonicParsing="false" text="Remote" toggleGroup="$branchesFilter"/>
             <RadioButton mnemonicParsing="false" text="Remote + Local" toggleGroup="$branchesFilter"/>
         </VBox>
-        <CheckBox fx:id="commonMatchingCheckBox" mnemonicParsing="false" text="Match in all projects"/>
+        <CheckBox fx:id="commonMatchingCheckBox" mnemonicParsing="false" text="Only common"/>
         <Button mnemonicParsing="false" onAction="#onUpdateList" text="Update list">
             <VBox.margin>
                 <Insets/>
