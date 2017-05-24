@@ -31,6 +31,7 @@ public class SwitchBranchWindowController {
     private static final String SELECTED_CAPTION = "Selected count: ";
     private static final String SWITCHTO_STATUS_ALERT_TITLE = "Switch branch info";
     private static final String SWITCHTO_STATUS_ALERT_HEADER = "Switch branch statuses:";
+    private static final String NEW_LINE_SYMBOL = "\n";
 
     private List<Branch> currentBranches = new ArrayList<>();
 
@@ -91,9 +92,10 @@ public class SwitchBranchWindowController {
         }
         String dialogMessage = switchStatuses.entrySet().stream()
                 .map(x -> x.getKey().getName() + "  -  " + x.getValue())
-                .collect(Collectors.joining("\n"));
+                .collect(Collectors.joining(NEW_LINE_SYMBOL));
         switchToStatusDialog(dialogMessage);
 
+        currentProjectsListView.refresh();
         onUpdateList();
     }
 
@@ -252,7 +254,7 @@ public class SwitchBranchWindowController {
                 String itemText;
 
                 Optional<String> currentBranchName = JGit.getInstance().getCurrentBranch(item);
-                itemText = currentBranchName.map(s -> item.getName() + " (Current branch: " + s + ")").orElseGet(item::getName);
+                itemText = currentBranchName.map(s -> item.getName() + NEW_LINE_SYMBOL + " >" + s).orElseGet(item::getName);
 
                 setGraphic(imageView);
                 setText(itemText);

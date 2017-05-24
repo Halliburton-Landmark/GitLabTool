@@ -15,3 +15,7 @@
     -fx-border-width: 1px;
     -fx-border-color: #afb6c6;
 }
+
+.list-view:focused > .virtual-flow > .clipped-container > .sheet > .contact-list-cell:focused {
+    -fx-background-color: green;
+}
