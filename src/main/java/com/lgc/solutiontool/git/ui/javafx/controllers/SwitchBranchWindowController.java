@@ -20,7 +20,11 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import org.apache.commons.lang.StringUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -99,7 +103,7 @@ public class SwitchBranchWindowController {
         onUpdateList();
     }
 
-    public void onCancel(ActionEvent actionEvent) {
+    public void onClose(ActionEvent actionEvent) {
         Node source = (Node) actionEvent.getSource();
         Stage stage = (Stage) source.getScene().getWindow();
         stage.close();
@@ -239,6 +243,9 @@ public class SwitchBranchWindowController {
     }
 
     private class ProjectListCell extends ListCell<Project> {
+        private final Integer LIST_CELL_SPACING = 5;
+        private final String LEFT_BRACKET = "[";
+        private final String RIGHT_BRACKET = "]";
 
         @Override
         protected void updateItem(Project item, boolean empty) {
@@ -251,14 +258,20 @@ public class SwitchBranchWindowController {
 
                 Image fxImage = new Image(getClass().getClassLoader().getResource(type.getIconUrl()).toExternalForm());
                 ImageView imageView = new ImageView(fxImage);
-                String itemText;
 
                 Optional<String> currentBranchName = JGit.getInstance().getCurrentBranch(item);
-                itemText = currentBranchName.map(s -> item.getName() + NEW_LINE_SYMBOL + "[" + s + "]").orElseGet(item::getName);
+                String currentBranch = currentBranchName.orElse(StringUtils.EMPTY);
 
-                setGraphic(imageView);
-                setText(itemText);
-                setTooltip(new Tooltip(itemText));
+                Text branchNameTextView = new Text(item.getName());
+                Text currentBranchTextView = new Text(LEFT_BRACKET + currentBranch + RIGHT_BRACKET);
+                currentBranchTextView.setFill(Color.DARKBLUE);
+
+                HBox hBoxItem = new HBox(imageView, branchNameTextView, currentBranchTextView);
+                hBoxItem.setSpacing(LIST_CELL_SPACING);
+
+                String tooltipText = item.getName() + " " + LEFT_BRACKET + currentBranch + RIGHT_BRACKET;
+                setTooltip(new Tooltip(tooltipText));
+                setGraphic(hBoxItem);
             }
         }
 
