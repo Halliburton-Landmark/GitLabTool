@@ -34,6 +34,10 @@ public class SwitchBranchWindowController {
 
     private List<Branch> currentBranches = new ArrayList<>();
 
+    private List<Project> allSelectedProjects = new ArrayList<>();
+
+    private List<Project> filteredProjects = new ArrayList<>();
+
     @FXML
     private ListView currentProjectsListView;
 
@@ -63,16 +67,15 @@ public class SwitchBranchWindowController {
         configureProjectsListView(currentProjectsListView);
         configureBranchesListView(branchesListView);
 
-        List<?> selectedProjects = SelectionsProvider.getInstance().getSelectionItems("mainWindow_projectsList");
-        setProjectListItems(selectedProjects, currentProjectsListView);
+        allSelectedProjects = SelectionsProvider.getInstance().getSelectionItems("mainWindow_projectsList");
+        setProjectListItems(allSelectedProjects, currentProjectsListView);
 
         searchField.textProperty().addListener((observable, oldValue, newValue) -> filterPlantList(oldValue, newValue));
 
         selectedProjectsCount.textProperty().bind(Bindings.concat(SELECTED_CAPTION,
                 Bindings.size((currentProjectsListView.getSelectionModel().getSelectedItems())).asString()));
 
-        allProjectsCount.textProperty().bind(Bindings.concat(TOTAL_CAPTION,
-                Bindings.size((currentProjectsListView.getItems())).asString()));
+        allProjectsCount.setText( TOTAL_CAPTION + allSelectedProjects.size());
     }
 
     /*
@@ -141,7 +144,7 @@ public class SwitchBranchWindowController {
             newValue = newValue.toUpperCase();
             for (Object branch : branchesListView.getItems()) {
                 String filterText = ((Branch) branch).getBranchName();
-                if (filterText.toUpperCase().contains(newValue)) {
+                if (filterText.toUpperCase().contains(newValue) ) {
                     filteredList.add((Branch) branch);
                 }
             }
