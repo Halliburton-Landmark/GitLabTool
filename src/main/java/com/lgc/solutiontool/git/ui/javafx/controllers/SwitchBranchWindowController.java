@@ -7,8 +7,6 @@ import com.lgc.solutiontool.git.jgit.BranchType;
 import com.lgc.solutiontool.git.jgit.JGit;
 import com.lgc.solutiontool.git.jgit.JGitStatus;
 import com.lgc.solutiontool.git.project.nature.projecttype.ProjectType;
-import com.lgc.solutiontool.git.services.ProjectTypeService;
-import com.lgc.solutiontool.git.services.ServiceProvider;
 import com.lgc.solutiontool.git.ui.icon.AppIconHolder;
 import com.lgc.solutiontool.git.ui.icon.LocalRemoteIconHolder;
 import com.lgc.solutiontool.git.ui.selection.SelectionsProvider;
@@ -33,9 +31,6 @@ public class SwitchBranchWindowController {
     private static final String SELECTED_CAPTION = "Selected count: ";
     private static final String SWITCHTO_STATUS_ALERT_TITLE = "Switch branch info";
     private static final String SWITCHTO_STATUS_ALERT_HEADER = "Switch branch statuses:";
-
-    private ProjectTypeService _projectTypeService =
-            (ProjectTypeService) ServiceProvider.getInstance().getService(ProjectTypeService.class.getName());
 
     private List<Branch> currentBranches = new ArrayList<>();
 
@@ -242,7 +237,6 @@ public class SwitchBranchWindowController {
     }
 
     private class ProjectListCell extends ListCell<Project> {
-        private static final String DS_PROJECT_TYPE = "com.lgc.dsg";
 
         @Override
         protected void updateItem(Project item, boolean empty) {
