@@ -254,7 +254,7 @@ public class SwitchBranchWindowController {
                 String itemText;
 
                 Optional<String> currentBranchName = JGit.getInstance().getCurrentBranch(item);
-                itemText = currentBranchName.map(s -> item.getName() + NEW_LINE_SYMBOL + " >" + s).orElseGet(item::getName);
+                itemText = currentBranchName.map(s -> item.getName() + NEW_LINE_SYMBOL + "[" + s + "]").orElseGet(item::getName);
 
                 setGraphic(imageView);
                 setText(itemText);
