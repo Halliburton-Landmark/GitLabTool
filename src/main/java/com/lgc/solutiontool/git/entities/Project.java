@@ -60,7 +60,7 @@ public class Project {
     /** Path to the cloned project **/
     private String _pathToClonedProject;
     private boolean _isCloned;
-    private transient ProjectType _type;
+    private ProjectType _type;
 
     /**
      * Sets a project type

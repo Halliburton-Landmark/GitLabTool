@@ -3,12 +3,16 @@ package com.lgc.solutiontool.git.ui.javafx.controllers;
 
 import com.lgc.solutiontool.git.entities.Group;
 import com.lgc.solutiontool.git.entities.Project;
+import com.lgc.solutiontool.git.project.nature.projecttype.ProjectType;
 import com.lgc.solutiontool.git.services.LoginService;
-import com.lgc.solutiontool.git.services.ProjectService;
+import com.lgc.solutiontool.git.services.ProjectTypeService;
 import com.lgc.solutiontool.git.services.ServiceProvider;
+import com.lgc.solutiontool.git.ui.selection.ListViewKey;
+import com.lgc.solutiontool.git.ui.selection.SelectionsProvider;
 import com.lgc.solutiontool.git.ui.toolbar.ToolbarManager;
 import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -16,8 +20,9 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
-import javafx.util.Callback;
 
 import java.util.List;
 
@@ -28,6 +33,9 @@ public class MainWindowController {
 
     private LoginService _loginService =
             (LoginService) ServiceProvider.getInstance().getService(LoginService.class.getName());
+
+    private ProjectTypeService _projectTypeService =
+            (ProjectTypeService) ServiceProvider.getInstance().getService(ProjectTypeService.class.getName());
 
     @FXML
     private ListView projectsList;
@@ -49,6 +57,7 @@ public class MainWindowController {
 
         BooleanBinding booleanBinding = projectsList.getSelectionModel().selectedItemProperty().isNull();
         ToolbarManager.getInstance().getAllButtonsForCurrentView().forEach(x -> x.disableProperty().bind(booleanBinding));
+
 
         //TODO: Additional thread should be placed to services
         new Thread(this::updateProjectList).start();
@@ -75,22 +84,7 @@ public class MainWindowController {
 
     private void configureListView(ListView listView) {
         //config displayable string
-        listView.setCellFactory(new Callback<ListView<Project>, ListCell<Project>>() {
-            @Override
-            public ListCell<Project> call(ListView<Project> p) {
-
-                return new ListCell<Project>() {
-                    @Override
-                    protected void updateItem(Project item, boolean bln) {
-                        super.updateItem(item, bln);
-                        if (item != null) {
-                            String itemText = item.getName();
-                            setText(itemText);
-                        }
-                    }
-                };
-            }
-        });
+        listView.setCellFactory(p -> new MainWindowController.ProjectListCell());
 
         //setup selection
         listView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
@@ -119,5 +113,37 @@ public class MainWindowController {
                 }
             }
         });
+
+        listView.getSelectionModel().getSelectedItems().addListener(new ListChangeListener() {
+            @Override
+            public void onChanged(ListChangeListener.Change change) {
+                SelectionsProvider.getInstance().setSelectionItems(ListViewKey.MAIN_WINDOW_PROJECTS.getKey(),
+                        listView.getSelectionModel().getSelectedItems());
+            }
+        });
+    }
+
+    private class ProjectListCell extends ListCell<Project> {
+
+        @Override
+        protected void updateItem(Project item, boolean empty) {
+            super.updateItem(item, empty);
+            setText(null);
+            setGraphic(null);
+
+            if (item != null && !empty) {
+                Image fxImage = getProjectIcon(item);
+                ImageView imageView = new ImageView(fxImage);
+
+                setGraphic(imageView);
+                setText(item.getName());
+            }
+        }
+
+        private Image getProjectIcon(Project item) {
+            ProjectType type = item.getProjectType();
+
+            return new Image(getClass().getClassLoader().getResource(type.getIconUrl()).toExternalForm());
+        }
     }
 }

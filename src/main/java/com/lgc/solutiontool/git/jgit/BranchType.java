@@ -1,7 +1,7 @@
 package com.lgc.solutiontool.git.jgit;
 
 /**
- * Type of branches in a repository.
+ * Type of branch in a repository.
 
  * @author Lyudmila Lyska
  */

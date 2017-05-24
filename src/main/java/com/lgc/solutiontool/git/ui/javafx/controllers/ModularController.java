@@ -5,25 +5,33 @@ import com.lgc.solutiontool.git.ui.ViewKey;
 import com.lgc.solutiontool.git.ui.icon.AppIconHolder;
 import com.lgc.solutiontool.git.ui.mainmenu.MainMenuItems;
 import com.lgc.solutiontool.git.ui.mainmenu.MainMenuManager;
+import com.lgc.solutiontool.git.ui.toolbar.ToolbarButtons;
 import com.lgc.solutiontool.git.ui.toolbar.ToolbarManager;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
+import javafx.stage.Modality;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.net.URL;
 
 public class ModularController {
 
     private static final String ABOUT_POPUP_TITLE = "About";
     private static final String ABOUT_POPUP_HEADER = "Solution tool for GitLab, powered by Luxoft";
     private static final String ABOUT_POPUP_CONTENT = "Contacts: Yurii Pitomets (yurii.pitomets2@halliburton.com)";
+    private static final String SWITCH_BRANCH_TITLE = "Switch branch";
 
     private static final String CSS_PATH = "css/style.css";
 
@@ -51,6 +59,7 @@ public class ModularController {
         toolbar.getItems().addAll(ToolbarManager.getInstance().createToolbarItems(ViewKey.WELCOME_WINDOW.getKey()));
         menuBar.getMenus().addAll(MainMenuManager.getInstance().createToolbarItems(ViewKey.WELCOME_WINDOW.getKey()));
         initActionsMainMenu(ViewKey.WELCOME_WINDOW.getKey());
+        initActionsToolBar(ViewKey.WELCOME_WINDOW.getKey());
 
         FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource(ViewKey.WELCOME_WINDOW.getPath()));
         Node node = loader.load();
@@ -70,6 +79,7 @@ public class ModularController {
         toolbar.getItems().addAll(ToolbarManager.getInstance().createToolbarItems(ViewKey.MAIN_WINDOW.getKey()));
         menuBar.getMenus().addAll(MainMenuManager.getInstance().createToolbarItems(ViewKey.MAIN_WINDOW.getKey()));
         initActionsMainMenu(ViewKey.MAIN_WINDOW.getKey());
+        initActionsToolBar(ViewKey.MAIN_WINDOW.getKey());
 
         FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource(ViewKey.MAIN_WINDOW.getPath()));
         Node node = loader.load();
@@ -87,6 +97,15 @@ public class ModularController {
         viewPane.getChildren().add(node);
     }
 
+    private void initActionsToolBar(String windowId) {
+        if (windowId.equals(ViewKey.WELCOME_WINDOW.getKey())) {
+            //TODO: add actions for removing group, importing from disk etc.
+        } else if (windowId.equals(ViewKey.MAIN_WINDOW.getKey())) {
+            Button switchBranch = ToolbarManager.getInstance().getButtonById(ToolbarButtons.SWITCH_BRANCH_BUTTON.getId());
+            switchBranch.setOnAction(event -> showSwitchBranchWindow());
+        }
+    }
+
     private void initActionsMainMenu(String windowId) {
         if (windowId.equals(ViewKey.WELCOME_WINDOW.getKey())) {
             MenuItem exit = MainMenuManager.getInstance().getButtonById(MainMenuItems.WELCOME_EXIT);
@@ -101,6 +120,31 @@ public class ModularController {
 
             MenuItem about = MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_ABOUT);
             about.setOnAction(event -> showAboutPopup());
+        }
+    }
+
+    private void showSwitchBranchWindow() {
+        try {
+
+            URL switchBranchWindowUrl = getClass().getClassLoader().getResource(ViewKey.SWITCH_BRANCH_WINDOW.getPath());
+            FXMLLoader loader = new FXMLLoader(switchBranchWindowUrl);
+            Parent root = loader.load();;
+
+            SwitchBranchWindowController controller = loader.getController();
+
+            Scene scene = new Scene(root);
+            Stage stage = new Stage();
+            stage.setScene(scene);
+            Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
+            stage.setHeight(primaryScreenBounds.getMaxY() / 1.5);
+            stage.setWidth(primaryScreenBounds.getMaxX() / 1.5);
+            stage.getIcons().add(AppIconHolder.getInstance().getAppIcoImage());
+            stage.setTitle(SWITCH_BRANCH_TITLE);
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.show();
+        } catch (IOException e) {
+            System.out.println("Could not load fxml resource: IOException");
+            e.printStackTrace();
         }
     }
 
