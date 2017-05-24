@@ -65,6 +65,6 @@
     <HBox alignment="TOP_RIGHT" maxHeight="50.0" prefHeight="100.0" prefWidth="200.0" spacing="20.0"
           GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="3">
         <Button onAction="#onApplyButton" mnemonicParsing="false" text="Apply"/>
-        <Button onAction="#onCancel" mnemonicParsing="false" text="Cancel"/>
+        <Button onAction="#onClose" mnemonicParsing="false" text="Close"/>
     </HBox>
 </GridPane>

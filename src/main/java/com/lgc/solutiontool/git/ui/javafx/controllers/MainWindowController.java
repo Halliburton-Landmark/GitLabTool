@@ -3,6 +3,7 @@ package com.lgc.solutiontool.git.ui.javafx.controllers;
 
 import com.lgc.solutiontool.git.entities.Group;
 import com.lgc.solutiontool.git.entities.Project;
+import com.lgc.solutiontool.git.jgit.JGit;
 import com.lgc.solutiontool.git.project.nature.projecttype.ProjectType;
 import com.lgc.solutiontool.git.services.LoginService;
 import com.lgc.solutiontool.git.services.ProjectTypeService;
@@ -16,15 +17,17 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
-import javafx.scene.control.SelectionMode;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
+import org.apache.commons.lang.StringUtils;
 
 import java.util.List;
+import java.util.Optional;
 
 public class MainWindowController {
     private static final String HEDER_GROUP_TITLE = "Current group: ";
@@ -124,6 +127,9 @@ public class MainWindowController {
     }
 
     private class ProjectListCell extends ListCell<Project> {
+        private final Integer LIST_CELL_SPACING = 5;
+        private final String LEFT_BRACKET = "[";
+        private final String RIGHT_BRACKET = "]";
 
         @Override
         protected void updateItem(Project item, boolean empty) {
@@ -132,18 +138,25 @@ public class MainWindowController {
             setGraphic(null);
 
             if (item != null && !empty) {
-                Image fxImage = getProjectIcon(item);
+                ProjectType type = item.getProjectType();
+
+                Image fxImage = new Image(getClass().getClassLoader().getResource(type.getIconUrl()).toExternalForm());
                 ImageView imageView = new ImageView(fxImage);
 
-                setGraphic(imageView);
-                setText(item.getName());
+                Optional<String> currentBranchName = JGit.getInstance().getCurrentBranch(item);
+                String currentBranch = currentBranchName.orElse(StringUtils.EMPTY);
+
+                Text branchNameTextView = new Text(item.getName());
+                Text currentBranchTextView = new Text(LEFT_BRACKET + currentBranch + RIGHT_BRACKET);
+                currentBranchTextView.setFill(Color.DARKBLUE);
+
+                HBox hBoxItem = new HBox(imageView, branchNameTextView, currentBranchTextView);
+                hBoxItem.setSpacing(LIST_CELL_SPACING);
+
+                String tooltipText = item.getName() + " " + LEFT_BRACKET + currentBranch + RIGHT_BRACKET;
+                setTooltip(new Tooltip(tooltipText));
+                setGraphic(hBoxItem);
             }
-        }
-
-        private Image getProjectIcon(Project item) {
-            ProjectType type = item.getProjectType();
-
-            return new Image(getClass().getClassLoader().getResource(type.getIconUrl()).toExternalForm());
         }
     }
 }
