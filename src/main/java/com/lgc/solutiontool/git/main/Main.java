@@ -6,6 +6,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 
+import com.lgc.solutiontool.git.args.ArgsProcessor;
 import com.lgc.solutiontool.git.connections.RESTConnector;
 import com.lgc.solutiontool.git.ui.UserInterface;
 import com.lgc.solutiontool.git.ui.javafx.JavaFXUI;
@@ -14,7 +15,13 @@ public class Main {
     public static void main(String[] args) {
         final UserInterface ui = new JavaFXUI();
         detectProxy();
+        applyArgs(args);
         ui.run(args);
+    }
+
+    private static void applyArgs(String[] args) {
+        ArgsProcessor ap = new ArgsProcessor();
+        ap.processArgs(args);
     }
 
     private static void detectProxy() {

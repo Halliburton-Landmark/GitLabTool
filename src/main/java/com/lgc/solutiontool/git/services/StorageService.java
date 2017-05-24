@@ -44,4 +44,9 @@ public interface StorageService {
      * @return instance of <code>Servers</code>
      */
     Servers loadServers();
+    
+    /**
+     * Completely deletes storage files
+     */
+    void clearStorage();
 }

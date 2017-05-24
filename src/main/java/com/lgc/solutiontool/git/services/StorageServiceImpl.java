@@ -1,6 +1,7 @@
 package com.lgc.solutiontool.git.services;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -9,6 +10,8 @@ import java.util.Collections;
 import java.util.List;
 
 import javax.xml.bind.JAXBException;
+
+import org.apache.commons.io.FileUtils;
 
 import com.lgc.solutiontool.git.entities.Group;
 import com.lgc.solutiontool.git.properties.ProgramProperties;
@@ -70,14 +73,15 @@ public class StorageServiceImpl implements StorageService {
         Servers servers = null;
         try {
             File file = getServersFile();
-            servers = XMLParser.loadObject(file, Servers.class);
+            if (file.length() != 0) {
+                servers = XMLParser.loadObject(file, Servers.class);
+            } else {
+                servers = new Servers();
+                updateServers(servers);
+            }
         } catch (IOException | JAXBException e) {
             System.err.println(this.getClass().getName() + ".loadServers: " + e.getMessage()); // TODO move to logger
-        } finally {
-            if (servers == null) {
-                updateServers(new Servers());
-                servers = loadServers();
-            }
+            servers = new Servers();
         }
         return servers;
     }
@@ -104,6 +108,17 @@ public class StorageServiceImpl implements StorageService {
             }
             file.createNewFile();
             return file;
+        }
+    }
+
+    @Override
+    public void clearStorage() {
+        try {
+            FileUtils.deleteDirectory(new File(_workingDirectory));
+        } catch(FileNotFoundException fnfe) {
+            System.out.println("Cannot clear storage. It is already cleared");
+        } catch (IOException e) {
+            System.err.println("Cannot clear storage due to IO error: " + e.getMessage());
         }
     }
 
