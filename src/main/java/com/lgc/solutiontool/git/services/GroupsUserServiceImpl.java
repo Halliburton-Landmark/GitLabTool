@@ -161,12 +161,10 @@ public class GroupsUserServiceImpl implements GroupsUserService {
         if (projects == null || projects.isEmpty()) {
             return false;
         }
-
         Collection<String> projectsName = PathUtilities.getFolders(localPathGroup);
         if (projectsName.isEmpty()) {
             return false;
         }
-
         projects.stream()
                 .filter(project -> projectsName.contains(project.getName()))
                 .forEach((project) -> updateProjectStatus(project, localPathGroup.toString()));
