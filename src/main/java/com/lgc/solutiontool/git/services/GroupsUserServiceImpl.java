@@ -139,10 +139,14 @@ public class GroupsUserServiceImpl implements GroupsUserService {
             return Optional.empty();
         }
         Group foundGroup = getGroupById(optFoundGroup.get().getId());
+        if (foundGroup == null) {
+            return Optional.empty();
+        }
         foundGroup.setPathToClonedGroup(groupPath.toString());
         foundGroup.setClonedStatus(true);
 
-        return updateProjectsInGroup(foundGroup.getProjects(), groupPath) ? Optional.of(foundGroup) : Optional.empty();
+        updateProjectsInGroup(foundGroup.getProjects(), groupPath);
+        return Optional.of(foundGroup);
     }
 
     private Optional<Group> getGroupByName(String nameGroup) {
@@ -157,19 +161,17 @@ public class GroupsUserServiceImpl implements GroupsUserService {
         return groups.stream().filter(group -> group.getName().equals(nameGroup)).findFirst();
     }
 
-    private boolean updateProjectsInGroup(Collection<Project> projects, Path localPathGroup) {
+    private void updateProjectsInGroup(Collection<Project> projects, Path localPathGroup) {
         if (projects == null || projects.isEmpty()) {
-            return false;
+            return;
         }
         Collection<String> projectsName = PathUtilities.getFolders(localPathGroup);
         if (projectsName.isEmpty()) {
-            return false;
+            return;
         }
         projects.stream()
                 .filter(project -> projectsName.contains(project.getName()))
                 .forEach((project) -> updateProjectStatus(project, localPathGroup.toString()));
-
-        return true;
     }
 
     private void updateProjectStatus(Project project, String pathGroup) {
