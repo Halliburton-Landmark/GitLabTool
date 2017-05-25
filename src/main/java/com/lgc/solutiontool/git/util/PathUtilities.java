@@ -27,7 +27,7 @@ public class PathUtilities {
     /**
      * Checks path is exist and it is regular file.
      *
-     * @param on disk for verification
+     * @param path on disk for verification
      * @return <true> - it exist and regular file, otherwise - <false>.
      */
     public static boolean isExistsAndRegularFile(Path path) {
