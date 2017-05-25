@@ -11,6 +11,7 @@ import com.lgc.solutiontool.git.ui.icon.AppIconHolder;
 import com.lgc.solutiontool.git.ui.icon.LocalRemoteIconHolder;
 import com.lgc.solutiontool.git.ui.selection.SelectionsProvider;
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -60,6 +61,9 @@ public class SwitchBranchWindowController {
     private Label branchesCountLabel;
 
     @FXML
+    private Button switchButton;
+
+    @FXML
     public void initialize() {
         configureProjectsListView(currentProjectsListView);
         configureBranchesListView(branchesListView);
@@ -68,6 +72,9 @@ public class SwitchBranchWindowController {
         setProjectListItems(allSelectedProjects, currentProjectsListView);
 
         searchField.textProperty().addListener((observable, oldValue, newValue) -> filterPlantList(oldValue, newValue));
+
+        BooleanBinding branchListBooleanBinding = branchesListView.getSelectionModel().selectedItemProperty().isNull();
+        switchButton.disableProperty().bind(branchListBooleanBinding);
 
         onUpdateList();
     }
