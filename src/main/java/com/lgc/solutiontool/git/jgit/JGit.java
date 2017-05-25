@@ -101,11 +101,11 @@ public class JGit {
     /**
      * Checks that project has selected branches
      *
-     * @param project    projects
-     * @param branches   branches that need to be checked
-     * @return           true if project contains selected branches, false if does not contains
+     * @param project   project for checking
+     * @param branches  branches that need to be checked
+     * @return          true if project contains selected branches, false if does not contains
      */
-    public boolean containsBranches(Project project, List<Branch> branches){
+    public boolean containsBranches(Project project, List<Branch> branches) {
         if (project == null || branches == null) {
             throw new IllegalArgumentException("Wrong parameters for obtaining branches.");
         }
