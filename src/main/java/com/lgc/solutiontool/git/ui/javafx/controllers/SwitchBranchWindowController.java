@@ -214,7 +214,6 @@ public class SwitchBranchWindowController {
 
 
         listView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            // Your action here
             if (newValue != null) {
                 ArrayList<Branch> selectedValue = new ArrayList<>();
                 selectedValue.add((Branch) newValue);
