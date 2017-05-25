@@ -3,10 +3,12 @@ package com.lgc.solutiontool.git.services;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
@@ -22,6 +24,7 @@ import com.lgc.solutiontool.git.jgit.JGit;
 import com.lgc.solutiontool.git.properties.ProgramProperties;
 import com.lgc.solutiontool.git.statuses.CloningStatus;
 import com.lgc.solutiontool.git.util.JSONParser;
+import com.lgc.solutiontool.git.util.PathUtilities;
 
 public class GroupsUserServiceImpl implements GroupsUserService {
     private RESTConnector _connector;
@@ -116,4 +119,67 @@ public class GroupsUserServiceImpl implements GroupsUserService {
     private void setConnector(RESTConnector connector) {
         _connector = connector;
     }
+
+    @Override
+    public Optional<Group> loadGroupFromLocalRepository(String groupPath) {
+        if (groupPath == null || groupPath.isEmpty()) {
+            throw new IllegalArgumentException("ERROR: Incorrect data.");
+        }
+        Path path = Paths.get(groupPath);
+        if (!PathUtilities.isExistsAndDirectory(path)) {
+            return Optional.empty();
+        }
+        return loadGroupFromLocalDisk(path);
+    }
+
+    private Optional<Group> loadGroupFromLocalDisk(Path groupPath) {
+        Path nameGroup = groupPath.getName(groupPath.getNameCount()-1);
+        Optional<Group> optFoundGroup = getGroupByName(nameGroup.toString());
+        if (!optFoundGroup.isPresent()) {
+            return Optional.empty();
+        }
+        Group foundGroup = getGroupById(optFoundGroup.get().getId());
+        foundGroup.setPathToClonedGroup(groupPath.toString());
+        foundGroup.setClonedStatus(true);
+
+        return updateProjectsInGroup(foundGroup.getProjects(), groupPath) ? Optional.of(foundGroup) : Optional.empty();
+    }
+
+    private Optional<Group> getGroupByName(String nameGroup) {
+        List<Group> groups = (List<Group>) getGroups(CurrentUser.getInstance().getCurrentUser());
+        if (groups == null || groups.isEmpty()) {
+            return Optional.empty();
+        }
+        return findGroupByName(groups, nameGroup);
+    }
+
+    private Optional<Group> findGroupByName(Collection<Group> groups, String nameGroup) {
+        return groups.stream().filter(group -> group.getName().equals(nameGroup)).findFirst();
+    }
+
+    private boolean updateProjectsInGroup(Collection<Project> projects, Path localPathGroup) {
+        if (projects == null || projects.isEmpty()) {
+            return false;
+        }
+
+        Collection<String> projectsName = PathUtilities.getFolders(localPathGroup);
+        if (projectsName.isEmpty()) {
+            return false;
+        }
+
+        projects.stream()
+                .filter(project -> projectsName.contains(project.getName()))
+                .forEach((project) -> updateProjectStatus(project, localPathGroup.toString()));
+
+        return true;
+    }
+
+    private void updateProjectStatus(Project project, String pathGroup) {
+        project.setClonedStatus(true);
+        project.setPathToClonedProject(pathGroup + project.getName());
+        ProjectTypeService typeService = (ProjectTypeService) ServiceProvider.getInstance().
+                getService(ProjectTypeService.class.getName());
+        project.setProjectType(typeService.getProjectType(project));
+    }
+
 }

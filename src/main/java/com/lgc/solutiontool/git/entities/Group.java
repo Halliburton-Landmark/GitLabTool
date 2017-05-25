@@ -1,9 +1,10 @@
 package com.lgc.solutiontool.git.entities;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
+
+import com.lgc.solutiontool.git.util.PathUtilities;
 
 /**
  * Class keeps data about group.
@@ -130,7 +131,7 @@ public class Group {
             throw new IllegalArgumentException("Invalid value passed");
         }
         Path pathToGroup = Paths.get(path);
-        if (Files.exists(pathToGroup) && Files.isDirectory(pathToGroup)) {
+        if (PathUtilities.isExistsAndDirectory(pathToGroup)) {
             _pathToClonedGroup = path;
         }
     }
