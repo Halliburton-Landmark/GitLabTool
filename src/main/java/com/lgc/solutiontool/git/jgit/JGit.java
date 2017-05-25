@@ -33,6 +33,7 @@ import org.eclipse.jgit.errors.NoWorkTreeException;
 import org.eclipse.jgit.errors.RevisionSyntaxException;
 import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.EmptyProgressMonitor;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.lib.PersonIdent;
@@ -47,7 +48,9 @@ import com.lgc.solutiontool.git.connections.token.CurrentUser;
 import com.lgc.solutiontool.git.entities.Group;
 import com.lgc.solutiontool.git.entities.Project;
 import com.lgc.solutiontool.git.entities.User;
-import com.lgc.solutiontool.git.util.FeedbackUtil;
+import com.lgc.solutiontool.git.util.NullCheckUtil;
+
+import javafx.util.Pair;
 
 /**
  * Class for work with Git:
@@ -73,6 +76,8 @@ public class JGit {
     public static JGit getInstance() {
         return _jgit;
     }
+
+    private boolean _isCloneCancelled = false;
 
     /**
      * Gets branches of project a certain type
@@ -127,42 +132,69 @@ public class JGit {
      *
      * @param group      group for clone
      * @param localPath  localPath the path to where will clone all the projects of the group
+     * @param onStart    method that will be called before clone of each project
      * @param onSuccess  method for tracking the success progress of cloning,
      *                   where <Integer> is a percentage of progress,
      *                   <Project> is a cloned project.
      * @param onError    method for tracking the errors during cloning,
      *                   where <Integer> is a percentage of progress, <String> error message.
      */
-    public void clone(Group group, String localPath, BiConsumer<Integer, Project> onSuccess, BiConsumer<Integer, String> onError) {
+    public void clone(Group group, String localPath,
+                      Consumer<Project> onStart,
+                      BiConsumer<Integer, Project> onSuccess,
+                      BiConsumer<Integer, Pair<Project, String>> onError,
+                      Runnable onFinish) {
         if (group == null || localPath == null) {
             return;
         }
+        _isCloneCancelled = false;
         if (group.isCloned()) {
             String errorMsg = "!ERROR: The operation is impossible, the " + group.getName() + " group is cloned.";
-            FeedbackUtil.sendError(onError, 100, errorMsg);
+            NullCheckUtil.acceptBiConsumer(onError, 100, new Pair(null, errorMsg));
             return;
         }
         Collection<Project> projects = group.getProjects();
         if (projects == null || projects.isEmpty()) {
             String errorMsg = "Cloning error. " + group.getName() + " group doesn't have projects.";
-            FeedbackUtil.sendError(onError, 100, errorMsg);
+            NullCheckUtil.acceptBiConsumer(onError, 100, new Pair(null, errorMsg));
             return;
         }
         String groupPath = localPath + File.separator + group.getName();
 
-        int aStepInProgress = 100 / projects.size();
-        int currentProgress = 0;
-        for (Project project : projects) {
-            currentProgress += aStepInProgress;
-            if (!clone(project, groupPath)) {
-                String errorMsg = "Cloning error of the " + project.getName() + " project";
-                FeedbackUtil.sendError(onError, currentProgress, errorMsg);
-                continue;
+        cloneGroupInBackgroundThread(group, onStart, onSuccess, onError, projects, onFinish, groupPath);
+    }
+
+    private void cloneGroupInBackgroundThread(Group group,
+                                         Consumer<Project> onStart,
+                                         BiConsumer<Integer, Project> onSuccess,
+                                         BiConsumer<Integer, Pair<Project, String>> onError,
+                                         Collection<Project> projects,
+                                         Runnable onFinish,
+                                         String groupPath) {
+        Runnable task = () -> {
+            int aStepInProgress = 100 / projects.size();
+            int currentProgress = 0;
+            for (Project project : projects) {
+                currentProgress += aStepInProgress;
+                NullCheckUtil.acceptConsumer(onStart, project);
+                if (!clone(project, groupPath)) {
+                    String errorMsg = "Cloning error of the " + project.getName() + " project";
+                    NullCheckUtil.acceptBiConsumer(onError, currentProgress, new Pair(project, errorMsg));
+                    continue;
+                }
+                NullCheckUtil.acceptBiConsumer(onSuccess, currentProgress, project);
             }
-            FeedbackUtil.sendSuccess(onSuccess, currentProgress, project);
-        }
-        group.setClonedStatus(true);
-        group.setPathToClonedGroup(groupPath);
+            group.setClonedStatus(true);
+            group.setPathToClonedGroup(groupPath);
+            onFinish.run();
+        };
+
+        Thread t = new Thread(task, "Clone Group Thread");
+        t.start();
+    }
+
+    public void calcelClone() {
+        _isCloneCancelled = true;
     }
 
     /**
@@ -299,15 +331,15 @@ public class JGit {
         for (Project pr : projects) {
             currentProgress += aStepInProgress;
             if (!pr.isCloned()) {
-                FeedbackUtil.sendError(onError, currentProgress, pr.getName() + ERROR_MSG_NOT_CLONED);
+                NullCheckUtil.acceptBiConsumer(onError, currentProgress, pr.getName() + ERROR_MSG_NOT_CLONED);
                 continue;
             }
             if(commit(pr, message, setAll, nameCommitter, emailCommitter,
                       nameAuthor, emailAuthor).equals(JGitStatus.FAILED)) {
-                FeedbackUtil.sendError(onError, currentProgress, "Failed to commit " + pr.getName() + " project");
+                NullCheckUtil.acceptBiConsumer(onError, currentProgress, "Failed to commit " + pr.getName() + " project");
                 continue;
             }
-            FeedbackUtil.sendSuccess(onSuccess, currentProgress);
+            NullCheckUtil.acceptConsumer(onSuccess, currentProgress);
         }
         return JGitStatus.SUCCESSFUL;
     }
@@ -346,16 +378,16 @@ public class JGit {
         for (Project pr : projects) {
             currentProgress += aStepInProgress;
             if (!pr.isCloned()) {
-                FeedbackUtil.sendError(onError, currentProgress, pr.getName() + ERROR_MSG_NOT_CLONED);
+                NullCheckUtil.acceptBiConsumer(onError, currentProgress, pr.getName() + ERROR_MSG_NOT_CLONED);
                 continue;
             }
             if(commitAndPush(pr, message, setAll, nameCommitter, emailCommitter, nameAuthor, emailAuthor)
                     .equals(JGitStatus.FAILED)) {
                 String errorMsg = "Failed to commit and push " + pr.getName() + " project";
-                FeedbackUtil.sendError(onError, currentProgress, errorMsg);
+                NullCheckUtil.acceptBiConsumer(onError, currentProgress, errorMsg);
                 continue;
             }
-            FeedbackUtil.sendSuccess(onSuccess, currentProgress);
+            NullCheckUtil.acceptConsumer(onSuccess, currentProgress);
         }
         return true;
     }
@@ -383,14 +415,14 @@ public class JGit {
         for (Project pr : projects) {
             currentProgress += aStepInProgress;
             if (!pr.isCloned()) {
-                FeedbackUtil.sendError(onError, currentProgress, pr.getName() + ERROR_MSG_NOT_CLONED);
+                NullCheckUtil.acceptBiConsumer(onError, currentProgress, pr.getName() + ERROR_MSG_NOT_CLONED);
                 continue;
             }
             if(push(pr).equals(JGitStatus.FAILED)) {
-                FeedbackUtil.sendError(onError, currentProgress, "Failed to push " + pr.getName() + " project");
+                NullCheckUtil.acceptBiConsumer(onError, currentProgress, "Failed to push " + pr.getName() + " project");
                 continue;
             }
-            FeedbackUtil.sendSuccess(onSuccess, currentProgress);
+            NullCheckUtil.acceptConsumer(onSuccess, currentProgress);
         }
         return true;
     }
@@ -566,7 +598,13 @@ public class JGit {
 
     private boolean clone(String linkClone, String localPath) {
         try {
-            Git.cloneRepository().setURI(linkClone).setDirectory(new File(localPath)).call();
+            Git.cloneRepository().setURI(linkClone).setDirectory(new File(localPath))
+                    .setProgressMonitor(new EmptyProgressMonitor() {
+                        @Override
+                        public boolean isCancelled() {
+                            return _isCloneCancelled;
+                        }
+                    }).call();
             return true;
         } catch (InvalidRemoteException | TransportException e) {
             System.err.println("!ERROR: " + e.getMessage());

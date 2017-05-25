@@ -1,6 +1,7 @@
 package com.lgc.solutiontool.git.ui.javafx.controllers;
 
 import java.io.File;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -15,6 +16,7 @@ import com.lgc.solutiontool.git.services.ServiceProvider;
 import com.lgc.solutiontool.git.statuses.CloningStatus;
 import com.lgc.solutiontool.git.ui.icon.AppIconHolder;
 
+import javafx.application.Platform;
 import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -31,6 +33,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import javafx.util.Callback;
+import javafx.util.Pair;
 
 @SuppressWarnings("unchecked")
 public class CloningGroupsWindowController {
@@ -93,15 +96,21 @@ public class CloningGroupsWindowController {
         String destinationPath = folderPath.getText();
         List<Group> selectedGroups = projectsList.getSelectionModel().getSelectedItems();
 
-        Map<Group, CloningStatus> statuses = _groupsService.cloneGroups(selectedGroups, destinationPath,
-                new SuccessfulOperationHandler(), new UnsuccessfulOperationHandler());
+        Map<Project, CloningStatus> statuses = new LinkedHashMap<>();
+        _groupsService.cloneGroups(selectedGroups, destinationPath,
+                new SuccessfulOperationHandler(statuses),
+                new UnsuccessfulOperationHandler(statuses),
+                () -> {
+                    Platform.runLater(() -> {
+                        String dialogMessage = statuses.entrySet().stream()
+                                .map(x -> x.getKey().getName() + "  -  " + x.getValue().getMessage())
+                                .collect(Collectors.joining("\n"));
+                        cloningStatusDialog(dialogMessage);
 
-        String dialogMessage = statuses.entrySet().stream()
-                .map(x -> x.getKey().getName() + "  -  " + x.getValue().getMessage())
-                .collect(Collectors.joining("\n"));
-        cloningStatusDialog(dialogMessage);
+                        stage.close();
+                    });
+                });
 
-        stage.close();
     }
 
     @FXML
@@ -179,10 +188,16 @@ public class CloningGroupsWindowController {
      */
     class SuccessfulOperationHandler implements BiConsumer<Integer, Project> {
 
+        private final Map<Project, CloningStatus> _statuses;
+
+        public SuccessfulOperationHandler(Map<Project, CloningStatus> statuses) {
+            _statuses = statuses;
+        }
+
         @Override
         public void accept(Integer percentage, Project project) {
             System.out.println("Progress: " + percentage + "%"); // TODO: in log or UI console
-
+            _statuses.put(project, CloningStatus.SUCCESSFUL);
             // Determine the project type
             ProjectTypeService prTypeService = (ProjectTypeService) ServiceProvider.getInstance()
                     .getService(ProjectTypeService.class.getName());
@@ -196,12 +211,19 @@ public class CloningGroupsWindowController {
      *
      * @author Lyudmila Lyska
      */
-    class UnsuccessfulOperationHandler implements BiConsumer<Integer, String> {
+    class UnsuccessfulOperationHandler implements BiConsumer<Integer, Pair<Project, String>> {
+
+        private final Map<Project, CloningStatus> _statuses;
+
+        public UnsuccessfulOperationHandler(Map<Project, CloningStatus> statuses) {
+            _statuses = statuses;
+        }
 
         @Override
-        public void accept(Integer percentage, String message) {
+        public void accept(Integer percentage, Pair<Project, String> projectMessage) {
             // TODO: in log or UI console
-            System.err.println("!ERROR: " + message);
+            _statuses.put(projectMessage.getKey(), CloningStatus.FAILED);
+            System.err.println("!ERROR: " + projectMessage.getValue());
             System.out.println("Progress: " + percentage + "%");
         }
 

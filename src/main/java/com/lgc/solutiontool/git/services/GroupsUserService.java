@@ -3,11 +3,14 @@ package com.lgc.solutiontool.git.services;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import com.lgc.solutiontool.git.entities.Group;
 import com.lgc.solutiontool.git.entities.Project;
 import com.lgc.solutiontool.git.entities.User;
 import com.lgc.solutiontool.git.statuses.CloningStatus;
+
+import javafx.util.Pair;
 
 public interface GroupsUserService {
 
@@ -32,7 +35,12 @@ public interface GroupsUserService {
                               where <Integer> is a percentage of progress, <String> error message.
      * @return cloned group
      */
-    Group cloneGroup(Group group, String destinationPath, BiConsumer<Integer, Project> onSuccess, BiConsumer<Integer, String> onError);
+    Group cloneGroup(Group group,
+                     String destinationPath,
+                     Consumer<Project> onStart,
+                     BiConsumer<Integer, Project> onSuccess,
+                     BiConsumer<Integer, Pair<Project, String>> onError,
+                     Runnable onFinish);
 
     /**
      * Clones list of user's groups
@@ -47,7 +55,7 @@ public interface GroupsUserService {
      * @return Groups and their cloning statuses
      */
     Map<Group, CloningStatus> cloneGroups(List<Group> groups, String destinationPath,
-            BiConsumer<Integer, Project> onSuccess, BiConsumer<Integer, String> onError);
+            BiConsumer<Integer, Project> onSuccess, BiConsumer<Integer, Pair<Project, String>> onError, Runnable onFinish);
 
     /**
      * Gets group by id
