@@ -98,6 +98,11 @@ public class JGit {
         return branches;
     }
 
+    public boolean containsBranches(Project project, List<Branch> branches){
+        List<Branch> allBranches = getBranches(project, BranchType.ALL);
+        return allBranches.containsAll(branches);
+    }
+
     private <T> void mergeCollections(Collection<T> first, Collection<T> second, boolean onlyGeneral) {
         if (onlyGeneral && !first.isEmpty()) { // TODO: TEST IT (Can repository hasn't branches?)
             first.retainAll(second);
