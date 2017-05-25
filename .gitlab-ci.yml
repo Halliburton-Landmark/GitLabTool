@@ -1,5 +1,8 @@
 image: strazhkoe/ubuntu-java8-maven
-job1:
+build:
  script:
  - "mvn install -B"
  - "cat target/site/jacoco/index.html"
+ artifacts:
+  paths:
+  - target/GitlabTool-full.jar
