@@ -1,9 +1,9 @@
 package com.lgc.solutiontool.git.services;
 
-import java.util.Collection;
 
 import com.lgc.solutiontool.git.entities.Group;
 import com.lgc.solutiontool.git.entities.Project;
+import java.util.Collection;
 
 public interface ProjectService {
 

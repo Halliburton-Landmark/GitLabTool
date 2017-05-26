@@ -143,7 +143,6 @@ public class GroupsUserServiceImpl implements GroupsUserService {
     }
 
     private Map<Optional<Group>, String> importGroup(Path groupPath) {
-
         Map<Optional<Group>, String> result = new HashMap<>();
         String nameGroup = groupPath.getName(groupPath.getNameCount()-1).toString();
         if (checkGroupIsLoaded(groupPath.toAbsolutePath().toString())) {
@@ -162,8 +161,6 @@ public class GroupsUserServiceImpl implements GroupsUserService {
         }
         foundGroup.setPathToClonedGroup(groupPath.toString());
         foundGroup.setClonedStatus(true);
-
-
         return updateProjectsInGroup(foundGroup, groupPath);
     }
 
