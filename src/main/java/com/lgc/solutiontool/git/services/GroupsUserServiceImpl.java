@@ -32,6 +32,13 @@ public class GroupsUserServiceImpl implements GroupsUserService {
     private static String privateTokenKey;
     private static String privateTokenValue;
 
+    private static final String GROUP_ALREADY_LOADED_MESSAGE = "The group with this path is already loaded.";
+    private static final String GROUP_DOESNT_EXIST_MESSAGE = "This group does not exist.";
+    private static final String ERROR_GETTING_GROUP_MESSAGE = "Error getting group from GitLab.";
+    private static final String GROUP_DOESNT_HAVE_PROJECTS_MESSAGE = "The group has no projects.";
+    private static final String INCCORECT_DATA_MESSAGE  = "ERROR: Incorrect data.";
+    private static final String PREFIX_SUCCESSFUL_LOAD = " uploaded.";
+
     public GroupsUserServiceImpl(RESTConnector connector) {
         setConnector(connector);
     }
@@ -123,12 +130,12 @@ public class GroupsUserServiceImpl implements GroupsUserService {
     @Override
     public Map<Optional<Group>, String> importGroup(String groupPath) {
         if (groupPath == null || groupPath.isEmpty()) {
-            throw new IllegalArgumentException("ERROR: Incorrect data.");
+            throw new IllegalArgumentException(INCCORECT_DATA_MESSAGE);
         }
         Path path = Paths.get(groupPath);
         if (!PathUtilities.isExistsAndDirectory(path)) {
             Map<Optional<Group>, String> result = new HashMap<>();
-            result.put(Optional.empty(), "The transmitted path does not exist or is not a directory.");
+            result.put(Optional.empty(), PathUtilities.PATH_NOT_EXISTS_OR_NOT_DIRECTORY);
             return result;
         }
         return importGroup(path);
@@ -139,17 +146,17 @@ public class GroupsUserServiceImpl implements GroupsUserService {
         Map<Optional<Group>, String> result = new HashMap<>();
         String nameGroup = groupPath.getName(groupPath.getNameCount()-1).toString();
         if (checkGroupIsLoaded(groupPath.toAbsolutePath().toString())) {
-            result.put(Optional.empty(), "The group with this path is already loaded.");
+            result.put(Optional.empty(), GROUP_ALREADY_LOADED_MESSAGE);
             return result;
         }
         Optional<Group> optFoundGroup = getGroupByName(nameGroup);
         if (!optFoundGroup.isPresent()) {
-            result.put(Optional.empty(), "This group does not exist.");
+            result.put(Optional.empty(), GROUP_DOESNT_EXIST_MESSAGE);
             return result;
         }
         Group foundGroup = getGroupById(optFoundGroup.get().getId());
         if (foundGroup == null) {
-            result.put(Optional.empty(), "Error getting group from GitLab.");
+            result.put(Optional.empty(), ERROR_GETTING_GROUP_MESSAGE);
             return result;
         }
         foundGroup.setPathToClonedGroup(groupPath.toString());
@@ -179,19 +186,18 @@ public class GroupsUserServiceImpl implements GroupsUserService {
         Map<Optional<Group>, String> result = new HashMap<>();
         Collection<Project> projects = group.getProjects();
         if (projects == null || projects.isEmpty()) {
-            result.put(Optional.empty(), "The group has no projects.");
+            result.put(Optional.empty(), GROUP_DOESNT_HAVE_PROJECTS_MESSAGE);
             return result;
         }
         Collection<String> projectsName = PathUtilities.getFolders(localPathGroup);
-        String subMessage = " uploaded.";
         if (projectsName.isEmpty()) {
-            result.put(Optional.of(group), group.getName() + subMessage );
+            result.put(Optional.of(group), group.getName() + PREFIX_SUCCESSFUL_LOAD );
             return result;
         }
         projects.stream()
                 .filter(project -> projectsName.contains(project.getName()))
                 .forEach((project) -> updateProjectStatus(project, localPathGroup.toString()));
-        result.put(Optional.of(group), group.getName() + subMessage );
+        result.put(Optional.of(group), group.getName() + PREFIX_SUCCESSFUL_LOAD );
         return result;
     }
 

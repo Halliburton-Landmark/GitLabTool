@@ -14,6 +14,8 @@ import java.util.Collections;
  */
 public class PathUtilities {
 
+    public static final String PATH_NOT_EXISTS_OR_NOT_DIRECTORY = "The transmitted path does not exist or is not a directory.";
+
     /**
      * Checks path is exist and it is directory.
      *
