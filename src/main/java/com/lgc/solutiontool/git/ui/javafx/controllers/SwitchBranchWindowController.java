@@ -7,6 +7,8 @@ import com.lgc.solutiontool.git.jgit.BranchType;
 import com.lgc.solutiontool.git.jgit.JGit;
 import com.lgc.solutiontool.git.jgit.JGitStatus;
 import com.lgc.solutiontool.git.project.nature.projecttype.ProjectType;
+import com.lgc.solutiontool.git.services.GitService;
+import com.lgc.solutiontool.git.services.ServiceProvider;
 import com.lgc.solutiontool.git.ui.icon.AppIconHolder;
 import com.lgc.solutiontool.git.ui.icon.LocalRemoteIconHolder;
 import com.lgc.solutiontool.git.ui.selection.SelectionsProvider;
@@ -34,6 +36,9 @@ public class SwitchBranchWindowController {
     private static final String SWITCHTO_STATUS_ALERT_TITLE = "Switch branch info";
     private static final String SWITCHTO_STATUS_ALERT_HEADER = "Switch branch statuses:";
     private static final String NEW_LINE_SYMBOL = "\n";
+
+    private GitService _gitService =
+            (GitService) ServiceProvider.getInstance().getService(GitService.class.getName());
 
     private List<Branch> allBranches = new ArrayList<>();
 
@@ -165,7 +170,7 @@ public class SwitchBranchWindowController {
 
         //filtering projects
         for (Object project : allSelectedProjects) {
-            if (JGit.getInstance().containsBranches((Project) project, branches)) {
+            if (_gitService.containsBranches((Project) project, branches, false)) {
                 filteredProjectList.add((Project) project);
             }
         }

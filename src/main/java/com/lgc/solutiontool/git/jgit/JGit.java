@@ -98,21 +98,6 @@ public class JGit {
         return branches;
     }
 
-    /**
-     * Checks that project has selected branches
-     *
-     * @param project   project for checking
-     * @param branches  branches that need to be checked
-     * @return          true if project contains selected branches, false if does not contains
-     */
-    public boolean containsBranches(Project project, List<Branch> branches) {
-        if (project == null || branches == null) {
-            throw new IllegalArgumentException("Wrong parameters for obtaining branches.");
-        }
-        List<Branch> allBranches = getBranches(project, BranchType.ALL);
-        return allBranches.containsAll(branches);
-    }
-
     private <T> void mergeCollections(Collection<T> first, Collection<T> second, boolean onlyGeneral) {
         if (onlyGeneral && !first.isEmpty()) { // TODO: TEST IT (Can repository hasn't branches?)
             first.retainAll(second);
