@@ -249,7 +249,6 @@ public class JGitTest {
             protected Optional<Git> getGitForRepository(String path) {
                 return Optional.of(gitMock);
             }
-
             @Override
             protected boolean isContinueMakePull(Project project) {
                 return false;
@@ -492,6 +491,7 @@ public class JGitTest {
             public List<Ref> call() throws GitAPIException {
                 throw getGitAPIException();
             }
+
         };
         Mockito.when(gitMock.branchList()).thenReturn(listCommandMock);
         Assert.assertEquals(getJGitMock(gitMock).createBranch(getProject(true), NAME_BRANCH, false), JGitStatus.FAILED);
@@ -500,6 +500,7 @@ public class JGitTest {
         listCommandMock = getListCommandMock(refMock);
         Mockito.when(refMock.getName()).thenReturn(Constants.R_REMOTES + NAME_BRANCH);
         Mockito.when(gitMock.branchList()).thenReturn(listCommandMock);
+        System.err.println("NAME MY BRANCH " + refMock.getName());
         Assert.assertEquals(getJGitMock(gitMock).createBranch(getProject(true), NAME_BRANCH, false), JGitStatus.BRANCH_ALREADY_EXISTS);
 
         CreateBranchCommand createBranchCommandMock = new CreateBranchCommand(getRepository()) {

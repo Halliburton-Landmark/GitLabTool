@@ -428,6 +428,9 @@ public class JGit {
             return JGitStatus.FAILED;
         }
         List<Branch> branches = getListShortNamesOfBranches(getRefs(project, null));
+        if (branches.isEmpty()) {
+            return JGitStatus.FAILED;
+        }
         if (!force && branches.stream().map(Branch::getBranchName).collect(Collectors.toList()).contains(nameBranch)) {
             return JGitStatus.BRANCH_ALREADY_EXISTS;
         }
@@ -454,7 +457,7 @@ public class JGit {
      *         CONFLICTS - if the branch has unsaved changes that can lead to conflicts.
      */
     public JGitStatus switchTo(Project project, String nameBranch, boolean isRemoteBranch) {
-        if (project == null || nameBranch == null) {
+        if (project == null || nameBranch == null || nameBranch.isEmpty()) {
             throw new IllegalArgumentException(
                     "Incorrect data: project is " + project + ", nameBranch is " + nameBranch);
         }
@@ -734,10 +737,11 @@ public class JGit {
         }
         List<Branch> branches = new ArrayList<>();
         for (Ref ref : listRefs) {
-            int length = (ref.toString().contains(Constants.R_HEADS)) ? Constants.R_HEADS.length()
-                    : Constants.R_REMOTES.length();
+            int length = (ref.toString().contains(Constants.R_HEADS)) ?
+                    Constants.R_HEADS.length() : Constants.R_REMOTES.length();
             if (ref.toString().contains(Constants.R_HEADS)) {
                 branches.add(new Branch(ref.getName().substring(length), BranchType.LOCAL));
+            } else {
                 branches.add(new Branch(ref.getName().substring(length), BranchType.REMOTE));
             }
         }
