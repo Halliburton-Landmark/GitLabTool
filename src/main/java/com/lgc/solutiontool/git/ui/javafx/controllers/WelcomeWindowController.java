@@ -169,4 +169,9 @@ public class WelcomeWindowController {
             }
         }
     }
+
+    public void refreshGroupsList() {
+        updateClonedGroups();
+        groupList.refresh();
+    }
 }

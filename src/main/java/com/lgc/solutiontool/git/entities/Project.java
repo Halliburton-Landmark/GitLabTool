@@ -1,6 +1,5 @@
 package com.lgc.solutiontool.git.entities;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Set;
@@ -8,6 +7,7 @@ import java.util.Set;
 import com.google.gson.annotations.SerializedName;
 import com.lgc.solutiontool.git.project.nature.operation.Operation;
 import com.lgc.solutiontool.git.project.nature.projecttype.ProjectType;
+import com.lgc.solutiontool.git.util.PathUtilities;
 
 /**
  * Class keeps data about project.
@@ -60,7 +60,7 @@ public class Project {
     /** Path to the cloned project **/
     private String _pathToClonedProject;
     private boolean _isCloned;
-    private transient ProjectType _type;
+    private ProjectType _type;
 
     /**
      * Sets a project type
@@ -120,7 +120,7 @@ public class Project {
     }
 
     protected boolean checkPath(Path pathToProject) {
-        return Files.exists(pathToProject) && Files.isDirectory(pathToProject);
+        return PathUtilities.isExistsAndDirectory(pathToProject);
     }
 
     /**

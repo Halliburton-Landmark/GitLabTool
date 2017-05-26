@@ -31,10 +31,10 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 
 class LoginDialog extends Dialog<DialogDTO> {
-	
-	private StorageService storageService =
+
+	private final StorageService storageService =
             (StorageService) ServiceProvider.getInstance().getService(StorageService.class.getName());
-	
+
 	LoginDialog() {
         setTitle("GitLab Welcome");
         final GridPane grid = new GridPane();
@@ -64,11 +64,11 @@ class LoginDialog extends Dialog<DialogDTO> {
 
         final Text actiontarget = new Text();
         grid.add(actiontarget, 1, 6);
-        
+
         final Text repositoryText = new Text("Service: ");
         grid.add(repositoryText, 0, 3);
-        
-        ObservableList<String> options = getBoxOptions();	
+
+        ObservableList<String> options = getBoxOptions();
         final ComboBox<String> comboBox = new ComboBox<>(options);
         comboBox.valueProperty().addListener((observableValue, oldValue, currentValue) -> {
             if (currentValue.equals("Other...")) {
@@ -88,7 +88,7 @@ class LoginDialog extends Dialog<DialogDTO> {
         getDialogPane().setContent(grid);
         setResultConverter(dialogButton -> {
             String serverURL = URLManager.completeServerURL(comboBox.getValue());
-            return dialogButton == loginButtonType 
+            return dialogButton == loginButtonType
                     ? new DialogDTO(userTextField.getText(), pwBox.getText(), serverURL)
                     : null;
         });
@@ -100,6 +100,7 @@ class LoginDialog extends Dialog<DialogDTO> {
             servers.add(e.getName());
         });
         ObservableList<String> options = FXCollections.observableArrayList(servers);
+        options.add("Other...");
         return options;
     }
 

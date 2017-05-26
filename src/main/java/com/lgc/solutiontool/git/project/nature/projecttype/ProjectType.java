@@ -14,6 +14,7 @@ import com.lgc.solutiontool.git.project.nature.operation.Operation;
 * For example:
 *   DSGProjectType (com.lgc.solutiontool.git.project.nature.projecttype.DSGProjectType) has:
 *     - id: "com.lgc.dsg"
+ *    - iconUrl: "icons/project/dsg_project.png"
 *     - operations: all git operations, changing pom.xml and text file etc.
 *     - structure:  all projects of DSGProjectType should have a pom.xml file in the project's root folder
 *                   and a pom.xml file in a plugins folder.
@@ -22,12 +23,21 @@ import com.lgc.solutiontool.git.project.nature.operation.Operation;
 */
 public interface ProjectType {
 
+    static final String ID_KEY = "id";
+
     /**
      * Gets id of type
      *
      * @return project type id
      */
     String getId();
+
+    /**
+     * Gets url of icon
+     *
+     * @return project icon url
+     */
+    String getIconUrl();
 
     /**
      * Does a type of project has access to a operation?

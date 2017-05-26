@@ -6,7 +6,6 @@ import java.util.Set;
 import com.lgc.solutiontool.git.entities.Project;
 import com.lgc.solutiontool.git.project.nature.projecttype.DSGProjectType;
 import com.lgc.solutiontool.git.project.nature.projecttype.ProjectType;
-import com.lgc.solutiontool.git.project.nature.projecttype.UnknownProjectType;
 
 /**
  * Service for working with a type of projects
@@ -14,13 +13,11 @@ import com.lgc.solutiontool.git.project.nature.projecttype.UnknownProjectType;
  * @author Lyudmila Lyska
  */
 public class ProjectTypeServiceImpl implements ProjectTypeService {
-
     private final Set<ProjectType> _types;
-    private final ProjectType UNKNOWN_TYPE = new UnknownProjectType();
 
     public ProjectTypeServiceImpl() {
         _types = new HashSet<>();
-        _types.add(new DSGProjectType());
+        initProjectTypes();
     }
 
     @Override
@@ -29,12 +26,34 @@ public class ProjectTypeServiceImpl implements ProjectTypeService {
             throw new IllegalArgumentException("Invalid data. Project is null.");
         }
         String path = project.getPathToClonedProject();
-        for (ProjectType projectType : _types) {
-            if (projectType.isProjectCorrespondsType(path)) {
-                return projectType;
+        if (path != null) {
+            for (ProjectType projectType : _types) {
+                if (projectType.isProjectCorrespondsType(path)) {
+                    return projectType;
+                }
             }
         }
         return UNKNOWN_TYPE;
     }
 
+    @Override
+    public ProjectType getTypeById(String idType) {
+        if (idType != null) {
+            for (ProjectType projectType : _types) {
+                if (projectType.getId().equals(idType)) {
+                    return projectType;
+                }
+            }
+        }
+        return UNKNOWN_TYPE;
+    }
+
+    protected void initProjectTypes() {
+        _types.add(new DSGProjectType());
+        _types.add(UNKNOWN_TYPE);
+    }
+
+    protected Set<ProjectType> getSetProjectTypes() {
+        return _types;
+    }
 }

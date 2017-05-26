@@ -11,7 +11,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.api.CreateBranchCommand;
 import org.eclipse.jgit.api.CreateBranchCommand.SetupUpstreamMode;
 import org.eclipse.jgit.api.Git;
@@ -41,6 +43,7 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 
 import com.lgc.solutiontool.git.connections.token.CurrentUser;
+import com.lgc.solutiontool.git.entities.Branch;
 import com.lgc.solutiontool.git.entities.Group;
 import com.lgc.solutiontool.git.entities.Project;
 import com.lgc.solutiontool.git.entities.User;
@@ -49,15 +52,16 @@ import com.lgc.solutiontool.git.util.FeedbackUtil;
 /**
  * Class for work with Git:
  *
- * - clone a group, project or URL of repository;
- * - pull, commit and push of projects;
- * - create, delete and switch to branch.
+ * - clone a group, project or URL of repository; - pull, commit and push of projects; - create, delete and switch to
+ * branch.
  *
  * @author Lyska Lyudmila
  */
 public class JGit {
     private static final JGit _jgit;
     private final String ERROR_MSG_NOT_CLONED = " project is not cloned. The operation is impossible";
+    private static final String ORIGIN_PREFIX = "origin/";
+
     static {
         _jgit = new JGit();
     }
@@ -75,10 +79,10 @@ public class JGit {
      * Gets branches of project a certain type
      *
      * @param project cloned project
-     * @param brType  type branch
+     * @param brType type branch
      * @return a list of branches
      */
-    public List<String> getBranches(Project project, BranchType brType) {
+    public List<Branch> getBranches(Project project, BranchType brType) {
         if (project == null || brType == null) {
             throw new IllegalArgumentException("Wrong parameters for obtaining branches.");
         }
@@ -93,17 +97,17 @@ public class JGit {
     /**
      * Gets branches of project
      *
-     * @param projects    cloned project
-     * @param brType      type branch
+     * @param projects cloned project
+     * @param brType type branch
      * @param onlyCommon if value is <true> return only common branches of projects, if <false> return all branches.
      * @return a list of branches
      */
-    public Set<String> getBranches(List<Project> projects, BranchType brType, boolean onlyCommon) {
+    public Set<Branch> getBranches(Collection<Project> projects, BranchType brType, boolean onlyCommon) {
         if (projects == null || brType == null) {
             throw new IllegalArgumentException("Wrong parameters for obtaining branches.");
         }
         ListMode mode = brType.equals(BranchType.LOCAL) ? null : ListMode.valueOf(brType.toString());
-        Set<String> branches = new HashSet<>();
+        Set<Branch> branches = new HashSet<>();
         projects.stream().forEach((pr) -> {
             if (pr == null) {
                 return;
@@ -112,7 +116,7 @@ public class JGit {
                 System.err.println(pr.getName() + ERROR_MSG_NOT_CLONED);
                 return;
             }
-            List<String> shortNamesBranches = getListShortNamesOfBranches(getRefs(pr, mode));
+            List<Branch> shortNamesBranches = getListShortNamesOfBranches(getRefs(pr, mode));
             mergeCollections(branches, shortNamesBranches, onlyCommon);
         });
         return branches;
@@ -129,15 +133,15 @@ public class JGit {
     /**
      * Clones all projects from the group
      *
-     * @param group      group for clone
-     * @param localPath  localPath the path to where will clone all the projects of the group
-     * @param onSuccess  method for tracking the success progress of cloning,
-     *                   where <Integer> is a percentage of progress,
-     *                   <Project> is a cloned project.
-     * @param onError    method for tracking the errors during cloning,
-     *                   where <Integer> is a percentage of progress, <String> error message.
+     * @param group group for clone
+     * @param localPath localPath the path to where will clone all the projects of the group
+     * @param onSuccess method for tracking the success progress of cloning, where <Integer> is a percentage of
+     *        progress, <Project> is a cloned project.
+     * @param onError method for tracking the errors during cloning, where <Integer> is a percentage of progress,
+     *        <String> error message.
      */
-    public boolean clone(Group group, String localPath, BiConsumer<Integer, Project> onSuccess, BiConsumer<Integer, String> onError) {
+    public boolean clone(Group group, String localPath, BiConsumer<Integer, Project> onSuccess,
+            BiConsumer<Integer, String> onError) {
         if (group == null || localPath == null) {
             throw new IllegalArgumentException("Incorrect data: group is " + group + ", localPath is " + localPath);
         }
@@ -223,26 +227,26 @@ public class JGit {
         if (!opGit.isPresent()) {
             return false;
         }
-            files.stream().forEach((file) -> {
-                if (file != null) {
-                    try {
-                        opGit.get().add().addFilepattern(file).call();
-                    } catch (GitAPIException e) {
-                        System.err.println("Could not add the " + file + " file");
-                        System.err.println("!ERROR: " + e.getMessage());
-                    }
+        files.stream().forEach((file) -> {
+            if (file != null) {
+                try {
+                    opGit.get().add().addFilepattern(file).call();
+                } catch (GitAPIException e) {
+                    System.err.println("Could not add the " + file + " file");
+                    System.err.println("!ERROR: " + e.getMessage());
                 }
-            });
+            }
+        });
         return true;
     }
 
     /**
      * Makes pull of the project
      *
-     * @param  project the cloned project
+     * @param project the cloned project
      * @return JGitStatus pull result
      */
-    public JGitStatus pull (Project project) {
+    public JGitStatus pull(Project project) {
         if (project == null) {
             throw new IllegalArgumentException("Incorrect data: project is null");
         }
@@ -270,28 +274,27 @@ public class JGit {
     /**
      * Commit of all the projects in the group
      *
-     * @param projects       projects for commit
-     * @param message        a message for commit. The commit message can not be {null}.
-     * @param setAll         if set to true the commit command automatically stages files that have been
-     *                       modified and deleted, but new files not known by the repository are not affected.
-     * @param nameCommitter  the name committer for this commit.
+     * @param projects projects for commit
+     * @param message a message for commit. The commit message can not be {null}.
+     * @param setAll if set to true the commit command automatically stages files that have been modified and deleted,
+     *        but new files not known by the repository are not affected.
+     * @param nameCommitter the name committer for this commit.
      * @param emailCommitter the email committer for this commit.
-     * @param nameAuthor     the name author for this commit.
-     * @param emailAuthor    the email author for this commit.
-     * @param onSuccess      method for tracking the success progress of cloning,
-     *                       where <Integer> is a percentage of progress.
-     * @param onError        method for tracking the errors during cloning,
-     *                       where <Integer> is a percentage of progress, <String> error message.
+     * @param nameAuthor the name author for this commit.
+     * @param emailAuthor the email author for this commit.
+     * @param onSuccess method for tracking the success progress of cloning, where <Integer> is a percentage of
+     *        progress.
+     * @param onError method for tracking the errors during cloning, where <Integer> is a percentage of progress,
+     *        <String> error message.
      *
-     * If the passed committer or author is {null} we take the value from the current user.
-     * Projects that failed to commit will be displayed in the UI console.
+     *        If the passed committer or author is {null} we take the value from the current user. Projects that failed
+     *        to commit will be displayed in the UI console.
      *
      * @return status SUCCESSFUL is if committed successfully, otherwise is FAILED.
      */
-    public JGitStatus commit (List<Project> projects, String message, boolean setAll,
-                              String nameCommitter, String emailCommitter,
-                              String nameAuthor, String emailAuthor,
-                              Consumer<Integer> onSuccess, BiConsumer<Integer, String> onError) {
+    public JGitStatus commit(List<Project> projects, String message, boolean setAll, String nameCommitter,
+            String emailCommitter, String nameAuthor, String emailAuthor, Consumer<Integer> onSuccess,
+            BiConsumer<Integer, String> onError) {
         if (projects == null || message == null || projects.isEmpty() || message.isEmpty()) {
             // TODO: add log
             throw new IllegalArgumentException("Incorrect data: projects is " + projects + ", message is " + message);
@@ -307,8 +310,8 @@ public class JGit {
                 FeedbackUtil.sendError(onError, currentProgress, pr.getName() + ERROR_MSG_NOT_CLONED);
                 continue;
             }
-            if(commitProject(pr, message, setAll, nameCommitter, emailCommitter,
-                      nameAuthor, emailAuthor).equals(JGitStatus.FAILED)) {
+            if (commitProject(pr, message, setAll, nameCommitter, emailCommitter, nameAuthor, emailAuthor)
+                    .equals(JGitStatus.FAILED)) {
                 FeedbackUtil.sendError(onError, currentProgress, "Failed to commit " + pr.getName() + " project");
                 continue;
             }
@@ -320,28 +323,27 @@ public class JGit {
     /**
      * Commit and push of all the projects in the group
      *
-     * @param projects       projects for commit and push
-     * @param message        a message for commit. The commit message can not be {null}.
-     * @param setAll         if set to true the commit command automatically stages files that have been
-     *                       modified and deleted, but new files not known by the repository are not affected.
-     * @param nameCommitter  the name committer for this commit.
+     * @param projects projects for commit and push
+     * @param message a message for commit. The commit message can not be {null}.
+     * @param setAll if set to true the commit command automatically stages files that have been modified and deleted,
+     *        but new files not known by the repository are not affected.
+     * @param nameCommitter the name committer for this commit.
      * @param emailCommitter the email committer for this commit.
-     * @param nameAuthor     the name author for this commit.
-     * @param emailAuthor    the email author for this commit.
-     * @param onSuccess      method for tracking the success progress of cloning,
-     *                       where <Integer> is a percentage of progress.
-     * @param onError        method for tracking the errors during cloning,
-     *                       where <Integer> is a percentage of progress, <String> error message.
+     * @param nameAuthor the name author for this commit.
+     * @param emailAuthor the email author for this commit.
+     * @param onSuccess method for tracking the success progress of cloning, where <Integer> is a percentage of
+     *        progress.
+     * @param onError method for tracking the errors during cloning, where <Integer> is a percentage of progress,
+     *        <String> error message.
      *
-     * If the passed committer or author is {null} we take the value from the current user.
-     * Projects that failed to commit or to push will be displayed in the console.
+     *        If the passed committer or author is {null} we take the value from the current user. Projects that failed
+     *        to commit or to push will be displayed in the console.
      *
      * @return
      */
-    public boolean commitAndPush (List<Project> projects, String message, boolean setAll,
-                                  String nameCommitter, String emailCommitter,
-                                  String nameAuthor, String emailAuthor,
-                                  Consumer<Integer> onSuccess, BiConsumer<Integer, String> onError) {
+    public boolean commitAndPush(List<Project> projects, String message, boolean setAll, String nameCommitter,
+            String emailCommitter, String nameAuthor, String emailAuthor, Consumer<Integer> onSuccess,
+            BiConsumer<Integer, String> onError) {
         if (message == null || projects == null || projects.isEmpty() || message.isEmpty()) {
             throw new IllegalArgumentException("Incorrect data: projects is " + projects + ", message is " + message);
         }
@@ -356,7 +358,7 @@ public class JGit {
                 FeedbackUtil.sendError(onError, currentProgress, pr.getName() + ERROR_MSG_NOT_CLONED);
                 continue;
             }
-            if(commitAndPush(pr, message, setAll, nameCommitter, emailCommitter, nameAuthor, emailAuthor)
+            if (commitAndPush(pr, message, setAll, nameCommitter, emailCommitter, nameAuthor, emailAuthor)
                     .equals(JGitStatus.FAILED)) {
                 String errorMsg = "Failed to commit and push " + pr.getName() + " project";
                 FeedbackUtil.sendError(onError, currentProgress, errorMsg);
@@ -370,17 +372,16 @@ public class JGit {
     /**
      * Push of all the projects in the group
      *
-     * @param projects   projects for push
-     * @param onSuccess  method for tracking the success progress of cloning,
-     *                   where <Integer> is a percentage of progress.
-     * @param onError    method for tracking the errors during cloning,
-     *                   where <Integer> is a percentage of progress, <String> error message.
-     * @return true   -  if the operation is completed successfully,
-     *         false  -  if an error occurred during execution
+     * @param projects projects for push
+     * @param onSuccess method for tracking the success progress of cloning, where <Integer> is a percentage of
+     *        progress.
+     * @param onError method for tracking the errors during cloning, where <Integer> is a percentage of progress,
+     *        <String> error message.
+     * @return true - if the operation is completed successfully, false - if an error occurred during execution
      *
-     * !Projects that failed to push will be displayed in the UI console.
+     *         !Projects that failed to push will be displayed in the UI console.
      */
-    public boolean push (List<Project> projects, Consumer<Integer> onSuccess, BiConsumer<Integer, String> onError) {
+    public boolean push(List<Project> projects, Consumer<Integer> onSuccess, BiConsumer<Integer, String> onError) {
         if (projects == null || projects.isEmpty()) {
             throw new IllegalArgumentException("Incorrect data: projects is " + projects);
         }
@@ -395,7 +396,7 @@ public class JGit {
                 FeedbackUtil.sendError(onError, currentProgress, pr.getName() + ERROR_MSG_NOT_CLONED);
                 continue;
             }
-            if(push(pr).equals(JGitStatus.FAILED)) {
+            if (push(pr).equals(JGitStatus.FAILED)) {
                 FeedbackUtil.sendError(onError, currentProgress, "Failed to push " + pr.getName() + " project");
                 continue;
             }
@@ -407,18 +408,16 @@ public class JGit {
     /**
      * Create a new branch in the local repository.
      *
-     * @param project      the cloned project
-     * @param nameBranch   the name of the branch
-     * @param force        if <code>true</code> and the branch with the given name
-     *                     already exists, the start-point of an existing branch will be
-     *                     set to a new start-point; if false, the existing branch will
-     *                     not be changed
-     * @return JGitStatus: SUCCESSFUL - if a new branch was created,
-     *                     FAILED - if the branch could not be created.
+     * @param project the cloned project
+     * @param nameBranch the name of the branch
+     * @param force if <code>true</code> and the branch with the given name already exists, the start-point of an
+     *        existing branch will be set to a new start-point; if false, the existing branch will not be changed
+     * @return JGitStatus: SUCCESSFUL - if a new branch was created, FAILED - if the branch could not be created.
      */
     public JGitStatus createBranch(Project project, String nameBranch, boolean force) {
         if (project == null || nameBranch == null || nameBranch.isEmpty()) {
-            throw new IllegalArgumentException("Incorrect data: project is " + project + ", nameBranch is " + nameBranch);
+            throw new IllegalArgumentException(
+                    "Incorrect data: project is " + project + ", nameBranch is " + nameBranch);
         }
         if (!project.isCloned()) {
             System.err.println(project.getName() + ERROR_MSG_NOT_CLONED);
@@ -428,20 +427,13 @@ public class JGit {
         if (!optGit.isPresent()) {
             return JGitStatus.FAILED;
         }
-        List<String> branches = getListShortNamesOfBranches(getRefs(project, null));
-        if (branches.isEmpty()) {
-            System.err.println("!ERROR: Failed to get list of branches");
-            return JGitStatus.FAILED;
-        }
-        if (!force && branches.contains(nameBranch)) {
+        List<Branch> branches = getListShortNamesOfBranches(getRefs(project, null));
+        if (!force && branches.stream().map(Branch::getBranchName).collect(Collectors.toList()).contains(nameBranch)) {
             return JGitStatus.BRANCH_ALREADY_EXISTS;
         }
         try {
             CreateBranchCommand create = optGit.get().branchCreate();
-            Ref res = create.setUpstreamMode(SetupUpstreamMode.TRACK)
-                            .setName(nameBranch)
-                            .setForce(force)
-                            .call();
+            Ref res = create.setUpstreamMode(SetupUpstreamMode.TRACK).setName(nameBranch).setForce(force).call();
             System.out.println("!CREATE NEW BRANCH: " + res.getName());
             return JGitStatus.SUCCESSFUL;
         } catch (GitAPIException e) {
@@ -453,19 +445,18 @@ public class JGit {
     /**
      * Switch to another branch (already existing).
      *
-     * @param project         the cloned project
-     * @param nameBranch      the name of the branch to which to switch
-     * @param setCreateBranch if value is <true> to switch to a branch for it, a new local branch
-                              with the same name will be created, if <false> switch to an existing branch.
+     * @param project the cloned project
+     * @param nameBranch the name of the branch to which to switch
+     * @param isRemoteBranch if value is <true> to switch to a branch for it, a new local branch with the same name will
+     *        be created, if <false> switch to an existing branch.
      *
-     * @return JGitStatus: SUCCESSFUL - if a new branch was created,
-     *                     FAILED - if the branch could not be created,
-     *                     CONFLICTS - if the branch has unsaved changes that can lead to conflicts.
+     * @return JGitStatus: SUCCESSFUL - if a new branch was created, FAILED - if the branch could not be created,
+     *         CONFLICTS - if the branch has unsaved changes that can lead to conflicts.
      */
-
-    public JGitStatus switchTo(Project project, String nameBranch, boolean setCreateBranch) {
-        if (project == null || nameBranch == null || nameBranch.isEmpty()) {
-            throw new IllegalArgumentException("Incorrect data: project is " + project + ", nameBranch is " + nameBranch);
+    public JGitStatus switchTo(Project project, String nameBranch, boolean isRemoteBranch) {
+        if (project == null || nameBranch == null) {
+            throw new IllegalArgumentException(
+                    "Incorrect data: project is " + project + ", nameBranch is " + nameBranch);
         }
         if (!project.isCloned()) {
             System.err.println(project.getName() + ERROR_MSG_NOT_CLONED);
@@ -475,12 +466,14 @@ public class JGit {
         if (!optGit.isPresent()) {
             return JGitStatus.FAILED;
         }
-        List<String> branches = getListShortNamesOfBranches(getRefs(project, null));
-        System.out.println("branches ========================= " + branches);
-        if (!branches.contains(nameBranch) && !setCreateBranch) {
+        String nameBranchWithoutAlias = nameBranch.replace(ORIGIN_PREFIX, StringUtils.EMPTY);
+        List<Branch> branches = getListShortNamesOfBranches(getRefs(project, null));
+        if (!branches.stream().map(Branch::getBranchName).collect(Collectors.toList()).contains(nameBranchWithoutAlias)
+                && !isRemoteBranch) {
             return JGitStatus.BRANCH_DOES_NOT_EXIST;
         }
-        if (branches.contains(nameBranch) && setCreateBranch) {
+        if (branches.stream().map(Branch::getBranchName).collect(Collectors.toList()).contains(nameBranchWithoutAlias)
+                && isRemoteBranch) {
             return JGitStatus.BRANCH_ALREADY_EXISTS;
         }
         Git git = optGit.get();
@@ -488,14 +481,16 @@ public class JGit {
             return JGitStatus.FAILED;
         }
         try {
-            if (isConflictsBetweenTwoBranches(git.getRepository(), git.getRepository().getFullBranch(), Constants.R_HEADS + nameBranch)) {
+            if (isCurrentBranch(git, nameBranchWithoutAlias)) {
+                return JGitStatus.BRANCH_CURRENTLY_CHECKED_OUT;
+            }
+            if (isConflictsBetweenTwoBranches(git.getRepository(), git.getRepository().getFullBranch(),
+                    Constants.R_HEADS + nameBranchWithoutAlias)) {
                 return JGitStatus.CONFLICTS;
             }
-            Ref ref = git.checkout()
-                         .setName(nameBranch)
-                         .setStartPoint("origin/" + nameBranch)
-                         .setCreateBranch(setCreateBranch)
-                         .call();
+
+            Ref ref = git.checkout().setName(nameBranchWithoutAlias)
+                    .setStartPoint(ORIGIN_PREFIX + nameBranchWithoutAlias).setCreateBranch(isRemoteBranch).call();
             System.out.println("!Switch to branch: " + ref.getName());
             return JGitStatus.SUCCESSFUL;
         } catch (IOException | GitAPIException e) {
@@ -534,16 +529,16 @@ public class JGit {
     /**
      * Removes a branch by name.
      *
-     * @param project      the cloned project
-     * @param nameBranch   the name of the branch for delete
-     * @param force        false - a check will be performed whether the branch to be deleted is already
-     *                     merged into the current branch and deletion will be refused in this case.
-     * @return JGitStatus: SUCCESSFUL - if a new branch was created,
-     *                     FAILED - if the branch could not be created.
+     * @param project the cloned project
+     * @param nameBranch the name of the branch for delete
+     * @param force false - a check will be performed whether the branch to be deleted is already merged into the
+     *        current branch and deletion will be refused in this case.
+     * @return JGitStatus: SUCCESSFUL - if a new branch was created, FAILED - if the branch could not be created.
      */
     public JGitStatus deleteBranch(Project project, String nameBranch, boolean force) {
         if (project == null || nameBranch == null || nameBranch.isEmpty()) {
-            throw new IllegalArgumentException("Incorrect data: project is " + project + ", nameBranch is " + nameBranch);
+            throw new IllegalArgumentException(
+                    "Incorrect data: project is " + project + ", nameBranch is " + nameBranch);
         }
         if (!project.isCloned()) {
             System.err.println(project.getName() + ERROR_MSG_NOT_CLONED);
@@ -603,9 +598,8 @@ public class JGit {
      * @param emailAuthor
      * @return
      */
-    public JGitStatus commitProject (Project project, String message, boolean setAll,
-                               String nameCommitter, String emailCommitter,
-                               String nameAuthor, String emailAuthor) {
+    public JGitStatus commitProject(Project project, String message, boolean setAll, String nameCommitter,
+            String emailCommitter, String nameAuthor, String emailAuthor) {
         if (project == null) {
             throw new IllegalArgumentException("Incorrect data! Project is null");
         }
@@ -617,11 +611,7 @@ public class JGit {
         PersonIdent author = getPersonIdent(nameAuthor, emailAuthor);
         PersonIdent comitter = getPersonIdent(nameCommitter, emailCommitter);
         try {
-            git.commit().setAll(setAll)
-                        .setMessage(message)
-                        .setAuthor(author)
-                        .setCommitter(comitter)
-                        .call();
+            git.commit().setAll(setAll).setMessage(message).setAuthor(author).setCommitter(comitter).call();
             return JGitStatus.SUCCESSFUL;
         } catch (Exception e) {
             System.err.println("!ERROR: " + e.getMessage());
@@ -641,9 +631,8 @@ public class JGit {
         return CurrentUser.getInstance().getCurrentUser();
     }
 
-    private JGitStatus commitAndPush(Project project, String message, boolean setAll,
-                                     String nameCommitter, String emailCommitter,
-                                     String nameAuthor, String emailAuthor) {
+    private JGitStatus commitAndPush(Project project, String message, boolean setAll, String nameCommitter,
+            String emailCommitter, String nameAuthor, String emailAuthor) {
         if (commitProject(project, message, setAll, nameCommitter, emailCommitter, nameAuthor, emailAuthor)
                 .equals(JGitStatus.FAILED)) {
             return JGitStatus.FAILED;
@@ -739,11 +728,18 @@ public class JGit {
         return Collections.emptyList();
     }
 
-    private List<String> getListShortNamesOfBranches(List<Ref> listRefs) {
-        List<String> branches = new ArrayList<>();
+    private List<Branch> getListShortNamesOfBranches(List<Ref> listRefs) {
+        if (listRefs == null || listRefs.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<Branch> branches = new ArrayList<>();
         for (Ref ref : listRefs) {
-            int length = (ref.toString().contains(Constants.R_HEADS)) ? Constants.R_HEADS.length() : Constants.R_REMOTES.length();
-            branches.add(ref.getName().substring(length));
+            int length = (ref.toString().contains(Constants.R_HEADS)) ? Constants.R_HEADS.length()
+                    : Constants.R_REMOTES.length();
+            if (ref.toString().contains(Constants.R_HEADS)) {
+                branches.add(new Branch(ref.getName().substring(length), BranchType.LOCAL));
+                branches.add(new Branch(ref.getName().substring(length), BranchType.REMOTE));
+            }
         }
         return branches;
     }
