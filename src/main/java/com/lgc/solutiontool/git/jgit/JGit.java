@@ -458,8 +458,7 @@ public class JGit {
      */
     public JGitStatus switchTo(Project project, String nameBranch, boolean isRemoteBranch) {
         if (project == null || nameBranch == null || nameBranch.isEmpty()) {
-            throw new IllegalArgumentException(
-                    "Incorrect data: project is " + project + ", nameBranch is " + nameBranch);
+            throw new IllegalArgumentException("Incorrect data: project is " + project + ", nameBranch is " + nameBranch);
         }
         if (!project.isCloned()) {
             System.err.println(project.getName() + ERROR_MSG_NOT_CLONED);
@@ -475,28 +474,23 @@ public class JGit {
                 && !isRemoteBranch) {
             return JGitStatus.BRANCH_DOES_NOT_EXIST;
         }
-        if (branches.stream().map(Branch::getBranchName).collect(Collectors.toList()).contains(nameBranchWithoutAlias)
-                && isRemoteBranch) {
+        if (branches.stream().map(Branch::getBranchName).collect(Collectors.toList()).contains(nameBranchWithoutAlias) && isRemoteBranch) {
             return JGitStatus.BRANCH_ALREADY_EXISTS;
         }
         Git git = optGit.get();
-        if (isCurrentBranch(git, nameBranch)) {
-            return JGitStatus.FAILED;
+        if (isCurrentBranch(git, nameBranchWithoutAlias)) {
+            return JGitStatus.BRANCH_CURRENTLY_CHECKED_OUT;
         }
         try {
-            if (isCurrentBranch(git, nameBranchWithoutAlias)) {
-                return JGitStatus.BRANCH_CURRENTLY_CHECKED_OUT;
-            }
             if (isConflictsBetweenTwoBranches(git.getRepository(), git.getRepository().getFullBranch(),
                     Constants.R_HEADS + nameBranchWithoutAlias)) {
                 return JGitStatus.CONFLICTS;
             }
-
             Ref ref = git.checkout().setName(nameBranchWithoutAlias)
                     .setStartPoint(ORIGIN_PREFIX + nameBranchWithoutAlias).setCreateBranch(isRemoteBranch).call();
             System.out.println("!Switch to branch: " + ref.getName());
             return JGitStatus.SUCCESSFUL;
-        } catch (IOException | GitAPIException e) {
+        } catch (GitAPIException | IOException e) {
             System.err.println("!ERROR: " + e.getMessage());
         }
         return JGitStatus.FAILED;
@@ -788,9 +782,7 @@ public class JGit {
         try {
             String currentBranch = git.getRepository().getFullBranch();
             String newBranch = Constants.R_HEADS + nameBranch;
-            if (currentBranch.equals(newBranch)) {
-                return true;
-            }
+            return currentBranch.equals(newBranch);
         } catch (IOException e) {
             System.err.println("!ERROR: " + e.getMessage());
         }

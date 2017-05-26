@@ -708,11 +708,14 @@ public class JGitTest {
         Repository repoMock = getRepo(NAME_BRANCH);
         Mockito.when(gitMock.getRepository()).thenReturn(repoMock);
         Assert.assertEquals(getJGitMock(gitMock).switchTo(getProject(true), NAME_BRANCH, false), JGitStatus.BRANCH_DOES_NOT_EXIST);
-        Assert.assertEquals(getJGitMock(gitMock).switchTo(getProject(true), NAME_BRANCH, true), JGitStatus.FAILED);
+        Assert.assertEquals(getJGitMock(gitMock).switchTo(getProject(true), NAME_BRANCH, true), JGitStatus.BRANCH_CURRENTLY_CHECKED_OUT);
 
         listCommandMock = getListCommandMock(refMock);
         Mockito.when(refMock.getName()).thenReturn(Constants.R_HEADS + NAME_BRANCH);
         Assert.assertEquals(getJGitMock(gitMock).switchTo(getProject(true), NAME_BRANCH, true), JGitStatus.BRANCH_ALREADY_EXISTS);
+
+        Mockito.when(refMock.getName()).thenReturn(Constants.R_HEADS + NAME_BRANCH + "2");
+        //Assert.assertEquals(getJGitMock(gitMock).switchTo(getProject(true), NAME_BRANCH, true), JGitStatus.BRANCH_ALREADY_EXISTS);
 
     }
 
