@@ -1,12 +1,24 @@
 package com.lgc.solutiontool.git.ui.javafx.controllers;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
+
 import com.lgc.solutiontool.git.entities.Group;
+import com.lgc.solutiontool.git.properties.ProgramProperties;
+import com.lgc.solutiontool.git.services.GroupsUserService;
+import com.lgc.solutiontool.git.services.ServiceProvider;
 import com.lgc.solutiontool.git.ui.ViewKey;
 import com.lgc.solutiontool.git.ui.icon.AppIconHolder;
 import com.lgc.solutiontool.git.ui.mainmenu.MainMenuItems;
 import com.lgc.solutiontool.git.ui.mainmenu.MainMenuManager;
 import com.lgc.solutiontool.git.ui.toolbar.ToolbarButtons;
 import com.lgc.solutiontool.git.ui.toolbar.ToolbarManager;
+
 import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -15,18 +27,22 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Button;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.SplitPane;
+import javafx.scene.control.ToolBar;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-
-import java.io.IOException;
-import java.net.URL;
 
 public class ModularController {
 
@@ -34,10 +50,16 @@ public class ModularController {
     private static final String ABOUT_POPUP_HEADER = "Solution tool for GitLab, powered by Luxoft";
     private static final String ABOUT_POPUP_CONTENT = "Contacts: Yurii Pitomets (yurii.pitomets2@halliburton.com)";
     private static final String SWITCH_BRANCH_TITLE = "Switch branch";
+    private static final String IMPORT_CHOOSER_TITLE = "Import Group";
+    private static final String IMPORT_DIALOG_TITLE = "Import Status Dialog";
+    private static final String SUCCESFUL_IMPORT_MESSAGE = "Import of group is Successful";
+    private static final String FAILED_IMPORT_MESSAGE = "Import of group is Failed";
 
     private static final String CSS_PATH = "css/style.css";
+    private static final Image _appIcon = AppIconHolder.getInstance().getAppIcoImage();
 
-    private MainWindowController mainWindowController;
+    private MainWindowController _mainWindowController;
+    private WelcomeWindowController _welcomeWindowController;
 
     @FXML
     public Pane consolePane;
@@ -59,6 +81,11 @@ public class ModularController {
         toolbar.getStylesheets().add(getClass().getClassLoader().getResource(CSS_PATH).toExternalForm());
     }
 
+    private final GroupsUserService _groupService = (GroupsUserService) ServiceProvider.getInstance()
+            .getService(GroupsUserService.class.getName());
+
+    private final ProgramProperties _programProperties = ProgramProperties.getInstance();
+
     public void loadWelcomeWindow() throws IOException {
         toolbar.getItems().addAll(ToolbarManager.getInstance().createToolbarItems(ViewKey.WELCOME_WINDOW.getKey()));
         menuBar.getMenus().addAll(MainMenuManager.getInstance().createToolbarItems(ViewKey.WELCOME_WINDOW.getKey()));
@@ -67,6 +94,7 @@ public class ModularController {
 
         FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource(ViewKey.WELCOME_WINDOW.getPath()));
         Node node = loader.load();
+        _welcomeWindowController = loader.getController();
 
         AnchorPane.setTopAnchor(node, 0.0);
         AnchorPane.setRightAnchor(node, 0.0);
@@ -88,9 +116,9 @@ public class ModularController {
         FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource(ViewKey.MAIN_WINDOW.getPath()));
         Node node = loader.load();
 
-        mainWindowController = loader.getController();
-        mainWindowController.setSelectedGroup(selectedGroup);
-        mainWindowController.beforeShowing();
+        _mainWindowController = loader.getController();
+        _mainWindowController.setSelectedGroup(selectedGroup);
+        _mainWindowController.beforeShowing();
 
         AnchorPane.setTopAnchor(node, 0.0);
         AnchorPane.setRightAnchor(node, 0.0);
@@ -103,9 +131,11 @@ public class ModularController {
 
     private void initActionsToolBar(String windowId) {
         if (windowId.equals(ViewKey.WELCOME_WINDOW.getKey())) {
-            //TODO: add actions for removing group, importing from disk etc.
+            ToolbarManager.getInstance().getButtonById(ToolbarButtons.IMPORT_GROUP_BUTTON.getId())
+                    .setOnAction(event -> importGroupDialog());
         } else if (windowId.equals(ViewKey.MAIN_WINDOW.getKey())) {
-            Button switchBranch = ToolbarManager.getInstance().getButtonById(ToolbarButtons.SWITCH_BRANCH_BUTTON.getId());
+            Button switchBranch = ToolbarManager.getInstance()
+                    .getButtonById(ToolbarButtons.SWITCH_BRANCH_BUTTON.getId());
             switchBranch.setOnAction(event -> showSwitchBranchWindow());
         }
     }
@@ -130,8 +160,8 @@ public class ModularController {
     private void showSwitchBranchWindow() {
         try {
             EventHandler<WindowEvent> confirmCloseEventHandler = event -> {
-                if (mainWindowController != null) {
-                    mainWindowController.refreshProjectsList();
+                if (_mainWindowController != null) {
+                    _mainWindowController.refreshProjectsList();
                 }
             };
 
@@ -147,7 +177,7 @@ public class ModularController {
             Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
             stage.setHeight(primaryScreenBounds.getMaxY() / 1.5);
             stage.setWidth(primaryScreenBounds.getMaxX() / 1.5);
-            stage.getIcons().add(AppIconHolder.getInstance().getAppIcoImage());
+            stage.getIcons().add(_appIcon);
             stage.setTitle(SWITCH_BRANCH_TITLE);
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.setOnHiding(confirmCloseEventHandler);
@@ -170,10 +200,74 @@ public class ModularController {
         alert.setHeaderText(ABOUT_POPUP_HEADER);
         alert.setContentText(ABOUT_POPUP_CONTENT);
 
-        Image appIcon = AppIconHolder.getInstance().getAppIcoImage();
         Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
-        stage.getIcons().add(appIcon);
+        stage.getIcons().add(_appIcon);
 
         alert.show();
+    }
+
+    private void importGroupDialog() {
+        if (viewPane != null) {
+            Stage stage = (Stage) viewPane.getScene().getWindow();
+            stage.getIcons().add(_appIcon);
+
+            DirectoryChooser chooser = new DirectoryChooser();
+            chooser.setTitle(IMPORT_CHOOSER_TITLE);
+            File selectedDirectory = chooser.showDialog(stage);
+            if (selectedDirectory == null) {
+                return;
+            }
+            new Thread(new ImportRunnable(selectedDirectory)).start();
+        }
+    }
+
+    /**
+     * Imports group from local disk to GitLab Tools workspace.
+     *
+     * @author Lyudmila Lyska
+     */
+    class ImportRunnable implements Runnable {
+
+        private final File _selectedDirectory;
+
+        public ImportRunnable(File selectedDirectory) {
+            _selectedDirectory = selectedDirectory;
+        }
+
+        @Override
+        public void run() {
+            Map<Optional<Group>, String> loadGroup = _groupService.importGroup(_selectedDirectory.getAbsolutePath());
+
+            for (Entry<Optional<Group>, String> mapGroup : loadGroup.entrySet()) {
+                Optional<Group> optGroup = mapGroup.getKey();
+                if (optGroup.isPresent()) {
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            _programProperties.updateClonedGroups(Arrays.asList(optGroup.get()));
+                            _welcomeWindowController.refreshGroupsList();
+                        }
+                    });
+                }
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        showStatusDialog(IMPORT_DIALOG_TITLE,
+                                optGroup.isPresent() ? SUCCESFUL_IMPORT_MESSAGE : FAILED_IMPORT_MESSAGE,
+                                mapGroup.getValue());
+                    }
+                });
+            }
+        }
+    }
+
+    private void showStatusDialog(String title, String header, String content) {
+        Alert alert = new Alert(AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(header);
+        alert.setContentText(content);
+        Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+        stage.getIcons().add(_appIcon);
+        alert.showAndWait();
     }
 }
