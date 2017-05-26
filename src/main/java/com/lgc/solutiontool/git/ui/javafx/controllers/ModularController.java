@@ -94,6 +94,7 @@ public class ModularController {
 
         FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource(ViewKey.WELCOME_WINDOW.getPath()));
         Node node = loader.load();
+        _welcomeWindowController = loader.getController();
 
         AnchorPane.setTopAnchor(node, 0.0);
         AnchorPane.setRightAnchor(node, 0.0);
@@ -207,45 +208,66 @@ public class ModularController {
 
     private void importGroupDialog() {
         if (viewPane != null) {
-            FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource(ViewKey.WELCOME_WINDOW.getPath()));
-            try {
-                loader.load();
-                _welcomeWindowController = loader.getController();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
             Stage stage = (Stage) viewPane.getScene().getWindow();
             Image appIcon = AppIconHolder.getInstance().getAppIcoImage();
             stage.getIcons().add(appIcon);
 
             DirectoryChooser chooser = new DirectoryChooser();
             chooser.setTitle(IMPORT_CHOOSER_TITLE);
-
             File selectedDirectory = chooser.showDialog(stage);
             if (selectedDirectory == null) {
                 return;
             }
-            Map<Optional<Group>, String> loadGroup = _groupService.importGroup(selectedDirectory.getAbsolutePath());
-            String headerMessage = "";
-            String contentMessage = "";
+            new Thread(new ImportRunnable(selectedDirectory)).start();
+        }
+    }
+
+    /**
+     *
+     *
+     * @author Lyudmila Lyska
+     */
+    class ImportRunnable implements Runnable {
+
+        private final File _selectedDirectory;
+
+        public ImportRunnable(File selectedDirectory) {
+            _selectedDirectory = selectedDirectory;
+        }
+
+        @Override
+        public void run() {
+            Map<Optional<Group>, String> loadGroup = _groupService.importGroup(_selectedDirectory.getAbsolutePath());
 
             for (Entry<Optional<Group>, String> mapGroup : loadGroup.entrySet()) {
                 Optional<Group> optGroup = mapGroup.getKey();
-                headerMessage = optGroup.isPresent() ? SUCCESFUL_IMPORT_MESSAGE : FAILED_IMPORT_MESSAGE;
-                contentMessage = mapGroup.getValue();
-
                 if (optGroup.isPresent()) {
-                    _programProperties.updateClonedGroups(Arrays.asList(optGroup.get()));
-                    _welcomeWindowController.refreshGroupsList();
+                    /*Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            // Update UI
+*/                            _programProperties.updateClonedGroups(Arrays.asList(optGroup.get()));
+                            _welcomeWindowController.refreshGroupsList();
+                        /*}
+                    });*/
                 }
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        showStatusDialog(IMPORT_DIALOG_TITLE,
+                                optGroup.isPresent() ? SUCCESFUL_IMPORT_MESSAGE : FAILED_IMPORT_MESSAGE,
+                                mapGroup.getValue());
+                    }
+                });
             }
-
-            Alert alert = new Alert(AlertType.INFORMATION);
-            alert.setTitle(IMPORT_DIALOG_TITLE);
-            alert.setHeaderText(headerMessage);
-            alert.setContentText(contentMessage);
-            alert.showAndWait();
         }
+    }
+
+    private void showStatusDialog(String title, String header, String content) {
+        Alert alert = new Alert(AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(header);
+        alert.setContentText(content);
+        alert.showAndWait();
     }
 }
