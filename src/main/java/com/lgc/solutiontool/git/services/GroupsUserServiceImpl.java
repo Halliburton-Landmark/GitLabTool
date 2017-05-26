@@ -121,7 +121,7 @@ public class GroupsUserServiceImpl implements GroupsUserService {
     }
 
     @Override
-    public Optional<Group> loadGroupFromLocalRepository(String groupPath) {
+    public Optional<Group> importGroup(String groupPath) {
         if (groupPath == null || groupPath.isEmpty()) {
             throw new IllegalArgumentException("ERROR: Incorrect data.");
         }
@@ -129,10 +129,10 @@ public class GroupsUserServiceImpl implements GroupsUserService {
         if (!PathUtilities.isExistsAndDirectory(path)) {
             return Optional.empty();
         }
-        return loadGroupFromLocalDisk(path);
+        return importGroup(path);
     }
 
-    private Optional<Group> loadGroupFromLocalDisk(Path groupPath) {
+    private Optional<Group> importGroup(Path groupPath) {
         Path nameGroup = groupPath.getName(groupPath.getNameCount()-1);
         Optional<Group> optFoundGroup = getGroupByName(nameGroup.toString());
         if (!optFoundGroup.isPresent()) {

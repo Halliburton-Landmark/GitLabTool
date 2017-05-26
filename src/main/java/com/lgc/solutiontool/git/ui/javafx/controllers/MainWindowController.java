@@ -1,15 +1,17 @@
 package com.lgc.solutiontool.git.ui.javafx.controllers;
 
 
+import java.util.List;
+
 import com.lgc.solutiontool.git.entities.Group;
 import com.lgc.solutiontool.git.entities.Project;
 import com.lgc.solutiontool.git.project.nature.projecttype.ProjectType;
 import com.lgc.solutiontool.git.services.LoginService;
-import com.lgc.solutiontool.git.services.ProjectTypeService;
 import com.lgc.solutiontool.git.services.ServiceProvider;
 import com.lgc.solutiontool.git.ui.selection.ListViewKey;
 import com.lgc.solutiontool.git.ui.selection.SelectionsProvider;
 import com.lgc.solutiontool.git.ui.toolbar.ToolbarManager;
+
 import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -24,18 +26,13 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 
-import java.util.List;
-
 public class MainWindowController {
     private static final String HEDER_GROUP_TITLE = "Current group: ";
 
     private Group _selectedGroup;
 
-    private LoginService _loginService =
+    private final LoginService _loginService =
             (LoginService) ServiceProvider.getInstance().getService(LoginService.class.getName());
-
-    private ProjectTypeService _projectTypeService =
-            (ProjectTypeService) ServiceProvider.getInstance().getService(ProjectTypeService.class.getName());
 
     @FXML
     private ListView projectsList;

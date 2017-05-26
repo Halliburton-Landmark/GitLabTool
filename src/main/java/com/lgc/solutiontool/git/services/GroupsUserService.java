@@ -59,12 +59,12 @@ public interface GroupsUserService {
     Group getGroupById(int idGroup);
 
     /**
-     * Loads a group from the local repository. Gets all data about a group from the GitLab.
+     * Imports a group from the local repository. Gets all data about a group from the GitLab.
      * Also, updates statuses, types and local paths of cloned projects.
      *
      * @param  groupPath path to cloned group
      * @throws IllegalArgumentException if data is incorrect
      * @return Optional of loaded group or Optional.empty() is group not found.
      */
-    Optional<Group> loadGroupFromLocalRepository(String groupPath);
+    Optional<Group> importGroup(String groupPath);
 }
