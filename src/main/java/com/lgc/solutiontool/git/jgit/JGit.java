@@ -26,11 +26,9 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.dircache.DirCache;
 import org.eclipse.jgit.dircache.DirCacheCheckout;
-import org.eclipse.jgit.errors.AmbiguousObjectException;
-import org.eclipse.jgit.errors.IncorrectObjectTypeException;
-import org.eclipse.jgit.errors.MissingObjectException;
+import org.eclipse.jgit.errors.CorruptObjectException;
+import org.eclipse.jgit.errors.NoWorkTreeException;
 import org.eclipse.jgit.errors.RevisionSyntaxException;
-import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectReader;
@@ -664,7 +662,7 @@ public class JGit {
     }
 
     // Check if we will have conflicts after the pull command
-    protected boolean isContinueMakePull(Project project) {
+    boolean isContinueMakePull(Project project) {
         Optional<Git> optGit = getGitForRepository(project.getPathToClonedProject());
         if (!optGit.isPresent()) {
             return false;
@@ -744,7 +742,11 @@ public class JGit {
         return branches;
     }
 
-    protected boolean isConflictsBetweenTwoBranches(Repository repo, String firstBranch, String secondBranch) {
+    RevWalk getRevWalk(Repository repo) {
+        return new RevWalk(repo);
+    }
+
+    boolean isConflictsBetweenTwoBranches(Repository repo, String firstBranch, String secondBranch) {
         try {
             Ref firstRef = repo.exactRef(firstBranch);
             Ref secondRef = repo.exactRef(secondBranch);
@@ -752,32 +754,34 @@ public class JGit {
                 return false;
             }
 
-            RevWalk revWalk = new RevWalk(repo);
-            AnyObjectId headId = firstRef.getObjectId();
-
-            RevCommit firstRefCommit = revWalk.parseCommit(headId);
-            RevCommit secondRefCommit = revWalk.parseCommit(secondRef.getObjectId());
-            revWalk.close();
-
+            RevWalk revWalk = getRevWalk(repo);
+            RevCommit firstRefCommit = null;
+            RevCommit secondRefCommit = null;
+            try {
+                firstRefCommit = revWalk.parseCommit(firstRef.getObjectId());
+                secondRefCommit = revWalk.parseCommit(secondRef.getObjectId());
+                revWalk.close();
+            } catch (Exception e) {
+                return false;
+            }
             if (firstRefCommit == null || secondRefCommit == null) {
                 return false;
             }
-
-            RevTree headTree = firstRefCommit.getTree();
-            DirCache dirCache = repo.lockDirCache();
-
-            DirCacheCheckout dirCacheCheck = new DirCacheCheckout(repo, headTree, dirCache, secondRefCommit.getTree());
-            dirCacheCheck.setFailOnConflict(true);
-            dirCacheCheck.checkout();
-            dirCache.unlock();
-            return false;
-        } catch (RevisionSyntaxException | IncorrectObjectTypeException | AmbiguousObjectException
-                | MissingObjectException e) {
-            System.err.println("!ERROR: " + e.getMessage());
-        } catch (IOException e) {
+            return checkDirCacheCheck(repo, firstRefCommit.getTree(), secondRefCommit.getTree());
+        } catch (IOException | RevisionSyntaxException e) {
             System.err.println("!ERROR: " + e.getMessage());
         }
         return true;
+    }
+
+    boolean checkDirCacheCheck(Repository repo, RevTree firstTree, RevTree secondTree)
+            throws NoWorkTreeException, CorruptObjectException, IOException {
+        DirCache dirCache = repo.lockDirCache();
+        DirCacheCheckout dirCacheCheck = new DirCacheCheckout(repo, firstTree, dirCache, secondTree);
+        dirCacheCheck.setFailOnConflict(true);
+        dirCacheCheck.checkout();
+        dirCache.unlock();
+        return false;
     }
 
     private boolean isCurrentBranch(Git git, String nameBranch) {
