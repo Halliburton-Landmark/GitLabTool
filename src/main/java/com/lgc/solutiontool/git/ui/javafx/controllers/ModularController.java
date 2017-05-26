@@ -56,6 +56,7 @@ public class ModularController {
     private static final String FAILED_IMPORT_MESSAGE = "Import of group is Failed";
 
     private static final String CSS_PATH = "css/style.css";
+    private static final Image _appIcon = AppIconHolder.getInstance().getAppIcoImage();
 
     private MainWindowController _mainWindowController;
     private WelcomeWindowController _welcomeWindowController;
@@ -176,7 +177,7 @@ public class ModularController {
             Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
             stage.setHeight(primaryScreenBounds.getMaxY() / 1.5);
             stage.setWidth(primaryScreenBounds.getMaxX() / 1.5);
-            stage.getIcons().add(AppIconHolder.getInstance().getAppIcoImage());
+            stage.getIcons().add(_appIcon);
             stage.setTitle(SWITCH_BRANCH_TITLE);
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.setOnHiding(confirmCloseEventHandler);
@@ -199,9 +200,8 @@ public class ModularController {
         alert.setHeaderText(ABOUT_POPUP_HEADER);
         alert.setContentText(ABOUT_POPUP_CONTENT);
 
-        Image appIcon = AppIconHolder.getInstance().getAppIcoImage();
         Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
-        stage.getIcons().add(appIcon);
+        stage.getIcons().add(_appIcon);
 
         alert.show();
     }
@@ -209,8 +209,7 @@ public class ModularController {
     private void importGroupDialog() {
         if (viewPane != null) {
             Stage stage = (Stage) viewPane.getScene().getWindow();
-            Image appIcon = AppIconHolder.getInstance().getAppIcoImage();
-            stage.getIcons().add(appIcon);
+            stage.getIcons().add(_appIcon);
 
             DirectoryChooser chooser = new DirectoryChooser();
             chooser.setTitle(IMPORT_CHOOSER_TITLE);
@@ -262,11 +261,13 @@ public class ModularController {
         }
     }
 
-        private void showStatusDialog(String title, String header, String content) {
-            Alert alert = new Alert(AlertType.INFORMATION);
-            alert.setTitle(title);
-            alert.setHeaderText(header);
-            alert.setContentText(content);
-            alert.showAndWait();
-        }
+    private void showStatusDialog(String title, String header, String content) {
+        Alert alert = new Alert(AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(header);
+        alert.setContentText(content);
+        Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+        stage.getIcons().add(_appIcon);
+        alert.showAndWait();
+    }
 }
