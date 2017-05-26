@@ -223,7 +223,7 @@ public class ModularController {
     }
 
     /**
-     *
+     * Imports group from local disk to GitLab Tools workspace.
      *
      * @author Lyudmila Lyska
      */
