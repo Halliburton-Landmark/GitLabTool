@@ -89,7 +89,7 @@ class LoginDialog extends Dialog<DialogDTO> {
         setResultConverter(dialogButton -> {
             String serverURL = URLManager.completeServerURL(comboBox.getValue());
             return dialogButton == loginButtonType
-                    ? new DialogDTO("LyskaL", "2569_LyudA1", serverURL)
+                    ? new DialogDTO(userTextField.getText(), pwBox.getText(), serverURL)
                     : null;
         });
     }

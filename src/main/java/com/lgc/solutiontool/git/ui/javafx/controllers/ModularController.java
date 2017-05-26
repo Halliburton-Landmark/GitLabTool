@@ -80,11 +80,10 @@ public class ModularController {
         toolbar.getStylesheets().add(getClass().getClassLoader().getResource(CSS_PATH).toExternalForm());
     }
 
-    private final GroupsUserService _groupService =
-            (GroupsUserService) ServiceProvider.getInstance().getService(GroupsUserService.class.getName());
+    private final GroupsUserService _groupService = (GroupsUserService) ServiceProvider.getInstance()
+            .getService(GroupsUserService.class.getName());
 
     private final ProgramProperties _programProperties = ProgramProperties.getInstance();
-
 
     public void loadWelcomeWindow() throws IOException {
         toolbar.getItems().addAll(ToolbarManager.getInstance().createToolbarItems(ViewKey.WELCOME_WINDOW.getKey()));
@@ -134,7 +133,8 @@ public class ModularController {
             ToolbarManager.getInstance().getButtonById(ToolbarButtons.IMPORT_GROUP_BUTTON.getId())
                     .setOnAction(event -> importGroupDialog());
         } else if (windowId.equals(ViewKey.MAIN_WINDOW.getKey())) {
-            Button switchBranch = ToolbarManager.getInstance().getButtonById(ToolbarButtons.SWITCH_BRANCH_BUTTON.getId());
+            Button switchBranch = ToolbarManager.getInstance()
+                    .getButtonById(ToolbarButtons.SWITCH_BRANCH_BUTTON.getId());
             switchBranch.setOnAction(event -> showSwitchBranchWindow());
         }
     }
@@ -242,14 +242,13 @@ public class ModularController {
             for (Entry<Optional<Group>, String> mapGroup : loadGroup.entrySet()) {
                 Optional<Group> optGroup = mapGroup.getKey();
                 if (optGroup.isPresent()) {
-                    /*Platform.runLater(new Runnable() {
+                    Platform.runLater(new Runnable() {
                         @Override
                         public void run() {
-                            // Update UI
-*/                            _programProperties.updateClonedGroups(Arrays.asList(optGroup.get()));
+                            _programProperties.updateClonedGroups(Arrays.asList(optGroup.get()));
                             _welcomeWindowController.refreshGroupsList();
-                        /*}
-                    });*/
+                        }
+                    });
                 }
                 Platform.runLater(new Runnable() {
                     @Override
@@ -263,11 +262,11 @@ public class ModularController {
         }
     }
 
-    private void showStatusDialog(String title, String header, String content) {
-        Alert alert = new Alert(AlertType.INFORMATION);
-        alert.setTitle(title);
-        alert.setHeaderText(header);
-        alert.setContentText(content);
-        alert.showAndWait();
-    }
+        private void showStatusDialog(String title, String header, String content) {
+            Alert alert = new Alert(AlertType.INFORMATION);
+            alert.setTitle(title);
+            alert.setHeaderText(header);
+            alert.setContentText(content);
+            alert.showAndWait();
+        }
 }

@@ -1,5 +1,6 @@
 package com.lgc.solutiontool.git.services;
 
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -203,7 +204,7 @@ public class GroupsUserServiceImpl implements GroupsUserService {
 
     private void updateProjectStatus(Project project, String pathGroup) {
         project.setClonedStatus(true);
-        project.setPathToClonedProject(pathGroup + project.getName());
+        project.setPathToClonedProject(pathGroup + File.separator + project.getName());
         ProjectTypeService typeService = (ProjectTypeService) ServiceProvider.getInstance().
                 getService(ProjectTypeService.class.getName());
         project.setProjectType(typeService.getProjectType(project));
