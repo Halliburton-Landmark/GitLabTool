@@ -18,6 +18,7 @@ import com.lgc.solutiontool.git.ui.toolbar.ToolbarButtons;
 import com.lgc.solutiontool.git.ui.toolbar.ToolbarManager;
 
 import javafx.application.Platform;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Rectangle2D;
@@ -39,6 +40,7 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 public class ModularController {
 
@@ -52,6 +54,8 @@ public class ModularController {
     private static final String FAILED_IMPORT_MESSAGE = "Import of group is Failed";
 
     private static final String CSS_PATH = "css/style.css";
+
+    private MainWindowController mainWindowController;
 
     @FXML
     public Pane consolePane;
@@ -108,9 +112,9 @@ public class ModularController {
         FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource(ViewKey.MAIN_WINDOW.getPath()));
         Node node = loader.load();
 
-        MainWindowController controller = loader.getController();
-        controller.setSelectedGroup(selectedGroup);
-        controller.beforeShowing();
+        mainWindowController = loader.getController();
+        mainWindowController.setSelectedGroup(selectedGroup);
+        mainWindowController.beforeShowing();
 
         AnchorPane.setTopAnchor(node, 0.0);
         AnchorPane.setRightAnchor(node, 0.0);
@@ -150,10 +154,15 @@ public class ModularController {
 
     private void showSwitchBranchWindow() {
         try {
+            EventHandler<WindowEvent> confirmCloseEventHandler = event -> {
+                if (mainWindowController != null) {
+                    mainWindowController.refreshProjectsList();
+                }
+            };
 
             URL switchBranchWindowUrl = getClass().getClassLoader().getResource(ViewKey.SWITCH_BRANCH_WINDOW.getPath());
             FXMLLoader loader = new FXMLLoader(switchBranchWindowUrl);
-            Parent root = loader.load();;
+            Parent root = loader.load();
 
             SwitchBranchWindowController controller = loader.getController();
 
@@ -166,6 +175,7 @@ public class ModularController {
             stage.getIcons().add(AppIconHolder.getInstance().getAppIcoImage());
             stage.setTitle(SWITCH_BRANCH_TITLE);
             stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setOnHiding(confirmCloseEventHandler);
             stage.show();
         } catch (IOException e) {
             System.out.println("Could not load fxml resource: IOException");
