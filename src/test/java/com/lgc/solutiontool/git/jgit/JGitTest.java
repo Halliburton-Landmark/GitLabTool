@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.jgit.api.AddCommand;
+import org.eclipse.jgit.api.CheckoutCommand;
 import org.eclipse.jgit.api.CommitCommand;
 import org.eclipse.jgit.api.CreateBranchCommand;
 import org.eclipse.jgit.api.DeleteBranchCommand;
@@ -25,6 +26,7 @@ import org.eclipse.jgit.api.StatusCommand;
 import org.eclipse.jgit.api.errors.AbortedByHookException;
 import org.eclipse.jgit.api.errors.CanceledException;
 import org.eclipse.jgit.api.errors.CannotDeleteCurrentBranchException;
+import org.eclipse.jgit.api.errors.CheckoutConflictException;
 import org.eclipse.jgit.api.errors.ConcurrentRefUpdateException;
 import org.eclipse.jgit.api.errors.DetachedHeadException;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -714,9 +716,74 @@ public class JGitTest {
         Mockito.when(refMock.getName()).thenReturn(Constants.R_HEADS + NAME_BRANCH);
         Assert.assertEquals(getJGitMock(gitMock).switchTo(getProject(true), NAME_BRANCH, true), JGitStatus.BRANCH_ALREADY_EXISTS);
 
-        Mockito.when(refMock.getName()).thenReturn(Constants.R_HEADS + NAME_BRANCH + "2");
-        //Assert.assertEquals(getJGitMock(gitMock).switchTo(getProject(true), NAME_BRANCH, true), JGitStatus.BRANCH_ALREADY_EXISTS);
+        Mockito.when(refMock.getName()).thenReturn(Constants.R_HEADS + NAME_BRANCH);
 
+        JGit git = new JGit() {
+            @Override
+            protected Optional<Git> getGitForRepository(String path) {
+                return Optional.of(gitMock);
+            }
+            @Override
+            protected boolean isConflictsBetweenTwoBranches(Repository repo, String firstBranch, String secondBranch) {
+                return true;
+            }
+        };
+        Assert.assertEquals(git.switchTo(getProject(true), NAME_BRANCH+"2", true), JGitStatus.CONFLICTS);
+
+        git = new JGit() {
+            @Override
+            protected Optional<Git> getGitForRepository(String path) {
+                return Optional.of(gitMock);
+            }
+            @Override
+            protected boolean isConflictsBetweenTwoBranches(Repository repo, String firstBranch, String secondBranch) {
+                return false;
+            }
+        };
+
+        CheckoutCommand checkoutCommandMock = new CheckoutCommand(getRepository()) {
+            @Override
+            public Ref call() throws GitAPIException, RefAlreadyExistsException, RefNotFoundException,
+                    InvalidRefNameException, CheckoutConflictException {
+                throw getGitAPIException();
+            }
+        };
+        Mockito.when(gitMock.checkout()).thenReturn(checkoutCommandMock);
+        Assert.assertEquals(git.switchTo(getProject(true), NAME_BRANCH+"2", true), JGitStatus.FAILED);
+    }
+
+    @Test
+    public void switchToCorrectDataTest() {
+        Git gitMock = getGitMock();
+        JGit git = new JGit() {
+            @Override
+            protected Optional<Git> getGitForRepository(String path) {
+                return Optional.of(gitMock);
+            }
+            @Override
+            protected boolean isConflictsBetweenTwoBranches(Repository repo, String firstBranch, String secondBranch) {
+                return false;
+            }
+        };
+        Repository repoMock = getRepo(NAME_BRANCH);
+        Mockito.when(gitMock.getRepository()).thenReturn(repoMock);
+
+        Ref refMock = mock(Ref.class);
+        Mockito.when(refMock.getName()).thenReturn(Constants.R_HEADS + NAME_BRANCH);
+        Mockito.when(refMock.toString()).thenReturn(Constants.R_HEADS);
+
+        ListBranchCommand listCommandMock = getListCommandMock(refMock);
+        Mockito.when(gitMock.branchList()).thenReturn(listCommandMock);
+
+        CheckoutCommand checkoutCommandMock = new CheckoutCommand(getRepository()) {
+            @Override
+            public Ref call() throws GitAPIException, RefAlreadyExistsException, RefNotFoundException,
+                    InvalidRefNameException, CheckoutConflictException {
+                return refMock;
+            }
+        };
+        Mockito.when(gitMock.checkout()).thenReturn(checkoutCommandMock);
+        Assert.assertEquals(git.switchTo(getProject(true), NAME_BRANCH+"2", true), JGitStatus.SUCCESSFUL);
     }
 
 

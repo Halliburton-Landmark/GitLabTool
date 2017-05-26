@@ -487,7 +487,9 @@ public class JGit {
                 return JGitStatus.CONFLICTS;
             }
             Ref ref = git.checkout().setName(nameBranchWithoutAlias)
-                    .setStartPoint(ORIGIN_PREFIX + nameBranchWithoutAlias).setCreateBranch(isRemoteBranch).call();
+                                    .setStartPoint(ORIGIN_PREFIX + nameBranchWithoutAlias)
+                                    .setCreateBranch(isRemoteBranch)
+                                    .call();
             System.out.println("!Switch to branch: " + ref.getName());
             return JGitStatus.SUCCESSFUL;
         } catch (GitAPIException | IOException e) {
@@ -742,7 +744,7 @@ public class JGit {
         return branches;
     }
 
-    private boolean isConflictsBetweenTwoBranches(Repository repo, String firstBranch, String secondBranch) {
+    protected boolean isConflictsBetweenTwoBranches(Repository repo, String firstBranch, String secondBranch) {
         try {
             Ref firstRef = repo.exactRef(firstBranch);
             Ref secondRef = repo.exactRef(secondBranch);
