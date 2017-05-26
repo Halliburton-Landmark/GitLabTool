@@ -19,7 +19,7 @@ public class PathUtilities {
     /**
      * Checks path is exist and it is directory.
      *
-     * @param path on disk for verification
+     * @param path path on disk
      * @return <true> - it exist and directory, otherwise - <false>.
      */
     public static boolean isExistsAndDirectory(Path path) {
@@ -29,7 +29,7 @@ public class PathUtilities {
     /**
      * Checks path is exist and it is regular file.
      *
-     * @param path on disk for verification
+     * @param path path on disk
      * @return <true> - it exist and regular file, otherwise - <false>.
      */
     public static boolean isExistsAndRegularFile(Path path) {
@@ -39,7 +39,7 @@ public class PathUtilities {
     /**
      * Gets all folders from directory
      *
-     * @param  path of directory to retrieve folders
+     * @param  path path on disk
      * @return names of found folders
      */
     public static Collection<String> getFolders(Path path) {
