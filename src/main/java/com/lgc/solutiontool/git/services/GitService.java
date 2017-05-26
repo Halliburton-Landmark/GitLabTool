@@ -5,6 +5,11 @@ import com.lgc.solutiontool.git.entities.Project;
 
 import java.util.List;
 
+/**
+ * Service for working with Git features.
+ *
+ * @author Pavlo Pidhorniy
+ */
 public interface GitService {
 
     /**
