@@ -2,6 +2,9 @@ package com.lgc.solutiontool.git.ui.javafx.controllers;
 
 
 import java.util.List;
+import java.util.Optional;
+
+import org.apache.commons.lang.StringUtils;
 
 import com.lgc.solutiontool.git.entities.Group;
 import com.lgc.solutiontool.git.entities.Project;
@@ -19,21 +22,18 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.control.*;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.control.SelectionMode;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
-import org.apache.commons.lang.StringUtils;
 
-<<<<<<< HEAD
-=======
-import java.util.List;
-import java.util.Optional;
-
->>>>>>> refs/remotes/origin/master
 public class MainWindowController {
     private static final String HEDER_GROUP_TITLE = "Current group: ";
 

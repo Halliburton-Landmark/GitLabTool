@@ -121,31 +121,42 @@ public class GroupsUserServiceImpl implements GroupsUserService {
     }
 
     @Override
-    public Optional<Group> importGroup(String groupPath) {
+    public Map<Optional<Group>, String> importGroup(String groupPath) {
         if (groupPath == null || groupPath.isEmpty()) {
             throw new IllegalArgumentException("ERROR: Incorrect data.");
         }
         Path path = Paths.get(groupPath);
         if (!PathUtilities.isExistsAndDirectory(path)) {
-            return Optional.empty();
+            Map<Optional<Group>, String> result = new HashMap<>();
+            result.put(Optional.empty(), "The transmitted path does not exist or is not a directory.");
+            return result;
         }
         return importGroup(path);
     }
 
-    private Optional<Group> importGroup(Path groupPath) {
-        Path nameGroup = groupPath.getName(groupPath.getNameCount()-1);
-        Optional<Group> optFoundGroup = getGroupByName(nameGroup.toString());
+    private Map<Optional<Group>, String> importGroup(Path groupPath) {
+
+        Map<Optional<Group>, String> result = new HashMap<>();
+        String nameGroup = groupPath.getName(groupPath.getNameCount()-1).toString();
+        if (checkGroupIsLoaded(groupPath.toAbsolutePath().toString())) {
+            result.put(Optional.empty(), "The group with this path is already loaded.");
+            return result;
+        }
+        Optional<Group> optFoundGroup = getGroupByName(nameGroup);
         if (!optFoundGroup.isPresent()) {
-            return Optional.empty();
+            result.put(Optional.empty(), "This group does not exist.");
+            return result;
         }
         Group foundGroup = getGroupById(optFoundGroup.get().getId());
         if (foundGroup == null) {
-            return Optional.empty();
+            result.put(Optional.empty(), "Error getting group from GitLab.");
+            return result;
         }
         foundGroup.setPathToClonedGroup(groupPath.toString());
         foundGroup.setClonedStatus(true);
 
-        return updateProjectsInGroup(foundGroup.getProjects(), groupPath)? Optional.of(foundGroup) : Optional.empty();
+
+        return updateProjectsInGroup(foundGroup, groupPath);
     }
 
     private Optional<Group> getGroupByName(String nameGroup) {
@@ -160,18 +171,28 @@ public class GroupsUserServiceImpl implements GroupsUserService {
         return groups.stream().filter(group -> group.getName().equals(nameGroup)).findFirst();
     }
 
-    private boolean updateProjectsInGroup(Collection<Project> projects, Path localPathGroup) {
+    private Optional<Group> findGroupByPath(Collection<Group> groups, String groupPath) {
+        return groups.stream().filter(group -> group.getPathToClonedGroup().equals(groupPath)).findFirst();
+    }
+
+    private Map<Optional<Group>, String> updateProjectsInGroup(Group group, Path localPathGroup) {
+        Map<Optional<Group>, String> result = new HashMap<>();
+        Collection<Project> projects = group.getProjects();
         if (projects == null || projects.isEmpty()) {
-            return false;
+            result.put(Optional.empty(), "The group has no projects.");
+            return result;
         }
         Collection<String> projectsName = PathUtilities.getFolders(localPathGroup);
+        String subMessage = " uploaded.";
         if (projectsName.isEmpty()) {
-            return false;
+            result.put(Optional.of(group), group.getName() + subMessage );
+            return result;
         }
         projects.stream()
                 .filter(project -> projectsName.contains(project.getName()))
                 .forEach((project) -> updateProjectStatus(project, localPathGroup.toString()));
-        return true;
+        result.put(Optional.of(group), group.getName() + subMessage );
+        return result;
     }
 
     private void updateProjectStatus(Project project, String pathGroup) {
@@ -180,6 +201,12 @@ public class GroupsUserServiceImpl implements GroupsUserService {
         ProjectTypeService typeService = (ProjectTypeService) ServiceProvider.getInstance().
                 getService(ProjectTypeService.class.getName());
         project.setProjectType(typeService.getProjectType(project));
+    }
+
+    private boolean checkGroupIsLoaded(String localPathGroup) {
+        List<Group> loadedGroups = ProgramProperties.getInstance().loadClonedGroups();
+        Optional<Group> foundGroup = findGroupByPath(loadedGroups, localPathGroup);
+        return foundGroup.isPresent();
     }
 
 }

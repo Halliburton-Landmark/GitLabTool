@@ -64,7 +64,7 @@ public interface GroupsUserService {
      *
      * @param  groupPath path to cloned group
      * @throws IllegalArgumentException if data is incorrect
-     * @return Optional of loaded group or Optional.empty() is group not found.
+     * @return Optional of loaded group or Optional.empty() and a error message.
      */
-    Optional<Group> importGroup(String groupPath);
+    Map<Optional<Group>, String> importGroup(String groupPath);
 }

@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 
 import com.lgc.solutiontool.git.entities.Group;
@@ -55,7 +57,8 @@ public class ModularController {
 
     private static final String CSS_PATH = "css/style.css";
 
-    private MainWindowController mainWindowController;
+    private MainWindowController _mainWindowController;
+    private WelcomeWindowController _welcomeWindowController;
 
     @FXML
     public Pane consolePane;
@@ -112,9 +115,9 @@ public class ModularController {
         FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource(ViewKey.MAIN_WINDOW.getPath()));
         Node node = loader.load();
 
-        mainWindowController = loader.getController();
-        mainWindowController.setSelectedGroup(selectedGroup);
-        mainWindowController.beforeShowing();
+        _mainWindowController = loader.getController();
+        _mainWindowController.setSelectedGroup(selectedGroup);
+        _mainWindowController.beforeShowing();
 
         AnchorPane.setTopAnchor(node, 0.0);
         AnchorPane.setRightAnchor(node, 0.0);
@@ -155,8 +158,8 @@ public class ModularController {
     private void showSwitchBranchWindow() {
         try {
             EventHandler<WindowEvent> confirmCloseEventHandler = event -> {
-                if (mainWindowController != null) {
-                    mainWindowController.refreshProjectsList();
+                if (_mainWindowController != null) {
+                    _mainWindowController.refreshProjectsList();
                 }
             };
 
@@ -204,6 +207,14 @@ public class ModularController {
 
     private void importGroupDialog() {
         if (viewPane != null) {
+            FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource(ViewKey.WELCOME_WINDOW.getPath()));
+            try {
+                loader.load();
+                _welcomeWindowController = loader.getController();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
             Stage stage = (Stage) viewPane.getScene().getWindow();
             Image appIcon = AppIconHolder.getInstance().getAppIcoImage();
             stage.getIcons().add(appIcon);
@@ -215,18 +226,26 @@ public class ModularController {
             if (selectedDirectory == null) {
                 return;
             }
-            Optional<Group> loadGroup = _groupService.importGroup(selectedDirectory.getAbsolutePath());
-            String dialogMessage = loadGroup.isPresent() ? SUCCESFUL_IMPORT_MESSAGE : FAILED_IMPORT_MESSAGE;
+            Map<Optional<Group>, String> loadGroup = _groupService.importGroup(selectedDirectory.getAbsolutePath());
+            String headerMessage = "";
+            String contentMessage = "";
 
-            if (loadGroup.isPresent()) {
-                _programProperties.updateClonedGroups(Arrays.asList(loadGroup.get()));
+            for (Entry<Optional<Group>, String> mapGroup : loadGroup.entrySet()) {
+                Optional<Group> optGroup = mapGroup.getKey();
+                headerMessage = optGroup.isPresent() ? SUCCESFUL_IMPORT_MESSAGE : FAILED_IMPORT_MESSAGE;
+                contentMessage = mapGroup.getValue();
+
+                if (optGroup.isPresent()) {
+                    _programProperties.updateClonedGroups(Arrays.asList(optGroup.get()));
+                    _welcomeWindowController.refreshGroupsList();
+                }
             }
 
-            Alert alert = new Alert(AlertType.NONE);
+            Alert alert = new Alert(AlertType.INFORMATION);
             alert.setTitle(IMPORT_DIALOG_TITLE);
-            alert.setHeaderText(dialogMessage);
+            alert.setHeaderText(headerMessage);
+            alert.setContentText(contentMessage);
             alert.showAndWait();
-
         }
     }
 }
