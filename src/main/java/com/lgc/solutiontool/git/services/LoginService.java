@@ -7,7 +7,7 @@ import com.lgc.solutiontool.git.ui.javafx.dto.DialogDTO;
 
 public interface LoginService {
 
-    Object login(DialogDTO dialogDTO, Consumer<Integer> handler);
+    void login(DialogDTO dialogDTO, Consumer<Integer> onSuccess);
 
     User getCurrentUser();
 

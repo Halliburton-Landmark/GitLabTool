@@ -23,7 +23,7 @@ public class LoginServiceImpl implements LoginService {
     }
 
     @Override
-    public Object login(DialogDTO dto, Consumer<Integer> handler) {
+    public void login(DialogDTO dto, Consumer<Integer> onSuccess) {
         Runnable runnable = () -> {
             HashMap<String, String> params = new HashMap<>();
             params.put("login", dto.getLogin());
@@ -31,9 +31,9 @@ public class LoginServiceImpl implements LoginService {
             getConnector().setUrlMainPart(dto.getServerURL());
             Object userJson = getConnector().sendPost("/session", params, null);
             if (userJson == null) {
-                handler.accept(HttpStatus.SC_UNAUTHORIZED);
+                onSuccess.accept(HttpStatus.SC_UNAUTHORIZED);
             } else {
-                handler.accept(HttpStatus.SC_OK);
+                onSuccess.accept(HttpStatus.SC_OK);
             }
 
             _currentUser = CurrentUser.getInstance();
@@ -42,14 +42,6 @@ public class LoginServiceImpl implements LoginService {
         };
         Thread loginThread = new Thread(runnable);
         loginThread.start();
-        
-        try {
-            while (loginThread.isAlive()) {
-                Thread.sleep(100);
-            }
-        } catch (InterruptedException e1) {}
-        
-        return _currentUser.getCurrentUser();
     }
 
     @Override

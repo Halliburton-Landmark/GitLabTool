@@ -116,16 +116,6 @@ class LoginDialog extends Dialog<DialogDTO> {
 
         getDialogPane().setContent(grid);
         initializeOnCloseEvent();
-        /*setResultConverter(dialogButton -> {
-            String serverURL = URLManager.completeServerURL(comboBox.getValue());
-            if (dialogButton == loginButtonType) {
-                _loginService.login(serverURL, userTextField.getText(), pwBox.getText());
-            }
-            return null;
-            return dialogButton == loginButtonType 
-                    ? new DialogDTO(userTextField.getText(), pwBox.getText(), serverURL)
-                    : null;
-        });*/
     }
 
     private ObservableList<String> getBoxOptions() {
