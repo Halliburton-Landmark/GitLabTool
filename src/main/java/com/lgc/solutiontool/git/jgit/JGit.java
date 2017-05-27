@@ -1,53 +1,35 @@
 package com.lgc.solutiontool.git.jgit;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-
-import org.eclipse.jgit.api.CreateBranchCommand;
+import com.lgc.solutiontool.git.connections.token.CurrentUser;
+import com.lgc.solutiontool.git.entities.Branch;
+import com.lgc.solutiontool.git.entities.Group;
+import com.lgc.solutiontool.git.entities.Project;
+import com.lgc.solutiontool.git.entities.User;
+import com.lgc.solutiontool.git.util.FeedbackUtil;
+import org.apache.commons.lang.StringUtils;
+import org.eclipse.jgit.api.*;
 import org.eclipse.jgit.api.CreateBranchCommand.SetupUpstreamMode;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.ListBranchCommand;
 import org.eclipse.jgit.api.ListBranchCommand.ListMode;
-import org.eclipse.jgit.api.MergeResult;
-import org.eclipse.jgit.api.PullResult;
-import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.dircache.DirCache;
 import org.eclipse.jgit.dircache.DirCacheCheckout;
-import org.eclipse.jgit.errors.AmbiguousObjectException;
-import org.eclipse.jgit.errors.IncorrectObjectTypeException;
-import org.eclipse.jgit.errors.MissingObjectException;
-import org.eclipse.jgit.errors.NoWorkTreeException;
-import org.eclipse.jgit.errors.RevisionSyntaxException;
-import org.eclipse.jgit.lib.AnyObjectId;
-import org.eclipse.jgit.lib.Constants;
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.ObjectReader;
-import org.eclipse.jgit.lib.PersonIdent;
-import org.eclipse.jgit.lib.Ref;
-import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.errors.*;
+import org.eclipse.jgit.lib.*;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 
-import com.lgc.solutiontool.git.connections.token.CurrentUser;
-import com.lgc.solutiontool.git.entities.Group;
-import com.lgc.solutiontool.git.entities.Project;
-import com.lgc.solutiontool.git.entities.User;
-import com.lgc.solutiontool.git.util.FeedbackUtil;
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+
 
 /**
  * Class for work with Git:
@@ -61,6 +43,8 @@ import com.lgc.solutiontool.git.util.FeedbackUtil;
 public class JGit {
     private static final JGit _jgit;
     private final String ERROR_MSG_NOT_CLONED = " project is not cloned. The operation is impossible";
+    private static final String ORIGIN_PREFIX = "origin/";
+
     static {
         _jgit = new JGit();
     }
@@ -81,7 +65,7 @@ public class JGit {
      * @param brType  type branch
      * @return a list of branches
      */
-    public List<String> getBranches(Project project, BranchType brType) {
+    public List<Branch> getBranches(Project project, BranchType brType) {
         if (project == null || brType == null) {
             throw new IllegalArgumentException("Wrong parameters for obtaining branches.");
         }
@@ -97,18 +81,18 @@ public class JGit {
      * @param onlyCommon if value is <true> return only common branches of projects, if <false> return all branches.
      * @return a list of branches
      */
-    public Set<String> getBranches(List<Project> projects, BranchType brType, boolean onlyCommon) {
+    public Set<Branch> getBranches(List<Project> projects, BranchType brType, boolean onlyCommon) {
         if (projects == null || brType == null) {
             throw new IllegalArgumentException("Wrong parameters for obtaining branches.");
         }
         ListMode mode = brType.equals(BranchType.LOCAL) ? null : ListMode.valueOf(brType.toString());
-        Set<String> branches = new HashSet<>();
+        Set<Branch> branches = new HashSet<>();
         projects.stream().forEach((pr) -> {
             if (!pr.isCloned()) {
                 System.err.println(pr.getName() + ERROR_MSG_NOT_CLONED);
                 return;
             }
-            List<String> shortNamesBranches = getListShortNamesOfBranches(getRefs(pr, mode));
+            List<Branch> shortNamesBranches = getListShortNamesOfBranches(getRefs(pr, mode));
             mergeCollections(branches, shortNamesBranches, onlyCommon);
         });
         return branches;
@@ -419,8 +403,9 @@ public class JGit {
         if (!optGit.isPresent()) {
             return JGitStatus.FAILED;
         }
-        List<String> branches = getListShortNamesOfBranches(getRefs(project, null));
-        if (!force && branches.contains(nameBranch)) {
+
+        List<Branch> branches = getListShortNamesOfBranches(getRefs(project, null));
+        if (!force && branches.stream().map(Branch::getBranchName).collect(Collectors.toList()).contains(nameBranch)) {
             return JGitStatus.BRANCH_ALREADY_EXISTS;
         }
         try {
@@ -443,14 +428,14 @@ public class JGit {
      *
      * @param project         the cloned project
      * @param nameBranch      the name of the branch to which to switch
-     * @param setCreateBranch if value is <true> to switch to a branch for it, a new local branch
+     * @param isRemoteBranch if value is <true> to switch to a branch for it, a new local branch
                               with the same name will be created, if <false> switch to an existing branch.
      *
      * @return JGitStatus: SUCCESSFUL - if a new branch was created,
      *                     FAILED - if the branch could not be created,
      *                     CONFLICTS - if the branch has unsaved changes that can lead to conflicts.
      */
-    public JGitStatus switchTo(Project project, String nameBranch, boolean setCreateBranch) {
+    public JGitStatus switchTo(Project project, String nameBranch, boolean isRemoteBranch) {
         if (project == null || nameBranch == null) {
             return JGitStatus.FAILED;
         }
@@ -462,26 +447,28 @@ public class JGit {
         if (!optGit.isPresent()) {
             return JGitStatus.FAILED;
         }
-        List<String> branches = getListShortNamesOfBranches(getRefs(project, null));
-        if (!branches.contains(nameBranch) && !setCreateBranch) {
+        String nameBranchWithoutAlias = nameBranch.replace(ORIGIN_PREFIX, StringUtils.EMPTY);
+        List<Branch> branches = getListShortNamesOfBranches(getRefs(project, null));
+        if (!branches.stream().map(Branch::getBranchName).collect(Collectors.toList()).contains(nameBranchWithoutAlias) && !isRemoteBranch) {
             return JGitStatus.BRANCH_DOES_NOT_EXIST;
         }
-        if (branches.contains(nameBranch) && setCreateBranch) {
+        if (branches.stream().map(Branch::getBranchName).collect(Collectors.toList()).contains(nameBranchWithoutAlias) && isRemoteBranch) {
             return JGitStatus.BRANCH_ALREADY_EXISTS;
         }
         Git git = optGit.get();
         try {
-            if (isCurrentBranch(git, nameBranch)) {
-                return JGitStatus.FAILED;
+            if (isCurrentBranch(git, nameBranchWithoutAlias)) {
+                return JGitStatus.BRANCH_CURRENTLY_CHECKED_OUT;
             }
             if (isConflictsBetweenTwoBranches(git.getRepository(), git.getRepository().getFullBranch(),
-                    Constants.R_HEADS + nameBranch)) {
+                    Constants.R_HEADS + nameBranchWithoutAlias)) {
                 return JGitStatus.CONFLICTS;
             }
+
             Ref ref = git.checkout()
-                         .setName(nameBranch)
-                         .setStartPoint("origin/" + nameBranch)
-                         .setCreateBranch(setCreateBranch)
+                         .setName(nameBranchWithoutAlias)
+                         .setStartPoint(ORIGIN_PREFIX + nameBranchWithoutAlias)
+                         .setCreateBranch(isRemoteBranch)
                          .call();
             System.out.println("!Switch to branch: " + ref.getName());
             return JGitStatus.SUCCESSFUL;
@@ -716,14 +703,18 @@ public class JGit {
         return Collections.emptyList();
     }
 
-    private List<String> getListShortNamesOfBranches(List<Ref> listRefs) {
+    private List<Branch> getListShortNamesOfBranches(List<Ref> listRefs) {
         if (listRefs == null || listRefs.isEmpty()) {
             return Collections.emptyList();
         }
-        List<String> branches = new ArrayList<>();
+        List<Branch> branches = new ArrayList<>();
         for (Ref ref : listRefs) {
             int length = (ref.toString().contains(Constants.R_HEADS)) ? Constants.R_HEADS.length() : Constants.R_REMOTES.length();
-            branches.add(ref.getName().substring(length));
+            if (ref.toString().contains(Constants.R_HEADS)) {
+                branches.add(new Branch(ref.getName().substring(length), BranchType.LOCAL));
+            } else {
+                branches.add(new Branch(ref.getName().substring(length), BranchType.REMOTE));
+            }
         }
         return branches;
     }

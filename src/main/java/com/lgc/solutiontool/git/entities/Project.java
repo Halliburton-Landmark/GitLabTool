@@ -60,7 +60,7 @@ public class Project {
     /** Path to the cloned project **/
     private String _pathToClonedProject;
     private boolean _isCloned;
-    private transient ProjectType _type;
+    private ProjectType _type;
 
     /**
      * Sets a project type
@@ -112,11 +112,15 @@ public class Project {
             throw new IllegalArgumentException("ERROR: Incorrect data. Value is null.");
         }
         Path pathToProject = Paths.get(path);
-        if (Files.exists(pathToProject) && Files.isDirectory(pathToProject)) {
+        if (checkPath(pathToProject)) {
             // TODO project must have /.git() folder.
             // The implementation of the method will be in the JGit class
             _pathToClonedProject = path;
         }
+    }
+
+    protected boolean checkPath(Path pathToProject) {
+        return Files.exists(pathToProject) && Files.isDirectory(pathToProject);
     }
 
     /**
