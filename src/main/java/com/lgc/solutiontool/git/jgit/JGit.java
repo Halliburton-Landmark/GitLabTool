@@ -1,34 +1,56 @@
 package com.lgc.solutiontool.git.jgit;
 
-import com.lgc.solutiontool.git.connections.token.CurrentUser;
-import com.lgc.solutiontool.git.entities.Branch;
-import com.lgc.solutiontool.git.entities.Group;
-import com.lgc.solutiontool.git.entities.Project;
-import com.lgc.solutiontool.git.entities.User;
-import com.lgc.solutiontool.git.util.FeedbackUtil;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.jgit.api.*;
+import org.eclipse.jgit.api.CreateBranchCommand;
 import org.eclipse.jgit.api.CreateBranchCommand.SetupUpstreamMode;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.ListBranchCommand;
 import org.eclipse.jgit.api.ListBranchCommand.ListMode;
+import org.eclipse.jgit.api.MergeResult;
+import org.eclipse.jgit.api.PullResult;
+import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.dircache.DirCache;
 import org.eclipse.jgit.dircache.DirCacheCheckout;
-import org.eclipse.jgit.errors.*;
-import org.eclipse.jgit.lib.*;
+import org.eclipse.jgit.errors.AmbiguousObjectException;
+import org.eclipse.jgit.errors.IncorrectObjectTypeException;
+import org.eclipse.jgit.errors.MissingObjectException;
+import org.eclipse.jgit.errors.NoWorkTreeException;
+import org.eclipse.jgit.errors.RevisionSyntaxException;
+import org.eclipse.jgit.lib.AnyObjectId;
+import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.ObjectReader;
+import org.eclipse.jgit.lib.PersonIdent;
+import org.eclipse.jgit.lib.Ref;
+import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.*;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
+import com.lgc.solutiontool.git.connections.token.CurrentUser;
+import com.lgc.solutiontool.git.entities.Branch;
+import com.lgc.solutiontool.git.entities.Group;
+import com.lgc.solutiontool.git.entities.Project;
+import com.lgc.solutiontool.git.entities.User;
+import com.lgc.solutiontool.git.util.FeedbackUtil;
 
 
 /**
@@ -81,7 +103,7 @@ public class JGit {
      * @param onlyCommon if value is <true> return only common branches of projects, if <false> return all branches.
      * @return a list of branches
      */
-    public Set<Branch> getBranches(List<Project> projects, BranchType brType, boolean onlyCommon) {
+    public Set<Branch> getBranches(Collection<Project> projects, BranchType brType, boolean onlyCommon) {
         if (projects == null || brType == null) {
             throw new IllegalArgumentException("Wrong parameters for obtaining branches.");
         }

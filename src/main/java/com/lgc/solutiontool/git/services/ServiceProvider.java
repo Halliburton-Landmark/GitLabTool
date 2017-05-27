@@ -35,5 +35,6 @@ public class ServiceProvider {
         _services.put(PomXMLService.class.getName(), new PomXMLServiceImpl());
         _services.put(ProjectTypeService.class.getName(), new ProjectTypeServiceImpl());
         _services.put(NetworkService.class.getName(), new NetworkServiceImpl());
+        _services.put(GitService.class.getName(), new GitServiceImpl());
     }
 }
