@@ -34,6 +34,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 
 class LoginDialog extends Dialog<DialogDTO> {
 
@@ -114,6 +115,7 @@ class LoginDialog extends Dialog<DialogDTO> {
         
 
         getDialogPane().setContent(grid);
+        initializeOnCloseEvent();
         /*setResultConverter(dialogButton -> {
             String serverURL = URLManager.completeServerURL(comboBox.getValue());
             if (dialogButton == loginButtonType) {
@@ -192,5 +194,16 @@ class LoginDialog extends Dialog<DialogDTO> {
     
     private Stage getStage() {
         return (Stage) signInButton.getScene().getWindow();
+    }
+    
+    /*
+     * It should be used to close Login window via 'X' button without errors in main JavaFX thread
+     * Need to find better solution
+     */
+    private void initializeOnCloseEvent() {
+        Window window = this.getDialogPane().getScene().getWindow();
+        window.setOnCloseRequest(event -> {
+            System.exit(0);
+        });
     }
 }

@@ -1,15 +1,11 @@
 package com.lgc.solutiontool.git.ui.javafx;
 
 import java.net.URL;
-import java.util.NoSuchElementException;
 
-import com.lgc.solutiontool.git.services.LoginService;
-import com.lgc.solutiontool.git.services.ServiceProvider;
 import com.lgc.solutiontool.git.ui.UserInterface;
 import com.lgc.solutiontool.git.ui.ViewKey;
 import com.lgc.solutiontool.git.ui.icon.AppIconHolder;
 import com.lgc.solutiontool.git.ui.javafx.controllers.ModularController;
-import com.lgc.solutiontool.git.ui.javafx.dto.DialogDTO;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
