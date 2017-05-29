@@ -43,8 +43,9 @@ class LoginDialog extends Dialog<DialogDTO> {
     private LoginService _loginService = (LoginService) ServiceProvider.getInstance()
             .getService(LoginService.class.getName());
     
-    private final String WRONG_CREDENTIALS = "Wrong login or password! \nPlease try again";
+    private final String WRONG_CREDENTIALS = "Wrong login or password! Please try again";
     private final String WAITING_MESSAGE = "Login... Please wait";
+    private final String EMPTY_FIELD = "Login or password is empty!";
 
     private final Text sceneTitle;
     private final Label userName;
@@ -170,16 +171,16 @@ class LoginDialog extends Dialog<DialogDTO> {
                     }
                 });
             } else {
-                showMessage(WRONG_CREDENTIALS, Color.RED);
+                showMessage(EMPTY_FIELD, Color.RED);
             }
         });
     }
     
     private boolean isEmptyInputFields(TextField userTextField, PasswordField passwordField) {
         return userTextField == null 
-                || userTextField.getText().equals("") 
+                || userTextField.getText().isEmpty() 
                 || passwordField == null 
-                || passwordField.getText().equals("");
+                || passwordField.getText().isEmpty();
     }
     
     private Stage getStage() {

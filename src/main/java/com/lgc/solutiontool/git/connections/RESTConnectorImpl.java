@@ -81,8 +81,8 @@ class RESTConnectorImpl implements RESTConnector {
             return response.toString();
         } catch (Exception e) {
             System.err.println("!Error: " + e.getMessage()); //TODO: move to logger
-            return null;
         }
+        return null;
     }
 
     private void setHTTPRequestHeader(Map<String, String> header, HttpsURLConnection con) {
