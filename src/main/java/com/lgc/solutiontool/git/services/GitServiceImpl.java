@@ -4,9 +4,12 @@ import com.lgc.solutiontool.git.entities.Branch;
 import com.lgc.solutiontool.git.entities.Project;
 import com.lgc.solutiontool.git.jgit.BranchType;
 import com.lgc.solutiontool.git.jgit.JGit;
+import com.lgc.solutiontool.git.jgit.JGitStatus;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class GitServiceImpl implements GitService {
 
@@ -25,6 +28,19 @@ public class GitServiceImpl implements GitService {
         }
 
         return isContains;
+    }
+
+    @Override
+    public Map<Project, JGitStatus> switchTo(List<Project> projects, Branch branch) {
+        String selectedBranchName = branch.getBranchName();
+        boolean isRemote = branch.getBranchType().equals(BranchType.REMOTE);
+
+        Map<Project, JGitStatus> switchStatuses = new HashMap<>();
+        for (Project project : projects) {
+            JGitStatus status = JGit.getInstance().switchTo(project, selectedBranchName, isRemote);
+            switchStatuses.put(project, status);
+        }
+        return switchStatuses;
     }
 
 }

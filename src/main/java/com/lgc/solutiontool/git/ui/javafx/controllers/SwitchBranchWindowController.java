@@ -90,14 +90,9 @@ public class SwitchBranchWindowController {
     public void onSwitchButton() {
         List<Project> selectedProjects = currentProjectsListView.getItems();
         Branch selectedBranch = (Branch) branchesListView.getSelectionModel().getSelectedItem();
-        String selectedBranchName = selectedBranch.getBranchName();
-        boolean isRemote = selectedBranch.getBranchType().equals(BranchType.REMOTE);
+        
+        Map<Project, JGitStatus> switchStatuses = _gitService.switchTo(selectedProjects, selectedBranch);
 
-        Map<Project, JGitStatus> switchStatuses = new HashMap<>();
-        for (Project project : selectedProjects) {
-            JGitStatus status = JGit.getInstance().switchTo(project, selectedBranchName, isRemote);
-            switchStatuses.put(project, status);
-        }
         String dialogMessage = switchStatuses.entrySet().stream()
                 .map(x -> x.getKey().getName() + "  -  " + x.getValue())
                 .collect(Collectors.joining(NEW_LINE_SYMBOL));
