@@ -14,6 +14,7 @@ import com.lgc.solutiontool.git.services.ProgramPropertiesService;
 import com.lgc.solutiontool.git.services.ServiceProvider;
 import com.lgc.solutiontool.git.ui.ViewKey;
 import com.lgc.solutiontool.git.ui.icon.AppIconHolder;
+import com.lgc.solutiontool.git.ui.javafx.AlertWithOptOut;
 import com.lgc.solutiontool.git.ui.mainmenu.MainMenuItems;
 import com.lgc.solutiontool.git.ui.mainmenu.MainMenuManager;
 import com.lgc.solutiontool.git.ui.toolbar.ToolbarButtons;
@@ -30,6 +31,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SplitPane;
@@ -134,12 +136,54 @@ public class ModularController {
         if (windowId.equals(ViewKey.WELCOME_WINDOW.getKey())) {
             ToolbarManager.getInstance().getButtonById(ToolbarButtons.IMPORT_GROUP_BUTTON.getId())
                     .setOnAction(event -> importGroupDialog());
+//            ToolbarManager.getInstance().getButtonById(ToolbarButtons.REMOVE_GROUP_BUTTON.getId())
+//                    .setOnAction(event -> removeGroupDialog());
         } else if (windowId.equals(ViewKey.MAIN_WINDOW.getKey())) {
             Button switchBranch = ToolbarManager.getInstance()
                     .getButtonById(ToolbarButtons.SWITCH_BRANCH_BUTTON.getId());
             switchBranch.setOnAction(event -> showSwitchBranchWindow());
         }
     }
+
+    public void removeGroupDialog(Group selectedGroup) {
+        AlertWithOptOut alert = new AlertWithOptOut(AlertType.CONFIRMATION, "Remove group", null,
+                "Are you sure you want to delete the " + selectedGroup.getName() + "?",
+                "I want to remove group from a local disk", ButtonType.YES, ButtonType.NO);
+        Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+        stage.getIcons().add(_appIcon);
+        alert.showAndWait();
+    }
+
+//    public static Alert createAlertWithOptOut(AlertType type, String title, String headerText, String message,
+//            String optOutMessage, Callback<Boolean, Void> optOutAction, ButtonType... buttonTypes) {
+//        Alert alert = new Alert(type);
+//        // Need to force the alert to layout in order to grab the graphic,
+//        // as we are replacing the dialog pane with a custom pane
+//        alert.getDialogPane().applyCss();
+//        Node graphic = alert.getDialogPane().getGraphic();
+//        // Create a new dialog pane that has a checkbox instead of the hide/show details button
+//        // Use the supplied callback for the action of the checkbox
+//        alert.setDialogPane(new DialogPane() {
+//            @Override
+//            protected Node createDetailsButton() {
+//                CheckBox optOut = new CheckBox();
+//                optOut.setText(optOutMessage);
+//                optOut.setOnAction(e -> optOutAction.call(optOut.isSelected()));
+//                return optOut;
+//            }
+//        });
+//        alert.getDialogPane().getButtonTypes().addAll(buttonTypes);
+//        alert.getDialogPane().setContentText(message);
+//        // Fool the dialog into thinking there is some expandable content
+//        // a Group won't take up any space if it has no children
+//        alert.getDialogPane().setExpandableContent(new javafx.scene.Group());
+//        alert.getDialogPane().setExpanded(true);
+//        // Reset the dialog graphic using the default style
+//        alert.getDialogPane().setGraphic(graphic);
+//        alert.setTitle(title);
+//        alert.setHeaderText(headerText);
+//        return alert;
+//    }
 
     private void initActionsMainMenu(String windowId) {
         if (windowId.equals(ViewKey.WELCOME_WINDOW.getKey())) {

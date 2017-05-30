@@ -101,6 +101,7 @@ public class WelcomeWindowController {
     private void configureToolbarCommands() {
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.SELECT_GROUP_BUTTON.getId()).setOnAction(this::onLoadSelectedGroupspace);
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.CLONE_GROUP_BUTTON.getId()).setOnAction(this::onCloneGroups);
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.REMOVE_GROUP_BUTTON.getId()).setOnAction(this::onRemoveGroup);
     }
 
     private void updateClonedGroups() {
@@ -119,6 +120,14 @@ public class WelcomeWindowController {
             }
         });
     }
+    @FXML
+    public void onRemoveGroup(ActionEvent actionEvent) {
+        Group group = (Group) groupList.getSelectionModel().getSelectedItem();
+        ModularController controller = getModularController();
+        if (controller != null) {
+            controller.removeGroupDialog(group);
+        }
+    }
 
     @FXML
     public void onLoadSelectedGroupspace(ActionEvent actionEvent) {
@@ -127,7 +136,6 @@ public class WelcomeWindowController {
             System.out.println("ERROR: Could not load fxml resource");
             return;
         }
-
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(modularWindow);
             Parent root = fxmlLoader.load();
@@ -146,6 +154,23 @@ public class WelcomeWindowController {
             e.printStackTrace();
         }
 
+    }
+
+    private ModularController getModularController() {
+        URL modularWindow = getClass().getClassLoader().getResource(ViewKey.MODULAR_CONTAINER.getPath());
+        if (modularWindow == null) {
+            System.out.println("ERROR: Could not load fxml resource");
+            return null;
+        }
+
+        FXMLLoader fxmlLoader = new FXMLLoader(modularWindow);
+        try {
+            Parent root = fxmlLoader.load();
+            return fxmlLoader.getController();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     private class GroupListCell extends ListCell<Group> {
