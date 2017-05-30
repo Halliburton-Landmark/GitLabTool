@@ -67,4 +67,12 @@ public interface GroupsUserService {
      * @return Optional of loaded group or Optional.empty() and a error message.
      */
     Map<Optional<Group>, String> importGroup(String groupPath);
+
+    /**
+    *
+    * @param group
+    * @param isRemoveFromLocalDisk
+    * @return
+    */
+   boolean removeGroup(Group group, boolean isRemoveFromLocalDisk);
 }

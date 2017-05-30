@@ -1,6 +1,7 @@
 package com.lgc.solutiontool.git.services;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -13,6 +14,7 @@ import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
+import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.errors.JGitInternalException;
 
 import com.google.gson.reflect.TypeToken;
@@ -22,7 +24,6 @@ import com.lgc.solutiontool.git.entities.Group;
 import com.lgc.solutiontool.git.entities.Project;
 import com.lgc.solutiontool.git.entities.User;
 import com.lgc.solutiontool.git.jgit.JGit;
-import com.lgc.solutiontool.git.properties.ProgramProperties;
 import com.lgc.solutiontool.git.statuses.CloningStatus;
 import com.lgc.solutiontool.git.util.JSONParser;
 import com.lgc.solutiontool.git.util.PathUtilities;
@@ -40,8 +41,11 @@ public class GroupsUserServiceImpl implements GroupsUserService {
     private static final String INCCORECT_DATA_MESSAGE  = "ERROR: Incorrect data.";
     private static final String PREFIX_SUCCESSFUL_LOAD = " uploaded.";
 
-    public GroupsUserServiceImpl(RESTConnector connector) {
+    private static ProgramPropertiesService _programProperties = null;
+
+    public GroupsUserServiceImpl(RESTConnector connector, ProgramPropertiesService programProperties) {
         setConnector(connector);
+        setProgramProperties(programProperties);
     }
 
     @Override
@@ -109,8 +113,22 @@ public class GroupsUserServiceImpl implements GroupsUserService {
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
 
-        ProgramProperties.getInstance().updateClonedGroups(clonedGroups);
+        _programProperties.updateClonedGroups(clonedGroups);
         return statusMap;
+    }
+
+    @Override
+    public Map<Optional<Group>, String> importGroup(String groupPath) {
+        if (groupPath == null || groupPath.isEmpty()) {
+            throw new IllegalArgumentException(INCCORECT_DATA_MESSAGE);
+        }
+        Path path = Paths.get(groupPath);
+        if (!PathUtilities.isExistsAndDirectory(path)) {
+            Map<Optional<Group>, String> result = new HashMap<>();
+            result.put(Optional.empty(), PathUtilities.PATH_NOT_EXISTS_OR_NOT_DIRECTORY);
+            return result;
+        }
+        return importGroup(path);
     }
 
     private CloningStatus getStatus(Group group) {
@@ -128,18 +146,10 @@ public class GroupsUserServiceImpl implements GroupsUserService {
         _connector = connector;
     }
 
-    @Override
-    public Map<Optional<Group>, String> importGroup(String groupPath) {
-        if (groupPath == null || groupPath.isEmpty()) {
-            throw new IllegalArgumentException(INCCORECT_DATA_MESSAGE);
+    private void setProgramProperties(ProgramPropertiesService programProperties) {
+        if (programProperties != null) {
+            _programProperties = programProperties;
         }
-        Path path = Paths.get(groupPath);
-        if (!PathUtilities.isExistsAndDirectory(path)) {
-            Map<Optional<Group>, String> result = new HashMap<>();
-            result.put(Optional.empty(), PathUtilities.PATH_NOT_EXISTS_OR_NOT_DIRECTORY);
-            return result;
-        }
-        return importGroup(path);
     }
 
     private Map<Optional<Group>, String> importGroup(Path groupPath) {
@@ -162,6 +172,39 @@ public class GroupsUserServiceImpl implements GroupsUserService {
         foundGroup.setPathToClonedGroup(groupPath.toString());
         foundGroup.setClonedStatus(true);
         return updateProjectsInGroup(foundGroup, groupPath);
+    }
+
+    @Override
+    public boolean removeGroup(Group removeGroup, boolean isRemoveFromLocalDisk) {
+        List<Group> groups = getLoadedGroups();
+        Optional<Group> optGroup = findGroupInList(groups, removeGroup);
+        boolean isRemoved = optGroup.isPresent() ? groups.remove(optGroup.get()) : false;
+
+        if (isRemoveFromLocalDisk && isRemoved) {
+            deleteGroupDirectory(removeGroup.getPathToClonedGroup());
+        }
+        return isRemoved;
+    }
+
+    private Optional<Group> findGroupInList(List<Group> groups, Group findGroup) {
+        return groups.stream().filter(group -> group.getName().equals(findGroup)).findFirst();
+    }
+
+    public boolean deleteGroupDirectory(String pathToClonedGroup) {
+        if (pathToClonedGroup == null) {
+            return false;
+        }
+        Path path = Paths.get(pathToClonedGroup);
+        if (!PathUtilities.isExistsAndDirectory(path)) {
+            return false;
+        }
+        try {
+            FileUtils.deleteDirectory(path.toFile());
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     private Optional<Group> getGroupByName(String nameGroup) {
@@ -208,9 +251,12 @@ public class GroupsUserServiceImpl implements GroupsUserService {
     }
 
     private boolean checkGroupIsLoaded(String localPathGroup) {
-        List<Group> loadedGroups = ProgramProperties.getInstance().loadClonedGroups();
-        Optional<Group> foundGroup = findGroupByPath(loadedGroups, localPathGroup);
-        return foundGroup.isPresent();
+        List<Group> loadedGroups = getLoadedGroups();
+        return loadedGroups == null ? false : findGroupByPath(loadedGroups, localPathGroup).isPresent();
+    }
+
+    private List<Group> getLoadedGroups() {
+        return _programProperties.loadClonedGroups();
     }
 
 }

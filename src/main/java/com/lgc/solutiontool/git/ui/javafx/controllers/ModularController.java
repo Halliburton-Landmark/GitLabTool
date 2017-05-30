@@ -9,8 +9,8 @@ import java.util.Map.Entry;
 import java.util.Optional;
 
 import com.lgc.solutiontool.git.entities.Group;
-import com.lgc.solutiontool.git.properties.ProgramProperties;
 import com.lgc.solutiontool.git.services.GroupsUserService;
+import com.lgc.solutiontool.git.services.ProgramPropertiesService;
 import com.lgc.solutiontool.git.services.ServiceProvider;
 import com.lgc.solutiontool.git.ui.ViewKey;
 import com.lgc.solutiontool.git.ui.icon.AppIconHolder;
@@ -84,7 +84,8 @@ public class ModularController {
     private final GroupsUserService _groupService = (GroupsUserService) ServiceProvider.getInstance()
             .getService(GroupsUserService.class.getName());
 
-    private final ProgramProperties _programProperties = ProgramProperties.getInstance();
+    private final ProgramPropertiesService _programProperties = (ProgramPropertiesService) ServiceProvider.getInstance()
+            .getService(ProgramPropertiesService.class.getName());
 
     public void loadWelcomeWindow() throws IOException {
         toolbar.getItems().addAll(ToolbarManager.getInstance().createToolbarItems(ViewKey.WELCOME_WINDOW.getKey()));

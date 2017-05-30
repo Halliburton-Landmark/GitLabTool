@@ -5,8 +5,8 @@ import java.net.URL;
 import java.util.List;
 
 import com.lgc.solutiontool.git.entities.Group;
-import com.lgc.solutiontool.git.properties.ProgramProperties;
 import com.lgc.solutiontool.git.services.LoginService;
+import com.lgc.solutiontool.git.services.ProgramPropertiesService;
 import com.lgc.solutiontool.git.services.ServiceProvider;
 import com.lgc.solutiontool.git.ui.ViewKey;
 import com.lgc.solutiontool.git.ui.icon.AppIconHolder;
@@ -45,8 +45,11 @@ public class WelcomeWindowController {
     @FXML
     private ListView groupList;
 
-    private final LoginService _loginService =
-            (LoginService) ServiceProvider.getInstance().getService(LoginService.class.getName());
+    private final LoginService _loginService = (LoginService) ServiceProvider.getInstance()
+            .getService(LoginService.class.getName());
+
+    private final ProgramPropertiesService _programProperties = (ProgramPropertiesService) ServiceProvider.getInstance()
+            .getService(ProgramPropertiesService.class.getName());
 
     @FXML
     public void initialize() {
@@ -101,7 +104,7 @@ public class WelcomeWindowController {
     }
 
     private void updateClonedGroups() {
-        List<Group> userGroups = ProgramProperties.getInstance().loadClonedGroups();
+        List<Group> userGroups = _programProperties.loadClonedGroups();
         if(userGroups != null) {
             groupList.setItems(FXCollections.observableList(userGroups));
         }
