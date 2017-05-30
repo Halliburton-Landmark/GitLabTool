@@ -41,6 +41,7 @@ public class LoginServiceImpl implements LoginService {
             CredentialsProvider.setDefault(new UsernamePasswordCredentialsProvider(dto.getLogin(), dto.getPassword()));
         };
         Thread loginThread = new Thread(runnable);
+        loginThread.setName("LoginThread");
         loginThread.start();
     }
 
