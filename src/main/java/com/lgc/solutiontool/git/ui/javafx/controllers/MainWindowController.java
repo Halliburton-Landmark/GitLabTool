@@ -12,6 +12,8 @@ import com.lgc.solutiontool.git.jgit.JGit;
 import com.lgc.solutiontool.git.project.nature.projecttype.ProjectType;
 import com.lgc.solutiontool.git.services.LoginService;
 import com.lgc.solutiontool.git.services.ServiceProvider;
+import com.lgc.solutiontool.git.ui.mainmenu.MainMenuItems;
+import com.lgc.solutiontool.git.ui.mainmenu.MainMenuManager;
 import com.lgc.solutiontool.git.ui.selection.ListViewKey;
 import com.lgc.solutiontool.git.ui.selection.SelectionsProvider;
 import com.lgc.solutiontool.git.ui.toolbar.ToolbarManager;
@@ -61,8 +63,11 @@ public class MainWindowController {
         configureListView(projectsList);
 
         BooleanBinding booleanBinding = projectsList.getSelectionModel().selectedItemProperty().isNull();
-        ToolbarManager.getInstance().getAllButtonsForCurrentView().forEach(x -> x.disableProperty().bind(booleanBinding));
+        ToolbarManager.getInstance().getAllButtonsForCurrentView()
+                .forEach(x -> x.disableProperty().bind(booleanBinding));
 
+        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_SWITCH_BRANCH).disableProperty()
+                .bind(booleanBinding);
 
         //TODO: Additional thread should be placed to services
         new Thread(this::updateProjectList).start();

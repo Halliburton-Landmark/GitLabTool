@@ -18,6 +18,7 @@ public enum MainMenuItems {
     WELCOME_ABOUT(ViewKey.WELCOME_WINDOW.getKey(), "Help", "welcome_help_about", "About"),
 
     MAIN_EXIT(ViewKey.MAIN_WINDOW.getKey(), "File", "main_file_exit", "Exit"),
+    MAIN_SWITCH_BRANCH(ViewKey.MAIN_WINDOW.getKey(), "Git", "main_git_switch_branch", "Switch branch"),
     MAIN_ABOUT(ViewKey.MAIN_WINDOW.getKey(), "Help", "main_help_about", "About");
 
     private final String viewKey;
