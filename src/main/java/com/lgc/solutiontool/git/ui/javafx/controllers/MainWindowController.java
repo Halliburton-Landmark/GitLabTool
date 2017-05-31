@@ -82,6 +82,13 @@ public class MainWindowController {
         projectsList.refresh();
     }
 
+    public void onSelectAll(){
+        if (projectsList != null && !projectsList.getItems().isEmpty()) {
+            projectsList.getSelectionModel().selectAll();
+            projectsList.requestFocus();
+        }
+    }
+
     private void configureToolbarCommands() {
     }
 

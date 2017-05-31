@@ -12,6 +12,7 @@ import com.lgc.solutiontool.git.services.ServiceProvider;
 import com.lgc.solutiontool.git.ui.icon.AppIconHolder;
 import com.lgc.solutiontool.git.ui.icon.LocalRemoteIconHolder;
 import com.lgc.solutiontool.git.ui.selection.SelectionsProvider;
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
@@ -213,6 +214,10 @@ public class SwitchBranchWindowController {
         listView.itemsProperty().addListener((observable, oldValue, newValue) ->
                 projectsCountLabel.textProperty().bind(Bindings.concat(TOTAL_CAPTION,
                         Bindings.size((listView.getItems())).asString())));
+
+        //disabling selection
+        listView.getSelectionModel().selectedIndexProperty().addListener(
+                (observable, oldvalue, newValue) -> Platform.runLater(() -> listView.getSelectionModel().select(-1)));
     }
 
     private void configureBranchesListView(ListView listView) {
