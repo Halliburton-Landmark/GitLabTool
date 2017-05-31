@@ -9,31 +9,31 @@ import com.lgc.solutiontool.git.entities.Group;
 import com.lgc.solutiontool.git.xml.XMLAdapter;
 
 @XmlRootElement
-public class ClonedGroupsProvider {
+public class ClonedGroups {
 
-    private static ClonedGroupsProvider _instance;
+    private static ClonedGroups _instance;
 
-    private List<Group> _clonedGroups;
+    private List<Group> _groups;
 
     /**
      * Gets instance's the class
      *
      * @return instance
      */
-    public static ClonedGroupsProvider getInstance() {
+    public static ClonedGroups getInstance() {
         if (_instance == null) {
-            _instance = new ClonedGroupsProvider();
+            _instance = new ClonedGroups();
         }
         return _instance;
     }
 
-    private ClonedGroupsProvider() {
+    private ClonedGroups() {
     }
 
     @XmlJavaTypeAdapter(XMLAdapter.class)
     public void setClonedGroups(List<Group> groups) {
         if (groups != null) {
-            _clonedGroups = groups;
+            _groups = groups;
         }
     }
 
@@ -43,7 +43,7 @@ public class ClonedGroupsProvider {
      * @return list of cloned groups
      */
     public List<Group> getClonedGroups() {
-        return _clonedGroups;
+        return _groups;
     }
 
 }

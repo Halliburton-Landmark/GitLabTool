@@ -5,8 +5,8 @@ import java.net.URL;
 import java.util.List;
 
 import com.lgc.solutiontool.git.entities.Group;
+import com.lgc.solutiontool.git.services.ClonedGroupsService;
 import com.lgc.solutiontool.git.services.LoginService;
-import com.lgc.solutiontool.git.services.ProgramPropertiesService;
 import com.lgc.solutiontool.git.services.ServiceProvider;
 import com.lgc.solutiontool.git.ui.ViewKey;
 import com.lgc.solutiontool.git.ui.icon.AppIconHolder;
@@ -48,8 +48,8 @@ public class WelcomeWindowController {
     private final LoginService _loginService = (LoginService) ServiceProvider.getInstance()
             .getService(LoginService.class.getName());
 
-    private final ProgramPropertiesService _programProperties = (ProgramPropertiesService) ServiceProvider.getInstance()
-            .getService(ProgramPropertiesService.class.getName());
+    private final ClonedGroupsService _programProperties = (ClonedGroupsService) ServiceProvider.getInstance()
+            .getService(ClonedGroupsService.class.getName());
 
     @FXML
     public void initialize() {
@@ -123,9 +123,24 @@ public class WelcomeWindowController {
     @FXML
     public void onRemoveGroup(ActionEvent actionEvent) {
         Group group = (Group) groupList.getSelectionModel().getSelectedItem();
-        ModularController controller = getModularController();
-        if (controller != null) {
-            controller.removeGroupDialog(group);
+        URL modularWindow = getClass().getClassLoader().getResource(ViewKey.MODULAR_CONTAINER.getPath());
+        if (modularWindow == null) {
+            System.out.println("ERROR: Could not load fxml resource");
+            return;
+        }
+
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(modularWindow);
+            Parent root = fxmlLoader.load();
+
+            ModularController myControllerHandle = fxmlLoader.getController();
+            myControllerHandle.removeGroupDialog(group);
+
+            Stage previousStage = (Stage) ((Node) actionEvent.getTarget()).getScene().getWindow();
+            previousStage.setScene(new Scene(root));
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -154,23 +169,6 @@ public class WelcomeWindowController {
             e.printStackTrace();
         }
 
-    }
-
-    private ModularController getModularController() {
-        URL modularWindow = getClass().getClassLoader().getResource(ViewKey.MODULAR_CONTAINER.getPath());
-        if (modularWindow == null) {
-            System.out.println("ERROR: Could not load fxml resource");
-            return null;
-        }
-
-        FXMLLoader fxmlLoader = new FXMLLoader(modularWindow);
-        try {
-            Parent root = fxmlLoader.load();
-            return fxmlLoader.getController();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
     }
 
     private class GroupListCell extends ListCell<Group> {

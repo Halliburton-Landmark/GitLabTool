@@ -32,7 +32,7 @@ public class StorageServiceImpl implements StorageService {
     public boolean updateStorage(String server, String username) {
         try {
             File file = getPropFile(server, username);
-            XMLParser.saveObject(file, ClonedGroupsProvider.getInstance());
+            XMLParser.saveObject(file, ClonedGroups.getInstance());
             return true;
         } catch (IOException | JAXBException e) {
             System.err.println(this.getClass().getName() + ".updateStorage: " + e.getMessage()); // TODO move to logger
@@ -44,7 +44,7 @@ public class StorageServiceImpl implements StorageService {
     public List<Group> loadStorage(String server, String username) {
         try {
             File file = getPropFile(server, username);
-            List<Group> list = XMLParser.loadObject(file, ClonedGroupsProvider.class).getClonedGroups();
+            List<Group> list = XMLParser.loadObject(file, ClonedGroups.class).getClonedGroups();
             return list == null ? Collections.emptyList() : list;
         } catch (IOException | JAXBException e) {
             System.err.println(this.getClass().getName() + ".loadStorage: " + e.getMessage()); // TODO move to logger

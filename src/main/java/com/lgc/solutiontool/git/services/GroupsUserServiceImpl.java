@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -41,9 +42,9 @@ public class GroupsUserServiceImpl implements GroupsUserService {
     private static final String INCCORECT_DATA_MESSAGE  = "ERROR: Incorrect data.";
     private static final String PREFIX_SUCCESSFUL_LOAD = " uploaded.";
 
-    private static ProgramPropertiesService _programProperties = null;
+    private static ClonedGroupsService _clonedGroupsService;
 
-    public GroupsUserServiceImpl(RESTConnector connector, ProgramPropertiesService programProperties) {
+    public GroupsUserServiceImpl(RESTConnector connector, ClonedGroupsService programProperties) {
         setConnector(connector);
         setProgramProperties(programProperties);
     }
@@ -113,7 +114,7 @@ public class GroupsUserServiceImpl implements GroupsUserService {
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
 
-        _programProperties.updateClonedGroups(clonedGroups);
+        _clonedGroupsService.addGroups(clonedGroups);
         return statusMap;
     }
 
@@ -146,9 +147,9 @@ public class GroupsUserServiceImpl implements GroupsUserService {
         _connector = connector;
     }
 
-    private void setProgramProperties(ProgramPropertiesService programProperties) {
+    private void setProgramProperties(ClonedGroupsService programProperties) {
         if (programProperties != null) {
-            _programProperties = programProperties;
+            _clonedGroupsService = programProperties;
         }
     }
 
@@ -175,36 +176,43 @@ public class GroupsUserServiceImpl implements GroupsUserService {
     }
 
     @Override
-    public boolean removeGroup(Group removeGroup, boolean isRemoveFromLocalDisk) {
-        List<Group> groups = getLoadedGroups();
-        Optional<Group> optGroup = findGroupInList(groups, removeGroup);
-        boolean isRemoved = optGroup.isPresent() ? groups.remove(optGroup.get()) : false;
-
-        if (isRemoveFromLocalDisk && isRemoved) {
-            deleteGroupDirectory(removeGroup.getPathToClonedGroup());
+    public Map<Boolean, String> removeGroup(Group removeGroup, boolean isRemoveFromLocalDisk) {
+        Map<Boolean, String> result = new HashMap<>();
+        System.err.println("Deleting group is started ..."); // TODO move to log
+        boolean isRemoved = _clonedGroupsService.removeGroups(Arrays.asList(removeGroup));
+        if (!isRemoved) {
+            result.put(false, "Failed deleting of group from the workspace.");
+            return result;
         }
-        return isRemoved;
+        if (isRemoveFromLocalDisk) {
+            System.err.println("Deleting group from local diskis started ..."); // TODO move to log
+            return deleteGroupFromDirectory(removeGroup.getPathToClonedGroup());
+        }
+        result.put(isRemoved, "Successful deleting of group from the workspace.");
+        return result;
     }
 
-    private Optional<Group> findGroupInList(List<Group> groups, Group findGroup) {
-        return groups.stream().filter(group -> group.getName().equals(findGroup)).findFirst();
-    }
-
-    public boolean deleteGroupDirectory(String pathToClonedGroup) {
+    public Map<Boolean, String> deleteGroupFromDirectory(String pathToClonedGroup) {
+        Map<Boolean, String> result = new HashMap<>();
         if (pathToClonedGroup == null) {
-            return false;
+            result.put(false, "Error removing. The path to the cloned group is not specified.");
+            return result;
         }
         Path path = Paths.get(pathToClonedGroup);
         if (!PathUtilities.isExistsAndDirectory(path)) {
-            return false;
+            result.put(false, "Error removing. The specified path does not exist or is not a directory.");
+            return result;
         }
         try {
             FileUtils.deleteDirectory(path.toFile());
-            return true;
+            result.put(true, "The group was successfully deleted from " + path.toString());
+            return result;
         } catch (IOException e) {
-            e.printStackTrace();
+            String messageError = "Error removing. " + e.getMessage();
+            System.err.println(messageError); // TODO move to log
+            result.put(false, messageError);
         }
-        return false;
+        return result;
     }
 
     private Optional<Group> getGroupByName(String nameGroup) {
@@ -256,7 +264,7 @@ public class GroupsUserServiceImpl implements GroupsUserService {
     }
 
     private List<Group> getLoadedGroups() {
-        return _programProperties.loadClonedGroups();
+        return _clonedGroupsService.loadClonedGroups();
     }
 
 }

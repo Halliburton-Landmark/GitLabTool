@@ -9,15 +9,15 @@ import com.lgc.solutiontool.git.util.URLManager;
  *
  * @author Lyudmila Lyska
  */
-public class ProgramPropertiesServiceImpl implements ProgramPropertiesService {
+public class ClonedGroupsServiceImpl implements ClonedGroupsService {
 
-    private final ClonedGroupsProvider _programProperties = ClonedGroupsProvider.getInstance();
+    private final ClonedGroups _clonedGroupsProvider = ClonedGroups.getInstance();
 
     private StorageService _storageService;
 
     private LoginService _loginService;
 
-    public ProgramPropertiesServiceImpl(StorageService storageService, LoginService loginService) {
+    public ClonedGroupsServiceImpl(StorageService storageService, LoginService loginService) {
         setStorageService(storageService);
         setLoginService(loginService);
     }
@@ -36,28 +36,26 @@ public class ProgramPropertiesServiceImpl implements ProgramPropertiesService {
 
     @Override
     public void setClonedGroups(List<Group> groups) {
-        _programProperties.setClonedGroups(groups);
+        _clonedGroupsProvider.setClonedGroups(groups);
     }
 
     @Override
     public List<Group> getClonedGroups() {
-        return _programProperties.getClonedGroups();
+        return _clonedGroupsProvider.getClonedGroups();
     }
 
     @Override
-    public void updateClonedGroups(List<Group> groups) {
+    public void addGroups(List<Group> groups) {
         if (groups == null || groups.isEmpty()) {
             return;
         }
-        List<Group> clonedGroup = _programProperties.getClonedGroups();
+        List<Group> clonedGroup = _clonedGroupsProvider.getClonedGroups();
         if (clonedGroup == null || clonedGroup.isEmpty()) {
             setClonedGroups(groups);
         } else {
             clonedGroup.addAll(groups);
         }
-
-        String username = _loginService.getCurrentUser().getUsername();
-        _storageService.updateStorage(URLManager.trimServerURL(_loginService.getServerURL()), username);
+        updateClonedGroups();
     }
 
     @Override
@@ -67,5 +65,27 @@ public class ProgramPropertiesServiceImpl implements ProgramPropertiesService {
                 username);
         setClonedGroups(groups);
         return getClonedGroups();
+    }
+
+    @Override
+    public boolean removeGroups(List<Group> groups) {
+        if (groups == null || groups.isEmpty()) {
+            return false;
+        }
+        List<Group> clonedGroup = _clonedGroupsProvider.getClonedGroups();
+        if (clonedGroup == null || clonedGroup.isEmpty()) {
+            return false;
+        }
+        boolean status = clonedGroup.removeAll(groups);
+        if (status) {
+            updateClonedGroups();
+        }
+        return status;
+    }
+
+    @Override
+    public void updateClonedGroups() {
+        String username = _loginService.getCurrentUser().getUsername();
+        _storageService.updateStorage(URLManager.trimServerURL(_loginService.getServerURL()), username);
     }
 }

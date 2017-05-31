@@ -9,12 +9,12 @@ import java.util.Map.Entry;
 import java.util.Optional;
 
 import com.lgc.solutiontool.git.entities.Group;
+import com.lgc.solutiontool.git.services.ClonedGroupsService;
 import com.lgc.solutiontool.git.services.GroupsUserService;
-import com.lgc.solutiontool.git.services.ProgramPropertiesService;
 import com.lgc.solutiontool.git.services.ServiceProvider;
 import com.lgc.solutiontool.git.ui.ViewKey;
 import com.lgc.solutiontool.git.ui.icon.AppIconHolder;
-import com.lgc.solutiontool.git.ui.javafx.AlertWithOptOut;
+import com.lgc.solutiontool.git.ui.javafx.AlertWithCheckBox;
 import com.lgc.solutiontool.git.ui.mainmenu.MainMenuItems;
 import com.lgc.solutiontool.git.ui.mainmenu.MainMenuManager;
 import com.lgc.solutiontool.git.ui.toolbar.ToolbarButtons;
@@ -52,10 +52,16 @@ public class ModularController {
     private static final String ABOUT_POPUP_HEADER = "Solution tool for GitLab, powered by Luxoft";
     private static final String ABOUT_POPUP_CONTENT = "Contacts: Yurii Pitomets (yurii.pitomets2@halliburton.com)";
     private static final String SWITCH_BRANCH_TITLE = "Switch branch";
+
     private static final String IMPORT_CHOOSER_TITLE = "Import Group";
     private static final String IMPORT_DIALOG_TITLE = "Import Status Dialog";
     private static final String SUCCESFUL_IMPORT_MESSAGE = "Import of group is Successful";
     private static final String FAILED_IMPORT_MESSAGE = "Import of group is Failed";
+
+    private static final String REMOVE_GROUP_DIALOG_TITLE = "Remove Group";
+    private static final String REMOVE_GROUP_STATUS_DIALOG_TITLE = "Import Status Dialog";
+    private static final String SUSSECCFUL_REMOVE_GROUP_MESSAGE = "Removing of group is Successful";
+    private static final String FAILED_REMOVE_GROUP_MESSAGE = "Removing of group is Failed";
 
     private static final String CSS_PATH = "css/style.css";
     private static final Image _appIcon = AppIconHolder.getInstance().getAppIcoImage();
@@ -86,8 +92,8 @@ public class ModularController {
     private final GroupsUserService _groupService = (GroupsUserService) ServiceProvider.getInstance()
             .getService(GroupsUserService.class.getName());
 
-    private final ProgramPropertiesService _programProperties = (ProgramPropertiesService) ServiceProvider.getInstance()
-            .getService(ProgramPropertiesService.class.getName());
+    private final ClonedGroupsService _clonedGroupsService = (ClonedGroupsService) ServiceProvider.getInstance()
+            .getService(ClonedGroupsService.class.getName());
 
     public void loadWelcomeWindow() throws IOException {
         toolbar.getItems().addAll(ToolbarManager.getInstance().createToolbarItems(ViewKey.WELCOME_WINDOW.getKey()));
@@ -136,8 +142,6 @@ public class ModularController {
         if (windowId.equals(ViewKey.WELCOME_WINDOW.getKey())) {
             ToolbarManager.getInstance().getButtonById(ToolbarButtons.IMPORT_GROUP_BUTTON.getId())
                     .setOnAction(event -> importGroupDialog());
-//            ToolbarManager.getInstance().getButtonById(ToolbarButtons.REMOVE_GROUP_BUTTON.getId())
-//                    .setOnAction(event -> removeGroupDialog());
         } else if (windowId.equals(ViewKey.MAIN_WINDOW.getKey())) {
             Button switchBranch = ToolbarManager.getInstance()
                     .getButtonById(ToolbarButtons.SWITCH_BRANCH_BUTTON.getId());
@@ -146,44 +150,30 @@ public class ModularController {
     }
 
     public void removeGroupDialog(Group selectedGroup) {
-        AlertWithOptOut alert = new AlertWithOptOut(AlertType.CONFIRMATION, "Remove group", null,
+        AlertWithCheckBox alert = new AlertWithCheckBox(AlertType.CONFIRMATION, REMOVE_GROUP_DIALOG_TITLE, null,
                 "Are you sure you want to delete the " + selectedGroup.getName() + "?",
                 "I want to remove group from a local disk", ButtonType.YES, ButtonType.NO);
         Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
         stage.getIcons().add(_appIcon);
-        alert.showAndWait();
+        Optional<ButtonType> result = alert.showAndWait();
+        if(result.get() == ButtonType.NO) {
+            return;
+        }
+        _welcomeWindowController.refreshGroupsList();
+        Runnable runnable = () -> {
+            Map<Boolean, String> status = _groupService.removeGroup(selectedGroup, alert.isSelected());
+            for (Entry<Boolean, String> mapStatus : status.entrySet()) {
+                String headerMessage;
+                if (mapStatus.getKey()) {
+                    headerMessage = SUSSECCFUL_REMOVE_GROUP_MESSAGE;
+                } else {
+                    headerMessage = FAILED_REMOVE_GROUP_MESSAGE;
+                }
+                showStatusDialog(REMOVE_GROUP_STATUS_DIALOG_TITLE, headerMessage, mapStatus.getValue());
+            }
+        };
+        new Thread(runnable).start();
     }
-
-//    public static Alert createAlertWithOptOut(AlertType type, String title, String headerText, String message,
-//            String optOutMessage, Callback<Boolean, Void> optOutAction, ButtonType... buttonTypes) {
-//        Alert alert = new Alert(type);
-//        // Need to force the alert to layout in order to grab the graphic,
-//        // as we are replacing the dialog pane with a custom pane
-//        alert.getDialogPane().applyCss();
-//        Node graphic = alert.getDialogPane().getGraphic();
-//        // Create a new dialog pane that has a checkbox instead of the hide/show details button
-//        // Use the supplied callback for the action of the checkbox
-//        alert.setDialogPane(new DialogPane() {
-//            @Override
-//            protected Node createDetailsButton() {
-//                CheckBox optOut = new CheckBox();
-//                optOut.setText(optOutMessage);
-//                optOut.setOnAction(e -> optOutAction.call(optOut.isSelected()));
-//                return optOut;
-//            }
-//        });
-//        alert.getDialogPane().getButtonTypes().addAll(buttonTypes);
-//        alert.getDialogPane().setContentText(message);
-//        // Fool the dialog into thinking there is some expandable content
-//        // a Group won't take up any space if it has no children
-//        alert.getDialogPane().setExpandableContent(new javafx.scene.Group());
-//        alert.getDialogPane().setExpanded(true);
-//        // Reset the dialog graphic using the default style
-//        alert.getDialogPane().setGraphic(graphic);
-//        alert.setTitle(title);
-//        alert.setHeaderText(headerText);
-//        return alert;
-//    }
 
     private void initActionsMainMenu(String windowId) {
         if (windowId.equals(ViewKey.WELCOME_WINDOW.getKey())) {
@@ -289,30 +279,29 @@ public class ModularController {
                     Platform.runLater(new Runnable() {
                         @Override
                         public void run() {
-                            _programProperties.updateClonedGroups(Arrays.asList(optGroup.get()));
+                            _clonedGroupsService.addGroups(Arrays.asList(optGroup.get()));
                             _welcomeWindowController.refreshGroupsList();
                         }
                     });
                 }
-                Platform.runLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        showStatusDialog(IMPORT_DIALOG_TITLE,
-                                optGroup.isPresent() ? SUCCESFUL_IMPORT_MESSAGE : FAILED_IMPORT_MESSAGE,
-                                mapGroup.getValue());
-                    }
-                });
+                showStatusDialog(IMPORT_DIALOG_TITLE,
+                        optGroup.isPresent() ? SUCCESFUL_IMPORT_MESSAGE : FAILED_IMPORT_MESSAGE, mapGroup.getValue());
             }
         }
     }
 
     private void showStatusDialog(String title, String header, String content) {
-        Alert alert = new Alert(AlertType.INFORMATION);
-        alert.setTitle(title);
-        alert.setHeaderText(header);
-        alert.setContentText(content);
-        Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
-        stage.getIcons().add(_appIcon);
-        alert.showAndWait();
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                Alert alert = new Alert(AlertType.INFORMATION);
+                alert.setTitle(title);
+                alert.setHeaderText(header);
+                alert.setContentText(content);
+                Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+                stage.getIcons().add(_appIcon);
+                alert.showAndWait();
+            }
+        });
     }
 }

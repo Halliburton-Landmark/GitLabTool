@@ -11,11 +11,11 @@ import javafx.scene.control.DialogPane;
  *
  * @author Lyudmila Lyska
  */
-public class AlertWithOptOut extends Alert {
+public class AlertWithCheckBox extends Alert {
 
     private CheckBox _optOut;
 
-    public AlertWithOptOut(AlertType type, String title, String headerText, String message,
+    public AlertWithCheckBox(AlertType type, String title, String headerText, String message,
             String optOutMessage, ButtonType... buttonTypes) {
         super(type);
         getDialogPane().applyCss();
@@ -39,6 +39,7 @@ public class AlertWithOptOut extends Alert {
         // Reset the dialog graphic using the default style
         getDialogPane().setGraphic(graphic);
         getDialogPane().setMinHeight(150);
+
         setTitle(title);
         setHeaderText(headerText);
     }
