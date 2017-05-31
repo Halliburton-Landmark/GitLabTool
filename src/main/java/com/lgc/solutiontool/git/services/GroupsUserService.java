@@ -71,8 +71,7 @@ public interface GroupsUserService {
     /**
      *
      * @param group
-     * @param isRemoveFromLocalDisk
      * @return
      */
-    Map<Boolean, String> removeGroup(Group group, boolean isRemoveFromLocalDisk);
+    Map<Boolean, String> removeGroup(Group group);
 }

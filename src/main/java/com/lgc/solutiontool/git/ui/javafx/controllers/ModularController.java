@@ -14,11 +14,11 @@ import com.lgc.solutiontool.git.services.GroupsUserService;
 import com.lgc.solutiontool.git.services.ServiceProvider;
 import com.lgc.solutiontool.git.ui.ViewKey;
 import com.lgc.solutiontool.git.ui.icon.AppIconHolder;
-import com.lgc.solutiontool.git.ui.javafx.AlertWithCheckBox;
 import com.lgc.solutiontool.git.ui.mainmenu.MainMenuItems;
 import com.lgc.solutiontool.git.ui.mainmenu.MainMenuManager;
 import com.lgc.solutiontool.git.ui.toolbar.ToolbarButtons;
 import com.lgc.solutiontool.git.ui.toolbar.ToolbarManager;
+
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -154,29 +154,29 @@ public class ModularController {
     }
 
     public void removeGroupDialog(Group selectedGroup) {
-        AlertWithCheckBox alert = new AlertWithCheckBox(AlertType.CONFIRMATION, REMOVE_GROUP_DIALOG_TITLE, null,
-                "Are you sure you want to delete the " + selectedGroup.getName() + "?",
-                "I want to remove group from a local disk", ButtonType.YES, ButtonType.NO);
+        Alert alert = new Alert(AlertType.CONFIRMATION);
+        alert.setTitle(REMOVE_GROUP_DIALOG_TITLE);
+        alert.setHeaderText("Are you sure you want to delete the " + selectedGroup.getName() + "?");
+
         Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
         stage.getIcons().add(_appIcon);
+
         Optional<ButtonType> result = alert.showAndWait();
-        if(result.get() == ButtonType.NO) {
+        if (result.get() == ButtonType.CANCEL) {
             return;
         }
-        _welcomeWindowController.refreshGroupsList();
-        Runnable runnable = () -> {
-            Map<Boolean, String> status = _groupService.removeGroup(selectedGroup, alert.isSelected());
-            for (Entry<Boolean, String> mapStatus : status.entrySet()) {
-                String headerMessage;
-                if (mapStatus.getKey()) {
-                    headerMessage = SUSSECCFUL_REMOVE_GROUP_MESSAGE;
-                } else {
-                    headerMessage = FAILED_REMOVE_GROUP_MESSAGE;
-                }
-                showStatusDialog(REMOVE_GROUP_STATUS_DIALOG_TITLE, headerMessage, mapStatus.getValue());
+
+        Map<Boolean, String> status = _groupService.removeGroup(selectedGroup);
+        for (Entry<Boolean, String> mapStatus : status.entrySet()) {
+            String headerMessage;
+            if (mapStatus.getKey()) {
+                headerMessage = SUSSECCFUL_REMOVE_GROUP_MESSAGE;
+                _welcomeWindowController.refreshGroupsList();
+            } else {
+                headerMessage = FAILED_REMOVE_GROUP_MESSAGE;
             }
-        };
-        new Thread(runnable).start();
+            showStatusDialog(REMOVE_GROUP_STATUS_DIALOG_TITLE, headerMessage, mapStatus.getValue());
+        }
     }
 
     @FXML
