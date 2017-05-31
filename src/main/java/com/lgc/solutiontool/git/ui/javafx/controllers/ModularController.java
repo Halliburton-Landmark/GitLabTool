@@ -19,8 +19,8 @@ import com.lgc.solutiontool.git.ui.mainmenu.MainMenuItems;
 import com.lgc.solutiontool.git.ui.mainmenu.MainMenuManager;
 import com.lgc.solutiontool.git.ui.toolbar.ToolbarButtons;
 import com.lgc.solutiontool.git.ui.toolbar.ToolbarManager;
-
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -142,6 +142,10 @@ public class ModularController {
         if (windowId.equals(ViewKey.WELCOME_WINDOW.getKey())) {
             ToolbarManager.getInstance().getButtonById(ToolbarButtons.IMPORT_GROUP_BUTTON.getId())
                     .setOnAction(event -> importGroupDialog());
+
+            ToolbarManager.getInstance().getButtonById(ToolbarButtons.REMOVE_GROUP_BUTTON.getId())
+                    .setOnAction(this::onRemoveGroup);
+
         } else if (windowId.equals(ViewKey.MAIN_WINDOW.getKey())) {
             Button switchBranch = ToolbarManager.getInstance()
                     .getButtonById(ToolbarButtons.SWITCH_BRANCH_BUTTON.getId());
@@ -173,6 +177,12 @@ public class ModularController {
             }
         };
         new Thread(runnable).start();
+    }
+
+    @FXML
+    public void onRemoveGroup(ActionEvent actionEvent) {
+        Group group = _welcomeWindowController.getSelectedGroup();
+        removeGroupDialog(group);
     }
 
     private void initActionsMainMenu(String windowId) {

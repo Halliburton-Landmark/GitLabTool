@@ -1,9 +1,5 @@
 package com.lgc.solutiontool.git.ui.javafx.controllers;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.List;
-
 import com.lgc.solutiontool.git.entities.Group;
 import com.lgc.solutiontool.git.services.ClonedGroupsService;
 import com.lgc.solutiontool.git.services.LoginService;
@@ -12,7 +8,6 @@ import com.lgc.solutiontool.git.ui.ViewKey;
 import com.lgc.solutiontool.git.ui.icon.AppIconHolder;
 import com.lgc.solutiontool.git.ui.toolbar.ToolbarButtons;
 import com.lgc.solutiontool.git.ui.toolbar.ToolbarManager;
-
 import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
@@ -33,6 +28,10 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Callback;
+
+import java.io.IOException;
+import java.net.URL;
+import java.util.List;
 
 /**
  * @author Yevhen Strazhko
@@ -91,6 +90,15 @@ public class WelcomeWindowController {
         }
     }
 
+    public Group getSelectedGroup() {
+        Group selectedGroup = (Group) groupList.getSelectionModel().getSelectedItem();
+        if (selectedGroup != null) {
+            return selectedGroup;
+        } else {
+            return new Group();
+        }
+    }
+
     private void configureToolbarEnablers(BooleanBinding booleanBinding) {
         ToolbarManager.getInstance().getAllButtonsForCurrentView().stream()
                 .filter(x -> x.getId().equals(ToolbarButtons.REMOVE_GROUP_BUTTON.getId())
@@ -101,7 +109,6 @@ public class WelcomeWindowController {
     private void configureToolbarCommands() {
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.SELECT_GROUP_BUTTON.getId()).setOnAction(this::onLoadSelectedGroupspace);
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.CLONE_GROUP_BUTTON.getId()).setOnAction(this::onCloneGroups);
-        ToolbarManager.getInstance().getButtonById(ToolbarButtons.REMOVE_GROUP_BUTTON.getId()).setOnAction(this::onRemoveGroup);
     }
 
     private void updateClonedGroups() {
@@ -119,29 +126,6 @@ public class WelcomeWindowController {
                 return new GroupListCell();
             }
         });
-    }
-    @FXML
-    public void onRemoveGroup(ActionEvent actionEvent) {
-        Group group = (Group) groupList.getSelectionModel().getSelectedItem();
-        URL modularWindow = getClass().getClassLoader().getResource(ViewKey.MODULAR_CONTAINER.getPath());
-        if (modularWindow == null) {
-            System.out.println("ERROR: Could not load fxml resource");
-            return;
-        }
-
-        try {
-            FXMLLoader fxmlLoader = new FXMLLoader(modularWindow);
-            Parent root = fxmlLoader.load();
-
-            ModularController myControllerHandle = fxmlLoader.getController();
-            myControllerHandle.removeGroupDialog(group);
-
-            Stage previousStage = (Stage) ((Node) actionEvent.getTarget()).getScene().getWindow();
-            previousStage.setScene(new Scene(root));
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     @FXML
