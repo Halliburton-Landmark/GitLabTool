@@ -5,10 +5,6 @@ import java.util.List;
 import com.lgc.solutiontool.git.entities.Group;
 import com.lgc.solutiontool.git.util.URLManager;
 
-/**
- *
- * @author Lyudmila Lyska
- */
 public class ClonedGroupsServiceImpl implements ClonedGroupsService {
 
     private final ClonedGroups _clonedGroupsProvider = ClonedGroups.getInstance();

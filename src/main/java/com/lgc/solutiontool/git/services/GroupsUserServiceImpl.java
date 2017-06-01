@@ -44,9 +44,9 @@ public class GroupsUserServiceImpl implements GroupsUserService {
 
     private static ClonedGroupsService _clonedGroupsService;
 
-    public GroupsUserServiceImpl(RESTConnector connector, ClonedGroupsService programProperties) {
+    public GroupsUserServiceImpl(RESTConnector connector, ClonedGroupsService clonedGroupsService) {
         setConnector(connector);
-        setProgramProperties(programProperties);
+        setClonedGroupsService(clonedGroupsService);
     }
 
     @Override
@@ -149,15 +149,15 @@ public class GroupsUserServiceImpl implements GroupsUserService {
         _connector = connector;
     }
 
-    private void setProgramProperties(ClonedGroupsService programProperties) {
-        if (programProperties != null) {
-            _clonedGroupsService = programProperties;
+    private void setClonedGroupsService(ClonedGroupsService clonedGroupsService) {
+        if (clonedGroupsService != null) {
+            _clonedGroupsService = clonedGroupsService;
         }
     }
 
     private Map<Optional<Group>, String> importGroup(Path groupPath) {
         Map<Optional<Group>, String> result = new HashMap<>();
-        String nameGroup = groupPath.getName(groupPath.getNameCount() - 1).toString();
+        String nameGroup = groupPath.getName(groupPath.getNameCount()-1).toString();
         if (checkGroupIsLoaded(groupPath.toAbsolutePath().toString())) {
             result.put(Optional.empty(), GROUP_ALREADY_LOADED_MESSAGE);
             return result;
@@ -179,6 +179,7 @@ public class GroupsUserServiceImpl implements GroupsUserService {
 
     @Override
     public Map<Boolean, String> removeGroup(Group removeGroup, boolean isRemoveFromLocalDisk) {
+        isRemoveFromLocalDisk = false; // TODO: see javadoc
         Map<Boolean, String> result = new HashMap<>();
         System.err.println("Deleting group is started ..."); // TODO move to log
         boolean isRemoved = _clonedGroupsService.removeGroups(Arrays.asList(removeGroup));
@@ -243,20 +244,20 @@ public class GroupsUserServiceImpl implements GroupsUserService {
         }
         Collection<String> projectsName = PathUtilities.getFolders(localPathGroup);
         if (projectsName.isEmpty()) {
-            result.put(Optional.of(group), group.getName() + PREFIX_SUCCESSFUL_LOAD);
+            result.put(Optional.of(group), group.getName() + PREFIX_SUCCESSFUL_LOAD );
             return result;
         }
         projects.stream().filter(project -> projectsName.contains(project.getName()))
                 .forEach((project) -> updateProjectStatus(project, localPathGroup.toString()));
-        result.put(Optional.of(group), group.getName() + PREFIX_SUCCESSFUL_LOAD);
+        result.put(Optional.of(group), group.getName() + PREFIX_SUCCESSFUL_LOAD );
         return result;
     }
 
     private void updateProjectStatus(Project project, String pathGroup) {
         project.setClonedStatus(true);
         project.setPathToClonedProject(pathGroup + File.separator + project.getName());
-        ProjectTypeService typeService = (ProjectTypeService) ServiceProvider.getInstance()
-                .getService(ProjectTypeService.class.getName());
+        ProjectTypeService typeService = (ProjectTypeService) ServiceProvider.getInstance().
+                getService(ProjectTypeService.class.getName());
         project.setProjectType(typeService.getProjectType(project));
     }
 
