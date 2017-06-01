@@ -148,6 +148,9 @@ public class ModularController {
             MenuItem about = MainMenuManager.getInstance().getButtonById(MainMenuItems.WELCOME_ABOUT);
             about.setOnAction(event -> showAboutPopup());
 
+            MenuItem importGroup = MainMenuManager.getInstance().getButtonById(MainMenuItems.WELCOME_IMPORT_GROUP);
+            importGroup.setOnAction(event -> importGroupDialog());
+
         } else if (windowId.equals(ViewKey.MAIN_WINDOW.getKey())) {
             MenuItem exit = MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_EXIT);
             exit.setOnAction(event -> Platform.exit());

@@ -15,10 +15,16 @@ import com.lgc.solutiontool.git.ui.ViewKey;
 public enum MainMenuItems {
 
     WELCOME_EXIT(ViewKey.WELCOME_WINDOW.getKey(), "File", "welcome_file_exit", "Exit"),
+    WELCOME_CLONE_GROUP(ViewKey.WELCOME_WINDOW.getKey(), "Group", "welcome_group_clone", "Clone"),
+    WELCOME_IMPORT_GROUP(ViewKey.WELCOME_WINDOW.getKey(), "Group", "welcome_group_import", "Import"),
+    WELCOME_REMOVE_GROUP(ViewKey.WELCOME_WINDOW.getKey(), "Group", "welcome_group_remove", "Remove"),
     WELCOME_ABOUT(ViewKey.WELCOME_WINDOW.getKey(), "Help", "welcome_help_about", "About"),
 
     MAIN_EXIT(ViewKey.MAIN_WINDOW.getKey(), "File", "main_file_exit", "Exit"),
+    MAIN_CREATE_BRANCH(ViewKey.MAIN_WINDOW.getKey(), "Git", "main_git_create_branch", "Create branch"),
     MAIN_SWITCH_BRANCH(ViewKey.MAIN_WINDOW.getKey(), "Git", "main_git_switch_branch", "Switch branch"),
+    MAIN_CLONE_PROJECT(ViewKey.MAIN_WINDOW.getKey(), "Git", "main_git_clone_project", "Clone project"),
+    MAIN_PULL(ViewKey.MAIN_WINDOW.getKey(), "Git", "main_git_pull", "Pull"),
     MAIN_ABOUT(ViewKey.MAIN_WINDOW.getKey(), "Help", "main_help_about", "About");
 
     private final String viewKey;

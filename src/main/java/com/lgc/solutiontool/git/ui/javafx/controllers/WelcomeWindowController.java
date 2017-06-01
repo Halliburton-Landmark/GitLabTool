@@ -10,6 +10,8 @@ import com.lgc.solutiontool.git.services.LoginService;
 import com.lgc.solutiontool.git.services.ServiceProvider;
 import com.lgc.solutiontool.git.ui.ViewKey;
 import com.lgc.solutiontool.git.ui.icon.AppIconHolder;
+import com.lgc.solutiontool.git.ui.mainmenu.MainMenuItems;
+import com.lgc.solutiontool.git.ui.mainmenu.MainMenuManager;
 import com.lgc.solutiontool.git.ui.toolbar.ToolbarButtons;
 import com.lgc.solutiontool.git.ui.toolbar.ToolbarManager;
 
@@ -59,6 +61,7 @@ public class WelcomeWindowController {
         userId.setText(_loginService.getCurrentUser().getName());
 
         configureToolbarCommands();
+        configureMainMenuCommands(groupListBooleanBinding);
     }
 
     @FXML
@@ -98,6 +101,14 @@ public class WelcomeWindowController {
     private void configureToolbarCommands() {
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.SELECT_GROUP_BUTTON.getId()).setOnAction(this::onLoadSelectedGroupspace);
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.CLONE_GROUP_BUTTON.getId()).setOnAction(this::onCloneGroups);
+    }
+
+    private void configureMainMenuCommands(BooleanBinding groupListBooleanBinding){
+        MenuItem cloneGroup = MainMenuManager.getInstance().getButtonById(MainMenuItems.WELCOME_CLONE_GROUP);
+        cloneGroup.setOnAction(this::onCloneGroups);
+
+        MenuItem removeGroup = MainMenuManager.getInstance().getButtonById(MainMenuItems.WELCOME_REMOVE_GROUP);
+        removeGroup.disableProperty().bind(groupListBooleanBinding);
     }
 
     private void updateClonedGroups() {
