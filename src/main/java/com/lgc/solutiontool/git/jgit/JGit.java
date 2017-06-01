@@ -48,9 +48,8 @@ import com.lgc.solutiontool.git.connections.token.CurrentUser;
 import com.lgc.solutiontool.git.entities.Group;
 import com.lgc.solutiontool.git.entities.Project;
 import com.lgc.solutiontool.git.entities.User;
+import com.lgc.solutiontool.git.services.ProgressListener;
 import com.lgc.solutiontool.git.util.NullCheckUtil;
-
-import javafx.util.Pair;
 
 /**
  * Class for work with Git:
@@ -132,61 +131,45 @@ public class JGit {
      *
      * @param group      group for clone
      * @param localPath  localPath the path to where will clone all the projects of the group
-     * @param onStart    method that will be called before clone of each project
-     * @param onSuccess  method for tracking the success progress of cloning,
-     *                   where <Integer> is a percentage of progress,
-     *                   <Project> is a cloned project.
-     * @param onError    method for tracking the errors during cloning,
-     *                   where <Integer> is a percentage of progress, <String> error message.
+     * @param progressListener
      */
-    public void clone(Group group, String localPath,
-                      Consumer<Project> onStart,
-                      BiConsumer<Integer, Project> onSuccess,
-                      BiConsumer<Integer, Pair<Project, String>> onError,
-                      Runnable onFinish) {
+    public void clone(Group group, String localPath, ProgressListener progressListener) {
         if (group == null || localPath == null) {
             return;
         }
         _isCloneCancelled = false;
         if (group.isCloned()) {
             String errorMsg = "!ERROR: The operation is impossible, the " + group.getName() + " group is cloned.";
-            NullCheckUtil.acceptBiConsumer(onError, 100, new Pair(null, errorMsg));
+            progressListener.onError(null, errorMsg);
             return;
         }
         Collection<Project> projects = group.getProjects();
         if (projects == null || projects.isEmpty()) {
             String errorMsg = "Cloning error. " + group.getName() + " group doesn't have projects.";
-            NullCheckUtil.acceptBiConsumer(onError, 100, new Pair(null, errorMsg));
+            progressListener.onError(null, errorMsg);
             return;
         }
         String groupPath = localPath + File.separator + group.getName();
 
-        cloneGroupInBackgroundThread(group, onStart, onSuccess, onError, projects, onFinish, groupPath);
+        cloneGroupInBackgroundThread(group, projects, progressListener, groupPath);
     }
 
-    private void cloneGroupInBackgroundThread(Group group,
-                                         Consumer<Project> onStart,
-                                         BiConsumer<Integer, Project> onSuccess,
-                                         BiConsumer<Integer, Pair<Project, String>> onError,
-                                         Collection<Project> projects,
-                                         Runnable onFinish,
+    private void cloneGroupInBackgroundThread(Group group, Collection<Project> projects,
+                                         ProgressListener progressListener,
                                          String groupPath) {
         Runnable task = () -> {
-            int aStepInProgress = 100 / projects.size();
-            int currentProgress = 0;
             for (Project project : projects) {
-                currentProgress += aStepInProgress;
-                NullCheckUtil.acceptConsumer(onStart, project);
+                progressListener.onStart(project);
                 if (!clone(project, groupPath)) {
                     String errorMsg = "Cloning error of the " + project.getName() + " project";
-                    NullCheckUtil.acceptBiConsumer(onError, currentProgress, new Pair(project, errorMsg));
+                    progressListener.onError(project, errorMsg);
                     continue;
                 }
-                NullCheckUtil.acceptBiConsumer(onSuccess, currentProgress, project);
+                progressListener.onSuccess(project);
             }
             group.setClonedStatus(true);
             group.setPathToClonedGroup(groupPath);
-            onFinish.run();
+            progressListener.onFinish();
         };
 
         Thread t = new Thread(task, "Clone Group Thread");

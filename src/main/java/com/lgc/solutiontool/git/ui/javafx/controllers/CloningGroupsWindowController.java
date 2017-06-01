@@ -5,18 +5,17 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
 
 import com.lgc.solutiontool.git.entities.Group;
 import com.lgc.solutiontool.git.entities.Project;
 import com.lgc.solutiontool.git.services.GroupsUserService;
 import com.lgc.solutiontool.git.services.LoginService;
+import com.lgc.solutiontool.git.services.ProgressListener;
 import com.lgc.solutiontool.git.services.ProjectTypeService;
 import com.lgc.solutiontool.git.services.ServiceProvider;
 import com.lgc.solutiontool.git.statuses.CloningStatus;
 import com.lgc.solutiontool.git.ui.icon.AppIconHolder;
 
-import javafx.application.Platform;
 import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -97,19 +96,19 @@ public class CloningGroupsWindowController {
         List<Group> selectedGroups = projectsList.getSelectionModel().getSelectedItems();
 
         Map<Project, CloningStatus> statuses = new LinkedHashMap<>();
-        _groupsService.cloneGroups(selectedGroups, destinationPath,
-                new SuccessfulOperationHandler(statuses),
-                new UnsuccessfulOperationHandler(statuses),
-                () -> {
-                    Platform.runLater(() -> {
-                        String dialogMessage = statuses.entrySet().stream()
-                                .map(x -> x.getKey().getName() + "  -  " + x.getValue().getMessage())
-                                .collect(Collectors.joining("\n"));
-                        cloningStatusDialog(dialogMessage);
-
-                        stage.close();
-                    });
-                });
+//        _groupsService.cloneGroups(selectedGroups, destinationPath,
+//                new SuccessfulOperationHandler(statuses),
+//                new UnsuccessfulOperationHandler(statuses),
+//                () -> {
+//                    Platform.runLater(() -> {
+//                        String dialogMessage = statuses.entrySet().stream()
+//                                .map(x -> x.getKey().getName() + "  -  " + x.getValue().getMessage())
+//                                .collect(Collectors.joining("\n"));
+//                        cloningStatusDialog(dialogMessage);
+//
+//                        stage.close();
+//                    });
+//                });
 
     }
 
@@ -182,31 +181,6 @@ public class CloningGroupsWindowController {
     }
 
     /**
-     * Handler for successful operation.
-     *
-     * @author Lyudmila Lyska
-     */
-    class SuccessfulOperationHandler implements BiConsumer<Integer, Project> {
-
-        private final Map<Project, CloningStatus> _statuses;
-
-        public SuccessfulOperationHandler(Map<Project, CloningStatus> statuses) {
-            _statuses = statuses;
-        }
-
-        @Override
-        public void accept(Integer percentage, Project project) {
-            System.out.println("Progress: " + percentage + "%"); // TODO: in log or UI console
-            _statuses.put(project, CloningStatus.SUCCESSFUL);
-            // Determine the project type
-            ProjectTypeService prTypeService = (ProjectTypeService) ServiceProvider.getInstance()
-                    .getService(ProjectTypeService.class.getName());
-            project.setProjectType(prTypeService.getProjectType(project));
-        }
-
-    }
-
-    /**
      * Handler for unsuccessful operation
      *
      * @author Lyudmila Lyska
@@ -226,6 +200,59 @@ public class CloningGroupsWindowController {
             System.err.println("!ERROR: " + projectMessage.getValue());
             System.out.println("Progress: " + percentage + "%");
         }
+
+    }
+
+    /**
+     *
+     *
+     * @author Lyudmila Lyska
+     */
+    class CloneProgressListener implements ProgressListener {
+
+        @Override
+        public void onSuccess(Object... t) {
+            if (t[0] instanceof Project) {
+                Project project = (Project) t[0];
+                System.err.println(project.getName() + " project is successful cloned!");
+
+                // Determine the project type
+                ProjectTypeService prTypeService = (ProjectTypeService) ServiceProvider.getInstance()
+                        .getService(ProjectTypeService.class.getName());
+                project.setProjectType(prTypeService.getProjectType(project));
+            }
+
+        }
+
+        @Override
+        public void onError(Object... t) {
+            if (t[0] instanceof String) {
+                System.err.println(t[0]);
+                if (t[1] instanceof Project) {
+                    Project project = (Project) t[1];
+                    System.err.println("Failed cloned of the " + project.getName() + " project!");
+                    return;
+                }
+                if (t[1] instanceof Group) {
+                    Group group = (Group) t[1];
+                    System.err.println("Failed cloned of the " + group.getName() + " group!");
+                }
+            }
+        }
+
+        @Override
+        public void onStart(Object... t) {
+            // TODO Auto-generated method stub
+
+        }
+
+        @Override
+        public void onFinish(Object... t) {
+            // TODO Auto-generated method stub
+
+        }
+
+
 
     }
 }

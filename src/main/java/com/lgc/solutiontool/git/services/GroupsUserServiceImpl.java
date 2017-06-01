@@ -7,8 +7,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.eclipse.jgit.api.errors.JGitInternalException;
@@ -17,14 +15,11 @@ import com.google.gson.reflect.TypeToken;
 import com.lgc.solutiontool.git.connections.RESTConnector;
 import com.lgc.solutiontool.git.connections.token.CurrentUser;
 import com.lgc.solutiontool.git.entities.Group;
-import com.lgc.solutiontool.git.entities.Project;
 import com.lgc.solutiontool.git.entities.User;
 import com.lgc.solutiontool.git.jgit.JGit;
 import com.lgc.solutiontool.git.properties.ProgramProperties;
 import com.lgc.solutiontool.git.statuses.CloningStatus;
 import com.lgc.solutiontool.git.util.JSONParser;
-
-import javafx.util.Pair;
 
 public class GroupsUserServiceImpl implements GroupsUserService {
     private RESTConnector _connector;
@@ -53,15 +48,12 @@ public class GroupsUserServiceImpl implements GroupsUserService {
     @Override
     public Group cloneGroup(Group group,
                             String destinationPath,
-                            Consumer<Project> onStart,
-                            BiConsumer<Integer, Project> onSuccess,
-                            BiConsumer<Integer, Pair<Project, String>> onError,
-                            Runnable onFinish) {
+                            ProgressListener progressListener) {
         try {
             if (group.getProjects() == null) {
                 group = getGroupById(group.getId());
             }
-            JGit.getInstance().clone(group, destinationPath, onStart, onSuccess, onError, onFinish);
+            JGit.getInstance().clone(group, destinationPath, progressListener);
         } catch (JGitInternalException ex) {
             System.out.println("!Error: " + ex.getMessage());
         }
@@ -86,9 +78,7 @@ public class GroupsUserServiceImpl implements GroupsUserService {
     @Override
     public Map<Group, CloningStatus> cloneGroups(List<Group> groups,
                                                  String destinationPath,
-                                                 BiConsumer<Integer, Project> onSuccess,
-                                                 BiConsumer<Integer, Pair<Project, String>> onError,
-                                                 Runnable onFinish) {
+                                                 ProgressListener progressListener) {
         if (groups == null || destinationPath == null) {
             return Collections.emptyMap();
         }
@@ -102,7 +92,7 @@ public class GroupsUserServiceImpl implements GroupsUserService {
         Map<Group, CloningStatus> statusMap = new HashMap<>();
         for (Group groupItem : groups) {
             //TODO pass onStart here
-            Group clonedGroup = cloneGroup(groupItem, destinationPath, null, onSuccess, onError, onFinish);
+            Group clonedGroup = cloneGroup(groupItem, destinationPath, progressListener);
             statusMap.put(clonedGroup, getStatus(clonedGroup));
         }
 
