@@ -1,11 +1,10 @@
-package com.lgc.solutiontool.git.services;
+package com.lgc.solutiontool.git.entities;
 
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
-import com.lgc.solutiontool.git.entities.Group;
 import com.lgc.solutiontool.git.xml.XMLAdapter;
 
 /**

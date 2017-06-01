@@ -2,6 +2,7 @@ package com.lgc.solutiontool.git.services;
 
 import java.util.List;
 
+import com.lgc.solutiontool.git.entities.ClonedGroups;
 import com.lgc.solutiontool.git.entities.Group;
 import com.lgc.solutiontool.git.util.URLManager;
 
@@ -74,8 +75,7 @@ public class ClonedGroupsServiceImpl implements ClonedGroupsService {
         return status;
     }
 
-    @Override
-    public void updateClonedGroupsInXML() {
+    private void updateClonedGroupsInXML() {
         String username = _loginService.getCurrentUser().getUsername();
         _storageService.updateStorage(URLManager.trimServerURL(_loginService.getServerURL()), username);
     }

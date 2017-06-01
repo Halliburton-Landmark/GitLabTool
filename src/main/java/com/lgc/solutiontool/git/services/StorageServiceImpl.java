@@ -10,6 +10,7 @@ import java.util.List;
 
 import javax.xml.bind.JAXBException;
 
+import com.lgc.solutiontool.git.entities.ClonedGroups;
 import com.lgc.solutiontool.git.entities.Group;
 import com.lgc.solutiontool.git.util.XMLParser;
 import com.lgc.solutiontool.git.xml.Servers;

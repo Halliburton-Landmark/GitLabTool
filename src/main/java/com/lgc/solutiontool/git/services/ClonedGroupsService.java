@@ -40,8 +40,4 @@ public interface ClonedGroupsService {
      */
     List<Group> loadClonedGroups();
 
-    /**
-    * Writes the current list of cloned groups to the XML file.
-    */
-   void updateClonedGroupsInXML();
 }
