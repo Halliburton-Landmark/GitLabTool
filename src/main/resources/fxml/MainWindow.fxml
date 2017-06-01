@@ -55,7 +55,7 @@
         <AnchorPane BorderPane.alignment="CENTER">
             <ListView fx:id="projectsList" prefHeight="400.0" prefWidth="248.0" AnchorPane.bottomAnchor="25.0"
                       AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
-            <Button maxHeight="25.0" onAction="#onSelectAll" text="Select all" AnchorPane.bottomAnchor="0.0"
+            <Button fx:id="selectAllButton" maxHeight="25.0" onAction="#onSelectAll" text="Select all" AnchorPane.bottomAnchor="0.0"
                     AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"/>
         </AnchorPane>
     </left>

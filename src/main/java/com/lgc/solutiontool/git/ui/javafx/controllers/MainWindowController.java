@@ -36,6 +36,7 @@ import javafx.scene.text.Text;
 
 public class MainWindowController {
     private static final String HEDER_GROUP_TITLE = "Current group: ";
+    private static final String SELECT_ALL_IMAGE_URL = "icons/main/select_all.png";
 
     private Group _selectedGroup;
 
@@ -51,12 +52,18 @@ public class MainWindowController {
     @FXML
     private Label userId;
 
+    @FXML
+    public Button selectAllButton;
+
     public void beforeShowing() {
         String username = _loginService.getCurrentUser().getName();
         userId.setText(username);
 
         String currentGroupname = getSelectedGroup().getName();
         leftLabel.setText(HEDER_GROUP_TITLE + currentGroupname);
+
+        Image imageSelectAll = new Image(getClass().getClassLoader().getResource(SELECT_ALL_IMAGE_URL).toExternalForm());
+        selectAllButton.setGraphic(new ImageView(imageSelectAll));
 
         configureListView(projectsList);
 
@@ -82,8 +89,8 @@ public class MainWindowController {
         projectsList.refresh();
     }
 
-    public void onSelectAll(){
-        if (projectsList != null && !projectsList.getItems().isEmpty()) {
+    public void onSelectAll() {
+        if (projectsList != null && projectsList.getItems() != null && !projectsList.getItems().isEmpty()) {
             projectsList.getSelectionModel().selectAll();
             projectsList.requestFocus();
         }
