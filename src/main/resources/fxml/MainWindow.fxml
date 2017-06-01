@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.layout.*?>
-<BorderPane
-            xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+<BorderPane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.lgc.solutiontool.git.ui.javafx.controllers.MainWindowController">
     <top>
         <GridPane maxHeight="17.0" style="-fx-background-color: #838EA9;" BorderPane.alignment="CENTER">
@@ -51,7 +51,13 @@
     </center>
 
     <left>
-        <ListView fx:id="projectsList" BorderPane.alignment="CENTER"/>
+
+        <AnchorPane BorderPane.alignment="CENTER">
+            <ListView fx:id="projectsList" prefHeight="400.0" prefWidth="248.0" AnchorPane.bottomAnchor="25.0"
+                      AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
+            <Button fx:id="selectAllButton" maxHeight="25.0" onAction="#onSelectAll" text="Select all" AnchorPane.bottomAnchor="0.0"
+                    AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"/>
+        </AnchorPane>
     </left>
 
 </BorderPane>
