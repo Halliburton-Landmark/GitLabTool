@@ -16,7 +16,7 @@ public class AlertWithCheckBox extends Alert {
     private CheckBox _optOut;
 
     public AlertWithCheckBox(AlertType type, String title, String headerText, String message,
-            String optOutMessage, ButtonType... buttonTypes) {
+            String optOutMessage, boolean isDisableCheckBox, ButtonType... buttonTypes) {
         super(type);
         getDialogPane().applyCss();
         Node graphic = getDialogPane().getGraphic();
@@ -27,6 +27,7 @@ public class AlertWithCheckBox extends Alert {
             protected Node createDetailsButton() {
                 _optOut = new CheckBox();
                 _optOut.setText(optOutMessage);
+                _optOut.setDisable(isDisableCheckBox);
                 return _optOut;
             }
         });

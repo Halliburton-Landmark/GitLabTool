@@ -1,6 +1,7 @@
 package com.lgc.solutiontool.git.services;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -14,6 +15,7 @@ import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
+import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.errors.JGitInternalException;
 
 import com.google.gson.reflect.TypeToken;
@@ -176,7 +178,7 @@ public class GroupsUserServiceImpl implements GroupsUserService {
     }
 
     @Override
-    public Map<Boolean, String> removeGroup(Group removeGroup) {
+    public Map<Boolean, String> removeGroup(Group removeGroup, boolean isRemoveFromLocalDisk) {
         Map<Boolean, String> result = new HashMap<>();
         System.err.println("Deleting group is started ..."); // TODO move to log
         boolean isRemoved = _clonedGroupsService.removeGroups(Arrays.asList(removeGroup));
@@ -184,8 +186,36 @@ public class GroupsUserServiceImpl implements GroupsUserService {
             result.put(false, "Failed deleting of group from the workspace.");
             return result;
         }
+        if (isRemoveFromLocalDisk) {
+            System.err.println("Deleting group from local diskis started ..."); // TODO move to log
+            return deleteGroupFromDirectory(removeGroup.getPathToClonedGroup());
+        }
         result.put(isRemoved, "Successful deleting of group from the workspace.");
         return result;
+    }
+
+    private Map<Boolean, String> deleteGroupFromDirectory(String pathToClonedGroup) {
+        Map<Boolean, String> result = new HashMap<>();
+        if (pathToClonedGroup == null) {
+            result.put(false, "Error removing. The path to the cloned group is not specified.");
+            return result;
+        }
+        Path path = Paths.get(pathToClonedGroup);
+        if (!PathUtilities.isExistsAndDirectory(path)) {
+            result.put(false, "Error removing. The specified path does not exist or is not a directory.");
+            return result;
+        }
+        try {
+            FileUtils.deleteDirectory(path.toFile());
+            result.put(true, "The group was successfully deleted from " + path.toString());
+            return result;
+        } catch (IOException e) {
+            String messageError = "Error removing. " + e.getMessage();
+            System.err.println(messageError); // TODO move to log
+            result.put(false, messageError);
+        }
+        return result;
+
     }
 
     private Optional<Group> getGroupByName(String nameGroup) {

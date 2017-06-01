@@ -69,9 +69,11 @@ public interface GroupsUserService {
     Map<Optional<Group>, String> importGroup(String groupPath);
 
     /**
-     *
-     * @param group
-     * @return
-     */
-    Map<Boolean, String> removeGroup(Group group);
+    *
+    * @param group
+    * @param isRemoveFromLocalDisk
+    * @return
+    */
+    Map<Boolean, String> removeGroup(Group group, boolean isRemoveFromLocalDisk);
+
 }
