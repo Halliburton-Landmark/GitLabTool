@@ -68,10 +68,8 @@ class RESTConnectorImpl implements RESTConnector {
             }
 
             int responseCode = con.getResponseCode();
-            /*System.out.println("\nSending '" + request +"' request to URL : " + obj.toString());
-            System.out.println("Response Code : " + responseCode);*/
-            logger.info("\nSending '" + request +"' request to URL : " + obj.toString() + 
-                    "\nResponse Code : " + responseCode);
+            logger.info("Sending '" + request +"' request to URL : " + obj.toString()); 
+            logger.info("Response Code : " + responseCode);
 
             BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
             StringBuilder response = new StringBuilder();
@@ -82,12 +80,11 @@ class RESTConnectorImpl implements RESTConnector {
             }
             in.close();
 
-            // print result
-//            System.out.println(response.toString());
             logger.info(response.toString());
             return response.toString();
+            
         } catch (Exception e) {
-            logger.error(e.getMessage());
+            logger.error(e.getStackTrace());
         }
         return null;
     }
@@ -116,6 +113,7 @@ class RESTConnectorImpl implements RESTConnector {
         try {
             return URLEncoder.encode(s, "UTF-8");
         } catch (UnsupportedEncodingException e) {
+            logger.error(e.getStackTrace());
             throw new UnsupportedOperationException(e);
         }
     }

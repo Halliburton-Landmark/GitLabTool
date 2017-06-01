@@ -41,7 +41,7 @@ import javafx.stage.Window;
 class LoginDialog extends Dialog<DialogDTO> {
 
     private static final Logger logger = LogManager.getLogger(LoginDialog.class);
-    
+
     private StorageService storageService = (StorageService) ServiceProvider.getInstance()
             .getService(StorageService.class.getName());
     private LoginService _loginService = (LoginService) ServiceProvider.getInstance()
@@ -160,13 +160,14 @@ class LoginDialog extends Dialog<DialogDTO> {
     private void setOnSignInButtonListener(Button button) {
         button.setOnAction(event -> {
             if (!isEmptyInputFields(userTextField, passwordField)) {
+                logger.info(WAITING_MESSAGE);
                 showMessage(WAITING_MESSAGE, Color.GREEN);
                 String serverURL = URLManager.completeServerURL(comboBox.getValue());
                 DialogDTO dto = new DialogDTO(userTextField.getText(), passwordField.getText(), serverURL);
                 _loginService.login(dto, responseCode -> {
                     if (responseCode == HttpStatus.SC_OK) {
                         Platform.runLater(() -> {
-                            logger.info("Logging successfull");
+                            logger.info("Login successfull");
                             getStage().close();
                         });
                     } else if (responseCode == HttpStatus.SC_UNAUTHORIZED) {
@@ -201,6 +202,7 @@ class LoginDialog extends Dialog<DialogDTO> {
     private void initializeOnCloseEvent() {
         Window window = this.getDialogPane().getScene().getWindow();
         window.setOnCloseRequest(event -> {
+            logger.debug("exit without logging in");
             System.exit(0);
         });
     }

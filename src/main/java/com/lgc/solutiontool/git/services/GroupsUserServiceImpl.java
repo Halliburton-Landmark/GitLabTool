@@ -13,6 +13,8 @@ import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jgit.api.errors.JGitInternalException;
 
 import com.google.gson.reflect.TypeToken;
@@ -28,6 +30,9 @@ import com.lgc.solutiontool.git.util.JSONParser;
 import com.lgc.solutiontool.git.util.PathUtilities;
 
 public class GroupsUserServiceImpl implements GroupsUserService {
+
+    private static final Logger logger = LogManager.getLogger(GroupsUserServiceImpl.class);
+
     private RESTConnector _connector;
 
     private static String privateTokenKey;
@@ -66,7 +71,7 @@ public class GroupsUserServiceImpl implements GroupsUserService {
             }
             JGit.getInstance().clone(group, destinationPath, onSuccess, onError);
         } catch (JGitInternalException ex) {
-            System.out.println("!Error: " + ex.getMessage());
+            logger.error(ex.getStackTrace());
         }
         return group;
     }
@@ -136,6 +141,7 @@ public class GroupsUserServiceImpl implements GroupsUserService {
         Path path = Paths.get(groupPath);
         if (!PathUtilities.isExistsAndDirectory(path)) {
             Map<Optional<Group>, String> result = new HashMap<>();
+            logger.debug(PathUtilities.PATH_NOT_EXISTS_OR_NOT_DIRECTORY);
             result.put(Optional.empty(), PathUtilities.PATH_NOT_EXISTS_OR_NOT_DIRECTORY);
             return result;
         }
@@ -146,16 +152,19 @@ public class GroupsUserServiceImpl implements GroupsUserService {
         Map<Optional<Group>, String> result = new HashMap<>();
         String nameGroup = groupPath.getName(groupPath.getNameCount()-1).toString();
         if (checkGroupIsLoaded(groupPath.toAbsolutePath().toString())) {
+            logger.debug(GROUP_ALREADY_LOADED_MESSAGE);
             result.put(Optional.empty(), GROUP_ALREADY_LOADED_MESSAGE);
             return result;
         }
         Optional<Group> optFoundGroup = getGroupByName(nameGroup);
         if (!optFoundGroup.isPresent()) {
+            logger.debug(GROUP_DOESNT_EXIST_MESSAGE);
             result.put(Optional.empty(), GROUP_DOESNT_EXIST_MESSAGE);
             return result;
         }
         Group foundGroup = getGroupById(optFoundGroup.get().getId());
         if (foundGroup == null) {
+            logger.debug(ERROR_GETTING_GROUP_MESSAGE);
             result.put(Optional.empty(), ERROR_GETTING_GROUP_MESSAGE);
             return result;
         }
@@ -184,17 +193,20 @@ public class GroupsUserServiceImpl implements GroupsUserService {
         Map<Optional<Group>, String> result = new HashMap<>();
         Collection<Project> projects = group.getProjects();
         if (projects == null || projects.isEmpty()) {
+            logger.debug(GROUP_DOESNT_HAVE_PROJECTS_MESSAGE);
             result.put(Optional.empty(), GROUP_DOESNT_HAVE_PROJECTS_MESSAGE);
             return result;
         }
         Collection<String> projectsName = PathUtilities.getFolders(localPathGroup);
         if (projectsName.isEmpty()) {
+            logger.debug(PREFIX_SUCCESSFUL_LOAD);
             result.put(Optional.of(group), group.getName() + PREFIX_SUCCESSFUL_LOAD );
             return result;
         }
         projects.stream()
                 .filter(project -> projectsName.contains(project.getName()))
                 .forEach((project) -> updateProjectStatus(project, localPathGroup.toString()));
+        logger.debug(PREFIX_SUCCESSFUL_LOAD);
         result.put(Optional.of(group), group.getName() + PREFIX_SUCCESSFUL_LOAD );
         return result;
     }

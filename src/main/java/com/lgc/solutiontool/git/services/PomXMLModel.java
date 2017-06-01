@@ -8,6 +8,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.model.io.xpp3.MavenXpp3Writer;
@@ -21,6 +23,8 @@ import org.codehaus.plexus.util.xml.pull.XmlPullParserException;
  */
 public class PomXMLModel {
 
+    private static final Logger logger = LogManager.getLogger(PomXMLModel.class);
+
     private Model _originalModel;
     private static final String FILE_NAME = "pom.xml";
 
@@ -31,14 +35,14 @@ public class PomXMLModel {
      */
     public PomXMLModel(String pomXmlPath) {
         if (pomXmlPath == null) {
-            System.err.println("!ERROR: Could not create file model, passed invalid data.");
+            logger.error("Could not create file model, passed invalid data.");
             return;
         }
         Path path = Paths.get(pomXmlPath);
         if (isCorrectPath(path)) {
             updateModelFile(path);
         } else {
-            System.err.println("!ERROR: Could not create file model. Invalid file path.");
+            logger.error("Could not create file model. Invalid file path.");
         }
     }
 
@@ -56,14 +60,14 @@ public class PomXMLModel {
      */
     public void writeToFile() {
         if (_originalModel == null) {
-            System.err.println("!ERROR: The file can not be written to. The model is not defined.");
+            logger.error("The file can not be written to. The model is not defined.");
             return;
         }
         try (Writer fileWriter = new FileWriter(_originalModel.getPomFile())) {
             MavenXpp3Writer pomWriter = new MavenXpp3Writer();
             pomWriter.write(fileWriter, _originalModel);
         } catch (Exception e) {
-            System.err.println("!ERROR: " + e.getMessage());
+            logger.error(e.getStackTrace());
         }
     }
 
@@ -77,7 +81,7 @@ public class PomXMLModel {
                 return;
             }
         } catch (IOException | XmlPullParserException e) {
-            System.err.println("!ERROR: " + e.getMessage());
+            logger.error(e.getStackTrace());
         }
         _originalModel = null;
     }
