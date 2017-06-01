@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.http.HttpStatus;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.lgc.solutiontool.git.services.LoginService;
 import com.lgc.solutiontool.git.services.ServiceProvider;
@@ -38,6 +40,8 @@ import javafx.stage.Window;
 
 class LoginDialog extends Dialog<DialogDTO> {
 
+    private static final Logger logger = LogManager.getLogger(LoginDialog.class);
+    
     private StorageService storageService = (StorageService) ServiceProvider.getInstance()
             .getService(StorageService.class.getName());
     private LoginService _loginService = (LoginService) ServiceProvider.getInstance()
@@ -162,15 +166,18 @@ class LoginDialog extends Dialog<DialogDTO> {
                 _loginService.login(dto, responseCode -> {
                     if (responseCode == HttpStatus.SC_OK) {
                         Platform.runLater(() -> {
+                            logger.info("Logging successfull");
                             getStage().close();
                         });
                     } else if (responseCode == HttpStatus.SC_UNAUTHORIZED) {
                         Platform.runLater(() -> {
+                            logger.warn(WRONG_CREDENTIALS);
                             showMessage(WRONG_CREDENTIALS, Color.RED);
                         });
                     }
                 });
             } else {
+                logger.warn(EMPTY_FIELD);
                 showMessage(EMPTY_FIELD, Color.RED);
             }
         });

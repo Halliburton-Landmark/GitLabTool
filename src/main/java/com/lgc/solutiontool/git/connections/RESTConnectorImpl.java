@@ -10,12 +10,16 @@ import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.lgc.solutiontool.git.exceptions.HTTPExceptionProvider;
 import com.lgc.solutiontool.git.util.RequestType;
 import com.lgc.solutiontool.git.util.URLManager;
 
 class RESTConnectorImpl implements RESTConnector {
 
+    private static final Logger logger = LogManager.getLogger(RESTConnectorImpl.class);
     private final HTTPExceptionProvider _exceptionProvider;
     private String urlMainPart;
 
@@ -64,8 +68,10 @@ class RESTConnectorImpl implements RESTConnector {
             }
 
             int responseCode = con.getResponseCode();
-            System.out.println("\nSending '" + request +"' request to URL : " + obj.toString());
-            System.out.println("Response Code : " + responseCode);
+            /*System.out.println("\nSending '" + request +"' request to URL : " + obj.toString());
+            System.out.println("Response Code : " + responseCode);*/
+            logger.info("\nSending '" + request +"' request to URL : " + obj.toString() + 
+                    "\nResponse Code : " + responseCode);
 
             BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
             StringBuilder response = new StringBuilder();
@@ -77,10 +83,11 @@ class RESTConnectorImpl implements RESTConnector {
             in.close();
 
             // print result
-            System.out.println(response.toString());
+//            System.out.println(response.toString());
+            logger.info(response.toString());
             return response.toString();
         } catch (Exception e) {
-            System.err.println("!Error: " + e.getMessage()); //TODO: move to logger
+            logger.error(e.getMessage());
         }
         return null;
     }
