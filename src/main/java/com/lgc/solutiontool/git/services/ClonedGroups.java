@@ -8,6 +8,14 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import com.lgc.solutiontool.git.entities.Group;
 import com.lgc.solutiontool.git.xml.XMLAdapter;
 
+/**
+ * The class contains information about the slanted projects of the group.
+ *
+ * It is the XmlRootElement.
+ * The information is read from the XML file and setting in it.
+ *
+ * @author Lyudmila Lyska
+ */
 @XmlRootElement
 public class ClonedGroups {
 
@@ -17,7 +25,6 @@ public class ClonedGroups {
 
     /**
      * Gets instance's the class
-     *
      * @return instance
      */
     public static ClonedGroups getInstance() {
@@ -39,7 +46,6 @@ public class ClonedGroups {
 
     /**
      * Gets a list of cloned groups
-     *
      * @return list of cloned groups
      */
     public List<Group> getClonedGroups() {

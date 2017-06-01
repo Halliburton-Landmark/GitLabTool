@@ -205,17 +205,17 @@ public class GroupsUserServiceImpl implements GroupsUserService {
             result.put(false, "Error removing. The specified path does not exist or is not a directory.");
             return result;
         }
+
         try {
             FileUtils.deleteDirectory(path.toFile());
             result.put(true, "The group was successfully deleted from " + path.toString());
             return result;
         } catch (IOException e) {
-            String messageError = "Error removing. " + e.getMessage();
-            System.err.println(messageError); // TODO move to log
-            result.put(false, messageError);
+            String errorMessage = "Error removing. " + e.getMessage();
+            result.put(true, errorMessage);
+            System.err.println(errorMessage);
         }
         return result;
-
     }
 
     private Optional<Group> getGroupByName(String nameGroup) {

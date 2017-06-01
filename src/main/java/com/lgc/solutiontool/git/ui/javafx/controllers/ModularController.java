@@ -14,7 +14,6 @@ import com.lgc.solutiontool.git.services.GroupsUserService;
 import com.lgc.solutiontool.git.services.ServiceProvider;
 import com.lgc.solutiontool.git.ui.ViewKey;
 import com.lgc.solutiontool.git.ui.icon.AppIconHolder;
-import com.lgc.solutiontool.git.ui.javafx.AlertWithCheckBox;
 import com.lgc.solutiontool.git.ui.mainmenu.MainMenuItems;
 import com.lgc.solutiontool.git.ui.mainmenu.MainMenuManager;
 import com.lgc.solutiontool.git.ui.toolbar.ToolbarButtons;
@@ -155,22 +154,23 @@ public class ModularController {
     }
 
     private void removeGroupDialog(Group selectedGroup) {
-        AlertWithCheckBox alert = new AlertWithCheckBox(AlertType.CONFIRMATION, REMOVE_GROUP_DIALOG_TITLE, null,
-                "Are you sure you want to delete the " + selectedGroup.getName() + "?",
-                "I want to remove group from a local disk", true, ButtonType.YES, ButtonType.NO);
+        Alert alert = new Alert(AlertType.CONFIRMATION);
+        alert.setTitle(REMOVE_GROUP_DIALOG_TITLE);
+        alert.setHeaderText("Are you sure you want to delete the " + selectedGroup.getName() + "?");
 
         Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
         stage.getIcons().add(_appIcon);
 
         Optional<ButtonType> result = alert.showAndWait();
-        if (result.get() == ButtonType.NO) {
+        if (result.get() == ButtonType.CANCEL) {
             return;
         }
         // TODO: We always pass <false> in the removeGroup method, because removing a group from a local disk
         // requires modification.
         // When we deleting .git folder we getting AccessDeniedException or folder is deleted only after
         // close application (Problem with threads(appears after import or clone group)).
-        Map<Boolean, String> status = _groupService.removeGroup(selectedGroup, false);
+        final boolean isRemoveFromLocakDisk = false;
+        Map<Boolean, String> status = _groupService.removeGroup(selectedGroup, isRemoveFromLocakDisk);
         for (Entry<Boolean, String> mapStatus : status.entrySet()) {
             String headerMessage;
             if (mapStatus.getKey()) {

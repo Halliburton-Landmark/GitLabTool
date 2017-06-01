@@ -35,11 +35,6 @@ public class ClonedGroupsServiceImpl implements ClonedGroupsService {
     }
 
     @Override
-    public void setClonedGroups(List<Group> groups) {
-        _clonedGroupsProvider.setClonedGroups(groups);
-    }
-
-    @Override
     public List<Group> getClonedGroups() {
         return _clonedGroupsProvider.getClonedGroups();
     }
@@ -51,11 +46,11 @@ public class ClonedGroupsServiceImpl implements ClonedGroupsService {
         }
         List<Group> clonedGroup = _clonedGroupsProvider.getClonedGroups();
         if (clonedGroup == null || clonedGroup.isEmpty()) {
-            setClonedGroups(groups);
+            _clonedGroupsProvider.setClonedGroups(groups);
         } else {
             clonedGroup.addAll(groups);
         }
-        updateClonedGroups();
+        updateClonedGroupsInXML();
     }
 
     @Override
@@ -63,7 +58,7 @@ public class ClonedGroupsServiceImpl implements ClonedGroupsService {
         String username = _loginService.getCurrentUser().getUsername();
         List<Group> groups = _storageService.loadStorage(URLManager.trimServerURL(_loginService.getServerURL()),
                 username);
-        setClonedGroups(groups);
+        _clonedGroupsProvider.setClonedGroups(groups);
         return getClonedGroups();
     }
 
@@ -78,13 +73,13 @@ public class ClonedGroupsServiceImpl implements ClonedGroupsService {
         }
         boolean status = clonedGroup.removeAll(groups);
         if (status) {
-            updateClonedGroups();
+            updateClonedGroupsInXML();
         }
         return status;
     }
 
     @Override
-    public void updateClonedGroups() {
+    public void updateClonedGroupsInXML() {
         String username = _loginService.getCurrentUser().getUsername();
         _storageService.updateStorage(URLManager.trimServerURL(_loginService.getServerURL()), username);
     }

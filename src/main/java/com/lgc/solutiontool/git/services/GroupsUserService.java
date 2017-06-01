@@ -69,10 +69,17 @@ public interface GroupsUserService {
     Map<Optional<Group>, String> importGroup(String groupPath);
 
     /**
+    * Removes a group from the workspace
     *
-    * @param group
-    * @param isRemoveFromLocalDisk
-    * @return
+    * @param group                 the group for deletion
+    * @param isRemoveFromLocalDisk if <true> remove group from local disk.
+    *                              !!! WARNING: We always pass <false> in the removeGroup method,
+    *                              because removing a group from a local disk requires modification.
+    *                              When we deleting ".git" folder we getting AccessDeniedException or folder
+    *                              is deleted only after close application
+    *                              (Problem with threads(appears after import or clone group)).
+    *
+    * @return status and message operation.
     */
     Map<Boolean, String> removeGroup(Group group, boolean isRemoveFromLocalDisk);
 
