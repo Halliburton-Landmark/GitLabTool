@@ -114,6 +114,9 @@ public class StorageServiceImpl implements StorageService {
         servers.getServers().forEach(server -> {
             if (server.getName().contentEquals(serverName)) {
                 server.setLastUserName(userName);
+                server.setLastUsed(true);
+            } else {
+                server.setLastUsed(false);
             }
         });
         return updateServers(servers);
@@ -123,5 +126,16 @@ public class StorageServiceImpl implements StorageService {
     public String getLastUserName(String serverName) {
         Server server = loadServers().getServer(serverName);
         return server != null ? server.getLastUserName() : "";
+    }
+    
+    @Override
+    public Server getLastUsedServer() {
+        Servers servers = loadServers();
+        for (Server server : servers.getServers()) {
+            if (server.isLastUsed()) {
+                return server;
+            }
+        }
+        return null;
     }
 }

@@ -13,6 +13,7 @@ import com.lgc.solutiontool.git.ui.ViewKey;
 import com.lgc.solutiontool.git.ui.javafx.controllers.ServerInputWindowController;
 import com.lgc.solutiontool.git.ui.javafx.dto.DialogDTO;
 import com.lgc.solutiontool.git.util.URLManager;
+import com.lgc.solutiontool.git.xml.Server;
 
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -111,7 +112,7 @@ class LoginDialog extends Dialog<DialogDTO> {
             }
             setLastUserName(comboBox, userTextField);
         });
-        comboBox.setValue(options.get(0));
+        comboBox.setValue(getDefaultComboBoxOption(options));
         grid.add(comboBox, 1, 3, 1, 1);
         
         
@@ -207,5 +208,10 @@ class LoginDialog extends Dialog<DialogDTO> {
     
     private void updateLastUserName() {
         storageService.updateLastUserName(comboBox.getValue(), userTextField.getText());
+    }
+    
+    private String getDefaultComboBoxOption(ObservableList<String> options) {
+        Server lastUsedServer = storageService.getLastUsedServer();
+        return lastUsedServer != null ? lastUsedServer.getName() : options.get(0);
     }
 }

@@ -11,6 +11,7 @@ public class Server {
     private String name;
     private String api;
     private String lastUserName;
+    private boolean lastUsed;
 
     public Server() {
     }
@@ -46,6 +47,15 @@ public class Server {
 
     public void setLastUserName(String lastUserName) {
         this.lastUserName = lastUserName;
+    }
+    
+
+    public boolean isLastUsed() {
+        return lastUsed;
+    }
+
+    public void setLastUsed(boolean lastUsed) {
+        this.lastUsed = lastUsed;
     }
 
     @Override

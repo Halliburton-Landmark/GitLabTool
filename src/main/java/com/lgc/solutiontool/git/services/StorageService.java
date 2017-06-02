@@ -1,10 +1,11 @@
 package com.lgc.solutiontool.git.services;
 
 
-import com.lgc.solutiontool.git.entities.Group;
-import com.lgc.solutiontool.git.xml.Servers;
-
 import java.util.List;
+
+import com.lgc.solutiontool.git.entities.Group;
+import com.lgc.solutiontool.git.xml.Server;
+import com.lgc.solutiontool.git.xml.Servers;
 /**
  * Class for work with program storage.
  *
@@ -59,4 +60,9 @@ public interface StorageService {
      * @return last user name who has been connected to this server or empty string if no one do it yet
      */
     String getLastUserName(String serverName);
+    
+    /**
+     * @return last used server
+     */
+    Server getLastUsedServer();
 }
