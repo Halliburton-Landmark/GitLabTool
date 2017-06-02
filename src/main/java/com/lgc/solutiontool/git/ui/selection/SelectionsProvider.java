@@ -50,7 +50,8 @@ public class SelectionsProvider {
      */
     public List getSelectionItems(String listViewId) {
         if (listViewId == null || listViewId.isEmpty()) {
-            logger.error("Incorrect data. Value is null or empty.", new IllegalArgumentException());
+            logger.error("Incorrect data. Value is null or empty.");
+            throw new IllegalArgumentException("Incorrect data. Value is null or empty.");
         }
         return _listItemsMap.get(listViewId);
     }
@@ -63,7 +64,8 @@ public class SelectionsProvider {
      */
     public void setSelectionItems(String listViewId, List items) {
         if (listViewId == null || listViewId.isEmpty() || items == null) {
-            logger.error("Incorrect data. Value is null or empty.", new IllegalArgumentException());
+            logger.error("Incorrect data. Value is null or empty.");
+            throw new IllegalArgumentException("Incorrect data. Value is null or empty.");
         }
         if (_listItemsMap.containsKey(listViewId)) {
             _listItemsMap.get(listViewId).clear();
