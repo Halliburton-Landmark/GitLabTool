@@ -1,6 +1,5 @@
 package com.lgc.solutiontool.git.ui.javafx;
 
-import com.lgc.solutiontool.git.jgit.JGit;
 import com.lgc.solutiontool.git.ui.javafx.dto.DialogDTO;
 
 import javafx.application.Platform;
@@ -70,7 +69,7 @@ public class CloneProgressDialog extends Dialog<DialogDTO> {
         _cancelButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent e) {
-                JGit.getInstance().cancelClone();
+                //JGit.getInstance().cancelClone();
                 _cancelButton.setDisable(true);
             }
         });

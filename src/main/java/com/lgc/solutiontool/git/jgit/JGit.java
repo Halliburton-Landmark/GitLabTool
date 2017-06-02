@@ -158,11 +158,8 @@ public class JGit {
                                          ProgressListener progressListener,
                                          String groupPath) {
         Runnable task = () -> {
-            double step = 1.0 / projects.size();
-            double currentProgress = 0.0;
             for (Project project : projects) {
-                currentProgress += step;
-                progressListener.onStart(currentProgress, project);
+                progressListener.onStart(project);
                 if (!clone(project, groupPath)) {
                     String errorMsg = "Cloning error of the " + project.getName() + " project";
                     progressListener.onError(project, errorMsg);
@@ -179,7 +176,7 @@ public class JGit {
         t.start();
     }
 
-    public void cancelClone() {
+    public void calcelClone() {
         _isCloneCancelled = true;
     }
 
