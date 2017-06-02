@@ -1,7 +1,6 @@
 package com.lgc.solutiontool.git.ui.javafx.controllers;
 
 import java.io.File;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -14,7 +13,6 @@ import com.lgc.solutiontool.git.services.ProgressListener;
 import com.lgc.solutiontool.git.services.ProjectTypeService;
 import com.lgc.solutiontool.git.services.ServiceProvider;
 import com.lgc.solutiontool.git.statuses.CloningStatus;
-import com.lgc.solutiontool.git.ui.icon.AppIconHolder;
 import com.lgc.solutiontool.git.ui.javafx.CloneProgressDialog;
 
 import javafx.beans.binding.BooleanBinding;
@@ -22,13 +20,11 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
@@ -95,26 +91,12 @@ public class CloningGroupsWindowController {
         Stage stage = (Stage) okButton.getScene().getWindow();
         String destinationPath = folderPath.getText();
         List<Group> selectedGroups = projectsList.getSelectionModel().getSelectedItems();
-
         Group selectedGroup = selectedGroups.get(0);
+
         CloneProgressDialog progressDialog = new CloneProgressDialog(stage, selectedGroup.getName());
+        progressDialog.updateGroupLabel(selectedGroup.getName());
 
         _groupsService.cloneGroup(selectedGroup, destinationPath, new CloneProgressListener(progressDialog));
-
-        Map<Project, CloningStatus> statuses = new LinkedHashMap<>();
-//        _groupsService.cloneGroups(selectedGroups, destinationPath,
-//                new SuccessfulOperationHandler(statuses),
-//                new UnsuccessfulOperationHandler(statuses),
-//                () -> {
-//                    Platform.runLater(() -> {
-//                        String dialogMessage = statuses.entrySet().stream()
-//                                .map(x -> x.getKey().getName() + "  -  " + x.getValue().getMessage())
-//                                .collect(Collectors.joining("\n"));
-//                        cloningStatusDialog(dialogMessage);
-//
-//                        stage.close();
-//                    });
-//                });
     }
 
     @FXML
@@ -124,18 +106,18 @@ public class CloningGroupsWindowController {
         stage.close();
     }
 
-    private void cloningStatusDialog(String content) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle(CLONING_STATUS_ALERT_TITLE);
-        alert.setHeaderText(CLONING_STATUS_ALERT_HEADER);
-        alert.setContentText(content);
-
-        Image appIcon = AppIconHolder.getInstance().getAppIcoImage();
-        Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
-        stage.getIcons().add(appIcon);
-
-        alert.showAndWait();
-    }
+//    private void cloningStatusDialog(String content) {
+//        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+//        alert.setTitle(CLONING_STATUS_ALERT_TITLE);
+//        alert.setHeaderText(CLONING_STATUS_ALERT_HEADER);
+//        alert.setContentText(content);
+//
+//        Image appIcon = AppIconHolder.getInstance().getAppIcoImage();
+//        Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+//        stage.getIcons().add(appIcon);
+//
+//        alert.showAndWait();
+//    }
 
     private void configureListView(ListView listView) {
         //config displayable string
@@ -253,17 +235,27 @@ public class CloningGroupsWindowController {
 
         @Override
         public void onStart(Object... t) {
-            // TODO Auto-generated method stub
+            if (t[0] instanceof Double) {
+                final double progress = (Double)t[0];
+                Runnable runnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        System.err.println("current progress: " + progress);
+                        _progressDialog.updateValue(progress);
+
+                        Project project = (Project)t[1];
+                        _progressDialog.updateProjectLabel(project.getName());
+                    }
+                };
+                new Thread(runnable).start();
+            }
+
 
         }
 
         @Override
         public void onFinish(Object... t) {
-            // TODO Auto-generated method stub
 
         }
-
-
-
     }
 }
