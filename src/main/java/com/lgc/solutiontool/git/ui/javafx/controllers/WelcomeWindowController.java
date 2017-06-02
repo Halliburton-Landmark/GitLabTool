@@ -47,7 +47,7 @@ public class WelcomeWindowController {
     private final LoginService _loginService = (LoginService) ServiceProvider.getInstance()
             .getService(LoginService.class.getName());
 
-    private final ClonedGroupsService _programProperties = (ClonedGroupsService) ServiceProvider.getInstance()
+    private final ClonedGroupsService _clonedGroupsService = (ClonedGroupsService) ServiceProvider.getInstance()
             .getService(ClonedGroupsService.class.getName());
 
     @FXML
@@ -112,7 +112,7 @@ public class WelcomeWindowController {
     }
 
     private void updateClonedGroups() {
-        List<Group> userGroups = _programProperties.loadClonedGroups();
+        List<Group> userGroups = _clonedGroupsService.loadClonedGroups();
         if(userGroups != null) {
             groupList.setItems(FXCollections.observableList(userGroups));
         }
