@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.lgc.solutiontool.git.entities.Group;
 import com.lgc.solutiontool.git.properties.ProgramProperties;
 import com.lgc.solutiontool.git.services.LoginService;
@@ -38,6 +41,8 @@ import javafx.util.Callback;
  * @author Yevhen Strazhko
  */
 public class WelcomeWindowController {
+    private static final Logger logger = LogManager.getLogger(WelcomeWindowController.class);
+    
     private static final String WINDOW_TITLE = "Cloning window";
     @FXML
     private Label userId;
@@ -83,8 +88,7 @@ public class WelcomeWindowController {
 
             stage.show();
         } catch (IOException e) {
-            System.out.println("Could not load fxml resource: IOException");
-            e.printStackTrace();
+            logger.error("Could not load fxml resource", e);
         }
     }
 
@@ -121,7 +125,7 @@ public class WelcomeWindowController {
     public void onLoadSelectedGroupspace(ActionEvent actionEvent) {
         URL modularWindow = getClass().getClassLoader().getResource(ViewKey.MODULAR_CONTAINER.getPath());
         if (modularWindow == null) {
-            System.out.println("ERROR: Could not load fxml resource");
+            logger.error("Could not load fxml resource");
             return;
         }
 
@@ -139,8 +143,7 @@ public class WelcomeWindowController {
             previousStage.setScene(new Scene(root));
 
         } catch (IOException e) {
-            System.out.println("Could not load fxml resource: IOException");
-            e.printStackTrace();
+            logger.error("Could not load fxml resource", e);
         }
 
     }

@@ -84,7 +84,7 @@ class RESTConnectorImpl implements RESTConnector {
             return response.toString();
             
         } catch (Exception e) {
-            logger.error(e.getStackTrace());
+            logger.error("", e);
         }
         return null;
     }
@@ -113,7 +113,7 @@ class RESTConnectorImpl implements RESTConnector {
         try {
             return URLEncoder.encode(s, "UTF-8");
         } catch (UnsupportedEncodingException e) {
-            logger.error(e.getStackTrace());
+            logger.error("", e);
             throw new UnsupportedOperationException(e);
         }
     }

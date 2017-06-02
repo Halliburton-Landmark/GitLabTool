@@ -218,7 +218,7 @@ public class JGit {
                 return Optional.of(status);
             }
         } catch (IOException | NoWorkTreeException | GitAPIException e) {
-            logger.error(e.getStackTrace());
+            logger.error("", e);
         }
         return Optional.empty();
     }
@@ -243,7 +243,7 @@ public class JGit {
                 try {
                     opGit.get().add().addFilepattern(nameFile).call();
                 } catch (GitAPIException e) {
-                    logger.error(e.getStackTrace());
+                    logger.error("", e);
                 }
             });
         }
@@ -277,7 +277,7 @@ public class JGit {
                 return JGitStatus.getStatus(mer.getMergeStatus().toString());
             }
         } catch (GitAPIException e) {
-            logger.error(e.getStackTrace());
+            logger.error("", e);
         }
         return JGitStatus.FAILED;
     }
@@ -468,7 +468,7 @@ public class JGit {
             logger.info("!CREATE NEW BRANCH: " + res.getName());
             return JGitStatus.SUCCESSFUL;
         } catch (GitAPIException | IOException e) {
-            logger.error(e.getStackTrace());
+            logger.error("", e);
         }
         return JGitStatus.FAILED;
     }
@@ -529,7 +529,7 @@ public class JGit {
             logger.info("!Switch to branch: " + ref.getName());
             return JGitStatus.SUCCESSFUL;
         } catch (IOException | GitAPIException e) {
-            logger.error(e.getStackTrace());
+            logger.error("", e);
         }
         return JGitStatus.FAILED;
     }
@@ -555,7 +555,7 @@ public class JGit {
             Repository repo = optGit.get().getRepository();
             return Optional.ofNullable(repo.getBranch());
         } catch (Exception e) {
-            logger.error(e.getStackTrace());
+            logger.error("", e);
         }
         return Optional.empty();
     }
@@ -594,7 +594,7 @@ public class JGit {
             logger.info("!Branch \"" + nameBranch + "\" deleted from the " + project.getPathToClonedProject());
             return JGitStatus.SUCCESSFUL;
         } catch (GitAPIException e) {
-            logger.error(e.getStackTrace());
+            logger.error("", e);
         }
         return JGitStatus.FAILED;
     }
@@ -614,9 +614,9 @@ public class JGit {
             Git.cloneRepository().setURI(linkClone).setDirectory(new File(localPath)).call();
             return true;
         } catch (InvalidRemoteException | TransportException e) {
-            logger.error(e.getStackTrace());
+            logger.error("", e);
         } catch (GitAPIException e) {
-            logger.error(e.getStackTrace());
+            logger.error("", e);
         }
         return false;
     }
@@ -645,7 +645,7 @@ public class JGit {
             logger.debug("commit " + JGitStatus.SUCCESSFUL);
             return JGitStatus.SUCCESSFUL;
         } catch (Exception e) {
-            logger.error(e.getStackTrace());
+            logger.error("", e);
         }
         return JGitStatus.FAILED;
     }
@@ -669,7 +669,7 @@ public class JGit {
             }
             return push(project);
         } catch (Exception e) {
-            logger.error(e.getStackTrace());
+            logger.error("", e);
         }
         return JGitStatus.FAILED;
     }
@@ -686,7 +686,7 @@ public class JGit {
                 logger.debug("push " + JGitStatus.SUCCESSFUL);
                 return JGitStatus.SUCCESSFUL;
             } catch (GitAPIException e) {
-                logger.error(e.getStackTrace());
+                logger.error("", e);
             }
         }
         return JGitStatus.FAILED;
@@ -697,7 +697,7 @@ public class JGit {
             try {
                 return Optional.ofNullable(Git.open(new File(path + "/.git")));
             } catch (IOException e) {
-                logger.error(e.getStackTrace());
+                logger.error("", e);
             }
         }
         return Optional.empty();
@@ -731,7 +731,7 @@ public class JGit {
 
             return Optional.ofNullable(git.diff().setNewTree(newTreeIter).call());
         } catch (IOException | GitAPIException e) {
-            logger.error(e.getStackTrace());
+            logger.error("", e);
         }
         return Optional.empty();
     }
@@ -761,7 +761,7 @@ public class JGit {
                 }
                 return brCommand.call();
             } catch (GitAPIException e) {
-                logger.error(e.getStackTrace());
+                logger.error("", e);
             }
         }
         return Collections.emptyList();
@@ -815,9 +815,9 @@ public class JGit {
             return false;
         } catch (RevisionSyntaxException | IncorrectObjectTypeException | AmbiguousObjectException
                 | MissingObjectException e) {
-            logger.error(e.getStackTrace());
+            logger.error("", e);
         } catch (IOException e) {
-            logger.error(e.getStackTrace());
+            logger.error("", e);
         }
         return true;
     }
@@ -830,7 +830,7 @@ public class JGit {
                 return true;
             }
         } catch (IOException e) {
-            logger.error(e.getStackTrace());
+            logger.error("", e);
         }
         return false;
     }
@@ -847,7 +847,7 @@ public class JGit {
             List<DiffEntry> diffEntries = optGit.get().diff().call();
             return !diffEntries.isEmpty();
         } catch (GitAPIException e) {
-            logger.error(e.getStackTrace());
+            logger.error("", e);
         }
         return false;
     }

@@ -85,7 +85,7 @@ class ReplacementServiceImpl implements ReplacementService {
                     }
                 });
             } catch (IOException e) {
-                logger.error(e.getStackTrace());
+                logger.error("", e);
             }
         }
     }
@@ -102,7 +102,7 @@ class ReplacementServiceImpl implements ReplacementService {
         } catch (IOException | DirectoryIteratorException e) {
             // IOException cannot be thrown during the iteration.
             // It can only be thrown by the newDirectoryStream method.
-            logger.error(e.getStackTrace());
+            logger.error("", e);
         }
         return Collections.emptyList();
     }
@@ -126,7 +126,7 @@ class ReplacementServiceImpl implements ReplacementService {
         try {
             return Optional.of(FileUtils.readFileToString(path.toFile(), Charset.forName("utf-8")));
         } catch (IOException e) {
-            logger.error(e.getStackTrace());
+            logger.error("", e);
         }
         return Optional.empty();
     }
@@ -135,7 +135,7 @@ class ReplacementServiceImpl implements ReplacementService {
         try {
             FileUtils.writeStringToFile(path.toFile(), textFromFile, Charset.forName("utf-8"), false);
         } catch (IOException e) {
-            logger.error(e.getStackTrace());
+            logger.error("", e);
         }
     }
 

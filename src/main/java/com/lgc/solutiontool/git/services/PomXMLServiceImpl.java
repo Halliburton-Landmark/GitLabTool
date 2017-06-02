@@ -37,7 +37,7 @@ public class PomXMLServiceImpl implements PomXMLService {
     private static final String CHANGE_ERROR_MESSAGE = "ERROR in changing the pom.xml file.";
 
     private void errorNotValidDataInLog() {
-        logger.error("!ERROR: Not valid data was submitted. Cannot modify the pom.xml files.");
+        logger.error("Not valid data was submitted. Cannot modify the pom.xml files.");
     }
 
     @Override
@@ -360,7 +360,7 @@ public class PomXMLServiceImpl implements PomXMLService {
                 }
             }
         } catch (IOException e) {
-            logger.error(e.getStackTrace());
+            logger.error("", e);
         }
         return null;
     }

@@ -110,6 +110,7 @@ class LoginDialog extends Dialog<DialogDTO> {
                         modifyComboBoxItems(comboBox, options);
                     });
                 } catch (IOException e) {
+                    logger.error("", e);
                     return;
                 }
             }

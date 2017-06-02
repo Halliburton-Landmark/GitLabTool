@@ -42,13 +42,13 @@ public class NetworkServiceImpl implements NetworkService {
             connection.setRequestMethod(RequestType.GET.toString());
             responseCode = connection.getResponseCode();
         } catch (SocketTimeoutException e1) {
-            logger.error(e1.getMessage()); // no need to log stackTrace here
+            logger.error("http status " + HttpStatus.SC_GATEWAY_TIMEOUT + " " + e1.getMessage()); 
             return HttpStatus.SC_GATEWAY_TIMEOUT;
         } catch (SocketException e2) {
-            logger.error(e2.getMessage()); // no need to log stackTrace here
+            logger.error("http status " + HttpStatus.SC_INTERNAL_SERVER_ERROR + " " + e2.getMessage()); 
             return HttpStatus.SC_INTERNAL_SERVER_ERROR;
         } catch (Exception e3) {
-            logger.error(e3.getMessage()); // no need to log stackTrace here
+            logger.error("Wrong response " + e3.getMessage()); 
             return WRONG_RESPONSE;
         }
         return responseCode;

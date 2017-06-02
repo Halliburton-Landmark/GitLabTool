@@ -41,7 +41,7 @@ public class StorageServiceImpl implements StorageService {
             XMLParser.saveObject(file, ProgramProperties.getInstance());
             return true;
         } catch (IOException | JAXBException e) {
-            logger.error(e.getStackTrace());
+            logger.error("", e);
             return false;
         }
     }
@@ -53,7 +53,7 @@ public class StorageServiceImpl implements StorageService {
             List<Group> list = XMLParser.loadObject(file, ProgramProperties.class).getClonedGroups();
             return list == null ? Collections.emptyList() : list;
         } catch (IOException | JAXBException e) {
-            logger.error(e.getStackTrace());
+            logger.error("", e);
             return Collections.emptyList();
         }
     }
@@ -65,7 +65,7 @@ public class StorageServiceImpl implements StorageService {
             XMLParser.saveObject(file, servers);
             return true;
         } catch (IOException | JAXBException e) {
-            logger.error(e.getStackTrace());
+            logger.error("", e);
             return false;
         }
     }
@@ -77,7 +77,8 @@ public class StorageServiceImpl implements StorageService {
             File file = getServersFile();
             servers = XMLParser.loadObject(file, Servers.class);
         } catch (IOException | JAXBException e) {
-            logger.error(e.getStackTrace());
+            logger.error(e.getMessage());
+            logger.warn("servers.xml file empty or does not exist. Load defaults");
         } finally {
             if (servers == null) {
                 updateServers(new Servers());

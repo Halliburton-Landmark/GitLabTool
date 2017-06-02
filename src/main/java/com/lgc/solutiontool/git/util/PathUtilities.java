@@ -7,6 +7,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 /**
  * A class of utilities for working with java.nio.file.Path class.
  *
@@ -14,6 +17,7 @@ import java.util.Collections;
  */
 public class PathUtilities {
 
+    private static final Logger logger = LogManager.getLogger(JSONParser.class);
     public static final String PATH_NOT_EXISTS_OR_NOT_DIRECTORY = "The transmitted path does not exist or is not a directory.";
 
     /**
@@ -50,7 +54,7 @@ public class PathUtilities {
         try {
             Files.newDirectoryStream(path).forEach((dir) -> folders.add(dir.getFileName().toString()));
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("", e);
         }
         return folders;
     }

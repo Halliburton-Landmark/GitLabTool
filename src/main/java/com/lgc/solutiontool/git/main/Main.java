@@ -32,7 +32,7 @@ public class Main {
             l = ProxySelector.getDefault().select(new URI(RESTConnector.URL_MAIN_PART));
         }
         catch (URISyntaxException e) {
-            e.printStackTrace();
+            logger.error("", e);
         }
         if (l != null) {
             for (Object name : l) {

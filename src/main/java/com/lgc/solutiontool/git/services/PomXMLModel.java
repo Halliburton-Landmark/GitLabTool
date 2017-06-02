@@ -67,7 +67,7 @@ public class PomXMLModel {
             MavenXpp3Writer pomWriter = new MavenXpp3Writer();
             pomWriter.write(fileWriter, _originalModel);
         } catch (Exception e) {
-            logger.error(e.getStackTrace());
+            logger.error("", e);
         }
     }
 

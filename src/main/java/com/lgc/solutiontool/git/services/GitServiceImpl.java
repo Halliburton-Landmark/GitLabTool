@@ -5,9 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.lgc.solutiontool.git.entities.Branch;
 import com.lgc.solutiontool.git.entities.Project;
 import com.lgc.solutiontool.git.jgit.BranchType;
@@ -16,12 +13,9 @@ import com.lgc.solutiontool.git.jgit.JGitStatus;
 
 public class GitServiceImpl implements GitService {
 
-    private static final Logger logger = LogManager.getLogger(GitServiceImpl.class);
-
     @Override
     public boolean containsBranches(Project project, List<Branch> branches, boolean isCommon) {
         if (project == null || branches == null) {
-            logger.error("Wrong parameters for obtaining branches.");
             throw new IllegalArgumentException("Wrong parameters for obtaining branches.");
         }
         List<Branch> projectBranches = JGit.getInstance().getBranches(project, BranchType.ALL);

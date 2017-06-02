@@ -8,6 +8,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.lgc.solutiontool.git.entities.Group;
 import com.lgc.solutiontool.git.properties.ProgramProperties;
 import com.lgc.solutiontool.git.services.GroupsUserService;
@@ -45,6 +48,8 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
 public class ModularController {
+
+    private static final Logger logger = LogManager.getLogger(ModularController.class);
 
     private static final String ABOUT_POPUP_TITLE = "About";
     private static final String ABOUT_POPUP_HEADER = "Solution tool for GitLab, powered by Luxoft";
@@ -183,8 +188,7 @@ public class ModularController {
             stage.setOnHiding(confirmCloseEventHandler);
             stage.show();
         } catch (IOException e) {
-            System.out.println("Could not load fxml resource: IOException");
-            e.printStackTrace();
+            logger.error("Could not load fxml resource", e);
         }
     }
 
