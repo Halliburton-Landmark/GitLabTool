@@ -78,7 +78,7 @@ public class StorageServiceImpl implements StorageService {
             servers = XMLParser.loadObject(file, Servers.class);
         } catch (IOException | JAXBException e) {
             logger.error(e.getMessage());
-            logger.warn("servers.xml file empty or does not exist. Load defaults");
+            logger.warn(SERVERS_FILENAME + " file empty or does not exist. Load defaults");
         } finally {
             if (servers == null) {
                 updateServers(new Servers());
