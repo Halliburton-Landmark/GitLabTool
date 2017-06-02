@@ -32,4 +32,13 @@ public class Servers {
     public void setServers(List<Server> servers) {
         this.servers = servers;
     }
+    
+    public Server getServer(String serverName) {
+        for (Server server : servers) {
+            if (server.getName().equals(serverName)) {
+                return server;
+            }
+        }
+        return null;
+    }
 }

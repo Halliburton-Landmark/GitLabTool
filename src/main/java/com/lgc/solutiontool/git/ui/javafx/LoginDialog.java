@@ -109,6 +109,7 @@ class LoginDialog extends Dialog<DialogDTO> {
                     return;
                 }
             }
+            setLastUserName(comboBox, userTextField);
         });
         comboBox.setValue(options.get(0));
         grid.add(comboBox, 1, 3, 1, 1);
@@ -161,6 +162,7 @@ class LoginDialog extends Dialog<DialogDTO> {
                 DialogDTO dto = new DialogDTO(userTextField.getText(), passwordField.getText(), serverURL);
                 _loginService.login(dto, responseCode -> {
                     if (responseCode == HttpStatus.SC_OK) {
+                        new Thread(this::updateLastUserName).start();
                         Platform.runLater(() -> {
                             getStage().close();
                         });
@@ -196,5 +198,14 @@ class LoginDialog extends Dialog<DialogDTO> {
         window.setOnCloseRequest(event -> {
             System.exit(0);
         });
+    }
+    
+    private void setLastUserName(ComboBox<String> comboBox, TextField userTextField) {
+        String lastUserName = storageService.getLastUserName(comboBox.getValue());
+        userTextField.setText(lastUserName);
+    }
+    
+    private void updateLastUserName() {
+        storageService.updateLastUserName(comboBox.getValue(), userTextField.getText());
     }
 }

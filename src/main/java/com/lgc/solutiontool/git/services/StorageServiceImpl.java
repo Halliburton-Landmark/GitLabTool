@@ -13,6 +13,7 @@ import javax.xml.bind.JAXBException;
 import com.lgc.solutiontool.git.entities.Group;
 import com.lgc.solutiontool.git.properties.ProgramProperties;
 import com.lgc.solutiontool.git.util.XMLParser;
+import com.lgc.solutiontool.git.xml.Server;
 import com.lgc.solutiontool.git.xml.Servers;
 
 
@@ -107,4 +108,20 @@ public class StorageServiceImpl implements StorageService {
         }
     }
 
+    @Override
+    public boolean updateLastUserName(String serverName, String userName) {
+        Servers servers = loadServers();
+        servers.getServers().forEach(server -> {
+            if (server.getName().contentEquals(serverName)) {
+                server.setLastUserName(userName);
+            }
+        });
+        return updateServers(servers);
+    }
+
+    @Override
+    public String getLastUserName(String serverName) {
+        Server server = loadServers().getServer(serverName);
+        return server != null ? server.getLastUserName() : "";
+    }
 }
