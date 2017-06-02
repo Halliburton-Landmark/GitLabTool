@@ -10,7 +10,7 @@ import com.lgc.solutiontool.git.services.LoginService;
 import com.lgc.solutiontool.git.services.ProgressListener;
 import com.lgc.solutiontool.git.services.ProjectTypeService;
 import com.lgc.solutiontool.git.services.ServiceProvider;
-import com.lgc.solutiontool.git.ui.javafx.ProgressDialog;
+import com.lgc.solutiontool.git.ui.javafx.CloneProgressDialog;
 
 import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
@@ -86,11 +86,9 @@ public class CloningGroupsWindowController {
         Stage stage = (Stage) okButton.getScene().getWindow();
         String destinationPath = folderPath.getText();
         List<Group> selectedGroups = projectsList.getSelectionModel().getSelectedItems();
-
-        ProgressDialog progressDialog = new ProgressDialog(stage);
-
         Group selectedGroup = selectedGroups.get(0);
-        progressDialog.updateGroupLabel(selectedGroup.getName());
+        CloneProgressDialog progressDialog = new CloneProgressDialog(stage, selectedGroup.getName());
+
         _groupsService.cloneGroup(selectedGroup, destinationPath, new CloneProgressListener(progressDialog));
     }
 
@@ -168,9 +166,9 @@ public class CloningGroupsWindowController {
      */
     class CloneProgressListener implements ProgressListener {
 
-        private final ProgressDialog _progressDialog;
+        private final CloneProgressDialog _progressDialog;
 
-        public CloneProgressListener(ProgressDialog progressDialog) {
+        public CloneProgressListener(CloneProgressDialog progressDialog) {
             _progressDialog = progressDialog; // TODO valid
         }
 

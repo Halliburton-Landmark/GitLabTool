@@ -25,10 +25,10 @@ import javafx.stage.Stage;
  *
  * @author Lyudmila Lyska
  */
-public class ProgressDialog extends Dialog<DialogDTO> {
+public class CloneProgressDialog extends Dialog<DialogDTO> {
 
     private final ProgressBar _progressBar = new ProgressBar(0);
-    private final ProgressIndicator _progressIndicator = new ProgressIndicator(0);
+    private final ProgressIndicator _progressIndicator = new ProgressIndicator();
 
     private final Label _currentGroupLabel;
     private final Label _currentProjectLabel;
@@ -36,7 +36,7 @@ public class ProgressDialog extends Dialog<DialogDTO> {
     private final TextArea _concole;
     private final Button _cancelButton;
 
-    public ProgressDialog(Stage primaryStage) {
+    public CloneProgressDialog(Stage primaryStage, String groupName) {
         GridPane grid = new GridPane();
         grid.setAlignment(Pos.CENTER_LEFT);
         grid.setHgap(10);
@@ -44,7 +44,7 @@ public class ProgressDialog extends Dialog<DialogDTO> {
         grid.setPadding(new Insets(25, 25, 25, 25));
 
         Label groupsLabel = new Label("Group: ");
-        _currentGroupLabel = new Label("...");
+        _currentGroupLabel = new Label(groupName);
         grid.add(groupsLabel, 0, 1);
         grid.add(_currentGroupLabel, 1, 1);
 
@@ -121,7 +121,7 @@ public class ProgressDialog extends Dialog<DialogDTO> {
             @Override
             public void run() {
                 _progressBar.setProgress(counter);
-                _progressIndicator.setProgress(counter);
+                //_progressIndicator.setProgress(counter);
             }
         };
         Thread thread = new Thread(runnable);
