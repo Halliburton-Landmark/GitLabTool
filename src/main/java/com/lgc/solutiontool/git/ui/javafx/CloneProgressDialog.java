@@ -28,7 +28,7 @@ import javafx.stage.Stage;
 public class CloneProgressDialog extends Dialog<DialogDTO> {
 
     private final ProgressBar _progressBar = new ProgressBar(0);
-    private final ProgressIndicator _progressIndicator = new ProgressIndicator();
+    private final ProgressIndicator _progressIndicator = new ProgressIndicator(0);
 
     private final Label _currentGroupLabel;
     private final Label _currentProjectLabel;
@@ -121,7 +121,7 @@ public class CloneProgressDialog extends Dialog<DialogDTO> {
             @Override
             public void run() {
                 _progressBar.setProgress(counter);
-                //_progressIndicator.setProgress(counter);
+                _progressIndicator.setProgress(counter);
             }
         };
         Thread thread = new Thread(runnable);
