@@ -6,10 +6,14 @@ import com.lgc.solutiontool.git.jgit.BranchType;
 import com.lgc.solutiontool.git.jgit.JGit;
 import com.lgc.solutiontool.git.jgit.JGitStatus;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+
+import org.eclipse.jgit.api.Status;
 
 public class GitServiceImpl implements GitService {
 
@@ -41,6 +45,24 @@ public class GitServiceImpl implements GitService {
             switchStatuses.put(project, status);
         }
         return switchStatuses;
+    }
+
+    @Override
+    public List<Project> getChangedProjects(List<Project> projects) {
+        if (projects == null) {
+            throw new IllegalArgumentException("Wrong parameters for obtaining branches.");
+        }
+
+        List<Project> changedProjects = new ArrayList<>();
+
+        for (Project project : projects) {
+            Optional<Status> status = JGit.getInstance().getStatusProject(project);
+            if (status.isPresent() && status.get().hasUncommittedChanges()) {
+                changedProjects.add(project);
+            }
+        }
+
+        return changedProjects;
     }
 
 }

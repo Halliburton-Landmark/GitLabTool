@@ -32,4 +32,12 @@ public interface GitService {
      * @return map with projects and theirs statuses of switching
      */
     Map<Project, JGitStatus> switchTo(List<Project> projects, Branch branch);
+
+    /**
+     * Gets projects that has uncommited changes
+     *
+     * @param projects projects that need to be checked
+     * @return list of projects that has uncommited changes
+     */
+    List<Project> getChangedProjects(List<Project> projects);
 }

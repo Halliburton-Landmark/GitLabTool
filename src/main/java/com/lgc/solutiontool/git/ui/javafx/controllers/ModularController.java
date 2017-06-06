@@ -4,18 +4,23 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 
 import com.lgc.solutiontool.git.entities.Group;
+import com.lgc.solutiontool.git.entities.Project;
 import com.lgc.solutiontool.git.properties.ProgramProperties;
+import com.lgc.solutiontool.git.services.GitService;
 import com.lgc.solutiontool.git.services.GroupsUserService;
 import com.lgc.solutiontool.git.services.ServiceProvider;
 import com.lgc.solutiontool.git.ui.ViewKey;
 import com.lgc.solutiontool.git.ui.icon.AppIconHolder;
+import com.lgc.solutiontool.git.ui.javafx.CommitDialog;
 import com.lgc.solutiontool.git.ui.mainmenu.MainMenuItems;
 import com.lgc.solutiontool.git.ui.mainmenu.MainMenuManager;
+import com.lgc.solutiontool.git.ui.selection.SelectionsProvider;
 import com.lgc.solutiontool.git.ui.toolbar.ToolbarButtons;
 import com.lgc.solutiontool.git.ui.toolbar.ToolbarManager;
 
@@ -30,6 +35,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SplitPane;
@@ -84,6 +91,9 @@ public class ModularController {
     private final GroupsUserService _groupService = (GroupsUserService) ServiceProvider.getInstance()
             .getService(GroupsUserService.class.getName());
 
+    private final GitService _gitService = (GitService) ServiceProvider.getInstance()
+            .getService(GitService.class.getName());
+
     private final ProgramProperties _programProperties = ProgramProperties.getInstance();
 
     public void loadWelcomeWindow() throws IOException {
@@ -136,7 +146,7 @@ public class ModularController {
         } else if (windowId.equals(ViewKey.MAIN_WINDOW.getKey())) {
             Button switchBranch = ToolbarManager.getInstance()
                     .getButtonById(ToolbarButtons.SWITCH_BRANCH_BUTTON.getId());
-            switchBranch.setOnAction(event -> showSwitchBranchWindow());
+            switchBranch.setOnAction(event -> switchBranchAction());
         }
     }
 
@@ -154,6 +164,16 @@ public class ModularController {
 
             MenuItem about = MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_ABOUT);
             about.setOnAction(event -> showAboutPopup());
+        }
+    }
+
+    private void switchBranchAction(){
+        List<Project> allSelectedProjects = SelectionsProvider.getInstance().getSelectionItems("mainWindow_projectsList");
+        List<Project> changedProjects = _gitService.getChangedProjects(allSelectedProjects);
+        if (changedProjects.isEmpty()) {
+            showSwitchBranchWindow();
+        } else {
+            showSwitchBranchConfirmWindow();
         }
     }
 
@@ -185,6 +205,30 @@ public class ModularController {
         } catch (IOException e) {
             System.out.println("Could not load fxml resource: IOException");
             e.printStackTrace();
+        }
+    }
+
+    private void showSwitchBranchConfirmWindow(){
+
+        Alert alert = new Alert(AlertType.WARNING);
+        alert.setTitle("Switch branch confirmation");
+        alert.setHeaderText("This projects have uncommited changes");
+        alert.setContentText("Would you like to commit the changes or discard ?");
+
+        ButtonType commitButton = new ButtonType("Commit changes");
+        ButtonType discardButton = new ButtonType("Discard changes");
+        ButtonType cancelButton = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+        alert.getButtonTypes().setAll(commitButton, discardButton, cancelButton);
+
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.get() == commitButton) {
+            CommitDialog dialog = new CommitDialog();
+            dialog.show();
+        } else if (result.get() == discardButton) {
+
+        } else {
+            alert.close();
         }
     }
 
