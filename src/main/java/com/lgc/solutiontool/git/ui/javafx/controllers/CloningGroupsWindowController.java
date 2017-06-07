@@ -2,8 +2,6 @@ package com.lgc.solutiontool.git.ui.javafx.controllers;
 
 import java.io.File;
 import java.util.List;
-import java.util.Map;
-import java.util.function.BiConsumer;
 
 import com.lgc.solutiontool.git.entities.Group;
 import com.lgc.solutiontool.git.entities.Project;
@@ -12,37 +10,40 @@ import com.lgc.solutiontool.git.services.LoginService;
 import com.lgc.solutiontool.git.services.ProgressListener;
 import com.lgc.solutiontool.git.services.ProjectTypeService;
 import com.lgc.solutiontool.git.services.ServiceProvider;
-import com.lgc.solutiontool.git.statuses.CloningStatus;
+import com.lgc.solutiontool.git.ui.icon.AppIconHolder;
 import com.lgc.solutiontool.git.ui.javafx.CloneProgressDialog;
 
+import javafx.application.Platform;
 import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import javafx.util.Callback;
-import javafx.util.Pair;
 
 @SuppressWarnings("unchecked")
 public class CloningGroupsWindowController {
     private static final String FOLDER_CHOOSER_DIALOG = "Destination folder";
     private static final String CLONING_STATUS_ALERT_TITLE = "Cloning info";
     private static final String CLONING_STATUS_ALERT_HEADER = "Cloning statuses:";
+    private static final String FINISH_CLONE_MESSAGE = "The cloning process is finished.";
 
 
-    private final LoginService _loginService =
-            (LoginService) ServiceProvider.getInstance().getService(LoginService.class.getName());
+    private final LoginService _loginService = (LoginService) ServiceProvider.getInstance()
+            .getService(LoginService.class.getName());
 
-    private final GroupsUserService _groupsService =
-            (GroupsUserService) ServiceProvider.getInstance().getService(GroupsUserService.class.getName());
+    private final GroupsUserService _groupsService = (GroupsUserService) ServiceProvider.getInstance()
+            .getService(GroupsUserService.class.getName());
 
     @FXML
     private TextField folderPath;
@@ -67,9 +68,8 @@ public class CloningGroupsWindowController {
         configureListView(projectsList);
         projectsList.setItems(myObservableList);
 
-        BooleanBinding booleanBinding =
-                projectsList.getSelectionModel().selectedItemProperty().isNull().or(
-                        folderPath.textProperty().isEqualTo(""));
+        BooleanBinding booleanBinding = projectsList.getSelectionModel().selectedItemProperty().isNull()
+                .or(folderPath.textProperty().isEqualTo(""));
 
         okButton.disableProperty().bind(booleanBinding);
     }
@@ -91,36 +91,34 @@ public class CloningGroupsWindowController {
         Stage stage = (Stage) okButton.getScene().getWindow();
         String destinationPath = folderPath.getText();
         List<Group> selectedGroups = projectsList.getSelectionModel().getSelectedItems();
+
         Group selectedGroup = selectedGroups.get(0);
 
         CloneProgressDialog progressDialog = new CloneProgressDialog(stage, selectedGroup.getName());
-        progressDialog.updateGroupLabel(selectedGroup.getName());
-
         _groupsService.cloneGroup(selectedGroup, destinationPath, new CloneProgressListener(progressDialog));
     }
 
     @FXML
     public void onCancelButton() throws Exception {
         Stage stage = (Stage) cancelButton.getScene().getWindow();
-
         stage.close();
     }
 
-//    private void cloningStatusDialog(String content) {
-//        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-//        alert.setTitle(CLONING_STATUS_ALERT_TITLE);
-//        alert.setHeaderText(CLONING_STATUS_ALERT_HEADER);
-//        alert.setContentText(content);
-//
-//        Image appIcon = AppIconHolder.getInstance().getAppIcoImage();
-//        Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
-//        stage.getIcons().add(appIcon);
-//
-//        alert.showAndWait();
-//    }
+    private void cloningStatusDialog(String content) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(CLONING_STATUS_ALERT_TITLE);
+        alert.setHeaderText(CLONING_STATUS_ALERT_HEADER);
+        alert.setContentText(content);
+
+        Image appIcon = AppIconHolder.getInstance().getAppIcoImage();
+        Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+        stage.getIcons().add(appIcon);
+
+        alert.showAndWait();
+    }
 
     private void configureListView(ListView listView) {
-        //config displayable string
+        // config displayable string
         listView.setCellFactory(new Callback<ListView<Group>, ListCell<Group>>() {
             @Override
             public ListCell<Group> call(ListView<Group> p) {
@@ -138,7 +136,7 @@ public class CloningGroupsWindowController {
             }
         });
 
-        //setup selection
+        // setup selection
         listView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         listView.addEventFilter(MouseEvent.MOUSE_PRESSED, evt -> {
             Node node = evt.getPickResult().getIntersectedNode();
@@ -168,30 +166,7 @@ public class CloningGroupsWindowController {
     }
 
     /**
-     * Handler for unsuccessful operation
-     *
-     * @author Lyudmila Lyska
-     */
-    class UnsuccessfulOperationHandler implements BiConsumer<Integer, Pair<Project, String>> {
-
-        private final Map<Project, CloningStatus> _statuses;
-
-        public UnsuccessfulOperationHandler(Map<Project, CloningStatus> statuses) {
-            _statuses = statuses;
-        }
-
-        @Override
-        public void accept(Integer percentage, Pair<Project, String> projectMessage) {
-            // TODO: in log or UI console
-            _statuses.put(projectMessage.getKey(), CloningStatus.FAILED);
-            System.err.println("!ERROR: " + projectMessage.getValue());
-            System.out.println("Progress: " + percentage + "%");
-        }
-
-    }
-
-    /**
-     *
+     * Listener for responding to the process of cloning a group
      *
      * @author Lyudmila Lyska
      */
@@ -200,62 +175,59 @@ public class CloningGroupsWindowController {
         private final CloneProgressDialog _progressDialog;
 
         public CloneProgressListener(CloneProgressDialog progressDialog) {
-            _progressDialog = progressDialog; // TODO valid
+            if (progressDialog == null) {
+                throw new IllegalAccessError("Invalid parameters");
+            }
+            _progressDialog = progressDialog;
         }
 
         @Override
         public void onSuccess(Object... t) {
             if (t[0] instanceof Project) {
                 Project project = (Project) t[0];
-                System.err.println(project.getName() + " project is successful cloned!");
+                _progressDialog.addMessageToConcole(project.getName() + " project is successful cloned!");
 
                 // Determine the project type
                 ProjectTypeService prTypeService = (ProjectTypeService) ServiceProvider.getInstance()
                         .getService(ProjectTypeService.class.getName());
                 project.setProjectType(prTypeService.getProjectType(project));
             }
-
+            if (t[1] instanceof Double) {
+                double progress = (Double) t[1];
+                _progressDialog.updateProgressBar(progress);
+            }
         }
 
         @Override
         public void onError(Object... t) {
-            if (t[0] instanceof String) {
-                System.err.println(t[0]);
-                if (t[1] instanceof Project) {
-                    Project project = (Project) t[1];
-                    System.err.println("Failed cloned of the " + project.getName() + " project!");
-                    return;
-                }
-                if (t[1] instanceof Group) {
-                    Group group = (Group) t[1];
-                    System.err.println("Failed cloned of the " + group.getName() + " group!");
-                }
+            if (t[0] instanceof Double) {
+                double progress = (Double) t[0];
+                _progressDialog.updateProgressBar(progress);
+            }
+            if (t[1] instanceof String) {
+                String message = (String) t[1];
+                _progressDialog.addMessageToConcole(message);
             }
         }
 
         @Override
         public void onStart(Object... t) {
-            if (t[0] instanceof Double) {
-                final double progress = (Double)t[0];
-                Runnable runnable = new Runnable() {
-                    @Override
-                    public void run() {
-                        System.err.println("current progress: " + progress);
-                        _progressDialog.updateValue(progress);
-
-                        Project project = (Project)t[1];
-                        _progressDialog.updateProjectLabel(project.getName());
-                    }
-                };
-                new Thread(runnable).start();
+            if (t[0] instanceof Project) {
+                Project project = (Project) t[0];
+                _progressDialog.updateProjectLabel(project.getName());
             }
-
-
         }
 
         @Override
         public void onFinish(Object... t) {
-
+            _progressDialog.resetProgress();
+            _progressDialog.addMessageToConcole(FINISH_CLONE_MESSAGE);
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    cloningStatusDialog(FINISH_CLONE_MESSAGE);
+                }
+            });
         }
     }
 }
