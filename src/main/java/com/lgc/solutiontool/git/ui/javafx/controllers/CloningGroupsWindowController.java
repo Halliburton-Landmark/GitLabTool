@@ -1,10 +1,12 @@
 package com.lgc.solutiontool.git.ui.javafx.controllers;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.List;
 
 import com.lgc.solutiontool.git.entities.Group;
 import com.lgc.solutiontool.git.entities.Project;
+import com.lgc.solutiontool.git.properties.ProgramProperties;
 import com.lgc.solutiontool.git.services.GroupsUserService;
 import com.lgc.solutiontool.git.services.LoginService;
 import com.lgc.solutiontool.git.services.ProgressListener;
@@ -95,7 +97,7 @@ public class CloningGroupsWindowController {
         Group selectedGroup = selectedGroups.get(0);
 
         CloneProgressDialog progressDialog = new CloneProgressDialog(stage, selectedGroup.getName());
-        _groupsService.cloneGroup(selectedGroup, destinationPath, new CloneProgressListener(progressDialog));
+        _groupsService.cloneGroups(selectedGroups, destinationPath, new CloneProgressListener(progressDialog));
     }
 
     @FXML
@@ -222,6 +224,10 @@ public class CloningGroupsWindowController {
         public void onFinish(Object... t) {
             _progressDialog.resetProgress();
             _progressDialog.addMessageToConcole(FINISH_CLONE_MESSAGE);
+            if (t[0] instanceof Group) {
+                Group clonedGroup = (Group) t[0];
+                ProgramProperties.getInstance().updateClonedGroups(Arrays.asList(clonedGroup));
+            }
             Platform.runLater(new Runnable() {
                 @Override
                 public void run() {

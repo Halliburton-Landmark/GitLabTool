@@ -3,6 +3,7 @@ package com.lgc.solutiontool.git.services;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -54,6 +55,7 @@ public class GroupsUserServiceImpl implements GroupsUserService {
                 group = getGroupById(group.getId());
             }
             JGit.getInstance().clone(group, destinationPath, progressListener);
+            ProgramProperties.getInstance().updateClonedGroups(Arrays.asList(group));
         } catch (JGitInternalException ex) {
             System.out.println("!Error: " + ex.getMessage());
         }

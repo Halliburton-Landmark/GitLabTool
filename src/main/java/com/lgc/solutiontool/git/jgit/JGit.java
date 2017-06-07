@@ -175,7 +175,7 @@ public class JGit {
             }
             group.setClonedStatus(true);
             group.setPathToClonedGroup(groupPath);
-            progressListener.onFinish();
+            progressListener.onFinish(group);
         };
 
         Thread t = new Thread(task, "Clone Group Thread");
