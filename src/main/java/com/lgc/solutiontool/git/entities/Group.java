@@ -208,4 +208,74 @@ public class Group {
     public Object[] getShared_projects() {
         return shared_projects;
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + (_isCloned ? 1231 : 1237);
+        result = prime * result + ((_pathToClonedGroup == null) ? 0 : _pathToClonedGroup.hashCode());
+        result = prime * result + ((full_name == null) ? 0 : full_name.hashCode());
+        result = prime * result + id;
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + ((path == null) ? 0 : path.hashCode());
+        result = prime * result + ((web_url == null) ? 0 : web_url.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        Group other = (Group) obj;
+        if (_isCloned != other._isCloned) {
+            return false;
+        }
+        if (_pathToClonedGroup == null) {
+            if (other._pathToClonedGroup != null) {
+                return false;
+            }
+        } else if (!_pathToClonedGroup.equals(other._pathToClonedGroup)) {
+            return false;
+        }
+        if (full_name == null) {
+            if (other.full_name != null) {
+                return false;
+            }
+        } else if (!full_name.equals(other.full_name)) {
+            return false;
+        }
+        if (id != other.id) {
+            return false;
+        }
+        if (name == null) {
+            if (other.name != null) {
+                return false;
+            }
+        } else if (!name.equals(other.name)) {
+            return false;
+        }
+        if (path == null) {
+            if (other.path != null) {
+                return false;
+            }
+        } else if (!path.equals(other.path)) {
+            return false;
+        }
+        if (web_url == null) {
+            if (other.web_url != null) {
+                return false;
+            }
+        } else if (!web_url.equals(other.web_url)) {
+            return false;
+        }
+        return true;
+    }
 }
