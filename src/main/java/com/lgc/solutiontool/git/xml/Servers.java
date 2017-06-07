@@ -2,6 +2,7 @@ package com.lgc.solutiontool.git.xml;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -32,13 +33,10 @@ public class Servers {
     public void setServers(List<Server> servers) {
         this.servers = servers;
     }
-    
-    public Server getServer(String serverName) {
-        for (Server server : servers) {
-            if (server.getName().equals(serverName)) {
-                return server;
-            }
-        }
-        return null;
+
+    public Optional<Server> getServer(String serverName) {
+        return servers.stream()
+                      .filter(server -> server.getName().equals(serverName))
+                      .findAny();
     }
 }

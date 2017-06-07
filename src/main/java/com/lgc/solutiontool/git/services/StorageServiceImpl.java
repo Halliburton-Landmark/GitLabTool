@@ -124,10 +124,11 @@ public class StorageServiceImpl implements StorageService {
 
     @Override
     public String getLastUserName(String serverName) {
-        Server server = loadServers().getServer(serverName);
-        return server != null ? server.getLastUserName() : "";
+        return loadServers().getServer(serverName)
+                            .map(Server::getLastUserName)
+                            .orElse("");
     }
-    
+
     @Override
     public Server getLastUsedServer() {
         Servers servers = loadServers();
