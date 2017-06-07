@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.http.HttpStatus;
+
+import com.lgc.solutiontool.git.services.LoginService;
 import com.lgc.solutiontool.git.services.ServiceProvider;
 import com.lgc.solutiontool.git.services.StorageService;
 import com.lgc.solutiontool.git.ui.ViewKey;
@@ -15,27 +18,46 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
-import javafx.scene.control.ButtonBar;
-import javafx.scene.control.ButtonType;
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+import javafx.stage.Stage;
+import javafx.stage.Window;
 
 class LoginDialog extends Dialog<DialogDTO> {
-	
-	private StorageService storageService =
-            (StorageService) ServiceProvider.getInstance().getService(StorageService.class.getName());
-	
-	LoginDialog() {
+
+    private StorageService storageService = (StorageService) ServiceProvider.getInstance()
+            .getService(StorageService.class.getName());
+    private LoginService _loginService = (LoginService) ServiceProvider.getInstance()
+            .getService(LoginService.class.getName());
+    
+    private final String WRONG_CREDENTIALS = "Wrong login or password! Please try again";
+    private final String WAITING_MESSAGE = "Login... Please wait";
+    private final String EMPTY_FIELD = "Login or password is empty!";
+
+    private final Text sceneTitle;
+    private final Label userName;
+    private final TextField userTextField;
+    private final Label password;
+    private final PasswordField passwordField;
+    private final Text repositoryText;
+    private final ComboBox<String> comboBox;
+    private final Label message;
+    private final Button signInButton;
+    
+    LoginDialog() {
         setTitle("GitLab Welcome");
         final GridPane grid = new GridPane();
         grid.setAlignment(Pos.CENTER);
@@ -43,33 +65,39 @@ class LoginDialog extends Dialog<DialogDTO> {
         grid.setVgap(10);
         grid.setPadding(new Insets(25, 25, 25, 25));
 
-        final Text scenetitle = new Text("Welcome To GitLab");
-        scenetitle.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
-        grid.add(scenetitle, 0, 0, 2, 1);
+        sceneTitle = new Text("Welcome To GitLab");
+        sceneTitle.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
+        GridPane.setHalignment(sceneTitle, HPos.CENTER);
+        grid.add(sceneTitle, 0, 0, 2, 1);
 
-        final Label userName = new Label("User Name:");
+        userName = new Label("User Name:");
         grid.add(userName, 0, 1);
 
-        final TextField userTextField = new TextField();
+        userTextField = new TextField();
         grid.add(userTextField, 1, 1);
 
-        final Label pw = new Label("Password:");
-        grid.add(pw, 0, 2);
+        password = new Label("Password:");
+        grid.add(password, 0, 2);
 
-        final PasswordField pwBox = new PasswordField();
-        grid.add(pwBox, 1, 2);
+        passwordField = new PasswordField();
+        grid.add(passwordField, 1, 2);
 
-        ButtonType loginButtonType = new ButtonType("Sign in", ButtonBar.ButtonData.OK_DONE);
-        getDialogPane().getButtonTypes().add(loginButtonType);
+        signInButton = new Button("Sign in");
+        signInButton.setDefaultButton(true);
+        GridPane.setHalignment(signInButton, HPos.RIGHT);
+        setOnSignInButtonListener(signInButton);
+        grid.add(signInButton, 1, 9, 1, 1);
 
-        final Text actiontarget = new Text();
-        grid.add(actiontarget, 1, 6);
+        message = new Label();
+        message.setText("blablabla");
+        message.setVisible(false);
+        grid.add(message, 0, 5, 3, 3);
         
-        final Text repositoryText = new Text("Service: ");
+        repositoryText = new Text("Service: ");
         grid.add(repositoryText, 0, 3);
         
         ObservableList<String> options = getBoxOptions();	
-        final ComboBox<String> comboBox = new ComboBox<>(options);
+        comboBox = new ComboBox<>(options);
         comboBox.valueProperty().addListener((observableValue, oldValue, currentValue) -> {
             if (currentValue.equals("Other...")) {
                 try {
@@ -84,14 +112,11 @@ class LoginDialog extends Dialog<DialogDTO> {
         });
         comboBox.setValue(options.get(0));
         grid.add(comboBox, 1, 3, 1, 1);
+        
+        
 
         getDialogPane().setContent(grid);
-        setResultConverter(dialogButton -> {
-            String serverURL = URLManager.completeServerURL(comboBox.getValue());
-            return dialogButton == loginButtonType 
-                    ? new DialogDTO(userTextField.getText(), pwBox.getText(), serverURL)
-                    : null;
-        });
+        initializeOnCloseEvent();
     }
 
     private ObservableList<String> getBoxOptions() {
@@ -121,5 +146,55 @@ class LoginDialog extends Dialog<DialogDTO> {
         ServerInputWindowController controller = (ServerInputWindowController) fxmlLoader.getController();
         controller.loadServerInputWindow(root);
     }
-
+    
+    private void showMessage(String msg, Color color) {
+        message.setText(msg);
+        message.setTextFill(Color.web(color.toString()));
+        message.setVisible(true);
+    }
+    
+    private void setOnSignInButtonListener(Button button) {
+        button.setOnAction(event -> {
+            if (!isEmptyInputFields(userTextField, passwordField)) {
+                showMessage(WAITING_MESSAGE, Color.GREEN);
+                String serverURL = URLManager.completeServerURL(comboBox.getValue());
+                DialogDTO dto = new DialogDTO(userTextField.getText(), passwordField.getText(), serverURL);
+                _loginService.login(dto, responseCode -> {
+                    if (responseCode == HttpStatus.SC_OK) {
+                        Platform.runLater(() -> {
+                            getStage().close();
+                        });
+                    } else if (responseCode == HttpStatus.SC_UNAUTHORIZED) {
+                        Platform.runLater(() -> {
+                            showMessage(WRONG_CREDENTIALS, Color.RED);
+                        });
+                    }
+                });
+            } else {
+                showMessage(EMPTY_FIELD, Color.RED);
+            }
+        });
+    }
+    
+    private boolean isEmptyInputFields(TextField userTextField, PasswordField passwordField) {
+        return userTextField == null 
+                || userTextField.getText().isEmpty() 
+                || passwordField == null 
+                || passwordField.getText().isEmpty();
+    }
+    
+    private Stage getStage() {
+        return (Stage) signInButton.getScene().getWindow();
+    }
+    
+    /*
+     * It should be used to close Login window via 'X' button without errors in main JavaFX thread
+     * Need to find better solution
+     */
+    private void initializeOnCloseEvent() {
+        Window window = this.getDialogPane().getScene().getWindow();
+        window.setOnCloseRequest(event -> {
+            System.exit(0);
+        });
+    }
 }

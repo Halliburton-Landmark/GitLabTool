@@ -32,8 +32,8 @@ public enum JGitStatus {
     },
 
     /**
-     * All the changes from the branch you’re trying to merge have already been merged
-     * to the branch you’re currently on.
+     * All the changes from the branch you're trying to merge have already been merged
+     * to the branch you're currently on.
      */
     ALREADY_UP_TO_DATE {
       @Override
@@ -147,6 +147,23 @@ public enum JGitStatus {
         @Override
         public String toString() {
           return "Branch does not exist";
+        }
+
+    },
+
+    /**
+     * The status indicates that the operation cannot be performed because the branch currently checked out
+     */
+    BRANCH_CURRENTLY_CHECKED_OUT {
+
+        @Override
+        public boolean isSuccessful() {
+            return false;
+        }
+
+        @Override
+        public String toString() {
+            return "Branch currently checked out";
         }
 
     };

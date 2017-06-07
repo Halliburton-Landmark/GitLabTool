@@ -2,6 +2,7 @@ package com.lgc.solutiontool.git.services;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import com.lgc.solutiontool.git.entities.Group;
 import com.lgc.solutiontool.git.entities.User;
@@ -45,4 +46,14 @@ public interface GroupsUserService {
      * @return Group
      */
     Group getGroupById(int idGroup);
+
+    /**
+     * Imports a group from the local repository. Gets all data about a group from the GitLab.
+     * Also, updates statuses, types and local paths of cloned projects.
+     *
+     * @param  groupPath path to cloned group
+     * @throws IllegalArgumentException if data is incorrect
+     * @return Optional of loaded group or Optional.empty() and a error message.
+     */
+    Map<Optional<Group>, String> importGroup(String groupPath);
 }

@@ -80,7 +80,7 @@ class RESTConnectorImpl implements RESTConnector {
             System.out.println(response.toString());
             return response.toString();
         } catch (Exception e) {
-            _exceptionProvider.throwException(e);
+            System.err.println("!Error: " + e.getMessage()); //TODO: move to logger
         }
         return null;
     }
@@ -113,16 +113,16 @@ class RESTConnectorImpl implements RESTConnector {
         }
     }
 
-	@Override
-	public void setUrlMainPart(String urlMainPart) {
-		if (urlMainPart != null && URLManager.isURLValid(urlMainPart)) {
-			this.urlMainPart = urlMainPart;
-		}
-	}
+    @Override
+    public void setUrlMainPart(String urlMainPart) {
+        if (urlMainPart != null && URLManager.isURLValid(urlMainPart)) {
+            this.urlMainPart = urlMainPart;
+        }
+    }
 
-	@Override
-	public String getUrlMainPart() {
-		return urlMainPart;
-	}
-	
+    @Override
+    public String getUrlMainPart() {
+        return urlMainPart;
+    }
+
 }

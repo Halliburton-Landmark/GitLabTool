@@ -16,10 +16,12 @@ public class DSGProjectType extends ProjectTypeImpl {
     public static final String TYPE_NAME = "com.lgc.dsg";
     private static final String STRUCTURE_OF_POM_FILE = "/pom.xml";
     private static final String STRUCTURE_OF_PLUGINS_POM = "/plugins/pom.xml";
+    private static final String DS_PROJECT_ICON_URL = "icons/project/dsg_project.png";
 
     public DSGProjectType() {
         super();
         setId(TYPE_NAME);
+        setImageUrl(DS_PROJECT_ICON_URL);
         addOperations(Arrays.asList(Operation.values()));
 
         addStructure(STRUCTURE_OF_POM_FILE);
