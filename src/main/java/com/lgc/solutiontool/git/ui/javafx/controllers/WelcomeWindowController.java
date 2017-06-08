@@ -94,6 +94,15 @@ public class WelcomeWindowController {
         }
     }
 
+    public Group getSelectedGroup() {
+        Group selectedGroup = (Group) groupList.getSelectionModel().getSelectedItem();
+        if (selectedGroup != null) {
+            return selectedGroup;
+        } else {
+            return new Group();
+        }
+    }
+
     private void configureToolbarEnablers(BooleanBinding booleanBinding) {
         ToolbarManager.getInstance().getAllButtonsForCurrentView().stream()
                 .filter(x -> x.getId().equals(ToolbarButtons.REMOVE_GROUP_BUTTON.getId())
