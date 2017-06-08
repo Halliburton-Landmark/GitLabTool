@@ -13,8 +13,8 @@ import javax.xml.bind.JAXBException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.lgc.solutiontool.git.entities.ClonedGroups;
 import com.lgc.solutiontool.git.entities.Group;
-import com.lgc.solutiontool.git.properties.ProgramProperties;
 import com.lgc.solutiontool.git.util.XMLParser;
 import com.lgc.solutiontool.git.xml.Servers;
 
@@ -25,7 +25,7 @@ public class StorageServiceImpl implements StorageService {
     private static final String USER_HOME_PROPERTY = "user.home";
     private static final String WORKSPACE_DIRECTORY_PROPERTY = ".SolutionTool";
     private static final String PATH_SEPARATOR = File.separator;
-    private static final String PROPERTY_FILENAME = "properties.xml";
+    private static final String CLONED_GROUPS_FILENAME = "clonedGroups.xml";
     private static final String SERVERS_FILENAME = "servers.xml";
 
     private final String _workingDirectory;
@@ -38,7 +38,7 @@ public class StorageServiceImpl implements StorageService {
     public boolean updateStorage(String server, String username) {
         try {
             File file = getPropFile(server, username);
-            XMLParser.saveObject(file, ProgramProperties.getInstance());
+            XMLParser.saveObject(file, ClonedGroups.getInstance());
             return true;
         } catch (IOException | JAXBException e) {
             logger.error("", e);
@@ -50,7 +50,7 @@ public class StorageServiceImpl implements StorageService {
     public List<Group> loadStorage(String server, String username) {
         try {
             File file = getPropFile(server, username);
-            List<Group> list = XMLParser.loadObject(file, ProgramProperties.class).getClonedGroups();
+            List<Group> list = XMLParser.loadObject(file, ClonedGroups.class).getClonedGroups();
             return list == null ? Collections.emptyList() : list;
         } catch (IOException | JAXBException e) {
             logger.error("", e);
@@ -90,7 +90,7 @@ public class StorageServiceImpl implements StorageService {
 
     private File getPropFile(String server, String username) throws IOException {
         Path propertyFilePath = Paths.get(_workingDirectory + PATH_SEPARATOR + server + PATH_SEPARATOR + username
-                + PATH_SEPARATOR + PROPERTY_FILENAME);
+                + PATH_SEPARATOR + CLONED_GROUPS_FILENAME);
         return getFile(propertyFilePath);
     }
 
