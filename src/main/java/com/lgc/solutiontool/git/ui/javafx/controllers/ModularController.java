@@ -223,6 +223,9 @@ public class ModularController {
 
         alert.getButtonTypes().setAll(commitButton, discardButton, cancelButton);
 
+        Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+        stage.getIcons().add(_appIcon);
+
         Optional<ButtonType> result = alert.showAndWait();
         if (result.get() == commitButton) {
 

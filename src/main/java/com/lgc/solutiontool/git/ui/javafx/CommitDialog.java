@@ -18,18 +18,9 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 /**
- * The AlertWithCheckBox class subclasses the Alert class.
+ * CommitDialog class allows to create a window for committing changes.
  *
- * It provides support for a number of pre-built dialog types that can be easily
- * shown to users to prompt for a response.
- *
- * The AlertWithCheckBox class allows to create a window with certain
- * ButtonTypes (for example: ButtonType.YES, ButtonType.NO, ButtonType.CANCEL etc).
- *
- * Also, the AlertWithCheckBox class contains a checkbox in the lower left corner.
- * The state of the checkbox button and its text we can be set in the constructor
- *
- * @author Lyudmila Lyska
+ * @author Pavlo Pidhorniy
  */
 public class CommitDialog extends Dialog {
     private static final Image _appIcon = AppIconHolder.getInstance().getAppIcoImage();

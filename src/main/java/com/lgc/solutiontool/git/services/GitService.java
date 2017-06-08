@@ -1,11 +1,11 @@
 package com.lgc.solutiontool.git.services;
 
+import java.util.List;
+import java.util.Map;
+
 import com.lgc.solutiontool.git.entities.Branch;
 import com.lgc.solutiontool.git.entities.Project;
 import com.lgc.solutiontool.git.jgit.JGitStatus;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * Service for working with Git features.
@@ -44,10 +44,9 @@ public interface GitService {
     /**
      * Commit changes to selectedProjects
      *
-     * @param projects
-     * @param commitMessage
-     * @param isPushImmediately
-     * @return
+     * @param projects          projects that contains changes
+     * @param commitMessage     message for commit
+     * @param isPushImmediately if true - make push operation after commiting, if false - make commit without pushing
      */
     void commitChanges(List<Project> projects, String commitMessage, boolean isPushImmediately);
 }
