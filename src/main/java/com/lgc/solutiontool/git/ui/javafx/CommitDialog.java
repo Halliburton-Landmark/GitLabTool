@@ -1,11 +1,14 @@
 package com.lgc.solutiontool.git.ui.javafx;
 
+import java.util.Optional;
+
 import org.apache.commons.lang.StringUtils;
 
 import com.lgc.solutiontool.git.ui.icon.AppIconHolder;
 
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextInputDialog;
@@ -28,18 +31,21 @@ import javafx.stage.Stage;
  *
  * @author Lyudmila Lyska
  */
-public class CommitDialog extends TextInputDialog {
+public class CommitDialog extends Dialog {
     private static final Image _appIcon = AppIconHolder.getInstance().getAppIcoImage();
+
+    private ButtonType commitButton;
+    private ButtonType commitAndPushButton;
 
     private TextArea _textArea;
 
     public CommitDialog() {
         super();
 
-        ButtonType commit = new ButtonType("Commit");
-        ButtonType commitAndPush = new ButtonType("Commit and push");
+        commitButton = new ButtonType("Commit");
+        commitAndPushButton = new ButtonType("Commit and push");
         ButtonType cancel = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
-        getDialogPane().getButtonTypes().setAll(commit, commitAndPush, cancel);
+        getDialogPane().getButtonTypes().setAll(commitButton, commitAndPushButton, cancel);
 
         Label label = new Label("Commit message:");
         _textArea = new TextArea();
@@ -53,6 +59,16 @@ public class CommitDialog extends TextInputDialog {
 
         setTitle("Switch branch confirmation");
         setHeaderText("This projects have uncommited a changes");
+
+
+    }
+
+    public ButtonType getCommitButton() {
+        return commitButton;
+    }
+
+    public ButtonType getCommitAndPushButton() {
+        return commitAndPushButton;
     }
 
     public String getCommitMessage(){

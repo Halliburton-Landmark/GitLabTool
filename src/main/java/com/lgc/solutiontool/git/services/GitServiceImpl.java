@@ -12,6 +12,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import org.eclipse.jgit.api.Status;
 
@@ -65,4 +67,44 @@ public class GitServiceImpl implements GitService {
         return changedProjects;
     }
 
+    @Override
+    public void commitChanges(List<Project> projects, String commitMessage, boolean isPushImmediately) {
+        if (isPushImmediately) {
+            JGit.getInstance().commitAndPush(projects, commitMessage, true, null, null, null, null,
+                    new SuccessfulOperationHandler(), new UnsuccessfulOperationHandler());
+        } else {
+            JGit.getInstance().commit(projects, commitMessage, true, null, null, null, null,
+                    new SuccessfulOperationHandler(), new UnsuccessfulOperationHandler());
+        }
+    }
+
+    /**
+     * Handler for successful operation
+     *
+     * @author Pavlo Pidhorniy
+     */
+    class SuccessfulOperationHandler implements Consumer<Integer> {
+
+        @Override
+        public void accept(Integer percentage) {
+            System.out.println("Progress: " + percentage + "%");
+
+        }
+    }
+
+    /**
+     * Handler for unsuccessful operation
+     *
+     * @author Pavlo Pidhorniy
+     */
+    class UnsuccessfulOperationHandler implements BiConsumer<Integer, String> {
+
+        @Override
+        public void accept(Integer percentage, String message) {
+            // TODO: in log or UI console
+            System.err.println("!ERROR: " + message);
+            System.out.println("Progress: " + percentage + "%");
+        }
+
+    }
 }

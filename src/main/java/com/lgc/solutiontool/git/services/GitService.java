@@ -34,10 +34,20 @@ public interface GitService {
     Map<Project, JGitStatus> switchTo(List<Project> projects, Branch branch);
 
     /**
-     * Gets projects that has uncommited changes
+     * Gets projects that have uncommited changes
      *
      * @param projects projects that need to be checked
      * @return list of projects that has uncommited changes
      */
     List<Project> getChangedProjects(List<Project> projects);
+
+    /**
+     * Commit changes to selectedProjects
+     *
+     * @param projects
+     * @param commitMessage
+     * @param isPushImmediately
+     * @return
+     */
+    void commitChanges(List<Project> projects, String commitMessage, boolean isPushImmediately);
 }

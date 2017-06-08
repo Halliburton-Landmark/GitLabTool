@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.lgc.solutiontool.git.entities.Group;
 import com.lgc.solutiontool.git.entities.Project;
 import com.lgc.solutiontool.git.properties.ProgramProperties;
@@ -173,7 +175,7 @@ public class ModularController {
         if (changedProjects.isEmpty()) {
             showSwitchBranchWindow();
         } else {
-            showSwitchBranchConfirmWindow();
+            showSwitchBranchConfirmWindow(changedProjects);
         }
     }
 
@@ -208,7 +210,7 @@ public class ModularController {
         }
     }
 
-    private void showSwitchBranchConfirmWindow(){
+    private void showSwitchBranchConfirmWindow(List<Project> selectedProjects){
 
         Alert alert = new Alert(AlertType.WARNING);
         alert.setTitle("Switch branch confirmation");
@@ -223,8 +225,23 @@ public class ModularController {
 
         Optional<ButtonType> result = alert.showAndWait();
         if (result.get() == commitButton) {
+
             CommitDialog dialog = new CommitDialog();
-            dialog.show();
+            Optional<ButtonType> commitResult = dialog.showAndWait();
+
+            if (commitResult.get() == dialog.getCommitButton() || commitResult.get() == dialog.getCommitAndPushButton()) {
+                String commitMessage = StringUtils.EMPTY;
+                if (dialog.getCommitMessage() != null) {
+                    commitMessage = dialog.getCommitMessage();
+                }
+
+                boolean isPush = false;
+                if (commitResult.get() == dialog.getCommitAndPushButton()) {
+                    isPush = true;
+                }
+                _gitService.commitChanges(selectedProjects, commitMessage, isPush);
+            }
+
         } else if (result.get() == discardButton) {
 
         } else {
