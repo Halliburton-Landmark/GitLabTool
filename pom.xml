@@ -76,7 +76,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>com.lgc.solutiontool.git.main.Main</mainClass>
+                            <mainClass>com.lgc.gitlabtool.git.main.Main</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
