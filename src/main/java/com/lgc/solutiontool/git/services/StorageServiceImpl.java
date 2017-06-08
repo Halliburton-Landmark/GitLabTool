@@ -119,6 +119,7 @@ public class StorageServiceImpl implements StorageService {
                 server.setLastUsed(false);
             }
         });
+        
         return updateServers(servers);
     }
 
@@ -131,12 +132,10 @@ public class StorageServiceImpl implements StorageService {
 
     @Override
     public Server getLastUsedServer() {
-        Servers servers = loadServers();
-        for (Server server : servers.getServers()) {
-            if (server.isLastUsed()) {
-                return server;
-            }
-        }
-        return null;
+        return loadServers().getServers()
+                .stream()
+                .filter(Server::isLastUsed)
+                .findAny()
+                .orElse(null);
     }
 }
