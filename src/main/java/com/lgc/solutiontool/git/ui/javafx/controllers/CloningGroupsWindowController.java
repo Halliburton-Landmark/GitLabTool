@@ -6,7 +6,7 @@ import java.util.List;
 
 import com.lgc.solutiontool.git.entities.Group;
 import com.lgc.solutiontool.git.entities.Project;
-import com.lgc.solutiontool.git.properties.ProgramProperties;
+import com.lgc.solutiontool.git.services.ClonedGroupsService;
 import com.lgc.solutiontool.git.services.GroupsUserService;
 import com.lgc.solutiontool.git.services.LoginService;
 import com.lgc.solutiontool.git.services.ProgressListener;
@@ -46,6 +46,9 @@ public class CloningGroupsWindowController {
 
     private final GroupsUserService _groupsService = (GroupsUserService) ServiceProvider.getInstance()
             .getService(GroupsUserService.class.getName());
+
+    private final ClonedGroupsService _clonedGroupsService = (ClonedGroupsService) ServiceProvider.getInstance()
+            .getService(ClonedGroupsService.class.getName());
 
     @FXML
     private TextField folderPath;
@@ -226,7 +229,7 @@ public class CloningGroupsWindowController {
             _progressDialog.addMessageToConcole(FINISH_CLONE_MESSAGE);
             if (t[0] instanceof Group) {
                 Group clonedGroup = (Group) t[0];
-                ProgramProperties.getInstance().updateClonedGroups(Arrays.asList(clonedGroup));
+                _clonedGroupsService.addGroups(Arrays.asList(clonedGroup));
             }
             Platform.runLater(new Runnable() {
                 @Override
