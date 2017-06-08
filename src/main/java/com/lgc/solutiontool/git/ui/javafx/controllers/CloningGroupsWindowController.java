@@ -6,6 +6,9 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.lgc.solutiontool.git.entities.Group;
 import com.lgc.solutiontool.git.entities.Project;
 import com.lgc.solutiontool.git.services.GroupsUserService;
@@ -38,6 +41,7 @@ public class CloningGroupsWindowController {
     private static final String CLONING_STATUS_ALERT_TITLE = "Cloning info";
     private static final String CLONING_STATUS_ALERT_HEADER = "Cloning statuses:";
 
+    private static final Logger logger = LogManager.getLogger(CloningGroupsWindowController.class);
 
     private final LoginService _loginService =
             (LoginService) ServiceProvider.getInstance().getService(LoginService.class.getName());
@@ -181,7 +185,7 @@ public class CloningGroupsWindowController {
 
         @Override
         public void accept(Integer percentage, Project project) {
-            System.out.println("Progress: " + percentage + "%"); // TODO: in log or UI console
+            logger.info("Progress: " + percentage + "%");
 
             // Determine the project type
             ProjectTypeService prTypeService = (ProjectTypeService) ServiceProvider.getInstance()
@@ -200,9 +204,8 @@ public class CloningGroupsWindowController {
 
         @Override
         public void accept(Integer percentage, String message) {
-            // TODO: in log or UI console
-            System.err.println("!ERROR: " + message);
-            System.out.println("Progress: " + percentage + "%");
+            logger.error("!ERROR: " + message);
+            logger.info("Progress: " + percentage + "%");
         }
 
     }

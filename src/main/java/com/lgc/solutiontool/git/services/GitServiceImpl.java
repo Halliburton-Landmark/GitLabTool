@@ -1,15 +1,15 @@
 package com.lgc.solutiontool.git.services;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.lgc.solutiontool.git.entities.Branch;
 import com.lgc.solutiontool.git.entities.Project;
 import com.lgc.solutiontool.git.jgit.BranchType;
 import com.lgc.solutiontool.git.jgit.JGit;
 import com.lgc.solutiontool.git.jgit.JGitStatus;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class GitServiceImpl implements GitService {
 
