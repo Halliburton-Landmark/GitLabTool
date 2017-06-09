@@ -4,6 +4,9 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.lgc.solutiontool.git.entities.Group;
 import com.lgc.solutiontool.git.entities.Project;
 import com.lgc.solutiontool.git.services.ClonedGroupsService;
@@ -42,6 +45,7 @@ public class CloningGroupsWindowController {
     private static final String FINISH_CLONE_MESSAGE = "The cloning process is finished.";
     private static final String CANCEL_CLONE_MESSAGE = "Cloning process of group was canceled.";
 
+    private static final Logger logger = LogManager.getLogger(CloningGroupsWindowController.class);
 
     private final LoginService _loginService = (LoginService) ServiceProvider.getInstance()
             .getService(LoginService.class.getName());
@@ -189,6 +193,7 @@ public class CloningGroupsWindowController {
         }
 
         @Override
+
         public void onSuccess(Object... t) {
             if (t[0] instanceof Project) {
                 Project project = (Project) t[0];

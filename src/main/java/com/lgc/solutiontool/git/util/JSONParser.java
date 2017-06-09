@@ -4,6 +4,9 @@ import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
@@ -12,6 +15,7 @@ import com.lgc.solutiontool.git.project.nature.projecttype.ProjectType;
 
 public class JSONParser {
 
+    private static final Logger logger = LogManager.getLogger(JSONParser.class);
     private static final GsonBuilder _gsonBuilder = new GsonBuilder();
     private static  Gson _gson;
     private static final Type _mapType = new TypeToken<Map<String, Object>>() {}.getType();
@@ -32,7 +36,7 @@ public class JSONParser {
             try {
                 return _gson.fromJson(json, _mapType);
             } catch (JsonSyntaxException ex) {
-                System.err.println("!ERROR: " + ex.getMessage());
+                logger.error("", ex);
             }
         }
         return null;
@@ -77,7 +81,7 @@ public class JSONParser {
             try {
                 return _gson.fromJson((String) json, classObject);
             } catch (JsonSyntaxException ex) {
-                System.err.println("!ERROR: " + ex.getMessage());
+                logger.error("", ex);
             }
         }
         return null;
@@ -96,7 +100,7 @@ public class JSONParser {
             try {
                 return _gson.fromJson((String) json, typeClass);
             } catch (JsonSyntaxException ex) {
-                System.err.println("!ERROR: " + ex.getMessage());
+                logger.error("", ex);
             }
         }
         return null;

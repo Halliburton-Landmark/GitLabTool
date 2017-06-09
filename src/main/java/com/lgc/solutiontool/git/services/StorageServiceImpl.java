@@ -10,13 +10,19 @@ import java.util.List;
 
 import javax.xml.bind.JAXBException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.lgc.solutiontool.git.entities.ClonedGroups;
 import com.lgc.solutiontool.git.entities.Group;
 import com.lgc.solutiontool.git.util.XMLParser;
+import com.lgc.solutiontool.git.xml.Server;
 import com.lgc.solutiontool.git.xml.Servers;
 
 
 public class StorageServiceImpl implements StorageService {
+    private static final Logger logger = LogManager.getLogger(StorageServiceImpl.class);
+    
     private static final String USER_HOME_PROPERTY = "user.home";
     private static final String WORKSPACE_DIRECTORY_PROPERTY = ".SolutionTool";
     private static final String PATH_SEPARATOR = File.separator;
@@ -36,7 +42,7 @@ public class StorageServiceImpl implements StorageService {
             XMLParser.saveObject(file, ClonedGroups.getInstance());
             return true;
         } catch (IOException | JAXBException e) {
-            System.err.println(this.getClass().getName() + ".updateStorage: " + e.getMessage()); // TODO move to logger
+            logger.error("", e);
             return false;
         }
     }
@@ -48,7 +54,7 @@ public class StorageServiceImpl implements StorageService {
             List<Group> list = XMLParser.loadObject(file, ClonedGroups.class).getClonedGroups();
             return list == null ? Collections.emptyList() : list;
         } catch (IOException | JAXBException e) {
-            System.err.println(this.getClass().getName() + ".loadStorage: " + e.getMessage()); // TODO move to logger
+            logger.error("", e);
             return Collections.emptyList();
         }
     }
@@ -60,7 +66,7 @@ public class StorageServiceImpl implements StorageService {
             XMLParser.saveObject(file, servers);
             return true;
         } catch (IOException | JAXBException e) {
-            System.err.println(this.getClass().getName() + ".updateServers: " + e.getMessage()); // TODO move to logger
+            logger.error("", e);
             return false;
         }
     }
@@ -72,7 +78,8 @@ public class StorageServiceImpl implements StorageService {
             File file = getServersFile();
             servers = XMLParser.loadObject(file, Servers.class);
         } catch (IOException | JAXBException e) {
-            System.err.println(this.getClass().getName() + ".loadServers: " + e.getMessage()); // TODO move to logger
+            logger.error(e.getMessage());
+            logger.warn(SERVERS_FILENAME + " file empty or does not exist. Load defaults");
         } finally {
             if (servers == null) {
                 updateServers(new Servers());
@@ -107,4 +114,34 @@ public class StorageServiceImpl implements StorageService {
         }
     }
 
+    @Override
+    public boolean updateLastUserName(String serverName, String userName) {
+        Servers servers = loadServers();
+        servers.getServers().forEach(server -> {
+            if (server.getName().contentEquals(serverName)) {
+                server.setLastUserName(userName);
+                server.setLastUsed(true);
+            } else {
+                server.setLastUsed(false);
+            }
+        });
+        
+        return updateServers(servers);
+    }
+
+    @Override
+    public String getLastUserName(String serverName) {
+        return loadServers().getServer(serverName)
+                            .map(Server::getLastUserName)
+                            .orElse("");
+    }
+
+    @Override
+    public Server getLastUsedServer() {
+        return loadServers().getServers()
+                .stream()
+                .filter(Server::isLastUsed)
+                .findAny()
+                .orElse(null);
+    }
 }
