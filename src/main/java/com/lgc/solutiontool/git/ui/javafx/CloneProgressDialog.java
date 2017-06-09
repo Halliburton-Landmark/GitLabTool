@@ -93,7 +93,7 @@ public class CloneProgressDialog extends Dialog<DialogDTO> {
         _messageConcole.setMouseTransparent(false);
         _messageConcole.setFocusTraversable(false);
         _messageConcole.setMinSize(400, 100);
-        addMessageToConcole("The cloning process of the " + groupName + " is began...", CloningMessageStatus.SIMPLE);
+        addMessageToConcole("The cloning process of the " + groupName + " group is started...", CloningMessageStatus.SIMPLE);
         grid.add(_messageConcole, 0, 3, 4, 3);
 
         _cancelButton = new Button("Cancel");
