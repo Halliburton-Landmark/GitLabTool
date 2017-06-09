@@ -8,12 +8,16 @@ import java.util.function.Consumer;
 import javax.net.ssl.HttpsURLConnection;
 
 import org.apache.http.HttpStatus;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.lgc.gitlabtool.git.util.RequestType;
 import com.lgc.gitlabtool.git.util.URLManager;
 
 public class NetworkServiceImpl implements NetworkService {
-    
+
+    private static final Logger logger = LogManager.getLogger(NetworkServiceImpl.class);
+
     private final int WRONG_RESPONSE = -1;
     private final int TIMEOUT = 10000; // timeout after 10 seconds
     private final String URL_SUFFIX = "/user";
@@ -38,13 +42,13 @@ public class NetworkServiceImpl implements NetworkService {
             connection.setRequestMethod(RequestType.GET.toString());
             responseCode = connection.getResponseCode();
         } catch (SocketTimeoutException e1) {
-            System.err.println(this.getClass().getName() + ": SocketTimeoutException: " + e1.getMessage()); // TODO move to logger
+            logger.error("http status " + HttpStatus.SC_GATEWAY_TIMEOUT + " " + e1.getMessage()); 
             return HttpStatus.SC_GATEWAY_TIMEOUT;
         } catch (SocketException e2) {
-            System.err.println(this.getClass().getName() + ": SocketException: " + e2.getMessage()); // TODO move to logger
+            logger.error("http status " + HttpStatus.SC_INTERNAL_SERVER_ERROR + " " + e2.getMessage()); 
             return HttpStatus.SC_INTERNAL_SERVER_ERROR;
         } catch (Exception e3) {
-            System.err.println(this.getClass().getName() + ": Exception: " + e3.getMessage()); // TODO move to logger
+            logger.error("Wrong response " + e3.getMessage()); 
             return WRONG_RESPONSE;
         }
         return responseCode;

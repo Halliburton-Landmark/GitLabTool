@@ -2,6 +2,9 @@ package com.lgc.gitlabtool.git.ui.javafx;
 
 import java.net.URL;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.lgc.gitlabtool.git.ui.UserInterface;
 import com.lgc.gitlabtool.git.ui.ViewKey;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
@@ -17,6 +20,8 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 public class JavaFXUI extends Application implements UserInterface {
+    private static final Logger logger = LogManager.getLogger(LoginDialog.class);
+
     private Image appIcon;
 
     @Override
@@ -30,7 +35,7 @@ public class JavaFXUI extends Application implements UserInterface {
 
         URL modularWindow = getClass().getClassLoader().getResource(ViewKey.MODULAR_CONTAINER.getPath());
         if (modularWindow == null) {
-            System.out.println("ERROR: Could not load fxml resource");
+            logger.error("Could not load fxml resource");
             return;
         }
 
@@ -43,7 +48,7 @@ public class JavaFXUI extends Application implements UserInterface {
 
         Scene scene = new Scene(root);
 
-        primaryStage.setTitle("Gitlab tool");
+        primaryStage.setTitle("Gitlab Tool");
         primaryStage.setScene(scene);
         Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
         primaryStage.setHeight(primaryScreenBounds.getMaxY() / 1.5);

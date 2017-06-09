@@ -11,6 +11,8 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Parent;
 import org.apache.maven.model.Repository;
@@ -25,12 +27,17 @@ import com.lgc.gitlabtool.git.entities.Project;
  */
 public class PomXMLServiceImpl implements PomXMLService {
 
+    private static final Logger logger = LogManager.getLogger(PomXMLModel.class);
+
     private static final String RELEASE_NAME_KEY = "releaseName";
     private static final String REPOSITORY_LAYOUT = "p2";
     private static final String POM_NAME = "pom.xml";
+    
+    private static final String SUCCESSFUL_CHANGE_MESSAGE = "The pom.xml file was changed successfully.";
+    private static final String CHANGE_ERROR_MESSAGE = "ERROR in changing the pom.xml file.";
 
     private void errorNotValidDataInLog() {
-        System.err.println("!ERROR: Not valid data was submitted. Cannot modify the pom.xml files."); // TODO replaced by log
+        logger.error("Not valid data was submitted. Cannot modify the pom.xml files.");
     }
 
     @Override
@@ -46,9 +53,9 @@ public class PomXMLServiceImpl implements PomXMLService {
             PomXMLModel model = getModel(project);
             if (changeParentVersion(model, newVersion)) {
                 model.writeToFile();
-                System.out.println("The pom.xml file was changed successfully."); // TODO replaced by log
+                logger.info(SUCCESSFUL_CHANGE_MESSAGE);
             } else {
-                System.err.println("!ERROR in changing the pom.xml file."); // TODO replaced by log
+                logger.error(CHANGE_ERROR_MESSAGE);
             }
         }
     }
@@ -66,9 +73,9 @@ public class PomXMLServiceImpl implements PomXMLService {
             PomXMLModel model = getModel(project);
             if (changeGroupName(model, oldName, newName)) {
                 model.writeToFile();
-                System.out.println("The pom.xml file was changed successfully."); // TODO replaced by log
+                logger.info(SUCCESSFUL_CHANGE_MESSAGE);
             } else {
-                System.err.println("!ERROR in changing the pom.xml file."); // TODO replaced by log
+                logger.error(CHANGE_ERROR_MESSAGE);
             }
         }
     }
@@ -86,9 +93,9 @@ public class PomXMLServiceImpl implements PomXMLService {
             PomXMLModel model = getModel(project);
             if (changeReleaseName(model, newName)) {
                 model.writeToFile();
-                System.out.println("The pom.xml file was changed successfully."); // TODO replaced by log
+                logger.info(SUCCESSFUL_CHANGE_MESSAGE);
             } else {
-                System.err.println("!ERROR in changing the pom.xml file."); // TODO replaced by log
+                logger.error(CHANGE_ERROR_MESSAGE);
             }
         }
     }
@@ -106,9 +113,9 @@ public class PomXMLServiceImpl implements PomXMLService {
             PomXMLModel model = getModel(project);
             if(addRepository(model, id, url)) {
                 model.writeToFile();
-                System.out.println("The pom.xml file was changed successfully."); // TODO replaced by log
+                logger.info(SUCCESSFUL_CHANGE_MESSAGE);
             } else {
-                System.err.println("!ERROR in changing the pom.xml file."); // TODO replaced by log
+                logger.error(CHANGE_ERROR_MESSAGE);
             }
         }
     }
@@ -126,9 +133,9 @@ public class PomXMLServiceImpl implements PomXMLService {
             PomXMLModel model = getModel(project);
             if (removeRepository(model, id)) {
                 model.writeToFile();
-                System.out.println("The pom.xml file was changed successfully."); // TODO replaced by log
+                logger.info(SUCCESSFUL_CHANGE_MESSAGE);
             } else {
-                System.err.println("!ERROR in changing the pom.xml file."); // TODO replaced by log
+                logger.error(CHANGE_ERROR_MESSAGE);
             }
         }
     }
@@ -151,9 +158,9 @@ public class PomXMLServiceImpl implements PomXMLService {
             List<Repository> rep = model.getRepositories();
             if (modifyRepository(rep, oldId, newId, newUrl)) {
                 pomModel.writeToFile();
-                System.out.println("The pom.xml file was changed successfully."); // TODO replaced by log
+                logger.info(SUCCESSFUL_CHANGE_MESSAGE);
             } else {
-                System.err.println("!ERROR in changing the pom.xml file."); // TODO replaced by log
+                logger.error(CHANGE_ERROR_MESSAGE);
             }
         }
     }
@@ -353,7 +360,7 @@ public class PomXMLServiceImpl implements PomXMLService {
                 }
             }
         } catch (IOException e) {
-            System.err.println("!ERROR: " + e.getMessage());
+            logger.error("", e);
         }
         return null;
     }

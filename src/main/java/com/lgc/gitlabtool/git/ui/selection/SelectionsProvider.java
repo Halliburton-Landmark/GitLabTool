@@ -1,11 +1,14 @@
 package com.lgc.gitlabtool.git.ui.selection;
 
-import com.lgc.gitlabtool.git.entities.Project;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import com.lgc.gitlabtool.git.entities.Project;
 
 /**
  * Provider which store listView elements by identifier
@@ -17,6 +20,7 @@ import java.util.Map;
  */
 public class SelectionsProvider {
 
+    private static final Logger logger = LogManager.getLogger(SelectionsProvider.class);
     private static SelectionsProvider _instance;
 
     private final Map<String, List> _listItemsMap;
@@ -46,7 +50,8 @@ public class SelectionsProvider {
      */
     public List getSelectionItems(String listViewId) {
         if (listViewId == null || listViewId.isEmpty()) {
-            throw new IllegalArgumentException("ERROR: Incorrect data. Value is null or empty.");
+            logger.error("Incorrect data. Value is null or empty.");
+            throw new IllegalArgumentException("Incorrect data. Value is null or empty.");
         }
         return _listItemsMap.get(listViewId);
     }
@@ -59,7 +64,8 @@ public class SelectionsProvider {
      */
     public void setSelectionItems(String listViewId, List items) {
         if (listViewId == null || listViewId.isEmpty() || items == null) {
-            throw new IllegalArgumentException("ERROR: Incorrect data. Value is null or empty.");
+            logger.error("Incorrect data. Value is null or empty.");
+            throw new IllegalArgumentException("Incorrect data. Value is null or empty.");
         }
         if (_listItemsMap.containsKey(listViewId)) {
             _listItemsMap.get(listViewId).clear();

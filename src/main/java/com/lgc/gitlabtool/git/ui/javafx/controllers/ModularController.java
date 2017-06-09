@@ -8,16 +8,19 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.services.ClonedGroupsService;
 import com.lgc.gitlabtool.git.services.GroupsUserService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
+import com.lgc.gitlabtool.git.ui.ViewKey;
+import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuItems;
 import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuManager;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarButtons;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarManager;
-import com.lgc.gitlabtool.git.ui.ViewKey;
-import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -48,8 +51,10 @@ import javafx.stage.WindowEvent;
 
 public class ModularController {
 
+    private static final Logger logger = LogManager.getLogger(ModularController.class);
+
     private static final String ABOUT_POPUP_TITLE = "About";
-    private static final String ABOUT_POPUP_HEADER = "GitLab tool, powered by Luxoft";
+    private static final String ABOUT_POPUP_HEADER = "Gitlab tool, powered by Luxoft";
     private static final String ABOUT_POPUP_CONTENT = "Contacts: Yurii Pitomets (yurii.pitomets2@halliburton.com)";
     private static final String SWITCH_BRANCH_TITLE = "Switch branch";
 
@@ -232,8 +237,7 @@ public class ModularController {
             stage.setOnHiding(confirmCloseEventHandler);
             stage.show();
         } catch (IOException e) {
-            System.out.println("Could not load fxml resource: IOException");
-            e.printStackTrace();
+            logger.error("Could not load fxml resource", e);
         }
     }
 

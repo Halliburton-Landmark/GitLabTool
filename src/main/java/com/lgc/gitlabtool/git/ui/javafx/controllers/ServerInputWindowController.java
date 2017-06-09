@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.List;
 
 import org.apache.http.HttpStatus;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.util.URLManager;
@@ -28,6 +30,8 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 public class ServerInputWindowController {
+
+    private static final Logger logger = LogManager.getLogger(ServerInputWindowController.class);
 
     private final String WRONG_INPUT_MESSAGE = "Wrong input! Please try again";
     private final String WRONG_SERVER_ADDRESS_MESSAGE = "Please enter an URL of existing \nGitLab server";
@@ -82,11 +86,13 @@ public class ServerInputWindowController {
         showMessage(VERIFYING_MESSAGE, Color.GREEN);
         getStage().getScene().setCursor(Cursor.WAIT);
         if (!isInputValid(serverTextField.getText())) {
+            logger.warn(WRONG_INPUT_MESSAGE + ": " + serverTextField.getText());
             showMessage(WRONG_INPUT_MESSAGE, Color.RED);
             getStage().getScene().setCursor(Cursor.DEFAULT);
             return;
         }
         if (isServerAlreadyExists(serverTextField.getText())) {
+            logger.warn(SERVER_ALREADY_EXISTS_MESSAGE + ": " + serverTextField.getText());
             showMessage(SERVER_ALREADY_EXISTS_MESSAGE, Color.RED);
             getStage().getScene().setCursor(Cursor.DEFAULT);
             return;
@@ -102,10 +108,12 @@ public class ServerInputWindowController {
                     });
                 } else if (responseCode < 0 || responseCode > HttpStatus.SC_UNAUTHORIZED) {
                     Platform.runLater(() -> {
+                        logger.warn(WRONG_SERVER_ADDRESS_MESSAGE + ": " + serverTextField.getText());
                         showMessage(WRONG_SERVER_ADDRESS_MESSAGE, Color.RED);
                     });
                 } else {
                     Platform.runLater(() -> {
+                        logger.warn(NO_INTERNET_CONNECTION_MESSAGE);
                         showMessage(NO_INTERNET_CONNECTION_MESSAGE, Color.RED);
                     });
                 }

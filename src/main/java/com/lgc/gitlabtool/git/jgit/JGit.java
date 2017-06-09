@@ -14,6 +14,8 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jgit.api.CreateBranchCommand;
 import org.eclipse.jgit.api.CreateBranchCommand.SetupUpstreamMode;
 import org.eclipse.jgit.api.Git;
@@ -63,9 +65,11 @@ import com.lgc.gitlabtool.git.entities.User;
  * @author Lyska Lyudmila
  */
 public class JGit {
+    private static final Logger logger = LogManager.getLogger(JGit.class);
     private static final JGit _jgit;
     private final String ERROR_MSG_NOT_CLONED = " project is not cloned. The operation is impossible";
     private static final String ORIGIN_PREFIX = "origin/";
+    private static final String WRONG_PARAMETERS = "Wrong parameters for obtaining branches.";
 
     static {
         _jgit = new JGit();
@@ -89,7 +93,8 @@ public class JGit {
      */
     public List<Branch> getBranches(Project project, BranchType brType) {
         if (project == null || brType == null) {
-            throw new IllegalArgumentException("Wrong parameters for obtaining branches.");
+            logger.error(WRONG_PARAMETERS);
+            throw new IllegalArgumentException(WRONG_PARAMETERS);
         }
         ListMode mode = brType.equals(BranchType.LOCAL) ? null : ListMode.valueOf(brType.toString());
         return getListShortNamesOfBranches(getRefs(project, mode));
@@ -105,13 +110,14 @@ public class JGit {
      */
     public Set<Branch> getBranches(Collection<Project> projects, BranchType brType, boolean onlyCommon) {
         if (projects == null || brType == null) {
-            throw new IllegalArgumentException("Wrong parameters for obtaining branches.");
+            logger.error(WRONG_PARAMETERS);
+            throw new IllegalArgumentException(WRONG_PARAMETERS);
         }
         ListMode mode = brType.equals(BranchType.LOCAL) ? null : ListMode.valueOf(brType.toString());
         Set<Branch> branches = new HashSet<>();
         projects.stream().forEach((pr) -> {
             if (!pr.isCloned()) {
-                System.err.println(pr.getName() + ERROR_MSG_NOT_CLONED);
+                logger.debug(pr.getName() + ERROR_MSG_NOT_CLONED);
                 return;
             }
             List<Branch> shortNamesBranches = getListShortNamesOfBranches(getRefs(pr, mode));
@@ -141,16 +147,19 @@ public class JGit {
      */
     public void clone(Group group, String localPath, BiConsumer<Integer, Project> onSuccess, BiConsumer<Integer, String> onError) {
         if (group == null || localPath == null) {
+            logger.debug("clone " + JGitStatus.FAILED);
             return;
         }
         if (group.isCloned()) {
             String errorMsg = "!ERROR: The operation is impossible, the " + group.getName() + " group is cloned.";
+            logger.debug(errorMsg);
             FeedbackUtil.sendError(onError, 100, errorMsg);
             return;
         }
         Collection<Project> projects = group.getProjects();
         if (projects == null || projects.isEmpty()) {
             String errorMsg = "Cloning error. " + group.getName() + " group doesn't have projects.";
+            logger.debug(errorMsg);
             FeedbackUtil.sendError(onError, 100, errorMsg);
             return;
         }
@@ -162,6 +171,7 @@ public class JGit {
             currentProgress += aStepInProgress;
             if (!clone(project, groupPath)) {
                 String errorMsg = "Cloning error of the " + project.getName() + " project";
+                logger.debug(errorMsg);
                 FeedbackUtil.sendError(onError, currentProgress, errorMsg);
                 continue;
             }
@@ -182,7 +192,7 @@ public class JGit {
             return Optional.empty();
         }
         if (!project.isCloned()) {
-            System.err.println(project.getName() + ERROR_MSG_NOT_CLONED);
+            logger.debug(project.getName() + ERROR_MSG_NOT_CLONED);
             return Optional.empty();
         }
         String path = project.getPathToClonedProject();
@@ -194,22 +204,21 @@ public class JGit {
             Status status = git.status().call();
             if (status != null) {
                 // debug code
-                System.out.println();
-                System.out.println("Conflicting: " + status.getConflicting());
-                System.out.println("Changed: " + status.getChanged());
-                System.out.println("Added: " + status.getAdded());
-                System.out.println("Ignored Not In Index: " + status.getIgnoredNotInIndex());
-                System.out.println("Conflicting Stage State: " + status.getConflictingStageState());
-                System.out.println("Missing: " + status.getMissing());
-                System.out.println("Modified: " + status.getModified());
-                System.out.println("Untracked: " + status.getUntracked());
-                System.out.println("Untracked Folders: " + status.getUntrackedFolders());
+                logger.debug("\nConflicting: " + status.getConflicting() + 
+                        "\nChanged: " + status.getChanged() + 
+                        "\nAdded: " + status.getAdded() + 
+                        "\nIgnored Not In Index: " + status.getIgnoredNotInIndex() + 
+                        "\nConflicting Stage State: " + status.getConflictingStageState() + 
+                        "\nMissing: " + status.getMissing() + 
+                        "\nModified: " + status.getModified() + 
+                        "\nUntracked: " + status.getUntracked() + 
+                        "\nUntracked Folders: " + status.getUntrackedFolders());
 
                 repository.close();
                 return Optional.of(status);
             }
         } catch (IOException | NoWorkTreeException | GitAPIException e) {
-            System.err.println("!ERROR: " + e.getMessage());
+            logger.error("", e);
         }
         return Optional.empty();
     }
@@ -225,7 +234,7 @@ public class JGit {
             return;
         }
         if (!project.isCloned()) {
-            System.err.println(project.getName() + ERROR_MSG_NOT_CLONED);
+            logger.debug(project.getName() + ERROR_MSG_NOT_CLONED);
             return;
         }
         Optional<Git> opGit = getGitForRepository(project.getPathToClonedProject());
@@ -234,7 +243,7 @@ public class JGit {
                 try {
                     opGit.get().add().addFilepattern(nameFile).call();
                 } catch (GitAPIException e) {
-                    System.err.println("!ERROR: " + e.getMessage());
+                    logger.error("", e);
                 }
             });
         }
@@ -248,15 +257,17 @@ public class JGit {
      */
     public JGitStatus pull (Project project) {
         if (project == null) {
+            logger.debug("pull " + JGitStatus.FAILED);
             return JGitStatus.FAILED;
         }
         if (!project.isCloned()) {
-            System.err.println(project.getName() + ERROR_MSG_NOT_CLONED);
+            logger.debug(project.getName() + ERROR_MSG_NOT_CLONED);
             return JGitStatus.FAILED;
         }
         try {
             Optional<Git> optGit = getGitForRepository(project.getPathToClonedProject());
             if (!optGit.isPresent()) {
+                logger.debug("pull " + JGitStatus.FAILED);
                 return JGitStatus.FAILED;
             }
             // check which files were changed to avoid conflicts
@@ -266,7 +277,7 @@ public class JGit {
                 return JGitStatus.getStatus(mer.getMergeStatus().toString());
             }
         } catch (GitAPIException e) {
-            System.err.println("!ERROR: " + e.getMessage());
+            logger.error("", e);
         }
         return JGitStatus.FAILED;
     }
@@ -297,7 +308,7 @@ public class JGit {
                               String nameAuthor, String emailAuthor,
                               Consumer<Integer> onSuccess, BiConsumer<Integer, String> onError) {
         if (projects == null || message == null || projects.isEmpty()) {
-            // TODO: add log
+            logger.debug("commit " + JGitStatus.FAILED);
             return JGitStatus.FAILED;
         }
         int aStepInProgress = 100 / projects.size();
@@ -305,16 +316,21 @@ public class JGit {
         for (Project pr : projects) {
             currentProgress += aStepInProgress;
             if (!pr.isCloned()) {
-                FeedbackUtil.sendError(onError, currentProgress, pr.getName() + ERROR_MSG_NOT_CLONED);
+                String errMessage = pr.getName() + ERROR_MSG_NOT_CLONED;
+                logger.debug(errMessage);
+                FeedbackUtil.sendError(onError, currentProgress, errMessage);
                 continue;
             }
             if(commit(pr, message, setAll, nameCommitter, emailCommitter,
                       nameAuthor, emailAuthor).equals(JGitStatus.FAILED)) {
-                FeedbackUtil.sendError(onError, currentProgress, "Failed to commit " + pr.getName() + " project");
+                String errMessage = "Failed to commit " + pr.getName() + " project";
+                logger.debug(errMessage);
+                FeedbackUtil.sendError(onError, currentProgress, errMessage);
                 continue;
             }
             FeedbackUtil.sendSuccess(onSuccess, currentProgress);
         }
+        logger.debug("commit " + JGitStatus.SUCCESSFUL);
         return JGitStatus.SUCCESSFUL;
     }
 
@@ -344,7 +360,7 @@ public class JGit {
                                   String nameAuthor, String emailAuthor,
                                   Consumer<Integer> onSuccess, BiConsumer<Integer, String> onError) {
         if (message == null || projects == null || projects.isEmpty()) {
-            // TODO: log
+            logger.debug("commitAndPush " + JGitStatus.FAILED);
             return false;
         }
         int aStepInProgress = 100 / projects.size();
@@ -352,15 +368,19 @@ public class JGit {
         for (Project pr : projects) {
             currentProgress += aStepInProgress;
             if (!pr.isCloned()) {
-                FeedbackUtil.sendError(onError, currentProgress, pr.getName() + ERROR_MSG_NOT_CLONED);
+                String errMessage = pr.getName() + ERROR_MSG_NOT_CLONED;
+                logger.debug(errMessage);
+                FeedbackUtil.sendError(onError, currentProgress, errMessage);
                 continue;
             }
             if(commitAndPush(pr, message, setAll, nameCommitter, emailCommitter, nameAuthor, emailAuthor)
                     .equals(JGitStatus.FAILED)) {
                 String errorMsg = "Failed to commit and push " + pr.getName() + " project";
+                logger.debug(errorMsg);
                 FeedbackUtil.sendError(onError, currentProgress, errorMsg);
                 continue;
             }
+            logger.debug("commitAndPush " + JGitStatus.SUCCESSFUL);
             FeedbackUtil.sendSuccess(onSuccess, currentProgress);
         }
         return true;
@@ -381,7 +401,7 @@ public class JGit {
      */
     public boolean push (List<Project> projects, Consumer<Integer> onSuccess, BiConsumer<Integer, String> onError) {
         if (projects.isEmpty() || projects == null) {
-            // TODO: add log
+            logger.debug("push " + JGitStatus.FAILED);
             return false;
         }
         int aStepInProgress = 100 / projects.size();
@@ -389,13 +409,18 @@ public class JGit {
         for (Project pr : projects) {
             currentProgress += aStepInProgress;
             if (!pr.isCloned()) {
-                FeedbackUtil.sendError(onError, currentProgress, pr.getName() + ERROR_MSG_NOT_CLONED);
+                String errMessage = pr.getName() + ERROR_MSG_NOT_CLONED;
+                logger.debug(errMessage);
+                FeedbackUtil.sendError(onError, currentProgress, errMessage);
                 continue;
             }
             if(push(pr).equals(JGitStatus.FAILED)) {
-                FeedbackUtil.sendError(onError, currentProgress, "Failed to push " + pr.getName() + " project");
+                String errMessage = "Failed to push " + pr.getName() + " project";
+                logger.debug(errMessage);
+                FeedbackUtil.sendError(onError, currentProgress, errMessage);
                 continue;
             }
+            logger.debug("push " + JGitStatus.SUCCESSFUL);
             FeedbackUtil.sendSuccess(onSuccess, currentProgress);
         }
         return true;
@@ -415,19 +440,22 @@ public class JGit {
      */
     public JGitStatus createBranch(Project project, String nameBranch, boolean force) {
         if (project == null || nameBranch == null) {
+            logger.debug("createBranch " + JGitStatus.FAILED);
             return JGitStatus.FAILED;
         }
         if (!project.isCloned()) {
-            System.err.println(project.getName() + ERROR_MSG_NOT_CLONED);
+            logger.debug(project.getName() + ERROR_MSG_NOT_CLONED);
             return JGitStatus.FAILED;
         }
         Optional<Git> optGit = getGitForRepository(project.getPathToClonedProject());
         if (!optGit.isPresent()) {
+            logger.debug("createBranch " + JGitStatus.FAILED);
             return JGitStatus.FAILED;
         }
 
         List<Branch> branches = getListShortNamesOfBranches(getRefs(project, null));
         if (!force && branches.stream().map(Branch::getBranchName).collect(Collectors.toList()).contains(nameBranch)) {
+            logger.debug("createBranch " + JGitStatus.BRANCH_ALREADY_EXISTS);
             return JGitStatus.BRANCH_ALREADY_EXISTS;
         }
         try {
@@ -437,10 +465,10 @@ public class JGit {
                             .setStartPoint(optGit.get().getRepository().getFullBranch())
                             .setForce(force)
                             .call();
-            System.out.println("!CREATE NEW BRANCH: " + res.getName());
+            logger.info("!CREATE NEW BRANCH: " + res.getName());
             return JGitStatus.SUCCESSFUL;
         } catch (GitAPIException | IOException e) {
-            System.err.println("!ERROR: " + e.getMessage());
+            logger.error("", e);
         }
         return JGitStatus.FAILED;
     }
@@ -459,31 +487,37 @@ public class JGit {
      */
     public JGitStatus switchTo(Project project, String nameBranch, boolean isRemoteBranch) {
         if (project == null || nameBranch == null) {
+            logger.debug("switchTo " + JGitStatus.FAILED);
             return JGitStatus.FAILED;
         }
         if (!project.isCloned()) {
-            System.err.println(project.getName() + ERROR_MSG_NOT_CLONED);
+            logger.debug(project.getName() + ERROR_MSG_NOT_CLONED);
             return JGitStatus.FAILED;
         }
         Optional<Git> optGit = getGitForRepository(project.getPathToClonedProject());
         if (!optGit.isPresent()) {
+            logger.debug("switchTo " + JGitStatus.FAILED);
             return JGitStatus.FAILED;
         }
         String nameBranchWithoutAlias = nameBranch.replace(ORIGIN_PREFIX, StringUtils.EMPTY);
         List<Branch> branches = getListShortNamesOfBranches(getRefs(project, null));
         if (!branches.stream().map(Branch::getBranchName).collect(Collectors.toList()).contains(nameBranchWithoutAlias) && !isRemoteBranch) {
+            logger.debug("switchTo " + JGitStatus.BRANCH_DOES_NOT_EXIST);
             return JGitStatus.BRANCH_DOES_NOT_EXIST;
         }
         if (branches.stream().map(Branch::getBranchName).collect(Collectors.toList()).contains(nameBranchWithoutAlias) && isRemoteBranch) {
+            logger.debug("switchTo " + JGitStatus.BRANCH_ALREADY_EXISTS);
             return JGitStatus.BRANCH_ALREADY_EXISTS;
         }
         Git git = optGit.get();
         try {
             if (isCurrentBranch(git, nameBranchWithoutAlias)) {
+                logger.debug("switchTo " + JGitStatus.BRANCH_CURRENTLY_CHECKED_OUT);
                 return JGitStatus.BRANCH_CURRENTLY_CHECKED_OUT;
             }
             if (isConflictsBetweenTwoBranches(git.getRepository(), git.getRepository().getFullBranch(),
                     Constants.R_HEADS + nameBranchWithoutAlias)) {
+                logger.warn("switchTo " + JGitStatus.CONFLICTS);
                 return JGitStatus.CONFLICTS;
             }
 
@@ -492,10 +526,10 @@ public class JGit {
                          .setStartPoint(ORIGIN_PREFIX + nameBranchWithoutAlias)
                          .setCreateBranch(isRemoteBranch)
                          .call();
-            System.out.println("!Switch to branch: " + ref.getName());
+            logger.info("!Switch to branch: " + ref.getName());
             return JGitStatus.SUCCESSFUL;
         } catch (IOException | GitAPIException e) {
-            System.err.println("!ERROR: " + e.getMessage());
+            logger.error("", e);
         }
         return JGitStatus.FAILED;
     }
@@ -510,7 +544,7 @@ public class JGit {
             return Optional.empty();
         }
         if (!project.isCloned()) {
-            System.err.println(project.getName() + ERROR_MSG_NOT_CLONED);
+            logger.debug(project.getName() + ERROR_MSG_NOT_CLONED);
             return Optional.empty();
         }
         Optional<Git> optGit = getGitForRepository(project.getPathToClonedProject());
@@ -521,7 +555,7 @@ public class JGit {
             Repository repo = optGit.get().getRepository();
             return Optional.ofNullable(repo.getBranch());
         } catch (Exception e) {
-            System.err.println("!ERROR: " + e.getMessage());
+            logger.error("", e);
         }
         return Optional.empty();
     }
@@ -538,27 +572,29 @@ public class JGit {
      */
     public JGitStatus deleteBranch(Project project, String nameBranch, boolean force) {
         if (project == null || nameBranch == null) {
+            logger.debug("deleteBranch " + JGitStatus.FAILED);
             return JGitStatus.FAILED;
         }
         if (!project.isCloned()) {
-            System.err.println(project.getName() + ERROR_MSG_NOT_CLONED);
+            logger.debug(project.getName() + ERROR_MSG_NOT_CLONED);
             return JGitStatus.FAILED;
         }
         Optional<Git> optGit = getGitForRepository(project.getPathToClonedProject());
         if (!optGit.isPresent() || nameBranch == null) {
+            logger.debug("deleteBranch " + JGitStatus.FAILED);
             return JGitStatus.FAILED;
         }
         Git git = optGit.get();
         if (isCurrentBranch(git, nameBranch)) {
-            System.err.println("!ERROR: The current branch can not be deleted.");
+            logger.error("The current branch can not be deleted.");
             return JGitStatus.FAILED;
         }
         try {
             git.branchDelete().setBranchNames(nameBranch).setForce(force).call();
-            System.out.println("!Branch \"" + nameBranch + "\" deleted from the " + project.getPathToClonedProject());
+            logger.info("!Branch \"" + nameBranch + "\" deleted from the " + project.getPathToClonedProject());
             return JGitStatus.SUCCESSFUL;
         } catch (GitAPIException e) {
-            System.err.println("!ERROR: " + e.getMessage());
+            logger.error("", e);
         }
         return JGitStatus.FAILED;
     }
@@ -578,9 +614,9 @@ public class JGit {
             Git.cloneRepository().setURI(linkClone).setDirectory(new File(localPath)).call();
             return true;
         } catch (InvalidRemoteException | TransportException e) {
-            System.err.println("!ERROR: " + e.getMessage());
+            logger.error("", e);
         } catch (GitAPIException e) {
-            System.err.println("!ERROR: " + e.getMessage());
+            logger.error("", e);
         }
         return false;
     }
@@ -589,10 +625,12 @@ public class JGit {
                                String nameCommitter, String emailCommitter,
                                String nameAuthor, String emailAuthor) {
         if (project == null) {
+            logger.debug("commit " + JGitStatus.FAILED);
             return JGitStatus.FAILED;
         }
         Optional<Git> opGit = getGitForRepository(project.getPathToClonedProject());
         if (!opGit.isPresent()) {
+            logger.debug("commit " + JGitStatus.FAILED);
             return JGitStatus.FAILED;
         }
         Git git = opGit.get();
@@ -604,9 +642,10 @@ public class JGit {
                         .setAuthor(author)
                         .setCommitter(comitter)
                         .call();
+            logger.debug("commit " + JGitStatus.SUCCESSFUL);
             return JGitStatus.SUCCESSFUL;
         } catch (Exception e) {
-            System.err.println("!ERROR: " + e.getMessage());
+            logger.error("", e);
         }
         return JGitStatus.FAILED;
     }
@@ -625,26 +664,29 @@ public class JGit {
         try {
             if(commit(project, message, setAll, nameCommitter, emailCommitter,
                       nameAuthor, emailAuthor).equals(JGitStatus.FAILED)) {
+                logger.debug("commitAndPush " + JGitStatus.FAILED);
                 return JGitStatus.FAILED;
             }
             return push(project);
         } catch (Exception e) {
-            System.err.println("!ERROR: " + e.getMessage());
+            logger.error("", e);
         }
         return JGitStatus.FAILED;
     }
 
     private JGitStatus push(Project project) {
         if (project == null) {
+            logger.debug("push " + JGitStatus.FAILED);
             return JGitStatus.FAILED;
         }
         Optional<Git> opGit = getGitForRepository(project.getPathToClonedProject());
         if (opGit.isPresent()) {
             try {
                 opGit.get().push().call();
+                logger.debug("push " + JGitStatus.SUCCESSFUL);
                 return JGitStatus.SUCCESSFUL;
             } catch (GitAPIException e) {
-                System.err.println("!ERROR: " + e.getMessage());
+                logger.error("", e);
             }
         }
         return JGitStatus.FAILED;
@@ -655,7 +697,7 @@ public class JGit {
             try {
                 return Optional.ofNullable(Git.open(new File(path + "/.git")));
             } catch (IOException e) {
-                System.err.println("!ERROR: " + e.getMessage());
+                logger.error("", e);
             }
         }
         return Optional.empty();
@@ -689,7 +731,7 @@ public class JGit {
 
             return Optional.ofNullable(git.diff().setNewTree(newTreeIter).call());
         } catch (IOException | GitAPIException e) {
-            System.err.println("!ERROR: " + e.getMessage());
+            logger.error("", e);
         }
         return Optional.empty();
     }
@@ -719,7 +761,7 @@ public class JGit {
                 }
                 return brCommand.call();
             } catch (GitAPIException e) {
-                System.err.println("!ERROR: " + e.getMessage());
+                logger.error("", e);
             }
         }
         return Collections.emptyList();
@@ -773,9 +815,9 @@ public class JGit {
             return false;
         } catch (RevisionSyntaxException | IncorrectObjectTypeException | AmbiguousObjectException
                 | MissingObjectException e) {
-            System.err.println("!ERROR: " + e.getMessage());
+            logger.error("", e);
         } catch (IOException e) {
-            System.err.println("!ERROR: " + e.getMessage());
+            logger.error("", e);
         }
         return true;
     }
@@ -788,7 +830,7 @@ public class JGit {
                 return true;
             }
         } catch (IOException e) {
-            System.err.println("!ERROR: " + e.getMessage());
+            logger.error("", e);
         }
         return false;
     }
@@ -805,7 +847,7 @@ public class JGit {
             List<DiffEntry> diffEntries = optGit.get().diff().call();
             return !diffEntries.isEmpty();
         } catch (GitAPIException e) {
-            System.err.println("!ERROR: " + e.getMessage());
+            logger.error("", e);
         }
         return false;
     }

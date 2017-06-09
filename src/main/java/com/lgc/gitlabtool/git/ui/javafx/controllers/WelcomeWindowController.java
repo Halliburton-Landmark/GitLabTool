@@ -1,5 +1,8 @@
 package com.lgc.gitlabtool.git.ui.javafx.controllers;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.services.ClonedGroupsService;
 import com.lgc.gitlabtool.git.services.LoginService;
@@ -8,7 +11,6 @@ import com.lgc.gitlabtool.git.ui.ViewKey;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarButtons;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarManager;
-
 import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
@@ -38,6 +40,8 @@ import java.util.List;
  * @author Yevhen Strazhko
  */
 public class WelcomeWindowController {
+    private static final Logger logger = LogManager.getLogger(WelcomeWindowController.class);
+    
     private static final String WINDOW_TITLE = "Cloning window";
     @FXML
     private Label userId;
@@ -86,8 +90,7 @@ public class WelcomeWindowController {
 
             stage.show();
         } catch (IOException e) {
-            System.out.println("Could not load fxml resource: IOException");
-            e.printStackTrace();
+            logger.error("Could not load fxml resource", e);
         }
     }
 
@@ -133,9 +136,10 @@ public class WelcomeWindowController {
     public void onLoadSelectedGroupspace(ActionEvent actionEvent) {
         URL modularWindow = getClass().getClassLoader().getResource(ViewKey.MODULAR_CONTAINER.getPath());
         if (modularWindow == null) {
-            System.out.println("ERROR: Could not load fxml resource");
+            logger.error("Could not load fxml resource");
             return;
         }
+
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(modularWindow);
             Parent root = fxmlLoader.load();
@@ -150,8 +154,7 @@ public class WelcomeWindowController {
             previousStage.setScene(new Scene(root));
 
         } catch (IOException e) {
-            System.out.println("Could not load fxml resource: IOException");
-            e.printStackTrace();
+            logger.error("Could not load fxml resource", e);
         }
 
     }

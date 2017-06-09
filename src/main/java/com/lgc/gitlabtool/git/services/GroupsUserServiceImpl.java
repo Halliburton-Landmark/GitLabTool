@@ -15,21 +15,26 @@ import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.errors.JGitInternalException;
 
 import com.google.gson.reflect.TypeToken;
-import com.lgc.gitlabtool.git.entities.Group;
-import com.lgc.gitlabtool.git.statuses.CloningStatus;
-import com.lgc.gitlabtool.git.util.PathUtilities;
 import com.lgc.gitlabtool.git.connections.RESTConnector;
 import com.lgc.gitlabtool.git.connections.token.CurrentUser;
+import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.User;
 import com.lgc.gitlabtool.git.jgit.JGit;
+import com.lgc.gitlabtool.git.statuses.CloningStatus;
 import com.lgc.gitlabtool.git.util.JSONParser;
+import com.lgc.gitlabtool.git.util.PathUtilities;
 
 public class GroupsUserServiceImpl implements GroupsUserService {
+
+    private static final Logger logger = LogManager.getLogger(GroupsUserServiceImpl.class);
+
     private RESTConnector _connector;
 
     private static String privateTokenKey;
@@ -73,7 +78,7 @@ public class GroupsUserServiceImpl implements GroupsUserService {
             }
             JGit.getInstance().clone(group, destinationPath, onSuccess, onError);
         } catch (JGitInternalException ex) {
-            System.out.println("!Error: " + ex.getMessage());
+            logger.error(ex.getStackTrace());
         }
         return group;
     }
@@ -95,7 +100,7 @@ public class GroupsUserServiceImpl implements GroupsUserService {
 
     @Override
     public Map<Group, CloningStatus> cloneGroups(List<Group> groups, String destinationPath,
-                                                 BiConsumer<Integer, Project> onSuccess, BiConsumer<Integer, String> onError) {
+            BiConsumer<Integer, Project> onSuccess, BiConsumer<Integer, String> onError) {
         if (groups == null || destinationPath == null) {
             return Collections.emptyMap();
         }
@@ -159,16 +164,19 @@ public class GroupsUserServiceImpl implements GroupsUserService {
         Map<Optional<Group>, String> result = new HashMap<>();
         String nameGroup = groupPath.getName(groupPath.getNameCount()-1).toString();
         if (checkGroupIsLoaded(groupPath.toAbsolutePath().toString())) {
+            logger.debug(GROUP_ALREADY_LOADED_MESSAGE);
             result.put(Optional.empty(), GROUP_ALREADY_LOADED_MESSAGE);
             return result;
         }
         Optional<Group> optFoundGroup = getGroupByName(nameGroup);
         if (!optFoundGroup.isPresent()) {
+            logger.debug(GROUP_DOESNT_EXIST_MESSAGE);
             result.put(Optional.empty(), GROUP_DOESNT_EXIST_MESSAGE);
             return result;
         }
         Group foundGroup = getGroupById(optFoundGroup.get().getId());
         if (foundGroup == null) {
+            logger.debug(ERROR_GETTING_GROUP_MESSAGE);
             result.put(Optional.empty(), ERROR_GETTING_GROUP_MESSAGE);
             return result;
         }
@@ -181,16 +189,18 @@ public class GroupsUserServiceImpl implements GroupsUserService {
     public Map<Boolean, String> removeGroup(Group removeGroup, boolean isRemoveFromLocalDisk) {
         isRemoveFromLocalDisk = false; // TODO: see javadoc
         Map<Boolean, String> result = new HashMap<>();
-        System.err.println("Deleting group is started ..."); // TODO move to log
+        logger.info("Deleting group is started ...");
         boolean isRemoved = _clonedGroupsService.removeGroups(Arrays.asList(removeGroup));
         if (!isRemoved) {
+            logger.warn("Failed deleting of group from the workspace.");
             result.put(false, "Failed deleting of group from the workspace.");
             return result;
         }
         if (isRemoveFromLocalDisk) {
-            System.err.println("Deleting group from local disk is started ..."); // TODO move to log
+            logger.error("Deleting group from local disk is started ...");
             return deleteGroupFromDirectory(removeGroup.getPathToClonedGroup());
         }
+        logger.info("Successful deleting of group from the workspace.");
         result.put(isRemoved, "Successful deleting of group from the workspace.");
         return result;
     }
@@ -198,23 +208,26 @@ public class GroupsUserServiceImpl implements GroupsUserService {
     private Map<Boolean, String> deleteGroupFromDirectory(String pathToClonedGroup) {
         Map<Boolean, String> result = new HashMap<>();
         if (pathToClonedGroup == null) {
+            logger.warn("Error removing. The path to the cloned group is not specified.");
             result.put(false, "Error removing. The path to the cloned group is not specified.");
             return result;
         }
         Path path = Paths.get(pathToClonedGroup);
         if (!PathUtilities.isExistsAndDirectory(path)) {
+            logger.warn("Error removing. The specified path does not exist or is not a directory.");
             result.put(false, "Error removing. The specified path does not exist or is not a directory.");
             return result;
         }
 
         try {
             FileUtils.deleteDirectory(path.toFile());
+            logger.info("The group was successfully deleted from " + path.toString());
             result.put(true, "The group was successfully deleted from " + path.toString());
             return result;
         } catch (IOException e) {
             String errorMessage = "Error removing. " + e.getMessage();
             result.put(true, errorMessage);
-            System.err.println(errorMessage);
+            logger.error(errorMessage);
         }
         return result;
     }
@@ -239,16 +252,19 @@ public class GroupsUserServiceImpl implements GroupsUserService {
         Map<Optional<Group>, String> result = new HashMap<>();
         Collection<Project> projects = group.getProjects();
         if (projects == null || projects.isEmpty()) {
+            logger.debug(GROUP_DOESNT_HAVE_PROJECTS_MESSAGE);
             result.put(Optional.empty(), GROUP_DOESNT_HAVE_PROJECTS_MESSAGE);
             return result;
         }
         Collection<String> projectsName = PathUtilities.getFolders(localPathGroup);
         if (projectsName.isEmpty()) {
+            logger.debug(PREFIX_SUCCESSFUL_LOAD);
             result.put(Optional.of(group), group.getName() + PREFIX_SUCCESSFUL_LOAD );
             return result;
         }
         projects.stream().filter(project -> projectsName.contains(project.getName()))
                 .forEach((project) -> updateProjectStatus(project, localPathGroup.toString()));
+        logger.debug(PREFIX_SUCCESSFUL_LOAD);
         result.put(Optional.of(group), group.getName() + PREFIX_SUCCESSFUL_LOAD );
         return result;
     }
@@ -269,4 +285,5 @@ public class GroupsUserServiceImpl implements GroupsUserService {
     private List<Group> getLoadedGroups() {
         return _clonedGroupsService.loadClonedGroups();
     }
+
 }

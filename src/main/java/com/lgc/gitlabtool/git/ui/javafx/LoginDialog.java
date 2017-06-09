@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.http.HttpStatus;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.lgc.gitlabtool.git.services.LoginService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
@@ -37,6 +39,8 @@ import javafx.stage.Stage;
 import javafx.stage.Window;
 
 class LoginDialog extends Dialog<DialogDTO> {
+
+    private static final Logger logger = LogManager.getLogger(LoginDialog.class);
 
     private StorageService storageService = (StorageService) ServiceProvider.getInstance()
             .getService(StorageService.class.getName());
@@ -106,6 +110,7 @@ class LoginDialog extends Dialog<DialogDTO> {
                         modifyComboBoxItems(comboBox, options);
                     });
                 } catch (IOException e) {
+                    logger.error("", e);
                     return;
                 }
             }
@@ -156,21 +161,25 @@ class LoginDialog extends Dialog<DialogDTO> {
     private void setOnSignInButtonListener(Button button) {
         button.setOnAction(event -> {
             if (!isEmptyInputFields(userTextField, passwordField)) {
+                logger.info(WAITING_MESSAGE);
                 showMessage(WAITING_MESSAGE, Color.GREEN);
                 String serverURL = URLManager.completeServerURL(comboBox.getValue());
                 DialogDTO dto = new DialogDTO(userTextField.getText(), passwordField.getText(), serverURL);
                 _loginService.login(dto, responseCode -> {
                     if (responseCode == HttpStatus.SC_OK) {
                         Platform.runLater(() -> {
+                            logger.info("Login successfull");
                             getStage().close();
                         });
                     } else if (responseCode == HttpStatus.SC_UNAUTHORIZED) {
                         Platform.runLater(() -> {
+                            logger.warn(WRONG_CREDENTIALS);
                             showMessage(WRONG_CREDENTIALS, Color.RED);
                         });
                     }
                 });
             } else {
+                logger.warn(EMPTY_FIELD);
                 showMessage(EMPTY_FIELD, Color.RED);
             }
         });
@@ -194,6 +203,7 @@ class LoginDialog extends Dialog<DialogDTO> {
     private void initializeOnCloseEvent() {
         Window window = this.getDialogPane().getScene().getWindow();
         window.setOnCloseRequest(event -> {
+            logger.debug("exit without logging in");
             System.exit(0);
         });
     }
