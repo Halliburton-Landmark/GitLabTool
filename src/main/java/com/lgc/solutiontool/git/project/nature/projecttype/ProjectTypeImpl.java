@@ -1,8 +1,5 @@
 package com.lgc.solutiontool.git.project.nature.projecttype;
 
-import com.google.gson.annotations.SerializedName;
-import com.lgc.solutiontool.git.project.nature.operation.Operation;
-
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -10,6 +7,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import com.google.gson.annotations.SerializedName;
+import com.lgc.solutiontool.git.project.nature.operation.Operation;
 
 /**
  * The class stores the minimum information required for types of projects
@@ -23,6 +26,7 @@ abstract class ProjectTypeImpl implements ProjectType {
 
     private String _projectIcoUrl;
     private static final String DEFAULT_PROJECT_ICON_URL = "icons/project/unknown_project.png";
+    private static final Logger logger = LogManager.getLogger(ProjectTypeImpl.class);
 
     private transient final Set<Operation> _operations;
     private transient final Set<String> _structures;
@@ -35,6 +39,7 @@ abstract class ProjectTypeImpl implements ProjectType {
 
     protected void setId(String id) {
         if (id == null || id.isEmpty()) {
+            logger.error("Invalid id = {" + id + "}");
             throw new IllegalArgumentException("Invalid id = {" + id + "}");
         }
         _id = id;
@@ -42,6 +47,7 @@ abstract class ProjectTypeImpl implements ProjectType {
 
     protected void setImageUrl(String imageUrl) {
         if (imageUrl == null || imageUrl.isEmpty()) {
+            logger.error("Invalid image url = {" + imageUrl + "}");
             throw new IllegalArgumentException("Invalid image url = {" + imageUrl + "}");
         }
         _projectIcoUrl = imageUrl;

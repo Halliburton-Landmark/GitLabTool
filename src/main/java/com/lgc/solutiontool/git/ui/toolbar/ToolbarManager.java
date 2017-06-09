@@ -1,7 +1,17 @@
 package com.lgc.solutiontool.git.ui.toolbar;
 
+import java.io.IOException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.lgc.solutiontool.git.ui.ViewKey;
 import com.lgc.solutiontool.git.ui.javafx.controllers.ModularController;
+
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -12,18 +22,13 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 /**
  * Class for managing an toolbar with buttons
  *
  * @author Pavlo Pidhorniy
  */
 public class ToolbarManager {
+    private static final Logger logger = LogManager.getLogger(ToolbarManager.class);
     private static final String HOME_BUTTON_ICON_URL = "icons/home.png";
     private static final String HOME_BUTTON_TEXT = "Welcome page";
     private static final String HOME_BUTTON_TOOLTIP = "Go to welcome page";
@@ -147,7 +152,7 @@ public class ToolbarManager {
     private void showWelcomePage(Button showWelcomButton) throws IOException {
         URL modularWindow = getClass().getClassLoader().getResource(ViewKey.MODULAR_CONTAINER.getPath());
         if (modularWindow == null) {
-            System.out.println("ERROR: Could not load fxml resource");
+            logger.error("Could not load fxml resource");
             return;
         }
 

@@ -1,18 +1,16 @@
 package com.lgc.solutiontool.git.ui.javafx.controllers;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.List;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.lgc.solutiontool.git.entities.Group;
-import com.lgc.solutiontool.git.properties.ProgramProperties;
+import com.lgc.solutiontool.git.services.ClonedGroupsService;
 import com.lgc.solutiontool.git.services.LoginService;
 import com.lgc.solutiontool.git.services.ServiceProvider;
 import com.lgc.solutiontool.git.ui.ViewKey;
 import com.lgc.solutiontool.git.ui.icon.AppIconHolder;
 import com.lgc.solutiontool.git.ui.toolbar.ToolbarButtons;
 import com.lgc.solutiontool.git.ui.toolbar.ToolbarManager;
-
 import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
@@ -34,10 +32,16 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Callback;
 
+import java.io.IOException;
+import java.net.URL;
+import java.util.List;
+
 /**
  * @author Yevhen Strazhko
  */
 public class WelcomeWindowController {
+    private static final Logger logger = LogManager.getLogger(WelcomeWindowController.class);
+    
     private static final String WINDOW_TITLE = "Cloning window";
     @FXML
     private Label userId;
@@ -45,8 +49,11 @@ public class WelcomeWindowController {
     @FXML
     private ListView groupList;
 
-    private final LoginService _loginService =
-            (LoginService) ServiceProvider.getInstance().getService(LoginService.class.getName());
+    private final LoginService _loginService = (LoginService) ServiceProvider.getInstance()
+            .getService(LoginService.class.getName());
+
+    private final ClonedGroupsService _clonedGroupsService = (ClonedGroupsService) ServiceProvider.getInstance()
+            .getService(ClonedGroupsService.class.getName());
 
     @FXML
     public void initialize() {
@@ -83,8 +90,16 @@ public class WelcomeWindowController {
 
             stage.show();
         } catch (IOException e) {
-            System.out.println("Could not load fxml resource: IOException");
-            e.printStackTrace();
+            logger.error("Could not load fxml resource", e);
+        }
+    }
+
+    public Group getSelectedGroup() {
+        Group selectedGroup = (Group) groupList.getSelectionModel().getSelectedItem();
+        if (selectedGroup != null) {
+            return selectedGroup;
+        } else {
+            return new Group();
         }
     }
 
@@ -101,7 +116,7 @@ public class WelcomeWindowController {
     }
 
     private void updateClonedGroups() {
-        List<Group> userGroups = ProgramProperties.getInstance().loadClonedGroups();
+        List<Group> userGroups = _clonedGroupsService.loadClonedGroups();
         if(userGroups != null) {
             groupList.setItems(FXCollections.observableList(userGroups));
         }
@@ -121,7 +136,7 @@ public class WelcomeWindowController {
     public void onLoadSelectedGroupspace(ActionEvent actionEvent) {
         URL modularWindow = getClass().getClassLoader().getResource(ViewKey.MODULAR_CONTAINER.getPath());
         if (modularWindow == null) {
-            System.out.println("ERROR: Could not load fxml resource");
+            logger.error("Could not load fxml resource");
             return;
         }
 
@@ -139,8 +154,7 @@ public class WelcomeWindowController {
             previousStage.setScene(new Scene(root));
 
         } catch (IOException e) {
-            System.out.println("Could not load fxml resource: IOException");
-            e.printStackTrace();
+            logger.error("Could not load fxml resource", e);
         }
 
     }

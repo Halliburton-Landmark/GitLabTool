@@ -10,10 +10,12 @@ import java.util.Map.Entry;
 import java.util.Optional;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.lgc.solutiontool.git.entities.Group;
 import com.lgc.solutiontool.git.entities.Project;
-import com.lgc.solutiontool.git.properties.ProgramProperties;
+import com.lgc.solutiontool.git.services.ClonedGroupsService;
 import com.lgc.solutiontool.git.services.GitService;
 import com.lgc.solutiontool.git.services.GroupsUserService;
 import com.lgc.solutiontool.git.services.ServiceProvider;
@@ -27,6 +29,7 @@ import com.lgc.solutiontool.git.ui.toolbar.ToolbarButtons;
 import com.lgc.solutiontool.git.ui.toolbar.ToolbarManager;
 
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -55,14 +58,22 @@ import javafx.stage.WindowEvent;
 
 public class ModularController {
 
+    private static final Logger logger = LogManager.getLogger(ModularController.class);
+
     private static final String ABOUT_POPUP_TITLE = "About";
     private static final String ABOUT_POPUP_HEADER = "Solution tool for GitLab, powered by Luxoft";
     private static final String ABOUT_POPUP_CONTENT = "Contacts: Yurii Pitomets (yurii.pitomets2@halliburton.com)";
     private static final String SWITCH_BRANCH_TITLE = "Switch branch";
+
     private static final String IMPORT_CHOOSER_TITLE = "Import Group";
     private static final String IMPORT_DIALOG_TITLE = "Import Status Dialog";
     private static final String SUCCESFUL_IMPORT_MESSAGE = "Import of group is Successful";
     private static final String FAILED_IMPORT_MESSAGE = "Import of group is Failed";
+
+    private static final String REMOVE_GROUP_DIALOG_TITLE = "Remove Group";
+    private static final String REMOVE_GROUP_STATUS_DIALOG_TITLE = "Import Status Dialog";
+    private static final String SUSSECCFUL_REMOVE_GROUP_MESSAGE = "Removing of group is Successful";
+    private static final String FAILED_REMOVE_GROUP_MESSAGE = "Removing of group is Failed";
 
     private static final String CSS_PATH = "css/style.css";
     private static final Image _appIcon = AppIconHolder.getInstance().getAppIcoImage();
@@ -93,10 +104,13 @@ public class ModularController {
     private final GroupsUserService _groupService = (GroupsUserService) ServiceProvider.getInstance()
             .getService(GroupsUserService.class.getName());
 
+
     private final GitService _gitService = (GitService) ServiceProvider.getInstance()
             .getService(GitService.class.getName());
 
-    private final ProgramProperties _programProperties = ProgramProperties.getInstance();
+    private final ClonedGroupsService _clonedGroupsService = (ClonedGroupsService) ServiceProvider.getInstance()
+            .getService(ClonedGroupsService.class.getName());
+
 
     public void loadWelcomeWindow() throws IOException {
         toolbar.getItems().addAll(ToolbarManager.getInstance().createToolbarItems(ViewKey.WELCOME_WINDOW.getKey()));
@@ -145,11 +159,51 @@ public class ModularController {
         if (windowId.equals(ViewKey.WELCOME_WINDOW.getKey())) {
             ToolbarManager.getInstance().getButtonById(ToolbarButtons.IMPORT_GROUP_BUTTON.getId())
                     .setOnAction(event -> importGroupDialog());
+
+            ToolbarManager.getInstance().getButtonById(ToolbarButtons.REMOVE_GROUP_BUTTON.getId())
+                    .setOnAction(this::onRemoveGroup);
+
         } else if (windowId.equals(ViewKey.MAIN_WINDOW.getKey())) {
             Button switchBranch = ToolbarManager.getInstance()
                     .getButtonById(ToolbarButtons.SWITCH_BRANCH_BUTTON.getId());
             switchBranch.setOnAction(event -> switchBranchAction());
         }
+    }
+
+    private void removeGroupDialog(Group selectedGroup) {
+        Alert alert = new Alert(AlertType.CONFIRMATION);
+        alert.setTitle(REMOVE_GROUP_DIALOG_TITLE);
+        alert.setHeaderText("Are you sure you want to delete the " + selectedGroup.getName() + "?");
+
+        Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+        stage.getIcons().add(_appIcon);
+
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.get() == ButtonType.CANCEL) {
+            return;
+        }
+        // TODO: We always pass <false> in the removeGroup method, because removing a group from a local disk
+        // requires modification.
+        // When we deleting .git folder we getting AccessDeniedException or folder is deleted only after
+        // close application (Problem with threads(appears after import or clone group)).
+        final boolean isRemoveFromLocakDisk = false;
+        Map<Boolean, String> status = _groupService.removeGroup(selectedGroup, isRemoveFromLocakDisk);
+        for (Entry<Boolean, String> mapStatus : status.entrySet()) {
+            String headerMessage;
+            if (mapStatus.getKey()) {
+                headerMessage = SUSSECCFUL_REMOVE_GROUP_MESSAGE;
+                _welcomeWindowController.refreshGroupsList();
+            } else {
+                headerMessage = FAILED_REMOVE_GROUP_MESSAGE;
+            }
+            showStatusDialog(REMOVE_GROUP_STATUS_DIALOG_TITLE, headerMessage, mapStatus.getValue());
+        }
+    }
+
+    @FXML
+    public void onRemoveGroup(ActionEvent actionEvent) {
+        Group group = _welcomeWindowController.getSelectedGroup();
+        removeGroupDialog(group);
     }
 
     private void initActionsMainMenu(String windowId) {
@@ -205,8 +259,7 @@ public class ModularController {
             stage.setOnHiding(confirmCloseEventHandler);
             stage.show();
         } catch (IOException e) {
-            System.out.println("Could not load fxml resource: IOException");
-            e.printStackTrace();
+            logger.error("Could not load fxml resource", e);
         }
     }
 
@@ -308,30 +361,29 @@ public class ModularController {
                     Platform.runLater(new Runnable() {
                         @Override
                         public void run() {
-                            _programProperties.updateClonedGroups(Arrays.asList(optGroup.get()));
+                            _clonedGroupsService.addGroups(Arrays.asList(optGroup.get()));
                             _welcomeWindowController.refreshGroupsList();
                         }
                     });
                 }
-                Platform.runLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        showStatusDialog(IMPORT_DIALOG_TITLE,
-                                optGroup.isPresent() ? SUCCESFUL_IMPORT_MESSAGE : FAILED_IMPORT_MESSAGE,
-                                mapGroup.getValue());
-                    }
-                });
+                showStatusDialog(IMPORT_DIALOG_TITLE,
+                        optGroup.isPresent() ? SUCCESFUL_IMPORT_MESSAGE : FAILED_IMPORT_MESSAGE, mapGroup.getValue());
             }
         }
     }
 
     private void showStatusDialog(String title, String header, String content) {
-        Alert alert = new Alert(AlertType.INFORMATION);
-        alert.setTitle(title);
-        alert.setHeaderText(header);
-        alert.setContentText(content);
-        Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
-        stage.getIcons().add(_appIcon);
-        alert.showAndWait();
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                Alert alert = new Alert(AlertType.INFORMATION);
+                alert.setTitle(title);
+                alert.setHeaderText(header);
+                alert.setContentText(content);
+                Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+                stage.getIcons().add(_appIcon);
+                alert.showAndWait();
+            }
+        });
     }
 }

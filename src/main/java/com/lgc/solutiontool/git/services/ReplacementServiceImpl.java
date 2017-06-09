@@ -17,6 +17,8 @@ import java.util.Collections;
 import java.util.Optional;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Class for work with mass changes in cloned files.
@@ -24,6 +26,8 @@ import org.apache.commons.io.FileUtils;
  * @author Lyska Lyudmila
  */
 class ReplacementServiceImpl implements ReplacementService {
+
+    private static final Logger logger = LogManager.getLogger(ReplacementServiceImpl.class);
 
     @Override
     public void replaceTextInFiles(String groupFolderPath, String fileName, String fromText, String toText) {
@@ -45,7 +49,7 @@ class ReplacementServiceImpl implements ReplacementService {
                 replaceText(listProjects, fileName, fromText, toText);
             }
         } else {
-            System.err.println("!ERROR: The file/directory " + path.getFileName() + " does not exist");
+            logger.error("The file/directory " + path.getFileName() + " does not exist");
         }
     }
 
@@ -81,7 +85,7 @@ class ReplacementServiceImpl implements ReplacementService {
                     }
                 });
             } catch (IOException e) {
-                System.err.println("!ERROR:" + e.getMessage());
+                logger.error("", e);
             }
         }
     }
@@ -98,7 +102,7 @@ class ReplacementServiceImpl implements ReplacementService {
         } catch (IOException | DirectoryIteratorException e) {
             // IOException cannot be thrown during the iteration.
             // It can only be thrown by the newDirectoryStream method.
-            System.err.println("!ERROR:" + e.getMessage());
+            logger.error("", e);
         }
         return Collections.emptyList();
     }
@@ -122,7 +126,7 @@ class ReplacementServiceImpl implements ReplacementService {
         try {
             return Optional.of(FileUtils.readFileToString(path.toFile(), Charset.forName("utf-8")));
         } catch (IOException e) {
-            System.err.println("!ERROR:" + e.getMessage());
+            logger.error("", e);
         }
         return Optional.empty();
     }
@@ -131,7 +135,7 @@ class ReplacementServiceImpl implements ReplacementService {
         try {
             FileUtils.writeStringToFile(path.toFile(), textFromFile, Charset.forName("utf-8"), false);
         } catch (IOException e) {
-            System.err.println("!ERROR:" + e.getMessage());
+            logger.error("", e);
         }
     }
 
