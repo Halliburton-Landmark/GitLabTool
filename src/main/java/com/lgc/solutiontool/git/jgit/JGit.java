@@ -164,20 +164,22 @@ public class JGit {
                                          ProgressListener progressListener,
                                          String groupPath) {
         Runnable task = () -> {
-            double step = 1.0 / projects.size();
-            double currentProgress = 0.0;
-            for (Project project : projects) {
-                if (!_isCloneCancelled) {
+                double step = 1.0 / projects.size();
+                double currentProgress = 0.0;
+                for (Project project : projects) {
                     currentProgress += step;
                     progressListener.onStart(project);
                     if (!clone(project, groupPath)) {
+                        if (_isCloneCancelled) {
+                            progressListener.onFinish((Object)null);
+                            return;
+                        }
                         String errorMsg = "Cloning error of the " + project.getName() + " project";
                         progressListener.onError(currentProgress, errorMsg);
                         continue;
                     }
                     progressListener.onSuccess(project, currentProgress);
                 }
-            }
             group.setClonedStatus(true);
             group.setPathToClonedGroup(groupPath);
             progressListener.onFinish(group);
@@ -608,7 +610,7 @@ public class JGit {
         } catch (GitAPIException e) {
             System.err.println("!ERROR: " + e.getMessage());
         } catch (JGitInternalException e) {
-            System.err.println("!ERROR: Cloning process of group was canceled!");
+            System.err.println("Cloning process of group was canceled!");
         }
         return false;
     }

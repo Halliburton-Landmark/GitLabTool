@@ -14,6 +14,7 @@ import com.lgc.solutiontool.git.services.ProjectTypeService;
 import com.lgc.solutiontool.git.services.ServiceProvider;
 import com.lgc.solutiontool.git.ui.icon.AppIconHolder;
 import com.lgc.solutiontool.git.ui.javafx.CloneProgressDialog;
+import com.lgc.solutiontool.git.ui.javafx.CloneProgressDialog.CloningMessageStatus;
 
 import javafx.application.Platform;
 import javafx.beans.binding.BooleanBinding;
@@ -39,6 +40,7 @@ public class CloningGroupsWindowController {
     private static final String CLONING_STATUS_ALERT_TITLE = "Cloning info";
     private static final String CLONING_STATUS_ALERT_HEADER = "Cloning statuses:";
     private static final String FINISH_CLONE_MESSAGE = "The cloning process is finished.";
+    private static final String CANCEL_CLONE_MESSAGE = "Cloning process of group was canceled.";
 
 
     private final LoginService _loginService = (LoginService) ServiceProvider.getInstance()
@@ -190,7 +192,8 @@ public class CloningGroupsWindowController {
         public void onSuccess(Object... t) {
             if (t[0] instanceof Project) {
                 Project project = (Project) t[0];
-                _progressDialog.addMessageToConcole(project.getName() + " project is successful cloned!");
+                _progressDialog.addMessageToConcole(project.getName() + " project is successful cloned!",
+                        CloningMessageStatus.SUCCESS);
 
                 // Determine the project type
                 ProjectTypeService prTypeService = (ProjectTypeService) ServiceProvider.getInstance()
@@ -211,7 +214,7 @@ public class CloningGroupsWindowController {
             }
             if (t[1] instanceof String) {
                 String message = (String) t[1];
-                _progressDialog.addMessageToConcole(message);
+                _progressDialog.addMessageToConcole(message, CloningMessageStatus.ERROR);
             }
         }
 
@@ -225,8 +228,6 @@ public class CloningGroupsWindowController {
 
         @Override
         public void onFinish(Object... t) {
-            _progressDialog.resetProgress();
-            _progressDialog.addMessageToConcole(FINISH_CLONE_MESSAGE);
             if (t[0] instanceof Group) {
                 Group clonedGroup = (Group) t[0];
                 _clonedGroupsService.addGroups(Arrays.asList(clonedGroup));
@@ -234,7 +235,10 @@ public class CloningGroupsWindowController {
             Platform.runLater(new Runnable() {
                 @Override
                 public void run() {
-                    cloningStatusDialog(FINISH_CLONE_MESSAGE);
+                    final String messageStatus = t[0] instanceof Group ? FINISH_CLONE_MESSAGE : CANCEL_CLONE_MESSAGE;
+                    _progressDialog.addMessageToConcole(messageStatus, CloningMessageStatus.SIMPLE);
+                    _progressDialog.resetProgress();
+                    cloningStatusDialog(messageStatus);
                 }
             });
         }

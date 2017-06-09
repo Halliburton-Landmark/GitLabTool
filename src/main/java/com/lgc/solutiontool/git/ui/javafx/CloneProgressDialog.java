@@ -4,8 +4,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import org.apache.commons.lang.StringUtils;
-
 import com.lgc.solutiontool.git.jgit.JGit;
 import com.lgc.solutiontool.git.ui.icon.AppIconHolder;
 import com.lgc.solutiontool.git.ui.javafx.dto.DialogDTO;
@@ -83,7 +81,7 @@ public class CloneProgressDialog extends Dialog<DialogDTO> {
                 }
 
                 if (item != null) {
-                    if(item.getStatus() != CloningMessageStatus.SIMPLE) {
+                    if (item.getStatus() != CloningMessageStatus.SIMPLE) {
                         setStyle(item.getCSSForStatus());
                     }
                     setText(item.getMessage());
@@ -106,7 +104,6 @@ public class CloneProgressDialog extends Dialog<DialogDTO> {
             @Override
             public void handle(ActionEvent e) {
                 JGit.getInstance().cancelClone();
-                addMessageToConcole("Cloning was cancelled...", CloningMessageStatus.SIMPLE);
                 setDisableCancel(true);
                 updateProgressBar(0.0);
             }
@@ -122,19 +119,14 @@ public class CloneProgressDialog extends Dialog<DialogDTO> {
         primaryStage.show();
     }
 
-    public void addMessageToConcole(String message) {
+    public void addMessageToConcole(String message, CloningMessageStatus status) {
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
-                addMessageToConcole(message, StringUtils.containsIgnoreCase(message, "error")
-                        ? CloningMessageStatus.ERROR : CloningMessageStatus.SUCCESS);
+                _messageConcole.getItems().add(new CloningMessage(currentDateToString() + message, status));
+                _messageConcole.refresh();
             }
         });
-    }
-
-    private void addMessageToConcole(String message, CloningMessageStatus status) {
-        _messageConcole.getItems().add(new CloningMessage(currentDateToString() + message, status));
-        _messageConcole.refresh();
     }
 
     public void updateProjectLabel(String projectLabel) {
@@ -195,14 +187,12 @@ public class CloneProgressDialog extends Dialog<DialogDTO> {
     }
 
     /**
-     * Status of cloning message. It class is needed to get CSS for each status.
+     * Status of cloning message for the CloneProgressDialog. It class is needed to get CSS for each status.
      *
      * @author Lyudmila Lyska
      */
-    enum CloningMessageStatus {
-        ERROR,
-        SUCCESS,
-        SIMPLE;
+    public enum CloningMessageStatus {
+        ERROR, SUCCESS, SIMPLE;
 
         /**
          * Gets CSS style for status
