@@ -16,6 +16,7 @@ import org.apache.logging.log4j.Logger;
 import com.lgc.solutiontool.git.entities.ClonedGroups;
 import com.lgc.solutiontool.git.entities.Group;
 import com.lgc.solutiontool.git.util.XMLParser;
+import com.lgc.solutiontool.git.xml.Server;
 import com.lgc.solutiontool.git.xml.Servers;
 
 
@@ -113,4 +114,34 @@ public class StorageServiceImpl implements StorageService {
         }
     }
 
+    @Override
+    public boolean updateLastUserName(String serverName, String userName) {
+        Servers servers = loadServers();
+        servers.getServers().forEach(server -> {
+            if (server.getName().contentEquals(serverName)) {
+                server.setLastUserName(userName);
+                server.setLastUsed(true);
+            } else {
+                server.setLastUsed(false);
+            }
+        });
+        
+        return updateServers(servers);
+    }
+
+    @Override
+    public String getLastUserName(String serverName) {
+        return loadServers().getServer(serverName)
+                            .map(Server::getLastUserName)
+                            .orElse("");
+    }
+
+    @Override
+    public Server getLastUsedServer() {
+        return loadServers().getServers()
+                .stream()
+                .filter(Server::isLastUsed)
+                .findAny()
+                .orElse(null);
+    }
 }
