@@ -49,8 +49,7 @@ public class CommitDialog extends Dialog {
         stage.getIcons().add(_appIcon);
 
         setTitle("Switch branch confirmation");
-        setHeaderText("This projects have uncommited a changes");
-
+        setHeaderText("This projects have uncommited changes");
 
     }
 

@@ -1,11 +1,5 @@
 package com.lgc.solutiontool.git.services;
 
-import com.lgc.solutiontool.git.entities.Branch;
-import com.lgc.solutiontool.git.entities.Project;
-import com.lgc.solutiontool.git.jgit.BranchType;
-import com.lgc.solutiontool.git.jgit.JGit;
-import com.lgc.solutiontool.git.jgit.JGitStatus;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -16,6 +10,12 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import org.eclipse.jgit.api.Status;
+
+import com.lgc.solutiontool.git.entities.Branch;
+import com.lgc.solutiontool.git.entities.Project;
+import com.lgc.solutiontool.git.jgit.BranchType;
+import com.lgc.solutiontool.git.jgit.JGit;
+import com.lgc.solutiontool.git.jgit.JGitStatus;
 
 public class GitServiceImpl implements GitService {
 
@@ -50,7 +50,7 @@ public class GitServiceImpl implements GitService {
     }
 
     @Override
-    public List<Project> getChangedProjects(List<Project> projects) {
+    public List<Project> getProjectsWithChanges(List<Project> projects) {
         if (projects == null) {
             throw new IllegalArgumentException("Wrong parameters for obtaining branches.");
         }

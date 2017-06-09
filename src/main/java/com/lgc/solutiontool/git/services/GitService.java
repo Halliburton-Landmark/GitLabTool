@@ -1,11 +1,11 @@
 package com.lgc.solutiontool.git.services;
 
-import java.util.List;
-import java.util.Map;
-
 import com.lgc.solutiontool.git.entities.Branch;
 import com.lgc.solutiontool.git.entities.Project;
 import com.lgc.solutiontool.git.jgit.JGitStatus;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * Service for working with Git features.
@@ -39,7 +39,7 @@ public interface GitService {
      * @param projects projects that need to be checked
      * @return list of projects that has uncommited changes
      */
-    List<Project> getChangedProjects(List<Project> projects);
+    List<Project> getProjectsWithChanges(List<Project> projects);
 
     /**
      * Commit changes to selectedProjects
