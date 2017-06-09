@@ -24,7 +24,7 @@ public class StorageServiceImpl implements StorageService {
     private static final Logger logger = LogManager.getLogger(StorageServiceImpl.class);
     
     private static final String USER_HOME_PROPERTY = "user.home";
-    private static final String WORKSPACE_DIRECTORY_PROPERTY = ".SolutionTool";
+    private static final String WORKSPACE_DIRECTORY_PROPERTY = ".GitlabTool";
     private static final String PATH_SEPARATOR = File.separator;
     private static final String CLONED_GROUPS_FILENAME = "clonedGroups.xml";
     private static final String SERVERS_FILENAME = "servers.xml";

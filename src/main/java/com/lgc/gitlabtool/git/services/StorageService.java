@@ -42,7 +42,7 @@ public interface StorageService {
     /**
      * Loads <code>Servers</code> instance from file that contains list of servers
      * If the file does not exist it returns default list of servers that is defined
-     * in com.lgc.solutiontool.git.xml.Servers.Servers()
+     * in com.lgc.gitlabtool.git.xml.Servers.Servers()
      *
      * @return instance of <code>Servers</code>
      */
