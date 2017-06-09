@@ -165,6 +165,7 @@ class LoginDialog extends Dialog<DialogDTO> {
             if (!isEmptyInputFields(userTextField, passwordField)) {
                 logger.info(WAITING_MESSAGE);
                 showMessage(WAITING_MESSAGE, Color.GREEN);
+                disableButton(true);
                 String serverURL = URLManager.completeServerURL(comboBox.getValue());
                 DialogDTO dto = new DialogDTO(userTextField.getText(), passwordField.getText(), serverURL);
                 _loginService.login(dto, responseCode -> {
@@ -178,14 +179,20 @@ class LoginDialog extends Dialog<DialogDTO> {
                         Platform.runLater(() -> {
                             logger.warn(WRONG_CREDENTIALS);
                             showMessage(WRONG_CREDENTIALS, Color.RED);
+                            disableButton(false);
                         });
                     }
                 });
             } else {
                 logger.warn(EMPTY_FIELD);
                 showMessage(EMPTY_FIELD, Color.RED);
+                disableButton(false);
             }
         });
+    }
+
+    private void disableButton(boolean trigger) {
+        signInButton.setDisable(trigger);
     }
 
     private boolean isEmptyInputFields(TextField userTextField, PasswordField passwordField) {
