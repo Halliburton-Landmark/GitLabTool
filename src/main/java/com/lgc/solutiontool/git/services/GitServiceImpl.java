@@ -68,43 +68,17 @@ public class GitServiceImpl implements GitService {
     }
 
     @Override
-    public void commitChanges(List<Project> projects, String commitMessage, boolean isPushImmediately) {
+    public void commitChanges(List<Project> projects, String commitMessage, boolean isPushImmediately,
+                              Consumer<Integer> onSuccess, BiConsumer<Integer, String> onError) {
         if (isPushImmediately) {
-            JGit.getInstance().commitAndPush(projects, commitMessage, true, null, null, null, null,
-                    new SuccessfulOperationHandler(), new UnsuccessfulOperationHandler());
+            //use null for getting default user-info
+            JGit.getInstance().commitAndPush(projects, commitMessage, true, null,
+                    null, null, null, onSuccess, onError);
         } else {
-            JGit.getInstance().commit(projects, commitMessage, true, null, null, null, null,
-                    new SuccessfulOperationHandler(), new UnsuccessfulOperationHandler());
+            //use null for getting default user-info
+            JGit.getInstance().commit(projects, commitMessage, true, null,
+                    null, null, null, onSuccess, onError);
         }
     }
 
-    /**
-     * Handler for successful operation
-     *
-     * @author Pavlo Pidhorniy
-     */
-    class SuccessfulOperationHandler implements Consumer<Integer> {
-
-        @Override
-        public void accept(Integer percentage) {
-            System.out.println("Progress: " + percentage + "%");
-
-        }
-    }
-
-    /**
-     * Handler for unsuccessful operation
-     *
-     * @author Pavlo Pidhorniy
-     */
-    class UnsuccessfulOperationHandler implements BiConsumer<Integer, String> {
-
-        @Override
-        public void accept(Integer percentage, String message) {
-            // TODO: in log or UI console
-            System.err.println("!ERROR: " + message);
-            System.out.println("Progress: " + percentage + "%");
-        }
-
-    }
 }

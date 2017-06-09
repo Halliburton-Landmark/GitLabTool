@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -295,7 +297,8 @@ public class ModularController {
                 if (commitResult.get() == dialog.getCommitAndPushButton()) {
                     isPush = true;
                 }
-                _gitService.commitChanges(selectedProjects, commitMessage, isPush);
+                _gitService.commitChanges(selectedProjects, commitMessage, isPush,
+                        new SuccessfulOperationHandler(), new UnsuccessfulOperationHandler());
             }
 
         } else if (result.get() == discardButton) {
@@ -385,5 +388,34 @@ public class ModularController {
                 alert.showAndWait();
             }
         });
+    }
+
+    /**
+     * Handler for successful operation
+     *
+     * @author Pavlo Pidhorniy
+     */
+    class SuccessfulOperationHandler implements Consumer<Integer> {
+
+        @Override
+        public void accept(Integer percentage) {
+            logger.info("Progress: " + percentage + "%");
+        }
+    }
+
+    /**
+     * Handler for unsuccessful operation
+     *
+     * @author Pavlo Pidhorniy
+     */
+    class UnsuccessfulOperationHandler implements BiConsumer<Integer, String> {
+
+        @Override
+        public void accept(Integer percentage, String message) {
+            // TODO: in log or UI console
+            logger.error("!ERROR: " + message);
+            logger.info("Progress: " + percentage + "%");
+        }
+
     }
 }
