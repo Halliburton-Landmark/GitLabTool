@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.BorderPane?>
 
-<BorderPane prefHeight="180.0" prefWidth="290.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.lgc.solutiontool.git.ui.javafx.controllers.ServerInputWindowController">
+<BorderPane prefHeight="180.0" prefWidth="290.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.lgc.gitlabtool.git.ui.javafx.controllers.ServerInputWindowController">
 	<bottom>
 		<GridPane prefHeight="210.0" prefWidth="280.0" BorderPane.alignment="CENTER">
 			<columnConstraints>
