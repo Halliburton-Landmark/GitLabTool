@@ -68,7 +68,7 @@ public class ModularController {
     private static final String SUSSECCFUL_REMOVE_GROUP_MESSAGE = "Removing of group is Successful";
     private static final String FAILED_REMOVE_GROUP_MESSAGE = "Removing of group is Failed";
 
-    private static final String CSS_PATH = "css/style.css";
+    private static final String CSS_PATH = "css" + File.separator + "style.css";
     private static final Image _appIcon = AppIconHolder.getInstance().getAppIcoImage();
 
     private MainWindowController _mainWindowController;

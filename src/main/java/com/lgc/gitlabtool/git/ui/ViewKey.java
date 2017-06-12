@@ -1,5 +1,7 @@
 package com.lgc.gitlabtool.git.ui;
 
+import java.io.File;
+
 /**
  * Enum-helper for managing viewWindow names
  *
@@ -7,12 +9,12 @@ package com.lgc.gitlabtool.git.ui;
  */
 public enum ViewKey {
 
-    WELCOME_WINDOW("welcomeWindow", "fxml/WelcomeWindow.fxml"),
-    MAIN_WINDOW("mainWindow", "fxml/MainWindow.fxml"),
-    MODULAR_CONTAINER("modularContainer", "fxml/ModularContainer.fxml"),
-    CLONING_GROUPS_WINDOW("cloningGroupsWindow", "fxml/CloningGroupsWindow.fxml"),
-    SWITCH_BRANCH_WINDOW("switchBranchWindow", "fxml/SwitchBranchWindow.fxml"),
-    SERVER_INPUT_WINDOW("serverInputWindow", "fxml/ServerInputWindow.fxml");
+    WELCOME_WINDOW("welcomeWindow", "fxml" + File.separator + "WelcomeWindow.fxml"),
+    MAIN_WINDOW("mainWindow", "fxml" + File.separator + "MainWindow.fxml"),
+    MODULAR_CONTAINER("modularContainer", "fxml" + File.separator + "ModularContainer.fxml"),
+    CLONING_GROUPS_WINDOW("cloningGroupsWindow", "fxml" + File.separator + "CloningGroupsWindow.fxml"),
+    SWITCH_BRANCH_WINDOW("switchBranchWindow", "fxml" + File.separator + "SwitchBranchWindow.fxml"),
+    SERVER_INPUT_WINDOW("serverInputWindow", "fxml" + File.separator + "ServerInputWindow.fxml");
 
     private final String key;
     private final String path;

@@ -1,5 +1,7 @@
 package com.lgc.gitlabtool.git.ui.icon;
 
+import java.io.File;
+
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
@@ -9,7 +11,7 @@ import javafx.scene.image.ImageView;
  * @author Pavlo Pidhorniy
  */
 public class AppIconHolder {
-    private static final String APP_ICON_URL = "icons/gitlab.png";
+    private static final String APP_ICON_URL = "icons" + File.separator + "gitlab.png";
     private static AppIconHolder instance = null;
 
     private static Image appIconImage;
