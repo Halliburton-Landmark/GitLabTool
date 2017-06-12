@@ -11,8 +11,8 @@ import javafx.scene.image.ImageView;
  * @author Pavlo Pidhorniy
  */
 public class LocalRemoteIconHolder {
-    private static final String LOCAL_BRANCH_ICON_URL = "icons" + File.separator + "branch" + File.separator + "local_Branch.png";
-    private static final String REMOTE_BRANCH_ICON_URL = "icons" + File.separator + "branch" + File.separator + "remote_Branch.png";
+    private static final String LOCAL_BRANCH_ICON_URL = "icons" + File.separator + "branch" + File.separator + "local_branch.png";
+    private static final String REMOTE_BRANCH_ICON_URL = "icons" + File.separator + "branch" + File.separator + "remote_branch.png";
 
     private static LocalRemoteIconHolder instance = null;
 
