@@ -12,12 +12,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.errors.JGitInternalException;
 
 import com.google.gson.reflect.TypeToken;
@@ -69,14 +68,12 @@ public class GroupsUserServiceImpl implements GroupsUserService {
         return null;
     }
 
-    @Override
-    public Group cloneGroup(Group group, String destinationPath, BiConsumer<Integer, Project> onSuccess,
-            BiConsumer<Integer, String> onError) {
+    private Group cloneGroup(Group group, String destinationPath, ProgressListener progressListener) {
         try {
             if (group.getProjects() == null) {
                 group = getGroupById(group.getId());
             }
-            JGit.getInstance().clone(group, destinationPath, onSuccess, onError);
+            JGit.getInstance().clone(group, destinationPath, progressListener);
         } catch (JGitInternalException ex) {
             logger.error(ex.getStackTrace());
         }
@@ -100,7 +97,8 @@ public class GroupsUserServiceImpl implements GroupsUserService {
 
     @Override
     public Map<Group, CloningStatus> cloneGroups(List<Group> groups, String destinationPath,
-            BiConsumer<Integer, Project> onSuccess, BiConsumer<Integer, String> onError) {
+            ProgressListener progressListener) {
+
         if (groups == null || destinationPath == null) {
             return Collections.emptyMap();
         }
@@ -113,7 +111,8 @@ public class GroupsUserServiceImpl implements GroupsUserService {
 
         Map<Group, CloningStatus> statusMap = new HashMap<>();
         for (Group groupItem : groups) {
-            Group clonedGroup = cloneGroup(groupItem, destinationPath, onSuccess, onError);
+            // TODO pass onStart here
+            Group clonedGroup = cloneGroup(groupItem, destinationPath, progressListener);
             statusMap.put(clonedGroup, getStatus(clonedGroup));
         }
 
@@ -162,7 +161,7 @@ public class GroupsUserServiceImpl implements GroupsUserService {
 
     private Map<Optional<Group>, String> importGroup(Path groupPath) {
         Map<Optional<Group>, String> result = new HashMap<>();
-        String nameGroup = groupPath.getName(groupPath.getNameCount()-1).toString();
+        String nameGroup = groupPath.getName(groupPath.getNameCount() - 1).toString();
         if (checkGroupIsLoaded(groupPath.toAbsolutePath().toString())) {
             logger.debug(GROUP_ALREADY_LOADED_MESSAGE);
             result.put(Optional.empty(), GROUP_ALREADY_LOADED_MESSAGE);
@@ -259,21 +258,21 @@ public class GroupsUserServiceImpl implements GroupsUserService {
         Collection<String> projectsName = PathUtilities.getFolders(localPathGroup);
         if (projectsName.isEmpty()) {
             logger.debug(PREFIX_SUCCESSFUL_LOAD);
-            result.put(Optional.of(group), group.getName() + PREFIX_SUCCESSFUL_LOAD );
+            result.put(Optional.of(group), group.getName() + PREFIX_SUCCESSFUL_LOAD);
             return result;
         }
         projects.stream().filter(project -> projectsName.contains(project.getName()))
                 .forEach((project) -> updateProjectStatus(project, localPathGroup.toString()));
         logger.debug(PREFIX_SUCCESSFUL_LOAD);
-        result.put(Optional.of(group), group.getName() + PREFIX_SUCCESSFUL_LOAD );
+        result.put(Optional.of(group), group.getName() + PREFIX_SUCCESSFUL_LOAD);
         return result;
     }
 
     private void updateProjectStatus(Project project, String pathGroup) {
         project.setClonedStatus(true);
         project.setPathToClonedProject(pathGroup + File.separator + project.getName());
-        ProjectTypeService typeService = (ProjectTypeService) ServiceProvider.getInstance().
-                getService(ProjectTypeService.class.getName());
+        ProjectTypeService typeService = (ProjectTypeService) ServiceProvider.getInstance()
+                .getService(ProjectTypeService.class.getName());
         project.setProjectType(typeService.getProjectType(project));
     }
 
@@ -285,5 +284,4 @@ public class GroupsUserServiceImpl implements GroupsUserService {
     private List<Group> getLoadedGroups() {
         return _clonedGroupsService.loadClonedGroups();
     }
-
 }
