@@ -32,8 +32,6 @@ public class MainWindowController {
 
     private Group _selectedGroup;
 
-    private static final String SHADOW_PROJECT_ICON_URL = "icons/project/shadow_project.png";
-
     private final LoginService _loginService =
             (LoginService) ServiceProvider.getInstance().getService(LoginService.class.getName());
 
