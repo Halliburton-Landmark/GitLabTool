@@ -3,6 +3,7 @@ package com.lgc.solutiontool.git.jgit;
 import static org.mockito.Mockito.mock;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -70,7 +71,6 @@ import org.mockito.Mockito;
 import com.lgc.solutiontool.git.entities.Group;
 import com.lgc.solutiontool.git.entities.Project;
 import com.lgc.solutiontool.git.entities.User;
-import com.lgc.solutiontool.git.util.JSONParser;
 
 /**
  * Tests for the JGit class.
@@ -93,7 +93,7 @@ public class JGitTest {
     }
 
     @Test
-    public void cloneGroupIncorrectDataExceptionTest() {
+    public void cloneGroupIncorrectDataTest() {
         Group group = new Group();
         group.setClonedStatus(true);
         Assert.assertFalse(JGit.getInstance().clone(group, ".", null, null));
@@ -108,7 +108,7 @@ public class JGitTest {
 
     @Test
     public void cloneGroupProjectsIsEmptyTest() {
-        Group group = JSONParser.parseToObject("{\"id\":1468081,\"name\":\"STG\", \"projects\":[]}", Group.class);
+        Group group = getCorrectGroup(0);
 
         // projects is empty, the clone method return false
         Assert.assertFalse(JGit.getInstance().clone(group, CORRECT_PATH, null, null));
@@ -127,15 +127,37 @@ public class JGitTest {
             }
         };
 
-        Group group = JSONParser.parseToObject("{\"id\":1468081,\"name\":\"STG\","
-                + "\"projects\":[{\"id\":3010543, \"name\":\"stg\", \"description\":\"\",\"default_branch\":\"master\",\"public\":false,"
-                + "\"visibility_level\":0,\"ssh_url_to_repo\":\"git@gitlab.com:SolutionToolGitLab/stg.git\","
-                + "\"http_url_to_repo\":\"https://gitlab.com/SolutionToolGitLab/stg.git\","
-                + "\"web_url\":\"https://gitlab.com/SolutionToolGitLab/stg\"}]}", Group.class);
+        Group group = getCorrectGroup(2);
+        Assert.assertTrue(git.clone(group, CORRECT_PATH, (progress, project) -> {}, (progress, message) -> {}));
+    }
 
-        Assert.assertTrue(git.clone(group, CORRECT_PATH, (progress, project) -> {
-        }, (progress, message) -> {
-        }));
+    private Group getCorrectGroup(int countProject) {
+        try {
+            Group group = new Group();
+
+            Class groupClass = group.getClass();
+            Field publicFields = groupClass.getDeclaredField("projects");
+
+            publicFields.setAccessible(true);
+            publicFields.set(group, getCorrectProject(countProject));
+
+            return group;
+
+        } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private List<Project> getCorrectProject(int countProject) {
+        List<Project> projects = new ArrayList<>();
+        for (int i = 0; i < countProject; i++) {
+            Project pr = new Project();
+            pr.setClonedStatus(true);
+            pr.setPathToClonedProject(".");
+            projects.add(pr);
+        }
+        return projects;
     }
 
     @Test
@@ -147,15 +169,9 @@ public class JGitTest {
             }
         };
 
-        Group group = JSONParser.parseToObject("{\"id\":1468081,\"name\":\"STG\","
-                + "\"projects\":[{\"id\":3010543, \"name\":\"stg\", \"description\":\"\",\"default_branch\":\"master\",\"public\":false,"
-                + "\"visibility_level\":0,\"ssh_url_to_repo\":\"git@gitlab.com:SolutionToolGitLab/stg.git\","
-                + "\"http_url_to_repo\":\"https://gitlab.com/SolutionToolGitLab/stg.git\","
-                + "\"web_url\":\"https://gitlab.com/SolutionToolGitLab/stg\"}]}", Group.class);
+        Group group = getCorrectGroup(1);
 
-        Assert.assertTrue(git.clone(group, CORRECT_PATH, (progress, project) -> {
-        }, (progress, message) -> {
-        }));
+        Assert.assertTrue(git.clone(group, CORRECT_PATH, (progress, project) -> {}, (progress, message) -> {}));
     }
 
     @Test
