@@ -1,12 +1,20 @@
 package com.lgc.gitlabtool.git.ui.javafx.controllers;
 
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang.StringUtils;
+
 import com.lgc.gitlabtool.git.entities.Branch;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.jgit.BranchType;
 import com.lgc.gitlabtool.git.jgit.JGit;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
-import com.lgc.gitlabtool.git.project.nature.projecttype.ProjectType;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
@@ -20,17 +28,18 @@ import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.control.RadioButton;
+import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.HBox;
-import javafx.scene.paint.Color;
-import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import org.apache.commons.lang.StringUtils;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 @SuppressWarnings("unchecked")
 public class SwitchBranchWindowController {
@@ -39,12 +48,12 @@ public class SwitchBranchWindowController {
     private static final String SWITCHTO_STATUS_ALERT_HEADER = "Switch branch statuses:";
     private static final String NEW_LINE_SYMBOL = "\n";
 
-    private GitService _gitService =
+    private final GitService _gitService =
             (GitService) ServiceProvider.getInstance().getService(GitService.class.getName());
 
-    private List<Branch> allBranches = new ArrayList<>();
+    private List<Branch> _allBranches = new ArrayList<>();
 
-    private List<Project> allSelectedProjects = new ArrayList<>();
+    private List<Project> _selectedClonedProjects = new ArrayList<>();
 
     @FXML
     private ListView currentProjectsListView;
@@ -75,8 +84,11 @@ public class SwitchBranchWindowController {
         configureProjectsListView(currentProjectsListView);
         configureBranchesListView(branchesListView);
 
-        allSelectedProjects = SelectionsProvider.getInstance().getSelectionItems("mainWindow_projectsList");
-        setProjectListItems(allSelectedProjects, currentProjectsListView);
+        List<Project> selectedProjects = SelectionsProvider.getInstance().getSelectionItems("mainWindow_projectsList");
+        _selectedClonedProjects = selectedProjects.stream()
+                                                  .filter((item)-> item.isCloned())
+                                                  .collect(Collectors.toList());
+        setProjectListItems(_selectedClonedProjects, currentProjectsListView);
 
         searchField.textProperty().addListener((observable, oldValue, newValue) -> filterPlantList(oldValue, newValue));
 
@@ -92,7 +104,7 @@ public class SwitchBranchWindowController {
     public void onSwitchButton() {
         List<Project> selectedProjects = currentProjectsListView.getItems();
         Branch selectedBranch = (Branch) branchesListView.getSelectionModel().getSelectedItem();
-        
+
         Map<Project, JGitStatus> switchStatuses = _gitService.switchTo(selectedProjects, selectedBranch);
 
         String dialogMessage = switchStatuses.entrySet().stream()
@@ -130,12 +142,12 @@ public class SwitchBranchWindowController {
                 branchType = BranchType.LOCAL;
         }
 
-        allBranches = getBranches(allSelectedProjects, branchType, isCommonMatching);
+        _allBranches = getBranches(_selectedClonedProjects, branchType, isCommonMatching);
         branchesListView.getSelectionModel().clearSelection();
-        branchesListView.setItems(FXCollections.observableArrayList(allBranches));
+        branchesListView.setItems(FXCollections.observableArrayList(_allBranches));
 
         searchField.setText(StringUtils.EMPTY);
-        currentProjectsListView.setItems(FXCollections.observableArrayList(allSelectedProjects));
+        currentProjectsListView.setItems(FXCollections.observableArrayList(_selectedClonedProjects));
     }
 
     private void filterPlantList(String oldValue, String newValue) {
@@ -143,12 +155,12 @@ public class SwitchBranchWindowController {
         List<Branch> filteredBranchList = new ArrayList<>();
 
         if (searchField == null || searchField.getText().equals(StringUtils.EMPTY)) {
-            branchesListView.setItems(FXCollections.observableArrayList(allBranches));
-            currentProjectsListView.setItems(FXCollections.observableArrayList(allSelectedProjects));
+            branchesListView.setItems(FXCollections.observableArrayList(_allBranches));
+            currentProjectsListView.setItems(FXCollections.observableArrayList(_selectedClonedProjects));
         } else {
             //filtering branches
             newValue = newValue.toUpperCase();
-            for (Object branch : allBranches) {
+            for (Object branch : _allBranches) {
                 String filterText = ((Branch) branch).getBranchName();
                 if (filterText.toUpperCase().contains(newValue)) {
                     filteredBranchList.add((Branch) branch);
@@ -166,7 +178,7 @@ public class SwitchBranchWindowController {
         List<Project> filteredProjectList = new ArrayList<>();
 
         //filtering projects
-        for (Object project : allSelectedProjects) {
+        for (Object project : _selectedClonedProjects) {
             if (_gitService.containsBranches((Project) project, branches, false)) {
                 filteredProjectList.add((Project) project);
             }
@@ -251,41 +263,6 @@ public class SwitchBranchWindowController {
         stage.getIcons().add(appIcon);
 
         alert.showAndWait();
-    }
-
-    private class ProjectListCell extends ListCell<Project> {
-        private final Integer LIST_CELL_SPACING = 5;
-        private final String LEFT_BRACKET = "[";
-        private final String RIGHT_BRACKET = "]";
-
-        @Override
-        protected void updateItem(Project item, boolean empty) {
-            super.updateItem(item, empty);
-            setText(null);
-            setGraphic(null);
-
-            if (item != null && !empty) {
-                ProjectType type = item.getProjectType();
-
-                Image fxImage = new Image(getClass().getClassLoader().getResource(type.getIconUrl()).toExternalForm());
-                ImageView imageView = new ImageView(fxImage);
-
-                Optional<String> currentBranchName = JGit.getInstance().getCurrentBranch(item);
-                String currentBranch = currentBranchName.orElse(StringUtils.EMPTY);
-
-                Text branchNameTextView = new Text(item.getName());
-                Text currentBranchTextView = new Text(LEFT_BRACKET + currentBranch + RIGHT_BRACKET);
-                currentBranchTextView.setFill(Color.DARKBLUE);
-
-                HBox hBoxItem = new HBox(imageView, branchNameTextView, currentBranchTextView);
-                hBoxItem.setSpacing(LIST_CELL_SPACING);
-
-                String tooltipText = item.getName() + " " + LEFT_BRACKET + currentBranch + RIGHT_BRACKET;
-                setTooltip(new Tooltip(tooltipText));
-                setGraphic(hBoxItem);
-            }
-        }
-
     }
 
     private class BranchListCell extends ListCell<Branch> {

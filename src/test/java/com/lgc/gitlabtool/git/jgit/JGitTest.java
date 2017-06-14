@@ -71,6 +71,7 @@ import org.mockito.Mockito;
 import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.User;
+import com.lgc.gitlabtool.git.services.ProgressListener;
 
 /**
  * Tests for the JGit class.
@@ -84,26 +85,26 @@ public class JGitTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void cloneGroupIncorrectDataExceptionGroupTest() {
-        JGit.getInstance().clone(null, CORRECT_PATH, null, null);
+        JGit.getInstance().clone(null, CORRECT_PATH, new EmptyListener());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void cloneGroupIncorrectDataExceptionPathTest() {
-        JGit.getInstance().clone(new Group(), null, null, null);
+        JGit.getInstance().clone(new Group(), null, new EmptyListener());
     }
 
     @Test
     public void cloneGroupIncorrectDataTest() {
         Group group = new Group();
         group.setClonedStatus(true);
-        Assert.assertFalse(JGit.getInstance().clone(group, ".", null, null));
+        Assert.assertFalse(JGit.getInstance().clone(group, ".", new EmptyListener()));
     }
 
     @Test
     public void cloneGroupProjectsIsNullTest() {
         Group group = new Group();
         // projects is null, the clone method return false
-        Assert.assertFalse(JGit.getInstance().clone(group, CORRECT_PATH, null, null));
+        Assert.assertFalse(JGit.getInstance().clone(group, CORRECT_PATH, new EmptyListener()));
     }
 
     @Test
@@ -111,10 +112,8 @@ public class JGitTest {
         Group group = getCorrectGroup(0);
 
         // projects is empty, the clone method return false
-        Assert.assertFalse(JGit.getInstance().clone(group, CORRECT_PATH, null, null));
-        Assert.assertFalse(JGit.getInstance().clone(group, CORRECT_PATH, (progress, project) -> {
-        }, (progress, message) -> {
-        }));
+        Assert.assertFalse(JGit.getInstance().clone(group, CORRECT_PATH, new EmptyListener()));
+        Assert.assertFalse(JGit.getInstance().clone(group, CORRECT_PATH, new EmptyListener()));
     }
 
     @Test
@@ -128,7 +127,7 @@ public class JGitTest {
         };
 
         Group group = getCorrectGroup(2);
-        Assert.assertTrue(git.clone(group, CORRECT_PATH, (progress, project) -> {}, (progress, message) -> {}));
+        Assert.assertTrue(git.clone(group, CORRECT_PATH, new EmptyListener()));
     }
 
     private Group getCorrectGroup(int countProject) {
@@ -171,7 +170,7 @@ public class JGitTest {
 
         Group group = getCorrectGroup(1);
 
-        Assert.assertTrue(git.clone(group, CORRECT_PATH, (progress, project) -> {}, (progress, message) -> {}));
+        Assert.assertTrue(git.clone(group, CORRECT_PATH, new EmptyListener()));
     }
 
     @Test
@@ -1140,4 +1139,22 @@ public class JGitTest {
         return mock(DirCache.class);
     }
 
+    class EmptyListener implements ProgressListener {
+
+        @Override
+        public void onSuccess(Object... t) {
+        }
+
+        @Override
+        public void onError(Object... t) {
+        }
+
+        @Override
+        public void onStart(Object... t) {
+        }
+
+        @Override
+        public void onFinish(Object... t) {
+        }
+    }
 }
