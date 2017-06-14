@@ -240,7 +240,7 @@ public class CloningGroupsWindowController {
             Platform.runLater(new Runnable() {
                 @Override
                 public void run() {
-                    final String messageStatus = t[0] instanceof Group ? FINISH_CLONE_MESSAGE : CANCEL_CLONE_MESSAGE;
+                    final String messageStatus = t[1] instanceof Boolean ? FINISH_CLONE_MESSAGE : CANCEL_CLONE_MESSAGE;
                     _progressDialog.addMessageToConcole(messageStatus, CloningMessageStatus.SIMPLE);
                     _progressDialog.resetProgress();
                     cloningStatusDialog(messageStatus);

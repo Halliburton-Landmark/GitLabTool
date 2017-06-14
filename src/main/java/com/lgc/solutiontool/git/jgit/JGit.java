@@ -173,16 +173,13 @@ public class JGit {
                                          ProgressListener progressListener,
                                          String groupPath) {
         Runnable task = () -> {
-                double step = 1.0 / projects.size();
-                double currentProgress = 0.0;
-                for (Project project : projects) {
+            double step = 1.0 / projects.size();
+            double currentProgress = 0.0;
+            for (Project project : projects) {
+                if (!_isCloneCancelled) {
                     currentProgress += step;
-                    progressListener.onStart(project);
+                    progressListener.onStart(project, currentProgress);
                     if (!clone(project, groupPath)) {
-                        if (_isCloneCancelled) {
-                            progressListener.onFinish((Object)null);
-                            return;
-                        }
                         String errorMsg = "Cloning error of the " + project.getName() + " project";
                         progressListener.onError(currentProgress, errorMsg);
                         logger.debug(errorMsg);
@@ -190,9 +187,10 @@ public class JGit {
                     }
                     progressListener.onSuccess(project, currentProgress);
                 }
+            }
             group.setClonedStatus(true);
             group.setPathToClonedGroup(groupPath);
-            progressListener.onFinish(group);
+            progressListener.onFinish(group, Boolean.valueOf(_isCloneCancelled));
         };
 
         Thread t = new Thread(task, "Clone Group Thread");

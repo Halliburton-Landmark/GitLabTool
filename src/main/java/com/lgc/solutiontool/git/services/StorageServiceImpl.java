@@ -22,7 +22,7 @@ import com.lgc.solutiontool.git.xml.Servers;
 
 public class StorageServiceImpl implements StorageService {
     private static final Logger logger = LogManager.getLogger(StorageServiceImpl.class);
-    
+
     private static final String USER_HOME_PROPERTY = "user.home";
     private static final String WORKSPACE_DIRECTORY_PROPERTY = ".SolutionTool";
     private static final String PATH_SEPARATOR = File.separator;
@@ -54,9 +54,9 @@ public class StorageServiceImpl implements StorageService {
             List<Group> list = XMLParser.loadObject(file, ClonedGroups.class).getClonedGroups();
             return list == null ? Collections.emptyList() : list;
         } catch (IOException | JAXBException e) {
-            logger.error("", e);
-            return Collections.emptyList();
+            logger.error("", e.getMessage());
         }
+        return Collections.emptyList();
     }
 
     @Override
@@ -125,7 +125,7 @@ public class StorageServiceImpl implements StorageService {
                 server.setLastUsed(false);
             }
         });
-        
+
         return updateServers(servers);
     }
 

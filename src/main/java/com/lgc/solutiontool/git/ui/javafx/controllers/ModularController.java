@@ -223,8 +223,6 @@ public class ModularController {
             FXMLLoader loader = new FXMLLoader(switchBranchWindowUrl);
             Parent root = loader.load();
 
-            SwitchBranchWindowController controller = loader.getController();
-
             Scene scene = new Scene(root);
             Stage stage = new Stage();
             stage.setScene(scene);
