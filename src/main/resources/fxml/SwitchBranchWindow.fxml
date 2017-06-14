@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.*?>
 <GridPane hgap="10.0" maxHeight="Infinity" maxWidth="Infinity" vgap="10.0" xmlns="http://javafx.com/javafx/8"
           xmlns:fx="http://javafx.com/fxml/1"
-          fx:controller="com.lgc.solutiontool.git.ui.javafx.controllers.SwitchBranchWindowController">
+          fx:controller="com.lgc.gitlabtool.git.ui.javafx.controllers.SwitchBranchWindowController">
     <columnConstraints>
         <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="120.0"/>
         <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0"/>

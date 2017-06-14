@@ -2,7 +2,7 @@
 <Configuration status="DEBUG">
 
     <Properties>
-        <Property name="filepath">${sys:user.home}/.SolutionTool/logs</Property>
+        <Property name="filepath">${sys:user.home}/.GitlabTool/logs</Property>
     </Properties>
 
     <Appenders>
@@ -11,7 +11,7 @@
                 pattern="%d{YYYY-MM-dd HH:mm:ss} [%t] %-5p %c{1}:%L - %msg%n" />
         </Console>
 
-        <RollingFile name="ApplicationDevFile" filename="${filepath}/SolutionTool_full.log"
+        <RollingFile name="ApplicationDevFile" filename="${filepath}/GitlabTool_full.log"
             filepattern="${logPath}/%d{YYYYMMddHHmmss}-section.log">
             <PatternLayout
                 pattern="%d{YYYY-MM-dd HH:mm:ss} [%t] %-5p %c{1}:%L - %msg%n" />
@@ -22,7 +22,7 @@
             <DefaultRolloverStrategy max="20" />
         </RollingFile>
 
-        <RollingFile name="ApplicationErrorsFile" filename="${filepath}/SolutionTool_errors.log"
+        <RollingFile name="ApplicationErrorsFile" filename="${filepath}/GitlabTool_full_errors.log"
             filepattern="${logPath}/%d{YYYYMMddHHmmss}-section.log">
             <PatternLayout
                 pattern="%d{YYYY-MM-dd HH:mm:ss} [%t] %-5p %c{1}:%L - %msg%n" />
