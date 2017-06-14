@@ -1,7 +1,6 @@
 package com.lgc.gitlabtool.git.ui.javafx.controllers;
 
 
-import java.io.File;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,7 +37,7 @@ import javafx.scene.text.Text;
 
 public class MainWindowController {
     private static final String HEDER_GROUP_TITLE = "Current group: ";
-    private static final String SELECT_ALL_IMAGE_URL = "icons" + File.separator + "main" + File.separator + "select_all.png";
+    private static final String SELECT_ALL_IMAGE_URL = "icons/main/select_all.png";
 
     private Group _selectedGroup;
 
