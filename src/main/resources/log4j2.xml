@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="DEBUG">
+
+    <Properties>
+        <Property name="filepath">${sys:user.home}/.GitlabTool/logs</Property>
+    </Properties>
+
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout
+                pattern="%d{YYYY-MM-dd HH:mm:ss} [%t] %-5p %c{1}:%L - %msg%n" />
+        </Console>
+
+        <RollingFile name="ApplicationDevFile" filename="${filepath}/GitlabTool_full.log"
+            filepattern="${logPath}/%d{YYYYMMddHHmmss}-section.log">
+            <PatternLayout
+                pattern="%d{YYYY-MM-dd HH:mm:ss} [%t] %-5p %c{1}:%L - %msg%n" />
+            <Policies>
+                <SizeBasedTriggeringPolicy
+                    size="100 MB" />
+            </Policies>
+            <DefaultRolloverStrategy max="20" />
+        </RollingFile>
+
+        <RollingFile name="ApplicationErrorsFile" filename="${filepath}/GitlabTool_full_errors.log"
+            filepattern="${logPath}/%d{YYYYMMddHHmmss}-section.log">
+            <PatternLayout
+                pattern="%d{YYYY-MM-dd HH:mm:ss} [%t] %-5p %c{1}:%L - %msg%n" />
+            <Policies>
+                <SizeBasedTriggeringPolicy
+                    size="100 MB" />
+            </Policies>
+            <DefaultRolloverStrategy max="20" />
+        </RollingFile>
+
+    </Appenders>
+
+    <Loggers>
+        <Root level="debug">
+            <AppenderRef ref="Console" />
+            <AppenderRef ref="ApplicationDevFile" />
+            <AppenderRef ref="ApplicationErrorsFile" level="error" />
+        </Root>
+    </Loggers>
+</Configuration>
