@@ -80,20 +80,19 @@ public class StorageServiceImpl implements StorageService {
     }
 
     @Override
-    public boolean updateGroupInfo(Group group) {
+    public void updateGroupInfo(Group group) {
         if (group == null) {
             logger.error("Error in the StorageServiceImpl.updateGroupInfo method. Group is null.");
-            return false;
+            return;
         }
         try {
             Path path = Paths.get(group.getPathToClonedGroup() + File.separator + INFO_GROUP_FILENAME);
             if (!PathUtilities.isExistsAndRegularFile(path)) {
                 Files.createFile(path);
             }
-            return updateStorage(path.toFile(), new GroupInfo(JSONParser.parseObjectToJson(group)));
+            updateStorage(path.toFile(), new GroupInfo(JSONParser.parseObjectToJson(group)));
         } catch (IOException | JAXBException e) {
             logger.error(e);
-            return false;
         }
     }
 
@@ -151,6 +150,8 @@ public class StorageServiceImpl implements StorageService {
         Path serversFilePath = Paths.get(_workingDirectory + PATH_SEPARATOR + SERVERS_FILENAME);
         return getFile(serversFilePath);
     }
+
+
 
     private File getFile(Path path) throws IOException {
         if (Files.exists(path)) {

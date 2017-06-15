@@ -70,17 +70,18 @@ public interface StorageService {
 
 
     /**
+     * Loads group from local path.
+     * Group will load if the root folder of group has property file with info of group.
      *
-     *
-     * @param path
-     * @return
+     * @param  path the local path to group
+     * @return loaded group
      */
     Group loadGroupInfo(String pathToGroup);
 
     /**
+     * Updates group info in a property file from the root folder of group.
      *
-     * @param group
-     * @return
+     * @param group the group for which is updated info
      */
-    boolean updateGroupInfo(Group group);
+    void updateGroupInfo(Group group);
 }
