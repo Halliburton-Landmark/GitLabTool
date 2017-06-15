@@ -36,13 +36,13 @@ public class StorageServiceImpl implements StorageService {
     private final String _workingDirectory;
 
     public StorageServiceImpl() {
-        _workingDirectory = System.getProperty(USER_HOME_PROPERTY) + PATH_SEPARATOR + WORKSPACE_DIRECTORY_PROPERTY;
+        _workingDirectory = System.getProperty(USER_HOME_PROPERTY) + PATH_SEPARATOR + WORKSPACE_DIRECTORY_PROPERTY + PATH_SEPARATOR;
     }
 
     @Override
     public boolean updateStorage(String server, String username) {
         try {
-            File file = getPropFile(server, username);
+            File file = getFile(_workingDirectory + server + PATH_SEPARATOR + username, CLONED_GROUPS_FILENAME);
             return updateStorage(file, ClonedGroups.getInstance());
         } catch (IOException | JAXBException e) {
             logger.error(e.getMessage());
@@ -53,7 +53,8 @@ public class StorageServiceImpl implements StorageService {
     @Override
     public List<Group> loadStorage(String server, String username) {
         try {
-            ClonedGroups groupsProvider = (ClonedGroups) loadStorage(getPropFile(server, username), ClonedGroups.class);
+            File file = getFile(_workingDirectory + server + PATH_SEPARATOR + username, CLONED_GROUPS_FILENAME);
+            ClonedGroups groupsProvider = (ClonedGroups) loadStorage(file, ClonedGroups.class);
             if (groupsProvider != null) {
                 List<Group> list = groupsProvider.getClonedGroups();
                 return list == null ? Collections.emptyList() : list;
@@ -67,11 +68,7 @@ public class StorageServiceImpl implements StorageService {
     @Override
     public Group loadGroupInfo(String pathToGroup) {
         try {
-            Path path = Paths.get(pathToGroup + File.separator + INFO_GROUP_FILENAME);
-            if (!PathUtilities.isExistsAndRegularFile(path)) {
-                Files.createFile(path);
-            }
-            GroupInfo info = (GroupInfo) loadStorage(path.toFile(), GroupInfo.class);
+            GroupInfo info = (GroupInfo) loadStorage(getFile(pathToGroup, INFO_GROUP_FILENAME), GroupInfo.class);
             return info.getGroup();
         } catch (IOException e) {
             logger.error(e.getMessage());
@@ -86,11 +83,7 @@ public class StorageServiceImpl implements StorageService {
             return;
         }
         try {
-            Path path = Paths.get(group.getPathToClonedGroup() + File.separator + INFO_GROUP_FILENAME);
-            if (!PathUtilities.isExistsAndRegularFile(path)) {
-                Files.createFile(path);
-            }
-            updateStorage(path.toFile(), new GroupInfo(JSONParser.parseObjectToJson(group)));
+            updateStorage(getFile(group.getPathToClonedGroup(), INFO_GROUP_FILENAME), new GroupInfo(JSONParser.parseObjectToJson(group)));
         } catch (IOException | JAXBException e) {
             logger.error(e);
         }
@@ -113,7 +106,7 @@ public class StorageServiceImpl implements StorageService {
     @Override
     public boolean updateServers(Servers servers) {
         try {
-            File file = getServersFile();
+            File file = getFile(_workingDirectory, SERVERS_FILENAME);
             XMLParser.saveObject(file, servers);
             return true;
         } catch (IOException | JAXBException e) {
@@ -126,10 +119,9 @@ public class StorageServiceImpl implements StorageService {
     public Servers loadServers() {
         Servers servers = null;
         try {
-            File file = getServersFile();
+            File file = getFile(_workingDirectory, SERVERS_FILENAME);
             servers = XMLParser.loadObject(file, Servers.class);
         } catch (IOException | JAXBException e) {
-            logger.error(e.getMessage());
             logger.warn(SERVERS_FILENAME + " file empty or does not exist. Load defaults");
         } finally {
             if (servers == null) {
@@ -140,31 +132,12 @@ public class StorageServiceImpl implements StorageService {
         return servers;
     }
 
-    private File getPropFile(String server, String username) throws IOException {
-        Path propertyFilePath = Paths.get(_workingDirectory + PATH_SEPARATOR + server + PATH_SEPARATOR + username
-                + PATH_SEPARATOR + CLONED_GROUPS_FILENAME);
-        return getFile(propertyFilePath);
-    }
-
-    private File getServersFile() throws IOException {
-        Path serversFilePath = Paths.get(_workingDirectory + PATH_SEPARATOR + SERVERS_FILENAME);
-        return getFile(serversFilePath);
-    }
-
-
-
-    private File getFile(Path path) throws IOException {
-        if (Files.exists(path)) {
-            return path.toFile();
-        } else {
-            File file = new File(path.toUri());
-            File parentDir = file.getParentFile();
-            if (!parentDir.exists()) {
-                parentDir.mkdirs();
-            }
-            file.createNewFile();
-            return file;
+    private File getFile(String pathDirectory, String fileName) throws IOException {
+        Path path = Paths.get(pathDirectory + PATH_SEPARATOR + fileName);
+        if (!PathUtilities.isExistsAndRegularFile(path)) {
+            Files.createFile(path);
         }
+        return path.toFile();
     }
 
     @Override

@@ -6,6 +6,8 @@ import java.net.URL;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -261,29 +263,29 @@ public class ModularController {
         if (viewPane != null) {
             Stage stage = (Stage) viewPane.getScene().getWindow();
             stage.getIcons().add(_appIcon);
-            Platform.runLater(new Runnable() {
-                @Override
-                public void run() {
-                    DirectoryChooser chooser = new DirectoryChooser();
-                    chooser.setTitle(IMPORT_CHOOSER_TITLE);
-                    File selectedDirectory = chooser.showDialog(stage);
-                    if (selectedDirectory == null) {
-                        return;
-                    }
 
-                    Optional<Group> loadGroup = _groupService.importGroup(selectedDirectory.getAbsolutePath());
-                    if (loadGroup.isPresent()) {
-                        Platform.runLater(new Runnable() {
-                            @Override
-                            public void run() {
-                                _welcomeWindowController.refreshGroupsList();
-                            }
-                        });
-                    } else {
-                        showStatusDialog(IMPORT_DIALOG_TITLE, FAILED_IMPORT_MESSAGE, " ");
-                    }
+            DirectoryChooser chooser = new DirectoryChooser();
+            chooser.setTitle(IMPORT_CHOOSER_TITLE);
+            File selectedDirectory = chooser.showDialog(stage);
+            if (selectedDirectory == null) {
+                return;
+            }
+
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            executor.submit(() -> {
+                Optional<Group> loadGroup = _groupService.importGroup(selectedDirectory.getAbsolutePath());
+                if (loadGroup.isPresent()) {
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            _welcomeWindowController.refreshGroupsList();
+                        }
+                    });
+                } else {
+                    showStatusDialog(IMPORT_DIALOG_TITLE, FAILED_IMPORT_MESSAGE, " ");
                 }
             });
+            executor.shutdown();
         }
     }
 
