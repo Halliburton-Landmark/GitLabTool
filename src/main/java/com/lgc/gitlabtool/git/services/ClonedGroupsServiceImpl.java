@@ -78,5 +78,11 @@ public class ClonedGroupsServiceImpl implements ClonedGroupsService {
     private void updateClonedGroupsInXML() {
         String username = _loginService.getCurrentUser().getUsername();
         _storageService.updateStorage(URLManager.trimServerURL(_loginService.getServerURL()), username);
+
+        updateGroupsInfo();
+    }
+
+    public void updateGroupsInfo() {
+        getClonedGroups().stream().forEach((group) -> _storageService.updateGroupInfo(group));
     }
 }

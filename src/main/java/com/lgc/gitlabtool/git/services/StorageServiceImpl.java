@@ -15,18 +15,22 @@ import org.apache.logging.log4j.Logger;
 
 import com.lgc.gitlabtool.git.entities.ClonedGroups;
 import com.lgc.gitlabtool.git.entities.Group;
+import com.lgc.gitlabtool.git.util.JSONParser;
+import com.lgc.gitlabtool.git.util.PathUtilities;
 import com.lgc.gitlabtool.git.util.XMLParser;
+import com.lgc.gitlabtool.git.xml.GroupInfo;
 import com.lgc.gitlabtool.git.xml.Server;
 import com.lgc.gitlabtool.git.xml.Servers;
 
 
 public class StorageServiceImpl implements StorageService {
     private static final Logger logger = LogManager.getLogger(StorageServiceImpl.class);
-    
+
     private static final String USER_HOME_PROPERTY = "user.home";
     private static final String WORKSPACE_DIRECTORY_PROPERTY = ".GitlabTool";
     private static final String PATH_SEPARATOR = File.separator;
     private static final String CLONED_GROUPS_FILENAME = "clonedGroups.xml";
+    private static final String INFO_GROUP_FILENAME = "gltGroupInfo.xml";
     private static final String SERVERS_FILENAME = "servers.xml";
 
     private final String _workingDirectory;
@@ -39,10 +43,9 @@ public class StorageServiceImpl implements StorageService {
     public boolean updateStorage(String server, String username) {
         try {
             File file = getPropFile(server, username);
-            XMLParser.saveObject(file, ClonedGroups.getInstance());
-            return true;
+            return updateStorage(file, ClonedGroups.getInstance());
         } catch (IOException | JAXBException e) {
-            logger.error("", e);
+            logger.error(e.getMessage());
             return false;
         }
     }
@@ -51,12 +54,60 @@ public class StorageServiceImpl implements StorageService {
     public List<Group> loadStorage(String server, String username) {
         try {
             File file = getPropFile(server, username);
-            List<Group> list = XMLParser.loadObject(file, ClonedGroups.class).getClonedGroups();
+            ClonedGroups groupsProvider = (ClonedGroups) loadStorage(file, ClonedGroups.class);
+            List<Group> list = groupsProvider.getClonedGroups();
             return list == null ? Collections.emptyList() : list;
-        } catch (IOException | JAXBException e) {
-            logger.error("", e);
+        } catch (IOException e) {
+            logger.error(e.getMessage());
             return Collections.emptyList();
         }
+    }
+
+    @Override
+    public Group loadGroupInfo(String pathToGroup) {
+        try {
+            Path path = Paths.get(pathToGroup + File.separator + INFO_GROUP_FILENAME);
+            if (!PathUtilities.isExistsAndRegularFile(path)) {
+                Files.createFile(path);
+            }
+            GroupInfo info = (GroupInfo) loadStorage(path.toFile(), GroupInfo.class);
+            return info.getGroup();
+        } catch (IOException e) {
+            logger.error(e.getMessage());
+            return null;
+        }
+    }
+
+    @Override
+    public boolean updateGroupInfo(Group group) {
+        if (group == null) {
+            logger.error("Error in the StorageServiceImpl.updateGroupInfo method. Group is null.");
+            return false;
+        }
+        try {
+            Path path = Paths.get(group.getPathToClonedGroup() + File.separator + INFO_GROUP_FILENAME);
+            if (!PathUtilities.isExistsAndRegularFile(path)) {
+                Files.createFile(path);
+            }
+            return updateStorage(path.toFile(), new GroupInfo(JSONParser.parseObjectToJson(group)));
+        } catch (IOException | JAXBException e) {
+            logger.error(e);
+            return false;
+        }
+    }
+
+    private boolean updateStorage(File file, Object object) throws JAXBException {
+        XMLParser.saveObject(file, object);
+        return true;
+    }
+
+    private Object loadStorage(File file, Class classPars) {
+        try {
+            return XMLParser.loadObject(file, classPars);
+        } catch (JAXBException e) {
+            logger.error(e.getMessage());
+        }
+        return Collections.emptyList();
     }
 
     @Override
@@ -125,7 +176,7 @@ public class StorageServiceImpl implements StorageService {
                 server.setLastUsed(false);
             }
         });
-        
+
         return updateServers(servers);
     }
 

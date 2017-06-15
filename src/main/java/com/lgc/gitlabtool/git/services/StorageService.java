@@ -67,4 +67,20 @@ public interface StorageService {
      * @return last used server
      */
     Server getLastUsedServer();
+
+
+    /**
+     *
+     *
+     * @param path
+     * @return
+     */
+    Group loadGroupInfo(String pathToGroup);
+
+    /**
+     *
+     * @param group
+     * @return
+     */
+    boolean updateGroupInfo(Group group);
 }
