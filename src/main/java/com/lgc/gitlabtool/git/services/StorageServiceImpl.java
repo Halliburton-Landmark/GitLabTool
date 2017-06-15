@@ -135,6 +135,7 @@ public class StorageServiceImpl implements StorageService {
     private File getFile(String pathDirectory, String fileName) throws IOException {
         Path path = Paths.get(pathDirectory + PATH_SEPARATOR + fileName);
         if (!PathUtilities.isExistsAndRegularFile(path)) {
+            Files.createDirectories(path.getParent());
             Files.createFile(path);
         }
         return path.toFile();
