@@ -3,7 +3,6 @@ package com.lgc.gitlabtool.git.ui.javafx.controllers;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -60,7 +59,6 @@ public class ModularController {
 
     private static final String IMPORT_CHOOSER_TITLE = "Import Group";
     private static final String IMPORT_DIALOG_TITLE = "Import Status Dialog";
-    private static final String SUCCESFUL_IMPORT_MESSAGE = "Import of group is Successful";
     private static final String FAILED_IMPORT_MESSAGE = "Import of group is Failed";
 
     private static final String REMOVE_GROUP_DIALOG_TITLE = "Remove Group";
@@ -263,48 +261,29 @@ public class ModularController {
         if (viewPane != null) {
             Stage stage = (Stage) viewPane.getScene().getWindow();
             stage.getIcons().add(_appIcon);
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    DirectoryChooser chooser = new DirectoryChooser();
+                    chooser.setTitle(IMPORT_CHOOSER_TITLE);
+                    File selectedDirectory = chooser.showDialog(stage);
+                    if (selectedDirectory == null) {
+                        return;
+                    }
 
-            DirectoryChooser chooser = new DirectoryChooser();
-            chooser.setTitle(IMPORT_CHOOSER_TITLE);
-            File selectedDirectory = chooser.showDialog(stage);
-            if (selectedDirectory == null) {
-                return;
-            }
-            new Thread(new ImportRunnable(selectedDirectory)).start();
-        }
-    }
-
-    /**
-     * Imports group from local disk to GitLab Tools workspace.
-     *
-     * @author Lyudmila Lyska
-     */
-    class ImportRunnable implements Runnable {
-
-        private final File _selectedDirectory;
-
-        public ImportRunnable(File selectedDirectory) {
-            _selectedDirectory = selectedDirectory;
-        }
-
-        @Override
-        public void run() {
-            Map<Optional<Group>, String> loadGroup = _groupService.importGroup(_selectedDirectory.getAbsolutePath());
-
-            for (Entry<Optional<Group>, String> mapGroup : loadGroup.entrySet()) {
-                Optional<Group> optGroup = mapGroup.getKey();
-                if (optGroup.isPresent()) {
-                    Platform.runLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            _clonedGroupsService.addGroups(Arrays.asList(optGroup.get()));
-                            _welcomeWindowController.refreshGroupsList();
-                        }
-                    });
+                    Optional<Group> loadGroup = _groupService.importGroup(selectedDirectory.getAbsolutePath());
+                    if (loadGroup.isPresent()) {
+                        Platform.runLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                _welcomeWindowController.refreshGroupsList();
+                            }
+                        });
+                    } else {
+                        showStatusDialog(IMPORT_DIALOG_TITLE, FAILED_IMPORT_MESSAGE, " ");
+                    }
                 }
-                showStatusDialog(IMPORT_DIALOG_TITLE,
-                        optGroup.isPresent() ? SUCCESFUL_IMPORT_MESSAGE : FAILED_IMPORT_MESSAGE, mapGroup.getValue());
-            }
+            });
         }
     }
 

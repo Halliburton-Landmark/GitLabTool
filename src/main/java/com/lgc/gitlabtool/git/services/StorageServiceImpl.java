@@ -53,14 +53,15 @@ public class StorageServiceImpl implements StorageService {
     @Override
     public List<Group> loadStorage(String server, String username) {
         try {
-            File file = getPropFile(server, username);
-            ClonedGroups groupsProvider = (ClonedGroups) loadStorage(file, ClonedGroups.class);
-            List<Group> list = groupsProvider.getClonedGroups();
-            return list == null ? Collections.emptyList() : list;
+            ClonedGroups groupsProvider = (ClonedGroups) loadStorage(getPropFile(server, username), ClonedGroups.class);
+            if (groupsProvider != null) {
+                List<Group> list = groupsProvider.getClonedGroups();
+                return list == null ? Collections.emptyList() : list;
+            }
         } catch (IOException e) {
             logger.error(e.getMessage());
-            return Collections.emptyList();
         }
+        return Collections.emptyList();
     }
 
     @Override
@@ -107,7 +108,7 @@ public class StorageServiceImpl implements StorageService {
         } catch (JAXBException e) {
             logger.error(e.getMessage());
         }
-        return Collections.emptyList();
+        return null;
     }
 
     @Override
@@ -117,7 +118,7 @@ public class StorageServiceImpl implements StorageService {
             XMLParser.saveObject(file, servers);
             return true;
         } catch (IOException | JAXBException e) {
-            logger.error("", e);
+            logger.error(e.getMessage());
             return false;
         }
     }

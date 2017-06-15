@@ -45,7 +45,7 @@ public interface GroupsUserService {
      * @throws IllegalArgumentException if data is incorrect
      * @return Optional of loaded group or Optional.empty() and a error message.
      */
-    Map<Optional<Group>, String> importGroup(String groupPath);
+    Optional<Group> importGroup(String groupPath);
 
     /**
     * Removes a group from the workspace
