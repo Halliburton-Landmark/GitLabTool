@@ -85,7 +85,7 @@ public class StorageServiceImpl implements StorageService {
         try {
             updateStorage(getFile(group.getPathToClonedGroup(), INFO_GROUP_FILENAME), new GroupInfo(JSONParser.parseObjectToJson(group)));
         } catch (IOException | JAXBException e) {
-            logger.error(e);
+            logger.error(e.getMessage());
         }
     }
 
