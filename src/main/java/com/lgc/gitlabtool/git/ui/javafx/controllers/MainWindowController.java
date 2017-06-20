@@ -109,16 +109,13 @@ public class MainWindowController {
         listView.setCellFactory(p -> new ProjectListCell());
 
         //setup selection
-        listView.getSelectionModel().getSelectedItems().addListener(new ListChangeListener<Project>(){
-            @Override
-            public void onChanged(  ListChangeListener.Change<? extends Project> changed){
-                if (listView.getSelectionModel().getSelectedItems().size() == listView.getItems().size()) {
-                    selectAllButton.setText("Deselect all");
-                    selectAllButton.setOnAction(action -> onDeselectAll());
-                } else {
-                    selectAllButton.setText("Select all");
-                    selectAllButton.setOnAction(action -> onSelectAll());
-                }
+        listView.getSelectionModel().getSelectedItems().addListener((ListChangeListener<Project>) changed -> {
+            if (listView.getSelectionModel().getSelectedItems().size() == listView.getItems().size()) {
+                selectAllButton.setText("Deselect all");
+                selectAllButton.setOnAction(action -> onDeselectAll());
+            } else {
+                selectAllButton.setText("Select all");
+                selectAllButton.setOnAction(action -> onSelectAll());
             }
         });
 
