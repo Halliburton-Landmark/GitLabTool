@@ -1,8 +1,6 @@
 package com.lgc.gitlabtool.git.util;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
 import org.apache.logging.log4j.LogManager;
@@ -11,38 +9,25 @@ import org.apache.logging.log4j.Logger;
 public class ProjectPropertiesUtil {
 
     private static final Logger logger = LogManager.getLogger(ProjectPropertiesUtil.class);
-    private static final String RESOURCE_PATH = ProjectPropertiesUtil.class.getClassLoader().getResource("pom.properties").getPath();
+    private static final String PROJECT_PROPERTY_FILE_NAME = "pom.properties";
 
-    public static String getProperty(String propertyFileName, String key) {
+    static String getProperty(String propertyFileName, String key) {
         Properties props = new Properties();
-        try (FileInputStream fis = new FileInputStream(propertyFileName)) {
+        try (InputStream fis = ProjectPropertiesUtil.class.getClassLoader().getResourceAsStream(propertyFileName)) {
             props.load(fis);
-        } catch (IOException e) {
+        } catch (Exception e) {
             logger.error("", e);
             return "undefined";
         }
-        return props != null ? props.getProperty(key) : "undefined";
-    }
-
-    public static boolean setProperty(String propertyFileName, String key, String value) {
-        Properties props = new Properties();
-        try (FileOutputStream fos = new FileOutputStream(propertyFileName)) {
-            props.setProperty(key, value);
-            props.store(fos, null);
-            logger.debug("property saved: " + key + ":" + value);
-        } catch (IOException e) {
-            logger.error("", e);
-            return false;
-        }
-        return true;
+        return props.getProperty(key) == null ? "undefined" : props.getProperty(key);
     }
 
     public static String getProjectVersion() {
-        return getProperty(RESOURCE_PATH, "gitlabtool.version");
+        return getProperty(PROJECT_PROPERTY_FILE_NAME, "gitlabtool.version");
     }
 
     public static String getProjectName() {
-        return getProperty(RESOURCE_PATH, "gitlabtool.name");
+        return getProperty(PROJECT_PROPERTY_FILE_NAME, "gitlabtool.name");
     }
 
 }
