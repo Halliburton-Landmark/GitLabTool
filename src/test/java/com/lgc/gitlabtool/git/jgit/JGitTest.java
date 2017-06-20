@@ -34,6 +34,7 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidConfigurationException;
 import org.eclipse.jgit.api.errors.InvalidRefNameException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
+import org.eclipse.jgit.api.errors.JGitInternalException;
 import org.eclipse.jgit.api.errors.NoFilepatternException;
 import org.eclipse.jgit.api.errors.NoHeadException;
 import org.eclipse.jgit.api.errors.NoMessageException;
@@ -118,16 +119,27 @@ public class JGitTest {
 
     @Test
     public void gitcloneRepositoryCorrectDataTest() {
-        JGit git = new JGit() {
+        Repository repo = getRepo("_");
+        Git gitMock = new Git (getRepository()) {
             @Override
-            protected boolean cloneRepository(String linkClone, String localPath)
+            public Repository getRepository() {
+                return repo;
+            }
+            @Override
+            public void close() {
+                //Do nothing
+            }
+        };
+        JGit jgit = new JGit() {
+            @Override
+            protected Git tryClone(String linkClone, String localPath)
                     throws InvalidRemoteException, TransportException, GitAPIException {
-                return true;
+                return gitMock;
             }
         };
 
         Group group = getCorrectGroup(2);
-        Assert.assertTrue(git.clone(group, CORRECT_PATH, new EmptyListener()));
+        Assert.assertTrue(jgit.clone(group, CORRECT_PATH, new EmptyListener()));
     }
 
     private Group getCorrectGroup(int countProject) {
@@ -160,16 +172,23 @@ public class JGitTest {
     }
 
     @Test
-    public void gitcloneRepositoryIncorrectDataTest() {
+    public void gitcloneRepositoryCancelExceptionTest() {
         JGit git = new JGit() {
             @Override
-            protected boolean cloneRepository(String linkClone, String localPath) throws GitAPIException {
+            protected Git tryClone(String linkClone, String localPath) throws JGitInternalException {
+                JGitInternalException cancelException = mock(JGitInternalException.class);
+                throw cancelException;
+            }
+        };
+        Group group = getCorrectGroup(1);
+        Assert.assertTrue(git.clone(group, CORRECT_PATH, new EmptyListener()));
+
+        git = new JGit() {
+            @Override
+            protected Git tryClone(String linkClone, String localPath) throws GitAPIException {
                 throw getGitAPIException();
             }
         };
-
-        Group group = getCorrectGroup(1);
-
         Assert.assertTrue(git.clone(group, CORRECT_PATH, new EmptyListener()));
     }
 
@@ -1005,6 +1024,11 @@ public class JGitTest {
             return new Repository(buildMock) {
 
                 @Override
+                public void close() {
+                    // Do nothing
+                }
+
+                @Override
                 public Ref exactRef(String name) throws IOException {
                     return null;
                 }
@@ -1063,6 +1087,12 @@ public class JGitTest {
         ObjectId objectIdMock = mock(ObjectId.class);
         Mockito.when(refMock.getObjectId()).thenReturn(objectIdMock);
         Repository repoMock = new Repository(buildMock) {
+
+            @Override
+            public void close() {
+                // Do nothing
+            }
+
             @Override
             public Ref exactRef(String name) throws IOException {
                 return refMock;

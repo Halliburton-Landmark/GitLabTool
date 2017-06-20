@@ -680,25 +680,26 @@ public class JGit {
     }
 
     private boolean clone(String linkClone, String localPath) {
-        try {
-            return cloneRepository(linkClone, localPath);
-        } catch (GitAPIException e) {
-            logger.error("", e);
+        try (Git git = tryClone(linkClone, localPath)) {
+            git.getRepository().close();
+            git.close();
+            return true;
         } catch (JGitInternalException e) {
             logger.error("Cloning process of group was canceled!");
+        } catch (GitAPIException e) {
+            logger.error(e.getMessage());
         }
         return false;
     }
 
-    protected boolean cloneRepository(String linkClone, String localPath) throws GitAPIException {
-        Git.cloneRepository().setURI(linkClone).setDirectory(new File(localPath))
+    protected Git tryClone(String linkClone, String localPath) throws GitAPIException {
+        return Git.cloneRepository().setURI(linkClone).setDirectory(new File(localPath))
                 .setProgressMonitor(new EmptyProgressMonitor() {
                     @Override
                     public boolean isCancelled() {
                         return _isCloneCancelled;
                     }
                 }).call();
-        return true;
     }
 
     private PersonIdent getPersonIdent(String name, String email) {
