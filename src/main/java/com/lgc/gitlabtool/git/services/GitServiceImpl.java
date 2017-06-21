@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.lgc.gitlabtool.git.entities.Branch;
 import com.lgc.gitlabtool.git.entities.Project;
@@ -41,6 +42,15 @@ public class GitServiceImpl implements GitService {
             switchStatuses.put(project, status);
         }
         return switchStatuses;
+    }
+
+    @Override
+    public Map<Project, JGitStatus> createBranch(List<Project> projects, String branchName, boolean force) {
+        Map<Project, JGitStatus> statuses = new HashMap<>();
+        for (Project project : projects.stream().filter(prj -> prj.isCloned()).collect(Collectors.toList())) {
+            statuses.put(project, JGit.getInstance().createBranch(project, branchName, force));
+        }
+        return statuses;
     }
 
 }

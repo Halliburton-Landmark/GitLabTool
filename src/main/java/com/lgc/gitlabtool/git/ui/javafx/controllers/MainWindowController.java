@@ -7,14 +7,17 @@ import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.services.LoginService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
+import com.lgc.gitlabtool.git.ui.javafx.CreateNewBranchDialog;
 import com.lgc.gitlabtool.git.ui.selection.ListViewKey;
 import com.lgc.gitlabtool.git.ui.selection.SelectionsProvider;
+import com.lgc.gitlabtool.git.ui.toolbar.ToolbarButtons;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarManager;
 
 import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -67,6 +70,7 @@ public class MainWindowController {
         new Thread(this::updateProjectList).start();
 
         configureToolbarCommands();
+        initNewBranchButton();
     }
 
     public Group getSelectedGroup() {
@@ -136,5 +140,21 @@ public class MainWindowController {
                         listView.getSelectionModel().getSelectedItems());
             }
         });
+    }
+
+    @FXML
+    public void onNewBranchButton(ActionEvent actionEvent) {
+        showCreateNewBranchDialog();
+    }
+
+    private void showCreateNewBranchDialog() {
+        CreateNewBranchDialog dialog = new CreateNewBranchDialog();
+        dialog.setProjects(projectsList.getSelectionModel().getSelectedItems());
+        dialog.showAndWait();
+    }
+
+    private void initNewBranchButton() {
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.NEW_BRANCH_BUTTON.getId())
+                .setOnAction(this::onNewBranchButton);
     }
 }

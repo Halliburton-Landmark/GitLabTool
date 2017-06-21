@@ -32,4 +32,6 @@ public interface GitService {
      * @return map with projects and theirs statuses of switching
      */
     Map<Project, JGitStatus> switchTo(List<Project> projects, Branch branch);
+    
+    Map<Project, JGitStatus> createBranch(List<Project> projects, String branchName, boolean force);
 }
