@@ -1,6 +1,7 @@
 package com.lgc.gitlabtool.git.util;
 
 import java.io.IOException;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -44,7 +45,7 @@ public class PathUtilities {
     /**
      * Gets all folders from directory
      *
-     * @param  path path on disk
+     * @param path path on disk
      * @return names of found folders
      */
     public static Collection<String> getFolders(Path path) {
@@ -52,8 +53,8 @@ public class PathUtilities {
             return Collections.emptyList();
         }
         Collection<String> folders = new ArrayList<>();
-        try {
-            Files.newDirectoryStream(path).forEach((dir) -> folders.add(dir.getFileName().toString()));
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(path)) {
+            stream.forEach((dir) -> folders.add(dir.getFileName().toString()));
         } catch (IOException e) {
             logger.error("", e);
         }
@@ -65,10 +66,32 @@ public class PathUtilities {
             return false;
         }
         try {
-            FileUtils.deleteDirectory(path.toFile());
+            FileUtils.touch(path.toFile());
+            FileUtils.forceDelete(path.toFile());
+//            Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+//                @Override
+//                public FileVisitResult visitFile(Path path, BasicFileAttributes attrs) throws IOException {
+//                    File file = path.toFile();
+//                    file.setWritable(true);
+//                    Files.delete(Paths.get(file.toURI()));
+//                    return FileVisitResult.CONTINUE;
+//                }
+//
+//                @Override
+//                public FileVisitResult postVisitDirectory(Path dir, IOException e) throws IOException {
+//                    if (e == null) {
+//                        File file = dir.toFile();
+//                        file.setWritable(true);
+//                        Files.delete(Paths.get(file.toURI()));
+//                        return FileVisitResult.CONTINUE;
+//                    } else {
+//                        throw e;
+//                    }
+//                }
+//            });
             return true;
         } catch (IOException e) {
-            logger.error("Error deleting path" + e.getMessage());
+            logger.error("Error deleting path: " + e.getMessage());
         }
         return false;
     }

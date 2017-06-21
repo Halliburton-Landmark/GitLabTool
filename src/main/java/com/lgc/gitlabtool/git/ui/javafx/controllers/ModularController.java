@@ -7,6 +7,8 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -17,6 +19,7 @@ import com.lgc.gitlabtool.git.services.GroupsUserService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.ViewKey;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
+import com.lgc.gitlabtool.git.ui.javafx.AlertWithCheckBox;
 import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuItems;
 import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuManager;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarButtons;
@@ -159,33 +162,32 @@ public class ModularController {
     }
 
     private void removeGroupDialog(Group selectedGroup) {
-        Alert alert = new Alert(AlertType.CONFIRMATION);
-        alert.setTitle(REMOVE_GROUP_DIALOG_TITLE);
-        alert.setHeaderText("Are you sure you want to delete the " + selectedGroup.getName() + "?");
-
+        AlertWithCheckBox alert = new AlertWithCheckBox(AlertType.CONFIRMATION,
+                REMOVE_GROUP_DIALOG_TITLE,
+                "Are you sure you want to delete the " + selectedGroup.getName() + "?",
+                "",
+                "remove group from a local disk",
+                ButtonType.YES, ButtonType.NO);
         Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
         stage.getIcons().add(_appIcon);
 
         Optional<ButtonType> result = alert.showAndWait();
-        if (result.get() == ButtonType.CANCEL) {
+        if (result.get() == ButtonType.NO) {
             return;
         }
-        // TODO: We always pass <false> in the removeGroup method, because removing a group from a local disk
-        // requires modification.
-        // When we deleting .git folder we getting AccessDeniedException or folder is deleted only after
-        // close application (Problem with threads(appears after import or clone group)).
-        final boolean isRemoveFromLocakDisk = false;
-        Map<Boolean, String> status = _groupService.removeGroup(selectedGroup, isRemoveFromLocakDisk);
-        for (Entry<Boolean, String> mapStatus : status.entrySet()) {
-            String headerMessage;
-            if (mapStatus.getKey()) {
-                headerMessage = SUSSECCFUL_REMOVE_GROUP_MESSAGE;
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.submit(() -> {
+            Map<Boolean, String> status = _groupService.removeGroup(selectedGroup, alert.isCheckBoxSelected());
+            for (Entry<Boolean, String> mapStatus : status.entrySet()) {
+                String headerMessage;
+                if (!mapStatus.getKey()) {
+                    headerMessage = FAILED_REMOVE_GROUP_MESSAGE;
+                    showStatusDialog(REMOVE_GROUP_STATUS_DIALOG_TITLE, headerMessage, mapStatus.getValue());
+                }
                 _welcomeWindowController.refreshGroupsList();
-            } else {
-                headerMessage = FAILED_REMOVE_GROUP_MESSAGE;
             }
-            showStatusDialog(REMOVE_GROUP_STATUS_DIALOG_TITLE, headerMessage, mapStatus.getValue());
-        }
+        });
+        executor.shutdown();
     }
 
     @FXML

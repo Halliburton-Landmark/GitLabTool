@@ -1,7 +1,6 @@
 package com.lgc.gitlabtool.git.services;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -14,7 +13,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.jgit.api.errors.JGitInternalException;
@@ -186,7 +184,6 @@ public class GroupsUserServiceImpl implements GroupsUserService {
 
     @Override
     public Map<Boolean, String> removeGroup(Group removeGroup, boolean isRemoveFromLocalDisk) {
-        isRemoveFromLocalDisk = false; // TODO: see javadoc
         Map<Boolean, String> result = new HashMap<>();
         logger.info("Deleting group is started ...");
         boolean isRemoved = _clonedGroupsService.removeGroups(Arrays.asList(removeGroup));
@@ -218,14 +215,15 @@ public class GroupsUserServiceImpl implements GroupsUserService {
             return result;
         }
 
-        try {
-            FileUtils.deleteDirectory(path.toFile());
-            logger.info("The group was successfully deleted from " + path.toString());
-            result.put(true, "The group was successfully deleted from " + path.toString());
+        boolean deleteResult = PathUtilities.deletePath(path);
+        if (deleteResult) {
+            String successMessage = "The group was successfully deleted from " + path.toString();
+            logger.info(successMessage);
+            result.put(true, successMessage);
             return result;
-        } catch (IOException e) {
-            String errorMessage = "Error removing. " + e.getMessage();
-            result.put(true, errorMessage);
+        } else {
+            String errorMessage = "Error removing folder " + path.toString();
+            result.put(false, errorMessage);
             logger.error(errorMessage);
         }
         return result;
@@ -257,13 +255,13 @@ public class GroupsUserServiceImpl implements GroupsUserService {
         }
         Collection<String> projectsName = PathUtilities.getFolders(localPathGroup);
         if (projectsName.isEmpty()) {
-            logger.debug(PREFIX_SUCCESSFUL_LOAD);
+            logger.debug(group.getName() + " " + PREFIX_SUCCESSFUL_LOAD);
             result.put(Optional.of(group), group.getName() + PREFIX_SUCCESSFUL_LOAD);
             return result;
         }
         projects.stream().filter(project -> projectsName.contains(project.getName()))
                 .forEach((project) -> updateProjectStatus(project, localPathGroup.toString()));
-        logger.debug(PREFIX_SUCCESSFUL_LOAD);
+        logger.debug(group.getName() + " " + PREFIX_SUCCESSFUL_LOAD);
         result.put(Optional.of(group), group.getName() + PREFIX_SUCCESSFUL_LOAD);
         return result;
     }

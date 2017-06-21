@@ -2,6 +2,7 @@ package com.lgc.gitlabtool.git.jgit;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -54,6 +55,7 @@ import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.User;
 import com.lgc.gitlabtool.git.services.ProgressListener;
 import com.lgc.gitlabtool.git.util.NullCheckUtil;
+import com.lgc.gitlabtool.git.util.PathUtilities;
 
 /**
  * Class for work with Git:
@@ -676,14 +678,14 @@ public class JGit {
             project.setPathToClonedProject(path);
             return true;
         }
+        PathUtilities.deletePath(Paths.get(path));
         return false;
     }
 
-    private boolean clone(String linkClone, String localPath) {
-        try (Git git = tryClone(linkClone, localPath)) {
-            git.getRepository().close();
-            git.close();
-            return true;
+    public boolean clone(String linkClone, String localPath) {
+        try (Git result = tryClone(linkClone, localPath)){
+            result.close();
+           return true;
         } catch (JGitInternalException e) {
             logger.error("Cloning process of group was canceled!");
         } catch (GitAPIException e) {
