@@ -42,6 +42,7 @@ public class CloneProgressDialog extends Dialog<DialogDTO> {
     private final Label _currentProjectLabel;
 
     private final Button _cancelButton;
+    private final Button _okButton;
     private final ListView<CloningMessage> _messageConcole;
 
     private final String DEFAULT_PROJECT_LABEL = "...";
@@ -94,11 +95,17 @@ public class CloneProgressDialog extends Dialog<DialogDTO> {
         addMessageToConcole("The cloning process of the " + groupName + " group is started...", CloningMessageStatus.SIMPLE);
         grid.add(_messageConcole, 0, 3, 4, 3);
 
+        _okButton = new Button("OK");
+        setDisableOkButton(true);
+        _okButton.setOnAction(event -> {
+            getStage().close();
+        });
+
         _cancelButton = new Button("Cancel");
         HBox hbBtn = new HBox(10);
         hbBtn.setAlignment(Pos.BOTTOM_RIGHT);
-        hbBtn.getChildren().add(_cancelButton);
-        grid.add(hbBtn, 3, 7);
+        hbBtn.getChildren().addAll(_okButton, _cancelButton);
+        grid.add(hbBtn, 3, 7, 2, 1);
 
         _cancelButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -148,11 +155,20 @@ public class CloneProgressDialog extends Dialog<DialogDTO> {
         updateProgressBar(0.0);
         _progressIndicator.setVisible(false);
         setDisableCancel(true);
+        setDisableOkButton(false);
         updateProjectLabel(DEFAULT_PROJECT_LABEL);
     }
 
     private void setDisableCancel(boolean isDisable) {
         _cancelButton.setDisable(isDisable);
+    }
+
+    private void setDisableOkButton(boolean isDisable) {
+        _okButton.setDisable(isDisable);
+    }
+
+    private Stage getStage() {
+        return (Stage) _okButton.getScene().getWindow();
     }
 
     private String currentDateToString() {
