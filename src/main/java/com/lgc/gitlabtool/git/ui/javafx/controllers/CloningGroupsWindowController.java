@@ -19,6 +19,7 @@ import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 import com.lgc.gitlabtool.git.ui.javafx.CloneProgressDialog;
 import com.lgc.gitlabtool.git.ui.javafx.CloneProgressDialog.CloningMessageStatus;
+import com.lgc.gitlabtool.git.util.StartUpLocation;
 
 import javafx.application.Platform;
 import javafx.beans.binding.BooleanBinding;
@@ -123,6 +124,21 @@ public class CloningGroupsWindowController {
         Image appIcon = AppIconHolder.getInstance().getAppIcoImage();
         Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
         stage.getIcons().add(appIcon);
+
+         /* Set sizing and position */
+        double dialogWidth = 300;
+        double dialogHeight = 300;
+
+        StartUpLocation startUpLoc = new StartUpLocation(dialogWidth, dialogHeight);
+        double xPos = startUpLoc.getXPos();
+        double yPos = startUpLoc.getYPos();
+
+        if (xPos != 0 && yPos != 0) {
+            stage.setX(xPos);
+            stage.setY(yPos);
+        } else {
+            stage.centerOnScreen();
+        }
 
         alert.showAndWait();
     }

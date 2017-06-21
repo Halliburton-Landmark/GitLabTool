@@ -11,6 +11,8 @@ import com.lgc.gitlabtool.git.ui.ViewKey;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarButtons;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarManager;
+import com.lgc.gitlabtool.git.util.StartUpLocation;
+
 import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
@@ -87,6 +89,23 @@ public class WelcomeWindowController {
             stage.setScene(new Scene(root));
             stage.setOnHidden(we -> updateClonedGroups());
             stage.getIcons().add(appIcon);
+
+             /* Set sizing and position */
+            double dialogWidth = 500;
+            double dialogHeight = 400;
+
+            StartUpLocation startUpLoc = new StartUpLocation(dialogWidth, dialogHeight);
+            double xPos = startUpLoc.getXPos();
+            double yPos = startUpLoc.getYPos();
+
+            if (xPos != 0 && yPos != 0) {
+                stage.setX(xPos);
+                stage.setY(yPos);
+            } else {
+                stage.centerOnScreen();
+            }
+            stage.setHeight(dialogHeight);
+            stage.setWidth(dialogWidth);
 
             stage.show();
         } catch (IOException e) {

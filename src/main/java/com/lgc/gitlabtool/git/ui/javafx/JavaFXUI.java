@@ -9,6 +9,7 @@ import com.lgc.gitlabtool.git.ui.UserInterface;
 import com.lgc.gitlabtool.git.ui.ViewKey;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 import com.lgc.gitlabtool.git.ui.javafx.controllers.ModularController;
+import com.lgc.gitlabtool.git.util.StartUpLocation;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -50,18 +51,49 @@ public class JavaFXUI extends Application implements UserInterface {
 
         primaryStage.setTitle("Gitlab Tool");
         primaryStage.setScene(scene);
-        Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
-        primaryStage.setHeight(primaryScreenBounds.getMaxY() / 1.5);
-        primaryStage.setWidth(primaryScreenBounds.getMaxX() / 1.5);
         primaryStage.getIcons().add(appIcon);
-        primaryStage.show();
 
+        /* Set sizing and position */
+        Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
+        double dialogWidth = primaryScreenBounds.getMaxX() / 1.5;
+        double dialogHeight = primaryScreenBounds.getMaxY() / 1.5;
+
+        StartUpLocation startUpLoc = new StartUpLocation(dialogWidth, dialogHeight);
+        double xPos = startUpLoc.getXPos();
+        double yPos = startUpLoc.getYPos();
+
+        if (xPos != 0 && yPos != 0) {
+            primaryStage.setX(xPos);
+            primaryStage.setY(yPos);
+        } else {
+            primaryStage.centerOnScreen();
+        }
+        primaryStage.setWidth(dialogWidth);
+        primaryStage.setHeight(dialogHeight);
+
+        primaryStage.show();
     }
 
     private void showLoginDialog() {
         LoginDialog loginDialog = new LoginDialog();
         Stage stage = (Stage) loginDialog.getDialogPane().getScene().getWindow();
         stage.getIcons().add(appIcon);
+
+        /* Set sizing and position */
+        double dialogWidth = 300;
+        double dialogHeight = 300;
+
+        StartUpLocation startUpLoc = new StartUpLocation(dialogWidth, dialogHeight);
+        double xPos = startUpLoc.getXPos();
+        double yPos = startUpLoc.getYPos();
+
+        if (xPos != 0 && yPos != 0) {
+            stage.setX(xPos);
+            stage.setY(yPos);
+        } else {
+            stage.centerOnScreen();
+        }
+
         loginDialog.showAndWait();
     }
 }
