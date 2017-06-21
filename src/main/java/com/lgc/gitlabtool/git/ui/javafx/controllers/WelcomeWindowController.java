@@ -11,12 +11,12 @@ import com.lgc.gitlabtool.git.ui.ViewKey;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarButtons;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarManager;
+
 import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
@@ -134,6 +134,11 @@ public class WelcomeWindowController {
 
     @FXML
     public void onLoadSelectedGroupspace(ActionEvent actionEvent) {
+        Group selectedGroup = (Group) groupList.getSelectionModel().getSelectedItem();
+        loadGroup(selectedGroup);
+    }
+
+    private void loadGroup(Group group){
         URL modularWindow = getClass().getClassLoader().getResource(ViewKey.MODULAR_CONTAINER.getPath());
         if (modularWindow == null) {
             logger.error("Could not load fxml resource");
@@ -145,12 +150,9 @@ public class WelcomeWindowController {
             Parent root = fxmlLoader.load();
 
             ModularController myControllerHandle = fxmlLoader.getController();
-            Group selectedGroup = (Group) groupList.getSelectionModel().getSelectedItem();
+            myControllerHandle.loadMainWindow(group);
 
-            myControllerHandle.loadMainWindow(selectedGroup);
-
-
-            Stage previousStage = (Stage) ((Node) actionEvent.getTarget()).getScene().getWindow();
+            Stage previousStage = (Stage) groupList.getScene().getWindow();
             previousStage.setScene(new Scene(root));
 
         } catch (IOException e) {
@@ -180,6 +182,16 @@ public class WelcomeWindowController {
 
                 tooltip.setText(item.getName() + " (" + localPath + ")");
                 setTooltip(tooltip);
+
+                setOnMouseClicked(event -> {
+                    if (event.getClickCount() > 1) {
+                        ListCell<Group> c = (ListCell<Group>) event.getSource();
+                        Group selectedGroup = c.getItem();
+                        if (selectedGroup != null) {
+                            loadGroup(selectedGroup);
+                        }
+                    }
+                });
             }
         }
     }
