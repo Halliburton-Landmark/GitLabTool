@@ -3,7 +3,6 @@ package com.lgc.gitlabtool.git.ui.javafx.controllers;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -68,7 +67,6 @@ public class ModularController {
 
     private static final String REMOVE_GROUP_DIALOG_TITLE = "Remove Group";
     private static final String REMOVE_GROUP_STATUS_DIALOG_TITLE = "Import Status Dialog";
-    private static final String SUSSECCFUL_REMOVE_GROUP_MESSAGE = "Removing of group is Successful";
     private static final String FAILED_REMOVE_GROUP_MESSAGE = "Removing of group is Failed";
 
     private static final String CSS_PATH = "css/style.css";
@@ -272,41 +270,22 @@ public class ModularController {
             if (selectedDirectory == null) {
                 return;
             }
-            new Thread(new ImportRunnable(selectedDirectory)).start();
-        }
-    }
-
-    /**
-     * Imports group from local disk to GitLab Tools workspace.
-     *
-     * @author Lyudmila Lyska
-     */
-    class ImportRunnable implements Runnable {
-
-        private final File _selectedDirectory;
-
-        public ImportRunnable(File selectedDirectory) {
-            _selectedDirectory = selectedDirectory;
-        }
-
-        @Override
-        public void run() {
-            Map<Optional<Group>, String> loadGroup = _groupService.importGroup(_selectedDirectory.getAbsolutePath());
-
-            for (Entry<Optional<Group>, String> mapGroup : loadGroup.entrySet()) {
-                Optional<Group> optGroup = mapGroup.getKey();
-                if (optGroup.isPresent()) {
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            executor.submit(() -> {
+                Group loadGroup = _groupService.importGroup(selectedDirectory.getAbsolutePath());
+                if (loadGroup == null) {
+                    showStatusDialog(IMPORT_DIALOG_TITLE, FAILED_IMPORT_MESSAGE,
+                            "Failed to load group from " + selectedDirectory.getAbsolutePath());
+                } else {
                     Platform.runLater(new Runnable() {
                         @Override
                         public void run() {
-                            _clonedGroupsService.addGroups(Arrays.asList(optGroup.get()));
                             _welcomeWindowController.refreshGroupsList();
                         }
                     });
                 }
-                showStatusDialog(IMPORT_DIALOG_TITLE,
-                        optGroup.isPresent() ? SUCCESFUL_IMPORT_MESSAGE : FAILED_IMPORT_MESSAGE, mapGroup.getValue());
-            }
+            });
+            executor.shutdown();
         }
     }
 

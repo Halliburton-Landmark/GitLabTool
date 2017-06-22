@@ -123,15 +123,13 @@ public class GroupsUserServiceImpl implements GroupsUserService {
     }
 
     @Override
-    public Map<Optional<Group>, String> importGroup(String groupPath) {
+    public Group importGroup(String groupPath) {
         if (groupPath == null || groupPath.isEmpty()) {
             throw new IllegalArgumentException(INCCORECT_DATA_MESSAGE);
         }
         Path path = Paths.get(groupPath);
         if (!PathUtilities.isExistsAndDirectory(path)) {
-            Map<Optional<Group>, String> result = new HashMap<>();
-            result.put(Optional.empty(), PathUtilities.PATH_NOT_EXISTS_OR_NOT_DIRECTORY);
-            return result;
+            return null;
         }
         return importGroup(path);
     }
@@ -157,28 +155,25 @@ public class GroupsUserServiceImpl implements GroupsUserService {
         }
     }
 
-    private Map<Optional<Group>, String> importGroup(Path groupPath) {
-        Map<Optional<Group>, String> result = new HashMap<>();
+    private Group importGroup(Path groupPath) {
         String nameGroup = groupPath.getName(groupPath.getNameCount() - 1).toString();
         if (checkGroupIsLoaded(groupPath.toAbsolutePath().toString())) {
             logger.debug(GROUP_ALREADY_LOADED_MESSAGE);
-            result.put(Optional.empty(), GROUP_ALREADY_LOADED_MESSAGE);
-            return result;
+            return null;
         }
         Optional<Group> optFoundGroup = getGroupByName(nameGroup);
         if (!optFoundGroup.isPresent()) {
             logger.debug(GROUP_DOESNT_EXIST_MESSAGE);
-            result.put(Optional.empty(), GROUP_DOESNT_EXIST_MESSAGE);
-            return result;
+            return null;
         }
         Group foundGroup = getGroupById(optFoundGroup.get().getId());
         if (foundGroup == null) {
             logger.debug(ERROR_GETTING_GROUP_MESSAGE);
-            result.put(Optional.empty(), ERROR_GETTING_GROUP_MESSAGE);
-            return result;
+            return null;
         }
         foundGroup.setPathToClonedGroup(groupPath.toString());
         foundGroup.setClonedStatus(true);
+        _clonedGroupsService.addGroups(Arrays.asList(foundGroup));
         return updateProjectsInGroup(foundGroup, groupPath);
     }
 
@@ -245,25 +240,21 @@ public class GroupsUserServiceImpl implements GroupsUserService {
         return groups.stream().filter(group -> group.getPathToClonedGroup().equals(groupPath)).findFirst();
     }
 
-    private Map<Optional<Group>, String> updateProjectsInGroup(Group group, Path localPathGroup) {
-        Map<Optional<Group>, String> result = new HashMap<>();
+    private Group updateProjectsInGroup(Group group, Path localPathGroup) {
         Collection<Project> projects = group.getProjects();
         if (projects == null || projects.isEmpty()) {
             logger.debug(GROUP_DOESNT_HAVE_PROJECTS_MESSAGE);
-            result.put(Optional.empty(), GROUP_DOESNT_HAVE_PROJECTS_MESSAGE);
-            return result;
+            return group;
         }
         Collection<String> projectsName = PathUtilities.getFolders(localPathGroup);
         if (projectsName.isEmpty()) {
             logger.debug(group.getName() + " " + PREFIX_SUCCESSFUL_LOAD);
-            result.put(Optional.of(group), group.getName() + PREFIX_SUCCESSFUL_LOAD);
-            return result;
+            return group;
         }
         projects.stream().filter(project -> projectsName.contains(project.getName()))
                 .forEach((project) -> updateProjectStatus(project, localPathGroup.toString()));
         logger.debug(group.getName() + " " + PREFIX_SUCCESSFUL_LOAD);
-        result.put(Optional.of(group), group.getName() + PREFIX_SUCCESSFUL_LOAD);
-        return result;
+        return group;
     }
 
     private void updateProjectStatus(Project project, String pathGroup) {

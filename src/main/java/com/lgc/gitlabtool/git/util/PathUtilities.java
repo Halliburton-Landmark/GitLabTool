@@ -68,27 +68,6 @@ public class PathUtilities {
         try {
             FileUtils.touch(path.toFile());
             FileUtils.forceDelete(path.toFile());
-//            Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
-//                @Override
-//                public FileVisitResult visitFile(Path path, BasicFileAttributes attrs) throws IOException {
-//                    File file = path.toFile();
-//                    file.setWritable(true);
-//                    Files.delete(Paths.get(file.toURI()));
-//                    return FileVisitResult.CONTINUE;
-//                }
-//
-//                @Override
-//                public FileVisitResult postVisitDirectory(Path dir, IOException e) throws IOException {
-//                    if (e == null) {
-//                        File file = dir.toFile();
-//                        file.setWritable(true);
-//                        Files.delete(Paths.get(file.toURI()));
-//                        return FileVisitResult.CONTINUE;
-//                    } else {
-//                        throw e;
-//                    }
-//                }
-//            });
             return true;
         } catch (IOException e) {
             logger.error("Error deleting path: " + e.getMessage());

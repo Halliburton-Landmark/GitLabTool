@@ -161,13 +161,6 @@ public class JGit {
             throw new IllegalArgumentException("Incorrect data: group is " + group + ", localPath is " + localPath);
         }
         _isCloneCancelled = false;
-        if (group.isCloned()) {
-            String errorMsg = "!ERROR: The operation is impossible, the " + group.getName() + " group is cloned.";
-            progressListener.onError(1.0, errorMsg);
-            progressListener.onFinish(null, FINISH_CLONE_MESSAGE);
-            logger.debug(errorMsg);
-            return false;
-        }
         Collection<Project> projects = group.getProjects();
         if (projects == null || projects.isEmpty()) {
             String errorMsg = "Cloning error. " + group.getName() + " group doesn't have projects.";
@@ -670,7 +663,7 @@ public class JGit {
             result.close();
            return true;
         } catch (JGitInternalException e) {
-            logger.error("Cloning process of group was canceled!");
+            logger.error("Cloning process of group was cancelled!");
         } catch (GitAPIException e) {
             logger.error(e.getMessage());
         }
