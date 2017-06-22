@@ -1,5 +1,9 @@
 package com.lgc.gitlabtool.git.ui.javafx.controllers;
 
+import java.io.IOException;
+import java.net.URL;
+import java.util.List;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -15,6 +19,7 @@ import com.lgc.gitlabtool.git.ui.toolbar.ToolbarManager;
 import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -24,6 +29,8 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
@@ -32,22 +39,18 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Callback;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.List;
-
 /**
  * @author Yevhen Strazhko
  */
 public class WelcomeWindowController {
     private static final Logger logger = LogManager.getLogger(WelcomeWindowController.class);
-    
+
     private static final String WINDOW_TITLE = "Cloning window";
     @FXML
     private Label userId;
 
     @FXML
-    private ListView groupList;
+    private ListView<Group> groupList;
 
     private final LoginService _loginService = (LoginService) ServiceProvider.getInstance()
             .getService(LoginService.class.getName());
@@ -95,7 +98,7 @@ public class WelcomeWindowController {
     }
 
     public Group getSelectedGroup() {
-        Group selectedGroup = (Group) groupList.getSelectionModel().getSelectedItem();
+        Group selectedGroup = groupList.getSelectionModel().getSelectedItem();
         if (selectedGroup != null) {
             return selectedGroup;
         } else {
@@ -111,19 +114,21 @@ public class WelcomeWindowController {
     }
 
     private void configureToolbarCommands() {
-        ToolbarManager.getInstance().getButtonById(ToolbarButtons.SELECT_GROUP_BUTTON.getId()).setOnAction(this::onLoadSelectedGroupspace);
-        ToolbarManager.getInstance().getButtonById(ToolbarButtons.CLONE_GROUP_BUTTON.getId()).setOnAction(this::onCloneGroups);
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.SELECT_GROUP_BUTTON.getId())
+                .setOnAction(this::onLoadSelectedGroupspace);
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.CLONE_GROUP_BUTTON.getId())
+                .setOnAction(this::onCloneGroups);
     }
 
     private void updateClonedGroups() {
         List<Group> userGroups = _clonedGroupsService.loadClonedGroups();
-        if(userGroups != null) {
+        if (userGroups != null) {
             groupList.setItems(FXCollections.observableList(userGroups));
         }
     }
 
-    private void configureListView(ListView listView) {
-        //config displayable string
+    private void configureListView(ListView<Group> listView) {
+        // config displayable string
         listView.setCellFactory(new Callback<ListView<Group>, ListCell<Group>>() {
             @Override
             public ListCell<Group> call(ListView<Group> p) {
@@ -134,11 +139,11 @@ public class WelcomeWindowController {
 
     @FXML
     public void onLoadSelectedGroupspace(ActionEvent actionEvent) {
-        Group selectedGroup = (Group) groupList.getSelectionModel().getSelectedItem();
+        Group selectedGroup = groupList.getSelectionModel().getSelectedItem();
         loadGroup(selectedGroup);
     }
 
-    private void loadGroup(Group group){
+    private void loadGroup(Group group) {
         URL modularWindow = getClass().getClassLoader().getResource(ViewKey.MODULAR_CONTAINER.getPath());
         if (modularWindow == null) {
             logger.error("Could not load fxml resource");
@@ -170,29 +175,38 @@ public class WelcomeWindowController {
             if (empty || item == null) {
                 setGraphic(null);
                 setTooltip(null);
-            } else {
-                Text groupNameText = new Text(item.getName());
-                groupNameText.setFont(Font.font(Font.getDefault().getFamily(), 14));
-
-                String localPath = item.getPathToClonedGroup();
-                Text localPathText = new Text(localPath);
-
-                VBox vboxItem = new VBox(groupNameText, localPathText);
-                setGraphic(vboxItem);
-
-                tooltip.setText(item.getName() + " (" + localPath + ")");
-                setTooltip(tooltip);
-
-                setOnMouseClicked(event -> {
-                    if (event.getClickCount() > 1) {
-                        ListCell<Group> c = (ListCell<Group>) event.getSource();
-                        Group selectedGroup = c.getItem();
-                        if (selectedGroup != null) {
-                            loadGroup(selectedGroup);
-                        }
-                    }
-                });
+                return;
             }
+            Text groupNameText = new Text(item.getName());
+            groupNameText.setFont(Font.font(Font.getDefault().getFamily(), 14));
+
+            String localPath = item.getPathToClonedGroup();
+            Text localPathText = new Text(localPath);
+
+            VBox vboxItem = new VBox(groupNameText, localPathText);
+            setGraphic(vboxItem);
+
+            tooltip.setText(item.getName() + " (" + localPath + ")");
+            setTooltip(tooltip);
+
+            setOnMouseClicked(loadGroupByDblClickHandler());
+        }
+
+        private EventHandler<? super MouseEvent> loadGroupByDblClickHandler() {
+            return event -> {
+                if (event.getButton() == MouseButton.PRIMARY &&
+                        event.getClickCount() > 1) {
+                    ListCell<?> c = (ListCell<?>) event.getSource();
+                    Object rawGroup = c.getItem();
+                    if (!Group.class.isInstance(rawGroup)) {
+                        return;
+                    }
+                    Group selectedGroup = (Group) rawGroup;
+                    if (selectedGroup != null) {
+                        loadGroup(selectedGroup);
+                    }
+                }
+            };
         }
     }
 
