@@ -17,12 +17,15 @@ public enum ToolbarButtons {
     IMPORT_GROUP_BUTTON(ViewKey.WELCOME_WINDOW.getKey(), "group_importGroup", "icons/welcome/import.png", "Import group", "Import group from disk"),
     SELECT_GROUP_BUTTON(ViewKey.WELCOME_WINDOW.getKey(), "group_selectGroup", "icons/welcome/select.png", "Load group", "Load selected group"),
 
+    /* Temporary unavailable buttons
     ADD_REPO_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "repo_addRepo", "icons/main/add.png", "Add repository", "Add repository"),
     REMOVE_REPO_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "repo_removeRepo", "icons/main/remove.png", "Remove repository", "Remove repository"),
     EDIT_REPO_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "repo_editRepo", "icons/main/edit.png", "Edit repository", "Edit repository"),
-    NEW_BRANCH_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "branch_newBranch", "icons/main/new_branch.png", "New branch", "Create new branch"),
-    SWITCH_BRANCH_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "branch_switchBranch", "icons/main/switch.png", "Switch branch", "Switch to another branch"),
     DELETE_BRANCH_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "branch_deleteBranch", "icons/main/remove.png", "Remove branch", "Remove branch");
+    */
+    NEW_BRANCH_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "branch_newBranch", "icons/main/new_branch.png", "New branch", "Create new branch"),
+    SWITCH_BRANCH_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "branch_switchBranch", "icons/main/switch.png", "Switch branch", "Switch to another branch");
+
 
     private final String viewKey;
     private final String id;
