@@ -543,7 +543,7 @@ public class JGit {
             logger.info("!CREATE NEW BRANCH: " + res.getName());
             return JGitStatus.SUCCESSFUL;
         } catch (GitAPIException e) {
-            logger.error("", e);
+            logger.error(e.getMessage());
         }
         return JGitStatus.FAILED;
     }
@@ -562,32 +562,31 @@ public class JGit {
      */
     public JGitStatus switchTo(Project project, String nameBranch, boolean isRemoteBranch) {
         if (project == null || nameBranch == null || nameBranch.isEmpty()) {
-            throw new IllegalArgumentException("Incorrect data: project is " + project + ", nameBranch is " + nameBranch);
+            throw new IllegalArgumentException(
+                    "Incorrect data: project is " + project + ", nameBranch is " + nameBranch);
         }
         if (!project.isCloned()) {
             logger.debug(project.getName() + ERROR_MSG_NOT_CLONED);
             return JGitStatus.FAILED;
         }
-        Optional<Git> optGit = getGitForRepository(project.getPathToClonedProject());
-        if (!optGit.isPresent()) {
-            logger.debug("switchTo " + JGitStatus.FAILED);
-            return JGitStatus.FAILED;
-        }
+
         String nameBranchWithoutAlias = nameBranch.replace(ORIGIN_PREFIX, StringUtils.EMPTY);
         List<Branch> branches = getListShortNamesOfBranches(getRefs(project, null));
-        if (!branches.stream().map(Branch::getBranchName).collect(Collectors.toList()).contains(nameBranchWithoutAlias) && !isRemoteBranch) {
+        if (!branches.stream().map(Branch::getBranchName).collect(Collectors.toList()).contains(nameBranchWithoutAlias)
+                && !isRemoteBranch) {
             logger.debug("switchTo " + JGitStatus.BRANCH_DOES_NOT_EXIST);
             return JGitStatus.BRANCH_DOES_NOT_EXIST;
         }
-        if (branches.stream().map(Branch::getBranchName).collect(Collectors.toList()).contains(nameBranchWithoutAlias) && isRemoteBranch) {
+        if (branches.stream().map(Branch::getBranchName).collect(Collectors.toList()).contains(nameBranchWithoutAlias)
+                && isRemoteBranch) {
             logger.debug("switchTo " + JGitStatus.BRANCH_ALREADY_EXISTS);
             return JGitStatus.BRANCH_ALREADY_EXISTS;
         }
-        Git git = optGit.get();
-        if (isCurrentBranch(git, nameBranchWithoutAlias)) {
-            return JGitStatus.BRANCH_CURRENTLY_CHECKED_OUT;
-        }
-        try {
+
+        try (Git git = getGit(project.getPathToClonedProject())) {
+            if (isCurrentBranch(git, nameBranchWithoutAlias)) {
+                return JGitStatus.BRANCH_CURRENTLY_CHECKED_OUT;
+            }
             if (isConflictsBetweenTwoBranches(git.getRepository(), git.getRepository().getFullBranch(),
                     Constants.R_HEADS + nameBranchWithoutAlias)) {
                 logger.warn("switchTo " + JGitStatus.CONFLICTS);
@@ -595,9 +594,7 @@ public class JGit {
             }
 
             Ref ref = git.checkout().setName(nameBranchWithoutAlias)
-                                    .setStartPoint(ORIGIN_PREFIX + nameBranchWithoutAlias)
-                                    .setCreateBranch(isRemoteBranch)
-                                    .call();
+                    .setStartPoint(ORIGIN_PREFIX + nameBranchWithoutAlias).setCreateBranch(isRemoteBranch).call();
             logger.info("!Switch to branch: " + ref.getName());
             return JGitStatus.SUCCESSFUL;
         } catch (IOException | GitAPIException e) {
@@ -619,17 +616,20 @@ public class JGit {
             logger.debug(project.getName() + ERROR_MSG_NOT_CLONED);
             return Optional.empty();
         }
-        Optional<Git> optGit = getGitForRepository(project.getPathToClonedProject());
-        if (!optGit.isPresent()) {
-            return Optional.empty();
-        }
-        try {
-            Repository repo = optGit.get().getRepository();
-            return Optional.ofNullable(repo.getBranch());
-        } catch (Exception e) {
+        try (Git git = getGit(project.getPathToClonedProject())) {
+            Repository repo = git.getRepository();
+            Optional<String> branch = Optional.ofNullable(repo.getBranch());
+            repo.close();
+            git.close();
+            return branch;
+        } catch (IOException e) {
             logger.error("", e);
         }
         return Optional.empty();
+    }
+
+    protected Git getGit(String path) throws IOException {
+        return Git.open(new File(path + "/.git"));
     }
 
     /**
@@ -800,17 +800,16 @@ public class JGit {
     }
 
     private List<Ref> getRefs(Project project, ListMode mode) {
-        Optional<Git> optGit = getGitForRepository(project.getPathToClonedProject());
-        if (optGit.isPresent()) {
-            try {
-                ListBranchCommand brCommand = optGit.get().branchList();
-                if (mode != null) {
-                    brCommand.setListMode(mode);
-                }
-                return brCommand.call();
-            } catch (GitAPIException e) {
-                logger.error("", e);
+        try (Git git = getGit(project.getPathToClonedProject())) {
+            ListBranchCommand brCommand = git.branchList();
+            if (mode != null) {
+                brCommand.setListMode(mode);
             }
+            return brCommand.call();
+        } catch (GitAPIException e) {
+            logger.error(e.getMessage());
+        } catch (IOException e1) {
+            logger.error(e1.getMessage());
         }
         return Collections.emptyList();
     }
@@ -861,9 +860,9 @@ public class JGit {
             return checkDirCacheCheck(repo, firstRefCommit.getTree(), secondRefCommit.getTree());
         } catch (RevisionSyntaxException | IncorrectObjectTypeException | AmbiguousObjectException
                 | MissingObjectException e) {
-            logger.error("", e);
-        } catch (IOException e) {
-            logger.error("", e);
+            logger.error(e.getMessage());
+        } catch (IOException e1) {
+            logger.error(e1.getMessage());
         }
         return true;
     }

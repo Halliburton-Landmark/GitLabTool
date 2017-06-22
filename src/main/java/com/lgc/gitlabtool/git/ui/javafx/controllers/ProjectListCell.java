@@ -1,7 +1,5 @@
 package com.lgc.gitlabtool.git.ui.javafx.controllers;
 
-import java.util.Optional;
-
 import org.apache.commons.lang.StringUtils;
 
 import com.lgc.gitlabtool.git.entities.Project;
@@ -52,11 +50,11 @@ public class ProjectListCell extends ListCell<Project> {
     }
 
     private Text getCurrentBrantProjectText(Project item) {
-        Optional<String> currentBranchName = JGit.getInstance().getCurrentBranch(item);
-        String currentBranch = currentBranchName.orElse(StringUtils.EMPTY);
-
-        String currentBranchText = item.isCloned() ? LEFT_BRACKET + currentBranch + RIGHT_BRACKET : StringUtils.EMPTY;
-        Text currentBranchTextView = new Text(currentBranchText);
+        String currentBranch = item.isCloned()
+                ? JGit.getInstance().getCurrentBranch(item).orElse(StringUtils.EMPTY)
+                : StringUtils.EMPTY;
+        String currentBranchFull = item.isCloned() ? LEFT_BRACKET + currentBranch + RIGHT_BRACKET : StringUtils.EMPTY;
+        Text currentBranchTextView = new Text(currentBranchFull);
         currentBranchTextView.setFill(Color.DARKBLUE);
 
         return currentBranchTextView;

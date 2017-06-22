@@ -19,7 +19,7 @@ import org.apache.logging.log4j.Logger;
  */
 public class PathUtilities {
 
-    private static final Logger logger = LogManager.getLogger(JSONParser.class);
+    private static final Logger logger = LogManager.getLogger(PathUtilities.class);
     public static final String PATH_NOT_EXISTS_OR_NOT_DIRECTORY = "The transmitted path does not exist or is not a directory.";
 
     /**
@@ -56,7 +56,7 @@ public class PathUtilities {
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(path)) {
             stream.forEach((dir) -> folders.add(dir.getFileName().toString()));
         } catch (IOException e) {
-            logger.error("", e);
+            logger.error(e.getMessage());
         }
         return folders;
     }
