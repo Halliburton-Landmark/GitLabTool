@@ -33,5 +33,15 @@ public interface GitService {
      */
     Map<Project, JGitStatus> switchTo(List<Project> projects, Branch branch);
     
+    /**
+     * 
+     * @param projects     the projects that needs new branch
+     * @param branchName   new branch name
+     * @param force        if <code>true</code> and the branch with the given name
+     *                     already exists, the start-point of an existing branch will be
+     *                     set to a new start-point; if false, the existing branch will
+     *                     not be changed
+     * @return map with projects and theirs statuses of branch creating
+     */
     Map<Project, JGitStatus> createBranch(List<Project> projects, String branchName, boolean force);
 }

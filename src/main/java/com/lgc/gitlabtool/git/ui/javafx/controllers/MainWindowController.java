@@ -142,9 +142,15 @@ public class MainWindowController {
         });
     }
 
+    private void initNewBranchButton() {
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.NEW_BRANCH_BUTTON.getId())
+                .setOnAction(this::onNewBranchButton);
+    }
+
     @FXML
     public void onNewBranchButton(ActionEvent actionEvent) {
         showCreateNewBranchDialog();
+        refreshProjectsList();
     }
 
     private void showCreateNewBranchDialog() {
@@ -153,8 +159,4 @@ public class MainWindowController {
         dialog.showAndWait();
     }
 
-    private void initNewBranchButton() {
-        ToolbarManager.getInstance().getButtonById(ToolbarButtons.NEW_BRANCH_BUTTON.getId())
-                .setOnAction(this::onNewBranchButton);
-    }
 }
