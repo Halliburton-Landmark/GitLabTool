@@ -6,6 +6,13 @@ import java.util.Properties;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+/**
+ * Provides possibility to get the project version and project name from property file
+ * that is filled by Maven according to the settings in pom.xml
+ * 
+ * @author Igor Khlaponin 
+ * @email IKhlaponin@luxoft.com
+ */
 public class ProjectPropertiesUtil {
 
     private static final Logger logger = LogManager.getLogger(ProjectPropertiesUtil.class);

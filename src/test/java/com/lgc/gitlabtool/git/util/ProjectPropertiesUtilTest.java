@@ -7,8 +7,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -18,7 +16,6 @@ public class ProjectPropertiesUtilTest {
 
     private static final String TEST_SOURCE_PATH = "src/main/resources"; // do not work with File.separator
     private static final String TEST_RESOURCE_FILE_NAME = "test.properties";
-    private static final Logger logger = LogManager.getLogger(ProjectPropertiesUtilTest.class);
 
     @Before
     public void setUp() {
@@ -28,7 +25,7 @@ public class ProjectPropertiesUtilTest {
             props.setProperty("gitlabtool.name", "Gitlab Tool");
             props.store(fos, null);
         } catch (IOException e) {
-            logger.error("Error in @Before test method", e);
+            e.printStackTrace();
         }
     }
 
@@ -40,7 +37,7 @@ public class ProjectPropertiesUtilTest {
                 file.delete();
             }
         } catch (Exception e) {
-            logger.error("Error in @After test method", e);
+            e.printStackTrace();
         }
     }
 
