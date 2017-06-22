@@ -8,12 +8,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.lgc.gitlabtool.git.services.ServiceProvider;
+import com.lgc.gitlabtool.git.util.ScreenUtil;
 import com.lgc.gitlabtool.git.util.URLManager;
 import com.lgc.gitlabtool.git.xml.Server;
 import com.lgc.gitlabtool.git.services.NetworkService;
 import com.lgc.gitlabtool.git.services.StorageService;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
-import com.lgc.gitlabtool.git.util.StartUpLocation;
 import com.lgc.gitlabtool.git.xml.Servers;
 
 import javafx.application.Platform;
@@ -84,16 +84,7 @@ public class ServerInputWindowController {
         double dialogWidth = 300;
         double dialogHeight = 100;
 
-        StartUpLocation startUpLoc = new StartUpLocation(dialogWidth, dialogHeight);
-        double xPos = startUpLoc.getXPos();
-        double yPos = startUpLoc.getYPos();
-
-        if (xPos != 0 && yPos != 0) {
-            stage.setX(xPos);
-            stage.setY(yPos);
-        } else {
-            stage.centerOnScreen();
-        }
+        ScreenUtil.adaptForMultiScreens(stage, dialogWidth, dialogHeight);
 
         stage.showAndWait();
     }

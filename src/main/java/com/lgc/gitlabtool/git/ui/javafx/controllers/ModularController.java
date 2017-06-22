@@ -21,7 +21,7 @@ import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuItems;
 import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuManager;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarButtons;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarManager;
-import com.lgc.gitlabtool.git.util.StartUpLocation;
+import com.lgc.gitlabtool.git.util.ScreenUtil;
 
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -170,16 +170,8 @@ public class ModularController {
         /* Set sizing and position */
         double dialogWidth = 300;
         double dialogHeight = 150;
-        StartUpLocation startUpLoc = new StartUpLocation(dialogWidth, dialogHeight);
-        double xPos = startUpLoc.getXPos();
-        double yPos = startUpLoc.getYPos();
 
-        if (xPos != 0 && yPos != 0) {
-            stage.setX(xPos);
-            stage.setY(yPos);
-        } else {
-            stage.centerOnScreen();
-        }
+        ScreenUtil.adaptForMultiScreens(stage, dialogWidth, dialogHeight);
 
         Optional<ButtonType> result = alert.showAndWait();
         if (result.get() == ButtonType.CANCEL) {
@@ -253,16 +245,8 @@ public class ModularController {
             double dialogWidth = primaryScreenBounds.getMaxX() / 1.5;
             double dialogHeight = primaryScreenBounds.getMaxY() / 1.5;
 
-            StartUpLocation startUpLoc = new StartUpLocation(dialogWidth, dialogHeight);
-            double xPos = startUpLoc.getXPos();
-            double yPos = startUpLoc.getYPos();
+            ScreenUtil.adaptForMultiScreens(stage, dialogWidth, dialogHeight);
 
-            if (xPos != 0 && yPos != 0) {
-                stage.setX(xPos);
-                stage.setY(yPos);
-            } else {
-                stage.centerOnScreen();
-            }
             stage.setWidth(dialogWidth);
             stage.setHeight(dialogHeight);
 
@@ -291,16 +275,7 @@ public class ModularController {
         double dialogWidth = 300;
         double dialogHeight = 150;
 
-        StartUpLocation startUpLoc = new StartUpLocation(dialogWidth, dialogHeight);
-        double xPos = startUpLoc.getXPos();
-        double yPos = startUpLoc.getYPos();
-
-        if (xPos != 0 && yPos != 0) {
-            stage.setX(xPos);
-            stage.setY(yPos);
-        } else {
-            stage.centerOnScreen();
-        }
+        ScreenUtil.adaptForMultiScreens(stage, dialogWidth, dialogHeight);
 
         alert.show();
     }
@@ -369,16 +344,7 @@ public class ModularController {
                 double dialogWidth = 300;
                 double dialogHeight = 150;
 
-                StartUpLocation startUpLoc = new StartUpLocation(dialogWidth, dialogHeight);
-                double xPos = startUpLoc.getXPos();
-                double yPos = startUpLoc.getYPos();
-
-                if (xPos != 0 && yPos != 0) {
-                    stage.setX(xPos);
-                    stage.setY(yPos);
-                } else {
-                    stage.centerOnScreen();
-                }
+                ScreenUtil.adaptForMultiScreens(stage, dialogWidth, dialogHeight);
 
                 alert.showAndWait();
             }

@@ -11,7 +11,7 @@ import com.lgc.gitlabtool.git.ui.ViewKey;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarButtons;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarManager;
-import com.lgc.gitlabtool.git.util.StartUpLocation;
+import com.lgc.gitlabtool.git.util.ScreenUtil;
 
 import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
@@ -94,16 +94,8 @@ public class WelcomeWindowController {
             double dialogWidth = 500;
             double dialogHeight = 400;
 
-            StartUpLocation startUpLoc = new StartUpLocation(dialogWidth, dialogHeight);
-            double xPos = startUpLoc.getXPos();
-            double yPos = startUpLoc.getYPos();
+            ScreenUtil.adaptForMultiScreens(stage, dialogWidth, dialogHeight);
 
-            if (xPos != 0 && yPos != 0) {
-                stage.setX(xPos);
-                stage.setY(yPos);
-            } else {
-                stage.centerOnScreen();
-            }
             stage.setHeight(dialogHeight);
             stage.setWidth(dialogWidth);
 
