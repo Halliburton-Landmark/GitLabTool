@@ -4,6 +4,7 @@
     <groupId>com.lgc</groupId>
     <artifactId>gitlabtool</artifactId>
     <version>0.0.1</version>
+    <name>Gitlab Tool</name>
 
     <dependencies>
         <dependency>
