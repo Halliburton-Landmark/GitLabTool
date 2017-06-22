@@ -61,6 +61,12 @@ public class PathUtilities {
         return folders;
     }
 
+    /**
+     * Delete path from a local disk
+     *
+     * @param  path the path on the local disk
+     * @return true - if it was deleted successful, otherwise - false.
+     */
     public static boolean deletePath(Path path) {
         if (!Files.exists(path)) {
             return false;
