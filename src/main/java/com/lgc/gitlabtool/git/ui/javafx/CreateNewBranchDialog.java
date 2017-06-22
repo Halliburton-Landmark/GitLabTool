@@ -36,20 +36,20 @@ public class CreateNewBranchDialog extends Dialog<String> {
     private final GitService _gitService = (GitService) ServiceProvider.getInstance()
             .getService(GitService.class.getName());
 
-    private final Label textLabel;
-    private final TextField branchNameField;
-    private final CheckBox checkoutBox;
-    private final Button createButton;
-    private final Button cancelButton;
+    private final Label _textLabel;
+    private final TextField _branchNameField;
+    private final CheckBox _checkoutBox;
+    private final Button _createButton;
+    private final Button _cancelButton;
 
-    private List<Project> projects;
+    private List<Project> _projects;
 
     public List<Project> getProjects() {
-        return projects;
+        return _projects;
     }
 
     public void setProjects(List<Project> projects) {
-        this.projects = projects;
+        this._projects = projects;
     }
 
     public CreateNewBranchDialog() {
@@ -60,28 +60,28 @@ public class CreateNewBranchDialog extends Dialog<String> {
         grid.setVgap(10);
         grid.setPadding(new Insets(25, 25, 25, 25));
 
-        textLabel = new Label("New branch: ");
-        grid.add(textLabel, 0, 1);
-        branchNameField = new TextField();
-        branchNameField.addEventFilter(KeyEvent.KEY_TYPED, getInputFilter());
+        _textLabel = new Label("New branch: ");
+        grid.add(_textLabel, 0, 1);
+        _branchNameField = new TextField();
+        _branchNameField.addEventFilter(KeyEvent.KEY_TYPED, getInputFilter());
 
-        grid.add(branchNameField, 1, 1, 2, 1);
-        checkoutBox = new CheckBox("Checkout new branch");
-        grid.add(checkoutBox, 1, 3);
+        grid.add(_branchNameField, 1, 1, 2, 1);
+        _checkoutBox = new CheckBox("Checkout new branch");
+        grid.add(_checkoutBox, 1, 3);
 
-        createButton = new Button("Create Branch");
-        createButton.setDisable(true);
-        createButton.setOnAction(this::onCreateButton);
-        createButton.setDefaultButton(true);
+        _createButton = new Button("Create Branch");
+        _createButton.setDisable(true);
+        _createButton.setOnAction(this::onCreateButton);
+        _createButton.setDefaultButton(true);
 
-        cancelButton = new Button("Cancel");
-        cancelButton.setOnAction(event -> {
+        _cancelButton = new Button("Cancel");
+        _cancelButton.setOnAction(event -> {
             getStage().close();
         });
 
         HBox hbBtn = new HBox(10);
         hbBtn.setAlignment(Pos.BOTTOM_RIGHT);
-        hbBtn.getChildren().addAll(createButton, cancelButton);
+        hbBtn.getChildren().addAll(_createButton, _cancelButton);
         grid.add(hbBtn, 2, 5);
 
         getDialogPane().setContent(grid);
@@ -99,25 +99,19 @@ public class CreateNewBranchDialog extends Dialog<String> {
     }
 
     private void onCreateButton(ActionEvent event) {
-        String newBranchName = branchNameField.getText().trim();
+        String newBranchName = _branchNameField.getText().trim();
         if (!isInputValid(newBranchName)) {
             return;
         }
         Map<Project, JGitStatus> results = _gitService.createBranch(getProjects(), newBranchName, false);
         // TODO: show results somehow in console or log
 
-        boolean switchToBranch = checkoutBox.isSelected();
+        boolean switchToBranch = _checkoutBox.isSelected();
         if (switchToBranch) {
-            _gitService.switchTo(getProjects(), getCreatedBranch(newBranchName, getProjects()));
+            _gitService.switchTo(getProjects(), newBranchName, false);
         }
 
         getStage().close();
-    }
-
-    private Branch getCreatedBranch(String name, List<Project> projects) {
-        Set<Branch> allBranchesWithTypes = JGit.getInstance().getBranches(projects, BranchType.LOCAL, true);
-
-        return allBranchesWithTypes.stream().filter(branch -> branch.getBranchName().equals(name)).findFirst().get();
     }
 
     private boolean isInputValid(String input) {
@@ -139,10 +133,10 @@ public class CreateNewBranchDialog extends Dialog<String> {
 
     private EventHandler<KeyEvent> getInputFilter() {
         return keyEvent -> {
-            if (isInputValid(branchNameField.getText().trim())) {
-                createButton.setDisable(false);
+            if (isInputValid(_branchNameField.getText().trim())) {
+                _createButton.setDisable(false);
             } else {
-                createButton.setDisable(true);
+                _createButton.setDisable(true);
             }
         };
     }

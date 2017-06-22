@@ -1,9 +1,11 @@
 package com.lgc.gitlabtool.git.services;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.lgc.gitlabtool.git.entities.Branch;
@@ -36,9 +38,14 @@ public class GitServiceImpl implements GitService {
         String selectedBranchName = branch.getBranchName();
         boolean isRemote = branch.getBranchType().equals(BranchType.REMOTE);
 
+        return switchTo(projects, selectedBranchName, isRemote);
+    }
+    
+    @Override
+    public Map<Project, JGitStatus> switchTo(List<Project> projects, String branchName, boolean isRemote) {
         Map<Project, JGitStatus> switchStatuses = new HashMap<>();
         for (Project project : projects) {
-            JGitStatus status = JGit.getInstance().switchTo(project, selectedBranchName, isRemote);
+            JGitStatus status = JGit.getInstance().switchTo(project, branchName, isRemote);
             switchStatuses.put(project, status);
         }
         return switchStatuses;
@@ -51,6 +58,15 @@ public class GitServiceImpl implements GitService {
             statuses.put(project, JGit.getInstance().createBranch(project, branchName, force));
         }
         return statuses;
+    }
+
+    @Override
+    public Branch getBranchByName(String branchName, Collection<Project> projects, BranchType brType, boolean onlyCommon) {
+        Set<Branch> allBranchesWithTypes = JGit.getInstance().getBranches(projects, brType, onlyCommon);
+        
+        return allBranchesWithTypes.stream()
+                .filter(branch -> branch.getBranchName().equals(branchName))
+                .findAny().orElse(null);
     }
 
 }
