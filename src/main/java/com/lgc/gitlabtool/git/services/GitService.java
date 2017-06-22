@@ -44,6 +44,14 @@ public interface GitService {
     List<Project> getProjectsWithChanges(List<Project> projects);
 
     /**
+     * Discard uncommited changes
+     *
+     * @param projects projects that need to be resets
+     * @return list of projects that and their discard statuses
+     */
+    Map<Project, JGitStatus> discardChanges(List<Project> projects);
+
+    /**
      * Commit changes to selectedProjects
      *
      * @param projects          projects that contains changes

@@ -297,12 +297,14 @@ public class ModularController {
                 if (commitResult.get() == dialog.getCommitAndPushButton()) {
                     isPush = true;
                 }
+
                 _gitService.commitChanges(selectedProjects, commitMessage, isPush,
                         new SuccessfulOperationHandler(), new UnsuccessfulOperationHandler());
             }
 
-        } else if (result.get() == discardButton) {
 
+        } else if (result.get() == discardButton) {
+            _gitService.discardChanges(selectedProjects);
         } else {
             alert.close();
         }

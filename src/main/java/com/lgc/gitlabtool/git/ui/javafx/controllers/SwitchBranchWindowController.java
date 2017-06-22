@@ -1,6 +1,16 @@
 package com.lgc.gitlabtool.git.ui.javafx.controllers;
 
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang.StringUtils;
+
 import com.lgc.gitlabtool.git.entities.Branch;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.jgit.BranchType;
@@ -20,17 +30,22 @@ import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.control.RadioButton;
+import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import org.apache.commons.lang.StringUtils;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 @SuppressWarnings("unchecked")
 public class SwitchBranchWindowController {
@@ -95,9 +110,18 @@ public class SwitchBranchWindowController {
         
         Map<Project, JGitStatus> switchStatuses = _gitService.switchTo(selectedProjects, selectedBranch);
 
-        String dialogMessage = switchStatuses.entrySet().stream()
-                .map(x -> x.getKey().getName() + "  -  " + x.getValue())
-                .collect(Collectors.joining(NEW_LINE_SYMBOL));
+        String dialogMessage;
+        if (switchStatuses.size() < 6) {
+            dialogMessage = switchStatuses.entrySet().stream()
+                    .map(x -> x.getKey().getName() + "  -  " + x.getValue())
+                    .collect(Collectors.joining(NEW_LINE_SYMBOL));
+        } else {
+            long successfulCount = switchStatuses.entrySet().stream()
+                    .filter(x->x.getValue().equals(JGitStatus.SUCCESSFUL))
+                    .count();
+            dialogMessage = successfulCount + " of " + switchStatuses.size() + " projects were switched successfully";
+        }
+
         switchToStatusDialog(dialogMessage);
 
         currentProjectsListView.refresh();

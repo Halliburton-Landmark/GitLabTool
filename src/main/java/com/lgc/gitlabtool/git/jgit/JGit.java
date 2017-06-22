@@ -23,7 +23,9 @@ import org.eclipse.jgit.api.ListBranchCommand;
 import org.eclipse.jgit.api.ListBranchCommand.ListMode;
 import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.api.PullResult;
+import org.eclipse.jgit.api.ResetCommand;
 import org.eclipse.jgit.api.Status;
+import org.eclipse.jgit.api.errors.CheckoutConflictException;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
@@ -47,12 +49,12 @@ import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 
-import com.lgc.gitlabtool.git.entities.Group;
-import com.lgc.gitlabtool.git.entities.Project;
-import com.lgc.gitlabtool.git.util.FeedbackUtil;
 import com.lgc.gitlabtool.git.connections.token.CurrentUser;
 import com.lgc.gitlabtool.git.entities.Branch;
+import com.lgc.gitlabtool.git.entities.Group;
+import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.User;
+import com.lgc.gitlabtool.git.util.FeedbackUtil;
 
 
 /**
@@ -124,6 +126,32 @@ public class JGit {
             mergeCollections(branches, shortNamesBranches, onlyCommon);
         });
         return branches;
+    }
+
+    public JGitStatus discardChanges(Project project) {
+        if (project == null) {
+            logger.error(WRONG_PARAMETERS);
+            throw new IllegalArgumentException(WRONG_PARAMETERS);
+        }
+
+        if (!project.isCloned()) {
+            logger.debug(project.getName() + ERROR_MSG_NOT_CLONED);
+            return JGitStatus.FAILED;
+        }
+        try (Git git = getGit(project.getPathToClonedProject())) {
+            git.reset().setMode(ResetCommand.ResetType.HARD).call();
+            return JGitStatus.SUCCESSFUL;
+        } catch (GitAPIException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            logger.error("", e);
+        }
+
+        return JGitStatus.FAILED;
+    }
+
+    protected Git getGit(String path) throws IOException {
+        return Git.open(new File(path + "/.git"));
     }
 
     private <T> void mergeCollections(Collection<T> first, Collection<T> second, boolean onlyGeneral) {
@@ -203,17 +231,6 @@ public class JGit {
             Repository repository = git.getRepository();
             Status status = git.status().call();
             if (status != null) {
-                // debug code
-                logger.debug("\nConflicting: " + status.getConflicting() + 
-                        "\nChanged: " + status.getChanged() + 
-                        "\nAdded: " + status.getAdded() + 
-                        "\nIgnored Not In Index: " + status.getIgnoredNotInIndex() + 
-                        "\nConflicting Stage State: " + status.getConflictingStageState() + 
-                        "\nMissing: " + status.getMissing() + 
-                        "\nModified: " + status.getModified() + 
-                        "\nUntracked: " + status.getUntracked() + 
-                        "\nUntracked Folders: " + status.getUntrackedFolders());
-
                 repository.close();
                 return Optional.of(status);
             }
@@ -521,6 +538,8 @@ public class JGit {
                 return JGitStatus.CONFLICTS;
             }
 
+            Ref q = git.reset().setMode( ResetCommand.ResetType.HARD ).call();
+
             Ref ref = git.checkout()
                          .setName(nameBranchWithoutAlias)
                          .setStartPoint(ORIGIN_PREFIX + nameBranchWithoutAlias)
@@ -528,6 +547,8 @@ public class JGit {
                          .call();
             logger.info("!Switch to branch: " + ref.getName());
             return JGitStatus.SUCCESSFUL;
+        } catch (CheckoutConflictException cce) {
+            logger.info("Oops..");
         } catch (IOException | GitAPIException e) {
             logger.error("", e);
         }

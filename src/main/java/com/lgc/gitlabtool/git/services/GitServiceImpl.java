@@ -3,6 +3,7 @@ package com.lgc.gitlabtool.git.services;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -65,6 +66,21 @@ public class GitServiceImpl implements GitService {
         }
 
         return changedProjects;
+    }
+
+    @Override
+    public Map<Project, JGitStatus> discardChanges(List<Project> projects) {
+        if (projects == null) {
+            throw new IllegalArgumentException("Wrong parameters for discarding projects.");
+        }
+
+        Map<Project, JGitStatus> results = new LinkedHashMap<>();
+        for (Project project : projects) {
+            JGitStatus status = JGit.getInstance().discardChanges(project);
+            results.put(project, status);
+        }
+
+        return results;
     }
 
     @Override
