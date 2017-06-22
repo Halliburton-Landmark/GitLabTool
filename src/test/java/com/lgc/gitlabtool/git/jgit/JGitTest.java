@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import org.eclipse.jgit.api.AddCommand;
 import org.eclipse.jgit.api.CheckoutCommand;
@@ -293,12 +292,7 @@ public class JGitTest {
         Git gitMock = getGitMock();
         JGit jGitMock = new JGit() {
             @Override
-            protected Optional<Git> getGitForRepository(String path) {
-                return Optional.of(gitMock);
-            }
-
-            @Override
-            protected boolean isContinueMakePull(Project project) {
+            protected boolean isContinueMakePull(Project project, Git git) {
                 return false;
             }
         };
@@ -985,11 +979,6 @@ public class JGitTest {
         if (gitMock == null) {
             return new JGit() {
                 @Override
-                protected Optional<Git> getGitForRepository(String path) {
-                    return Optional.empty();
-                }
-
-                @Override
                 protected Git getGit(String path) throws IOException {
                     throw mock(IOException.class);
                 }
@@ -998,12 +987,7 @@ public class JGitTest {
 
         JGit correctJGitMock = new JGit() {
             @Override
-            protected Optional<Git> getGitForRepository(String path) {
-                return Optional.of(gitMock);
-            }
-
-            @Override
-            protected boolean isContinueMakePull(Project project) {
+            protected boolean isContinueMakePull(Project project, Git git) {
                 return true;
             }
 

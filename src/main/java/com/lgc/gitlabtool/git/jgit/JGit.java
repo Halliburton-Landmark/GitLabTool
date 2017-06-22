@@ -230,8 +230,7 @@ public class JGit {
         }
         String path = project.getPathToClonedProject();
 
-        try {
-            Git git = getGitForRepository(path).get();
+        try (Git git = getGit(path)) {
             Status status = git.status().call();
             if (status != null) {
                 // debug code
@@ -246,8 +245,8 @@ public class JGit {
                         "\nUntracked Folders: " + status.getUntrackedFolders());
                 return Optional.of(status);
             }
-        } catch (NoWorkTreeException | GitAPIException e) {
-            logger.error("", e);
+        } catch (NoWorkTreeException | GitAPIException | IOException e) {
+            logger.error(e.getMessage());
         }
         return Optional.empty();
     }
@@ -262,21 +261,23 @@ public class JGit {
         if (files == null || project == null) {
             throw new IllegalArgumentException("Incorrect data: project is " + project + ", files is " + files);
         }
-        Optional<Git> opGit = getGitForRepository(project.getPathToClonedProject());
-        if (!opGit.isPresent()) {
-            return false;
-        }
-        files.stream().forEach((file) -> {
-            if (file != null) {
-                try {
-                    opGit.get().add().addFilepattern(file).call();
-                } catch (GitAPIException e) {
-                    System.err.println("Could not add the " + file + " file");
-                    System.err.println("!ERROR: " + e.getMessage());
+        try (Git git = getGit(project.getPathToClonedProject())) {
+            files.stream().forEach((file) -> {
+                if (file != null) {
+                    try {
+                        git.add().addFilepattern(file).call();
+                    } catch (GitAPIException e) {
+                        System.err.println("Could not add the " + file + " file");
+                        System.err.println("!ERROR: " + e.getMessage());
+                    }
                 }
-            }
-        });
-        return true;
+            });
+            git.close();
+            return true;
+        } catch (IOException e) {
+            logger.error(e.getMessage());
+        }
+        return false;
     }
 
     /**
@@ -293,20 +294,16 @@ public class JGit {
             logger.debug(project.getName() + ERROR_MSG_NOT_CLONED);
             return JGitStatus.FAILED;
         }
-        try {
-            Optional<Git> optGit = getGitForRepository(project.getPathToClonedProject());
-            if (!optGit.isPresent()) {
-                logger.debug("pull " + JGitStatus.FAILED);
-                return JGitStatus.FAILED;
-            }
+        try (Git git = getGit(project.getPathToClonedProject())) {
             // check which files were changed to avoid conflicts
-            if (isContinueMakePull(project)) {
-                PullResult pullResult = optGit.get().pull().call();
+            if (isContinueMakePull(project, git)) {
+                PullResult pullResult = git.pull().call();
                 MergeResult mer = pullResult.getMergeResult();
+                git.close();
                 return JGitStatus.getStatus(mer.getMergeStatus().toString());
             }
-        } catch (GitAPIException e) {
-            logger.error("", e);
+        } catch (GitAPIException | IOException e) {
+            logger.error(e.getMessage());
         }
         return JGitStatus.FAILED;
     }
@@ -387,20 +384,14 @@ public class JGit {
         if (project == null) {
             throw new IllegalArgumentException("Incorrect data! Project is null");
         }
-        Optional<Git> opGit = getGitForRepository(project.getPathToClonedProject());
-        if (!opGit.isPresent()) {
-            logger.debug("commit " + JGitStatus.FAILED);
-            return JGitStatus.FAILED;
-        }
-        Git git = opGit.get();
-        PersonIdent author = getPersonIdent(nameAuthor, emailAuthor);
-        PersonIdent comitter = getPersonIdent(nameCommitter, emailCommitter);
-        try {
+        try (Git git = getGit(project.getPathToClonedProject())){
+            PersonIdent author = getPersonIdent(nameAuthor, emailAuthor);
+            PersonIdent comitter = getPersonIdent(nameCommitter, emailCommitter);
             git.commit().setAll(setAll).setMessage(message).setAuthor(author).setCommitter(comitter).call();
-            logger.debug("commit " + JGitStatus.SUCCESSFUL);
+            logger.debug("commit for " + project.getName() + " project is " + JGitStatus.SUCCESSFUL);
             return JGitStatus.SUCCESSFUL;
-        } catch (Exception e) {
-            logger.error("", e);
+        } catch (IOException | GitAPIException e) {
+            logger.error(e.getMessage());
         }
         return JGitStatus.FAILED;
     }
@@ -518,32 +509,29 @@ public class JGit {
             throw new IllegalArgumentException(
                     "Incorrect data: project is " + project + ", nameBranch is " + nameBranch);
         }
-
         if (!project.isCloned()) {
             logger.debug(project.getName() + ERROR_MSG_NOT_CLONED);
             return JGitStatus.FAILED;
         }
-        Optional<Git> optGit = getGitForRepository(project.getPathToClonedProject());
-        if (!optGit.isPresent()) {
-            logger.debug("createBranch " + JGitStatus.FAILED);
-            return JGitStatus.FAILED;
-        }
+        try (Git git = getGit(project.getPathToClonedProject())) {
+            List<Branch> branches = getListShortNamesOfBranches(getRefs(project, null));
+            if (branches.isEmpty()) {
+                return JGitStatus.FAILED;
+            }
+            if (!force && branches.stream().map(Branch::getBranchName).collect(Collectors.toList()).contains(nameBranch)) {
+                logger.debug("createBranch " + JGitStatus.BRANCH_ALREADY_EXISTS);
+                return JGitStatus.BRANCH_ALREADY_EXISTS;
+            }
 
-        List<Branch> branches = getListShortNamesOfBranches(getRefs(project, null));
-        if (branches.isEmpty()) {
-            return JGitStatus.FAILED;
-        }
-        if (!force && branches.stream().map(Branch::getBranchName).collect(Collectors.toList()).contains(nameBranch)) {
-            logger.debug("createBranch " + JGitStatus.BRANCH_ALREADY_EXISTS);
-            return JGitStatus.BRANCH_ALREADY_EXISTS;
-        }
-        try {
-            CreateBranchCommand create = optGit.get().branchCreate();
+            CreateBranchCommand create = git.branchCreate();
             Ref res = create.setUpstreamMode(SetupUpstreamMode.TRACK).setName(nameBranch).setForce(force).call();
             logger.info("!CREATE NEW BRANCH: " + res.getName());
+            git.close();
             return JGitStatus.SUCCESSFUL;
         } catch (GitAPIException e) {
             logger.error(e.getMessage());
+        } catch (IOException e1) {
+            logger.error(e1.getMessage());
         }
         return JGitStatus.FAILED;
     }
@@ -651,23 +639,18 @@ public class JGit {
             logger.debug(project.getName() + ERROR_MSG_NOT_CLONED);
             return JGitStatus.FAILED;
         }
-        Optional<Git> optGit = getGitForRepository(project.getPathToClonedProject());
-        if (!optGit.isPresent()) {
-            logger.debug("deleteBranch " + JGitStatus.FAILED);
-            return JGitStatus.FAILED;
-        }
-        Git git = optGit.get();
-        if (isCurrentBranch(git, nameBranch)) {
-            logger.error("The current branch can not be deleted.");
-            return JGitStatus.FAILED;
-        }
-        try {
+        try (Git git = getGit(project.getPathToClonedProject())) {
+            if (isCurrentBranch(git, nameBranch)) {
+                logger.error("The current branch can not be deleted.");
+                return JGitStatus.FAILED;
+            }
             git.branchDelete().setBranchNames(nameBranch).setForce(force).call();
             logger.info("!Branch \"" + nameBranch + "\" deleted from the " + project.getPathToClonedProject());
             return JGitStatus.SUCCESSFUL;
-        } catch (GitAPIException e) {
-            logger.error("", e);
+        } catch (GitAPIException | IOException e) {
+            logger.error(e.getMessage());
         }
+
         return JGitStatus.FAILED;
     }
 
@@ -727,37 +710,20 @@ public class JGit {
     }
 
     private JGitStatus push(Project project) {
-        Optional<Git> opGit = getGitForRepository(project.getPathToClonedProject());
-        if (opGit.isPresent()) {
-            try {
-                opGit.get().push().call();
-                logger.debug("push " + JGitStatus.SUCCESSFUL);
-                return JGitStatus.SUCCESSFUL;
-            } catch (GitAPIException e) {
-                logger.error("", e);
-            }
+        try (Git git = getGit(project.getPathToClonedProject())) {
+            git.push().call();
+            git.close();
+            logger.debug("push " + JGitStatus.SUCCESSFUL);
+            return JGitStatus.SUCCESSFUL;
+        } catch (GitAPIException | IOException e) {
+            logger.error(e.getMessage());
         }
         return JGitStatus.FAILED;
     }
 
-    protected Optional<Git> getGitForRepository(String path) {
-        if (path != null) {
-            try {
-                return Optional.ofNullable(Git.open(new File(path + "/.git")));
-            } catch (IOException e) {
-                logger.error("", e);
-            }
-        }
-        return Optional.empty();
-    }
-
     // Check if we will have conflicts after the pull command
-    boolean isContinueMakePull(Project project) {
-        Optional<Git> optGit = getGitForRepository(project.getPathToClonedProject());
-        if (!optGit.isPresent()) {
-            return false;
-        }
-        Optional<List<DiffEntry>> optListDiffs = getListModifyFilesInLocalRepository(optGit.get());
+    boolean isContinueMakePull(Project project, Git git) {
+        Optional<List<DiffEntry>> optListDiffs = getListModifyFilesInLocalRepository(git);
         Optional<Status> optStatus = getStatusProject(project);
         if (!optListDiffs.isPresent() || !optStatus.isPresent()) {
             return false;
