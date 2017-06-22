@@ -5,8 +5,7 @@ import javafx.stage.Stage;
 /**
  * Util class for adapting stage to multiple screens
  *
- * @author Lyudmila Lyska
- * @author Yevhen Strazhko
+ * @author Pavlo Pidhorniy
  */
 public class ScreenUtil {
 
