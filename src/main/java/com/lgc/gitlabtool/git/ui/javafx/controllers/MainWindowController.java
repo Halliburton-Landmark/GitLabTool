@@ -39,7 +39,7 @@ public class MainWindowController {
             (LoginService) ServiceProvider.getInstance().getService(LoginService.class.getName());
 
     @FXML
-    private ListView projectsList;
+    private ListView<Project> projectsList;
 
     @FXML
     private Label leftLabel;
@@ -67,7 +67,9 @@ public class MainWindowController {
 
 
         //TODO: Additional thread should be placed to services
-        new Thread(this::updateProjectList).start();
+        Thread t = new Thread(this::updateProjectList);
+        t.setName("Updating project list");
+        t.start();
 
         configureToolbarCommands();
         initNewBranchButton();
@@ -92,6 +94,13 @@ public class MainWindowController {
         }
     }
 
+    public void onDeselectAll(){
+        if (projectsList != null && projectsList.getItems() != null && !projectsList.getItems().isEmpty()) {
+            projectsList.getSelectionModel().clearSelection();
+            projectsList.requestFocus();
+        }
+    }
+
     private void configureToolbarCommands() {
     }
 
@@ -101,11 +110,21 @@ public class MainWindowController {
         projectsList.setItems(projectsObservableList);
     }
 
-    private void configureListView(ListView listView) {
+    private void configureListView(ListView<Project> listView) {
         //config displayable string
         listView.setCellFactory(p -> new ProjectListCell());
 
         //setup selection
+        listView.getSelectionModel().getSelectedItems().addListener((ListChangeListener<Project>) changed -> {
+            if (areAllItemsSelected(listView)) {
+                selectAllButton.setText("Deselect all");
+                selectAllButton.setOnAction(action -> onDeselectAll());
+            } else {
+                selectAllButton.setText("Select all");
+                selectAllButton.setOnAction(action -> onSelectAll());
+            }
+        });
+
         listView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         listView.addEventFilter(MouseEvent.MOUSE_PRESSED, evt -> {
             Node node = evt.getPickResult().getIntersectedNode();
@@ -117,8 +136,8 @@ public class MainWindowController {
             if (node instanceof ListCell) {
                 evt.consume();
 
-                ListCell cell = (ListCell) node;
-                ListView lv = cell.getListView();
+                ListCell<?> cell = (ListCell<?>) node;
+                ListView<?> lv = cell.getListView();
 
                 lv.requestFocus();
 
@@ -133,13 +152,17 @@ public class MainWindowController {
             }
         });
 
-        listView.getSelectionModel().getSelectedItems().addListener(new ListChangeListener() {
+        listView.getSelectionModel().getSelectedItems().addListener(new ListChangeListener<Project>() {
             @Override
-            public void onChanged(ListChangeListener.Change change) {
+            public void onChanged(ListChangeListener.Change<? extends Project> change) {
                 SelectionsProvider.getInstance().setSelectionItems(ListViewKey.MAIN_WINDOW_PROJECTS.getKey(),
                         listView.getSelectionModel().getSelectedItems());
             }
         });
+    }
+
+    private boolean areAllItemsSelected(ListView<?> listView) {
+        return listView.getSelectionModel().getSelectedItems().size() == listView.getItems().size();
     }
 
     private void initNewBranchButton() {
