@@ -4,9 +4,6 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.jgit.JGit;
@@ -41,7 +38,8 @@ public class CloningGroupsWindowController {
     private static final String CLONING_STATUS_ALERT_TITLE = "Cloning info";
     private static final String CLONING_STATUS_ALERT_HEADER = "Cloning statuses:";
 
-    private static final Logger logger = LogManager.getLogger(CloningGroupsWindowController.class);
+    //Uncomment if you want to log something
+    //private static final Logger logger = LogManager.getLogger(CloningGroupsWindowController.class);
 
     private final LoginService _loginService = (LoginService) ServiceProvider.getInstance()
             .getService(LoginService.class.getName());
@@ -124,7 +122,7 @@ public class CloningGroupsWindowController {
         alert.showAndWait();
     }
 
-    private void configureListView(ListView listView) {
+    private void configureListView(ListView<Group> listView) {
         // config displayable string
         listView.setCellFactory(new Callback<ListView<Group>, ListCell<Group>>() {
             @Override
