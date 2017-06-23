@@ -150,7 +150,7 @@ public class JGit {
     /**
      * Clones all projects from the group
      *
-     * @param group      group for clone
+     * @param projects   the projects for cloning
      * @param localPath  localPath the path to where will clone all the projects of the group
      * @param progressListener
      */

@@ -106,7 +106,6 @@ public class JSONParserTest {
     public void parseToObjectCorrectDataTest() {
         Group gr = JSONParser.parseToObject(groupJson, Group.class);
         Assert.assertNotNull(gr);
-        Assert.assertNotNull(gr.getProjects());
         Assert.assertEquals(1348279, gr.getId());
 
         Assert.assertNotNull(JSONParser.parseToObject("{}", Group.class));
