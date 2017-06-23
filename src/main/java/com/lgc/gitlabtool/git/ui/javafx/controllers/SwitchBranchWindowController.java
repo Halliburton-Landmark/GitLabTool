@@ -264,10 +264,7 @@ public class SwitchBranchWindowController {
         stage.getIcons().add(appIcon);
 
         /* Set sizing and position */
-        double dialogWidth = 300;
-        double dialogHeight = 150;
-
-        ScreenUtil.adaptForMultiScreens(stage, dialogWidth, dialogHeight);
+        ScreenUtil.adaptForMultiScreens(stage, 300, 150);
 
         alert.showAndWait();
     }

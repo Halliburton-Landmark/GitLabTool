@@ -81,10 +81,7 @@ public class ServerInputWindowController {
         stage.initModality(Modality.APPLICATION_MODAL);
 
         /* Set sizing and position */
-        double dialogWidth = 300;
-        double dialogHeight = 100;
-
-        ScreenUtil.adaptForMultiScreens(stage, dialogWidth, dialogHeight);
+        ScreenUtil.adaptForMultiScreens(stage, 300, 100);
 
         stage.showAndWait();
     }

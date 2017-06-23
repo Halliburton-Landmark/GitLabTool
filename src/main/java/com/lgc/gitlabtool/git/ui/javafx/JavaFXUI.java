@@ -72,10 +72,7 @@ public class JavaFXUI extends Application implements UserInterface {
         stage.getIcons().add(appIcon);
 
         /* Set sizing and position */
-        double dialogWidth = 300;
-        double dialogHeight = 300;
-
-        ScreenUtil.adaptForMultiScreens(stage, dialogWidth, dialogHeight);
+        ScreenUtil.adaptForMultiScreens(stage, 300, 300);
 
         loginDialog.showAndWait();
     }

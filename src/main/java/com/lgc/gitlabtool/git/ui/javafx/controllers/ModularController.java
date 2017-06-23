@@ -168,10 +168,7 @@ public class ModularController {
         stage.getIcons().add(_appIcon);
 
         /* Set sizing and position */
-        double dialogWidth = 300;
-        double dialogHeight = 150;
-
-        ScreenUtil.adaptForMultiScreens(stage, dialogWidth, dialogHeight);
+        ScreenUtil.adaptForMultiScreens(stage, 300, 150);
 
         Optional<ButtonType> result = alert.showAndWait();
         if (result.get() == ButtonType.CANCEL) {
@@ -272,10 +269,7 @@ public class ModularController {
         stage.getIcons().add(_appIcon);
 
         /* Set sizing and position */
-        double dialogWidth = 300;
-        double dialogHeight = 150;
-
-        ScreenUtil.adaptForMultiScreens(stage, dialogWidth, dialogHeight);
+        ScreenUtil.adaptForMultiScreens(stage, 300, 150);
 
         alert.show();
     }
@@ -341,10 +335,7 @@ public class ModularController {
                 stage.getIcons().add(_appIcon);
 
                 /* Set sizing and position */
-                double dialogWidth = 300;
-                double dialogHeight = 150;
-
-                ScreenUtil.adaptForMultiScreens(stage, dialogWidth, dialogHeight);
+                ScreenUtil.adaptForMultiScreens(stage, 300, 150);
 
                 alert.showAndWait();
             }

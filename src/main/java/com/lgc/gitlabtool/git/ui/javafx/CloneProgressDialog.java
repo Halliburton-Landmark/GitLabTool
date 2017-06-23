@@ -119,10 +119,7 @@ public class CloneProgressDialog extends Dialog<DialogDTO> {
         primaryStage.getIcons().add(appIcon);
 
         /* Set size and position */
-        double dialogWidth = 500;
-        double dialogHeight = 350;
-
-        ScreenUtil.adaptForMultiScreens(primaryStage, dialogWidth, dialogHeight);
+        ScreenUtil.adaptForMultiScreens(primaryStage, 500, 350);
 
         primaryStage.show();
     }
