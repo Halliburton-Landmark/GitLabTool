@@ -54,7 +54,10 @@ public class GitServiceImpl implements GitService {
     @Override
     public Map<Project, JGitStatus> createBranch(List<Project> projects, String branchName, boolean force) {
         Map<Project, JGitStatus> statuses = new HashMap<>();
-        List<Project> localProjects = projects.stream().filter(prj -> prj.isCloned()).collect(Collectors.toList());
+        List<Project> localProjects = 
+                projects.stream()
+                .filter(prj -> prj.isCloned())
+                .collect(Collectors.toList());
         for (Project project : localProjects) {
             statuses.put(project, JGit.getInstance().createBranch(project, branchName, force));
         }
