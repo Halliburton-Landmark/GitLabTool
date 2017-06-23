@@ -104,7 +104,6 @@ public class CloneProgressDialog extends Dialog<DialogDTO> {
             @Override
             public void handle(ActionEvent e) {
                 JGit.getInstance().cancelClone();
-                setDisableCancel(true);
                 updateProgressBar(0.0);
             }
         });
@@ -147,12 +146,19 @@ public class CloneProgressDialog extends Dialog<DialogDTO> {
     public void resetProgress() {
         updateProgressBar(0.0);
         _progressIndicator.setVisible(false);
-        setDisableCancel(true);
+        makeCancelButtonAsOk();
         updateProjectLabel(DEFAULT_PROJECT_LABEL);
     }
 
-    private void setDisableCancel(boolean isDisable) {
-        _cancelButton.setDisable(isDisable);
+    private void makeCancelButtonAsOk() {
+        _cancelButton.setText("OK");
+        _cancelButton.setOnAction(event -> {
+            getStage().close();
+        });
+    }
+
+    private Stage getStage() {
+        return (Stage) _cancelButton.getScene().getWindow();
     }
 
     private String currentDateToString() {
