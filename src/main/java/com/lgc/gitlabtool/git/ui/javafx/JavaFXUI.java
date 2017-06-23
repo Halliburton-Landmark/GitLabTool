@@ -10,6 +10,7 @@ import com.lgc.gitlabtool.git.ui.UserInterface;
 import com.lgc.gitlabtool.git.ui.ViewKey;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 import com.lgc.gitlabtool.git.ui.javafx.controllers.ModularController;
+import com.lgc.gitlabtool.git.util.ProjectPropertiesUtil;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -49,7 +50,7 @@ public class JavaFXUI extends Application implements UserInterface {
 
         Scene scene = new Scene(root);
 
-        primaryStage.setTitle("Gitlab Tool");
+        primaryStage.setTitle("Gitlab Tool v." + ProjectPropertiesUtil.getProjectVersion());
         primaryStage.setScene(scene);
         primaryStage.getIcons().add(appIcon);
 
