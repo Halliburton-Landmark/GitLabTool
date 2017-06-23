@@ -47,7 +47,6 @@ import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 
 import com.lgc.gitlabtool.git.connections.token.CurrentUser;
 import com.lgc.gitlabtool.git.entities.Branch;
-import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.User;
 import com.lgc.gitlabtool.git.services.ProgressListener;
@@ -153,26 +152,19 @@ public class JGit {
      * @param localPath  localPath the path to where will clone all the projects of the group
      * @param progressListener
      */
-    public boolean clone(Group group, String localPath, ProgressListener progressListener) {
-        if (group == null || localPath == null) {
-            throw new IllegalArgumentException("Incorrect data: group is " + group + ", localPath is " + localPath);
-        }
+    public boolean clone(Collection<Project> projects, String localPath, ProgressListener progressListener) {
         _isCloneCancelled = false;
-        Collection<Project> projects = group.getProjects();
-        if (projects == null || projects.isEmpty()) {
-            String errorMsg = "Cloning error. " + group.getName() + " group doesn't have projects.";
+        if (projects == null || localPath == null || projects.isEmpty()) {
+            String errorMsg = "Cloning error. Projects or local path is null or the group doesn't have projects.";
             progressListener.onError(1.0, errorMsg);
             progressListener.onFinish(null, FINISH_CLONE_MESSAGE);
-            logger.debug(errorMsg);
-            return false;
+            throw new IllegalArgumentException(errorMsg);
         }
-        String groupPath = localPath + File.separator + group.getName();
-
-        cloneGroupInBackgroundThread(group, projects, progressListener, groupPath);
+        cloneGroupInBackgroundThread(projects, progressListener, localPath);
         return true;
     }
 
-    private void cloneGroupInBackgroundThread(Group group, Collection<Project> projects,
+    private void cloneGroupInBackgroundThread(Collection<Project> projects,
                                          ProgressListener progressListener,
                                          String groupPath) {
         Runnable task = () -> {
@@ -191,9 +183,7 @@ public class JGit {
                     progressListener.onSuccess(project, currentProgress);
                 }
             }
-            group.setClonedStatus(true);
-            group.setPathToClonedGroup(groupPath);
-            progressListener.onFinish(group, _isCloneCancelled ? CANCEL_CLONE_MESSAGE : FINISH_CLONE_MESSAGE);
+            progressListener.onFinish(_isCloneCancelled ? CANCEL_CLONE_MESSAGE : FINISH_CLONE_MESSAGE);
         };
 
         Thread t = new Thread(task, "Clone Group Thread");
@@ -650,13 +640,11 @@ public class JGit {
 
     private boolean clone(Project project, String localPath) {
         String path = localPath + File.separator + project.getName();
-        if (clone(project.getHttp_url_to_repo(), path)) {
-            project.setClonedStatus(true);
-            project.setPathToClonedProject(path);
-            return true;
+        if (!clone(project.getHttp_url_to_repo(), path)) {
+            PathUtilities.deletePath(Paths.get(path));
+            return false;
         }
-        PathUtilities.deletePath(Paths.get(path));
-        return false;
+        return true;
     }
 
     public boolean clone(String linkClone, String localPath) {

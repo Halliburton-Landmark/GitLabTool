@@ -3,7 +3,6 @@ package com.lgc.gitlabtool.git.jgit;
 import static org.mockito.Mockito.mock;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -68,7 +67,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.User;
 import com.lgc.gitlabtool.git.services.ProgressListener;
@@ -90,31 +88,9 @@ public class JGitTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void cloneGroupIncorrectDataExceptionPathTest() {
-        JGit.getInstance().clone(new Group(), null, new EmptyListener());
+        JGit.getInstance().clone(new ArrayList<>(), null, new EmptyListener());
     }
 
-    @Test
-    public void cloneGroupIncorrectDataTest() {
-        Group group = new Group();
-        group.setClonedStatus(true);
-        Assert.assertFalse(JGit.getInstance().clone(group, ".", new EmptyListener()));
-    }
-
-    @Test
-    public void cloneGroupProjectsIsNullTest() {
-        Group group = new Group();
-        // projects is null, the clone method return false
-        Assert.assertFalse(JGit.getInstance().clone(group, CORRECT_PATH, new EmptyListener()));
-    }
-
-    @Test
-    public void cloneGroupProjectsIsEmptyTest() {
-        Group group = getCorrectGroup(0);
-
-        // projects is empty, the clone method return false
-        Assert.assertFalse(JGit.getInstance().clone(group, CORRECT_PATH, new EmptyListener()));
-        Assert.assertFalse(JGit.getInstance().clone(group, CORRECT_PATH, new EmptyListener()));
-    }
 
     @Test
     public void gitcloneRepositoryCorrectDataTest() {
@@ -137,37 +113,7 @@ public class JGitTest {
             }
         };
 
-        Group group = getCorrectGroup(2);
-        Assert.assertTrue(jgit.clone(group, CORRECT_PATH, new EmptyListener()));
-    }
-
-    private Group getCorrectGroup(int countProject) {
-        try {
-            Group group = new Group();
-
-            Class groupClass = group.getClass();
-            Field publicFields = groupClass.getDeclaredField("projects");
-
-            publicFields.setAccessible(true);
-            publicFields.set(group, getCorrectProject(countProject));
-
-            return group;
-
-        } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    private List<Project> getCorrectProject(int countProject) {
-        List<Project> projects = new ArrayList<>();
-        for (int i = 0; i < countProject; i++) {
-            Project pr = new Project();
-            pr.setClonedStatus(true);
-            pr.setPathToClonedProject(".");
-            projects.add(pr);
-        }
-        return projects;
+        Assert.assertTrue(jgit.clone(getCorrectProject(2), CORRECT_PATH, new EmptyListener()));
     }
 
     @Test
@@ -179,8 +125,7 @@ public class JGitTest {
                 throw cancelException;
             }
         };
-        Group group = getCorrectGroup(1);
-        Assert.assertTrue(git.clone(group, CORRECT_PATH, new EmptyListener()));
+        Assert.assertTrue(git.clone(getProjects(2), CORRECT_PATH, new EmptyListener()));
 
         git = new JGit() {
             @Override
@@ -188,7 +133,7 @@ public class JGitTest {
                 throw getGitAPIException();
             }
         };
-        Assert.assertTrue(git.clone(group, CORRECT_PATH, new EmptyListener()));
+        Assert.assertTrue(git.clone(getProjects(2), CORRECT_PATH, new EmptyListener()));
     }
 
     @Test
@@ -1181,5 +1126,24 @@ public class JGitTest {
         @Override
         public void onFinish(Object... t) {
         }
+    }
+
+    private List<Project> getProjects(int count) {
+        List<Project> projects = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            projects.add(new Project());
+        }
+        return projects;
+    }
+
+    private List<Project> getCorrectProject(int countProject) {
+        List<Project> projects = new ArrayList<>();
+        for (int i = 0; i < countProject; i++) {
+            Project pr = new Project();
+            pr.setClonedStatus(true);
+            pr.setPathToClonedProject(".");
+            projects.add(pr);
+        }
+        return projects;
     }
 }

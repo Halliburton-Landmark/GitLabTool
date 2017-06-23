@@ -27,12 +27,14 @@ public class ServiceProvider {
         RESTConnector restConnector = RESTConnectorFactory.getInstance().getRESTConnector();
         LoginService loginService = new LoginServiceImpl(restConnector);
         StorageService storageService = new StorageServiceImpl();
+        ProjectService projectService = new ProjectServiceImpl(restConnector);
         ClonedGroupsService programProgertiesService = new ClonedGroupsServiceImpl(storageService, loginService);
 
         _services = new HashMap<>();
         _services.put(LoginService.class.getName(), loginService);
         _services.put(ClonedGroupsService.class.getName(), programProgertiesService);
-        _services.put(GroupsUserService.class.getName(), new GroupsUserServiceImpl(restConnector, programProgertiesService));
+        _services.put(GroupsUserService.class.getName(),
+                new GroupsUserServiceImpl(restConnector, programProgertiesService, projectService));
         _services.put(ProjectService.class.getName(), new ProjectServiceImpl(restConnector));
         _services.put(StorageService.class.getName(), storageService);
         _services.put(ReplacementService.class.getName(), new ReplacementServiceImpl());

@@ -14,7 +14,6 @@ import com.lgc.gitlabtool.git.services.ClonedGroupsService;
 import com.lgc.gitlabtool.git.services.GroupsUserService;
 import com.lgc.gitlabtool.git.services.LoginService;
 import com.lgc.gitlabtool.git.services.ProgressListener;
-import com.lgc.gitlabtool.git.services.ProjectTypeService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 import com.lgc.gitlabtool.git.ui.javafx.CloneProgressDialog;
@@ -105,7 +104,8 @@ public class CloningGroupsWindowController {
         Group selectedGroup = selectedGroups.get(0);
 
         CloneProgressDialog progressDialog = new CloneProgressDialog(stage, selectedGroup.getName());
-        _groupsService.cloneGroups(selectedGroups, destinationPath, new CloneProgressListener(progressDialog));
+        _groupsService.cloneGroups(selectedGroups, destinationPath,
+                new CloneProgressListener(selectedGroup, destinationPath, progressDialog));
     }
 
     @FXML
@@ -183,12 +183,16 @@ public class CloningGroupsWindowController {
     class CloneProgressListener implements ProgressListener {
 
         private final CloneProgressDialog _progressDialog;
+        private final Group _group;
+        private final String _localPath;
 
-        public CloneProgressListener(CloneProgressDialog progressDialog) {
-            if (progressDialog == null) {
+        public CloneProgressListener(Group group, String localPath, CloneProgressDialog progressDialog) {
+            if (progressDialog == null || group == null || localPath == null) {
                 throw new IllegalAccessError("Invalid parameters");
             }
             _progressDialog = progressDialog;
+            _group = group;
+            _localPath = localPath;
         }
 
         @Override
@@ -198,11 +202,6 @@ public class CloningGroupsWindowController {
                 Project project = (Project) t[0];
                 _progressDialog.addMessageToConcole(project.getName() + " project is successful cloned!",
                         CloningMessageStatus.SUCCESS);
-
-                // Determine the project type
-                ProjectTypeService prTypeService = (ProjectTypeService) ServiceProvider.getInstance()
-                        .getService(ProjectTypeService.class.getName());
-                project.setProjectType(prTypeService.getProjectType(project));
             }
             if (t[1] instanceof Double) {
                 double progress = (Double) t[1];
@@ -232,14 +231,14 @@ public class CloningGroupsWindowController {
 
         @Override
         public void onFinish(Object... t) {
-            if (t[0] instanceof Group) {
-                Group clonedGroup = (Group) t[0];
-                _clonedGroupsService.addGroups(Arrays.asList(clonedGroup));
-            }
             Platform.runLater(new Runnable() {
                 @Override
                 public void run() {
-                    final String messageStatus = t[1] instanceof String ? (String) t[1] : JGit.FINISH_CLONE_MESSAGE;
+                    _group.setClonedStatus(true);
+                    _group.setPathToClonedGroup(_localPath + File.separator + _group.getName());
+                    _clonedGroupsService.addGroups(Arrays.asList(_group));
+
+                    final String messageStatus = t[0] instanceof String ? (String) t[0] : JGit.FINISH_CLONE_MESSAGE;
                     _progressDialog.addMessageToConcole(messageStatus, CloningMessageStatus.SIMPLE);
                     _progressDialog.resetProgress();
                     cloningStatusDialog(messageStatus);

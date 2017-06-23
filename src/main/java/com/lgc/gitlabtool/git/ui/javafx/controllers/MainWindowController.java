@@ -3,7 +3,6 @@ package com.lgc.gitlabtool.git.ui.javafx.controllers;
 
 import java.util.List;
 
-import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.services.LoginService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
@@ -30,13 +29,14 @@ public class MainWindowController {
     private static final String HEDER_GROUP_TITLE = "Current group: ";
     private static final String SELECT_ALL_IMAGE_URL = "icons/main/select_all.png";
 
-    private Group _selectedGroup;
+    private List<Project> _projects;
+    private String _groupName;
 
     private final LoginService _loginService =
             (LoginService) ServiceProvider.getInstance().getService(LoginService.class.getName());
 
     @FXML
-    private ListView projectsList;
+    private ListView<Project> projectsList;
 
     @FXML
     private Label leftLabel;
@@ -51,7 +51,7 @@ public class MainWindowController {
         String username = _loginService.getCurrentUser().getName();
         userId.setText(username);
 
-        String currentGroupname = getSelectedGroup().getName();
+        String currentGroupname = _groupName;
         leftLabel.setText(HEDER_GROUP_TITLE + currentGroupname);
 
         Image imageSelectAll = new Image(getClass().getClassLoader().getResource(SELECT_ALL_IMAGE_URL).toExternalForm());
@@ -69,12 +69,9 @@ public class MainWindowController {
         configureToolbarCommands();
     }
 
-    public Group getSelectedGroup() {
-        return _selectedGroup;
-    }
-
-    public void setSelectedGroup(Group selectedGroup) {
-        this._selectedGroup = selectedGroup;
+    public void setSelectedGroup(List<Project> projects, String groupName) {
+        _projects = projects;
+        _groupName = groupName;
     }
 
     public void refreshProjectsList(){
@@ -92,12 +89,11 @@ public class MainWindowController {
     }
 
     private void updateProjectList() {
-        List<Project> groupProjects = (List<Project>) _selectedGroup.getProjects();
-        ObservableList<Project> projectsObservableList = FXCollections.observableList(groupProjects);
+        ObservableList<Project> projectsObservableList = FXCollections.observableList(_projects);
         projectsList.setItems(projectsObservableList);
     }
 
-    private void configureListView(ListView listView) {
+    private void configureListView(ListView<Project> listView) {
         //config displayable string
         listView.setCellFactory(p -> new ProjectListCell());
 
