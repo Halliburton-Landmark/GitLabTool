@@ -133,10 +133,11 @@ public class JSONParserTest {
 
     @Test
     public void parseToCollectionIncorrectDataTest() {
-        Assert.assertNull(JSONParser.parseToCollectionObjects(null, typeListGroups));
-        Assert.assertNull(JSONParser.parseToCollectionObjects(groupsJson, null));
-        Assert.assertNull(JSONParser.parseToCollectionObjects(null, null));
-        Assert.assertNull(JSONParser.parseToCollectionObjects("76437 jhj 31", typeListGroups));
-        Assert.assertNull(JSONParser.parseToCollectionObjects("{}", typeListGroups));
+        List emptyList = Collections.emptyList();
+        Assert.assertEquals(JSONParser.parseToCollectionObjects(null, typeListGroups), emptyList);
+        Assert.assertEquals(JSONParser.parseToCollectionObjects(groupsJson, null), emptyList);
+        Assert.assertEquals(JSONParser.parseToCollectionObjects(null, null), emptyList);
+        Assert.assertEquals(JSONParser.parseToCollectionObjects("76437 jhj 31", typeListGroups), emptyList);
+        Assert.assertEquals(JSONParser.parseToCollectionObjects("{}", typeListGroups), emptyList);
     }
 }

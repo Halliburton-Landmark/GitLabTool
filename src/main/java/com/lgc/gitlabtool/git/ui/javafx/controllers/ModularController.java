@@ -137,7 +137,7 @@ public class ModularController {
         _mainWindowController = loader.getController();
 
         String nameGroup = selectedGroup.getName();
-        List<Project> projects = (List<Project>) _projectService.loadProject(selectedGroup);
+        List<Project> projects = (List<Project>) _projectService.loadProjects(selectedGroup);
         _mainWindowController.setSelectedGroup(projects, nameGroup);
         _mainWindowController.beforeShowing();
 

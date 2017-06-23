@@ -29,9 +29,18 @@ public class ProjectServiceImpl implements ProjectService {
     private static final String PREFIX_SUCCESSFUL_LOAD = " group loaded successful";
 
     private static final Logger _logger = LogManager.getLogger(ProjectServiceImpl.class);
+    private static ProjectTypeService _projectTypeService;
 
-    public ProjectServiceImpl(RESTConnector connector) {
+    public ProjectServiceImpl(RESTConnector connector, ProjectTypeService projectTypeService) {
         setConnector(connector);
+        setProjectTypeService(projectTypeService);
+    }
+
+    private void setProjectTypeService(ProjectTypeService projectTypeService) {
+        if (projectTypeService != null) {
+            _projectTypeService = projectTypeService;
+        }
+
     }
 
     @Override
@@ -44,10 +53,10 @@ public class ProjectServiceImpl implements ProjectService {
             header.put(privateTokenKey, privateTokenValue);
             Object jsonProjects = getConnector().sendGet(sendString, null, header);
 
-            return JSONParser.parseToCollectionObjects(jsonProjects, new TypeToken<List<Project>>() {
-            }.getType());
+            Collection<Project> projects = JSONParser.parseToCollectionObjects(jsonProjects, new TypeToken<List<Project>>() {}.getType());
+            return projects != null ? projects : Collections.emptyList();
         }
-        return null;
+        return Collections.emptyList();
     }
 
     private RESTConnector getConnector() {
@@ -59,10 +68,10 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public Collection<Project> loadProject(Group group) {
+    public Collection<Project> loadProjects(Group group) {
         Collection<Project> projects = getProjects(group);
         if (projects == null || projects.isEmpty()) {
-            _logger.debug(GROUP_DOESNT_HAVE_PROJECTS_MESSAGE);
+            _logger.error(GROUP_DOESNT_HAVE_PROJECTS_MESSAGE);
             return Collections.emptyList();
         }
         String successMessage = "The projects of " + group.getName() + PREFIX_SUCCESSFUL_LOAD;
@@ -82,8 +91,6 @@ public class ProjectServiceImpl implements ProjectService {
     private void updateProjectStatus(Project project, String pathGroup) {
         project.setClonedStatus(true);
         project.setPathToClonedProject(pathGroup + File.separator + project.getName());
-        ProjectTypeService typeService = (ProjectTypeService) ServiceProvider.getInstance()
-                .getService(ProjectTypeService.class.getName());
-        project.setProjectType(typeService.getProjectType(project));
+        project.setProjectType(_projectTypeService.getProjectType(project));
     }
 }

@@ -25,5 +25,5 @@ public interface ProjectService {
      * @param  group the group for which we need to load projects
      * @return the list of projects
      */
-    Collection<Project> loadProject(Group group);
+    Collection<Project> loadProjects(Group group);
 }

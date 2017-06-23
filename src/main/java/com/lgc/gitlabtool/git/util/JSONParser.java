@@ -2,6 +2,7 @@ package com.lgc.gitlabtool.git.util;
 
 import java.lang.reflect.Type;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
@@ -81,7 +82,7 @@ public class JSONParser {
             try {
                 return _gson.fromJson((String) json, classObject);
             } catch (JsonSyntaxException ex) {
-                logger.error(ex.getMessage());
+                logger.error("Error parsing: " + ex.getMessage());
             }
         }
         return null;
@@ -100,9 +101,9 @@ public class JSONParser {
             try {
                 return _gson.fromJson((String) json, typeClass);
             } catch (JsonSyntaxException ex) {
-                logger.error("", ex);
+                logger.error("Error parsing : ", ex.getMessage());
             }
         }
-        return null;
+        return Collections.emptyList();
     }
 }
