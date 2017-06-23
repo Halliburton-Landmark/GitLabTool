@@ -4,9 +4,6 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.jgit.JGit;
@@ -25,15 +22,12 @@ import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
-import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
-import javafx.scene.input.MouseEvent;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import javafx.util.Callback;
@@ -44,7 +38,8 @@ public class CloningGroupsWindowController {
     private static final String CLONING_STATUS_ALERT_TITLE = "Cloning info";
     private static final String CLONING_STATUS_ALERT_HEADER = "Cloning statuses:";
 
-    private static final Logger logger = LogManager.getLogger(CloningGroupsWindowController.class);
+    //Uncomment if you want to log something
+    //private static final Logger logger = LogManager.getLogger(CloningGroupsWindowController.class);
 
     private final LoginService _loginService = (LoginService) ServiceProvider.getInstance()
             .getService(LoginService.class.getName());
@@ -127,7 +122,7 @@ public class CloningGroupsWindowController {
         alert.showAndWait();
     }
 
-    private void configureListView(ListView listView) {
+    private void configureListView(ListView<Group> listView) {
         // config displayable string
         listView.setCellFactory(new Callback<ListView<Group>, ListCell<Group>>() {
             @Override
@@ -146,33 +141,6 @@ public class CloningGroupsWindowController {
             }
         });
 
-        // setup selection
-        listView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        listView.addEventFilter(MouseEvent.MOUSE_PRESSED, evt -> {
-            Node node = evt.getPickResult().getIntersectedNode();
-
-            while (node != null && node != listView && !(node instanceof ListCell)) {
-                node = node.getParent();
-            }
-
-            if (node instanceof ListCell) {
-                evt.consume();
-
-                ListCell cell = (ListCell) node;
-                ListView lv = cell.getListView();
-
-                lv.requestFocus();
-
-                if (!cell.isEmpty()) {
-                    int index = cell.getIndex();
-                    if (cell.isSelected()) {
-                        lv.getSelectionModel().clearSelection(index);
-                    } else {
-                        lv.getSelectionModel().select(index);
-                    }
-                }
-            }
-        });
     }
 
     /**

@@ -23,6 +23,7 @@ import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuItems;
 import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuManager;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarButtons;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarManager;
+import com.lgc.gitlabtool.git.util.ProjectPropertiesUtil;
 
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -56,7 +57,8 @@ public class ModularController {
     private static final Logger logger = LogManager.getLogger(ModularController.class);
 
     private static final String ABOUT_POPUP_TITLE = "About";
-    private static final String ABOUT_POPUP_HEADER = "Gitlab tool, powered by Luxoft";
+    private static final String ABOUT_POPUP_HEADER = "Gitlab tool v." + ProjectPropertiesUtil.getProjectVersion()
+            + ", powered by Luxoft";
     private static final String ABOUT_POPUP_CONTENT = "Contacts: Yurii Pitomets (yurii.pitomets2@halliburton.com)";
     private static final String SWITCH_BRANCH_TITLE = "Switch branch";
 
