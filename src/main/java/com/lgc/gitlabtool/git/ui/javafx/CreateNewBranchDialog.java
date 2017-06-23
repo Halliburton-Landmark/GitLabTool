@@ -2,6 +2,7 @@ package com.lgc.gitlabtool.git.ui.javafx;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
@@ -103,7 +104,6 @@ public class CreateNewBranchDialog extends Dialog<String> {
             return;
         }
         Map<Project, JGitStatus> results = _gitService.createBranch(getProjects(), newBranchName, false);
-        // TODO: show results somehow in console or log
 
         boolean switchToBranch = _checkoutBox.isSelected();
         if (switchToBranch) {
@@ -143,8 +143,20 @@ public class CreateNewBranchDialog extends Dialog<String> {
     }
 
     private void createAndShowStatusDialog(List<Project> projects, Map<Project, JGitStatus> results) {
-        String info = "new branch has been created in " + results.size() + " of " + projects.size()
-                + " selected projects";
+        int size = results.size();
+        String info = "";
+        if (size < 10) {
+            info = results.entrySet().stream().map(pair -> pair.getKey().getName() + " - " + pair.getValue())
+                    .collect(Collectors.joining("\n"));
+        } else {
+            int countOfCreatedBranches = 
+                    results.entrySet().stream()
+                    .map(pair -> pair.getValue())
+                    .filter(status -> status.equals(JGitStatus.SUCCESSFUL))
+                    .collect(Collectors.toList())
+                    .size();
+            info = "new branch has been created in " + countOfCreatedBranches + " of " + projects.size() + " selected projects";
+        }
         Alert statusDialog = new StatusDialog(STATUS_DIALOG_TITLE, STATUS_DIALOG_HEADER, info);
         statusDialog.showAndWait();
     }
