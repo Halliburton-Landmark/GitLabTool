@@ -9,7 +9,7 @@ import javafx.stage.Stage;
 /**
  * This type of dialog should be used in Gitlab Tool
  * instead of pure <code>Alert</code> dialog
- * becouse it contains application icon and basic settings
+ * because it contains application icon and basic settings
  * 
  * @author Igor Khlaponin
  */
