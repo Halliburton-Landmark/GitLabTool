@@ -2,12 +2,8 @@ package com.lgc.gitlabtool.git.ui.javafx;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-import com.lgc.gitlabtool.git.entities.Branch;
 import com.lgc.gitlabtool.git.entities.Project;
-import com.lgc.gitlabtool.git.jgit.BranchType;
-import com.lgc.gitlabtool.git.jgit.JGit;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
@@ -17,6 +13,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Dialog;
@@ -32,6 +29,8 @@ import javafx.stage.Window;
 public class CreateNewBranchDialog extends Dialog<String> {
 
     private static final String DIALOG_TITLE = "Create new branch";
+    private static final String STATUS_DIALOG_TITLE = "Branch Creating status";
+    private static final String STATUS_DIALOG_HEADER = "Branch creating info";
 
     private final GitService _gitService = (GitService) ServiceProvider.getInstance()
             .getService(GitService.class.getName());
@@ -112,6 +111,8 @@ public class CreateNewBranchDialog extends Dialog<String> {
         }
 
         getStage().close();
+
+        createAndShowStatusDialog(getProjects(), results);
     }
 
     private boolean isInputValid(String input) {
@@ -139,5 +140,12 @@ public class CreateNewBranchDialog extends Dialog<String> {
                 _createButton.setDisable(true);
             }
         };
+    }
+
+    private void createAndShowStatusDialog(List<Project> projects, Map<Project, JGitStatus> results) {
+        String info = "new branch has been created in " + results.size() + " of " + projects.size()
+                + " selected projects";
+        Alert statusDialog = new StatusDialog(STATUS_DIALOG_TITLE, STATUS_DIALOG_HEADER, info);
+        statusDialog.showAndWait();
     }
 }
