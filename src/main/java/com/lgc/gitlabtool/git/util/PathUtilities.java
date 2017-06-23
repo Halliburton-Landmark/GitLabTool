@@ -72,11 +72,10 @@ public class PathUtilities {
             return false;
         }
         try {
-            FileUtils.touch(path.toFile());
             FileUtils.forceDelete(path.toFile());
             return true;
         } catch (IOException e) {
-            logger.error("Error deleting path: " + e.getMessage());
+            logger.error("Error deleting path: " + e);
         }
         return false;
     }

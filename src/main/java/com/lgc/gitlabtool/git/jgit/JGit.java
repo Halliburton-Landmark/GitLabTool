@@ -2,6 +2,7 @@ package com.lgc.gitlabtool.git.jgit;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -43,6 +44,7 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 
 import com.lgc.gitlabtool.git.connections.token.CurrentUser;
@@ -539,15 +541,18 @@ public class JGit {
 
         String nameBranchWithoutAlias = nameBranch.replace(ORIGIN_PREFIX, StringUtils.EMPTY);
         List<Branch> branches = getListShortNamesOfBranches(getRefs(project, null));
-        if (!isContaintsBranch(branches, nameBranchWithoutAlias) && !isRemoteBranch) {
+        boolean isContaints = isContaintsBranch(branches, nameBranchWithoutAlias);
+        if (!isContaints && !isRemoteBranch) {
             logger.error("Failed " + prefixErrorMessage + JGitStatus.BRANCH_DOES_NOT_EXIST);
             return JGitStatus.BRANCH_DOES_NOT_EXIST;
         }
-        if (isContaintsBranch(branches, nameBranchWithoutAlias) && isRemoteBranch) {
+        if (isContaints && isRemoteBranch) {
             logger.error("Failed " + prefixErrorMessage + JGitStatus.BRANCH_ALREADY_EXISTS);
             return JGitStatus.BRANCH_ALREADY_EXISTS;
         }
+        try (Repository repo = local(Paths.get(project.getPathToClonedProject()))) {
 
+        }
         try (Git git = getGit(project.getPathToClonedProject())) {
             if (isCurrentBranch(git, nameBranchWithoutAlias)) {
                 return JGitStatus.BRANCH_CURRENTLY_CHECKED_OUT;
@@ -558,9 +563,13 @@ public class JGit {
                 return JGitStatus.CONFLICTS;
             }
 
-            Ref ref = git.checkout().setName(nameBranchWithoutAlias)
-                    .setStartPoint(ORIGIN_PREFIX + nameBranchWithoutAlias).setCreateBranch(isRemoteBranch).call();
-            logger.info(prefixErrorMessage + ref.getName());
+            git.checkout().setName(nameBranchWithoutAlias)
+                                    .setStartPoint(ORIGIN_PREFIX + nameBranchWithoutAlias)
+                                    .setCreateBranch(isRemoteBranch)
+                                    .call();
+            logger.info(prefixErrorMessage + ORIGIN_PREFIX + nameBranchWithoutAlias);
+            git.getRepository().close();
+            git.close();
             return JGitStatus.SUCCESSFUL;
         } catch (IOException | GitAPIException e) {
             logger.error("Failed " + prefixErrorMessage + e.getMessage());
@@ -649,6 +658,7 @@ public class JGit {
 
     public boolean clone(String linkClone, String localPath) {
         try (Git result = tryClone(linkClone, localPath)){
+            result.getRepository().close();
             result.close();
            return true;
         } catch (JGitInternalException e) {
@@ -658,6 +668,17 @@ public class JGit {
         }
         return false;
     }
+
+    public static Repository local(Path path){
+        try {
+          FileRepositoryBuilder builder=new FileRepositoryBuilder();
+          return builder.setGitDir(path.toFile()).readEnvironment().setMustExist(true).build();
+        }
+       catch (  IOException e) {
+          System.err.println("ERROR");
+        }
+        return null;
+      }
 
     protected Git tryClone(String linkClone, String localPath) throws GitAPIException {
         return Git.cloneRepository()
@@ -828,7 +849,6 @@ public class JGit {
     private boolean isCurrentBranch(Git git, String nameBranch) {
         try {
             String currentBranch = git.getRepository().getFullBranch();
-            git.close();
             String newBranch = Constants.R_HEADS + nameBranch;
             return currentBranch.equals(newBranch);
         } catch (IOException e) {
