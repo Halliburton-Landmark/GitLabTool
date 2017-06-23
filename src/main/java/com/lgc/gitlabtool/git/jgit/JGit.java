@@ -30,10 +30,7 @@ import org.eclipse.jgit.api.errors.JGitInternalException;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.dircache.DirCache;
 import org.eclipse.jgit.dircache.DirCacheCheckout;
-import org.eclipse.jgit.errors.AmbiguousObjectException;
 import org.eclipse.jgit.errors.CorruptObjectException;
-import org.eclipse.jgit.errors.IncorrectObjectTypeException;
-import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.errors.NoWorkTreeException;
 import org.eclipse.jgit.errors.RevisionSyntaxException;
 import org.eclipse.jgit.lib.Constants;
@@ -239,7 +236,7 @@ public class JGit {
                 return Optional.of(status);
             }
         } catch (NoWorkTreeException | GitAPIException | IOException e) {
-            logger.error(e.getMessage());
+            logger.error("Error getting status " + e.getMessage());
         }
         return Optional.empty();
     }
@@ -268,7 +265,7 @@ public class JGit {
             git.close();
             return true;
         } catch (IOException e) {
-            logger.error(e.getMessage());
+            logger.error("Error opening repository " + project.getPathToClonedProject() + " " + e.getMessage());
         }
         return false;
     }
@@ -296,7 +293,7 @@ public class JGit {
                 return JGitStatus.getStatus(mer.getMergeStatus().toString());
             }
         } catch (GitAPIException | IOException e) {
-            logger.error(e.getMessage());
+            logger.error("Pull error for the " + project.getName() + " project: " + e.getMessage());
         }
         return JGitStatus.FAILED;
     }
@@ -349,7 +346,7 @@ public class JGit {
             }
             NullCheckUtil.acceptConsumer(onSuccess, currentProgress);
         }
-        logger.debug("commit " + JGitStatus.SUCCESSFUL);
+        logger.debug("Commit for the projects is " + JGitStatus.SUCCESSFUL);
         return JGitStatus.SUCCESSFUL;
     }
 
@@ -381,10 +378,10 @@ public class JGit {
             PersonIdent author = getPersonIdent(nameAuthor, emailAuthor);
             PersonIdent comitter = getPersonIdent(nameCommitter, emailCommitter);
             git.commit().setAll(setAll).setMessage(message).setAuthor(author).setCommitter(comitter).call();
-            logger.debug("commit for " + project.getName() + " project is " + JGitStatus.SUCCESSFUL);
+            logger.debug("Commit for the " + project.getName() + " project is " + JGitStatus.SUCCESSFUL);
             return JGitStatus.SUCCESSFUL;
         } catch (IOException | GitAPIException e) {
-            logger.error(e.getMessage());
+            logger.error("Failed commit for the " + project.getName() + " " + e.getMessage());
         }
         return JGitStatus.FAILED;
     }
@@ -438,7 +435,7 @@ public class JGit {
                 continue;
             }
             NullCheckUtil.acceptConsumer(onSuccess, currentProgress);
-            logger.debug("commitAndPush " + JGitStatus.SUCCESSFUL);
+            logger.debug("Commit and push for projects is " + JGitStatus.SUCCESSFUL);
         }
         return true;
     }
@@ -480,7 +477,7 @@ public class JGit {
                 continue;
             }
             NullCheckUtil.acceptConsumer(onSuccess, currentProgress);
-            logger.debug("push " + JGitStatus.SUCCESSFUL);
+            logger.debug("Push for projects is " + JGitStatus.SUCCESSFUL);
         }
         return true;
     }
@@ -511,8 +508,8 @@ public class JGit {
             if (branches.isEmpty()) {
                 return JGitStatus.FAILED;
             }
-            if (!force && branches.stream().map(Branch::getBranchName).collect(Collectors.toList()).contains(nameBranch)) {
-                logger.debug("createBranch " + JGitStatus.BRANCH_ALREADY_EXISTS);
+            if (!force && isContaintsBranch(branches, nameBranch)) {
+                logger.error("Error create branch: " + JGitStatus.BRANCH_ALREADY_EXISTS);
                 return JGitStatus.BRANCH_ALREADY_EXISTS;
             }
 
@@ -521,10 +518,8 @@ public class JGit {
             logger.info("!CREATE NEW BRANCH: " + res.getName());
             git.close();
             return JGitStatus.SUCCESSFUL;
-        } catch (GitAPIException e) {
-            logger.error(e.getMessage());
-        } catch (IOException e1) {
-            logger.error(e1.getMessage());
+        } catch (GitAPIException | IOException e) {
+            logger.error("Failed create branch for the " + project.getName() + " : " + e.getMessage());
         }
         return JGitStatus.FAILED;
     }
@@ -546,21 +541,20 @@ public class JGit {
             throw new IllegalArgumentException(
                     "Incorrect data: project is " + project + ", nameBranch is " + nameBranch);
         }
+        String prefixErrorMessage = "Swith to branch for the " + project.getName() + " project: ";
         if (!project.isCloned()) {
-            logger.debug(project.getName() + ERROR_MSG_NOT_CLONED);
+            logger.error(prefixErrorMessage + ERROR_MSG_NOT_CLONED);
             return JGitStatus.FAILED;
         }
 
         String nameBranchWithoutAlias = nameBranch.replace(ORIGIN_PREFIX, StringUtils.EMPTY);
         List<Branch> branches = getListShortNamesOfBranches(getRefs(project, null));
-        if (!branches.stream().map(Branch::getBranchName).collect(Collectors.toList()).contains(nameBranchWithoutAlias)
-                && !isRemoteBranch) {
-            logger.debug("switchTo " + JGitStatus.BRANCH_DOES_NOT_EXIST);
+        if (!isContaintsBranch(branches, nameBranchWithoutAlias) && !isRemoteBranch) {
+            logger.error("Failed " + prefixErrorMessage + JGitStatus.BRANCH_DOES_NOT_EXIST);
             return JGitStatus.BRANCH_DOES_NOT_EXIST;
         }
-        if (branches.stream().map(Branch::getBranchName).collect(Collectors.toList()).contains(nameBranchWithoutAlias)
-                && isRemoteBranch) {
-            logger.debug("switchTo " + JGitStatus.BRANCH_ALREADY_EXISTS);
+        if (isContaintsBranch(branches, nameBranchWithoutAlias) && isRemoteBranch) {
+            logger.error("Failed " + prefixErrorMessage + JGitStatus.BRANCH_ALREADY_EXISTS);
             return JGitStatus.BRANCH_ALREADY_EXISTS;
         }
 
@@ -570,18 +564,25 @@ public class JGit {
             }
             if (isConflictsBetweenTwoBranches(git.getRepository(), git.getRepository().getFullBranch(),
                     Constants.R_HEADS + nameBranchWithoutAlias)) {
-                logger.warn("switchTo " + JGitStatus.CONFLICTS);
+                logger.warn(prefixErrorMessage + JGitStatus.CONFLICTS);
                 return JGitStatus.CONFLICTS;
             }
 
             Ref ref = git.checkout().setName(nameBranchWithoutAlias)
                     .setStartPoint(ORIGIN_PREFIX + nameBranchWithoutAlias).setCreateBranch(isRemoteBranch).call();
-            logger.info("!Switch to branch: " + ref.getName());
+            logger.info(prefixErrorMessage + ref.getName());
             return JGitStatus.SUCCESSFUL;
         } catch (IOException | GitAPIException e) {
-            logger.error("", e);
+            logger.error("Failed " + prefixErrorMessage + e.getMessage());
         }
         return JGitStatus.FAILED;
+    }
+
+    private boolean isContaintsBranch(List<Branch> branches, String nameBranch) {
+        return branches.stream()
+                       .map(Branch::getBranchName)
+                       .collect(Collectors.toList())
+                       .contains(nameBranch);
     }
 
     /**
@@ -604,7 +605,7 @@ public class JGit {
             git.close();
             return branch;
         } catch (IOException e) {
-            logger.error("", e);
+            logger.error("Error getting current branch for the " + project.getName() + " : " + e.getMessage());
         }
         return Optional.empty();
     }
@@ -641,7 +642,7 @@ public class JGit {
             logger.info("!Branch \"" + nameBranch + "\" deleted from the " + project.getPathToClonedProject());
             return JGitStatus.SUCCESSFUL;
         } catch (GitAPIException | IOException e) {
-            logger.error(e.getMessage());
+            logger.error("Error deleting branch for the " + project.getName() + " project: " + e.getMessage());
         }
 
         return JGitStatus.FAILED;
@@ -665,19 +666,22 @@ public class JGit {
         } catch (JGitInternalException e) {
             logger.error("Cloning process of group was cancelled!");
         } catch (GitAPIException e) {
-            logger.error(e.getMessage());
+            logger.error("Clone error " + linkClone + " : " + e.getMessage());
         }
         return false;
     }
 
     protected Git tryClone(String linkClone, String localPath) throws GitAPIException {
-        return Git.cloneRepository().setURI(linkClone).setDirectory(new File(localPath))
-                .setProgressMonitor(new EmptyProgressMonitor() {
-                    @Override
-                    public boolean isCancelled() {
-                        return _isCloneCancelled;
-                    }
-                }).call();
+        return Git.cloneRepository()
+                  .setURI(linkClone)
+                  .setDirectory(new File(localPath))
+                  .setProgressMonitor(new EmptyProgressMonitor() {
+                      @Override
+                      public boolean isCancelled() {
+                          return _isCloneCancelled;
+                      }
+                  })
+                  .call();
     }
 
     private PersonIdent getPersonIdent(String name, String email) {
@@ -709,7 +713,7 @@ public class JGit {
             logger.debug("push " + JGitStatus.SUCCESSFUL);
             return JGitStatus.SUCCESSFUL;
         } catch (GitAPIException | IOException e) {
-            logger.error(e.getMessage());
+            logger.error("Push error for the " + project.getName() + " project: " + e.getMessage());
         }
         return JGitStatus.FAILED;
     }
@@ -738,7 +742,7 @@ public class JGit {
 
             return Optional.ofNullable(git.diff().setNewTree(newTreeIter).call());
         } catch (IOException | GitAPIException e) {
-            logger.error("", e);
+            logger.error("Error getting modify files in local repository: ", e.getMessage());
         }
         return Optional.empty();
     }
@@ -765,10 +769,9 @@ public class JGit {
                 brCommand.setListMode(mode);
             }
             return brCommand.call();
-        } catch (GitAPIException e) {
-            logger.error(e.getMessage());
-        } catch (IOException e1) {
-            logger.error(e1.getMessage());
+        } catch (GitAPIException | IOException e) {
+            logger.error("Error getting the list of remote branches of the "
+                                + project.getName() + " project:" + e.getMessage());
         }
         return Collections.emptyList();
     }
@@ -817,11 +820,8 @@ public class JGit {
             }
 
             return checkDirCacheCheck(repo, firstRefCommit.getTree(), secondRefCommit.getTree());
-        } catch (RevisionSyntaxException | IncorrectObjectTypeException | AmbiguousObjectException
-                | MissingObjectException e) {
-            logger.error(e.getMessage());
-        } catch (IOException e1) {
-            logger.error(e1.getMessage());
+        } catch (RevisionSyntaxException | IOException e) {
+            logger.error("Failed finding conflicts in the repository: " + e.getMessage());
         }
         return true;
     }
@@ -840,10 +840,11 @@ public class JGit {
     private boolean isCurrentBranch(Git git, String nameBranch) {
         try {
             String currentBranch = git.getRepository().getFullBranch();
+            git.close();
             String newBranch = Constants.R_HEADS + nameBranch;
             return currentBranch.equals(newBranch);
         } catch (IOException e) {
-            logger.error("", e);
+            logger.error("[is current branch] Error getting the repository: " + e.getMessage());
         }
         return false;
     }
