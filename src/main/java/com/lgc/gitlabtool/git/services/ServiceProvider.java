@@ -34,7 +34,7 @@ public class ServiceProvider {
         _services.put(ClonedGroupsService.class.getName(), programProgertiesService);
         _services.put(GroupsUserService.class.getName(), new GroupsUserServiceImpl(restConnector, programProgertiesService));
         _services.put(ProjectService.class.getName(), new ProjectServiceImpl(restConnector));
-        _services.put(StorageService.class.getName(), new StorageServiceImpl());
+        _services.put(StorageService.class.getName(), storageService);
         _services.put(ReplacementService.class.getName(), new ReplacementServiceImpl());
         _services.put(PomXMLService.class.getName(), new PomXMLServiceImpl());
         _services.put(ProjectTypeService.class.getName(), new ProjectTypeServiceImpl());
