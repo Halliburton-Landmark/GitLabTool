@@ -33,7 +33,7 @@ public class CreateNewBranchDialog extends Dialog<String> {
     private static final String STATUS_DIALOG_TITLE = "Branch Creating status";
     private static final String STATUS_DIALOG_HEADER = "Branch creating info";
 
-    private final GitService _gitService = (GitService) ServiceProvider.getInstance()
+    private static final GitService _gitService = (GitService) ServiceProvider.getInstance()
             .getService(GitService.class.getName());
 
     private final Label _textLabel;
@@ -146,7 +146,8 @@ public class CreateNewBranchDialog extends Dialog<String> {
         int size = results.size();
         String info = "";
         if (size < 10) {
-            info = results.entrySet().stream().map(pair -> pair.getKey().getName() + " - " + pair.getValue())
+            info = results.entrySet().stream()
+                    .map(pair -> pair.getKey().getName() + " - " + pair.getValue())
                     .collect(Collectors.joining("\n"));
         } else {
             int countOfCreatedBranches = 
@@ -155,7 +156,8 @@ public class CreateNewBranchDialog extends Dialog<String> {
                     .filter(status -> status.equals(JGitStatus.SUCCESSFUL))
                     .collect(Collectors.toList())
                     .size();
-            info = "new branch has been created in " + countOfCreatedBranches + " of " + projects.size() + " selected projects";
+            info = "new branch has been created in " + countOfCreatedBranches 
+                    + " of " + projects.size() + " selected projects";
         }
         Alert statusDialog = new StatusDialog(STATUS_DIALOG_TITLE, STATUS_DIALOG_HEADER, info);
         statusDialog.showAndWait();

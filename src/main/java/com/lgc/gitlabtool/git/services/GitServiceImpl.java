@@ -1,11 +1,9 @@
 package com.lgc.gitlabtool.git.services;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.lgc.gitlabtool.git.entities.Branch;
@@ -62,15 +60,6 @@ public class GitServiceImpl implements GitService {
             statuses.put(project, JGit.getInstance().createBranch(project, branchName, force));
         }
         return statuses;
-    }
-
-    @Override
-    public Branch getBranchByName(String branchName, Collection<Project> projects, BranchType brType, boolean onlyCommon) {
-        Set<Branch> allBranchesWithTypes = JGit.getInstance().getBranches(projects, brType, onlyCommon);
-        
-        return allBranchesWithTypes.stream()
-                .filter(branch -> branch.getBranchName().equals(branchName))
-                .findAny().orElse(null);
     }
 
 }

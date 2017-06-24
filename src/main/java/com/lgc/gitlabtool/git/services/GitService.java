@@ -1,13 +1,12 @@
 package com.lgc.gitlabtool.git.services;
 
+import java.util.List;
+import java.util.Map;
+
+import com.lgc.gitlabtool.git.entities.Branch;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.jgit.BranchType;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
-import com.lgc.gitlabtool.git.entities.Branch;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Service for working with Git features.
@@ -57,13 +56,5 @@ public interface GitService {
      * @return map with projects and theirs statuses of branch creating
      */
     Map<Project, JGitStatus> createBranch(List<Project> projects, String branchName, boolean force);
-    
-    /**
-     * @param branchName - name of the branch
-     * @param projects - projects that should contain this branch
-     * @param brType - type of the branch. See {@link BranchType}
-     * @param onlyCommon - if value is <true> return only common branches of projects, if <false> return all branches.
-     * @return branch by its name or <code>null</code> if such branch does not exist
-     */
-    Branch getBranchByName(String branchName, Collection<Project> projects, BranchType brType, boolean onlyCommon);
+
 }
