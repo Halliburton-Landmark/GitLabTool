@@ -16,14 +16,15 @@ import com.lgc.gitlabtool.git.util.ProjectPropertiesUtil;
 
 
 public class Main {
-    
+
     private static final Logger logger = LogManager.getLogger(Main.class);
-    
+
     public static void main(String[] args) {
         final UserInterface ui = new JavaFXUI();
         logger.debug("==================== application started");
-        logger.info(ProjectPropertiesUtil.getProjectName().toUpperCase() + 
-                " version: " + ProjectPropertiesUtil.getProjectVersion());
+        logger.info(ProjectPropertiesUtil.getProjectName().toUpperCase() +
+                " version: " + ProjectPropertiesUtil.getProjectVersion() +
+                "." + ProjectPropertiesUtil.getCommitHash());
         detectProxy();
         ui.run(args);
     }
@@ -48,7 +49,7 @@ public class Main {
                 if (addr == null) {
                     logger.info("No Proxy");
                 } else {
-                    logger.info("proxy hostname: " + addr.getHostName()); 
+                    logger.info("proxy hostname: " + addr.getHostName());
                     logger.info("proxy port: " + addr.getPort());
                     System.setProperty("http.proxyHost", addr.getHostName());
                     System.setProperty("http.proxyPort", Integer.toString(addr.getPort()));
