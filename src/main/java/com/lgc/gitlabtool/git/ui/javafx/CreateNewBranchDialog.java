@@ -132,7 +132,7 @@ public class CreateNewBranchDialog extends Dialog<String> {
          * It does not provide spaces in the middle of the name
          * (first and last spaces will be trimmed automatically so we do not check them)
          */
-        String regexp = "([a-z0-9_])+";
+        String regexp = "([A-Za-z0-9_])+";
         return input.matches(regexp);
     }
 
