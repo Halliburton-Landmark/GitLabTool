@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -37,7 +38,7 @@ public class JSONParser {
             try {
                 return _gson.fromJson(json, _mapType);
             } catch (JsonSyntaxException ex) {
-                logger.error("", ex);
+                logger.error("Error parsing from a json to a map: " + ex.getMessage());
             }
         }
         return null;
@@ -53,7 +54,7 @@ public class JSONParser {
         if (data != null) {
             return _gson.toJson(data);
         }
-        return null;
+        return StringUtils.EMPTY;
     }
 
     /**
@@ -82,7 +83,7 @@ public class JSONParser {
             try {
                 return _gson.fromJson((String) json, classObject);
             } catch (JsonSyntaxException ex) {
-                logger.error("Error parsing: " + ex.getMessage());
+                logger.error("Error parsing from a json to a object: " + ex.getMessage());
             }
         }
         return null;
@@ -101,7 +102,7 @@ public class JSONParser {
             try {
                 return _gson.fromJson((String) json, typeClass);
             } catch (JsonSyntaxException ex) {
-                logger.error("Error parsing : ", ex.getMessage());
+                logger.error("Error parsing from a json to a collection of objects: " + ex.getMessage());
             }
         }
         return Collections.emptyList();

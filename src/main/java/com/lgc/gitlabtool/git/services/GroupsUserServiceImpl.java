@@ -12,7 +12,6 @@ import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.eclipse.jgit.api.errors.JGitInternalException;
 
 import com.google.gson.reflect.TypeToken;
 import com.lgc.gitlabtool.git.connections.RESTConnector;
@@ -21,7 +20,6 @@ import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.User;
 import com.lgc.gitlabtool.git.jgit.JGit;
-import com.lgc.gitlabtool.git.statuses.CloningStatus;
 import com.lgc.gitlabtool.git.util.JSONParser;
 import com.lgc.gitlabtool.git.util.PathUtilities;
 
@@ -65,17 +63,12 @@ public class GroupsUserServiceImpl implements GroupsUserService {
         return null;
     }
 
-    private Group cloneGroup(Group group, String destinationPath, ProgressListener progressListener) {
-        try {
-            Collection<Project> projects = _projectService.getProjects(group);
-            if (projects != null) {
-                String groupPath = destinationPath + File.separator + group.getName();
-                JGit.getInstance().clone(projects, groupPath, progressListener);
-            }
-        } catch (JGitInternalException | IllegalArgumentException ex) {
-            logger.error("Cloning error: " + ex.getMessage());
+    private void cloneGroup(Group group, String destinationPath, ProgressListener progressListener) {
+        Collection<Project> projects = _projectService.getProjects(group);
+        if (projects != null) {
+            String groupPath = destinationPath + File.separator + group.getName();
+            JGit.getInstance().clone(projects, groupPath, progressListener);
         }
-        return group;
     }
 
     @Override
@@ -116,13 +109,6 @@ public class GroupsUserServiceImpl implements GroupsUserService {
             return null;
         }
         return importGroup(path);
-    }
-
-    private CloningStatus getStatus(Group group) {
-        if (group.isCloned()) {
-            return CloningStatus.SUCCESSFUL;
-        }
-        return CloningStatus.FAILED;
     }
 
     private RESTConnector getConnector() {
