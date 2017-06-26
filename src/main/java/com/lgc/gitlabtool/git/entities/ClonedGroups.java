@@ -22,6 +22,7 @@ public class ClonedGroups {
 
     private List<Group> _groups;
 
+
     /**
      * Gets instance's the class
      * @return instance

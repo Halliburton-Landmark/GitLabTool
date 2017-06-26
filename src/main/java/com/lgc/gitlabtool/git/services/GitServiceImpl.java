@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.lgc.gitlabtool.git.entities.Branch;
 import com.lgc.gitlabtool.git.entities.Project;
@@ -35,12 +36,30 @@ public class GitServiceImpl implements GitService {
         String selectedBranchName = branch.getBranchName();
         boolean isRemote = branch.getBranchType().equals(BranchType.REMOTE);
 
+        return switchTo(projects, selectedBranchName, isRemote);
+    }
+    
+    @Override
+    public Map<Project, JGitStatus> switchTo(List<Project> projects, String branchName, boolean isRemote) {
         Map<Project, JGitStatus> switchStatuses = new HashMap<>();
         for (Project project : projects) {
-            JGitStatus status = JGit.getInstance().switchTo(project, selectedBranchName, isRemote);
+            JGitStatus status = JGit.getInstance().switchTo(project, branchName, isRemote);
             switchStatuses.put(project, status);
         }
         return switchStatuses;
+    }
+
+    @Override
+    public Map<Project, JGitStatus> createBranch(List<Project> projects, String branchName, boolean force) {
+        Map<Project, JGitStatus> statuses = new HashMap<>();
+        List<Project> localProjects = 
+                projects.stream()
+                .filter(prj -> prj.isCloned())
+                .collect(Collectors.toList());
+        for (Project project : localProjects) {
+            statuses.put(project, JGit.getInstance().createBranch(project, branchName, force));
+        }
+        return statuses;
     }
 
 }

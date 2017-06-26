@@ -2,6 +2,7 @@ package com.lgc.gitlabtool.git.ui.javafx.controllers;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -13,9 +14,11 @@ import com.lgc.gitlabtool.git.services.LoginService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.ViewKey;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
+import com.lgc.gitlabtool.git.ui.javafx.StatusDialog;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarButtons;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarManager;
 
+import javafx.application.Platform;
 import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
@@ -24,6 +27,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
@@ -43,9 +47,13 @@ import javafx.util.Callback;
  * @author Yevhen Strazhko
  */
 public class WelcomeWindowController {
-    private static final Logger logger = LogManager.getLogger(WelcomeWindowController.class);
+    private static final Logger _logger = LogManager.getLogger(WelcomeWindowController.class);
 
     private static final String WINDOW_TITLE = "Cloning window";
+    private static final String FAILED_HEADER_MESSAGE_LOAD_GROUP = "Failed loading cloned groups. ";
+    private static final String FAILED_CONTENT_MESSAGE_LOAD_GROUP
+                                        = "These groups may have been moved to another folder or deleted from disc: ";
+
     @FXML
     private Label userId;
 
@@ -93,7 +101,7 @@ public class WelcomeWindowController {
 
             stage.show();
         } catch (IOException e) {
-            logger.error("Could not load fxml resource", e);
+            _logger.error("Could not load fxml resource: " + e.getMessage());
         }
     }
 
@@ -124,7 +132,27 @@ public class WelcomeWindowController {
         List<Group> userGroups = _clonedGroupsService.loadClonedGroups();
         if (userGroups != null) {
             groupList.setItems(FXCollections.observableList(userGroups));
+
+            showNotExistGroups(_clonedGroupsService.getNotExistGroup());
         }
+    }
+
+    private void showNotExistGroups(Collection<Group> groups) {
+        if (groups == null || groups.isEmpty()) {
+            return;
+        }
+        StringBuffer infoAboutGroups = new StringBuffer();
+        groups.forEach(group -> infoAboutGroups.append(group.getName() + " (" + group.getPathToClonedGroup() + ");"));
+        _logger.warn(FAILED_HEADER_MESSAGE_LOAD_GROUP + FAILED_CONTENT_MESSAGE_LOAD_GROUP + infoAboutGroups);
+
+        String namesAndPathsGroups = infoAboutGroups.toString().replace(";", ";\n\r");
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                Alert dialog = new StatusDialog(FAILED_HEADER_MESSAGE_LOAD_GROUP, FAILED_CONTENT_MESSAGE_LOAD_GROUP, namesAndPathsGroups);
+                dialog.showAndWait();
+            }
+        });
     }
 
     private void configureListView(ListView<Group> listView) {
@@ -146,7 +174,7 @@ public class WelcomeWindowController {
     private void loadGroup(Group group) {
         URL modularWindow = getClass().getClassLoader().getResource(ViewKey.MODULAR_CONTAINER.getPath());
         if (modularWindow == null) {
-            logger.error("Could not load fxml resource");
+            _logger.error("Could not load fxml resource");
             return;
         }
 
@@ -161,7 +189,7 @@ public class WelcomeWindowController {
             previousStage.setScene(new Scene(root));
 
         } catch (IOException e) {
-            logger.error("Could not load fxml resource", e);
+            _logger.error("Could not load fxml resource: " + e.getMessage());
         }
 
     }
