@@ -507,7 +507,7 @@ public class JGit {
 
             CreateBranchCommand create = git.branchCreate();
             Ref res = create.setUpstreamMode(SetupUpstreamMode.TRACK).setName(nameBranch).setForce(force).call();
-            logger.info("!CREATE NEW BRANCH: " + res.getName());
+            logger.info("!Create new branch for the " + project.getName() + " project: " + res.getName());
             git.close();
             return JGitStatus.SUCCESSFUL;
         } catch (GitAPIException | IOException e) {
