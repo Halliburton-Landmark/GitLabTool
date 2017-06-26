@@ -14,9 +14,11 @@ import com.lgc.gitlabtool.git.services.LoginService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.ViewKey;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
+import com.lgc.gitlabtool.git.ui.javafx.StatusDialog;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarButtons;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarManager;
 
+import javafx.application.Platform;
 import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
@@ -25,6 +27,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
@@ -47,6 +50,9 @@ public class WelcomeWindowController {
     private static final Logger _logger = LogManager.getLogger(WelcomeWindowController.class);
 
     private static final String WINDOW_TITLE = "Cloning window";
+    private static final String FAILED_HEADER_MESSAGE_LOAD_GROUP = "Failed loading cloned groups. ";
+    private static final String FAILED_CONTENT_MESSAGE_LOAD_GROUP = "Perhaps they may have been moved to another folder or deleted: ";
+
     @FXML
     private Label userId;
 
@@ -134,10 +140,18 @@ public class WelcomeWindowController {
         if (groups == null || groups.isEmpty()) {
             return;
         }
-        StringBuffer infoAboutGroups = new StringBuffer("");
-        groups.forEach(group -> infoAboutGroups.append("\n\r" + group.getName() + " (" + group.getPathToClonedGroup() + ");"));
-        _logger.warn("Failed to load the following groups:" + infoAboutGroups +
-                     "They may have been moved to another folder or deleted.");
+        StringBuffer infoAboutGroups = new StringBuffer();
+        groups.forEach(group -> infoAboutGroups.append(group.getName() + " (" + group.getPathToClonedGroup() + ");"));
+        _logger.warn(FAILED_HEADER_MESSAGE_LOAD_GROUP + FAILED_CONTENT_MESSAGE_LOAD_GROUP + infoAboutGroups);
+
+        String namesAndPathsGroups = infoAboutGroups.toString().replace(";", ";\n\r");
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                Alert dialog = new StatusDialog(FAILED_HEADER_MESSAGE_LOAD_GROUP, FAILED_CONTENT_MESSAGE_LOAD_GROUP, namesAndPathsGroups);
+                dialog.showAndWait();
+            }
+        });
     }
 
     private void configureListView(ListView<Group> listView) {
