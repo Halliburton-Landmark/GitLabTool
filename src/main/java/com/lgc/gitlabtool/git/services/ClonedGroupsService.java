@@ -42,8 +42,9 @@ public interface ClonedGroupsService {
     List<Group> loadClonedGroups();
 
     /**
+     * Get the groups that were not found on the local disk when loading the cloned groups
      *
-     * @return
+     * @return collection of groups
      */
     Collection<Group> getNotExistGroup();
 }
