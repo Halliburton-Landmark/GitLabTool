@@ -24,7 +24,7 @@ public class Main {
         logger.debug("==================== application started");
         logger.info(ProjectPropertiesUtil.getProjectName().toUpperCase() +
                 " version: " + ProjectPropertiesUtil.getProjectVersion() +
-                "." + ProjectPropertiesUtil.getCommitHash());
+                " (" + ProjectPropertiesUtil.getCommitHash() + ")");
         detectProxy();
         ui.run(args);
     }

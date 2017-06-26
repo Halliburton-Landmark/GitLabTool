@@ -59,7 +59,7 @@ public class ModularController {
 
     private static final String ABOUT_POPUP_TITLE = "About";
     private static final String ABOUT_POPUP_HEADER =
-            "Gitlab tool v." + getProjectVersion() + "." + getCommitHash() + ", powered by Luxoft";
+            "Gitlab tool v." + getProjectVersion() + " (" + getCommitHash() + "), powered by Luxoft";
     private static final String ABOUT_POPUP_CONTENT = "Contacts: Yurii Pitomets (yurii.pitomets2@halliburton.com)";
     private static final String SWITCH_BRANCH_TITLE = "Switch branch";
 
