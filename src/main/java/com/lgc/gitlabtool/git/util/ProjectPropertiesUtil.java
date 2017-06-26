@@ -9,8 +9,8 @@ import org.apache.logging.log4j.Logger;
 /**
  * Provides possibility to get the project version and project name from property file
  * that is filled by Maven according to the settings in pom.xml
- * 
- * @author Igor Khlaponin 
+ *
+ * @author Igor Khlaponin
  * @email IKhlaponin@luxoft.com
  */
 public class ProjectPropertiesUtil {
@@ -25,7 +25,7 @@ public class ProjectPropertiesUtil {
 
     /**
      * Returns the value from the property file by its key
-     * 
+     *
      * @param propertyFileName - name of the property file
      * @param key - the key
      * @return the value from the property file or <code>UNDEFINED_VALUE</code> if such key does not exist
@@ -35,7 +35,7 @@ public class ProjectPropertiesUtil {
         try (InputStream fis = ProjectPropertiesUtil.class.getClassLoader().getResourceAsStream(propertyFileName)) {
             props.load(fis);
         } catch (Exception e) {
-            _logger.error("", e);
+            _logger.error("Error getting properties: " + e.getMessage());
             return UNDEFINED_VALUE;
         }
         return props.getProperty(key) == null ? UNDEFINED_VALUE : props.getProperty(key);

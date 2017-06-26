@@ -625,7 +625,7 @@ public class JGit {
             Repository repo = optGit.get().getRepository();
             return Optional.ofNullable(repo.getBranch());
         } catch (Exception e) {
-            logger.error("", e);
+            logger.error("Error getting curent branch: " + e.getMessage());
         }
         return Optional.empty();
     }

@@ -75,7 +75,7 @@ public class GroupsUserServiceImpl implements GroupsUserService {
             }
             JGit.getInstance().clone(group, destinationPath, progressListener);
         } catch (JGitInternalException ex) {
-            logger.error(ex.getStackTrace());
+            logger.error("Error cloning of the " + group.getName() + " group: " + ex.getStackTrace());
         }
         return group;
     }

@@ -29,14 +29,14 @@ public interface RESTConnector {
 
     /**
      * Sets the main part of server URL to the <code>RESTConnector</code>
-     * 
+     *
      * @param url the main part of the server URL
      */
     void setUrlMainPart(String url);
-    
+
     /**
      * Returns the main part of server URL
-     * 
+     *
      * @return main part of server URL
      */
     String getUrlMainPart();

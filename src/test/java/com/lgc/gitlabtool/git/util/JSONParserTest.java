@@ -86,7 +86,7 @@ public class JSONParserTest {
 
     @Test
     public void parseToJsonFromMapIncorrectDataTest() {
-        Assert.assertNull(JSONParser.parseMapToJson(null));
+        Assert.assertTrue(JSONParser.parseMapToJson(null).isEmpty());
     }
 
     @Test

@@ -10,6 +10,7 @@ import java.util.List;
 
 import javax.xml.bind.JAXBException;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -21,8 +22,8 @@ import com.lgc.gitlabtool.git.xml.Servers;
 
 
 public class StorageServiceImpl implements StorageService {
-    private static final Logger logger = LogManager.getLogger(StorageServiceImpl.class);
-    
+    private static final Logger _logger = LogManager.getLogger(StorageServiceImpl.class);
+
     private static final String USER_HOME_PROPERTY = "user.home";
     private static final String WORKSPACE_DIRECTORY_PROPERTY = ".GitlabTool";
     private static final String PATH_SEPARATOR = File.separator;
@@ -42,7 +43,7 @@ public class StorageServiceImpl implements StorageService {
             XMLParser.saveObject(file, ClonedGroups.getInstance());
             return true;
         } catch (IOException | JAXBException e) {
-            logger.error("", e);
+            _logger.error("Error updating storage: " + e.getMessage());
             return false;
         }
     }
@@ -54,7 +55,7 @@ public class StorageServiceImpl implements StorageService {
             List<Group> list = XMLParser.loadObject(file, ClonedGroups.class).getClonedGroups();
             return list == null ? Collections.emptyList() : list;
         } catch (IOException | JAXBException e) {
-            logger.error("", e);
+            _logger.error("Error loading storage: " + e.getMessage());
             return Collections.emptyList();
         }
     }
@@ -66,7 +67,7 @@ public class StorageServiceImpl implements StorageService {
             XMLParser.saveObject(file, servers);
             return true;
         } catch (IOException | JAXBException e) {
-            logger.error("", e);
+            _logger.error("Error updating servers: " + e.getMessage());
             return false;
         }
     }
@@ -78,8 +79,8 @@ public class StorageServiceImpl implements StorageService {
             File file = getServersFile();
             servers = XMLParser.loadObject(file, Servers.class);
         } catch (IOException | JAXBException e) {
-            logger.error(e.getMessage());
-            logger.warn(SERVERS_FILENAME + " file empty or does not exist. Load defaults");
+            _logger.error("Error updating services: " + e.getMessage());
+            _logger.warn(SERVERS_FILENAME + " file empty or does not exist. Load defaults");
         } finally {
             if (servers == null) {
                 updateServers(new Servers());
@@ -125,7 +126,7 @@ public class StorageServiceImpl implements StorageService {
                 server.setLastUsed(false);
             }
         });
-        
+
         return updateServers(servers);
     }
 
@@ -133,7 +134,7 @@ public class StorageServiceImpl implements StorageService {
     public String getLastUserName(String serverName) {
         return loadServers().getServer(serverName)
                             .map(Server::getLastUserName)
-                            .orElse("");
+                            .orElse(StringUtils.EMPTY);
     }
 
     @Override
