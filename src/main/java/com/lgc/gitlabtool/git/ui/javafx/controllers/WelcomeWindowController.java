@@ -51,7 +51,8 @@ public class WelcomeWindowController {
 
     private static final String WINDOW_TITLE = "Cloning window";
     private static final String FAILED_HEADER_MESSAGE_LOAD_GROUP = "Failed loading cloned groups. ";
-    private static final String FAILED_CONTENT_MESSAGE_LOAD_GROUP = "Perhaps they may have been moved to another folder or deleted: ";
+    private static final String FAILED_CONTENT_MESSAGE_LOAD_GROUP
+                                        = "These groups may have been moved to another folder or deleted from disc: ";
 
     @FXML
     private Label userId;
