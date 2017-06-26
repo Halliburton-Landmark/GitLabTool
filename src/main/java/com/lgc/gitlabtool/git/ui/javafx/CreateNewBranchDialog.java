@@ -27,6 +27,7 @@ import javafx.scene.image.Image;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 
@@ -110,7 +111,7 @@ public class CreateNewBranchDialog extends Dialog<String> {
     private void onCreateButton(ActionEvent event) {
         String newBranchName = _branchNameField.getText().trim();
         if (!isInputValid(newBranchName)) {
-            showMessage(_branchNameField.getText() + WRONG_INPUT_MESSAGE);
+            showMessage(_branchNameField.getText() + WRONG_INPUT_MESSAGE, Color.RED);
             return;
         }
         Map<Project, JGitStatus> results = _gitService.createBranch(getProjects(), newBranchName, false);
@@ -131,7 +132,7 @@ public class CreateNewBranchDialog extends Dialog<String> {
          * It does not provide spaces in the middle of the name
          * (first and last spaces will be trimmed automatically so we do not check them)
          */
-        String regexp = "([a-z0-9_])+";
+        String regexp = "([A-Za-z0-9_])+";
         return input.matches(regexp);
     }
 
@@ -146,16 +147,17 @@ public class CreateNewBranchDialog extends Dialog<String> {
         return keyEvent -> {
             if (isInputValid(_branchNameField.getText().trim())) {
                 _createButton.setDisable(false);
-                showMessage(CHOOSE_BRANCH_NAME_MESSAGE);
+                showMessage(CHOOSE_BRANCH_NAME_MESSAGE, Color.BLACK);
             } else {
-                showMessage(_branchNameField.getText() + WRONG_INPUT_MESSAGE);
+                showMessage(_branchNameField.getText() + WRONG_INPUT_MESSAGE, Color.RED);
                 _createButton.setDisable(true);
             }
         };
     }
 
-    private void showMessage(String message) {
+    private void showMessage(String message, Color color) {
         _messageLabel.setText(message);
+        _messageLabel.setTextFill(color);
         _logger.debug(message);
     }
 
