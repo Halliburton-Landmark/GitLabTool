@@ -8,9 +8,9 @@ import org.eclipse.jgit.transport.CredentialsProvider;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 
 import com.lgc.gitlabtool.git.connections.RESTConnector;
-import com.lgc.gitlabtool.git.ui.javafx.dto.DialogDTO;
 import com.lgc.gitlabtool.git.connections.token.CurrentUser;
 import com.lgc.gitlabtool.git.entities.User;
+import com.lgc.gitlabtool.git.ui.javafx.dto.DialogDTO;
 import com.lgc.gitlabtool.git.util.JSONParser;
 
 public class LoginServiceImpl implements LoginService {
@@ -33,12 +33,12 @@ public class LoginServiceImpl implements LoginService {
             if (userJson == null) {
                 onSuccess.accept(HttpStatus.SC_UNAUTHORIZED);
             } else {
+                _currentUser = CurrentUser.getInstance();
+                _currentUser.setCurrentUser(JSONParser.parseToObject(userJson, User.class));
+                CredentialsProvider.setDefault(new UsernamePasswordCredentialsProvider(dto.getLogin(), dto.getPassword()));
+
                 onSuccess.accept(HttpStatus.SC_OK);
             }
-
-            _currentUser = CurrentUser.getInstance();
-            _currentUser.setCurrentUser(JSONParser.parseToObject(userJson, User.class));
-            CredentialsProvider.setDefault(new UsernamePasswordCredentialsProvider(dto.getLogin(), dto.getPassword()));
         };
         Thread loginThread = new Thread(runnable);
         loginThread.setName("LoginThread");

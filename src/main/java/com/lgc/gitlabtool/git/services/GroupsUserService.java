@@ -2,7 +2,6 @@ package com.lgc.gitlabtool.git.services;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.User;
@@ -43,9 +42,9 @@ public interface GroupsUserService {
      *
      * @param  groupPath path to cloned group
      * @throws IllegalArgumentException if data is incorrect
-     * @return Optional of loaded group or Optional.empty() and a error message.
+     * @return loaded group
      */
-    Map<Optional<Group>, String> importGroup(String groupPath);
+    Group importGroup(String groupPath);
 
     /**
     * Removes a group from the workspace
