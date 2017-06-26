@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.eclipse.jgit.api.errors.JGitInternalException;
 
 import com.google.gson.reflect.TypeToken;
 import com.lgc.gitlabtool.git.connections.RESTConnector;
@@ -67,14 +66,10 @@ public class GroupsUserServiceImpl implements GroupsUserService {
     }
 
     private Group cloneGroup(Group group, String destinationPath, ProgressListener progressListener) {
-        try {
-            if (group.getProjects() == null) {
-                group = getGroupById(group.getId());
-            }
-            JGit.getInstance().clone(group, destinationPath, progressListener);
-        } catch (JGitInternalException ex) {
-            logger.error(ex.getStackTrace());
+        if (group.getProjects() == null) {
+            group = getGroupById(group.getId());
         }
+        JGit.getInstance().clone(group, destinationPath, progressListener);
         return group;
     }
 
