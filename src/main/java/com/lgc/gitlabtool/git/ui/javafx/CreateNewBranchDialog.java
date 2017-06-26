@@ -73,7 +73,7 @@ public class CreateNewBranchDialog extends Dialog<String> {
         _textLabel = new Label("New branch: ");
         grid.add(_textLabel, 0, 3);
         _branchNameField = new TextField();
-        _branchNameField.addEventFilter(KeyEvent.KEY_TYPED, getInputFilter());
+        _branchNameField.addEventFilter(KeyEvent.KEY_RELEASED, getInputFilter());
 
         grid.add(_branchNameField, 1, 3, 2, 1);
         _checkoutBox = new CheckBox("Checkout new branch");
@@ -110,10 +110,6 @@ public class CreateNewBranchDialog extends Dialog<String> {
 
     private void onCreateButton(ActionEvent event) {
         String newBranchName = _branchNameField.getText().trim();
-        if (!isInputValid(newBranchName)) {
-            showMessage(_branchNameField.getText() + WRONG_INPUT_MESSAGE, Color.RED);
-            return;
-        }
         Map<Project, JGitStatus> results = _gitService.createBranch(getProjects(), newBranchName, false);
 
         boolean switchToBranch = _checkoutBox.isSelected();
@@ -149,8 +145,10 @@ public class CreateNewBranchDialog extends Dialog<String> {
                 _createButton.setDisable(false);
                 showMessage(CHOOSE_BRANCH_NAME_MESSAGE, Color.BLACK);
             } else {
-                showMessage(_branchNameField.getText() + WRONG_INPUT_MESSAGE, Color.RED);
+                String message = _branchNameField.getText() + WRONG_INPUT_MESSAGE;
+                showMessage(message, Color.RED);
                 _createButton.setDisable(true);
+                _logger.debug(message);
             }
         };
     }
@@ -158,7 +156,6 @@ public class CreateNewBranchDialog extends Dialog<String> {
     private void showMessage(String message, Color color) {
         _messageLabel.setText(message);
         _messageLabel.setTextFill(color);
-        _logger.debug(message);
     }
 
     private void createAndShowStatusDialog(List<Project> projects, Map<Project, JGitStatus> results) {
