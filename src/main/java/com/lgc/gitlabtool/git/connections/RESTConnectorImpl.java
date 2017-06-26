@@ -109,7 +109,7 @@ class RESTConnectorImpl implements RESTConnector {
         try {
             return URLEncoder.encode(s, "UTF-8");
         } catch (UnsupportedEncodingException e) {
-            _logger.error("Error uncoding URL: " + e.getMessage());
+            _logger.error("Error encoding URL: " + e.getMessage());
             throw new UnsupportedOperationException(e);
         }
     }

@@ -35,7 +35,7 @@ public class ProjectPropertiesUtil {
         try (InputStream fis = ProjectPropertiesUtil.class.getClassLoader().getResourceAsStream(propertyFileName)) {
             props.load(fis);
         } catch (Exception e) {
-            _logger.error("Error getting properties: " + e.getMessage());
+            _logger.error("", e);
             return UNDEFINED_VALUE;
         }
         return props.getProperty(key) == null ? UNDEFINED_VALUE : props.getProperty(key);
