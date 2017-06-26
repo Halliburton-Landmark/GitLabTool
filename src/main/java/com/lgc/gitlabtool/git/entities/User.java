@@ -14,111 +14,66 @@ public class User {
     private final String name;
 
     /** The username of the user **/
-    private final String username;
+    private String username;
 
     /** The id of the user **/
-    private final int id;
+    private int id;
 
-    private final String state;
+    private String state;
 
     /** The avatar's URL **/
-    private final String avatar_url;
+    private String avatar_url;
 
     /** The created date **/
-    private final String created_at;
+    private String created_at;
 
     /** The user is admin - true or false (default) **/
-    private final boolean is_admin;
+    private boolean is_admin;
 
     /** The user's biography **/
-    private final String bio;
+    private String bio;
 
     /** The Skype ID **/
-    private final String skype;
+    private String skype;
 
     /** The LinkedIn **/
-    private final String linkedin;
+    private String linkedin;
 
     /** The Twitter account **/
-    private final String twitter;
+    private String twitter;
 
     /** The Website URL **/
-    private final String website_url;
+    private String website_url;
 
     /** The user of the email **/
     private final String email;
 
-    private final int color_scheme_id;
+    private int color_scheme_id;
 
     /** The limit projects each user can create **/
-    private final int projects_limit;
+    private int projects_limit;
 
-    private final String current_sign_in_at;
+    private String current_sign_in_at;
 
-    private final Object identities;
+    private Object identities;
 
     /** The user can create groups **/
-    private final boolean can_create_group;
+    private boolean can_create_group;
 
     /** The user can create projects **/
-    private final boolean can_create_project;
+    private boolean can_create_project;
 
-    private final boolean two_factor_enabled;
+    private boolean two_factor_enabled;
 
     /** The private token of the user **/
-    private final String private_token;
+    private String private_token;
 
-    /**
-     * Constructor to create an instance of the class.
-     *
-     * @param name the name of the user
-     * @param username the username of the user
-     * @param id the id of the user
-     * @param state
-     * @param avatar_url the avatar's URL
-     * @param created_at the created date
-     * @param is_admin the user is admin
-     * @param bio the user's biography
-     * @param skype the Skype ID
-     * @param linkedin the LinkedIn
-     * @param twitter the Twitter account
-     * @param website_url the Website URL
-     * @param email the user of the email
-     * @param color_scheme_id
-     * @param projects_limit the limit projects each user can create
-     * @param current_sign_in_at
-     * @param identities
-     * @param can_create_group the user can create groups
-     * @param can_create_project the user can create projects
-     * @param two_factor_enabled
-     * @param private_token the private token of the user
-     */
-    public User(String name, String username, int id, String state, String avatar_url, String created_at,
-                boolean is_admin, String bio, String skype, String linkedin, String twitter, String website_url,
-                String email, int color_scheme_id, int projects_limit, String current_sign_in_at, Object identities,
-                boolean can_create_group, boolean can_create_project, boolean two_factor_enabled, String private_token) {
-        super();
+    public User(String name, String email) {
+        if (name == null || email == null || name.isEmpty() || email.isEmpty()) { // TODO valid
+            throw new IllegalArgumentException("Incorrect data!");
+        }
         this.name = name;
-        this.username = username;
-        this.id = id;
-        this.state = state;
-        this.avatar_url = avatar_url;
-        this.created_at = created_at;
-        this.is_admin = is_admin;
-        this.bio = bio;
-        this.skype = skype;
-        this.linkedin = linkedin;
-        this.twitter = twitter;
-        this.website_url = website_url;
         this.email = email;
-        this.color_scheme_id = color_scheme_id;
-        this.projects_limit = projects_limit;
-        this.current_sign_in_at = current_sign_in_at;
-        this.identities = identities;
-        this.can_create_group = can_create_group;
-        this.can_create_project = can_create_project;
-        this.two_factor_enabled = two_factor_enabled;
-        this.private_token = private_token;
     }
 
     /**

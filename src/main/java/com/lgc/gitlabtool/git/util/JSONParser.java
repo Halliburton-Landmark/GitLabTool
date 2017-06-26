@@ -81,7 +81,7 @@ public class JSONParser {
             try {
                 return _gson.fromJson((String) json, classObject);
             } catch (JsonSyntaxException ex) {
-                logger.error("", ex);
+                logger.error(ex.getMessage());
             }
         }
         return null;

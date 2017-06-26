@@ -63,7 +63,6 @@ public class Server {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((api == null) ? 0 : api.hashCode());
-        result = prime * result + ((lastUserName == null) ? 0 : lastUserName.hashCode());
         result = prime * result + ((name == null) ? 0 : name.hashCode());
         return result;
     }
@@ -81,11 +80,6 @@ public class Server {
             if (other.api != null)
                 return false;
         } else if (!api.equals(other.api))
-            return false;
-        if (lastUserName == null) {
-            if (other.lastUserName != null)
-                return false;
-        } else if (!lastUserName.equals(other.lastUserName))
             return false;
         if (name == null) {
             if (other.name != null)

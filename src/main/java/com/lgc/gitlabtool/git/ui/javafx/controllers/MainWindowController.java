@@ -2,16 +2,11 @@ package com.lgc.gitlabtool.git.ui.javafx.controllers;
 
 
 import java.util.List;
-import java.util.Optional;
-
-import org.apache.commons.lang.StringUtils;
 
 import com.lgc.gitlabtool.git.entities.Group;
-import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.entities.Project;
-import com.lgc.gitlabtool.git.jgit.JGit;
-import com.lgc.gitlabtool.git.project.nature.projecttype.ProjectType;
 import com.lgc.gitlabtool.git.services.LoginService;
+import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.selection.ListViewKey;
 import com.lgc.gitlabtool.git.ui.selection.SelectionsProvider;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarManager;
@@ -22,18 +17,14 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
-import javafx.scene.control.Tooltip;
-import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.HBox;
-import javafx.scene.paint.Color;
-import javafx.scene.text.Text;
 
 public class MainWindowController {
     private static final String HEDER_GROUP_TITLE = "Current group: ";
@@ -45,7 +36,7 @@ public class MainWindowController {
             (LoginService) ServiceProvider.getInstance().getService(LoginService.class.getName());
 
     @FXML
-    private ListView projectsList;
+    private ListView<Project> projectsList;
 
     @FXML
     private Label leftLabel;
@@ -73,7 +64,9 @@ public class MainWindowController {
 
 
         //TODO: Additional thread should be placed to services
-        new Thread(this::updateProjectList).start();
+        Thread t = new Thread(this::updateProjectList);
+        t.setName("Updating project list");
+        t.start();
 
         configureToolbarCommands();
     }
@@ -97,6 +90,13 @@ public class MainWindowController {
         }
     }
 
+    public void onDeselectAll(){
+        if (projectsList != null && projectsList.getItems() != null && !projectsList.getItems().isEmpty()) {
+            projectsList.getSelectionModel().clearSelection();
+            projectsList.requestFocus();
+        }
+    }
+
     private void configureToolbarCommands() {
     }
 
@@ -106,11 +106,21 @@ public class MainWindowController {
         projectsList.setItems(projectsObservableList);
     }
 
-    private void configureListView(ListView listView) {
+    private void configureListView(ListView<Project> listView) {
         //config displayable string
-        listView.setCellFactory(p -> new MainWindowController.ProjectListCell());
+        listView.setCellFactory(p -> new ProjectListCell());
 
         //setup selection
+        listView.getSelectionModel().getSelectedItems().addListener((ListChangeListener<Project>) changed -> {
+            if (areAllItemsSelected(listView)) {
+                selectAllButton.setText("Deselect all");
+                selectAllButton.setOnAction(action -> onDeselectAll());
+            } else {
+                selectAllButton.setText("Select all");
+                selectAllButton.setOnAction(action -> onSelectAll());
+            }
+        });
+
         listView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         listView.addEventFilter(MouseEvent.MOUSE_PRESSED, evt -> {
             Node node = evt.getPickResult().getIntersectedNode();
@@ -122,8 +132,8 @@ public class MainWindowController {
             if (node instanceof ListCell) {
                 evt.consume();
 
-                ListCell cell = (ListCell) node;
-                ListView lv = cell.getListView();
+                ListCell<?> cell = (ListCell<?>) node;
+                ListView<?> lv = cell.getListView();
 
                 lv.requestFocus();
 
@@ -138,47 +148,16 @@ public class MainWindowController {
             }
         });
 
-        listView.getSelectionModel().getSelectedItems().addListener(new ListChangeListener() {
+        listView.getSelectionModel().getSelectedItems().addListener(new ListChangeListener<Project>() {
             @Override
-            public void onChanged(ListChangeListener.Change change) {
+            public void onChanged(ListChangeListener.Change<? extends Project> change) {
                 SelectionsProvider.getInstance().setSelectionItems(ListViewKey.MAIN_WINDOW_PROJECTS.getKey(),
                         listView.getSelectionModel().getSelectedItems());
             }
         });
     }
 
-    private class ProjectListCell extends ListCell<Project> {
-        private final Integer LIST_CELL_SPACING = 5;
-        private final String LEFT_BRACKET = "[";
-        private final String RIGHT_BRACKET = "]";
-
-        @Override
-        protected void updateItem(Project item, boolean empty) {
-            super.updateItem(item, empty);
-            setText(null);
-            setGraphic(null);
-
-            if (item != null && !empty) {
-                ProjectType type = item.getProjectType();
-
-                Image fxImage = new Image(getClass().getClassLoader().getResource(type.getIconUrl()).toExternalForm());
-                ImageView imageView = new ImageView(fxImage);
-
-                Optional<String> currentBranchName = JGit.getInstance().getCurrentBranch(item);
-                String currentBranch = currentBranchName.orElse(StringUtils.EMPTY);
-
-                Text branchNameTextView = new Text(item.getName());
-                Text currentBranchTextView = new Text(LEFT_BRACKET + currentBranch + RIGHT_BRACKET);
-                currentBranchTextView.setFill(Color.DARKBLUE);
-
-                HBox hBoxItem = new HBox(imageView, branchNameTextView, currentBranchTextView);
-                hBoxItem.setSpacing(LIST_CELL_SPACING);
-
-                String tooltipText = item.getName() + " " + LEFT_BRACKET + currentBranch + RIGHT_BRACKET;
-                setTooltip(new Tooltip(tooltipText));
-                setGraphic(hBoxItem);
-            }
-        }
-
+    private boolean areAllItemsSelected(ListView<?> listView) {
+        return listView.getSelectionModel().getSelectedItems().size() == listView.getItems().size();
     }
 }

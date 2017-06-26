@@ -2,13 +2,10 @@ package com.lgc.gitlabtool.git.services;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.function.BiConsumer;
 
 import com.lgc.gitlabtool.git.entities.Group;
-import com.lgc.gitlabtool.git.statuses.CloningStatus;
-import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.User;
+import com.lgc.gitlabtool.git.statuses.CloningStatus;
 
 public interface GroupsUserService {
 
@@ -22,33 +19,14 @@ public interface GroupsUserService {
     Object getGroups(User user);
 
     /**
-     * Clones user's group
-     *
-     * @param group           Group for cloning.
-     * @param destinationPath Local path of workspace.
-     * @param onSuccess       method for tracking the success progress of cloning,
-     *                        where <Integer> is a percentage of progress,
-     *                        <Project> is a cloned project.
-     * @param onError         method for tracking the errors during cloning,
-                              where <Integer> is a percentage of progress, <String> error message.
-     * @return cloned group
-     */
-    Group cloneGroup(Group group, String destinationPath, BiConsumer<Integer, Project> onSuccess, BiConsumer<Integer, String> onError);
-
-    /**
      * Clones list of user's groups
      *
      * @param groups          List of groups for cloning
      * @param destinationPath Local path of workspace
-     * @param onSuccess       method for tracking the success progress of cloning,
-     *                        where <Integer> is a percentage of progress,
-     *                        <Project> is a cloned project.
-     * @param onError         method for tracking the errors during cloning,
-                              where <Integer> is a percentage of progress, <String> error message.
+     * @param
      * @return Groups and their cloning statuses
      */
-    Map<Group, CloningStatus> cloneGroups(List<Group> groups, String destinationPath,
-                                          BiConsumer<Integer, Project> onSuccess, BiConsumer<Integer, String> onError);
+    Map<Group, CloningStatus> cloneGroups(List<Group> groups, String destinationPath, ProgressListener progressListener);
 
     /**
      * Gets group by id
@@ -64,9 +42,9 @@ public interface GroupsUserService {
      *
      * @param  groupPath path to cloned group
      * @throws IllegalArgumentException if data is incorrect
-     * @return Optional of loaded group or Optional.empty() and a error message.
+     * @return loaded group
      */
-    Map<Optional<Group>, String> importGroup(String groupPath);
+    Group importGroup(String groupPath);
 
     /**
     * Removes a group from the workspace

@@ -1,36 +1,33 @@
 package com.lgc.gitlabtool.git.ui.javafx.controllers;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.Project;
+import com.lgc.gitlabtool.git.jgit.JGit;
+import com.lgc.gitlabtool.git.services.ClonedGroupsService;
 import com.lgc.gitlabtool.git.services.GroupsUserService;
 import com.lgc.gitlabtool.git.services.LoginService;
+import com.lgc.gitlabtool.git.services.ProgressListener;
 import com.lgc.gitlabtool.git.services.ProjectTypeService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
-import com.lgc.gitlabtool.git.statuses.CloningStatus;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
+import com.lgc.gitlabtool.git.ui.javafx.CloneProgressDialog;
+import com.lgc.gitlabtool.git.ui.javafx.CloneProgressDialog.CloningMessageStatus;
 
+import javafx.application.Platform;
 import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
-import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
-import javafx.scene.input.MouseEvent;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import javafx.util.Callback;
@@ -41,13 +38,17 @@ public class CloningGroupsWindowController {
     private static final String CLONING_STATUS_ALERT_TITLE = "Cloning info";
     private static final String CLONING_STATUS_ALERT_HEADER = "Cloning statuses:";
 
-    private static final Logger logger = LogManager.getLogger(CloningGroupsWindowController.class);
+    //Uncomment if you want to log something
+    //private static final Logger logger = LogManager.getLogger(CloningGroupsWindowController.class);
 
-    private final LoginService _loginService =
-            (LoginService) ServiceProvider.getInstance().getService(LoginService.class.getName());
+    private final LoginService _loginService = (LoginService) ServiceProvider.getInstance()
+            .getService(LoginService.class.getName());
 
-    private final GroupsUserService _groupsService =
-            (GroupsUserService) ServiceProvider.getInstance().getService(GroupsUserService.class.getName());
+    private final GroupsUserService _groupsService = (GroupsUserService) ServiceProvider.getInstance()
+            .getService(GroupsUserService.class.getName());
+
+    private final ClonedGroupsService _clonedGroupsService = (ClonedGroupsService) ServiceProvider.getInstance()
+            .getService(ClonedGroupsService.class.getName());
 
     @FXML
     private TextField folderPath;
@@ -72,9 +73,8 @@ public class CloningGroupsWindowController {
         configureListView(projectsList);
         projectsList.setItems(myObservableList);
 
-        BooleanBinding booleanBinding =
-                projectsList.getSelectionModel().selectedItemProperty().isNull().or(
-                        folderPath.textProperty().isEqualTo(""));
+        BooleanBinding booleanBinding = projectsList.getSelectionModel().selectedItemProperty().isNull()
+                .or(folderPath.textProperty().isEqualTo(""));
 
         okButton.disableProperty().bind(booleanBinding);
     }
@@ -97,21 +97,15 @@ public class CloningGroupsWindowController {
         String destinationPath = folderPath.getText();
         List<Group> selectedGroups = projectsList.getSelectionModel().getSelectedItems();
 
-        Map<Group, CloningStatus> statuses = _groupsService.cloneGroups(selectedGroups, destinationPath,
-                new SuccessfulOperationHandler(), new UnsuccessfulOperationHandler());
+        Group selectedGroup = selectedGroups.get(0);
 
-        String dialogMessage = statuses.entrySet().stream()
-                .map(x -> x.getKey().getName() + "  -  " + x.getValue().getMessage())
-                .collect(Collectors.joining("\n"));
-        cloningStatusDialog(dialogMessage);
-
-        stage.close();
+        CloneProgressDialog progressDialog = new CloneProgressDialog(stage, selectedGroup.getName());
+        _groupsService.cloneGroups(selectedGroups, destinationPath, new CloneProgressListener(progressDialog));
     }
 
     @FXML
     public void onCancelButton() throws Exception {
         Stage stage = (Stage) cancelButton.getScene().getWindow();
-
         stage.close();
     }
 
@@ -128,8 +122,8 @@ public class CloningGroupsWindowController {
         alert.showAndWait();
     }
 
-    private void configureListView(ListView listView) {
-        //config displayable string
+    private void configureListView(ListView<Group> listView) {
+        // config displayable string
         listView.setCellFactory(new Callback<ListView<Group>, ListCell<Group>>() {
             @Override
             public ListCell<Group> call(ListView<Group> p) {
@@ -147,66 +141,78 @@ public class CloningGroupsWindowController {
             }
         });
 
-        //setup selection
-        listView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        listView.addEventFilter(MouseEvent.MOUSE_PRESSED, evt -> {
-            Node node = evt.getPickResult().getIntersectedNode();
+    }
 
-            while (node != null && node != listView && !(node instanceof ListCell)) {
-                node = node.getParent();
+    /**
+     * Listener for responding to the process of cloning a group
+     *
+     * @author Lyudmila Lyska
+     */
+    class CloneProgressListener implements ProgressListener {
+
+        private final CloneProgressDialog _progressDialog;
+
+        public CloneProgressListener(CloneProgressDialog progressDialog) {
+            if (progressDialog == null) {
+                throw new IllegalAccessError("Invalid parameters");
             }
+            _progressDialog = progressDialog;
+        }
 
-            if (node instanceof ListCell) {
-                evt.consume();
+        @Override
 
-                ListCell cell = (ListCell) node;
-                ListView lv = cell.getListView();
+        public void onSuccess(Object... t) {
+            if (t[0] instanceof Project) {
+                Project project = (Project) t[0];
+                _progressDialog.addMessageToConcole(project.getName() + " project is successful cloned!",
+                        CloningMessageStatus.SUCCESS);
 
-                lv.requestFocus();
+                // Determine the project type
+                ProjectTypeService prTypeService = (ProjectTypeService) ServiceProvider.getInstance()
+                        .getService(ProjectTypeService.class.getName());
+                project.setProjectType(prTypeService.getProjectType(project));
+            }
+            if (t[1] instanceof Double) {
+                double progress = (Double) t[1];
+                _progressDialog.updateProgressBar(progress);
+            }
+        }
 
-                if (!cell.isEmpty()) {
-                    int index = cell.getIndex();
-                    if (cell.isSelected()) {
-                        lv.getSelectionModel().clearSelection(index);
-                    } else {
-                        lv.getSelectionModel().select(index);
-                    }
+        @Override
+        public void onError(Object... t) {
+            if (t[0] instanceof Double) {
+                double progress = (Double) t[0];
+                _progressDialog.updateProgressBar(progress);
+            }
+            if (t[1] instanceof String) {
+                String message = (String) t[1];
+                _progressDialog.addMessageToConcole(message, CloningMessageStatus.ERROR);
+            }
+        }
+
+        @Override
+        public void onStart(Object... t) {
+            if (t[0] instanceof Project) {
+                Project project = (Project) t[0];
+                _progressDialog.updateProjectLabel(project.getName());
+            }
+        }
+
+        @Override
+        public void onFinish(Object... t) {
+            if (t[0] instanceof Group) {
+                Group clonedGroup = (Group) t[0];
+                _clonedGroupsService.addGroups(Arrays.asList(clonedGroup));
+            }
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    final String messageStatus = t[1] instanceof String ? (String) t[1] : JGit.FINISH_CLONE_MESSAGE;
+                    _progressDialog.addMessageToConcole(messageStatus, CloningMessageStatus.SIMPLE);
+                    _progressDialog.resetProgress();
+                    cloningStatusDialog(messageStatus);
                 }
-            }
-        });
-    }
-
-    /**
-     * Handler for successful operation.
-     *
-     * @author Lyudmila Lyska
-     */
-    class SuccessfulOperationHandler implements BiConsumer<Integer, Project> {
-
-        @Override
-        public void accept(Integer percentage, Project project) {
-            logger.info("Progress: " + percentage + "%");
-
-            // Determine the project type
-            ProjectTypeService prTypeService = (ProjectTypeService) ServiceProvider.getInstance()
-                    .getService(ProjectTypeService.class.getName());
-            project.setProjectType(prTypeService.getProjectType(project));
+            });
         }
-
-    }
-
-    /**
-     * Handler for unsuccessful operation
-     *
-     * @author Lyudmila Lyska
-     */
-    class UnsuccessfulOperationHandler implements BiConsumer<Integer, String> {
-
-        @Override
-        public void accept(Integer percentage, String message) {
-            logger.error("!ERROR: " + message);
-            logger.info("Progress: " + percentage + "%");
-        }
-
     }
 }

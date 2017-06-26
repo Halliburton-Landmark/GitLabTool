@@ -12,6 +12,7 @@ import org.apache.logging.log4j.Logger;
 import com.lgc.gitlabtool.git.connections.RESTConnector;
 import com.lgc.gitlabtool.git.ui.UserInterface;
 import com.lgc.gitlabtool.git.ui.javafx.JavaFXUI;
+import com.lgc.gitlabtool.git.util.ProjectPropertiesUtil;
 
 
 public class Main {
@@ -20,13 +21,15 @@ public class Main {
     
     public static void main(String[] args) {
         final UserInterface ui = new JavaFXUI();
+        logger.debug("==================== application started");
+        logger.info(ProjectPropertiesUtil.getProjectName().toUpperCase() + 
+                " version: " + ProjectPropertiesUtil.getProjectVersion());
         detectProxy();
         ui.run(args);
     }
 
     private static void detectProxy() {
         System.setProperty("java.net.useSystemProxies", "true");
-        logger.debug("==================== application started");
         logger.info("detecting proxies");
         List<?> l = null;
         try {
