@@ -2,6 +2,7 @@ package com.lgc.gitlabtool.git.ui.javafx.controllers;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -43,7 +44,7 @@ import javafx.util.Callback;
  * @author Yevhen Strazhko
  */
 public class WelcomeWindowController {
-    private static final Logger logger = LogManager.getLogger(WelcomeWindowController.class);
+    private static final Logger _logger = LogManager.getLogger(WelcomeWindowController.class);
 
     private static final String WINDOW_TITLE = "Cloning window";
     @FXML
@@ -93,7 +94,7 @@ public class WelcomeWindowController {
 
             stage.show();
         } catch (IOException e) {
-            logger.error("Could not load fxml resource", e);
+            _logger.error("Could not load fxml resource: " + e.getMessage());
         }
     }
 
@@ -124,7 +125,19 @@ public class WelcomeWindowController {
         List<Group> userGroups = _clonedGroupsService.loadClonedGroups();
         if (userGroups != null) {
             groupList.setItems(FXCollections.observableList(userGroups));
+
+            showNotExistGroups(_clonedGroupsService.getNotExistGroup());
         }
+    }
+
+    private void showNotExistGroups(Collection<Group> groups) {
+        if (groups == null || groups.isEmpty()) {
+            return;
+        }
+        StringBuffer infoAboutGroups = new StringBuffer("");
+        groups.forEach(group -> infoAboutGroups.append("\n\r" + group.getName() + " (" + group.getPathToClonedGroup() + ");"));
+        _logger.warn("Failed to load the following groups:" + infoAboutGroups +
+                     "They may have been moved to another folder or deleted.");
     }
 
     private void configureListView(ListView<Group> listView) {
@@ -146,7 +159,7 @@ public class WelcomeWindowController {
     private void loadGroup(Group group) {
         URL modularWindow = getClass().getClassLoader().getResource(ViewKey.MODULAR_CONTAINER.getPath());
         if (modularWindow == null) {
-            logger.error("Could not load fxml resource");
+            _logger.error("Could not load fxml resource");
             return;
         }
 
@@ -161,7 +174,7 @@ public class WelcomeWindowController {
             previousStage.setScene(new Scene(root));
 
         } catch (IOException e) {
-            logger.error("Could not load fxml resource", e);
+            _logger.error("Could not load fxml resource: " + e.getMessage());
         }
 
     }

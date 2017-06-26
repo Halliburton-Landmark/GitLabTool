@@ -1,5 +1,6 @@
 package com.lgc.gitlabtool.git.services;
 
+import java.util.Collection;
 import java.util.List;
 
 import com.lgc.gitlabtool.git.entities.Group;
@@ -40,4 +41,9 @@ public interface ClonedGroupsService {
      */
     List<Group> loadClonedGroups();
 
+    /**
+     *
+     * @return
+     */
+    Collection<Group> getNotExistGroup();
 }

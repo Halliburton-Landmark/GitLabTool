@@ -1,14 +1,21 @@
 package com.lgc.gitlabtool.git.services;
 
+import java.nio.file.Paths;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.lgc.gitlabtool.git.entities.ClonedGroups;
 import com.lgc.gitlabtool.git.entities.Group;
+import com.lgc.gitlabtool.git.util.PathUtilities;
 import com.lgc.gitlabtool.git.util.URLManager;
 
 public class ClonedGroupsServiceImpl implements ClonedGroupsService {
 
     private final ClonedGroups _clonedGroupsProvider = ClonedGroups.getInstance();
+
+    private List<Group> _notExistGroups;
 
     private StorageService _storageService;
 
@@ -55,7 +62,14 @@ public class ClonedGroupsServiceImpl implements ClonedGroupsService {
         String username = _loginService.getCurrentUser().getUsername();
         List<Group> groups = _storageService.loadStorage(URLManager.trimServerURL(_loginService.getServerURL()),
                 username);
+
+        _notExistGroups = groups.stream()
+                                .filter(group -> !PathUtilities.isExistsAndDirectory(Paths.get(group.getPathToClonedGroup())))
+                                .collect(Collectors.toList());
+
+        groups.removeAll(_notExistGroups);
         _clonedGroupsProvider.setClonedGroups(groups);
+        updateClonedGroupsInXML();
         return getClonedGroups();
     }
 
@@ -75,8 +89,14 @@ public class ClonedGroupsServiceImpl implements ClonedGroupsService {
         return status;
     }
 
+    @Override
+    public Collection<Group> getNotExistGroup() {
+        return Collections.unmodifiableCollection(_notExistGroups);
+    }
+
     private void updateClonedGroupsInXML() {
         String username = _loginService.getCurrentUser().getUsername();
         _storageService.updateStorage(URLManager.trimServerURL(_loginService.getServerURL()), username);
     }
+
 }
