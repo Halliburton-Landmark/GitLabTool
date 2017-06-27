@@ -166,11 +166,10 @@ public class CreateNewBranchDialog extends Dialog<String> {
                     .collect(Collectors.joining("\n"));
         } else {
             int countOfCreatedBranches = 
-                    results.entrySet().stream()
+                    (int) results.entrySet().stream()
                     .map(pair -> pair.getValue())
                     .filter(status -> status.equals(JGitStatus.SUCCESSFUL))
-                    .collect(Collectors.toList())
-                    .size();
+                    .count();
             info = "new branch has been created in " + countOfCreatedBranches 
                     + " of " + projects.size() + " selected projects";
         }

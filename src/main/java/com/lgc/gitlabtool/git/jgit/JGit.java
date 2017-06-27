@@ -103,7 +103,7 @@ public class JGit {
             throw new IllegalArgumentException(WRONG_PARAMETERS);
         }
         if (!project.isCloned()) {
-            System.err.println(project.getName() + ERROR_MSG_NOT_CLONED);
+            logger.error(project.getName() + ERROR_MSG_NOT_CLONED);
             return Collections.emptyList();
         }
 
@@ -259,8 +259,8 @@ public class JGit {
                     try {
                         git.add().addFilepattern(file).call();
                     } catch (GitAPIException e) {
-                        System.err.println("Could not add the " + file + " file");
-                        System.err.println("!ERROR: " + e.getMessage());
+                        logger.error("Could not add the " + file + " file");
+                        logger.error("!ERROR: " + e.getMessage());
                     }
                 }
             });
@@ -560,9 +560,6 @@ public class JGit {
             logger.error("Failed " + prefixErrorMessage + JGitStatus.BRANCH_ALREADY_EXISTS);
             return JGitStatus.BRANCH_ALREADY_EXISTS;
         }
-        try (Repository repo = local(Paths.get(project.getPathToClonedProject()))) {
-
-        }
         try (Git git = getGit(project.getPathToClonedProject())) {
             if (isCurrentBranch(git, nameBranchWithoutAlias)) {
                 return JGitStatus.BRANCH_CURRENTLY_CHECKED_OUT;
@@ -680,17 +677,6 @@ public class JGit {
         }
         return false;
     }
-
-    public static Repository local(Path path){
-        try {
-          FileRepositoryBuilder builder=new FileRepositoryBuilder();
-          return builder.setGitDir(path.toFile()).readEnvironment().setMustExist(true).build();
-        }
-       catch (  IOException e) {
-          System.err.println("ERROR");
-        }
-        return null;
-      }
 
     protected Git tryClone(String linkClone, String localPath) throws GitAPIException {
         return Git.cloneRepository()
