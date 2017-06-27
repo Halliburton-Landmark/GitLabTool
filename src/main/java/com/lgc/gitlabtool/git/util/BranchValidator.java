@@ -1,6 +1,8 @@
 package com.lgc.gitlabtool.git.util;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 
 public class BranchValidator {
     
@@ -33,12 +35,12 @@ public class BranchValidator {
         if (branchName.endsWith(".lock") || branchName.endsWith("/")) {
             return false;
         }
-        String[] restrictedCharacters = { "~", "^", ":", " ", "?", "@", "*", "[", "\\", ".." };
-        int countOfErrors = (int) Arrays.asList(restrictedCharacters).stream()
+        List<String> restrictedCharacters = Arrays.asList("~", "^", ":", " ", "?", "@", "*", "[", "\\", "..");
+        Optional<String> matches = restrictedCharacters.stream()
                 .filter(e -> branchName.contains(e))
-                .count();
+                .findFirst();
 
-        return countOfErrors == 0;
+        return !matches.isPresent();
     }
 
 }
