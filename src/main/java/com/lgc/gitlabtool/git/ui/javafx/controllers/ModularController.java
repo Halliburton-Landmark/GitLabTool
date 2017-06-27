@@ -335,7 +335,6 @@ public class ModularController {
                     .map(pair -> pair.getKey().getName() + " - " + pair.getValue())
                     .collect(Collectors.joining("\n"));
         } else {
-
             long countSuccessfulDiscarding =
                     commitStatuses.entrySet().stream()
                             .map(Entry::getValue)

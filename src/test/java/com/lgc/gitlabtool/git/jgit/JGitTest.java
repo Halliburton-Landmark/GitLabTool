@@ -425,7 +425,7 @@ public class JGitTest {
                         .map(Map.Entry::getValue)
                         .filter(status -> status.equals(JGitStatus.SUCCESSFUL))
                         .count();
-        Assert.assertEquals(result.size(), countSuccessfulDiscarding);
+        Assert.assertEquals(0, countSuccessfulDiscarding);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -496,7 +496,7 @@ public class JGitTest {
                         .map(Map.Entry::getValue)
                         .filter(status -> status.equals(JGitStatus.SUCCESSFUL))
                         .count();
-        Assert.assertEquals(result.size(), countSuccessfulDiscarding);
+        Assert.assertEquals(0, countSuccessfulDiscarding);
     }
 
     @Test
@@ -994,7 +994,6 @@ public class JGitTest {
         List<Project> listProjects = new ArrayList<>();
         listProjects.add(getProject(true));
         listProjects.add(null);
-        listProjects.add(getProject(false));
         listProjects.add(getProject(true));
         return listProjects;
     }
