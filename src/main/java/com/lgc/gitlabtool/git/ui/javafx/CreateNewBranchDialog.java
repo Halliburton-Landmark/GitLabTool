@@ -12,6 +12,7 @@ import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
+import com.lgc.gitlabtool.git.util.BranchValidator;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -123,13 +124,7 @@ public class CreateNewBranchDialog extends Dialog<String> {
     }
 
     private boolean isInputValid(String input) {
-        /*
-         * input could contain only chars, digits and underscores. 
-         * It does not provide spaces in the middle of the name
-         * (first and last spaces will be trimmed automatically so we do not check them)
-         */
-        String regexp = "([A-Za-z0-9_])+";
-        return input.matches(regexp);
+        return BranchValidator.validate(input);
     }
 
     private void initializeOnCloseEvent() {
