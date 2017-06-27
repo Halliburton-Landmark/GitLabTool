@@ -14,8 +14,8 @@ import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 import com.lgc.gitlabtool.git.util.BranchValidator;
 
+import javafx.beans.value.ChangeListener;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
@@ -25,7 +25,6 @@ import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
@@ -74,7 +73,7 @@ public class CreateNewBranchDialog extends Dialog<String> {
         _textLabel = new Label("New branch: ");
         grid.add(_textLabel, 0, 3);
         _branchNameField = new TextField();
-        _branchNameField.addEventFilter(KeyEvent.KEY_RELEASED, getInputFilter());
+        _branchNameField.textProperty().addListener(getInputFilter());
 
         grid.add(_branchNameField, 1, 3, 2, 1);
         _checkoutBox = new CheckBox("Checkout new branch");
@@ -134,8 +133,8 @@ public class CreateNewBranchDialog extends Dialog<String> {
         });
     }
 
-    private EventHandler<KeyEvent> getInputFilter() {
-        return keyEvent -> {
+    private ChangeListener<? super String> getInputFilter() {
+        return (observable, oldValue, newValue) -> {
             if (isInputValid(_branchNameField.getText().trim())) {
                 _createButton.setDisable(false);
                 showMessage(CHOOSE_BRANCH_NAME_MESSAGE, Color.BLACK);
@@ -156,17 +155,16 @@ public class CreateNewBranchDialog extends Dialog<String> {
     private void createAndShowStatusDialog(List<Project> projects, Map<Project, JGitStatus> results) {
         int size = results.size();
         String info = "";
-        if (size < 10) {
+        if (size < StatusDialog.MAX_ROW_COUNT_IN_STATUS_DIALOG) {
             info = results.entrySet().stream()
                     .map(pair -> pair.getKey().getName() + " - " + pair.getValue())
                     .collect(Collectors.joining("\n"));
         } else {
             int countOfCreatedBranches = 
-                    results.entrySet().stream()
+                    (int) results.entrySet().stream()
                     .map(pair -> pair.getValue())
                     .filter(status -> status.equals(JGitStatus.SUCCESSFUL))
-                    .collect(Collectors.toList())
-                    .size();
+                    .count();
             info = "new branch has been created in " + countOfCreatedBranches 
                     + " of " + projects.size() + " selected projects";
         }
