@@ -26,7 +26,7 @@ public class BranchValidator {
      *      <p>
      *      <a href="https://git-scm.com/docs/git-check-ref-format">look on git</a>
      */
-    public static boolean validate(String branchName) {
+    public boolean validate(String branchName) {
         if (branchName.startsWith(".")) {
             return false;
         }

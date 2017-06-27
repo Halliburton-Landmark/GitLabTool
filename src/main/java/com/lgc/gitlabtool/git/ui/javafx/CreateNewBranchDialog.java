@@ -51,6 +51,7 @@ public class CreateNewBranchDialog extends Dialog<String> {
     private final Button _cancelButton;
 
     private List<Project> _projects;
+    private BranchValidator _branchValidator = new BranchValidator();
 
     public List<Project> getProjects() {
         return _projects;
@@ -123,7 +124,7 @@ public class CreateNewBranchDialog extends Dialog<String> {
     }
 
     private boolean isInputValid(String input) {
-        return BranchValidator.validate(input);
+        return _branchValidator.validate(input);
     }
 
     private void initializeOnCloseEvent() {

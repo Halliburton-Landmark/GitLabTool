@@ -22,7 +22,7 @@ public class BranchValidatorTest {
     
     @Test
     public void inputIsValid() {
-        boolean actualResult = BranchValidator.validate(testData);
+        boolean actualResult = new BranchValidator().validate(testData);
         
         assertEquals(expectedResult, actualResult);
     }
@@ -34,31 +34,31 @@ public class BranchValidatorTest {
             {"asdf-asdf-Nds", true},
             {"HJsdHJK", true},
             {"=-234", true},
-            {".sdf", false}, // dot on the beginning of the row
-            {"adsf..df", false}, // contain double dot
-            {"asdf/", false}, // slash at the end of the row
+            {".sdf", false},          // dot on the beginning of the row
+            {"adsf..df", false},      // contains double dot
+            {"asdf/", false},         // slash at the end of the row
             {"asdf/asdf", true},
-            {"asdf.lock", false}, // .lock at the end of the row
+            {"asdf.lock", false},     // .lock at the end of the row
             {"asdf.lock.foo", true},
-            {"adsf~", false}, // contains ~ character
+            {"adsf~", false},         // contains ~ character
             {"~asd", false},
-            {"^sdaf", false}, // contains ^ character
+            {"^sdaf", false},         // contains ^ character
             {"ad^", false},
-            {":sdf", false}, // contains : character
+            {":sdf", false},          // contains : character
             {"asdf:", false},
-            {" ", false}, // contains spaces
+            {" ", false},             // contains spaces
             {" sdf", false},
             {"sdf ", false},
             {"sdf adsf", false},
-            {"adf\\", false}, // contains back slash
-            {"sdf@", false}, // contains @ character
+            {"adf\\", false},         // contains back slash
+            {"sdf@", false},          // contains @ character
             {"sdf@adsf", false},
             {"asdf@{", false},
-            {"?sdf", false}, // contains ? character
+            {"?sdf", false},          // contains ? character
             {"adsf?d", false},
-            {"adf*", false}, // contains * character
+            {"adf*", false},          // contains * character
             {"*asd", false},
-            {"[", false}, // contains [ character
+            {"[", false},             // contains [ character
             {"asdf[", false}
         });
     }
