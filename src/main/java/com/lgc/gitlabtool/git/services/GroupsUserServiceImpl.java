@@ -1,17 +1,14 @@
 package com.lgc.gitlabtool.git.services;
 
 import java.io.File;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -23,7 +20,6 @@ import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.User;
 import com.lgc.gitlabtool.git.jgit.JGit;
-import com.lgc.gitlabtool.git.statuses.CloningStatus;
 import com.lgc.gitlabtool.git.util.JSONParser;
 import com.lgc.gitlabtool.git.util.PathUtilities;
 
@@ -39,15 +35,17 @@ public class GroupsUserServiceImpl implements GroupsUserService {
     private static final String GROUP_ALREADY_LOADED_MESSAGE = "The group with this path is already loaded.";
     private static final String GROUP_DOESNT_EXIST_MESSAGE = "This group does not exist.";
     private static final String ERROR_GETTING_GROUP_MESSAGE = "Error getting group from GitLab.";
-    private static final String GROUP_DOESNT_HAVE_PROJECTS_MESSAGE = "The group has no projects.";
     private static final String INCCORECT_DATA_MESSAGE = "ERROR: Incorrect data.";
-    private static final String PREFIX_SUCCESSFUL_LOAD = " uploaded.";
 
     private static ClonedGroupsService _clonedGroupsService;
+    private static ProjectService _projectService;
 
-    public GroupsUserServiceImpl(RESTConnector connector, ClonedGroupsService clonedGroupsService) {
+    public GroupsUserServiceImpl(RESTConnector connector,
+                                 ClonedGroupsService clonedGroupsService,
+                                 ProjectService projectService) {
         setConnector(connector);
         setClonedGroupsService(clonedGroupsService);
+        setProjectService(projectService);
     }
 
     @Override
@@ -65,12 +63,12 @@ public class GroupsUserServiceImpl implements GroupsUserService {
         return null;
     }
 
-    private Group cloneGroup(Group group, String destinationPath, ProgressListener progressListener) {
-        if (group.getProjects() == null) {
-            group = getGroupById(group.getId());
+    private void cloneGroup(Group group, String destinationPath, ProgressListener progressListener) {
+        Collection<Project> projects = _projectService.getProjects(group);
+        if (projects != null) {
+            String groupPath = destinationPath + File.separator + group.getName();
+            JGit.getInstance().clone(projects, groupPath, progressListener);
         }
-        JGit.getInstance().clone(group, destinationPath, progressListener);
-        return group;
     }
 
     @Override
@@ -89,32 +87,16 @@ public class GroupsUserServiceImpl implements GroupsUserService {
     }
 
     @Override
-    public Map<Group, CloningStatus> cloneGroups(List<Group> groups, String destinationPath,
-            ProgressListener progressListener) {
-
+    public void cloneGroups(List<Group> groups, String destinationPath, ProgressListener progressListener) {
         if (groups == null || destinationPath == null) {
-            return Collections.emptyMap();
+            throw new IllegalArgumentException("Invalid parameters.");
         }
-
-        // path validation
         Path path = Paths.get(destinationPath);
-        if (!Files.exists(path) || !Files.isDirectory(path)) {
-            return Collections.emptyMap();
+        if (!PathUtilities.isExistsAndDirectory(path)) {
+            logger.error(path.toAbsolutePath() + " path is not exist or it is not a directory.");
+            return;
         }
-
-        Map<Group, CloningStatus> statusMap = new HashMap<>();
-        for (Group groupItem : groups) {
-            // TODO pass onStart here
-            Group clonedGroup = cloneGroup(groupItem, destinationPath, progressListener);
-            statusMap.put(clonedGroup, getStatus(clonedGroup));
-        }
-
-        List<Group> clonedGroups = statusMap.entrySet().stream()
-                .filter(map -> map.getValue() == (CloningStatus.SUCCESSFUL)).map(Map.Entry::getKey)
-                .collect(Collectors.toList());
-
-        _clonedGroupsService.addGroups(clonedGroups);
-        return statusMap;
+        groups.forEach((group) -> cloneGroup(group, destinationPath, progressListener));
     }
 
     @Override
@@ -129,13 +111,6 @@ public class GroupsUserServiceImpl implements GroupsUserService {
         return importGroup(path);
     }
 
-    private CloningStatus getStatus(Group group) {
-        if (group.isCloned()) {
-            return CloningStatus.SUCCESSFUL;
-        }
-        return CloningStatus.FAILED;
-    }
-
     private RESTConnector getConnector() {
         return _connector;
     }
@@ -147,6 +122,12 @@ public class GroupsUserServiceImpl implements GroupsUserService {
     private void setClonedGroupsService(ClonedGroupsService clonedGroupsService) {
         if (clonedGroupsService != null) {
             _clonedGroupsService = clonedGroupsService;
+        }
+    }
+
+    private void setProjectService(ProjectService projectService) {
+        if (projectService != null) {
+            _projectService = projectService;
         }
     }
 
@@ -169,7 +150,7 @@ public class GroupsUserServiceImpl implements GroupsUserService {
         foundGroup.setPathToClonedGroup(groupPath.toString());
         foundGroup.setClonedStatus(true);
         _clonedGroupsService.addGroups(Arrays.asList(foundGroup));
-        return updateProjectsInGroup(foundGroup, groupPath);
+        return foundGroup;
     }
 
     @Override
@@ -233,31 +214,6 @@ public class GroupsUserServiceImpl implements GroupsUserService {
 
     private Optional<Group> findGroupByPath(Collection<Group> groups, String groupPath) {
         return groups.stream().filter(group -> group.getPathToClonedGroup().equals(groupPath)).findFirst();
-    }
-
-    private Group updateProjectsInGroup(Group group, Path localPathGroup) {
-        Collection<Project> projects = group.getProjects();
-        if (projects == null || projects.isEmpty()) {
-            logger.debug(GROUP_DOESNT_HAVE_PROJECTS_MESSAGE);
-            return group;
-        }
-        Collection<String> projectsName = PathUtilities.getFolders(localPathGroup);
-        if (projectsName.isEmpty()) {
-            logger.debug(group.getName() + " " + PREFIX_SUCCESSFUL_LOAD);
-            return group;
-        }
-        projects.stream().filter(project -> projectsName.contains(project.getName()))
-                .forEach((project) -> updateProjectStatus(project, localPathGroup.toString()));
-        logger.debug(group.getName() + " " + PREFIX_SUCCESSFUL_LOAD);
-        return group;
-    }
-
-    private void updateProjectStatus(Project project, String pathGroup) {
-        project.setClonedStatus(true);
-        project.setPathToClonedProject(pathGroup + File.separator + project.getName());
-        ProjectTypeService typeService = (ProjectTypeService) ServiceProvider.getInstance()
-                .getService(ProjectTypeService.class.getName());
-        project.setProjectType(typeService.getProjectType(project));
     }
 
     private boolean checkGroupIsLoaded(String localPathGroup) {

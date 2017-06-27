@@ -23,6 +23,7 @@ import com.lgc.gitlabtool.git.services.ClonedGroupsService;
 import com.lgc.gitlabtool.git.services.GitService;
 
 import com.lgc.gitlabtool.git.services.GroupsUserService;
+import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.ViewKey;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
@@ -117,6 +118,8 @@ public class ModularController {
     private final ClonedGroupsService _clonedGroupsService = (ClonedGroupsService) ServiceProvider.getInstance()
             .getService(ClonedGroupsService.class.getName());
 
+    private final ProjectService _projectService =
+            (ProjectService) ServiceProvider.getInstance().getService(ProjectService.class.getName());
 
     public void loadWelcomeWindow() throws IOException {
         toolbar.getItems().addAll(ToolbarManager.getInstance().createToolbarItems(ViewKey.WELCOME_WINDOW.getKey()));
@@ -149,7 +152,10 @@ public class ModularController {
         Node node = loader.load();
 
         _mainWindowController = loader.getController();
-        _mainWindowController.setSelectedGroup(selectedGroup);
+
+        String nameGroup = selectedGroup.getName();
+        List<Project> projects = (List<Project>) _projectService.loadProjects(selectedGroup);
+        _mainWindowController.setSelectedGroup(projects, nameGroup);
         _mainWindowController.beforeShowing();
 
         AnchorPane.setTopAnchor(node, 0.0);
