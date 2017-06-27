@@ -158,10 +158,8 @@ public class JGit {
         try (Git git = getGit(project.getPathToClonedProject())) {
             git.reset().setMode(ResetCommand.ResetType.HARD).call();
             return JGitStatus.SUCCESSFUL;
-        } catch (GitAPIException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            logger.error("IO error ", e);
+        } catch (GitAPIException | IOException e) {
+            logger.error("Failed to discard changed for the " + project.getName() +" project: ", e);
         }
 
         return JGitStatus.FAILED;

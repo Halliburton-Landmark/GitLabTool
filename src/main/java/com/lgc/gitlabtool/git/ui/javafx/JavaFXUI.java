@@ -56,7 +56,6 @@ public class JavaFXUI extends Application implements UserInterface {
         primaryStage.setHeight(primaryScreenBounds.getMaxY() / 1.5);
         primaryStage.setWidth(primaryScreenBounds.getMaxX() / 1.5);
         primaryStage.getIcons().add(appIcon);
-
         primaryStage.show();
 
     }
