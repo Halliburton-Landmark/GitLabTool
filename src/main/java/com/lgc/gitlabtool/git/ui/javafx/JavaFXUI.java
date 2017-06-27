@@ -78,7 +78,7 @@ public class JavaFXUI extends Application implements UserInterface {
         closeConfirmation.initOwner(mainStage);
 
         Optional<ButtonType> closeResponse = closeConfirmation.showAndWait();
-        if (!ButtonType.OK.equals(closeResponse.get())) {
+        if (!ButtonType.OK.equals(closeResponse.orElse(ButtonType.CANCEL))) {
             event.consume();
         }
     };
