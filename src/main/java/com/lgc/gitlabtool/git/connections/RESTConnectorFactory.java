@@ -1,25 +1,23 @@
 package com.lgc.gitlabtool.git.connections;
 
-import com.lgc.gitlabtool.git.exceptions.HTTPExceptionProvider;
-
 public class RESTConnectorFactory {
-	
-	private static RESTConnectorFactory instance;
-	
-	private RESTConnector restConnector;
-	
-	private RESTConnectorFactory() {
-		restConnector = new RESTConnectorImpl(HTTPExceptionProvider.getInstance());
-	}
-	
-	public static RESTConnectorFactory getInstance() {
-		if (instance == null) {
-			instance = new RESTConnectorFactory();
-		}
-		return instance;
-	}
+
+    private static RESTConnectorFactory _instance;
+
+    private final RESTConnector _restConnector;
+
+    private RESTConnectorFactory() {
+        _restConnector = new RESTConnectorImpl();
+    }
+
+    public static RESTConnectorFactory getInstance() {
+        if (_instance == null) {
+            _instance = new RESTConnectorFactory();
+        }
+        return _instance;
+    }
 
     public RESTConnector getRESTConnector() {
-    	return restConnector;
+        return _restConnector;
     }
 }

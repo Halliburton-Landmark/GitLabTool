@@ -1,5 +1,8 @@
 package com.lgc.gitlabtool.git.ui.javafx.controllers;
 
+import static com.lgc.gitlabtool.git.util.ProjectPropertiesUtil.getCommitHash;
+import static com.lgc.gitlabtool.git.util.ProjectPropertiesUtil.getProjectVersion;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -18,6 +21,7 @@ import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.services.ClonedGroupsService;
 import com.lgc.gitlabtool.git.services.GitService;
+
 import com.lgc.gitlabtool.git.services.GroupsUserService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.ViewKey;
@@ -29,7 +33,6 @@ import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuManager;
 import com.lgc.gitlabtool.git.ui.selection.SelectionsProvider;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarButtons;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarManager;
-import com.lgc.gitlabtool.git.util.ProjectPropertiesUtil;
 
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -65,15 +68,13 @@ public class ModularController {
 
     private static final String ABOUT_POPUP_TITLE = "About";
 
-    private static final String ABOUT_POPUP_HEADER = "Gitlab tool v." + ProjectPropertiesUtil.getProjectVersion()
-            + ", powered by Luxoft";
-
+    private static final String ABOUT_POPUP_HEADER =
+            "Gitlab tool v." + getProjectVersion() + " (" + getCommitHash() + "), powered by Luxoft";
     private static final String ABOUT_POPUP_CONTENT = "Contacts: Yurii Pitomets (yurii.pitomets2@halliburton.com)";
     private static final String SWITCH_BRANCH_TITLE = "Switch branch";
 
     private static final String IMPORT_CHOOSER_TITLE = "Import Group";
     private static final String IMPORT_DIALOG_TITLE = "Import Status Dialog";
-    private static final String SUCCESFUL_IMPORT_MESSAGE = "Import of group is Successful";
     private static final String FAILED_IMPORT_MESSAGE = "Import of group is Failed";
 
     private static final String REMOVE_GROUP_DIALOG_TITLE = "Remove Group";
@@ -248,8 +249,6 @@ public class ModularController {
             URL switchBranchWindowUrl = getClass().getClassLoader().getResource(ViewKey.SWITCH_BRANCH_WINDOW.getPath());
             FXMLLoader loader = new FXMLLoader(switchBranchWindowUrl);
             Parent root = loader.load();
-
-            SwitchBranchWindowController controller = loader.getController();
 
             Scene scene = new Scene(root);
             Stage stage = new Stage();

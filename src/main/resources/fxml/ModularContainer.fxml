@@ -21,7 +21,7 @@
     </top>
 
     <center>
-        <SplitPane fx:id="parentPane" dividerPositions="0.8" orientation="VERTICAL">
+        <SplitPane fx:id="parentPane" dividerPositions="0.95" orientation="VERTICAL">
             <AnchorPane fx:id="viewPane"/>
             <Pane fx:id="consolePane" style="-fx-background-color: #D7DBE3;">
                 <Label alignment="CENTER" text="Console mock" textFill="#000000d7">

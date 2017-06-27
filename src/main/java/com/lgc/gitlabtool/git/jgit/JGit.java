@@ -2,7 +2,6 @@ package com.lgc.gitlabtool.git.jgit;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -48,7 +47,6 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
-import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 
 import com.lgc.gitlabtool.git.connections.token.CurrentUser;
@@ -108,7 +106,7 @@ public class JGit {
             throw new IllegalArgumentException(WRONG_PARAMETERS);
         }
         if (!project.isCloned()) {
-            System.err.println(project.getName() + ERROR_MSG_NOT_CLONED);
+            logger.error(project.getName() + ERROR_MSG_NOT_CLONED);
             return Collections.emptyList();
         }
 
@@ -275,8 +273,8 @@ public class JGit {
                     try {
                         git.add().addFilepattern(file).call();
                     } catch (GitAPIException e) {
-                        System.err.println("Could not add the " + file + " file");
-                        System.err.println("!ERROR: " + e.getMessage());
+                        logger.error("Could not add the " + file + " file");
+                        logger.error("!ERROR: " + e.getMessage());
                     }
                 }
             });
@@ -538,7 +536,9 @@ public class JGit {
                 return JGitStatus.FAILED;
             }
             if (!force && isContaintsBranch(branches, nameBranch)) {
-                logger.error("Error create branch: " + JGitStatus.BRANCH_ALREADY_EXISTS);
+                logger.error(() -> "Error createing branch "
+                          + nameBranch + " in project " + project.getName() +
+                          ". " + JGitStatus.BRANCH_ALREADY_EXISTS);
                 return JGitStatus.BRANCH_ALREADY_EXISTS;
             }
 
@@ -586,9 +586,6 @@ public class JGit {
         if (isContaints && isRemoteBranch) {
             logger.error("Failed " + prefixErrorMessage + JGitStatus.BRANCH_ALREADY_EXISTS);
             return JGitStatus.BRANCH_ALREADY_EXISTS;
-        }
-        try (Repository repo = local(Paths.get(project.getPathToClonedProject()))) {
-
         }
         try (Git git = getGit(project.getPathToClonedProject())) {
             if (isCurrentBranch(git, nameBranchWithoutAlias)) {
@@ -710,17 +707,6 @@ public class JGit {
         }
         return false;
     }
-
-    public static Repository local(Path path){
-        try {
-          FileRepositoryBuilder builder=new FileRepositoryBuilder();
-          return builder.setGitDir(path.toFile()).readEnvironment().setMustExist(true).build();
-        }
-       catch (  IOException e) {
-          System.err.println("ERROR");
-        }
-        return null;
-      }
 
     protected Git tryClone(String linkClone, String localPath) throws GitAPIException {
         return Git.cloneRepository()

@@ -32,6 +32,8 @@ public class ProjectListCell extends ListCell<Project> {
             ImageView imageView = new ImageView(fxImage);
 
             Text branchNameTextView = new Text(item.getName());
+            Color textColor = item.isCloned() ? Color.BLACK : Color.DIMGRAY;
+            branchNameTextView.setFill(textColor);
             Text currentBranchTextView = getCurrentBrantProjectText(item);
 
             HBox hBoxItem = new HBox(imageView, branchNameTextView, currentBranchTextView);
@@ -59,4 +61,5 @@ public class ProjectListCell extends ListCell<Project> {
 
         return currentBranchTextView;
     }
+
 }

@@ -27,17 +27,20 @@ import org.apache.logging.log4j.Logger;
  */
 class ReplacementServiceImpl implements ReplacementService {
 
-    private static final Logger logger = LogManager.getLogger(ReplacementServiceImpl.class);
+    private static final Logger _logger = LogManager.getLogger(ReplacementServiceImpl.class);
 
     @Override
     public void replaceTextInFiles(String groupFolderPath, String fileName, String fromText, String toText) {
-        if (groupFolderPath == null || fileName == null) {
-            return;
+        if (groupFolderPath == null || fileName == null || groupFolderPath.isEmpty() || fileName.isEmpty()) {
+            throw new IllegalArgumentException("Invalid parameters: group path = {"
+                            + groupFolderPath + "}, file name = {" + fileName + "}" );
         }
         if (fromText == null || toText == null) {
-            return;
+            throw new IllegalArgumentException("Invalid parameters: from text = {"
+                    + fromText + "}, to text = {" + toText + "}" );
         }
         if (fromText.equals(toText)) {
+            _logger.debug("Replacing text cancelled: fromText and toText are equal.");
             return;
         }
 
@@ -49,7 +52,7 @@ class ReplacementServiceImpl implements ReplacementService {
                 replaceText(listProjects, fileName, fromText, toText);
             }
         } else {
-            logger.error("The file/directory " + path.getFileName() + " does not exist");
+            _logger.error("The file/directory " + path.getFileName() + " does not exist");
         }
     }
 
@@ -85,11 +88,12 @@ class ReplacementServiceImpl implements ReplacementService {
                     }
                 });
             } catch (IOException e) {
-                logger.error("", e);
+                _logger.error("Error replacing text: " + e.getMessage());
             }
         }
     }
 
+    // TODO: This method need replace with method getFolders from the PathUtilities class or move it there
     private Collection<Path> getAllElementsInFolder(Path path) {
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(path)) {
             Collection<Path> listProjects = new ArrayList<>();
@@ -102,7 +106,7 @@ class ReplacementServiceImpl implements ReplacementService {
         } catch (IOException | DirectoryIteratorException e) {
             // IOException cannot be thrown during the iteration.
             // It can only be thrown by the newDirectoryStream method.
-            logger.error("", e);
+            _logger.error("Error getting folders: "  + path + " : " + e.getMessage());
         }
         return Collections.emptyList();
     }
@@ -126,7 +130,7 @@ class ReplacementServiceImpl implements ReplacementService {
         try {
             return Optional.of(FileUtils.readFileToString(path.toFile(), Charset.forName("utf-8")));
         } catch (IOException e) {
-            logger.error("", e);
+            _logger.error("Error reading file: " + path + " : " + e.getMessage());
         }
         return Optional.empty();
     }
@@ -135,7 +139,7 @@ class ReplacementServiceImpl implements ReplacementService {
         try {
             FileUtils.writeStringToFile(path.toFile(), textFromFile, Charset.forName("utf-8"), false);
         } catch (IOException e) {
-            logger.error("", e);
+            _logger.error("Error writing file " + path + " : " + e.getMessage());
         }
     }
 

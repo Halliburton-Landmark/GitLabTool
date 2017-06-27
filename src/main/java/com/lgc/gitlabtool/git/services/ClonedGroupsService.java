@@ -1,5 +1,6 @@
 package com.lgc.gitlabtool.git.services;
 
+import java.util.Collection;
 import java.util.List;
 
 import com.lgc.gitlabtool.git.entities.Group;
@@ -40,4 +41,10 @@ public interface ClonedGroupsService {
      */
     List<Group> loadClonedGroups();
 
+    /**
+     * Get the groups that were not found on the local disk when loading the cloned groups
+     *
+     * @return collection of groups
+     */
+    Collection<Group> getNotExistGroup();
 }
