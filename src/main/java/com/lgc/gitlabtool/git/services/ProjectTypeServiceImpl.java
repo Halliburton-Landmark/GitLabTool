@@ -50,7 +50,6 @@ public class ProjectTypeServiceImpl implements ProjectTypeService {
 
     protected void initProjectTypes() {
         _types.add(new DSGProjectType());
-        _types.add(UNKNOWN_TYPE);
     }
 
     protected Set<ProjectType> getSetProjectTypes() {
