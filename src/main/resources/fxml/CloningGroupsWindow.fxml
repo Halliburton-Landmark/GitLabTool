@@ -4,7 +4,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
-<GridPane fx:controller="com.lgc.solutiontool.git.ui.javafx.controllers.CloningGroupsWindowController" hgap="14.0"
+<GridPane fx:controller="com.lgc.gitlabtool.git.ui.javafx.controllers.CloningGroupsWindowController" hgap="14.0"
           maxHeight="+Infinity"
           maxWidth="+Infinity" minHeight="-Infinity" minWidth="-Infinity" vgap="10.0"
           xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">

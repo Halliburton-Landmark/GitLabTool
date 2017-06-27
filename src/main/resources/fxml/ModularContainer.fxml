@@ -9,7 +9,7 @@
 <BorderPane id="background" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
             prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8"
             xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.lgc.solutiontool.git.ui.javafx.controllers.ModularController">
+            fx:controller="com.lgc.gitlabtool.git.ui.javafx.controllers.ModularController">
     <top>
         <VBox BorderPane.alignment="CENTER">
             <MenuBar fx:id="menuBar">
@@ -21,7 +21,7 @@
     </top>
 
     <center>
-        <SplitPane fx:id="parentPane" dividerPositions="0.8" orientation="VERTICAL">
+        <SplitPane fx:id="parentPane" dividerPositions="0.95" orientation="VERTICAL">
             <AnchorPane fx:id="viewPane"/>
             <Pane fx:id="consolePane" style="-fx-background-color: #D7DBE3;">
                 <Label alignment="CENTER" text="Console mock" textFill="#000000d7">
