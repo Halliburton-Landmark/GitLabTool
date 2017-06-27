@@ -12,6 +12,7 @@ import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
+import com.lgc.gitlabtool.git.util.BranchValidator;
 
 import javafx.beans.value.ChangeListener;
 import javafx.event.ActionEvent;
@@ -50,6 +51,7 @@ public class CreateNewBranchDialog extends Dialog<String> {
     private final Button _cancelButton;
 
     private List<Project> _projects;
+    private BranchValidator _branchValidator = new BranchValidator();
 
     public List<Project> getProjects() {
         return _projects;
@@ -122,13 +124,7 @@ public class CreateNewBranchDialog extends Dialog<String> {
     }
 
     private boolean isInputValid(String input) {
-        /*
-         * input could contain only chars, digits and underscores. 
-         * It does not provide spaces in the middle of the name
-         * (first and last spaces will be trimmed automatically so we do not check them)
-         */
-        String regexp = "([A-Za-z0-9_])+";
-        return input.matches(regexp);
+        return _branchValidator.validate(input);
     }
 
     private void initializeOnCloseEvent() {
@@ -140,7 +136,7 @@ public class CreateNewBranchDialog extends Dialog<String> {
 
     private ChangeListener<? super String> getInputFilter() {
         return (observable, oldValue, newValue) -> {
-            if (isInputValid(_branchNameField.getText().trim())) {
+            if (!_branchNameField.getText().isEmpty() && isInputValid(_branchNameField.getText())) {
                 _createButton.setDisable(false);
                 showMessage(CHOOSE_BRANCH_NAME_MESSAGE, Color.BLACK);
             } else {
