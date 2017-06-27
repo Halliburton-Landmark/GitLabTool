@@ -2,7 +2,6 @@ package com.lgc.gitlabtool.git.jgit;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -44,7 +43,6 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
-import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 
 import com.lgc.gitlabtool.git.connections.token.CurrentUser;
@@ -511,7 +509,9 @@ public class JGit {
                 return JGitStatus.FAILED;
             }
             if (!force && isContaintsBranch(branches, nameBranch)) {
-                logger.error("Error create branch: " + JGitStatus.BRANCH_ALREADY_EXISTS);
+                logger.error(() -> "Error createing branch "
+                          + nameBranch + " in project " + project.getName() +
+                          ". " + JGitStatus.BRANCH_ALREADY_EXISTS);
                 return JGitStatus.BRANCH_ALREADY_EXISTS;
             }
 
