@@ -152,7 +152,7 @@ public class JGit {
      *
      * @param projects   the projects for cloning
      * @param localPath  localPath the path to where will clone all the projects of the group
-     * @param progressListener
+     * @param progressListener listener for obtaining data on the process of performing the operation.
      */
     public boolean clone(Collection<Project> projects, String localPath, ProgressListener progressListener) {
         _isCloneCancelled = false;

@@ -20,9 +20,9 @@ public interface GroupsUserService {
     /**
      * Clones list of user's groups and adds their to the ClonedGroups class.
      *
-     * @param groups          List of groups for cloning
-     * @param destinationPath Local path of workspace
-     * @param
+     * @param groups           List of groups for cloning
+     * @param destinationPath  Local path of workspace
+     * @param progressListener Listener for obtaining data on the process of performing the operation.
      */
     void cloneGroups(List<Group> groups, String destinationPath, ProgressListener progressListener);
 
