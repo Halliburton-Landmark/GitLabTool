@@ -135,7 +135,7 @@ public class CreateNewBranchDialog extends Dialog<String> {
 
     private ChangeListener<? super String> getInputFilter() {
         return (observable, oldValue, newValue) -> {
-            if (isInputValid(_branchNameField.getText().trim())) {
+            if (!_branchNameField.getText().isEmpty() && isInputValid(_branchNameField.getText())) {
                 _createButton.setDisable(false);
                 showMessage(CHOOSE_BRANCH_NAME_MESSAGE, Color.BLACK);
             } else {
