@@ -160,7 +160,7 @@ public class CreateNewBranchDialog extends Dialog<String> {
     private void createAndShowStatusDialog(List<Project> projects, Map<Project, JGitStatus> results) {
         int size = results.size();
         String info = "";
-        if (size < 10) {
+        if (size < StatusDialog.MAX_ROW_COUNT_IN_STATUS_DIALOG) {
             info = results.entrySet().stream()
                     .map(pair -> pair.getKey().getName() + " - " + pair.getValue())
                     .collect(Collectors.joining("\n"));
