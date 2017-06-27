@@ -62,6 +62,6 @@ public interface GitService {
      * @param onError        method for tracking the errors during cloning,
      *                       where <Integer> is a percentage of progress, <String> error message.
      */
-    void commitChanges(List<Project> projects, String commitMessage, boolean isPushImmediately,
+    Map<Project, JGitStatus> commitChanges(List<Project> projects, String commitMessage, boolean isPushImmediately,
                        Consumer<Integer> onSuccess, BiConsumer<Integer, String> onError);
 }

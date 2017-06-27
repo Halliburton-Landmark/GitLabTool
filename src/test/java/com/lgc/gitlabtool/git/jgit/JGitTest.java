@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.jgit.api.AddCommand;
 import org.eclipse.jgit.api.CheckoutCommand;
@@ -405,15 +406,26 @@ public class JGitTest {
             }
         };
         Mockito.when(gitMock.commit()).thenReturn(commitCommand);
-        JGitStatus result = getJGitMock(gitMock).commit(getProjects(), "_", false, "Lyuda", "l@gmail.com", "Lyuda",
+        Map<Project, JGitStatus> result = getJGitMock(gitMock).commit(getProjects(), "_", false, "Lyuda", "l@gmail.com", "Lyuda",
                 "l@gmail.com", null, null);
-        Assert.assertEquals(result, JGitStatus.SUCCESSFUL);
+
+        long countSuccessfulDiscarding =
+                result.entrySet().stream()
+                        .map(Map.Entry::getValue)
+                        .filter(status -> status.equals(JGitStatus.SUCCESSFUL))
+                        .count();
+        Assert.assertEquals(result.size(), countSuccessfulDiscarding);
     }
 
     @Test
     public void commitAllProjectsIncorrectDataTest() {
-        JGitStatus result = getJGitMock(null).commit(getProjects(), "_", false, null, null, null, null, null, null);
-        Assert.assertEquals(result, JGitStatus.SUCCESSFUL);
+        Map<Project, JGitStatus> result = getJGitMock(null).commit(getProjects(), "_", false, null, null, null, null, null, null);
+        long countSuccessfulDiscarding =
+                result.entrySet().stream()
+                        .map(Map.Entry::getValue)
+                        .filter(status -> status.equals(JGitStatus.SUCCESSFUL))
+                        .count();
+        Assert.assertEquals(result.size(), countSuccessfulDiscarding);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -478,8 +490,13 @@ public class JGitTest {
 
     @Test
     public void commitAndPushIncorrectDataTest() {
-        Assert.assertTrue(
-                getJGitMock(null).commitAndPush(getProjects(), "__", false, null, null, null, null, null, null));
+        Map<Project, JGitStatus> result = getJGitMock(null).commitAndPush(getProjects(), "__", false, null, null, null, null, null, null);
+        long countSuccessfulDiscarding =
+                result.entrySet().stream()
+                        .map(Map.Entry::getValue)
+                        .filter(status -> status.equals(JGitStatus.SUCCESSFUL))
+                        .count();
+        Assert.assertEquals(result.size(), countSuccessfulDiscarding);
     }
 
     @Test
@@ -501,10 +518,17 @@ public class JGitTest {
             }
         };
         Mockito.when(gitMock.push()).thenReturn(pushCommandMock);
-        Assert.assertTrue(getJGitMock(gitMock).commitAndPush(getProjects(), "__", false, "Lyuda", "l@gmail.com",
+        Map<Project, JGitStatus> result = getJGitMock(gitMock).commitAndPush(getProjects(), "__", false, "Lyuda", "l@gmail.com",
                 "Lyuda", "l@gmail.com", (progress) -> {
                 }, (progress, message) -> {
-                }));
+                });
+
+        long countSuccessfulDiscarding =
+                result.entrySet().stream()
+                        .map(Map.Entry::getValue)
+                        .filter(status -> status.equals(JGitStatus.SUCCESSFUL))
+                        .count();
+        Assert.assertEquals(result.size(), countSuccessfulDiscarding);
     }
 
     @Test(expected = IllegalArgumentException.class)

@@ -7,8 +7,10 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
@@ -335,12 +337,13 @@ public class JGit {
      * If the passed committer or author is {null} we take the value from the current user.
      * Projects that failed to commit will be displayed in the UI console.
      *
-     * @return status SUCCESSFUL is if committed successfully, otherwise is FAILED.
+     * @return map with projects and theirs statuses
      */
-    public JGitStatus commit (List<Project> projects, String message, boolean setAll,
+    public Map<Project, JGitStatus> commit (List<Project> projects, String message, boolean setAll,
                               String nameCommitter, String emailCommitter,
                               String nameAuthor, String emailAuthor,
                               Consumer<Integer> onSuccess, BiConsumer<Integer, String> onError) {
+        Map<Project, JGitStatus> statuses = new HashMap<>();
         if (projects == null || message == null || projects.isEmpty() || message.isEmpty()) {
             throw new IllegalArgumentException("Incorrect data: projects is " + projects + ", message is " + message);
         }
@@ -352,20 +355,24 @@ public class JGit {
                 continue;
             }
             if (!pr.isCloned()) {
+                statuses.put(pr, JGitStatus.FAILED);
                 String errMessage = pr.getName() + ERROR_MSG_NOT_CLONED;
                 logger.debug(errMessage);
                 continue;
             }
             if(commitProject(pr, message, setAll, nameCommitter, emailCommitter,
                       nameAuthor, emailAuthor).equals(JGitStatus.FAILED)) {
+                statuses.put(pr, JGitStatus.FAILED);
                 String errMessage = "Failed to commit " + pr.getName() + " project";
                 logger.debug(errMessage);
                 continue;
             }
             NullCheckUtil.acceptConsumer(onSuccess, currentProgress);
+            statuses.put(pr, JGitStatus.SUCCESSFUL);
+            logger.debug("Commit for the projects is " + JGitStatus.SUCCESSFUL);
         }
-        logger.debug("Commit for the projects is " + JGitStatus.SUCCESSFUL);
-        return JGitStatus.SUCCESSFUL;
+
+        return statuses;
     }
 
     /**
@@ -423,12 +430,13 @@ public class JGit {
      * If the passed committer or author is {null} we take the value from the current user.
      * Projects that failed to commit or to push will be displayed in the console.
      *
-     * @return
+     * @return statuses of operation
      */
-    public boolean commitAndPush (List<Project> projects, String message, boolean setAll,
-                                  String nameCommitter, String emailCommitter,
-                                  String nameAuthor, String emailAuthor,
-                                  Consumer<Integer> onSuccess, BiConsumer<Integer, String> onError) {
+    public Map<Project, JGitStatus> commitAndPush (List<Project> projects, String message, boolean setAll,
+                                                   String nameCommitter, String emailCommitter,
+                                                   String nameAuthor, String emailAuthor,
+                                                   Consumer<Integer> onSuccess, BiConsumer<Integer, String> onError) {
+        Map<Project, JGitStatus> statuses = new HashMap<>();
         if (message == null || projects == null || projects.isEmpty() || message.isEmpty()) {
             throw new IllegalArgumentException("Incorrect data: projects is " + projects + ", message is " + message);
         }
@@ -442,6 +450,7 @@ public class JGit {
             if (!pr.isCloned()) {
                 NullCheckUtil.acceptBiConsumer(onError, currentProgress, pr.getName() + ERROR_MSG_NOT_CLONED);
                 String errMessage = pr.getName() + ERROR_MSG_NOT_CLONED;
+                statuses.put(pr, JGitStatus.FAILED);
                 logger.debug(errMessage);
                 continue;
             }
@@ -449,13 +458,15 @@ public class JGit {
                     .equals(JGitStatus.FAILED)) {
                 String errorMsg = "Failed to commit and push " + pr.getName() + " project";
                 NullCheckUtil.acceptBiConsumer(onError, currentProgress, errorMsg);
+                statuses.put(pr, JGitStatus.FAILED);
                 logger.debug(errorMsg);
                 continue;
             }
             NullCheckUtil.acceptConsumer(onSuccess, currentProgress);
+            statuses.put(pr, JGitStatus.SUCCESSFUL);
             logger.debug("Commit and push for projects is " + JGitStatus.SUCCESSFUL);
         }
-        return true;
+        return statuses;
     }
 
     /**

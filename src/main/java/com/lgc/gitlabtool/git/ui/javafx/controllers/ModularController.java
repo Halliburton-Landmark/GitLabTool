@@ -7,10 +7,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -18,14 +19,16 @@ import org.apache.logging.log4j.Logger;
 
 import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.Project;
+import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.services.ClonedGroupsService;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.GroupsUserService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.ViewKey;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
-import com.lgc.gitlabtool.git.ui.javafx.CommitDialog;
 import com.lgc.gitlabtool.git.ui.javafx.AlertWithCheckBox;
+import com.lgc.gitlabtool.git.ui.javafx.CommitDialog;
+import com.lgc.gitlabtool.git.ui.javafx.StatusDialog;
 import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuItems;
 import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuManager;
 import com.lgc.gitlabtool.git.ui.selection.SelectionsProvider;
@@ -81,6 +84,12 @@ public class ModularController {
     private static final String REMOVE_GROUP_DIALOG_TITLE = "Remove Group";
     private static final String REMOVE_GROUP_STATUS_DIALOG_TITLE = "Import Status Dialog";
     private static final String FAILED_REMOVE_GROUP_MESSAGE = "Removing of group is Failed";
+
+    private static final String STATUS_DISCARD_DIALOG_TITLE = "Discarding changes status";
+    private static final String STATUS_DISCARD_DIALOG_HEADER = "Discarding changes info";
+
+    private static final String STATUS_COMMIT_DIALOG_TITLE = "Committing changes status";
+    private static final String STATUS_COMMIT_DIALOG_HEADER = "Committing changes info";
 
     private static final String CSS_PATH = "css/style.css";
     private static final Image _appIcon = AppIconHolder.getInstance().getAppIcoImage();
@@ -287,31 +296,89 @@ public class ModularController {
 
         Optional<ButtonType> result = alert.showAndWait();
         if (result.get() == commitButton) {
-
-            CommitDialog dialog = new CommitDialog();
-            Optional<ButtonType> commitResult = dialog.showAndWait();
-
-            if (commitResult.get() == dialog.getCommitButton() || commitResult.get() == dialog.getCommitAndPushButton()) {
-                String commitMessage = StringUtils.EMPTY;
-                if (dialog.getCommitMessage() != null) {
-                    commitMessage = dialog.getCommitMessage();
-                }
-
-                boolean isPush = false;
-                if (commitResult.get() == dialog.getCommitAndPushButton()) {
-                    isPush = true;
-                }
-
-                _gitService.commitChanges(selectedProjects, commitMessage, isPush,
-                        new SuccessfulOperationHandler(), new UnsuccessfulOperationHandler());
-            }
-
+          showCommitPushDialog(selectedProjects);
 
         } else if (result.get() == discardButton) {
-            _gitService.discardChanges(selectedProjects);
+            Map<Project, JGitStatus> discardStatuses =_gitService.discardChanges(selectedProjects);
+            showDiscardStatusDialog(selectedProjects, discardStatuses);
+
         } else {
             alert.close();
         }
+    }
+
+    private void showCommitPushDialog(List<Project> projects) {
+        CommitDialog dialog = new CommitDialog();
+        Optional<ButtonType> commitResult = dialog.showAndWait();
+
+        if (commitResult.get() == dialog.getCommitButton() || commitResult.get() == dialog.getCommitAndPushButton()) {
+            String commitMessage = StringUtils.EMPTY;
+
+            if (dialog.getCommitMessage() != null) {
+                commitMessage = dialog.getCommitMessage();
+            }
+
+            boolean isPush = commitResult.get().equals(dialog.getCommitAndPushButton());
+
+            Map<Project, JGitStatus> commitStatuses = _gitService.commitChanges(projects, commitMessage, isPush,
+                    new SuccessfulOperationHandler(), new UnsuccessfulOperationHandler());
+
+            showCommitStatusDialog(projects, commitStatuses);
+        }
+    }
+
+    private void showCommitStatusDialog(List<Project> projects, Map<Project, JGitStatus> commitStatuses){
+        String info;
+
+        if (commitStatuses.size() < 6) {
+            info = commitStatuses.entrySet().stream()
+                    .map(pair -> pair.getKey().getName() + " - " + pair.getValue())
+                    .collect(Collectors.joining("\n"));
+        } else {
+
+            long countSuccessfulDiscarding =
+                    commitStatuses.entrySet().stream()
+                            .map(Entry::getValue)
+                            .filter(status -> status.equals(JGitStatus.SUCCESSFUL))
+                            .count();
+            if (countSuccessfulDiscarding == projects.size()) {
+                info = "All changes was successfully commited";
+            } else {
+                info = "Committing changes was failed" + "\n"
+                        + "Successfully: " + countSuccessfulDiscarding + " project(s)" + "\n"
+                        + "Failed: " + (projects.size() - countSuccessfulDiscarding) + " project(s)";
+            }
+        }
+
+        Alert statusDialog = new StatusDialog(STATUS_COMMIT_DIALOG_TITLE, STATUS_COMMIT_DIALOG_HEADER, info);
+        statusDialog.showAndWait();
+    }
+
+    private void showDiscardStatusDialog(List<Project> projects, Map<Project, JGitStatus> discardStatuses){
+        String info;
+
+        if (discardStatuses.size() < 6) {
+            info = discardStatuses.entrySet().stream()
+                    .map(pair -> pair.getKey().getName() + " - " + pair.getValue())
+                    .collect(Collectors.joining("\n"));
+        } else {
+
+            long countSuccessfulDiscarding =
+                    discardStatuses.entrySet().stream()
+                            .map(Entry::getValue)
+                            .filter(status -> status.equals(JGitStatus.SUCCESSFUL))
+                            .count();
+            if (countSuccessfulDiscarding == projects.size()) {
+                info = "All changes was successfully discarded";
+            } else {
+                info = "Discarding changes was failed" + "\n"
+                        + "Successfully: " + countSuccessfulDiscarding + " project(s)" + "\n"
+                        + "Failed: " + (projects.size() - countSuccessfulDiscarding) + " project(s)";
+            }
+        }
+
+        Alert statusDialog = new StatusDialog(STATUS_DISCARD_DIALOG_TITLE, STATUS_DISCARD_DIALOG_HEADER, info);
+        statusDialog.showAndWait();
     }
 
     private void showAboutPopup() {
@@ -328,6 +395,7 @@ public class ModularController {
 
         Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
         stage.getIcons().add(_appIcon);
+        stage.initModality(Modality.APPLICATION_MODAL);
 
         alert.show();
     }
@@ -378,7 +446,7 @@ public class ModularController {
     }
 
     /**
-     * Handler for successful operation
+     * Handler for successful discard operation
      *
      * @author Pavlo Pidhorniy
      */
@@ -386,12 +454,13 @@ public class ModularController {
 
         @Override
         public void accept(Integer percentage) {
+            //TODO: use this handler for UI console
             logger.info("Progress: " + percentage + "%");
         }
     }
 
     /**
-     * Handler for unsuccessful operation
+     * Handler for unsuccessful discard operation
      *
      * @author Pavlo Pidhorniy
      */
@@ -399,7 +468,7 @@ public class ModularController {
 
         @Override
         public void accept(Integer percentage, String message) {
-            // TODO: in log or UI console
+            //TODO: use this handler for UI console
             logger.error("!ERROR: " + message);
             logger.info("Progress: " + percentage + "%");
         }

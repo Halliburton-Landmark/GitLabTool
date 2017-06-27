@@ -84,16 +84,19 @@ public class GitServiceImpl implements GitService {
     }
 
     @Override
-    public void commitChanges(List<Project> projects, String commitMessage, boolean isPushImmediately,
-                              Consumer<Integer> onSuccess, BiConsumer<Integer, String> onError) {
+    public Map<Project, JGitStatus> commitChanges(List<Project> projects, String commitMessage, boolean isPushImmediately,
+                                                  Consumer<Integer> onSuccess, BiConsumer<Integer, String> onError) {
+        Map<Project, JGitStatus> results;
         if (isPushImmediately) {
             //use null for getting default user-info
-            JGit.getInstance().commitAndPush(projects, commitMessage, true, null,
+            results = JGit.getInstance().commitAndPush(projects, commitMessage, true, null,
                     null, null, null, onSuccess, onError);
         } else {
             //use null for getting default user-info
-            JGit.getInstance().commit(projects, commitMessage, true, null,
+            results = JGit.getInstance().commit(projects, commitMessage, true, null,
                     null, null, null, onSuccess, onError);
         }
+
+        return results;
     }
 }
