@@ -56,7 +56,7 @@ public class PathUtilities {
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(path)) {
             stream.forEach((dir) -> folders.add(dir.getFileName().toString()));
         } catch (IOException e) {
-            logger.error(e.getMessage());
+            logger.error("Error getting forders: " + e.getMessage());
         }
         return folders;
     }
@@ -75,7 +75,7 @@ public class PathUtilities {
             FileUtils.forceDelete(path.toFile());
             return true;
         } catch (IOException e) {
-            logger.error("Error deleting path: " + e);
+            logger.error("Error deleting path: " + e.getMessage());
         }
         return false;
     }

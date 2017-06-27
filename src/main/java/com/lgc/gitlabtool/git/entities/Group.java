@@ -33,7 +33,7 @@ public class Group {
     /**
      * Projects in group
      **/
-    private Collection<Project> projects;
+    private transient Collection<Project> projects;
 
     private String _pathToClonedGroup;
 

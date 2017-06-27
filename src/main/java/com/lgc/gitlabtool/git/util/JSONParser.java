@@ -2,6 +2,7 @@ package com.lgc.gitlabtool.git.util;
 
 import java.lang.reflect.Type;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
@@ -104,6 +105,6 @@ public class JSONParser {
                 logger.error("Error parsing from a json to a collection of objects: " + ex.getMessage());
             }
         }
-        return null;
+        return Collections.emptyList();
     }
 }
