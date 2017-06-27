@@ -161,7 +161,7 @@ public class JGit {
         } catch (GitAPIException e) {
             e.printStackTrace();
         } catch (IOException e) {
-            logger.error("", e);
+            logger.error("IO error ", e);
         }
 
         return JGitStatus.FAILED;
@@ -352,6 +352,7 @@ public class JGit {
         for (Project pr : projects) {
             currentProgress += aStepInProgress;
             if (pr == null) {
+                statuses.put(new Project(), JGitStatus.FAILED);
                 continue;
             }
             if (!pr.isCloned()) {
@@ -445,6 +446,7 @@ public class JGit {
         for (Project pr : projects) {
             currentProgress += aStepInProgress;
             if (pr == null) {
+                statuses.put(new Project(), JGitStatus.FAILED);
                 continue;
             }
             if (!pr.isCloned()) {
@@ -751,7 +753,7 @@ public class JGit {
             String emailCommitter, String nameAuthor, String emailAuthor) {
         if (commitProject(project, message, setAll, nameCommitter, emailCommitter, nameAuthor, emailAuthor)
                 .equals(JGitStatus.FAILED)) {
-            logger.debug("commitAndPush " + JGitStatus.FAILED);
+            logger.debug("Commit and Push " + JGitStatus.FAILED + " (Project: " + project.getName() + ")");
             return JGitStatus.FAILED;
         }
         return push(project);
@@ -761,7 +763,7 @@ public class JGit {
         try (Git git = getGit(project.getPathToClonedProject())) {
             git.push().call();
             git.close();
-            logger.debug("push " + JGitStatus.SUCCESSFUL);
+            logger.debug("Push " + JGitStatus.SUCCESSFUL + " (Project: " + project.getName() + ")");
             return JGitStatus.SUCCESSFUL;
         } catch (GitAPIException | IOException e) {
             logger.error("Push error for the " + project.getName() + " project: " + e.getMessage());
@@ -871,7 +873,7 @@ public class JGit {
             }
 
             return checkDirCacheCheck(repo, firstRefCommit.getTree(), secondRefCommit.getTree());
-        } catch (RevisionSyntaxException | IOException e) {
+        } catch (RevisionSyntaxException  | IOException e) {
             logger.error("Failed finding conflicts in the repository: " + e.getMessage());
         }
         return true;

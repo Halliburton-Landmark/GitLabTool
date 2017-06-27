@@ -83,6 +83,7 @@ public class JGitTest {
 
     private static final String NAME_BRANCH = "test_name";
     private static final String CORRECT_PATH = "/path";
+    private static final Integer COUNT_INCORRECT_PROJECT = 2;
 
     @Test(expected = IllegalArgumentException.class)
     public void cloneGroupIncorrectDataExceptionGroupTest() {
@@ -414,7 +415,7 @@ public class JGitTest {
                         .map(Map.Entry::getValue)
                         .filter(status -> status.equals(JGitStatus.SUCCESSFUL))
                         .count();
-        Assert.assertEquals(result.size(), countSuccessfulDiscarding);
+        Assert.assertEquals(result.size() - COUNT_INCORRECT_PROJECT, countSuccessfulDiscarding);
     }
 
     @Test
@@ -528,7 +529,7 @@ public class JGitTest {
                         .map(Map.Entry::getValue)
                         .filter(status -> status.equals(JGitStatus.SUCCESSFUL))
                         .count();
-        Assert.assertEquals(result.size(), countSuccessfulDiscarding);
+        Assert.assertEquals(result.size() - COUNT_INCORRECT_PROJECT, countSuccessfulDiscarding);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -991,9 +992,11 @@ public class JGitTest {
     }
 
     private List<Project> getProjects() {
+        //Please use COUNT_INCORRECT_PROJECT if you add here new incorrect value
         List<Project> listProjects = new ArrayList<>();
         listProjects.add(getProject(true));
         listProjects.add(null);
+        listProjects.add(getProject(false));
         listProjects.add(getProject(true));
         return listProjects;
     }
