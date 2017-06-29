@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -19,6 +20,7 @@ import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 import com.lgc.gitlabtool.git.ui.icon.LocalRemoteIconHolder;
+import com.lgc.gitlabtool.git.ui.javafx.SwitchBranchConfirmDialog;
 import com.lgc.gitlabtool.git.ui.selection.SelectionsProvider;
 import com.lgc.gitlabtool.git.util.ScreenUtil;
 
@@ -31,6 +33,8 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
@@ -44,10 +48,15 @@ import javafx.stage.Stage;
 
 @SuppressWarnings("unchecked")
 public class SwitchBranchWindowController {
+
     private static final String TOTAL_CAPTION = "Total count: ";
     private static final String SWITCHTO_STATUS_ALERT_TITLE = "Switch branch info";
     private static final String SWITCHTO_STATUS_ALERT_HEADER = "Switch branch statuses:";
     private static final String NEW_LINE_SYMBOL = "\n";
+
+    private static final String STATUS_DISCARD_DIALOG_TITLE = "Discarding changes status";
+    private static final String STATUS_DISCARD_DIALOG_HEADER = "Discarding changes info";
+
 
     private final GitService _gitService =
             (GitService) ServiceProvider.getInstance().getService(GitService.class.getName());
@@ -106,14 +115,56 @@ public class SwitchBranchWindowController {
         List<Project> selectedProjects = currentProjectsListView.getItems();
         Branch selectedBranch = (Branch) branchesListView.getSelectionModel().getSelectedItem();
 
+        List<Project> changedProjects = _gitService.getProjectsWithChanges(selectedProjects);
+        if (changedProjects.isEmpty()) {
+            switchBranch(selectedProjects, selectedBranch);
+        } else {
+            showSwitchBranchConfirmWindow(changedProjects);
+        }
+
+    }
+
+    private void switchBranch(List<Project> selectedProjects, Branch selectedBranch){
+
         Map<Project, JGitStatus> switchStatuses = _gitService.switchTo(selectedProjects, selectedBranch);
 
-        String dialogMessage = switchStatuses.entrySet().stream()
-                .map(x -> x.getKey().getName() + "  -  " + x.getValue())
-                .collect(Collectors.joining(NEW_LINE_SYMBOL));
+        String dialogMessage;
+        if (switchStatuses.size() < 6) {
+            dialogMessage = switchStatuses.entrySet().stream()
+                    .map(x -> x.getKey().getName() + "  -  " + x.getValue())
+                    .collect(Collectors.joining(NEW_LINE_SYMBOL));
+        } else {
+            long successfulCount = switchStatuses.entrySet().stream()
+                    .filter(x->x.getValue().equals(JGitStatus.SUCCESSFUL))
+                    .count();
+            dialogMessage = successfulCount + " of " + switchStatuses.size() + " projects were switched successfully";
+        }
+
         switchToStatusDialog(dialogMessage);
 
         currentProjectsListView.refresh();
+    }
+
+    private void showSwitchBranchConfirmWindow(List<Project> selectedProjects){
+
+        SwitchBranchConfirmDialog alert = new SwitchBranchConfirmDialog();
+
+        Optional<ButtonType> result = alert.showAndWait();
+
+        if (alert.getCommitButton().equals(result.orElse(ButtonType.CANCEL))) {
+            alert.showCommitPushDialog(selectedProjects);
+
+        } else if (alert.getDiscardButton().equals(result.orElse(ButtonType.CANCEL))) {
+            Map<Project, JGitStatus> discardStatuses =_gitService.discardChanges(selectedProjects);
+
+            String headerMessage = "All changes was successfully discarded";
+            String failedMessage = "Discarding changes was failed";
+            alert.showStatusDialog(selectedProjects, discardStatuses,
+                    headerMessage, failedMessage, STATUS_DISCARD_DIALOG_TITLE, STATUS_DISCARD_DIALOG_HEADER);
+
+        } else {
+            alert.close();
+        }
     }
 
     public void onClose(ActionEvent actionEvent) {
@@ -298,4 +349,5 @@ public class SwitchBranchWindowController {
             return branchIcon;
         }
     }
+
 }

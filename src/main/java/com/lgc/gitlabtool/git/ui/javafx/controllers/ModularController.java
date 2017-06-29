@@ -18,6 +18,10 @@ import org.apache.logging.log4j.Logger;
 
 import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.Project;
+import com.lgc.gitlabtool.git.jgit.JGitStatus;
+import com.lgc.gitlabtool.git.services.ClonedGroupsService;
+import com.lgc.gitlabtool.git.services.GitService;
+
 import com.lgc.gitlabtool.git.services.GroupsUserService;
 import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
@@ -26,6 +30,7 @@ import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 import com.lgc.gitlabtool.git.ui.javafx.AlertWithCheckBox;
 import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuItems;
 import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuManager;
+import com.lgc.gitlabtool.git.ui.selection.SelectionsProvider;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarButtons;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarManager;
 import com.lgc.gitlabtool.git.util.ScreenUtil;
@@ -62,6 +67,7 @@ public class ModularController {
     private static final Logger logger = LogManager.getLogger(ModularController.class);
 
     private static final String ABOUT_POPUP_TITLE = "About";
+
     private static final String ABOUT_POPUP_HEADER =
             "Gitlab tool v." + getProjectVersion() + " (" + getCommitHash() + "), powered by Luxoft";
     private static final String ABOUT_POPUP_CONTENT = "Contacts: Yurii Pitomets (yurii.pitomets2@halliburton.com)";
@@ -74,6 +80,9 @@ public class ModularController {
     private static final String REMOVE_GROUP_DIALOG_TITLE = "Remove Group";
     private static final String REMOVE_GROUP_STATUS_DIALOG_TITLE = "Import Status Dialog";
     private static final String FAILED_REMOVE_GROUP_MESSAGE = "Removing of group is Failed";
+
+    private static final String STATUS_DISCARD_DIALOG_TITLE = "Discarding changes status";
+    private static final String STATUS_DISCARD_DIALOG_HEADER = "Discarding changes info";
 
     private static final String CSS_PATH = "css/style.css";
     private static final Image _appIcon = AppIconHolder.getInstance().getAppIcoImage();
@@ -103,6 +112,13 @@ public class ModularController {
 
     private final GroupsUserService _groupService = (GroupsUserService) ServiceProvider.getInstance()
             .getService(GroupsUserService.class.getName());
+
+
+    private final GitService _gitService = (GitService) ServiceProvider.getInstance()
+            .getService(GitService.class.getName());
+
+    private final ClonedGroupsService _clonedGroupsService = (ClonedGroupsService) ServiceProvider.getInstance()
+            .getService(ClonedGroupsService.class.getName());
 
     private final ProjectService _projectService =
             (ProjectService) ServiceProvider.getInstance().getService(ProjectService.class.getName());
@@ -164,7 +180,7 @@ public class ModularController {
         } else if (windowId.equals(ViewKey.MAIN_WINDOW.getKey())) {
             Button switchBranch = ToolbarManager.getInstance()
                     .getButtonById(ToolbarButtons.SWITCH_BRANCH_BUTTON.getId());
-            switchBranch.setOnAction(event -> showSwitchBranchWindow());
+            switchBranch.setOnAction(event -> switchBranchAction());
         }
     }
 
@@ -227,6 +243,11 @@ public class ModularController {
         }
     }
 
+    private void switchBranchAction(){
+        List<Project> allSelectedProjects = SelectionsProvider.getInstance().getSelectionItems("mainWindow_projectsList");
+        showSwitchBranchWindow();
+    }
+
     private void showSwitchBranchWindow() {
         try {
             EventHandler<WindowEvent> confirmCloseEventHandler = event -> {
@@ -277,6 +298,7 @@ public class ModularController {
 
         Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
         stage.getIcons().add(_appIcon);
+        stage.initModality(Modality.APPLICATION_MODAL);
 
         /* Set sizing and position */
         ScreenUtil.adaptForMultiScreens(stage, 300, 150);
@@ -332,4 +354,5 @@ public class ModularController {
             }
         });
     }
+
 }

@@ -6,8 +6,10 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
@@ -24,7 +26,9 @@ import org.eclipse.jgit.api.ListBranchCommand;
 import org.eclipse.jgit.api.ListBranchCommand.ListMode;
 import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.api.PullResult;
+import org.eclipse.jgit.api.ResetCommand;
 import org.eclipse.jgit.api.Status;
+import org.eclipse.jgit.api.errors.CheckoutConflictException;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.JGitInternalException;
 import org.eclipse.jgit.diff.DiffEntry;
@@ -52,6 +56,7 @@ import com.lgc.gitlabtool.git.entities.User;
 import com.lgc.gitlabtool.git.services.ProgressListener;
 import com.lgc.gitlabtool.git.util.NullCheckUtil;
 import com.lgc.gitlabtool.git.util.PathUtilities;
+
 
 /**
  * Class for work with Git:
@@ -137,6 +142,26 @@ public class JGit {
         return branches;
     }
 
+    public JGitStatus discardChanges(Project project) {
+        if (project == null) {
+            logger.error(WRONG_PARAMETERS);
+            throw new IllegalArgumentException(WRONG_PARAMETERS);
+        }
+
+        if (!project.isCloned()) {
+            logger.debug(project.getName() + ERROR_MSG_NOT_CLONED);
+            return JGitStatus.FAILED;
+        }
+        try (Git git = getGit(project.getPathToClonedProject())) {
+            git.reset().setMode(ResetCommand.ResetType.HARD).call();
+            return JGitStatus.SUCCESSFUL;
+        } catch (GitAPIException | IOException e) {
+            logger.error("Failed to discard changed for the " + project.getName() +" project: ", e);
+        }
+
+        return JGitStatus.FAILED;
+    }
+
     private <T> void mergeCollections(Collection<T> first, Collection<T> second, boolean onlyGeneral) {
         if (onlyGeneral && !first.isEmpty()) { // TODO: TEST IT (Can repository hasn't branches?)
             first.retainAll(second);
@@ -213,16 +238,7 @@ public class JGit {
         try (Git git = getGit(path)) {
             Status status = git.status().call();
             if (status != null) {
-                // debug code
-                logger.debug("\nConflicting: " + status.getConflicting() +
-                        "\nChanged: " + status.getChanged() +
-                        "\nAdded: " + status.getAdded() +
-                        "\nIgnored Not In Index: " + status.getIgnoredNotInIndex() +
-                        "\nConflicting Stage State: " + status.getConflictingStageState() +
-                        "\nMissing: " + status.getMissing() +
-                        "\nModified: " + status.getModified() +
-                        "\nUntracked: " + status.getUntracked() +
-                        "\nUntracked Folders: " + status.getUntrackedFolders());
+
                 return Optional.of(status);
             }
         } catch (NoWorkTreeException | GitAPIException | IOException e) {
@@ -299,20 +315,18 @@ public class JGit {
      * @param emailCommitter the email committer for this commit.
      * @param nameAuthor     the name author for this commit.
      * @param emailAuthor    the email author for this commit.
-     * @param onSuccess      method for tracking the success progress of cloning,
-     *                       where <Integer> is a percentage of progress.
-     * @param onError        method for tracking the errors during cloning,
-     *                       where <Integer> is a percentage of progress, <String> error message.
+     * @param progressListener Listener for obtaining data on the process of performing the operation.
      *
      * If the passed committer or author is {null} we take the value from the current user.
      * Projects that failed to commit will be displayed in the UI console.
      *
-     * @return status SUCCESSFUL is if committed successfully, otherwise is FAILED.
+     * @return map with projects and theirs statuses
      */
-    public JGitStatus commit (List<Project> projects, String message, boolean setAll,
+    public Map<Project, JGitStatus> commit (List<Project> projects, String message, boolean setAll,
                               String nameCommitter, String emailCommitter,
                               String nameAuthor, String emailAuthor,
-                              Consumer<Integer> onSuccess, BiConsumer<Integer, String> onError) {
+                              ProgressListener progressListener) {
+        Map<Project, JGitStatus> statuses = new HashMap<>();
         if (projects == null || message == null || projects.isEmpty() || message.isEmpty()) {
             throw new IllegalArgumentException("Incorrect data: projects is " + projects + ", message is " + message);
         }
@@ -321,30 +335,35 @@ public class JGit {
         for (Project pr : projects) {
             currentProgress += aStepInProgress;
             if (pr == null) {
+                statuses.put(new Project(), JGitStatus.FAILED);
                 continue;
             }
             if (!pr.isCloned()) {
+                statuses.put(pr, JGitStatus.FAILED);
                 String errMessage = pr.getName() + ERROR_MSG_NOT_CLONED;
                 logger.debug(errMessage);
                 continue;
             }
             if(commitProject(pr, message, setAll, nameCommitter, emailCommitter,
                       nameAuthor, emailAuthor).equals(JGitStatus.FAILED)) {
+                statuses.put(pr, JGitStatus.FAILED);
                 String errMessage = "Failed to commit " + pr.getName() + " project";
                 logger.debug(errMessage);
                 continue;
             }
-            NullCheckUtil.acceptConsumer(onSuccess, currentProgress);
+            progressListener.onSuccess(currentProgress);
+            statuses.put(pr, JGitStatus.SUCCESSFUL);
+            logger.debug("Commit for the projects is " + JGitStatus.SUCCESSFUL);
         }
-        logger.debug("Commit for the projects is " + JGitStatus.SUCCESSFUL);
-        return JGitStatus.SUCCESSFUL;
+
+        return statuses;
     }
 
     /**
      *
      * Commit of project in the group
      *
-     * @param projects       a project for commit
+     * @param project       a project for commit
      * @param message        a message for commit. The commit message can not be {null}.
      * @param setAll         if set to true the commit command automatically stages files that have been
      *                       modified and deleted, but new files not known by the repository are not affected.
@@ -387,20 +406,18 @@ public class JGit {
      * @param emailCommitter the email committer for this commit.
      * @param nameAuthor     the name author for this commit.
      * @param emailAuthor    the email author for this commit.
-     * @param onSuccess      method for tracking the success progress of cloning,
-     *                       where <Integer> is a percentage of progress.
-     * @param onError        method for tracking the errors during cloning,
-     *                       where <Integer> is a percentage of progress, <String> error message.
+     * @param progressListener Listener for obtaining data on the process of performing the operation.
      *
      * If the passed committer or author is {null} we take the value from the current user.
      * Projects that failed to commit or to push will be displayed in the console.
      *
-     * @return
+     * @return statuses of operation
      */
-    public boolean commitAndPush (List<Project> projects, String message, boolean setAll,
-                                  String nameCommitter, String emailCommitter,
-                                  String nameAuthor, String emailAuthor,
-                                  Consumer<Integer> onSuccess, BiConsumer<Integer, String> onError) {
+    public Map<Project, JGitStatus> commitAndPush (List<Project> projects, String message, boolean setAll,
+                                                   String nameCommitter, String emailCommitter,
+                                                   String nameAuthor, String emailAuthor,
+                                                   ProgressListener progressListener) {
+        Map<Project, JGitStatus> statuses = new HashMap<>();
         if (message == null || projects == null || projects.isEmpty() || message.isEmpty()) {
             throw new IllegalArgumentException("Incorrect data: projects is " + projects + ", message is " + message);
         }
@@ -409,25 +426,29 @@ public class JGit {
         for (Project pr : projects) {
             currentProgress += aStepInProgress;
             if (pr == null) {
+                statuses.put(new Project(), JGitStatus.FAILED);
                 continue;
             }
             if (!pr.isCloned()) {
-                NullCheckUtil.acceptBiConsumer(onError, currentProgress, pr.getName() + ERROR_MSG_NOT_CLONED);
+                progressListener.onError(currentProgress);
                 String errMessage = pr.getName() + ERROR_MSG_NOT_CLONED;
+                statuses.put(pr, JGitStatus.FAILED);
                 logger.debug(errMessage);
                 continue;
             }
             if(commitAndPush(pr, message, setAll, nameCommitter, emailCommitter, nameAuthor, emailAuthor)
                     .equals(JGitStatus.FAILED)) {
                 String errorMsg = "Failed to commit and push " + pr.getName() + " project";
-                NullCheckUtil.acceptBiConsumer(onError, currentProgress, errorMsg);
-                logger.debug(errorMsg);
+                progressListener.onError(currentProgress);
+                statuses.put(pr, JGitStatus.FAILED);
+                logger.error(errorMsg);
                 continue;
             }
-            NullCheckUtil.acceptConsumer(onSuccess, currentProgress);
+            progressListener.onSuccess(currentProgress);
+            statuses.put(pr, JGitStatus.SUCCESSFUL);
             logger.debug("Commit and push for projects is " + JGitStatus.SUCCESSFUL);
         }
-        return true;
+        return statuses;
     }
 
     /**
@@ -567,7 +588,10 @@ public class JGit {
             logger.info(prefixErrorMessage + ORIGIN_PREFIX + nameBranchWithoutAlias);
             git.getRepository().close();
             git.close();
+
             return JGitStatus.SUCCESSFUL;
+        } catch (CheckoutConflictException cce) {
+            logger.info("Oops..");
         } catch (IOException | GitAPIException e) {
             logger.error("Failed " + prefixErrorMessage + e.getMessage());
         }
@@ -695,7 +719,7 @@ public class JGit {
             String emailCommitter, String nameAuthor, String emailAuthor) {
         if (commitProject(project, message, setAll, nameCommitter, emailCommitter, nameAuthor, emailAuthor)
                 .equals(JGitStatus.FAILED)) {
-            logger.debug("commitAndPush " + JGitStatus.FAILED);
+            logger.debug("Commit and Push " + JGitStatus.FAILED + " (Project: " + project.getName() + ")");
             return JGitStatus.FAILED;
         }
         return push(project);
@@ -705,7 +729,7 @@ public class JGit {
         try (Git git = getGit(project.getPathToClonedProject())) {
             git.push().call();
             git.close();
-            logger.debug("push " + JGitStatus.SUCCESSFUL);
+            logger.debug("Push " + JGitStatus.SUCCESSFUL + " (Project: " + project.getName() + ")");
             return JGitStatus.SUCCESSFUL;
         } catch (GitAPIException | IOException e) {
             logger.error("Push error for the " + project.getName() + " project: " + e.getMessage());
@@ -815,7 +839,7 @@ public class JGit {
             }
 
             return checkDirCacheCheck(repo, firstRefCommit.getTree(), secondRefCommit.getTree());
-        } catch (RevisionSyntaxException | IOException e) {
+        } catch (RevisionSyntaxException  | IOException e) {
             logger.error("Failed finding conflicts in the repository: " + e.getMessage());
         }
         return true;

@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.jgit.api.AddCommand;
 import org.eclipse.jgit.api.CheckoutCommand;
@@ -80,6 +81,7 @@ public class JGitTest {
 
     private static final String NAME_BRANCH = "test_name";
     private static final String CORRECT_PATH = "/path";
+    private static final Integer COUNT_INCORRECT_PROJECT = 2;
 
     @Test(expected = IllegalArgumentException.class)
     public void cloneGroupIncorrectDataExceptionGroupTest() {
@@ -281,22 +283,22 @@ public class JGitTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void commitMessageIsNullTest() {
-        JGit.getInstance().commit(getProjects(), null, false, null, null, null, null, null, null);
+        JGit.getInstance().commit(getProjects(), null, false, null, null, null, null, new EmptyListener());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void commitMessageIsEmptyTest() {
-        JGit.getInstance().commit(getProjects(), "", false, null, null, null, null, null, null);
+        JGit.getInstance().commit(getProjects(), "", false, null, null, null, null, new EmptyListener());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void commitProjectsIsEmptyTest() {
-        JGit.getInstance().commit(new ArrayList<>(), "__", false, null, null, null, null, null, null);
+        JGit.getInstance().commit(new ArrayList<>(), "__", false, null, null, null, null, new EmptyListener());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void commitProjectsIsNullTest() {
-        JGit.getInstance().commit(null, "__", false, null, null, null, null, null, null);
+        JGit.getInstance().commit(null, "__", false, null, null, null, null, new EmptyListener());
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -350,15 +352,16 @@ public class JGitTest {
             }
         };
         Mockito.when(gitMock.commit()).thenReturn(commitCommand);
-        JGitStatus result = getJGitMock(gitMock).commit(getProjects(), "_", false, "Lyuda", "l@gmail.com", "Lyuda",
-                "l@gmail.com", null, null);
-        Assert.assertEquals(result, JGitStatus.SUCCESSFUL);
+        Map<Project, JGitStatus> result = getJGitMock(gitMock).commit(getProjects(), "_", false, "Lyuda", "l@gmail.com", "Lyuda",
+                "l@gmail.com", new EmptyListener());
+
+        Assert.assertEquals(getCountCorrectProject(getProjects()), getCountCorrectStatuses(result));
     }
 
     @Test
     public void commitAllProjectsIncorrectDataTest() {
-        JGitStatus result = getJGitMock(null).commit(getProjects(), "_", false, null, null, null, null, null, null);
-        Assert.assertEquals(result, JGitStatus.SUCCESSFUL);
+        Map<Project, JGitStatus> result = getJGitMock(null).commit(getProjects(), "_", false, null, null, null, null, new EmptyListener());
+        Assert.assertEquals(result.size(), getCountIncorrectStatuses(result));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -403,28 +406,28 @@ public class JGitTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void commitAndPushProjectsIsNullTest() {
-        JGit.getInstance().commitAndPush(null, "_", false, null, null, null, null, null, null);
+        JGit.getInstance().commitAndPush(null, "_", false, null, null, null, null, new EmptyListener());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void commitAndPushMessageIsNullTest() {
-        JGit.getInstance().commitAndPush(getProjects(), null, false, null, null, null, null, null, null);
+        JGit.getInstance().commitAndPush(getProjects(), null, false, null, null, null, null, new EmptyListener());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void commitAndPushProjectsIsEmptyTest() {
-        JGit.getInstance().commitAndPush(new ArrayList<>(), "_", false, null, null, null, null, null, null);
+        JGit.getInstance().commitAndPush(new ArrayList<>(), "_", false, null, null, null, null, new EmptyListener());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void commitAndPushMessageIsEmptyTest() {
-        JGit.getInstance().commitAndPush(getProjects(), "", false, null, null, null, null, null, null);
+        JGit.getInstance().commitAndPush(getProjects(), "", false, null, null, null, null, new EmptyListener());
     }
 
     @Test
     public void commitAndPushIncorrectDataTest() {
-        Assert.assertTrue(
-                getJGitMock(null).commitAndPush(getProjects(), "__", false, null, null, null, null, null, null));
+        Map<Project, JGitStatus> result = getJGitMock(null).commitAndPush(getProjects(), "__", false, null, null, null, null, new EmptyListener());
+        Assert.assertEquals(result.size(), getCountIncorrectStatuses(result));
     }
 
     @Test
@@ -446,10 +449,10 @@ public class JGitTest {
             }
         };
         Mockito.when(gitMock.push()).thenReturn(pushCommandMock);
-        Assert.assertTrue(getJGitMock(gitMock).commitAndPush(getProjects(), "__", false, "Lyuda", "l@gmail.com",
-                "Lyuda", "l@gmail.com", (progress) -> {
-                }, (progress, message) -> {
-                }));
+        Map<Project, JGitStatus> result = getJGitMock(gitMock).commitAndPush(getProjects(), "__", false, "Lyuda", "l@gmail.com",
+                "Lyuda", "l@gmail.com", new EmptyListener());
+
+        Assert.assertEquals(getCountCorrectProject(getProjects()), getCountCorrectStatuses(result));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -912,12 +915,37 @@ public class JGitTest {
     }
 
     private List<Project> getProjects() {
+        //Please use COUNT_INCORRECT_PROJECT if you add here new incorrect value
         List<Project> listProjects = new ArrayList<>();
         listProjects.add(getProject(true));
         listProjects.add(null);
         listProjects.add(getProject(false));
         listProjects.add(getProject(true));
         return listProjects;
+    }
+
+    private long getCountIncorrectProject(List<Project> projects) {
+        return projects.stream()
+                .filter((project) -> project == null || !project.isCloned())
+                .count();
+    }
+
+    private long getCountCorrectProject(List<Project> projects) {
+        return (projects.size() - getCountIncorrectProject(projects));
+    }
+
+    private long getCountCorrectStatuses(Map<Project, JGitStatus> statuses){
+        return  statuses.entrySet().stream()
+                .map(Map.Entry::getValue)
+                .filter(status -> status.equals(JGitStatus.SUCCESSFUL))
+                .count();
+    }
+
+    private long getCountIncorrectStatuses(Map<Project, JGitStatus> statuses){
+        return  statuses.entrySet().stream()
+                .map(Map.Entry::getValue)
+                .filter(status -> status.equals(JGitStatus.FAILED))
+                .count();
     }
 
     private JGit getJGitMock(Git gitMock) {
