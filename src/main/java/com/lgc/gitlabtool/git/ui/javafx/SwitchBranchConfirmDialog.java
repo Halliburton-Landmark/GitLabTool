@@ -135,36 +135,6 @@ public class SwitchBranchConfirmDialog extends Alert {
         return cancelButton;
     }
 
-    /**
-     * Handler for successful discard operation
-     *
-     * @author Pavlo Pidhorniy
-     *//*
-    class SuccessfulOperationHandler implements Consumer<Integer> {
-
-        @Override
-        public void accept(Integer percentage) {
-            //TODO: use this handler for UI console
-            logger.info("Progress: " + percentage + "%");
-        }
-    }
-
-    *//**
-     * Handler for unsuccessful discard operation
-     *
-     * @author Pavlo Pidhorniy
-     *//*
-    class UnsuccessfulOperationHandler implements BiConsumer<Integer, String> {
-
-        @Override
-        public void accept(Integer percentage, String message) {
-            //TODO: use this handler for UI console
-            logger.error("!ERROR: " + message);
-            logger.info("Progress: " + percentage + "%");
-        }
-
-    }*/
-
     class SwitchBranchProgressListener implements ProgressListener {
 
         @Override
