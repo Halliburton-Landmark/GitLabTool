@@ -2,6 +2,7 @@ package com.lgc.gitlabtool.git.ui.javafx.controllers;
 
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.services.LoginService;
@@ -174,7 +175,12 @@ public class MainWindowController {
 
     private void showCreateNewBranchDialog() {
         CreateNewBranchDialog dialog = new CreateNewBranchDialog();
-        dialog.setProjects(projectsList.getSelectionModel().getSelectedItems());
+        List<Project> allSelectedProjects = projectsList.getSelectionModel().getSelectedItems();
+        List<Project> clonedProjects =
+                allSelectedProjects.stream()
+                        .filter(prj -> prj.isCloned())
+                        .collect(Collectors.toList());
+        dialog.setProjects(clonedProjects);
         dialog.showAndWait();
     }
 
