@@ -315,10 +315,7 @@ public class JGit {
      * @param emailCommitter the email committer for this commit.
      * @param nameAuthor     the name author for this commit.
      * @param emailAuthor    the email author for this commit.
-     * @param onSuccess      method for tracking the success progress of cloning,
-     *                       where <Integer> is a percentage of progress.
-     * @param onError        method for tracking the errors during cloning,
-     *                       where <Integer> is a percentage of progress, <String> error message.
+     * @param progressListener Listener for obtaining data on the process of performing the operation.
      *
      * If the passed committer or author is {null} we take the value from the current user.
      * Projects that failed to commit will be displayed in the UI console.
@@ -328,7 +325,7 @@ public class JGit {
     public Map<Project, JGitStatus> commit (List<Project> projects, String message, boolean setAll,
                               String nameCommitter, String emailCommitter,
                               String nameAuthor, String emailAuthor,
-                              Consumer<Integer> onSuccess, BiConsumer<Integer, String> onError) {
+                              ProgressListener progressListener) {
         Map<Project, JGitStatus> statuses = new HashMap<>();
         if (projects == null || message == null || projects.isEmpty() || message.isEmpty()) {
             throw new IllegalArgumentException("Incorrect data: projects is " + projects + ", message is " + message);
@@ -354,7 +351,7 @@ public class JGit {
                 logger.debug(errMessage);
                 continue;
             }
-            NullCheckUtil.acceptConsumer(onSuccess, currentProgress);
+            progressListener.onSuccess(currentProgress);
             statuses.put(pr, JGitStatus.SUCCESSFUL);
             logger.debug("Commit for the projects is " + JGitStatus.SUCCESSFUL);
         }
@@ -409,10 +406,7 @@ public class JGit {
      * @param emailCommitter the email committer for this commit.
      * @param nameAuthor     the name author for this commit.
      * @param emailAuthor    the email author for this commit.
-     * @param onSuccess      method for tracking the success progress of cloning,
-     *                       where <Integer> is a percentage of progress.
-     * @param onError        method for tracking the errors during cloning,
-     *                       where <Integer> is a percentage of progress, <String> error message.
+     * @param progressListener Listener for obtaining data on the process of performing the operation.
      *
      * If the passed committer or author is {null} we take the value from the current user.
      * Projects that failed to commit or to push will be displayed in the console.
@@ -422,7 +416,7 @@ public class JGit {
     public Map<Project, JGitStatus> commitAndPush (List<Project> projects, String message, boolean setAll,
                                                    String nameCommitter, String emailCommitter,
                                                    String nameAuthor, String emailAuthor,
-                                                   Consumer<Integer> onSuccess, BiConsumer<Integer, String> onError) {
+                                                   ProgressListener progressListener) {
         Map<Project, JGitStatus> statuses = new HashMap<>();
         if (message == null || projects == null || projects.isEmpty() || message.isEmpty()) {
             throw new IllegalArgumentException("Incorrect data: projects is " + projects + ", message is " + message);
@@ -436,7 +430,7 @@ public class JGit {
                 continue;
             }
             if (!pr.isCloned()) {
-                NullCheckUtil.acceptBiConsumer(onError, currentProgress, pr.getName() + ERROR_MSG_NOT_CLONED);
+                progressListener.onError(currentProgress);
                 String errMessage = pr.getName() + ERROR_MSG_NOT_CLONED;
                 statuses.put(pr, JGitStatus.FAILED);
                 logger.debug(errMessage);
@@ -445,12 +439,12 @@ public class JGit {
             if(commitAndPush(pr, message, setAll, nameCommitter, emailCommitter, nameAuthor, emailAuthor)
                     .equals(JGitStatus.FAILED)) {
                 String errorMsg = "Failed to commit and push " + pr.getName() + " project";
-                NullCheckUtil.acceptBiConsumer(onError, currentProgress, errorMsg);
+                progressListener.onError(currentProgress);
                 statuses.put(pr, JGitStatus.FAILED);
-                logger.debug(errorMsg);
+                logger.error(errorMsg);
                 continue;
             }
-            NullCheckUtil.acceptConsumer(onSuccess, currentProgress);
+            progressListener.onSuccess(currentProgress);
             statuses.put(pr, JGitStatus.SUCCESSFUL);
             logger.debug("Commit and push for projects is " + JGitStatus.SUCCESSFUL);
         }

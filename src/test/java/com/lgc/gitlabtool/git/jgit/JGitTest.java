@@ -283,22 +283,22 @@ public class JGitTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void commitMessageIsNullTest() {
-        JGit.getInstance().commit(getProjects(), null, false, null, null, null, null, null, null);
+        JGit.getInstance().commit(getProjects(), null, false, null, null, null, null, new EmptyListener());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void commitMessageIsEmptyTest() {
-        JGit.getInstance().commit(getProjects(), "", false, null, null, null, null, null, null);
+        JGit.getInstance().commit(getProjects(), "", false, null, null, null, null, new EmptyListener());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void commitProjectsIsEmptyTest() {
-        JGit.getInstance().commit(new ArrayList<>(), "__", false, null, null, null, null, null, null);
+        JGit.getInstance().commit(new ArrayList<>(), "__", false, null, null, null, null, new EmptyListener());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void commitProjectsIsNullTest() {
-        JGit.getInstance().commit(null, "__", false, null, null, null, null, null, null);
+        JGit.getInstance().commit(null, "__", false, null, null, null, null, new EmptyListener());
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -353,14 +353,14 @@ public class JGitTest {
         };
         Mockito.when(gitMock.commit()).thenReturn(commitCommand);
         Map<Project, JGitStatus> result = getJGitMock(gitMock).commit(getProjects(), "_", false, "Lyuda", "l@gmail.com", "Lyuda",
-                "l@gmail.com", null, null);
+                "l@gmail.com", new EmptyListener());
 
         Assert.assertEquals(getCountCorrectProject(getProjects()), getCountCorrectStatuses(result));
     }
 
     @Test
     public void commitAllProjectsIncorrectDataTest() {
-        Map<Project, JGitStatus> result = getJGitMock(null).commit(getProjects(), "_", false, null, null, null, null, null, null);
+        Map<Project, JGitStatus> result = getJGitMock(null).commit(getProjects(), "_", false, null, null, null, null, new EmptyListener());
         Assert.assertEquals(result.size(), getCountIncorrectStatuses(result));
     }
 
@@ -406,27 +406,27 @@ public class JGitTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void commitAndPushProjectsIsNullTest() {
-        JGit.getInstance().commitAndPush(null, "_", false, null, null, null, null, null, null);
+        JGit.getInstance().commitAndPush(null, "_", false, null, null, null, null, new EmptyListener());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void commitAndPushMessageIsNullTest() {
-        JGit.getInstance().commitAndPush(getProjects(), null, false, null, null, null, null, null, null);
+        JGit.getInstance().commitAndPush(getProjects(), null, false, null, null, null, null, new EmptyListener());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void commitAndPushProjectsIsEmptyTest() {
-        JGit.getInstance().commitAndPush(new ArrayList<>(), "_", false, null, null, null, null, null, null);
+        JGit.getInstance().commitAndPush(new ArrayList<>(), "_", false, null, null, null, null, new EmptyListener());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void commitAndPushMessageIsEmptyTest() {
-        JGit.getInstance().commitAndPush(getProjects(), "", false, null, null, null, null, null, null);
+        JGit.getInstance().commitAndPush(getProjects(), "", false, null, null, null, null, new EmptyListener());
     }
 
     @Test
     public void commitAndPushIncorrectDataTest() {
-        Map<Project, JGitStatus> result = getJGitMock(null).commitAndPush(getProjects(), "__", false, null, null, null, null, null, null);
+        Map<Project, JGitStatus> result = getJGitMock(null).commitAndPush(getProjects(), "__", false, null, null, null, null, new EmptyListener());
         Assert.assertEquals(result.size(), getCountIncorrectStatuses(result));
     }
 
@@ -450,9 +450,7 @@ public class JGitTest {
         };
         Mockito.when(gitMock.push()).thenReturn(pushCommandMock);
         Map<Project, JGitStatus> result = getJGitMock(gitMock).commitAndPush(getProjects(), "__", false, "Lyuda", "l@gmail.com",
-                "Lyuda", "l@gmail.com", (progress) -> {
-                }, (progress, message) -> {
-                });
+                "Lyuda", "l@gmail.com", new EmptyListener());
 
         Assert.assertEquals(getCountCorrectProject(getProjects()), getCountCorrectStatuses(result));
     }

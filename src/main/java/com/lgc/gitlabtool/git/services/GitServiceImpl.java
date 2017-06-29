@@ -7,8 +7,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.eclipse.jgit.api.Status;
@@ -45,7 +43,7 @@ public class GitServiceImpl implements GitService {
 
         return switchTo(projects, selectedBranchName, isRemote);
     }
-    
+
     @Override
     public Map<Project, JGitStatus> switchTo(List<Project> projects, String branchName, boolean isRemote) {
         Map<Project, JGitStatus> switchStatuses = new HashMap<>();
@@ -95,24 +93,25 @@ public class GitServiceImpl implements GitService {
 
     @Override
     public Map<Project, JGitStatus> commitChanges(List<Project> projects, String commitMessage, boolean isPushImmediately,
-                                                  Consumer<Integer> onSuccess, BiConsumer<Integer, String> onError) {
+                    ProgressListener progressListener) {
         Map<Project, JGitStatus> results;
         if (isPushImmediately) {
             //use null for getting default user-info
             results = JGit.getInstance().commitAndPush(projects, commitMessage, true, null,
-                    null, null, null, onSuccess, onError);
+                    null, null, null, progressListener);
         } else {
             //use null for getting default user-info
             results = JGit.getInstance().commit(projects, commitMessage, true, null,
-                    null, null, null, onSuccess, onError);
+                    null, null, null, progressListener);
         }
 
         return results;
     }
 
+    @Override
     public Map<Project, JGitStatus> createBranch(List<Project> projects, String branchName, boolean force) {
         Map<Project, JGitStatus> statuses = new HashMap<>();
-        List<Project> localProjects = 
+        List<Project> localProjects =
                 projects.stream()
                 .filter(prj -> prj.isCloned())
                 .collect(Collectors.toList());

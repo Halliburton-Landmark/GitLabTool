@@ -2,12 +2,6 @@ package com.lgc.gitlabtool.git.services;
 
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-
-import com.lgc.gitlabtool.git.entities.Branch;
-import com.lgc.gitlabtool.git.entities.Project;
-import com.lgc.gitlabtool.git.jgit.JGitStatus;
 
 import com.lgc.gitlabtool.git.entities.Branch;
 import com.lgc.gitlabtool.git.entities.Project;
@@ -62,27 +56,24 @@ public interface GitService {
      * @param projects          projects that contains changes
      * @param commitMessage     message for commit
      * @param isPushImmediately if true - make push operation after commiting, if false - make commit without pushing
-     * @param onSuccess      method for tracking the success progress of cloning,
-     *                       where <Integer> is a percentage of progress.
-     * @param onError        method for tracking the errors during cloning,
-     *                       where <Integer> is a percentage of progress, <String> error message.
+     * @param progressListener Listener for obtaining data on the process of performing the operation.
      */
     Map<Project, JGitStatus> commitChanges(List<Project> projects, String commitMessage, boolean isPushImmediately,
-                       Consumer<Integer> onSuccess, BiConsumer<Integer, String> onError);
-    
+                       ProgressListener progressListener);
+
     /**
      * Switches projects to selected branch
-     * 
+     *
      * @param projects projects that need to be switched
      * @param branchName name of the branch
      * @param isRemote <code>true</code> if the branch has {@link BranchType#REMOTE}
      * @return map with projects and theirs statuses of switching
      */
     Map<Project, JGitStatus> switchTo(List<Project> projects, String branchName, boolean isRemote);
-    
+
     /**
      * Creates new branch
-     * 
+     *
      * @param projects     the projects that needs new branch
      * @param branchName   new branch name
      * @param force        if <code>true</code> and the branch with the given name

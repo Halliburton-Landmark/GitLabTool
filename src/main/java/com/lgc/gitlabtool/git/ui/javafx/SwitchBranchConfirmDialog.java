@@ -3,8 +3,6 @@ package com.lgc.gitlabtool.git.ui.javafx;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
@@ -14,6 +12,7 @@ import org.apache.logging.log4j.Logger;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.services.GitService;
+import com.lgc.gitlabtool.git.services.ProgressListener;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 
@@ -66,7 +65,7 @@ public class SwitchBranchConfirmDialog extends Alert {
             boolean isPush = commitResult.get().equals(dialog.getCommitAndPushButton());
 
             Map<Project, JGitStatus> commitStatuses = _gitService.commitChanges(projects, commitMessage, isPush,
-                    new SuccessfulOperationHandler(), new UnsuccessfulOperationHandler());
+                    new SwitchBranchProgressListener());
 
             String headerMessage = "All changes was successfully commited";
             String failedMessage = "Committing changes was failed";
@@ -107,7 +106,7 @@ public class SwitchBranchConfirmDialog extends Alert {
      * Handler for successful discard operation
      *
      * @author Pavlo Pidhorniy
-     */
+     *//*
     class SuccessfulOperationHandler implements Consumer<Integer> {
 
         @Override
@@ -117,11 +116,11 @@ public class SwitchBranchConfirmDialog extends Alert {
         }
     }
 
-    /**
+    *//**
      * Handler for unsuccessful discard operation
      *
      * @author Pavlo Pidhorniy
-     */
+     *//*
     class UnsuccessfulOperationHandler implements BiConsumer<Integer, String> {
 
         @Override
@@ -130,6 +129,34 @@ public class SwitchBranchConfirmDialog extends Alert {
             logger.error("!ERROR: " + message);
             logger.info("Progress: " + percentage + "%");
         }
+
+    }*/
+
+    class SwitchBranchProgressListener implements ProgressListener {
+
+        @Override
+        public void onSuccess(Object... t) {
+            if (t[0] instanceof Integer) {
+                showProgress(t[0]);
+            }
+        }
+
+        @Override
+        public void onError(Object... t) {
+            showProgress(t[0]);
+        }
+
+        private void showProgress(Object object) {
+            if (object instanceof Integer) {
+                logger.info("Progress: " + object + "%");
+            }
+        }
+
+        @Override
+        public void onStart(Object... t) {}
+
+        @Override
+        public void onFinish(Object... t) {}
 
     }
 }
