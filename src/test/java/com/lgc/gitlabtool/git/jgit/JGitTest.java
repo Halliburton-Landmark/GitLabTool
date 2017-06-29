@@ -927,19 +927,9 @@ public class JGitTest {
     }
 
     private long getCountIncorrectProject(List<Project> projects) {
-        int countIncorrectProject = 0;
-
-        for (Project project : projects) {
-            if (project == null) {
-                countIncorrectProject++;
-                continue;
-            }
-            if (!project.isCloned()) {
-                countIncorrectProject++;
-            }
-        }
-
-        return countIncorrectProject;
+        return projects.stream()
+                .filter((project) -> project == null || !project.isCloned())
+                .count();
     }
 
     private long getCountCorrectProject(List<Project> projects) {
