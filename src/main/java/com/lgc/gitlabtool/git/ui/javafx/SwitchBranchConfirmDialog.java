@@ -17,6 +17,7 @@ import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 
 import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
@@ -33,22 +34,26 @@ public class SwitchBranchConfirmDialog extends Alert {
     private static final String STATUS_COMMIT_DIALOG_TITLE = "Committing changes status";
     private static final String STATUS_COMMIT_DIALOG_HEADER = "Committing changes info";
 
-    public SwitchBranchConfirmDialog(ButtonType... buttonTypes) {
+    ButtonType commitButton;
+    ButtonType discardButton;
+    ButtonType cancelButton;
+
+    public SwitchBranchConfirmDialog() {
         super(AlertType.WARNING);
+
+        commitButton = new ButtonType("Commit changes");
+        discardButton = new ButtonType("Discard changes");
+        cancelButton = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
 
         setTitle("Switch branch confirmation");
         setHeaderText("This projects have uncommited changes");
         setContentText("Would you like to commit the changes or discard ?");
 
-        getDialogPane().getButtonTypes().setAll(buttonTypes);
+        getDialogPane().getButtonTypes().setAll(commitButton, discardButton, cancelButton);
 
         Stage stage = (Stage) getDialogPane().getScene().getWindow();
         stage.getIcons().add(_appIcon);
 
-    }
-
-    public enum ConfirmStatuses {
-        COMMIT, DISCARD, CANCEL;
     }
 
     public void showCommitPushDialog(List<Project> projects) {
@@ -58,11 +63,12 @@ public class SwitchBranchConfirmDialog extends Alert {
         if (commitResult.get() == dialog.getCommitButton() || commitResult.get() == dialog.getCommitAndPushButton()) {
             String commitMessage = StringUtils.EMPTY;
 
-            if (dialog.getCommitMessage() != null) {
-                commitMessage = dialog.getCommitMessage();
-            }
-
             boolean isPush = commitResult.get().equals(dialog.getCommitAndPushButton());
+
+            if (dialog.getCommitMessage() != null || dialog.getCommitMessage().isEmpty()) {
+                showEmptyCommitMessageWarning();
+                return;
+            }
 
             Map<Project, JGitStatus> commitStatuses = _gitService.commitChanges(projects, commitMessage, isPush,
                     new SwitchBranchProgressListener());
@@ -72,6 +78,21 @@ public class SwitchBranchConfirmDialog extends Alert {
             showStatusDialog(projects, commitStatuses,
                     headerMessage, failedMessage, STATUS_COMMIT_DIALOG_TITLE, STATUS_COMMIT_DIALOG_HEADER);
         }
+    }
+
+    public void showEmptyCommitMessageWarning(){
+        // TODO: It's temporary solution. Should be rewrite CommitDialog for using Button instead ButtonTypes.
+        // After that we can use disablers on buttons.
+        Alert alert = new Alert(AlertType.WARNING);
+        alert.setTitle("Warning");
+        alert.setHeaderText("Empty commit message");
+        alert.setContentText("Please enter commit message");
+
+        Image appIcon = AppIconHolder.getInstance().getAppIcoImage();
+        Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+        stage.getIcons().add(appIcon);
+
+        alert.showAndWait();
     }
 
     public void showStatusDialog(List<Project> projects, Map<Project, JGitStatus> discardStatuses,
@@ -100,6 +121,18 @@ public class SwitchBranchConfirmDialog extends Alert {
 
         Alert statusDialog = new StatusDialog(dialogTitle, dialogHeader, info);
         statusDialog.showAndWait();
+    }
+
+    public ButtonType getCommitButton(){
+        return commitButton;
+    }
+
+    public ButtonType getDiscardButton(){
+        return discardButton;
+    }
+
+    public ButtonType getCancelButton(){
+        return cancelButton;
     }
 
     /**
