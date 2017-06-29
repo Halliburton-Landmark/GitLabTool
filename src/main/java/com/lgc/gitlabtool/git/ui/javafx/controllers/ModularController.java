@@ -239,12 +239,7 @@ public class ModularController {
 
     private void switchBranchAction(){
         List<Project> allSelectedProjects = SelectionsProvider.getInstance().getSelectionItems("mainWindow_projectsList");
-        List<Project> changedProjects = _gitService.getProjectsWithChanges(allSelectedProjects);
-        if (changedProjects.isEmpty()) {
-            showSwitchBranchWindow();
-        } else {
-            showSwitchBranchConfirmWindow(changedProjects);
-        }
+        showSwitchBranchWindow();
     }
 
     private void showSwitchBranchWindow() {
