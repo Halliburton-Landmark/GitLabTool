@@ -2,11 +2,9 @@ package com.lgc.gitlabtool.git.services;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.User;
-import com.lgc.gitlabtool.git.statuses.CloningStatus;
 
 public interface GroupsUserService {
 
@@ -20,14 +18,13 @@ public interface GroupsUserService {
     Object getGroups(User user);
 
     /**
-     * Clones list of user's groups
+     * Clones list of user's groups and adds their to the ClonedGroups class.
      *
-     * @param groups          List of groups for cloning
-     * @param destinationPath Local path of workspace
-     * @param
-     * @return Groups and their cloning statuses
+     * @param groups           List of groups for cloning
+     * @param destinationPath  Local path of workspace
+     * @param progressListener Listener for obtaining data on the process of performing the operation.
      */
-    Map<Group, CloningStatus> cloneGroups(List<Group> groups, String destinationPath, ProgressListener progressListener);
+    void cloneGroups(List<Group> groups, String destinationPath, ProgressListener progressListener);
 
     /**
      * Gets group by id
@@ -43,20 +40,15 @@ public interface GroupsUserService {
      *
      * @param  groupPath path to cloned group
      * @throws IllegalArgumentException if data is incorrect
-     * @return Optional of loaded group or Optional.empty() and a error message.
+     * @return loaded group
      */
-    Map<Optional<Group>, String> importGroup(String groupPath);
+    Group importGroup(String groupPath);
 
     /**
     * Removes a group from the workspace
     *
     * @param group                 the group for deletion
-    * @param isRemoveFromLocalDisk if <true> remove group from local disk.
-    *                              !!! WARNING: We always pass <false> in the removeGroup method,
-    *                              because removing a group from a local disk requires modification.
-    *                              When we deleting ".git" folder we getting AccessDeniedException or folder
-    *                              is deleted only after close application
-    *                              (Problem with threads(appears after import or clone group)).
+    * @param isRemoveFromLocalDisk if <true> remove group from local disk, otherwise - false
     *
     * @return status and message operation.
     */

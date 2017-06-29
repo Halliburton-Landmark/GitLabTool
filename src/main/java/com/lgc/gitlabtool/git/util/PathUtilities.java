@@ -1,12 +1,14 @@
 package com.lgc.gitlabtool.git.util;
 
 import java.io.IOException;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -17,7 +19,7 @@ import org.apache.logging.log4j.Logger;
  */
 public class PathUtilities {
 
-    private static final Logger logger = LogManager.getLogger(JSONParser.class);
+    private static final Logger logger = LogManager.getLogger(PathUtilities.class);
     public static final String PATH_NOT_EXISTS_OR_NOT_DIRECTORY = "The transmitted path does not exist or is not a directory.";
 
     /**
@@ -43,7 +45,7 @@ public class PathUtilities {
     /**
      * Gets all folders from directory
      *
-     * @param  path path on disk
+     * @param path path on disk
      * @return names of found folders
      */
     public static Collection<String> getFolders(Path path) {
@@ -51,12 +53,30 @@ public class PathUtilities {
             return Collections.emptyList();
         }
         Collection<String> folders = new ArrayList<>();
-        try {
-            Files.newDirectoryStream(path).forEach((dir) -> folders.add(dir.getFileName().toString()));
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(path)) {
+            stream.forEach((dir) -> folders.add(dir.getFileName().toString()));
         } catch (IOException e) {
-            logger.error("", e);
+            logger.error("Error getting forders: " + e.getMessage());
         }
         return folders;
     }
 
+    /**
+     * Delete path from a local disk
+     *
+     * @param  path the path on the local disk
+     * @return true - if it was deleted successful, otherwise - false.
+     */
+    public static boolean deletePath(Path path) {
+        if (!Files.exists(path)) {
+            return false;
+        }
+        try {
+            FileUtils.forceDelete(path.toFile());
+            return true;
+        } catch (IOException e) {
+            logger.error("Error deleting path: " + e.getMessage());
+        }
+        return false;
+    }
 }

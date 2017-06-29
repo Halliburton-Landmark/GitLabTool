@@ -1,28 +1,34 @@
 package com.lgc.gitlabtool.git.ui.javafx.controllers;
 
+import static com.lgc.gitlabtool.git.util.ProjectPropertiesUtil.getCommitHash;
+import static com.lgc.gitlabtool.git.util.ProjectPropertiesUtil.getProjectVersion;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.lgc.gitlabtool.git.entities.Group;
-import com.lgc.gitlabtool.git.services.ClonedGroupsService;
+import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.services.GroupsUserService;
+import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.ViewKey;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
+import com.lgc.gitlabtool.git.ui.javafx.AlertWithCheckBox;
 import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuItems;
 import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuManager;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarButtons;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarManager;
 import com.lgc.gitlabtool.git.util.ScreenUtil;
-import com.lgc.gitlabtool.git.util.ProjectPropertiesUtil;
 
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -56,19 +62,17 @@ public class ModularController {
     private static final Logger logger = LogManager.getLogger(ModularController.class);
 
     private static final String ABOUT_POPUP_TITLE = "About";
-    private static final String ABOUT_POPUP_HEADER = "Gitlab tool v." + ProjectPropertiesUtil.getProjectVersion()
-            + ", powered by Luxoft";
+    private static final String ABOUT_POPUP_HEADER =
+            "Gitlab tool v." + getProjectVersion() + " (" + getCommitHash() + "), powered by Luxoft";
     private static final String ABOUT_POPUP_CONTENT = "Contacts: Yurii Pitomets (yurii.pitomets2@halliburton.com)";
     private static final String SWITCH_BRANCH_TITLE = "Switch branch";
 
     private static final String IMPORT_CHOOSER_TITLE = "Import Group";
     private static final String IMPORT_DIALOG_TITLE = "Import Status Dialog";
-    private static final String SUCCESFUL_IMPORT_MESSAGE = "Import of group is Successful";
     private static final String FAILED_IMPORT_MESSAGE = "Import of group is Failed";
 
     private static final String REMOVE_GROUP_DIALOG_TITLE = "Remove Group";
     private static final String REMOVE_GROUP_STATUS_DIALOG_TITLE = "Import Status Dialog";
-    private static final String SUSSECCFUL_REMOVE_GROUP_MESSAGE = "Removing of group is Successful";
     private static final String FAILED_REMOVE_GROUP_MESSAGE = "Removing of group is Failed";
 
     private static final String CSS_PATH = "css/style.css";
@@ -100,8 +104,8 @@ public class ModularController {
     private final GroupsUserService _groupService = (GroupsUserService) ServiceProvider.getInstance()
             .getService(GroupsUserService.class.getName());
 
-    private final ClonedGroupsService _clonedGroupsService = (ClonedGroupsService) ServiceProvider.getInstance()
-            .getService(ClonedGroupsService.class.getName());
+    private final ProjectService _projectService =
+            (ProjectService) ServiceProvider.getInstance().getService(ProjectService.class.getName());
 
     public void loadWelcomeWindow() throws IOException {
         toolbar.getItems().addAll(ToolbarManager.getInstance().createToolbarItems(ViewKey.WELCOME_WINDOW.getKey()));
@@ -134,7 +138,10 @@ public class ModularController {
         Node node = loader.load();
 
         _mainWindowController = loader.getController();
-        _mainWindowController.setSelectedGroup(selectedGroup);
+
+        String nameGroup = selectedGroup.getName();
+        List<Project> projects = (List<Project>) _projectService.loadProjects(selectedGroup);
+        _mainWindowController.setSelectedGroup(projects, nameGroup);
         _mainWindowController.beforeShowing();
 
         AnchorPane.setTopAnchor(node, 0.0);
@@ -162,10 +169,12 @@ public class ModularController {
     }
 
     private void removeGroupDialog(Group selectedGroup) {
-        Alert alert = new Alert(AlertType.CONFIRMATION);
-        alert.setTitle(REMOVE_GROUP_DIALOG_TITLE);
-        alert.setHeaderText("Are you sure you want to delete the " + selectedGroup.getName() + "?");
-
+        AlertWithCheckBox alert = new AlertWithCheckBox(AlertType.CONFIRMATION,
+                REMOVE_GROUP_DIALOG_TITLE,
+                "Are you sure you want to delete the " + selectedGroup.getName() + "?",
+                "",
+                "remove group from a local disk",
+                ButtonType.YES, ButtonType.NO);
         Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
         stage.getIcons().add(_appIcon);
 
@@ -173,25 +182,22 @@ public class ModularController {
         ScreenUtil.adaptForMultiScreens(stage, 300, 150);
 
         Optional<ButtonType> result = alert.showAndWait();
-        if (result.get() == ButtonType.CANCEL) {
+        if (result.get() == ButtonType.NO) {
             return;
         }
-        // TODO: We always pass <false> in the removeGroup method, because removing a group from a local disk
-        // requires modification.
-        // When we deleting .git folder we getting AccessDeniedException or folder is deleted only after
-        // close application (Problem with threads(appears after import or clone group)).
-        final boolean isRemoveFromLocakDisk = false;
-        Map<Boolean, String> status = _groupService.removeGroup(selectedGroup, isRemoveFromLocakDisk);
-        for (Entry<Boolean, String> mapStatus : status.entrySet()) {
-            String headerMessage;
-            if (mapStatus.getKey()) {
-                headerMessage = SUSSECCFUL_REMOVE_GROUP_MESSAGE;
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.submit(() -> {
+            Map<Boolean, String> status = _groupService.removeGroup(selectedGroup, alert.isCheckBoxSelected());
+            for (Entry<Boolean, String> mapStatus : status.entrySet()) {
+                String headerMessage;
+                if (!mapStatus.getKey()) {
+                    headerMessage = FAILED_REMOVE_GROUP_MESSAGE;
+                    showStatusDialog(REMOVE_GROUP_STATUS_DIALOG_TITLE, headerMessage, mapStatus.getValue());
+                }
                 _welcomeWindowController.refreshGroupsList();
-            } else {
-                headerMessage = FAILED_REMOVE_GROUP_MESSAGE;
             }
-            showStatusDialog(REMOVE_GROUP_STATUS_DIALOG_TITLE, headerMessage, mapStatus.getValue());
-        }
+        });
+        executor.shutdown();
     }
 
     @FXML
@@ -214,6 +220,10 @@ public class ModularController {
 
             MenuItem about = MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_ABOUT);
             about.setOnAction(event -> showAboutPopup());
+
+            MenuItem switchTo = MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_SWITCH_BRANCH);
+            switchTo.setOnAction(event -> showSwitchBranchWindow());
+
         }
     }
 
@@ -228,8 +238,6 @@ public class ModularController {
             URL switchBranchWindowUrl = getClass().getClassLoader().getResource(ViewKey.SWITCH_BRANCH_WINDOW.getPath());
             FXMLLoader loader = new FXMLLoader(switchBranchWindowUrl);
             Parent root = loader.load();
-
-            SwitchBranchWindowController controller = loader.getController();
 
             Scene scene = new Scene(root);
             Stage stage = new Stage();
@@ -287,41 +295,22 @@ public class ModularController {
             if (selectedDirectory == null) {
                 return;
             }
-            new Thread(new ImportRunnable(selectedDirectory)).start();
-        }
-    }
-
-    /**
-     * Imports group from local disk to GitLab Tools workspace.
-     *
-     * @author Lyudmila Lyska
-     */
-    class ImportRunnable implements Runnable {
-
-        private final File _selectedDirectory;
-
-        public ImportRunnable(File selectedDirectory) {
-            _selectedDirectory = selectedDirectory;
-        }
-
-        @Override
-        public void run() {
-            Map<Optional<Group>, String> loadGroup = _groupService.importGroup(_selectedDirectory.getAbsolutePath());
-
-            for (Entry<Optional<Group>, String> mapGroup : loadGroup.entrySet()) {
-                Optional<Group> optGroup = mapGroup.getKey();
-                if (optGroup.isPresent()) {
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            executor.submit(() -> {
+                Group loadGroup = _groupService.importGroup(selectedDirectory.getAbsolutePath());
+                if (loadGroup == null) {
+                    showStatusDialog(IMPORT_DIALOG_TITLE, FAILED_IMPORT_MESSAGE,
+                            "Failed to load group from " + selectedDirectory.getAbsolutePath());
+                } else {
                     Platform.runLater(new Runnable() {
                         @Override
                         public void run() {
-                            _clonedGroupsService.addGroups(Arrays.asList(optGroup.get()));
                             _welcomeWindowController.refreshGroupsList();
                         }
                     });
                 }
-                showStatusDialog(IMPORT_DIALOG_TITLE,
-                        optGroup.isPresent() ? SUCCESFUL_IMPORT_MESSAGE : FAILED_IMPORT_MESSAGE, mapGroup.getValue());
-            }
+            });
+            executor.shutdown();
         }
     }
 

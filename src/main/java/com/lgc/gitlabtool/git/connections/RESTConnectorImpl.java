@@ -13,19 +13,15 @@ import javax.net.ssl.HttpsURLConnection;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.lgc.gitlabtool.git.exceptions.HTTPExceptionProvider;
 import com.lgc.gitlabtool.git.util.RequestType;
 import com.lgc.gitlabtool.git.util.URLManager;
 
 class RESTConnectorImpl implements RESTConnector {
 
-    private static final Logger logger = LogManager.getLogger(RESTConnectorImpl.class);
-    private final HTTPExceptionProvider _exceptionProvider;
-    private String urlMainPart;
+    private static final Logger _logger = LogManager.getLogger(RESTConnectorImpl.class);
+    private String _urlMainPart;
 
-    RESTConnectorImpl(HTTPExceptionProvider provider) {
-        this._exceptionProvider = provider;
-    }
+    public RESTConnectorImpl() {}
 
     @Override
     public Object sendPost(String suffixForUrl, Map<String, String> params, Map<String, String> header) {
@@ -50,7 +46,7 @@ class RESTConnectorImpl implements RESTConnector {
      */
     private Object sendRequest(String suffixForUrl, Map<String, String> params, Map<String, String> header, RequestType request) {
         try {
-            URL obj = new URL(urlMainPart + suffixForUrl);
+            URL obj = new URL(_urlMainPart + suffixForUrl);
             HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
 
             setHTTPRequestHeader(header, con);
@@ -68,8 +64,8 @@ class RESTConnectorImpl implements RESTConnector {
             }
 
             int responseCode = con.getResponseCode();
-            logger.info("Sending '" + request +"' request to URL : " + obj.toString()); 
-            logger.info("Response Code : " + responseCode);
+            _logger.info("Sending '" + request +"' request to URL : " + obj.toString());
+            _logger.info("Response Code : " + responseCode);
 
             BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
             StringBuilder response = new StringBuilder();
@@ -80,11 +76,11 @@ class RESTConnectorImpl implements RESTConnector {
             }
             in.close();
 
-            logger.info(response.toString());
+            _logger.info(response.toString());
             return response.toString();
-            
+
         } catch (Exception e) {
-            logger.error("", e);
+            _logger.error("Error sending request: " + e.getMessage());
         }
         return null;
     }
@@ -113,7 +109,7 @@ class RESTConnectorImpl implements RESTConnector {
         try {
             return URLEncoder.encode(s, "UTF-8");
         } catch (UnsupportedEncodingException e) {
-            logger.error("", e);
+            _logger.error("Error encoding URL: " + e.getMessage());
             throw new UnsupportedOperationException(e);
         }
     }
@@ -121,13 +117,13 @@ class RESTConnectorImpl implements RESTConnector {
     @Override
     public void setUrlMainPart(String urlMainPart) {
         if (urlMainPart != null && URLManager.isURLValid(urlMainPart)) {
-            this.urlMainPart = urlMainPart;
+            this._urlMainPart = urlMainPart;
         }
     }
 
     @Override
     public String getUrlMainPart() {
-        return urlMainPart;
+        return _urlMainPart;
     }
 
 }
