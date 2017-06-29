@@ -79,7 +79,7 @@ public class SwitchBranchConfirmDialog extends Alert {
     private void showCommitStatusDialog(List<Project> projects, Map<Project, JGitStatus> commitStatuses) {
         String info;
 
-        if (commitStatuses.size() < 6) {
+        if (commitStatuses.size() < StatusDialog.MAX_ROW_COUNT_IN_STATUS_DIALOG) {
             info = commitStatuses.entrySet().stream()
                     .map(pair -> pair.getKey().getName() + " - " + pair.getValue())
                     .collect(Collectors.joining("\n"));
@@ -105,7 +105,7 @@ public class SwitchBranchConfirmDialog extends Alert {
     public void showDiscardStatusDialog(List<Project> projects, Map<Project, JGitStatus> discardStatuses) {
         String info;
 
-        if (discardStatuses.size() < 6) {
+        if (discardStatuses.size() < StatusDialog.MAX_ROW_COUNT_IN_STATUS_DIALOG) {
             info = discardStatuses.entrySet().stream()
                     .map(pair -> pair.getKey().getName() + " - " + pair.getValue())
                     .collect(Collectors.joining("\n"));

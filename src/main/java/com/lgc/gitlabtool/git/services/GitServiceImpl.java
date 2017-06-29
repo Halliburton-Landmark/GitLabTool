@@ -82,6 +82,10 @@ public class GitServiceImpl implements GitService {
 
         Map<Project, JGitStatus> results = new LinkedHashMap<>();
         for (Project project : projects) {
+            if(project == null){
+                results.put(project, JGitStatus.FAILED);
+                continue;
+            }
             JGitStatus status = JGit.getInstance().discardChanges(project);
             results.put(project, status);
         }
