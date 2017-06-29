@@ -20,6 +20,7 @@ import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 import com.lgc.gitlabtool.git.ui.icon.LocalRemoteIconHolder;
 import com.lgc.gitlabtool.git.ui.selection.SelectionsProvider;
+import com.lgc.gitlabtool.git.util.ScreenUtil;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -261,6 +262,9 @@ public class SwitchBranchWindowController {
         Image appIcon = AppIconHolder.getInstance().getAppIcoImage();
         Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
         stage.getIcons().add(appIcon);
+
+        /* Set sizing and position */
+        ScreenUtil.adaptForMultiScreens(stage, 300, 150);
 
         alert.showAndWait();
     }

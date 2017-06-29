@@ -28,6 +28,7 @@ import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuItems;
 import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuManager;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarButtons;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarManager;
+import com.lgc.gitlabtool.git.util.ScreenUtil;
 
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -177,6 +178,9 @@ public class ModularController {
         Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
         stage.getIcons().add(_appIcon);
 
+        /* Set sizing and position */
+        ScreenUtil.adaptForMultiScreens(stage, 300, 150);
+
         Optional<ButtonType> result = alert.showAndWait();
         if (result.get() == ButtonType.NO) {
             return;
@@ -216,7 +220,7 @@ public class ModularController {
 
             MenuItem about = MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_ABOUT);
             about.setOnAction(event -> showAboutPopup());
-            
+
             MenuItem switchTo = MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_SWITCH_BRANCH);
             switchTo.setOnAction(event -> showSwitchBranchWindow());
 
@@ -238,13 +242,21 @@ public class ModularController {
             Scene scene = new Scene(root);
             Stage stage = new Stage();
             stage.setScene(scene);
-            Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
-            stage.setHeight(primaryScreenBounds.getMaxY() / 1.5);
-            stage.setWidth(primaryScreenBounds.getMaxX() / 1.5);
             stage.getIcons().add(_appIcon);
             stage.setTitle(SWITCH_BRANCH_TITLE);
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.setOnHiding(confirmCloseEventHandler);
+
+            /* Set size and position */
+            Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
+            double dialogWidth = primaryScreenBounds.getMaxX() / 1.5;
+            double dialogHeight = primaryScreenBounds.getMaxY() / 1.5;
+
+            ScreenUtil.adaptForMultiScreens(stage, dialogWidth, dialogHeight);
+
+            stage.setWidth(dialogWidth);
+            stage.setHeight(dialogHeight);
+
             stage.show();
         } catch (IOException e) {
             logger.error("Could not load fxml resource", e);
@@ -265,6 +277,9 @@ public class ModularController {
 
         Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
         stage.getIcons().add(_appIcon);
+
+        /* Set sizing and position */
+        ScreenUtil.adaptForMultiScreens(stage, 300, 150);
 
         alert.show();
     }
@@ -309,6 +324,10 @@ public class ModularController {
                 alert.setContentText(content);
                 Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
                 stage.getIcons().add(_appIcon);
+
+                /* Set sizing and position */
+                ScreenUtil.adaptForMultiScreens(stage, 300, 150);
+
                 alert.showAndWait();
             }
         });

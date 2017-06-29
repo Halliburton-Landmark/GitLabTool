@@ -8,6 +8,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.lgc.gitlabtool.git.services.ServiceProvider;
+import com.lgc.gitlabtool.git.util.ScreenUtil;
 import com.lgc.gitlabtool.git.util.URLManager;
 import com.lgc.gitlabtool.git.xml.Server;
 import com.lgc.gitlabtool.git.services.NetworkService;
@@ -78,6 +79,10 @@ public class ServerInputWindowController {
         Image appIcon = AppIconHolder.getInstance().getAppIcoImage();
         stage.getIcons().add(appIcon);
         stage.initModality(Modality.APPLICATION_MODAL);
+
+        /* Set sizing and position */
+        ScreenUtil.adaptForMultiScreens(stage, 300, 100);
+
         stage.showAndWait();
     }
 

@@ -7,6 +7,7 @@ import java.util.Date;
 import com.lgc.gitlabtool.git.jgit.JGit;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 import com.lgc.gitlabtool.git.ui.javafx.dto.DialogDTO;
+import com.lgc.gitlabtool.git.util.ScreenUtil;
 
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
@@ -115,6 +116,10 @@ public class CloneProgressDialog extends Dialog<DialogDTO> {
         primaryStage.setScene(scene);
         primaryStage.setTitle("Cloning groups...");
         primaryStage.getIcons().add(appIcon);
+
+        /* Set size and position */
+        ScreenUtil.adaptForMultiScreens(primaryStage, 500, 350);
+
         primaryStage.show();
     }
 

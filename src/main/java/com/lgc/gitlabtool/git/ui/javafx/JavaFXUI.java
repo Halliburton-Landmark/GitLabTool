@@ -11,6 +11,7 @@ import com.lgc.gitlabtool.git.ui.ViewKey;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 import com.lgc.gitlabtool.git.ui.javafx.controllers.ModularController;
 import com.lgc.gitlabtool.git.util.ProjectPropertiesUtil;
+import com.lgc.gitlabtool.git.util.ScreenUtil;
 
 import javafx.application.Application;
 import javafx.event.EventHandler;
@@ -60,16 +61,24 @@ public class JavaFXUI extends Application implements UserInterface {
 
         primaryStage.setTitle("Gitlab Tool v." + ProjectPropertiesUtil.getProjectVersion());
         primaryStage.setScene(scene);
-        Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
-        primaryStage.setHeight(primaryScreenBounds.getMaxY() / 1.5);
-        primaryStage.setWidth(primaryScreenBounds.getMaxX() / 1.5);
         primaryStage.getIcons().add(appIcon);
         primaryStage.setOnCloseRequest(confirmCloseEventHandler);
         primaryStage.show();
 
+        /* Set sizing and position */
+        Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
+        double dialogWidth = primaryScreenBounds.getMaxX() / 1.5;
+        double dialogHeight = primaryScreenBounds.getMaxY() / 1.5;
+
+        ScreenUtil.adaptForMultiScreens(primaryStage, dialogWidth, dialogHeight);
+
+        primaryStage.setWidth(dialogWidth);
+        primaryStage.setHeight(dialogHeight);
+
+        primaryStage.show();
     }
 
-    private EventHandler<WindowEvent> confirmCloseEventHandler = event -> {
+    private final EventHandler<WindowEvent> confirmCloseEventHandler = event -> {
         Alert closeConfirmation = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to exit?");
         Button exitButton = (Button) closeConfirmation.getDialogPane().lookupButton(ButtonType.OK);
 
@@ -88,6 +97,10 @@ public class JavaFXUI extends Application implements UserInterface {
         LoginDialog loginDialog = new LoginDialog();
         Stage stage = (Stage) loginDialog.getDialogPane().getScene().getWindow();
         stage.getIcons().add(appIcon);
+
+        /* Set sizing and position */
+        ScreenUtil.adaptForMultiScreens(stage, 300, 300);
+
         loginDialog.showAndWait();
     }
 }

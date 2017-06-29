@@ -19,6 +19,7 @@ import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuItems;
 import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuManager;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarButtons;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarManager;
+import com.lgc.gitlabtool.git.util.ScreenUtil;
 
 import javafx.application.Platform;
 import javafx.beans.binding.BooleanBinding;
@@ -102,6 +103,15 @@ public class WelcomeWindowController {
             stage.setScene(new Scene(root));
             stage.setOnHidden(we -> updateClonedGroups());
             stage.getIcons().add(appIcon);
+
+             /* Set sizing and position */
+            double dialogWidth = 500;
+            double dialogHeight = 400;
+
+            ScreenUtil.adaptForMultiScreens(stage, dialogWidth, dialogHeight);
+
+            stage.setHeight(dialogHeight);
+            stage.setWidth(dialogWidth);
 
             stage.show();
         } catch (IOException e) {
