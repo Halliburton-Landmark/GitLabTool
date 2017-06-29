@@ -15,6 +15,8 @@ import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.ViewKey;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 import com.lgc.gitlabtool.git.ui.javafx.StatusDialog;
+import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuItems;
+import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuManager;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarButtons;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarManager;
 
@@ -31,6 +33,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseButton;
@@ -77,6 +80,7 @@ public class WelcomeWindowController {
         userId.setText(_loginService.getCurrentUser().getName());
 
         configureToolbarCommands();
+        configureMainMenuCommands();
     }
 
     @FXML
@@ -126,6 +130,11 @@ public class WelcomeWindowController {
                 .setOnAction(this::onLoadSelectedGroupspace);
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.CLONE_GROUP_BUTTON.getId())
                 .setOnAction(this::onCloneGroups);
+    }
+
+    private void configureMainMenuCommands(){
+        MenuItem cloneGroup = MainMenuManager.getInstance().getButtonById(MainMenuItems.WELCOME_CLONE_GROUP);
+        cloneGroup.setOnAction(this::onCloneGroups);
     }
 
     private void updateClonedGroups() {

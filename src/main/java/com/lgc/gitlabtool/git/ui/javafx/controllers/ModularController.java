@@ -216,6 +216,10 @@ public class ModularController {
 
             MenuItem about = MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_ABOUT);
             about.setOnAction(event -> showAboutPopup());
+            
+            MenuItem switchTo = MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_SWITCH_BRANCH);
+            switchTo.setOnAction(event -> showSwitchBranchWindow());
+
         }
     }
 

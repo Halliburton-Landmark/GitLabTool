@@ -7,10 +7,13 @@ import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.services.LoginService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.javafx.CreateNewBranchDialog;
+import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuItems;
+import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuManager;
 import com.lgc.gitlabtool.git.ui.selection.ListViewKey;
 import com.lgc.gitlabtool.git.ui.selection.SelectionsProvider;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarButtons;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarManager;
+
 
 import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
@@ -63,8 +66,14 @@ public class MainWindowController {
         configureListView(projectsList);
 
         BooleanBinding booleanBinding = projectsList.getSelectionModel().selectedItemProperty().isNull();
-        ToolbarManager.getInstance().getAllButtonsForCurrentView().forEach(x -> x.disableProperty().bind(booleanBinding));
+        ToolbarManager.getInstance().getAllButtonsForCurrentView()
+                .forEach(x -> x.disableProperty().bind(booleanBinding));
 
+        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_SWITCH_BRANCH).disableProperty()
+                .bind(booleanBinding);
+
+        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_CREATE_BRANCH).disableProperty()
+                .bind(booleanBinding);
 
         //TODO: Additional thread should be placed to services
         Thread t = new Thread(this::updateProjectList);
@@ -164,6 +173,10 @@ public class MainWindowController {
     private void initNewBranchButton() {
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.NEW_BRANCH_BUTTON.getId())
                 .setOnAction(this::onNewBranchButton);
+
+        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_CREATE_BRANCH)
+                .setOnAction(this::onNewBranchButton);
+
     }
 
     @FXML
