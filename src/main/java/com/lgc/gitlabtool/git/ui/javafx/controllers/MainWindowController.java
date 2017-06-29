@@ -112,7 +112,10 @@ public class MainWindowController {
     }
 
     private void updateProjectList() {
-        ObservableList<Project> projectsObservableList = FXCollections.observableList(_projects);
+        List<Project> sortedProjectList = _projects.stream()
+                .sorted((project1, project2) -> Boolean.compare(project2.isCloned(),project1.isCloned()))
+                .collect(Collectors.toList());
+        ObservableList<Project> projectsObservableList = FXCollections.observableList(sortedProjectList);
         projectsList.setItems(projectsObservableList);
     }
 
