@@ -57,10 +57,6 @@ public class SwitchBranchConfirmDialog extends Alert {
 
     }
 
-    public enum ConfirmStatuses {
-        COMMIT, DISCARD, CANCEL;
-    }
-
     public void showCommitPushDialog(List<Project> projects) {
         CommitDialog dialog = new CommitDialog();
         Optional<ButtonType> commitResult = dialog.showAndWait();
@@ -68,11 +64,12 @@ public class SwitchBranchConfirmDialog extends Alert {
         if (commitResult.get() == dialog.getCommitButton() || commitResult.get() == dialog.getCommitAndPushButton()) {
             String commitMessage = StringUtils.EMPTY;
 
-            if (dialog.getCommitMessage() != null) {
-                commitMessage = dialog.getCommitMessage();
-            }
-
             boolean isPush = commitResult.get().equals(dialog.getCommitAndPushButton());
+
+            if (dialog.getCommitMessage() != null || dialog.getCommitMessage().isEmpty()) {
+                showEmptyCommitMessageWarning();
+                return;
+            }
 
             Map<Project, JGitStatus> commitStatuses = _gitService.commitChanges(projects, commitMessage, isPush,
                     new SuccessfulOperationHandler(), new UnsuccessfulOperationHandler());
@@ -82,6 +79,21 @@ public class SwitchBranchConfirmDialog extends Alert {
             showStatusDialog(projects, commitStatuses,
                     headerMessage, failedMessage, STATUS_COMMIT_DIALOG_TITLE, STATUS_COMMIT_DIALOG_HEADER);
         }
+    }
+
+    public void showEmptyCommitMessageWarning(){
+        // TODO: It's temporary solution. Should be rewrite CommitDialog for using Button instead ButtonTypes.
+        // After that we can use disablers on buttons.
+        Alert alert = new Alert(AlertType.WARNING);
+        alert.setTitle("Warning");
+        alert.setHeaderText("Empty commit message");
+        alert.setContentText("Please enter commit message");
+
+        Image appIcon = AppIconHolder.getInstance().getAppIcoImage();
+        Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+        stage.getIcons().add(appIcon);
+
+        alert.showAndWait();
     }
 
     public void showStatusDialog(List<Project> projects, Map<Project, JGitStatus> discardStatuses,
