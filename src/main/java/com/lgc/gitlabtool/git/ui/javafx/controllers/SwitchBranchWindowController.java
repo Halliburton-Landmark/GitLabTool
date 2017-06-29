@@ -53,6 +53,10 @@ public class SwitchBranchWindowController {
     private static final String SWITCHTO_STATUS_ALERT_HEADER = "Switch branch statuses:";
     private static final String NEW_LINE_SYMBOL = "\n";
 
+    private static final String STATUS_DISCARD_DIALOG_TITLE = "Discarding changes status";
+    private static final String STATUS_DISCARD_DIALOG_HEADER = "Discarding changes info";
+
+
     private final GitService _gitService =
             (GitService) ServiceProvider.getInstance().getService(GitService.class.getName());
 
@@ -155,7 +159,11 @@ public class SwitchBranchWindowController {
 
         } else if (discardButton.equals(result.orElse(ButtonType.CANCEL))) {
             Map<Project, JGitStatus> discardStatuses =_gitService.discardChanges(selectedProjects);
-            alert.showDiscardStatusDialog(selectedProjects, discardStatuses);
+
+            String headerMessage = "All changes was successfully discarded";
+            String failedMessage = "Discarding changes was failed";
+            alert.showStatusDialog(selectedProjects, discardStatuses,
+                    headerMessage, failedMessage, STATUS_DISCARD_DIALOG_TITLE, STATUS_DISCARD_DIALOG_HEADER);
 
         } else {
             alert.close();

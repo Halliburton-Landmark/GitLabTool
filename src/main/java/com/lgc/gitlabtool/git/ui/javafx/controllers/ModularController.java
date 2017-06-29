@@ -82,6 +82,9 @@ public class ModularController {
     private static final String REMOVE_GROUP_STATUS_DIALOG_TITLE = "Import Status Dialog";
     private static final String FAILED_REMOVE_GROUP_MESSAGE = "Removing of group is Failed";
 
+    private static final String STATUS_DISCARD_DIALOG_TITLE = "Discarding changes status";
+    private static final String STATUS_DISCARD_DIALOG_HEADER = "Discarding changes info";
+
     private static final String CSS_PATH = "css/style.css";
     private static final Image _appIcon = AppIconHolder.getInstance().getAppIcoImage();
 
@@ -288,7 +291,11 @@ public class ModularController {
 
         } else if (discardButton.equals(result.orElse(ButtonType.CANCEL))) {
             Map<Project, JGitStatus> discardStatuses =_gitService.discardChanges(selectedProjects);
-            alert.showDiscardStatusDialog(selectedProjects, discardStatuses);
+
+            String headerMessage = "All changes was successfully discarded";
+            String failedMessage = "Discarding changes was failed";
+            alert.showStatusDialog(selectedProjects, discardStatuses,
+                    headerMessage, failedMessage, STATUS_DISCARD_DIALOG_TITLE, STATUS_DISCARD_DIALOG_HEADER);
 
         } else {
             alert.close();

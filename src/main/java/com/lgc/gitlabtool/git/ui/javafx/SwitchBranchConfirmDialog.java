@@ -16,7 +16,6 @@ import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
-import com.lgc.gitlabtool.git.ui.javafx.controllers.SwitchBranchWindowController;
 
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
@@ -31,9 +30,6 @@ public class SwitchBranchConfirmDialog extends Alert {
 
     private final GitService _gitService =
             (GitService) ServiceProvider.getInstance().getService(GitService.class.getName());
-
-    private static final String STATUS_DISCARD_DIALOG_TITLE = "Discarding changes status";
-    private static final String STATUS_DISCARD_DIALOG_HEADER = "Discarding changes info";
 
     private static final String STATUS_COMMIT_DIALOG_TITLE = "Committing changes status";
     private static final String STATUS_COMMIT_DIALOG_HEADER = "Committing changes info";
@@ -72,37 +68,15 @@ public class SwitchBranchConfirmDialog extends Alert {
             Map<Project, JGitStatus> commitStatuses = _gitService.commitChanges(projects, commitMessage, isPush,
                     new SuccessfulOperationHandler(), new UnsuccessfulOperationHandler());
 
-            showCommitStatusDialog(projects, commitStatuses);
+            String headerMessage = "All changes was successfully commited";
+            String failedMessage = "Committing changes was failed";
+            showStatusDialog(projects, commitStatuses,
+                    headerMessage, failedMessage, STATUS_COMMIT_DIALOG_TITLE, STATUS_COMMIT_DIALOG_HEADER);
         }
     }
 
-    private void showCommitStatusDialog(List<Project> projects, Map<Project, JGitStatus> commitStatuses) {
-        String info;
-
-        if (commitStatuses.size() < StatusDialog.MAX_ROW_COUNT_IN_STATUS_DIALOG) {
-            info = commitStatuses.entrySet().stream()
-                    .map(pair -> pair.getKey().getName() + " - " + pair.getValue())
-                    .collect(Collectors.joining("\n"));
-        } else {
-            long countSuccessfulDiscarding =
-                    commitStatuses.entrySet().stream()
-                            .map(Map.Entry::getValue)
-                            .filter(status -> status.equals(JGitStatus.SUCCESSFUL))
-                            .count();
-            if (countSuccessfulDiscarding == projects.size()) {
-                info = "All changes was successfully commited";
-            } else {
-                info = "Committing changes was failed" + "\n"
-                        + "Successfully: " + countSuccessfulDiscarding + " project(s)" + "\n"
-                        + "Failed: " + (projects.size() - countSuccessfulDiscarding) + " project(s)";
-            }
-        }
-
-        Alert statusDialog = new StatusDialog(STATUS_COMMIT_DIALOG_TITLE, STATUS_COMMIT_DIALOG_HEADER, info);
-        statusDialog.showAndWait();
-    }
-
-    public void showDiscardStatusDialog(List<Project> projects, Map<Project, JGitStatus> discardStatuses) {
+    public void showStatusDialog(List<Project> projects, Map<Project, JGitStatus> discardStatuses,
+                                 String headerMessage, String failedMessage, String dialogTitle, String dialogHeader) {
         String info;
 
         if (discardStatuses.size() < StatusDialog.MAX_ROW_COUNT_IN_STATUS_DIALOG) {
@@ -117,15 +91,15 @@ public class SwitchBranchConfirmDialog extends Alert {
                             .filter(status -> status.equals(JGitStatus.SUCCESSFUL))
                             .count();
             if (countSuccessfulDiscarding == projects.size()) {
-                info = "All changes was successfully discarded";
+                info = headerMessage;
             } else {
-                info = "Discarding changes was failed" + "\n"
+                info = failedMessage + "\n"
                         + "Successfully: " + countSuccessfulDiscarding + " project(s)" + "\n"
                         + "Failed: " + (projects.size() - countSuccessfulDiscarding) + " project(s)";
             }
         }
 
-        Alert statusDialog = new StatusDialog(STATUS_DISCARD_DIALOG_TITLE, STATUS_DISCARD_DIALOG_HEADER, info);
+        Alert statusDialog = new StatusDialog(dialogTitle, dialogHeader, info);
         statusDialog.showAndWait();
     }
 
