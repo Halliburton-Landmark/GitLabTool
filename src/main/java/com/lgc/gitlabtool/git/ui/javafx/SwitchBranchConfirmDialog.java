@@ -65,7 +65,7 @@ public class SwitchBranchConfirmDialog extends Alert {
 
             boolean isPush = commitResult.get().equals(dialog.getCommitAndPushButton());
 
-            if (dialog.getCommitMessage() != null || dialog.getCommitMessage().isEmpty()) {
+            if (dialog.getCommitMessage() == null || dialog.getCommitMessage().isEmpty()) {
                 showEmptyCommitMessageWarning();
                 return;
             }
