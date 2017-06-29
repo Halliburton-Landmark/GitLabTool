@@ -146,18 +146,14 @@ public class SwitchBranchWindowController {
 
     private void showSwitchBranchConfirmWindow(List<Project> selectedProjects){
 
-        ButtonType commitButton = new ButtonType("Commit changes");
-        ButtonType discardButton = new ButtonType("Discard changes");
-        ButtonType cancelButton = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
-
-        SwitchBranchConfirmDialog alert = new SwitchBranchConfirmDialog(commitButton, discardButton, cancelButton);
+        SwitchBranchConfirmDialog alert = new SwitchBranchConfirmDialog();
 
         Optional<ButtonType> result = alert.showAndWait();
 
-        if (commitButton.equals(result.orElse(ButtonType.CANCEL))) {
+        if (alert.getCommitButton().equals(result.orElse(ButtonType.CANCEL))) {
             alert.showCommitPushDialog(selectedProjects);
 
-        } else if (discardButton.equals(result.orElse(ButtonType.CANCEL))) {
+        } else if (alert.getDiscardButton().equals(result.orElse(ButtonType.CANCEL))) {
             Map<Project, JGitStatus> discardStatuses =_gitService.discardChanges(selectedProjects);
 
             String headerMessage = "All changes was successfully discarded";
