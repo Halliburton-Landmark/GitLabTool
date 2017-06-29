@@ -355,23 +355,13 @@ public class JGitTest {
         Map<Project, JGitStatus> result = getJGitMock(gitMock).commit(getProjects(), "_", false, "Lyuda", "l@gmail.com", "Lyuda",
                 "l@gmail.com", null, null);
 
-        long countSuccessfulDiscarding =
-                result.entrySet().stream()
-                        .map(Map.Entry::getValue)
-                        .filter(status -> status.equals(JGitStatus.SUCCESSFUL))
-                        .count();
-        Assert.assertEquals(result.size() - COUNT_INCORRECT_PROJECT, countSuccessfulDiscarding);
+        Assert.assertEquals(getCountCorrectProject(getProjects()), getCountCorrectStatuses(result));
     }
 
     @Test
     public void commitAllProjectsIncorrectDataTest() {
         Map<Project, JGitStatus> result = getJGitMock(null).commit(getProjects(), "_", false, null, null, null, null, null, null);
-        long countSuccessfulDiscarding =
-                result.entrySet().stream()
-                        .map(Map.Entry::getValue)
-                        .filter(status -> status.equals(JGitStatus.SUCCESSFUL))
-                        .count();
-        Assert.assertEquals(0, countSuccessfulDiscarding);
+        Assert.assertEquals(result.size(), getCountIncorrectStatuses(result));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -437,12 +427,7 @@ public class JGitTest {
     @Test
     public void commitAndPushIncorrectDataTest() {
         Map<Project, JGitStatus> result = getJGitMock(null).commitAndPush(getProjects(), "__", false, null, null, null, null, null, null);
-        long countSuccessfulDiscarding =
-                result.entrySet().stream()
-                        .map(Map.Entry::getValue)
-                        .filter(status -> status.equals(JGitStatus.SUCCESSFUL))
-                        .count();
-        Assert.assertEquals(0, countSuccessfulDiscarding);
+        Assert.assertEquals(result.size(), getCountIncorrectStatuses(result));
     }
 
     @Test
@@ -469,12 +454,7 @@ public class JGitTest {
                 }, (progress, message) -> {
                 });
 
-        long countSuccessfulDiscarding =
-                result.entrySet().stream()
-                        .map(Map.Entry::getValue)
-                        .filter(status -> status.equals(JGitStatus.SUCCESSFUL))
-                        .count();
-        Assert.assertEquals(result.size() - COUNT_INCORRECT_PROJECT, countSuccessfulDiscarding);
+        Assert.assertEquals(getCountCorrectProject(getProjects()), getCountCorrectStatuses(result));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -944,6 +924,40 @@ public class JGitTest {
         listProjects.add(getProject(false));
         listProjects.add(getProject(true));
         return listProjects;
+    }
+
+    private long getCountIncorrectProject(List<Project> projects) {
+        int countIncorrectProject = 0;
+
+        for (Project project : projects) {
+            if (project == null) {
+                countIncorrectProject++;
+                continue;
+            }
+            if (!project.isCloned()) {
+                countIncorrectProject++;
+            }
+        }
+
+        return countIncorrectProject;
+    }
+
+    private long getCountCorrectProject(List<Project> projects) {
+        return (projects.size() - getCountIncorrectProject(projects));
+    }
+
+    private long getCountCorrectStatuses(Map<Project, JGitStatus> statuses){
+        return  statuses.entrySet().stream()
+                .map(Map.Entry::getValue)
+                .filter(status -> status.equals(JGitStatus.SUCCESSFUL))
+                .count();
+    }
+
+    private long getCountIncorrectStatuses(Map<Project, JGitStatus> statuses){
+        return  statuses.entrySet().stream()
+                .map(Map.Entry::getValue)
+                .filter(status -> status.equals(JGitStatus.FAILED))
+                .count();
     }
 
     private JGit getJGitMock(Git gitMock) {
