@@ -26,14 +26,7 @@ public class GitServiceImpl implements GitService {
         }
         List<Branch> projectBranches = JGit.getInstance().getBranches(project, BranchType.ALL);
 
-        boolean isContains;
-        if (isCommon) {
-            isContains = projectBranches.containsAll(branches);
-        } else {
-            isContains = !Collections.disjoint(projectBranches, branches);
-        }
-
-        return isContains;
+        return isCommon ? projectBranches.containsAll(branches) : !Collections.disjoint(projectBranches, branches);
     }
 
     @Override
@@ -46,11 +39,9 @@ public class GitServiceImpl implements GitService {
 
     @Override
     public Map<Project, JGitStatus> switchTo(List<Project> projects, String branchName, boolean isRemote) {
-        Map<Project, JGitStatus> switchStatuses = new HashMap<>();
-        for (Project project : projects) {
-            JGitStatus status = JGit.getInstance().switchTo(project, branchName, isRemote);
-            switchStatuses.put(project, status);
-        }
+        final Map<Project, JGitStatus> switchStatuses = new HashMap<>();
+        projects.parallelStream()
+                .forEach((project) -> switchToAndSaveStatuses(project, branchName, isRemote, switchStatuses));
         return switchStatuses;
     }
 
@@ -111,14 +102,18 @@ public class GitServiceImpl implements GitService {
     @Override
     public Map<Project, JGitStatus> createBranch(List<Project> projects, String branchName, boolean force) {
         Map<Project, JGitStatus> statuses = new HashMap<>();
-        List<Project> localProjects =
-                projects.stream()
-                .filter(prj -> prj.isCloned())
-                .collect(Collectors.toList());
-        for (Project project : localProjects) {
-            statuses.put(project, JGit.getInstance().createBranch(project, branchName, force));
-        }
+        List<Project> clonedProjects = projects.stream()
+                                              .filter(prj -> prj.isCloned())
+                                              .collect(Collectors.toList());
+        clonedProjects.stream().forEach(
+                (project) -> statuses.put(project, JGit.getInstance().createBranch(project, branchName, force)));
         return statuses;
+    }
+
+    private void switchToAndSaveStatuses(Project project, String branchName, boolean isRemote,
+            Map<Project, JGitStatus> statuses) {
+        JGitStatus status = JGit.getInstance().switchTo(project, branchName, isRemote);
+        statuses.put(project, status);
     }
 
 }
