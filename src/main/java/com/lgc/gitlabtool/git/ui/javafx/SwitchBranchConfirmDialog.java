@@ -70,6 +70,7 @@ public class SwitchBranchConfirmDialog extends Alert {
                 return;
             }
 
+            commitMessage = dialog.getCommitMessage();
             Map<Project, JGitStatus> commitStatuses = _gitService.commitChanges(projects, commitMessage, isPush,
                     new SwitchBranchProgressListener());
 

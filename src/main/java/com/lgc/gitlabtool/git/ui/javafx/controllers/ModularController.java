@@ -28,7 +28,6 @@ import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.ViewKey;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 import com.lgc.gitlabtool.git.ui.javafx.AlertWithCheckBox;
-import com.lgc.gitlabtool.git.ui.javafx.SwitchBranchConfirmDialog;
 import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuItems;
 import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuManager;
 import com.lgc.gitlabtool.git.ui.selection.SelectionsProvider;
@@ -47,7 +46,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -267,29 +265,6 @@ public class ModularController {
             stage.show();
         } catch (IOException e) {
             logger.error("Could not load fxml resource", e);
-        }
-    }
-
-    public void showSwitchBranchConfirmWindow(List<Project> selectedProjects){
-
-        SwitchBranchConfirmDialog alert = new SwitchBranchConfirmDialog();
-
-        Optional<ButtonType> result = alert.showAndWait();
-
-        if (alert.getCommitButton().equals(result.orElse(ButtonType.CANCEL))) {
-
-            alert.showCommitPushDialog(selectedProjects);
-
-        } else if (alert.getDiscardButton().equals(result.orElse(ButtonType.CANCEL))) {
-            Map<Project, JGitStatus> discardStatuses =_gitService.discardChanges(selectedProjects);
-
-            String headerMessage = "All changes was successfully discarded";
-            String failedMessage = "Discarding changes was failed";
-            alert.showStatusDialog(selectedProjects, discardStatuses,
-                    headerMessage, failedMessage, STATUS_DISCARD_DIALOG_TITLE, STATUS_DISCARD_DIALOG_HEADER);
-
-        } else {
-            alert.close();
         }
     }
 
