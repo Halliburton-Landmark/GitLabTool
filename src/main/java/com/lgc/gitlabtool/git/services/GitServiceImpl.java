@@ -40,7 +40,8 @@ public class GitServiceImpl implements GitService {
     public Map<Project, JGitStatus> switchTo(List<Project> projects, String branchName, boolean isRemote) {
         final Map<Project, JGitStatus> switchStatuses = new ConcurrentHashMap<>();
         projects.parallelStream()
-                .forEach((project) -> switchToAndSaveStatuses(project, branchName, isRemote, switchStatuses));
+                .forEach((project) ->
+                    switchStatuses.put(project, JGit.getInstance().switchTo(project, branchName, isRemote)));
         return switchStatuses;
     }
 
@@ -106,12 +107,6 @@ public class GitServiceImpl implements GitService {
                 .forEach((project) ->
                         statuses.put(project, JGit.getInstance().createBranch(project, branchName, force)));
         return statuses;
-    }
-
-    private void switchToAndSaveStatuses(Project project, String branchName, boolean isRemote,
-            Map<Project, JGitStatus> statuses) {
-        JGitStatus status = JGit.getInstance().switchTo(project, branchName, isRemote);
-        statuses.put(project, status);
     }
 
 }
