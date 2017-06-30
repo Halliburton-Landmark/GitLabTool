@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 import org.eclipse.jgit.api.Status;
 
@@ -102,11 +101,10 @@ public class GitServiceImpl implements GitService {
     @Override
     public Map<Project, JGitStatus> createBranch(List<Project> projects, String branchName, boolean force) {
         Map<Project, JGitStatus> statuses = new ConcurrentHashMap<>();
-        List<Project> clonedProjects = projects.stream()
-                                              .filter(prj -> prj.isCloned())
-                                              .collect(Collectors.toList());
-        clonedProjects.parallelStream().forEach(
-                (project) -> statuses.put(project, JGit.getInstance().createBranch(project, branchName, force)));
+        projects.parallelStream()
+                .filter(prj -> prj.isCloned())
+                .forEach((project) ->
+                        statuses.put(project, JGit.getInstance().createBranch(project, branchName, force)));
         return statuses;
     }
 
