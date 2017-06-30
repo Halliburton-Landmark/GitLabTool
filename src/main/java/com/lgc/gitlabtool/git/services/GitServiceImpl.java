@@ -2,7 +2,6 @@ package com.lgc.gitlabtool.git.services;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -102,11 +101,11 @@ public class GitServiceImpl implements GitService {
 
     @Override
     public Map<Project, JGitStatus> createBranch(List<Project> projects, String branchName, boolean force) {
-        Map<Project, JGitStatus> statuses = new HashMap<>();
+        Map<Project, JGitStatus> statuses = new ConcurrentHashMap<>();
         List<Project> clonedProjects = projects.stream()
                                               .filter(prj -> prj.isCloned())
                                               .collect(Collectors.toList());
-        clonedProjects.stream().forEach(
+        clonedProjects.parallelStream().forEach(
                 (project) -> statuses.put(project, JGit.getInstance().createBranch(project, branchName, force)));
         return statuses;
     }
