@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import org.eclipse.jgit.api.Status;
@@ -39,7 +40,7 @@ public class GitServiceImpl implements GitService {
 
     @Override
     public Map<Project, JGitStatus> switchTo(List<Project> projects, String branchName, boolean isRemote) {
-        final Map<Project, JGitStatus> switchStatuses = new HashMap<>();
+        final Map<Project, JGitStatus> switchStatuses = new ConcurrentHashMap<>();
         projects.parallelStream()
                 .forEach((project) -> switchToAndSaveStatuses(project, branchName, isRemote, switchStatuses));
         return switchStatuses;
