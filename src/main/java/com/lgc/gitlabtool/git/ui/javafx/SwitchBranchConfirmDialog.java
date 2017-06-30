@@ -38,9 +38,9 @@ public class SwitchBranchConfirmDialog extends Alert {
     private static final String STATUS_PUSH_DIALOG_TITLE = "Pushing changes status";
     private static final String STATUS_PUSH_DIALOG_HEADER = "Pushing changes info";
 
-    ButtonType commitButton;
-    ButtonType discardButton;
-    ButtonType cancelButton;
+    private ButtonType commitButton;
+    private ButtonType discardButton;
+    private ButtonType cancelButton;
 
     public SwitchBranchConfirmDialog() {
         super(AlertType.WARNING);
