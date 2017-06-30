@@ -33,7 +33,6 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
@@ -114,13 +113,16 @@ public class SwitchBranchWindowController {
     public void onSwitchButton() {
         List<Project> selectedProjects = currentProjectsListView.getItems();
         Branch selectedBranch = (Branch) branchesListView.getSelectionModel().getSelectedItem();
+        boolean isChangesReseted = true;
 
         List<Project> changedProjects = _gitService.getProjectsWithChanges(selectedProjects);
         if (!changedProjects.isEmpty()) {
-            showSwitchBranchConfirmWindow(changedProjects);
+            isChangesReseted = showSwitchBranchConfirmWindow(changedProjects);
         }
 
-        switchBranch(selectedProjects, selectedBranch);
+        if (isChangesReseted) {
+            switchBranch(selectedProjects, selectedBranch);
+        }
     }
 
     private void switchBranch(List<Project> selectedProjects, Branch selectedBranch){
@@ -144,7 +146,7 @@ public class SwitchBranchWindowController {
         currentProjectsListView.refresh();
     }
 
-    private void showSwitchBranchConfirmWindow(List<Project> selectedProjects){
+    private boolean showSwitchBranchConfirmWindow(List<Project> selectedProjects){
 
         SwitchBranchConfirmDialog alert = new SwitchBranchConfirmDialog();
 
@@ -152,6 +154,7 @@ public class SwitchBranchWindowController {
 
         if (alert.getCommitButton().equals(result.orElse(ButtonType.CANCEL))) {
             alert.showCommitPushDialog(selectedProjects);
+            return true;
 
         } else if (alert.getDiscardButton().equals(result.orElse(ButtonType.CANCEL))) {
             Map<Project, JGitStatus> discardStatuses =_gitService.discardChanges(selectedProjects);
@@ -160,9 +163,11 @@ public class SwitchBranchWindowController {
             String failedMessage = "Discarding changes was failed";
             alert.showStatusDialog(selectedProjects, discardStatuses,
                     headerMessage, failedMessage, STATUS_DISCARD_DIALOG_TITLE, STATUS_DISCARD_DIALOG_HEADER);
+            return true;
 
         } else {
             alert.close();
+            return false;
         }
     }
 
