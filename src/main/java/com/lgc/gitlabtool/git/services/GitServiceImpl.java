@@ -40,8 +40,8 @@ public class GitServiceImpl implements GitService {
     @Override
     public Map<Project, JGitStatus> switchTo(List<Project> projects, String branchName, boolean isRemote) {
         final Map<Project, JGitStatus> switchStatuses = new ConcurrentHashMap<>();
-        projects.parallelStream().forEach(
-                (project) -> switchStatuses.put(project, _git.switchTo(project, branchName, isRemote)));
+        projects.parallelStream()
+                .forEach((project) -> switchStatuses.put(project, _git.switchTo(project, branchName, isRemote)));
         return switchStatuses;
     }
 
@@ -67,7 +67,8 @@ public class GitServiceImpl implements GitService {
             throw new IllegalArgumentException("Wrong parameters for discarding projects.");
         }
         final Map<Project, JGitStatus> results = new ConcurrentHashMap<>();
-        projects.parallelStream().forEach(project -> discardChanges(project, results));
+        projects.parallelStream()
+                .forEach(project -> discardChanges(project, results));
         return results;
     }
 
@@ -82,8 +83,9 @@ public class GitServiceImpl implements GitService {
     @Override
     public Map<Project, JGitStatus> createBranch(List<Project> projects, String branchName, boolean force) {
         Map<Project, JGitStatus> statuses = new ConcurrentHashMap<>();
-        projects.parallelStream().filter(prj -> prj.isCloned()).forEach(
-                (project) -> statuses.put(project, _git.createBranch(project, branchName, force)));
+        projects.parallelStream()
+                .filter(prj -> prj.isCloned())
+                .forEach((project) -> statuses.put(project, _git.createBranch(project, branchName, force)));
         return statuses;
     }
 
