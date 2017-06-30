@@ -15,6 +15,7 @@ import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.ProgressListener;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
+import com.lgc.gitlabtool.git.util.ScreenUtil;
 
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonBar;
@@ -54,6 +55,8 @@ public class SwitchBranchConfirmDialog extends Alert {
         Stage stage = (Stage) getDialogPane().getScene().getWindow();
         stage.getIcons().add(_appIcon);
 
+         /* Set sizing and position */
+        ScreenUtil.adaptForMultiScreens(stage, 300, 100);
     }
 
     public void showCommitPushDialog(List<Project> projects) {
@@ -92,6 +95,9 @@ public class SwitchBranchConfirmDialog extends Alert {
         Image appIcon = AppIconHolder.getInstance().getAppIcoImage();
         Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
         stage.getIcons().add(appIcon);
+
+         /* Set sizing and position */
+        ScreenUtil.adaptForMultiScreens(stage, 300, 100);
 
         alert.showAndWait();
     }

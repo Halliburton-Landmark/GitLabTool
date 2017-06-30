@@ -13,6 +13,7 @@ import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 import com.lgc.gitlabtool.git.util.BranchValidator;
+import com.lgc.gitlabtool.git.util.ScreenUtil;
 
 import javafx.beans.value.ChangeListener;
 import javafx.event.ActionEvent;
@@ -101,6 +102,9 @@ public class CreateNewBranchDialog extends Dialog<String> {
         stage.setResizable(false);
         stage.setTitle(DIALOG_TITLE);
         stage.getIcons().add(appIcon);
+
+         /* Set sizing and position */
+        ScreenUtil.adaptForMultiScreens(stage, 300, 150);
 
         initializeOnCloseEvent();
     }

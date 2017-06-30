@@ -3,6 +3,7 @@ package com.lgc.gitlabtool.git.ui.javafx;
 import org.apache.commons.lang.StringUtils;
 
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
+import com.lgc.gitlabtool.git.util.ScreenUtil;
 
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
@@ -47,6 +48,9 @@ public class CommitDialog extends Dialog {
 
         setTitle("Switch branch confirmation");
         setHeaderText("This projects have uncommited changes");
+
+         /* Set sizing and position */
+        ScreenUtil.adaptForMultiScreens(stage, 350, 200);
 
     }
 
