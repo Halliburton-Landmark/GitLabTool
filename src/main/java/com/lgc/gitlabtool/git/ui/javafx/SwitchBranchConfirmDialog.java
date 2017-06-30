@@ -35,9 +35,12 @@ public class SwitchBranchConfirmDialog extends Alert {
     private static final String STATUS_COMMIT_DIALOG_TITLE = "Committing changes status";
     private static final String STATUS_COMMIT_DIALOG_HEADER = "Committing changes info";
 
-    ButtonType commitButton;
-    ButtonType discardButton;
-    ButtonType cancelButton;
+    private static final String STATUS_PUSH_DIALOG_TITLE = "Pushing changes status";
+    private static final String STATUS_PUSH_DIALOG_HEADER = "Pushing changes info";
+
+    private ButtonType commitButton;
+    private ButtonType discardButton;
+    private ButtonType cancelButton;
 
     public SwitchBranchConfirmDialog() {
         super(AlertType.WARNING);
@@ -79,8 +82,10 @@ public class SwitchBranchConfirmDialog extends Alert {
 
             String headerMessage = "All changes was successfully commited";
             String failedMessage = "Committing changes was failed";
+            String dialogTitle = isPush ? STATUS_PUSH_DIALOG_TITLE : STATUS_COMMIT_DIALOG_TITLE;
+            String dialogHeader = isPush ? STATUS_PUSH_DIALOG_HEADER : STATUS_COMMIT_DIALOG_HEADER;
             showStatusDialog(projects, commitStatuses,
-                    headerMessage, failedMessage, STATUS_COMMIT_DIALOG_TITLE, STATUS_COMMIT_DIALOG_HEADER);
+                    headerMessage, failedMessage, dialogTitle, dialogHeader);
         }
     }
 
