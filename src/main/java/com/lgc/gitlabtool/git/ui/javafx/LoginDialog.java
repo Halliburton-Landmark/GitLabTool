@@ -140,10 +140,10 @@ class LoginDialog extends Dialog<DialogDTO> {
         ObservableList<String> boxOptions = getBoxOptions();
         boxOptions.forEach(e -> {
             if (!options.contains(e)) {
-                comboBox.getItems().add(options.size() - 1, e);
+                comboBox.getItems().add(0, e);
             }
         });
-        comboBox.setValue(boxOptions.get(boxOptions.size() - 2));
+        comboBox.setValue(options.get(0));
     }
 
     private void openServerInputWindow() throws IOException {
@@ -219,7 +219,7 @@ class LoginDialog extends Dialog<DialogDTO> {
 
     private void setLastUserName(ComboBox<String> comboBox, TextField userTextField) {
         String lastUserName = storageService.getLastUserName(comboBox.getValue());
-        userTextField.setText(lastUserName);
+        userTextField.setText(lastUserName.isEmpty() ? userTextField.getText() : lastUserName);
     }
 
     private void updateLastUserName() {

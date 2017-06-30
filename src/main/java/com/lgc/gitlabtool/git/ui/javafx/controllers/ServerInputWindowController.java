@@ -132,7 +132,7 @@ public class ServerInputWindowController {
     private void updateServersList() {
         String inputServerName = URLManager.trimServerURL(serverTextField.getText());
         List<Server> servers = storageService.loadServers().getServers();
-        int index = servers.size() - 1;
+        int index = 0;
         if (inputServerName != null && !inputServerName.equals("")) {
             servers.add(index, new Server(inputServerName, api.getValue()));
         }
