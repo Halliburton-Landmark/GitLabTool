@@ -1,6 +1,7 @@
 package com.lgc.gitlabtool.git.ui.javafx;
 
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
+import com.lgc.gitlabtool.git.util.ScreenUtil;
 
 import javafx.scene.control.Alert;
 import javafx.scene.image.Image;
@@ -40,6 +41,9 @@ public class StatusDialog extends Alert {
         Image appIcon = AppIconHolder.getInstance().getAppIcoImage();
         Stage stage = (Stage) getDialogPane().getScene().getWindow();
         stage.getIcons().add(appIcon);
+
+         /* Set sizing and position */
+        ScreenUtil.adaptForMultiScreens(stage, 300, 100);
     }
 
 }
