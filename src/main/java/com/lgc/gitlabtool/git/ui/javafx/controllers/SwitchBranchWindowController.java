@@ -20,6 +20,7 @@ import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 import com.lgc.gitlabtool.git.ui.icon.LocalRemoteIconHolder;
+import com.lgc.gitlabtool.git.ui.javafx.StatusDialog;
 import com.lgc.gitlabtool.git.ui.javafx.SwitchBranchConfirmDialog;
 import com.lgc.gitlabtool.git.ui.selection.SelectionsProvider;
 import com.lgc.gitlabtool.git.util.ScreenUtil;
@@ -113,14 +114,12 @@ public class SwitchBranchWindowController {
     public void onSwitchButton() {
         List<Project> selectedProjects = currentProjectsListView.getItems();
         Branch selectedBranch = (Branch) branchesListView.getSelectionModel().getSelectedItem();
-        boolean isChangesReseted = true;
 
         List<Project> changedProjects = _gitService.getProjectsWithChanges(selectedProjects);
-        if (!changedProjects.isEmpty()) {
-            isChangesReseted = showSwitchBranchConfirmWindow(changedProjects);
-        }
 
-        if (isChangesReseted) {
+        if (!changedProjects.isEmpty()) {
+            launchSwitchBranchConfirmation(changedProjects, selectedProjects, selectedBranch);
+        } else {
             switchBranch(selectedProjects, selectedBranch);
         }
     }
@@ -130,7 +129,7 @@ public class SwitchBranchWindowController {
         Map<Project, JGitStatus> switchStatuses = _gitService.switchTo(selectedProjects, selectedBranch);
 
         String dialogMessage;
-        if (switchStatuses.size() < 6) {
+        if (switchStatuses.size() < StatusDialog.MAX_ROW_COUNT_IN_STATUS_DIALOG) {
             dialogMessage = switchStatuses.entrySet().stream()
                     .map(x -> x.getKey().getName() + "  -  " + x.getValue())
                     .collect(Collectors.joining(NEW_LINE_SYMBOL));
@@ -146,28 +145,27 @@ public class SwitchBranchWindowController {
         currentProjectsListView.refresh();
     }
 
-    private boolean showSwitchBranchConfirmWindow(List<Project> selectedProjects){
+    private void launchSwitchBranchConfirmation(List<Project> changedProjects,
+                                                List<Project> selectedProjects, Branch selectedBranch) {
 
         SwitchBranchConfirmDialog alert = new SwitchBranchConfirmDialog();
-
         Optional<ButtonType> result = alert.showAndWait();
 
         if (alert.getCommitButton().equals(result.orElse(ButtonType.CANCEL))) {
-            alert.showCommitPushDialog(selectedProjects);
-            return true;
+            alert.showCommitPushDialog(changedProjects);
 
+            switchBranch(selectedProjects, selectedBranch);
         } else if (alert.getDiscardButton().equals(result.orElse(ButtonType.CANCEL))) {
-            Map<Project, JGitStatus> discardStatuses =_gitService.discardChanges(selectedProjects);
+            Map<Project, JGitStatus> discardStatuses = _gitService.discardChanges(changedProjects);
 
             String headerMessage = "All changes was successfully discarded";
             String failedMessage = "Discarding changes was failed";
-            alert.showStatusDialog(selectedProjects, discardStatuses,
+            alert.showStatusDialog(changedProjects, discardStatuses,
                     headerMessage, failedMessage, STATUS_DISCARD_DIALOG_TITLE, STATUS_DISCARD_DIALOG_HEADER);
-            return true;
 
+            switchBranch(selectedProjects, selectedBranch);
         } else {
             alert.close();
-            return false;
         }
     }
 
