@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -50,18 +51,17 @@ public class ProjectServiceImpl implements ProjectService {
         privateTokenKey = CurrentUser.getInstance().getPrivateTokenKey();
         if (privateTokenValue != null) {
             String sendString = "/groups/" + group.getId() + "/projects?per_page=" + MAX_PROJECTS_COUNT_ON_THE_PAGE;
-            HashMap<String, String> header = new HashMap<>();
+            Map<String, String> header = new HashMap<>();
             header.put(privateTokenKey, privateTokenValue);
-            Object jsonProjects = getConnector().sendGet(sendString, null, header);
 
-            Collection<Project> projects = JSONParser.parseToCollectionObjects(jsonProjects, new TypeToken<List<Project>>() {}.getType());
+            Collection<Project> projects = getProjectsPerPage(sendString, header);
 
             String xTotalPagesHeader = getConnector().getConnection().getHeaderField("X-Total-Pages");
             int countOfPages = xTotalPagesHeader != null ? Integer.parseInt(xTotalPagesHeader) : 1;
             if (countOfPages > 1) {
                 for (int i = 2; i <= countOfPages; i++) {
                     String nextPageString = sendString + "&page=" + i;
-                    Collection<Project> nextPageProjects = getProjectsFromNextPage(nextPageString, header);
+                    Collection<Project> nextPageProjects = getProjectsPerPage(nextPageString, header);
                     projects.addAll(nextPageProjects);
                 }
             }
@@ -71,7 +71,7 @@ public class ProjectServiceImpl implements ProjectService {
         return Collections.emptyList();
     }
 
-    private Collection<Project> getProjectsFromNextPage(String requestString, HashMap<String, String> header) {
+    private Collection<Project> getProjectsPerPage(String requestString, Map<String, String> header) {
         Object nextPageJSONProjects = getConnector().sendGet(requestString, null, header);
         Collection<Project> nextPageProjects = JSONParser.parseToCollectionObjects(nextPageJSONProjects,
                 new TypeToken<List<Project>>() {}.getType());
