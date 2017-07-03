@@ -26,7 +26,8 @@ public class ProjectServiceImpl implements ProjectService {
     private static String privateTokenValue;
 
     private static final String GROUP_DOESNT_HAVE_PROJECTS_MESSAGE = "The group has no projects.";
-    private static final String PREFIX_SUCCESSFUL_LOAD = " group loaded successful";
+    private static final String PREFIX_SUCCESSFUL_LOAD = " group have been successfully loaded";
+    private static final int MAX_PROJECTS_COUNT_ON_THE_PAGE = 100;
 
     private static final Logger _logger = LogManager.getLogger(ProjectServiceImpl.class);
     private static ProjectTypeService _projectTypeService;
@@ -48,12 +49,24 @@ public class ProjectServiceImpl implements ProjectService {
         privateTokenValue = CurrentUser.getInstance().getPrivateTokenValue();
         privateTokenKey = CurrentUser.getInstance().getPrivateTokenKey();
         if (privateTokenValue != null) {
-            String sendString = "/groups/" + group.getId() + "/projects";
+            String sendString = "/groups/" + group.getId() + "/projects?per_page=" + MAX_PROJECTS_COUNT_ON_THE_PAGE;
             HashMap<String, String> header = new HashMap<>();
             header.put(privateTokenKey, privateTokenValue);
             Object jsonProjects = getConnector().sendGet(sendString, null, header);
-
             Collection<Project> projects = JSONParser.parseToCollectionObjects(jsonProjects, new TypeToken<List<Project>>() {}.getType());
+            
+            String xTotalPagesHeader = getConnector().getConnection().getHeaderField("X-Total-Pages");
+            int countOfPages = xTotalPagesHeader != null ? Integer.parseInt(xTotalPagesHeader) : 1;
+            if (countOfPages > 1) {
+                for (int i = 2; i <= countOfPages; i++) {
+                    String nextPageString = sendString + "&page=" + i;
+                    Object nextPageJSONProjects = getConnector().sendGet(nextPageString, null, header);
+                    Collection<Project> nextPageProjects = JSONParser.parseToCollectionObjects(nextPageJSONProjects,
+                            new TypeToken<List<Project>>() {}.getType());
+                    projects.addAll(nextPageProjects);
+                }
+            }
+
             return projects != null ? projects : Collections.emptyList();
         }
         return Collections.emptyList();

@@ -20,8 +20,13 @@ class RESTConnectorImpl implements RESTConnector {
 
     private static final Logger _logger = LogManager.getLogger(RESTConnectorImpl.class);
     private String _urlMainPart;
+    private HttpsURLConnection _connection;
 
     public RESTConnectorImpl() {}
+
+    public HttpsURLConnection getConnection() {
+        return this._connection;
+    }
 
     @Override
     public Object sendPost(String suffixForUrl, Map<String, String> params, Map<String, String> header) {
@@ -47,27 +52,27 @@ class RESTConnectorImpl implements RESTConnector {
     private Object sendRequest(String suffixForUrl, Map<String, String> params, Map<String, String> header, RequestType request) {
         try {
             URL obj = new URL(_urlMainPart + suffixForUrl);
-            HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
+            _connection = (HttpsURLConnection) obj.openConnection();
 
-            setHTTPRequestHeader(header, con);
-            con.setRequestMethod(request.toString());
+            setHTTPRequestHeader(header, _connection);
+            _connection.setRequestMethod(request.toString());
 
             if (params != null) {
                 String urlParameters = formParameters(params);
                 // Send post request
-                con.setDoOutput(true);
+                _connection.setDoOutput(true);
 
-                DataOutputStream wr = new DataOutputStream(con.getOutputStream());
+                DataOutputStream wr = new DataOutputStream(_connection.getOutputStream());
                 wr.writeBytes(urlParameters);
                 wr.flush();
                 wr.close();
             }
 
-            int responseCode = con.getResponseCode();
+            int responseCode = _connection.getResponseCode();
             _logger.info("Sending '" + request +"' request to URL : " + obj.toString());
             _logger.info("Response Code : " + responseCode);
 
-            BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+            BufferedReader in = new BufferedReader(new InputStreamReader(_connection.getInputStream()));
             StringBuilder response = new StringBuilder();
 
             String inputLine;
@@ -81,6 +86,8 @@ class RESTConnectorImpl implements RESTConnector {
 
         } catch (Exception e) {
             _logger.error("Error sending request: " + e.getMessage());
+        } finally {
+            _connection.disconnect();
         }
         return null;
     }

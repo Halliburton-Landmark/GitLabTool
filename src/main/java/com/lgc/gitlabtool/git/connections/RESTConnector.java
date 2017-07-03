@@ -2,6 +2,8 @@ package com.lgc.gitlabtool.git.connections;
 
 import java.util.Map;
 
+import javax.net.ssl.HttpsURLConnection;
+
 public interface RESTConnector {
     String URL_MAIN_PART = "https://gitlab.com/api/v3";
 
@@ -40,4 +42,9 @@ public interface RESTConnector {
      * @return main part of server URL
      */
     String getUrlMainPart();
+    
+    /**
+     * @return connection for current request or <code>null</code> if connection does not exist
+     */
+    HttpsURLConnection getConnection();
 }
