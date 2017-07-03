@@ -35,9 +35,9 @@ public class SwitchBranchConfirmDialog extends Alert {
     private static final String STATUS_COMMIT_DIALOG_TITLE = "Committing changes status";
     private static final String STATUS_COMMIT_DIALOG_HEADER = "Committing changes info";
 
-    ButtonType commitButton;
-    ButtonType discardButton;
-    ButtonType cancelButton;
+    private ButtonType commitButton;
+    private ButtonType discardButton;
+    private ButtonType cancelButton;
 
     public SwitchBranchConfirmDialog() {
         super(AlertType.WARNING);
@@ -59,7 +59,7 @@ public class SwitchBranchConfirmDialog extends Alert {
         ScreenUtil.adaptForMultiScreens(stage, 300, 100);
     }
 
-    public void showCommitPushDialog(List<Project> projects) {
+    public ButtonType showCommitPushDialog(List<Project> projects) {
         CommitDialog dialog = new CommitDialog();
         Optional<ButtonType> commitResult = dialog.showAndWait();
 
@@ -70,7 +70,7 @@ public class SwitchBranchConfirmDialog extends Alert {
 
             if (dialog.getCommitMessage() == null || dialog.getCommitMessage().isEmpty()) {
                 showEmptyCommitMessageWarning();
-                return;
+                return ButtonType.CANCEL;
             }
 
             commitMessage = dialog.getCommitMessage();
@@ -82,6 +82,9 @@ public class SwitchBranchConfirmDialog extends Alert {
             showStatusDialog(projects, commitStatuses,
                     headerMessage, failedMessage, STATUS_COMMIT_DIALOG_TITLE, STATUS_COMMIT_DIALOG_HEADER);
         }
+
+        return commitResult.get();
+
     }
 
     public void showEmptyCommitMessageWarning(){

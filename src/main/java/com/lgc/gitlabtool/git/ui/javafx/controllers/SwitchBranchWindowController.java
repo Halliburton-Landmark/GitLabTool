@@ -34,6 +34,7 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
@@ -152,9 +153,11 @@ public class SwitchBranchWindowController {
         Optional<ButtonType> result = alert.showAndWait();
 
         if (alert.getCommitButton().equals(result.orElse(ButtonType.CANCEL))) {
-            alert.showCommitPushDialog(changedProjects);
+            ButtonType resultBT = alert.showCommitPushDialog(changedProjects);
 
-            switchBranch(selectedProjects, selectedBranch);
+            if (!resultBT.getButtonData().equals(ButtonBar.ButtonData.CANCEL_CLOSE)) {
+                switchBranch(selectedProjects, selectedBranch);
+            }
         } else if (alert.getDiscardButton().equals(result.orElse(ButtonType.CANCEL))) {
             Map<Project, JGitStatus> discardStatuses = _gitService.discardChanges(changedProjects);
 
