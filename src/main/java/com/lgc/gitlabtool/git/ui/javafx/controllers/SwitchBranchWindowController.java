@@ -117,10 +117,10 @@ public class SwitchBranchWindowController {
 
         List<Project> changedProjects = _gitService.getProjectsWithChanges(selectedProjects);
 
-        if (!changedProjects.isEmpty()) {
-            launchSwitchBranchConfirmation(changedProjects, selectedProjects, selectedBranch);
-        } else {
+        if (changedProjects.isEmpty()) {
             switchBranch(selectedProjects, selectedBranch);
+        } else {
+            launchSwitchBranchConfirmation(changedProjects, selectedProjects, selectedBranch);
         }
     }
 
