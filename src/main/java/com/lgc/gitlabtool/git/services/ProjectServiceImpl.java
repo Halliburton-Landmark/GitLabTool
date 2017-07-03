@@ -53,16 +53,15 @@ public class ProjectServiceImpl implements ProjectService {
             HashMap<String, String> header = new HashMap<>();
             header.put(privateTokenKey, privateTokenValue);
             Object jsonProjects = getConnector().sendGet(sendString, null, header);
+
             Collection<Project> projects = JSONParser.parseToCollectionObjects(jsonProjects, new TypeToken<List<Project>>() {}.getType());
-            
+
             String xTotalPagesHeader = getConnector().getConnection().getHeaderField("X-Total-Pages");
             int countOfPages = xTotalPagesHeader != null ? Integer.parseInt(xTotalPagesHeader) : 1;
             if (countOfPages > 1) {
                 for (int i = 2; i <= countOfPages; i++) {
                     String nextPageString = sendString + "&page=" + i;
-                    Object nextPageJSONProjects = getConnector().sendGet(nextPageString, null, header);
-                    Collection<Project> nextPageProjects = JSONParser.parseToCollectionObjects(nextPageJSONProjects,
-                            new TypeToken<List<Project>>() {}.getType());
+                    Collection<Project> nextPageProjects = getProjectsFromNextPage(nextPageString, header);
                     projects.addAll(nextPageProjects);
                 }
             }
@@ -70,6 +69,13 @@ public class ProjectServiceImpl implements ProjectService {
             return projects != null ? projects : Collections.emptyList();
         }
         return Collections.emptyList();
+    }
+
+    private Collection<Project> getProjectsFromNextPage(String requestString, HashMap<String, String> header) {
+        Object nextPageJSONProjects = getConnector().sendGet(requestString, null, header);
+        Collection<Project> nextPageProjects = JSONParser.parseToCollectionObjects(nextPageJSONProjects,
+                new TypeToken<List<Project>>() {}.getType());
+        return nextPageProjects;
     }
 
     private RESTConnector getConnector() {
