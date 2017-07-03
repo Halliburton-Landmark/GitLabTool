@@ -153,9 +153,9 @@ public class SwitchBranchWindowController {
         Optional<ButtonType> result = alert.showAndWait();
 
         if (alert.getCommitButton().equals(result.orElse(ButtonType.CANCEL))) {
-            ButtonType resultBT = alert.showCommitPushDialog(changedProjects);
+            ButtonType resultCommitPushDialog = alert.showCommitPushDialog(changedProjects);
 
-            if (!resultBT.getButtonData().equals(ButtonBar.ButtonData.CANCEL_CLOSE)) {
+            if (!resultCommitPushDialog.getButtonData().equals(ButtonBar.ButtonData.CANCEL_CLOSE)) {
                 switchBranch(selectedProjects, selectedBranch);
             }
         } else if (alert.getDiscardButton().equals(result.orElse(ButtonType.CANCEL))) {
