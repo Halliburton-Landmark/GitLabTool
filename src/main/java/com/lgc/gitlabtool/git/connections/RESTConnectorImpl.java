@@ -21,10 +21,11 @@ class RESTConnectorImpl implements RESTConnector {
     private static final Logger _logger = LogManager.getLogger(RESTConnectorImpl.class);
     private String _urlMainPart;
     private HttpsURLConnection _connection;
+    private static final String TOTAL_PAGES_COUNT_HEADER = "X-Total-Pages";
 
     public RESTConnectorImpl() {}
 
-    public HttpsURLConnection getConnection() {
+    private HttpsURLConnection getConnection() {
         return this._connection;
     }
 
@@ -131,6 +132,14 @@ class RESTConnectorImpl implements RESTConnector {
     @Override
     public String getUrlMainPart() {
         return _urlMainPart;
+    }
+
+    @Override
+    public int getCountOfPages() {
+        String xTotalPagesHeader = getConnection() != null 
+                ? getConnection().getHeaderField(TOTAL_PAGES_COUNT_HEADER) 
+                : null;
+        return xTotalPagesHeader != null ? Integer.parseInt(xTotalPagesHeader) : 1;
     }
 
 }

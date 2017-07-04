@@ -4,6 +4,8 @@ import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import com.lgc.gitlabtool.git.services.ProjectServiceImpl;
+
 public interface RESTConnector {
     String URL_MAIN_PART = "https://gitlab.com/api/v3";
 
@@ -44,7 +46,14 @@ public interface RESTConnector {
     String getUrlMainPart();
     
     /**
-     * @return connection for current request or <code>null</code> if connection does not exist
+     * Returns the count of pages with projects after sending the request with 
+     * set <code>per_page</code> parameter
+     * <p>
+     * Count of pages will be calculated by <code>per_page</code> value
+     * <p>
+     * Could be gotten only after sending the request
+     * 
+     * @return count of pages with max count of projects on it or <code>1</code> if connection does not exist
      */
-    HttpsURLConnection getConnection();
+    int getCountOfPages();
 }

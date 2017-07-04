@@ -56,14 +56,11 @@ public class ProjectServiceImpl implements ProjectService {
 
             Collection<Project> projects = getProjectsPerPage(sendString, header);
 
-            String xTotalPagesHeader = getConnector().getConnection().getHeaderField("X-Total-Pages");
-            int countOfPages = xTotalPagesHeader != null ? Integer.parseInt(xTotalPagesHeader) : 1;
-            if (countOfPages > 1) {
-                for (int i = 2; i <= countOfPages; i++) {
-                    String nextPageString = sendString + "&page=" + i;
-                    Collection<Project> nextPageProjects = getProjectsPerPage(nextPageString, header);
-                    projects.addAll(nextPageProjects);
-                }
+            int countOfPages = getConnector().getCountOfPages();
+            for (int i = 2; i <= countOfPages; i++) {
+                String nextPageString = sendString + "&page=" + i;
+                Collection<Project> nextPageProjects = getProjectsPerPage(nextPageString, header);
+                projects.addAll(nextPageProjects);
             }
 
             return projects != null ? projects : Collections.emptyList();
