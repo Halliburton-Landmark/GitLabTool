@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.*?>
 <BorderPane xmlns="http://javafx.com/javafx/8"
             xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.lgc.gitlabtool.git.ui.javafx.controllers.WelcomeWindowController">
+            fx:controller="com.lgc.gitlabtool.git.ui.javafx.controllers.GroupWindowController">
     <top>
         <GridPane maxHeight="17.0" style="-fx-background-color: #838EA9;" BorderPane.alignment="CENTER">
             <columnConstraints>

@@ -50,8 +50,8 @@ import javafx.util.Callback;
 /**
  * @author Yevhen Strazhko
  */
-public class WelcomeWindowController {
-    private static final Logger _logger = LogManager.getLogger(WelcomeWindowController.class);
+public class GroupWindowController {
+    private static final Logger _logger = LogManager.getLogger(GroupWindowController.class);
 
     private static final String WINDOW_TITLE = "Cloning window";
     private static final String FAILED_HEADER_MESSAGE_LOAD_GROUP = "Failed loading cloned groups. ";

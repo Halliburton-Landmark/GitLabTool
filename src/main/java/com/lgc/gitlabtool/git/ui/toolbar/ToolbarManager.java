@@ -64,7 +64,7 @@ public class ToolbarManager {
 
         items = new ArrayList<>();
 
-        if (!windowId.equals(ViewKey.WELCOME_WINDOW.getKey())) {
+        if (!windowId.equals(ViewKey.GROUP_WINDOW.getKey())) {
             items.add(createHomeButton());
         }
 
@@ -160,7 +160,7 @@ public class ToolbarManager {
         Parent root = fxmlLoader.load();
 
         ModularController myControllerHandle = fxmlLoader.getController();
-        myControllerHandle.loadWelcomeWindow();
+        myControllerHandle.loadGroupWindow();
 
         Stage previousStage = (Stage) showWelcomButton.getScene().getWindow();
         previousStage.setScene(new Scene(root));
