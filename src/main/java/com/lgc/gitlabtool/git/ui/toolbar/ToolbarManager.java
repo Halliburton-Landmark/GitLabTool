@@ -29,8 +29,8 @@ import javafx.stage.Stage;
  */
 public class ToolbarManager {
     private static final Logger logger = LogManager.getLogger(ToolbarManager.class);
-    private static final String HOME_BUTTON_ICON_URL = "icons/home.png";
-    private static final String HOME_BUTTON_TEXT = "Welcome page";
+    private static final String HOME_BUTTON_ICON_URL = "icons/main/change_group.png";
+    private static final String HOME_BUTTON_TEXT = "Change group";
     private static final String HOME_BUTTON_TOOLTIP = "Go to welcome page";
     private static final String HOME_BUTTON_ID = "homeButton";
 
