@@ -52,7 +52,7 @@ public class CreateNewBranchDialog extends Dialog<String> {
     private final Button _cancelButton;
 
     private List<Project> _projects;
-    private BranchValidator _branchValidator = new BranchValidator();
+    private final BranchValidator _branchValidator = new BranchValidator();
 
     public List<Project> getProjects() {
         return _projects;
@@ -165,12 +165,12 @@ public class CreateNewBranchDialog extends Dialog<String> {
                     .map(pair -> pair.getKey().getName() + " - " + pair.getValue())
                     .collect(Collectors.joining("\n"));
         } else {
-            int countOfCreatedBranches = 
+            int countOfCreatedBranches =
                     (int) results.entrySet().stream()
                     .map(pair -> pair.getValue())
                     .filter(status -> status.equals(JGitStatus.SUCCESSFUL))
                     .count();
-            info = "new branch has been created in " + countOfCreatedBranches 
+            info = "New branch has been created in " + countOfCreatedBranches
                     + " of " + projects.size() + " selected projects";
         }
         Alert statusDialog = new StatusDialog(STATUS_DIALOG_TITLE, STATUS_DIALOG_HEADER, info);
