@@ -29,10 +29,10 @@ import javafx.stage.Stage;
  */
 public class ToolbarManager {
     private static final Logger logger = LogManager.getLogger(ToolbarManager.class);
-    private static final String HOME_BUTTON_ICON_URL = "icons/main/change_group.png";
-    private static final String HOME_BUTTON_TEXT = "Change group";
-    private static final String HOME_BUTTON_TOOLTIP = "Go to welcome page";
-    private static final String HOME_BUTTON_ID = "homeButton";
+    private static final String CHANGE_GROUP_BUTTON_ICON_URL = "icons/main/change_group.png";
+    private static final String CHANGE_GROUP_BUTTON_TEXT = "Change group";
+    private static final String CHANGE_GROUP_BUTTON_TOOLTIP = "Change current group";
+    private static final String CHANGE_GROUP_BUTTON_ID = "changeGroupButton";
 
     private static ToolbarManager instance = null;
 
@@ -115,7 +115,7 @@ public class ToolbarManager {
 
             //except homeButton
             Button buttonNode = (Button) node;
-            if (buttonNode.getId().equals(HOME_BUTTON_ID)) {
+            if (buttonNode.getId().equals(CHANGE_GROUP_BUTTON_ID)) {
                 continue;
             }
 
@@ -126,10 +126,10 @@ public class ToolbarManager {
     }
 
     private Button createHomeButton() {
-        Image homeImage = new Image(getClass().getClassLoader().getResource(HOME_BUTTON_ICON_URL).toExternalForm());
-        Button homeButton = new Button(HOME_BUTTON_TEXT, new ImageView(homeImage));
-        homeButton.setTooltip(new Tooltip(HOME_BUTTON_TOOLTIP));
-        homeButton.setId(HOME_BUTTON_ID);
+        Image homeImage = new Image(getClass().getClassLoader().getResource(CHANGE_GROUP_BUTTON_ICON_URL).toExternalForm());
+        Button homeButton = new Button(CHANGE_GROUP_BUTTON_TEXT, new ImageView(homeImage));
+        homeButton.setTooltip(new Tooltip(CHANGE_GROUP_BUTTON_TOOLTIP));
+        homeButton.setId(CHANGE_GROUP_BUTTON_ID);
         homeButton.setOnAction((e) -> {
             try {
                 showWelcomePage(homeButton);
