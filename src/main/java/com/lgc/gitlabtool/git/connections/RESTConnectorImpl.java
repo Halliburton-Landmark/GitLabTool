@@ -20,22 +20,27 @@ class RESTConnectorImpl implements RESTConnector {
 
     private static final Logger _logger = LogManager.getLogger(RESTConnectorImpl.class);
     private String _urlMainPart;
-    private HttpsURLConnection _connection;
-    private static final String TOTAL_PAGES_COUNT_HEADER = "X-Total-Pages";
 
     public RESTConnectorImpl() {}
 
-    private HttpsURLConnection getConnection() {
-        return this._connection;
+    /**
+     * Opens the HTTP connection to the defined URL 
+     * 
+     * @param url - URL to send connection
+     * @return created connection for defined URL
+     * @throws Exception if URL isn't valid
+     */
+    private HttpsURLConnection getConnection(URL url) throws Exception {
+        return (HttpsURLConnection) url.openConnection();
     }
 
     @Override
-    public Object sendPost(String suffixForUrl, Map<String, String> params, Map<String, String> header) {
+    public HttpResponseHolder sendPost(String suffixForUrl, Map<String, String> params, Map<String, String> header) {
         return sendRequest(suffixForUrl, params,header, RequestType.POST);
     }
 
     @Override
-    public Object sendGet(String suffixForUrl, Map<String, String> params, Map<String, String> header) {
+    public HttpResponseHolder sendGet(String suffixForUrl, Map<String, String> params, Map<String, String> header) {
         return sendRequest(suffixForUrl, params,header, RequestType.GET);
     }
 
@@ -48,32 +53,34 @@ class RESTConnectorImpl implements RESTConnector {
      *               if the header is not needed then pass null
      * @param request - for example: RequestType.GET or RequestType.POST etc.
      *
-     * @return string with data or null, if an error occurred in the request
+     * @return {@link HttpResponseHolder} instance which contains response body, response code and header lines
+     *         or <code>null</code>, if an error occurred in the request
      */
-    private Object sendRequest(String suffixForUrl, Map<String, String> params, Map<String, String> header, RequestType request) {
+    private HttpResponseHolder sendRequest(String suffixForUrl, Map<String, String> params, Map<String, String> header, RequestType request) {
+        HttpsURLConnection connection = null;
         try {
-            URL obj = new URL(_urlMainPart + suffixForUrl);
-            _connection = (HttpsURLConnection) obj.openConnection();
+            URL url = new URL(_urlMainPart + suffixForUrl);
+            connection = getConnection(url);
 
-            setHTTPRequestHeader(header, _connection);
-            _connection.setRequestMethod(request.toString());
+            setHTTPRequestHeader(header, connection);
+            connection.setRequestMethod(request.toString());
 
             if (params != null) {
                 String urlParameters = formParameters(params);
                 // Send post request
-                _connection.setDoOutput(true);
+                connection.setDoOutput(true);
 
-                DataOutputStream wr = new DataOutputStream(_connection.getOutputStream());
+                DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
                 wr.writeBytes(urlParameters);
                 wr.flush();
                 wr.close();
             }
 
-            int responseCode = _connection.getResponseCode();
-            _logger.info("Sending '" + request +"' request to URL : " + obj.toString());
+            int responseCode = connection.getResponseCode();
+            _logger.info("Sending '" + request +"' request to URL : " + url.toString());
             _logger.info("Response Code : " + responseCode);
 
-            BufferedReader in = new BufferedReader(new InputStreamReader(_connection.getInputStream()));
+            BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             StringBuilder response = new StringBuilder();
 
             String inputLine;
@@ -82,13 +89,17 @@ class RESTConnectorImpl implements RESTConnector {
             }
             in.close();
 
+            HttpResponseHolder responseHolder = new HttpResponseHolder(connection.getHeaderFields(), response.toString(), responseCode);
             _logger.info(response.toString());
-            return response.toString();
+
+            return responseHolder;
 
         } catch (Exception e) {
             _logger.error("Error sending request: " + e.getMessage());
         } finally {
-            _connection.disconnect();
+            if (connection != null && connection.getExpiration() == 0) {
+                connection.disconnect();
+            }
         }
         return null;
     }
@@ -132,14 +143,6 @@ class RESTConnectorImpl implements RESTConnector {
     @Override
     public String getUrlMainPart() {
         return _urlMainPart;
-    }
-
-    @Override
-    public int getCountOfPages() {
-        String xTotalPagesHeader = getConnection() != null 
-                ? getConnection().getHeaderField(TOTAL_PAGES_COUNT_HEADER) 
-                : null;
-        return xTotalPagesHeader != null ? Integer.parseInt(xTotalPagesHeader) : 1;
     }
 
 }

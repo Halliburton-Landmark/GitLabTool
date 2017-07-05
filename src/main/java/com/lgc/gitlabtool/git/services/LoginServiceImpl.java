@@ -29,7 +29,7 @@ public class LoginServiceImpl implements LoginService {
             params.put("login", dto.getLogin());
             params.put("password", dto.getPassword());
             getConnector().setUrlMainPart(dto.getServerURL());
-            Object userJson = getConnector().sendPost("/session", params, null);
+            Object userJson = getConnector().sendPost("/session", params, null).getBody();
             if (userJson == null) {
                 onSuccess.accept(HttpStatus.SC_UNAUTHORIZED);
             } else {
