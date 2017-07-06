@@ -70,6 +70,9 @@ public class JavaFXUI extends Application implements UserInterface {
         ScreenUtil.adaptForMultiScreens(primaryStage, primaryScreenBounds.getMaxX() / 1.5,
                 primaryScreenBounds.getMaxY() / 1.5);
 
+        primaryStage.setMinWidth(primaryScreenBounds.getMaxX() / 3);
+        primaryStage.setMinHeight(primaryScreenBounds.getMaxY() / 3);
+
         primaryStage.show();
     }
 
