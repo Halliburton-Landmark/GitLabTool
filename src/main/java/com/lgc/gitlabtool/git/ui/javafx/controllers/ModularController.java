@@ -275,6 +275,8 @@ public class ModularController {
 
             stage.setWidth(dialogWidth);
             stage.setHeight(dialogHeight);
+            stage.setMinWidth(dialogWidth / 2);
+            stage.setMinHeight(dialogHeight / 2);
 
             stage.show();
         } catch (IOException e) {

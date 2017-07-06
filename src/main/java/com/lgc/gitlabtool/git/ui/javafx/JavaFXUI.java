@@ -63,17 +63,15 @@ public class JavaFXUI extends Application implements UserInterface {
         primaryStage.setScene(scene);
         primaryStage.getIcons().add(appIcon);
         primaryStage.setOnCloseRequest(confirmCloseEventHandler);
-        primaryStage.show();
 
         /* Set sizing and position */
         Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
-        double dialogWidth = primaryScreenBounds.getMaxX() / 1.5;
-        double dialogHeight = primaryScreenBounds.getMaxY() / 1.5;
 
-        ScreenUtil.adaptForMultiScreens(primaryStage, dialogWidth, dialogHeight);
+        ScreenUtil.adaptForMultiScreens(primaryStage, primaryScreenBounds.getMaxX() / 1.5,
+                primaryScreenBounds.getMaxY() / 1.5);
 
-        primaryStage.setWidth(dialogWidth);
-        primaryStage.setHeight(dialogHeight);
+        primaryStage.setMinWidth(primaryScreenBounds.getMaxX() / 3);
+        primaryStage.setMinHeight(primaryScreenBounds.getMaxY() / 3);
 
         primaryStage.show();
     }
