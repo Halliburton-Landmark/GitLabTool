@@ -18,10 +18,8 @@ import org.apache.logging.log4j.Logger;
 
 import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.Project;
-import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.services.ClonedGroupsService;
 import com.lgc.gitlabtool.git.services.GitService;
-
 import com.lgc.gitlabtool.git.services.GroupsUserService;
 import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
@@ -155,9 +153,9 @@ public class ModularController {
 
         _mainWindowController = loader.getController();
 
-        String nameGroup = selectedGroup.getName();
+        String groupTitle = selectedGroup.getName() + " [" + selectedGroup.getPathToClonedGroup() + "]";
         List<Project> projects = (List<Project>) _projectService.loadProjects(selectedGroup);
-        _mainWindowController.setSelectedGroup(projects, nameGroup);
+        _mainWindowController.setSelectedGroup(projects, groupTitle);
         _mainWindowController.beforeShowing();
 
         AnchorPane.setTopAnchor(node, 0.0);
