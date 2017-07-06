@@ -15,7 +15,6 @@ import com.lgc.gitlabtool.git.ui.selection.SelectionsProvider;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarButtons;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarManager;
 
-
 import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -37,7 +36,7 @@ public class MainWindowController {
     private static final String SELECT_ALL_IMAGE_URL = "icons/main/select_all.png";
 
     private List<Project> _projects;
-    private String _groupName;
+    private String _groupTitle;
 
     private final LoginService _loginService =
             (LoginService) ServiceProvider.getInstance().getService(LoginService.class.getName());
@@ -58,7 +57,7 @@ public class MainWindowController {
         String username = _loginService.getCurrentUser().getName();
         userId.setText(username);
 
-        String currentGroupname = _groupName;
+        String currentGroupname = _groupTitle;
         leftLabel.setText(HEDER_GROUP_TITLE + currentGroupname);
 
         Image imageSelectAll = new Image(getClass().getClassLoader().getResource(SELECT_ALL_IMAGE_URL).toExternalForm());
@@ -85,9 +84,9 @@ public class MainWindowController {
         initNewBranchButton();
     }
 
-    public void setSelectedGroup(List<Project> projects, String groupName) {
+    public void setSelectedGroup(List<Project> projects, String groupTitle) {
         _projects = projects;
-        _groupName = groupName;
+        _groupTitle = groupTitle;
     }
 
     public void refreshProjectsList(){
