@@ -19,7 +19,7 @@ public enum MainMenuItems {
     GROUP_WINDOW_ABOUT(ViewKey.GROUP_WINDOW.getKey(), "Help", "group_window_help_about","icons/mainmenu/about.png", "About"),
 
     MAIN_EXIT(ViewKey.MAIN_WINDOW.getKey(), "File", "main_file_exit","icons/mainmenu/exit.png", "Exit"),
-    MAIN_CREATE_BRANCH(ViewKey.MAIN_WINDOW.getKey(), "Git", "main_git_create_branch","icons/mainmenu/createbranch.png", "New branch"),
+    MAIN_CREATE_BRANCH(ViewKey.MAIN_WINDOW.getKey(), "Git", "main_git_create_branch","icons/mainmenu/newbranch.png", "New branch"),
     MAIN_SWITCH_BRANCH(ViewKey.MAIN_WINDOW.getKey(), "Git", "main_git_switch_branch","icons/mainmenu/switchbranch.png", "Switch branch"),
     MAIN_ABOUT(ViewKey.MAIN_WINDOW.getKey(), "Help", "main_help_about","icons/mainmenu/about.png", "About");
 
