@@ -55,7 +55,7 @@ public class GroupsUserServiceImpl implements GroupsUserService {
         if (privateTokenValue != null) {
             HashMap<String, String> header = new HashMap<>();
             header.put(privateTokenKey, privateTokenValue);
-            Object userProjects = getConnector().sendGet("/groups", null, header);
+            Object userProjects = getConnector().sendGet("/groups", null, header).getBody();
             return JSONParser.parseToCollectionObjects(userProjects, new TypeToken<List<Group>>() {
             }.getType());
         }
@@ -80,7 +80,7 @@ public class GroupsUserServiceImpl implements GroupsUserService {
             HashMap<String, String> header = new HashMap<>();
             header.put(privateTokenKey, privateTokenValue);
 
-            Object uparsedGroup = getConnector().sendGet(sendString, null, header);
+            Object uparsedGroup = getConnector().sendGet(sendString, null, header).getBody();
             return JSONParser.parseToObject(uparsedGroup, Group.class);
         }
         return null;
