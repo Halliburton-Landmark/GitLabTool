@@ -14,9 +14,9 @@ import com.lgc.gitlabtool.git.ui.ViewKey;
  */
 public enum MainMenuItems {
 
-    WELCOME_EXIT(ViewKey.GROUP_WINDOW.getKey(), "File", "welcome_file_exit", "Exit"),
-    WELCOME_CLONE_GROUP(ViewKey.GROUP_WINDOW.getKey(), "Git", "welcome_group_clone", "Clone"),
-    WELCOME_ABOUT(ViewKey.GROUP_WINDOW.getKey(), "Help", "welcome_help_about", "About"),
+    GROUP_WINDOW_EXIT(ViewKey.GROUP_WINDOW.getKey(), "File", "group_window_file_exit", "Exit"),
+    GROUP_WINDOW_CLONE_GROUP(ViewKey.GROUP_WINDOW.getKey(), "Git", "group_window_group_clone", "Clone"),
+    GROUP_WINDOW_ABOUT(ViewKey.GROUP_WINDOW.getKey(), "Help", "group_window_help_about", "About"),
 
     MAIN_EXIT(ViewKey.MAIN_WINDOW.getKey(), "File", "main_file_exit", "Exit"),
     MAIN_CREATE_BRANCH(ViewKey.MAIN_WINDOW.getKey(), "Git", "main_git_create_branch", "New branch"),

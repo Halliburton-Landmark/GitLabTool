@@ -132,7 +132,7 @@ public class ToolbarManager {
         homeButton.setId(CHANGE_GROUP_BUTTON_ID);
         homeButton.setOnAction((e) -> {
             try {
-                showWelcomePage(homeButton);
+                showGroupWindow(homeButton);
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
@@ -149,7 +149,7 @@ public class ToolbarManager {
         return button;
     }
 
-    private void showWelcomePage(Button showWelcomButton) throws IOException {
+    private void showGroupWindow(Button showWelcomButton) throws IOException {
         URL modularWindow = getClass().getClassLoader().getResource(ViewKey.MODULAR_CONTAINER.getPath());
         if (modularWindow == null) {
             logger.error("Could not load fxml resource");

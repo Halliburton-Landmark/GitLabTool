@@ -210,10 +210,10 @@ public class ModularController {
 
     private void initActionsMainMenu(String windowId) {
         if (windowId.equals(ViewKey.GROUP_WINDOW.getKey())) {
-            MenuItem exit = MainMenuManager.getInstance().getButtonById(MainMenuItems.WELCOME_EXIT);
+            MenuItem exit = MainMenuManager.getInstance().getButtonById(MainMenuItems.GROUP_WINDOW_EXIT);
             exit.setOnAction(event -> Platform.exit());
 
-            MenuItem about = MainMenuManager.getInstance().getButtonById(MainMenuItems.WELCOME_ABOUT);
+            MenuItem about = MainMenuManager.getInstance().getButtonById(MainMenuItems.GROUP_WINDOW_ABOUT);
             about.setOnAction(event -> showAboutPopup());
 
         } else if (windowId.equals(ViewKey.MAIN_WINDOW.getKey())) {

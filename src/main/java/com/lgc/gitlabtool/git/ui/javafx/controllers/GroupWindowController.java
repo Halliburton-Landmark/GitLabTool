@@ -143,7 +143,7 @@ public class GroupWindowController {
     }
 
     private void configureMainMenuCommands(){
-        MenuItem cloneGroup = MainMenuManager.getInstance().getButtonById(MainMenuItems.WELCOME_CLONE_GROUP);
+        MenuItem cloneGroup = MainMenuManager.getInstance().getButtonById(MainMenuItems.GROUP_WINDOW_CLONE_GROUP);
         cloneGroup.setOnAction(this::onCloneGroups);
     }
 
