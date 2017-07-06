@@ -106,10 +106,10 @@ public class MainMenuManager {
     }
 
     private MenuItem createButton(String buttonId, String imgPath, String btnText) {
-        Image btnImage = new Image(getClass().getClassLoader().getResource(imgPath).toExternalForm());
-        MenuItem button = new MenuItem(btnText, new ImageView(btnImage));
-        button.setId(buttonId);
+        Image menuItemImage = new Image(getClass().getClassLoader().getResource(imgPath).toExternalForm());
+        MenuItem menuItem = new MenuItem(btnText, new ImageView(menuItemImage));
+        menuItem.setId(buttonId);
 
-        return button;
+        return menuItem;
     }
 }
