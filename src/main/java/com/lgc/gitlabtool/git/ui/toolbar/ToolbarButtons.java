@@ -12,10 +12,10 @@ import com.lgc.gitlabtool.git.ui.ViewKey;
  */
 public enum ToolbarButtons {
 
-    CLONE_GROUP_BUTTON(ViewKey.WELCOME_WINDOW.getKey(), "group_cloneGroup", "icons/welcome/clone.png", "Clone group", "Clone group"),
-    REMOVE_GROUP_BUTTON(ViewKey.WELCOME_WINDOW.getKey(), "group_removeGroup", "icons/welcome/remove.png", "Remove group", "Remove selected group"),
-    IMPORT_GROUP_BUTTON(ViewKey.WELCOME_WINDOW.getKey(), "group_importGroup", "icons/welcome/import.png", "Import group", "Import group from disk"),
-    SELECT_GROUP_BUTTON(ViewKey.WELCOME_WINDOW.getKey(), "group_selectGroup", "icons/welcome/select.png", "Load group", "Load selected group"),
+    CLONE_GROUP_BUTTON(ViewKey.GROUP_WINDOW.getKey(), "group_cloneGroup", "icons/group_window/clone.png", "Clone group", "Clone group"),
+    REMOVE_GROUP_BUTTON(ViewKey.GROUP_WINDOW.getKey(), "group_removeGroup", "icons/group_window/remove.png", "Remove group", "Remove selected group"),
+    IMPORT_GROUP_BUTTON(ViewKey.GROUP_WINDOW.getKey(), "group_importGroup", "icons/group_window/import.png", "Import group", "Import group from disk"),
+    SELECT_GROUP_BUTTON(ViewKey.GROUP_WINDOW.getKey(), "group_selectGroup", "icons/group_window/select.png", "Load group", "Load selected group"),
 
     /* Temporary unavailable buttons
     ADD_REPO_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "repo_addRepo", "icons/main/add.png", "Add repository", "Add repository"),

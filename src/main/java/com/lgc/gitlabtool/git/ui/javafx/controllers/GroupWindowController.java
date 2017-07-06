@@ -50,10 +50,10 @@ import javafx.util.Callback;
 /**
  * @author Yevhen Strazhko
  */
-public class WelcomeWindowController {
-    private static final Logger _logger = LogManager.getLogger(WelcomeWindowController.class);
+public class GroupWindowController {
+    private static final Logger _logger = LogManager.getLogger(GroupWindowController.class);
 
-    private static final String WINDOW_TITLE = "Cloning window";
+    private static final String CLONE_WINDOW_TITLE = "Cloning window";
     private static final String FAILED_HEADER_MESSAGE_LOAD_GROUP = "Failed loading cloned groups. ";
     private static final String FAILED_CONTENT_MESSAGE_LOAD_GROUP
                                         = "These groups may have been moved to another folder or deleted from disc: ";
@@ -98,7 +98,7 @@ public class WelcomeWindowController {
             Stage stage = new Stage();
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.initStyle(StageStyle.DECORATED);
-            stage.setTitle(WINDOW_TITLE);
+            stage.setTitle(CLONE_WINDOW_TITLE);
             stage.setResizable(false);
             stage.setScene(new Scene(root));
             stage.setOnHidden(we -> updateClonedGroups());
@@ -143,7 +143,7 @@ public class WelcomeWindowController {
     }
 
     private void configureMainMenuCommands(){
-        MenuItem cloneGroup = MainMenuManager.getInstance().getButtonById(MainMenuItems.WELCOME_CLONE_GROUP);
+        MenuItem cloneGroup = MainMenuManager.getInstance().getButtonById(MainMenuItems.GROUP_WINDOW_CLONE_GROUP);
         cloneGroup.setOnAction(this::onCloneGroups);
     }
 

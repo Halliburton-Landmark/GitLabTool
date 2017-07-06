@@ -7,7 +7,7 @@ package com.lgc.gitlabtool.git.ui;
  */
 public enum ViewKey {
 
-    WELCOME_WINDOW("welcomeWindow", "fxml/WelcomeWindow.fxml"),
+    GROUP_WINDOW("groupWindow", "fxml/GroupWindow.fxml"),
     MAIN_WINDOW("mainWindow", "fxml/MainWindow.fxml"),
     MODULAR_CONTAINER("modularContainer", "fxml/ModularContainer.fxml"),
     CLONING_GROUPS_WINDOW("cloningGroupsWindow", "fxml/CloningGroupsWindow.fxml"),

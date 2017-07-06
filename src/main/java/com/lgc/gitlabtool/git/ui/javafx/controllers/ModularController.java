@@ -18,8 +18,6 @@ import org.apache.logging.log4j.Logger;
 
 import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.Project;
-import com.lgc.gitlabtool.git.services.ClonedGroupsService;
-import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.GroupsUserService;
 import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
@@ -79,14 +77,11 @@ public class ModularController {
     private static final String REMOVE_GROUP_STATUS_DIALOG_TITLE = "Import Status Dialog";
     private static final String FAILED_REMOVE_GROUP_MESSAGE = "Removing of group is Failed";
 
-    private static final String STATUS_DISCARD_DIALOG_TITLE = "Discarding changes status";
-    private static final String STATUS_DISCARD_DIALOG_HEADER = "Discarding changes info";
-
     private static final String CSS_PATH = "css/style.css";
     private static final Image _appIcon = AppIconHolder.getInstance().getAppIcoImage();
 
     private MainWindowController _mainWindowController;
-    private WelcomeWindowController _welcomeWindowController;
+    private GroupWindowController _groupWindowController;
 
     @FXML
     public Pane consolePane;
@@ -111,25 +106,18 @@ public class ModularController {
     private final GroupsUserService _groupService = (GroupsUserService) ServiceProvider.getInstance()
             .getService(GroupsUserService.class.getName());
 
-
-    private final GitService _gitService = (GitService) ServiceProvider.getInstance()
-            .getService(GitService.class.getName());
-
-    private final ClonedGroupsService _clonedGroupsService = (ClonedGroupsService) ServiceProvider.getInstance()
-            .getService(ClonedGroupsService.class.getName());
-
     private final ProjectService _projectService =
             (ProjectService) ServiceProvider.getInstance().getService(ProjectService.class.getName());
 
-    public void loadWelcomeWindow() throws IOException {
-        toolbar.getItems().addAll(ToolbarManager.getInstance().createToolbarItems(ViewKey.WELCOME_WINDOW.getKey()));
-        menuBar.getMenus().addAll(MainMenuManager.getInstance().createToolbarItems(ViewKey.WELCOME_WINDOW.getKey()));
-        initActionsMainMenu(ViewKey.WELCOME_WINDOW.getKey());
-        initActionsToolBar(ViewKey.WELCOME_WINDOW.getKey());
+    public void loadGroupWindow() throws IOException {
+        toolbar.getItems().addAll(ToolbarManager.getInstance().createToolbarItems(ViewKey.GROUP_WINDOW.getKey()));
+        menuBar.getMenus().addAll(MainMenuManager.getInstance().createToolbarItems(ViewKey.GROUP_WINDOW.getKey()));
+        initActionsMainMenu(ViewKey.GROUP_WINDOW.getKey());
+        initActionsToolBar(ViewKey.GROUP_WINDOW.getKey());
 
-        FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource(ViewKey.WELCOME_WINDOW.getPath()));
+        FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource(ViewKey.GROUP_WINDOW.getPath()));
         Node node = loader.load();
-        _welcomeWindowController = loader.getController();
+        _groupWindowController = loader.getController();
 
         AnchorPane.setTopAnchor(node, 0.0);
         AnchorPane.setRightAnchor(node, 0.0);
@@ -168,7 +156,7 @@ public class ModularController {
     }
 
     private void initActionsToolBar(String windowId) {
-        if (windowId.equals(ViewKey.WELCOME_WINDOW.getKey())) {
+        if (windowId.equals(ViewKey.GROUP_WINDOW.getKey())) {
             ToolbarManager.getInstance().getButtonById(ToolbarButtons.IMPORT_GROUP_BUTTON.getId())
                     .setOnAction(event -> importGroupDialog());
 
@@ -208,7 +196,7 @@ public class ModularController {
                     headerMessage = FAILED_REMOVE_GROUP_MESSAGE;
                     showStatusDialog(REMOVE_GROUP_STATUS_DIALOG_TITLE, headerMessage, mapStatus.getValue());
                 }
-                _welcomeWindowController.refreshGroupsList();
+                _groupWindowController.refreshGroupsList();
             }
         });
         executor.shutdown();
@@ -216,16 +204,16 @@ public class ModularController {
 
     @FXML
     public void onRemoveGroup(ActionEvent actionEvent) {
-        Group group = _welcomeWindowController.getSelectedGroup();
+        Group group = _groupWindowController.getSelectedGroup();
         removeGroupDialog(group);
     }
 
     private void initActionsMainMenu(String windowId) {
-        if (windowId.equals(ViewKey.WELCOME_WINDOW.getKey())) {
-            MenuItem exit = MainMenuManager.getInstance().getButtonById(MainMenuItems.WELCOME_EXIT);
+        if (windowId.equals(ViewKey.GROUP_WINDOW.getKey())) {
+            MenuItem exit = MainMenuManager.getInstance().getButtonById(MainMenuItems.GROUP_WINDOW_EXIT);
             exit.setOnAction(event -> Platform.exit());
 
-            MenuItem about = MainMenuManager.getInstance().getButtonById(MainMenuItems.WELCOME_ABOUT);
+            MenuItem about = MainMenuManager.getInstance().getButtonById(MainMenuItems.GROUP_WINDOW_ABOUT);
             about.setOnAction(event -> showAboutPopup());
 
         } else if (windowId.equals(ViewKey.MAIN_WINDOW.getKey())) {
@@ -327,7 +315,7 @@ public class ModularController {
                     Platform.runLater(new Runnable() {
                         @Override
                         public void run() {
-                            _welcomeWindowController.refreshGroupsList();
+                            _groupWindowController.refreshGroupsList();
                         }
                     });
                 }
