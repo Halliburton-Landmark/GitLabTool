@@ -3,6 +3,8 @@ package com.lgc.gitlabtool.git.ui.mainmenu;
 import com.lgc.gitlabtool.git.ui.javafx.controllers.ModularController;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 
 import java.util.*;
 
@@ -55,7 +57,7 @@ public class MainMenuManager {
         for (Menu menu : menus) {
             for (MainMenuItems button : MainMenuItems.values()) {
                 if (button.getViewKey().equals(windowId) && button.getMenuName().equals(menu.getText())) {
-                    menu.getItems().add(createButton(button.getId(), button.getText()));
+                    menu.getItems().add(createButton(button.getId(), button.getIconUrl(), button.getText()));
                 }
             }
         }
@@ -103,8 +105,9 @@ public class MainMenuManager {
         return items;
     }
 
-    private MenuItem createButton(String buttonId, String btnText) {
-        MenuItem button = new MenuItem(btnText);
+    private MenuItem createButton(String buttonId, String imgPath, String btnText) {
+        Image btnImage = new Image(getClass().getClassLoader().getResource(imgPath).toExternalForm());
+        MenuItem button = new MenuItem(btnText, new ImageView(btnImage));
         button.setId(buttonId);
 
         return button;
