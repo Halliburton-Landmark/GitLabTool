@@ -10,42 +10,74 @@ import java.util.Map;
  */
 public class HttpResponseHolder {
 
-    private Map<String, List<String>> headerLines;
-    private Object body;
-    private int responseCode;
+    private Map<String, List<String>> _headerLines;
+    private Object _body;
+    private int _responseCode;
+
+    public HttpResponseHolder() {
+        
+    }
 
     public HttpResponseHolder(Map<String, List<String>> headerLines, Object body) {
-        this.headerLines = headerLines;
-        this.body = body;
+        this._headerLines = headerLines;
+        this._body = body;
     }
 
     public HttpResponseHolder(Map<String, List<String>> headerLines, Object body, int responseCode) {
         this(headerLines, body);
-        this.responseCode = responseCode;
+        this._responseCode = responseCode;
     }
 
+    /**
+     * Returns the header lines of HTTP response from server
+     * 
+     * @return collection of the header lines
+     */
     public Map<String, List<String>> getHeaderLines() {
-        return headerLines;
+        return _headerLines;
     }
 
+    /**
+     * Sets the header lines of HTTP response from server
+     * 
+     * @param headerLines - HTTP response header lines
+     */
     public void setHeaderLines(Map<String, List<String>> headerLines) {
-        this.headerLines = headerLines;
+        this._headerLines = headerLines;
     }
 
+    /**
+     * @return the body of the server response
+     */
     public Object getBody() {
-        return body;
+        return _body;
     }
 
+    /**
+     * Sets the body of the server HTTP response
+     * 
+     * @param body - body of the server response
+     */
     public void setBody(Object body) {
-        this.body = body;
+        this._body = body;
     }
 
+    /**
+     * Returns the response code of the server
+     * 
+     * @return response code
+     */
     public int getResponseCode() {
-        return responseCode;
+        return _responseCode;
     }
 
+    /**
+     * Sets the response code of the server
+     * 
+     * @param responseCode
+     */
     public void setResponseCode(int responseCode) {
-        this.responseCode = responseCode;
+        this._responseCode = responseCode;
     }
 
 }

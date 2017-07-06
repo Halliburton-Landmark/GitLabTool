@@ -101,7 +101,7 @@ class RESTConnectorImpl implements RESTConnector {
                 connection.disconnect();
             }
         }
-        return null;
+        return new HttpResponseHolder();
     }
 
     private void setHTTPRequestHeader(Map<String, String> header, HttpsURLConnection con) {

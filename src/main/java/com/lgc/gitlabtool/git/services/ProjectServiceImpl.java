@@ -56,9 +56,7 @@ public class ProjectServiceImpl implements ProjectService {
             Map<String, String> header = new HashMap<>();
             header.put(privateTokenKey, privateTokenValue);
 
-            Collection<Project> projects = getProjectsForAllPages(sendString, header);
-
-            return projects != null ? projects : Collections.emptyList();
+            return getProjectsForAllPages(sendString, header);
         }
         return Collections.emptyList();
     }

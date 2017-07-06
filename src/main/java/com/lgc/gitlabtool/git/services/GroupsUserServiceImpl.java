@@ -200,7 +200,6 @@ public class GroupsUserServiceImpl implements GroupsUserService {
         return result;
     }
 
-    @SuppressWarnings("unchecked")
     private Optional<Group> getGroupByName(String nameGroup) {
         List<Group> groups = (List<Group>) getGroups(CurrentUser.getInstance().getCurrentUser());
         if (groups == null || groups.isEmpty()) {
