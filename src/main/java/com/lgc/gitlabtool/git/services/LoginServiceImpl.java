@@ -7,6 +7,7 @@ import org.apache.http.HttpStatus;
 import org.eclipse.jgit.transport.CredentialsProvider;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 
+import com.lgc.gitlabtool.git.connections.HttpResponseHolder;
 import com.lgc.gitlabtool.git.connections.RESTConnector;
 import com.lgc.gitlabtool.git.connections.token.CurrentUser;
 import com.lgc.gitlabtool.git.entities.User;
@@ -29,7 +30,8 @@ public class LoginServiceImpl implements LoginService {
             params.put("login", dto.getLogin());
             params.put("password", dto.getPassword());
             getConnector().setUrlMainPart(dto.getServerURL());
-            Object userJson = getConnector().sendPost("/session", params, null);
+            HttpResponseHolder responseHolder = getConnector().sendPost("/session", params, null);
+            Object userJson = responseHolder != null ? responseHolder.getBody() : null;
             if (userJson == null) {
                 onSuccess.accept(HttpStatus.SC_UNAUTHORIZED);
             } else {
