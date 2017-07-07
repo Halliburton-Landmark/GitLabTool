@@ -3,6 +3,7 @@ package com.lgc.gitlabtool.git.ui.javafx;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
@@ -37,6 +38,13 @@ public class SwitchBranchConfirmDialog extends Alert {
 
     private static final String STATUS_PUSH_DIALOG_TITLE = "Pushing changes status";
     private static final String STATUS_PUSH_DIALOG_HEADER = "Pushing changes info";
+    
+    private static final String STATUS_DISCARD_DIALOG_TITLE = "Discarding changes status";
+    private static final String STATUS_DISCARD_DIALOG_HEADER = "Discarding changes info";
+    
+    private static final String SUCCESSFUL_DISCARD_HEADER_MESSAGE = "All changes was successfully discarded";
+    private static final String FAILED_DISCARDING_MESSAGE = "Discarding changes was failed";
+    
 
     private ButtonType commitButton;
     private ButtonType discardButton;
@@ -148,6 +156,33 @@ public class SwitchBranchConfirmDialog extends Alert {
 
     public ButtonType getCancelButton(){
         return cancelButton;
+    }
+    
+    public void launchSwitchBranchConfirmation(List<Project> changedProjects, List<Project> selectedProjects,
+            String selectedBranchName, BiConsumer<List<Project>, String> consumer) {
+
+        SwitchBranchConfirmDialog alert = this;
+        Optional<ButtonType> result = alert.showAndWait();
+
+        if (alert.getCommitButton().equals(result.orElse(ButtonType.CANCEL))) {
+            ButtonType resultCommitPushDialog = alert.showCommitPushDialog(changedProjects);
+
+            if (!resultCommitPushDialog.getButtonData().equals(ButtonBar.ButtonData.CANCEL_CLOSE)) {
+                consumer.accept(selectedProjects, selectedBranchName);
+            }
+        } else if (alert.getDiscardButton().equals(result.orElse(ButtonType.CANCEL))) {
+            Map<Project, JGitStatus> discardStatuses = _gitService.discardChanges(changedProjects);
+
+            alert.showStatusDialog(changedProjects, discardStatuses, 
+                    SUCCESSFUL_DISCARD_HEADER_MESSAGE, 
+                    FAILED_DISCARDING_MESSAGE,
+                    STATUS_DISCARD_DIALOG_TITLE, 
+                    STATUS_DISCARD_DIALOG_HEADER);
+
+            consumer.accept(selectedProjects, selectedBranchName);
+        } else {
+            alert.close();
+        }
     }
 
     class SwitchBranchProgressListener implements ProgressListener {

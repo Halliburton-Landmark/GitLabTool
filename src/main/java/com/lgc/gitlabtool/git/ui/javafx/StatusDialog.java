@@ -1,5 +1,11 @@
 package com.lgc.gitlabtool.git.ui.javafx;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import com.lgc.gitlabtool.git.entities.Project;
+import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 import com.lgc.gitlabtool.git.util.ScreenUtil;
 
@@ -24,6 +30,8 @@ public class StatusDialog extends Alert {
      * <p>
      */
     public static final int MAX_ROW_COUNT_IN_STATUS_DIALOG = 10;
+    
+    private static final String NEW_LINE_SYMBOL = "\n";
 
     /**
      * Creates the instance of this class with Gitlab Tool icon
@@ -33,10 +41,21 @@ public class StatusDialog extends Alert {
      * @param content - message that should be shown
      */
     public StatusDialog(String title, String headerText, String content) {
+        this(title, headerText);
+        setContentText(content);
+    }
+
+    /**
+     * Creates the instance of this class with Gitlab Tool icon
+     * without content
+     * 
+     * @param title - the title of the window
+     * @param headerText - header of the message
+     */
+    public StatusDialog(String title, String headerText) {
         super(Alert.AlertType.INFORMATION);
         setTitle(title);
         setHeaderText(headerText);
-        setContentText(content);
 
         Image appIcon = AppIconHolder.getInstance().getAppIcoImage();
         Stage stage = (Stage) getDialogPane().getScene().getWindow();
@@ -44,6 +63,42 @@ public class StatusDialog extends Alert {
 
          /* Set sizing and position */
         ScreenUtil.adaptForMultiScreens(stage, 300, 100);
+    }
+
+    /**
+     * Sets the content to be shown depends on count of projects. 
+     * If count of projects is more than {@link #MAX_ROW_COUNT_IN_STATUS_DIALOG}
+     * then collapsed message will be shown.
+     * Else detailed information about statuses will be shown.
+     * 
+     * @param statuses - statuses of JGit action
+     * @param countOfProjects - total count of selected projects
+     * @param collapsedMessageTemplate - template of the message that will be shown if count of statuses
+     *                           more than {@link #MAX_ROW_COUNT_IN_STATUS_DIALOG}
+     * @return massage that will be shown
+     */
+    public String showMessage(Map<Project, JGitStatus> statuses, int countOfProjects, String collapsedMessageTemplate) {
+        int size = statuses.size();
+        if (size > 0 && size < MAX_ROW_COUNT_IN_STATUS_DIALOG) {
+            String detailedMessage = statuses.entrySet().stream()
+                    .map(pair -> pair.getKey().getName() + " - " + pair.getValue())
+                    .collect(Collectors.joining(NEW_LINE_SYMBOL));
+            setContentText(detailedMessage);
+            return detailedMessage;
+        } else {
+            String formattedMessage = String.format(collapsedMessageTemplate, getSomeOfManySuffix(statuses, countOfProjects));
+            setContentText(formattedMessage);
+            return collapsedMessageTemplate;
+        }
+    }
+    
+    private String getSomeOfManySuffix(Map<Project, JGitStatus> statuses, int countOfProjects) {
+        int countOfSuccessfulStatuses =
+                (int) statuses.entrySet().stream()
+                .map(pair -> pair.getValue())
+                .filter(status -> status.equals(JGitStatus.SUCCESSFUL))
+                .count();
+        return countOfSuccessfulStatuses + " of " + countOfProjects;
     }
 
 }
