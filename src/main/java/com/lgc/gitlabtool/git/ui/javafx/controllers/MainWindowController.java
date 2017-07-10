@@ -51,7 +51,6 @@ public class MainWindowController {
     private static final Logger _logger =
             LogManager.getLogger(MainWindowController.class);
 
-
     @FXML
     private ListView<Project> projectsList;
 
