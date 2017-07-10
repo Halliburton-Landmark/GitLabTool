@@ -18,6 +18,7 @@ import com.lgc.gitlabtool.git.connections.RESTConnector;
 import com.lgc.gitlabtool.git.connections.token.CurrentUser;
 import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.Project;
+import com.lgc.gitlabtool.git.project.nature.projecttype.ProjectType;
 import com.lgc.gitlabtool.git.util.JSONParser;
 import com.lgc.gitlabtool.git.util.PathUtilities;
 
@@ -34,6 +35,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     private static final Logger _logger = LogManager.getLogger(ProjectServiceImpl.class);
     private static ProjectTypeService _projectTypeService;
+    private static CurrentUser _currentUser = CurrentUser.getInstance();
 
     public ProjectServiceImpl(RESTConnector connector, ProjectTypeService projectTypeService) {
         setConnector(connector);
@@ -49,16 +51,23 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public Collection<Project> getProjects(Group group) {
-        privateTokenValue = CurrentUser.getInstance().getPrivateTokenValue();
-        privateTokenKey = CurrentUser.getInstance().getPrivateTokenKey();
-        if (privateTokenValue != null) {
+        Map<String, String> header = getCurrentPrivateToken();
+        if (!header.isEmpty()) {
             String sendString = "/groups/" + group.getId() + "/projects?per_page=" + MAX_PROJECTS_COUNT_ON_THE_PAGE;
-            Map<String, String> header = new HashMap<>();
-            header.put(privateTokenKey, privateTokenValue);
-
             return getProjectsForAllPages(sendString, header);
         }
         return Collections.emptyList();
+    }
+
+    private Map<String, String> getCurrentPrivateToken() {
+        privateTokenValue = _currentUser.getPrivateTokenValue();
+        privateTokenKey = _currentUser.getPrivateTokenKey();
+
+        Map<String, String> header = new HashMap<>();
+        if (privateTokenValue != null) {
+            header.put(privateTokenKey, privateTokenValue);
+        }
+        return header;
     }
 
     private Collection<Project> getProjectsForAllPages(String requestString, Map<String, String> header) {
@@ -117,5 +126,25 @@ public class ProjectServiceImpl implements ProjectService {
         project.setClonedStatus(true);
         project.setPathToClonedProject(pathGroup + File.separator + project.getName());
         project.setProjectType(_projectTypeService.getProjectType(project));
+    }
+
+    @Override
+    public Project createProjectInGitLab(Group group, String name) {
+        Map<String, String> param = new HashMap<>();
+        param.put("name", name);
+        param.put("namespace_id", String.valueOf(group.getId()));
+
+        Map<String, String> header = getCurrentPrivateToken();
+        if(!header.isEmpty()) {
+            Object obj = getConnector().sendPost("/projects", param, header).getBody();
+            return JSONParser.parseToObject(obj, Project.class);
+        }
+        return null;
+    }
+
+    @Override
+    public boolean createProjectByProjectType(String name, ProjectType typeproject) {
+        // TODO Auto-generated method stub
+        return false;
     }
 }

@@ -80,6 +80,15 @@ public class GroupWindowController {
 
         userId.setText(_loginService.getCurrentUser().getName());
 
+//        ProjectService service = (ProjectService) ServiceProvider.getInstance()
+//                .getService(ProjectService.class.getName());
+//
+//        Group group = new Group();
+//        group.setId(1467925);
+//        group.setName("apitest_group");
+//
+//        service.createProjectInGitLab(group, "test_ate", "1467925");
+
         configureToolbarCommands();
         configureMainMenuCommands();
     }

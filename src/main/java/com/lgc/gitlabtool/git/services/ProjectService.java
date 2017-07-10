@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.Project;
+import com.lgc.gitlabtool.git.project.nature.projecttype.ProjectType;
 
 public interface ProjectService {
 
@@ -26,4 +27,15 @@ public interface ProjectService {
      * @return the list of projects
      */
     Collection<Project> loadProjects(Group group);
+
+
+    Project createProjectInGitLab(Group group, String name);
+
+    /**
+     *
+     *
+     * @param name
+     * @return
+     */
+    boolean createProjectByProjectType(String name, ProjectType typeproject);
 }
