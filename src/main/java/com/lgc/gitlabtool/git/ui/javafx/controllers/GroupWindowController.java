@@ -9,8 +9,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.lgc.gitlabtool.git.entities.Group;
+import com.lgc.gitlabtool.git.project.nature.projecttype.UnknownProjectType;
 import com.lgc.gitlabtool.git.services.ClonedGroupsService;
 import com.lgc.gitlabtool.git.services.LoginService;
+import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.ViewKey;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
@@ -80,14 +82,16 @@ public class GroupWindowController {
 
         userId.setText(_loginService.getCurrentUser().getName());
 
-//        ProjectService service = (ProjectService) ServiceProvider.getInstance()
-//                .getService(ProjectService.class.getName());
-//
-//        Group group = new Group();
-//        group.setId(1467925);
-//        group.setName("apitest_group");
-//
-//        service.createProjectInGitLab(group, "test_ate", "1467925");
+        ProjectService service = (ProjectService) ServiceProvider.getInstance()
+                .getService(ProjectService.class.getName());
+
+        Group group = new Group();
+        group.setId(1348279);
+        group.setName("apitest_group");
+        group.setPathToClonedGroup("D:\\TEST STG\\apitest_group");
+        group.setClonedStatus(true);
+
+        service.createProject(group, "test_create_project", UnknownProjectType.ID_KEY);
 
         configureToolbarCommands();
         configureMainMenuCommands();

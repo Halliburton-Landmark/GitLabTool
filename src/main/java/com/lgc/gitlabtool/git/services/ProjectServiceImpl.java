@@ -20,7 +20,6 @@ import com.lgc.gitlabtool.git.connections.token.CurrentUser;
 import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.jgit.JGit;
-import com.lgc.gitlabtool.git.project.nature.projecttype.ProjectType;
 import com.lgc.gitlabtool.git.util.JSONParser;
 import com.lgc.gitlabtool.git.util.PathUtilities;
 
@@ -138,14 +137,14 @@ public class ProjectServiceImpl implements ProjectService {
 
         Map<String, String> header = getCurrentPrivateToken();
         if(!header.isEmpty()) {
-            _logger.info("Create remote project...");
+            _logger.info("Creating remote project...");
             Object obj = getConnector().sendPost("/projects", param, header).getBody();
             return JSONParser.parseToObject(obj, Project.class);
         }
         return null;
     }
 
-    private boolean createLocalProject(Project project, String path, ProjectType typeProject) {
+    private boolean createLocalProject(Project project, String path, String idProjectType) {
         List<Project> projects = Arrays.asList(project);
         _git.clone(projects, path, EmptyProgressListener.get());
         _git.commitAndPush(projects, "Created new project", true, null, null, null, null, EmptyProgressListener.get());
@@ -155,14 +154,14 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public Project createProject(Group group, String name, String path, ProjectType typeProject) {
+    public Project createProject(Group group, String name, String idProjectType) {
         _logger.info("Started creating project...");
         Project project = createRemoteProject(group, name);
         if (project == null) {
             _logger.error("Failed creating remote project!");
         }
         _logger.info("Create local project...");
-        boolean result = createLocalProject(project, path, typeProject);
+        boolean result = createLocalProject(project, group.getPathToClonedGroup(), idProjectType);
         if (result) {
             _logger.info("Local project was successfully created!");
         } else {
