@@ -9,7 +9,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.lgc.gitlabtool.git.entities.Group;
-import com.lgc.gitlabtool.git.project.nature.projecttype.UnknownProjectType;
+import com.lgc.gitlabtool.git.project.nature.projecttype.DSGProjectType;
 import com.lgc.gitlabtool.git.services.ClonedGroupsService;
 import com.lgc.gitlabtool.git.services.LoginService;
 import com.lgc.gitlabtool.git.services.ProjectService;
@@ -91,7 +91,7 @@ public class GroupWindowController {
         group.setPathToClonedGroup("D:\\TEST STG\\apitest_group");
         group.setClonedStatus(true);
 
-        service.createProject(group, "test_create_project", UnknownProjectType.ID_KEY);
+        service.createProject(group, "create_dsg_project", DSGProjectType.TYPE_NAME);
 
         configureToolbarCommands();
         configureMainMenuCommands();

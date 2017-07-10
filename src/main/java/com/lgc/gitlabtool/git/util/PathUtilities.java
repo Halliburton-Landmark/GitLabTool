@@ -79,4 +79,23 @@ public class PathUtilities {
         }
         return false;
     }
+
+    public static boolean createPath(Path path) {
+        if (Files.exists(path)) {
+            logger.info("This path already exists!");
+            return true; // TODO: ???
+        }
+        try {
+            if (Files.isRegularFile(path)) {
+                Files.createDirectories(path.getParent());
+                Files.createFile(path);
+            } else {
+                Files.createDirectories(path);
+            }
+            return true;
+        } catch (IOException e) {
+            logger.error("Error creating path: " + e.getMessage());
+        }
+        return false;
+    }
 }

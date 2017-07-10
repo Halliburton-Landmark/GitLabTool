@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -20,6 +21,7 @@ import com.lgc.gitlabtool.git.connections.token.CurrentUser;
 import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.jgit.JGit;
+import com.lgc.gitlabtool.git.project.nature.projecttype.ProjectType;
 import com.lgc.gitlabtool.git.util.JSONParser;
 import com.lgc.gitlabtool.git.util.PathUtilities;
 
@@ -147,20 +149,36 @@ public class ProjectServiceImpl implements ProjectService {
     private boolean createLocalProject(Project project, String path, String idProjectType) {
         List<Project> projects = Arrays.asList(project);
         _git.clone(projects, path, EmptyProgressListener.get());
-        _git.commitAndPush(projects, "Created new project", true, null, null, null, null, EmptyProgressListener.get());
+        ProjectType projectType = _projectTypeService.getTypeById(idProjectType);
+        Set<String> structures = projectType.getStructures();
 
-
-        return false;
+        long count = structures.stream()
+                               .filter(stucture -> PathUtilities.createPath(Paths.get(stucture)))
+                               .count();
+        if (count == structures.size()) {
+            _logger.info("Structure of type was successfully created!");
+            _git.commitAndPush(projects, "Created new project", true, null, null, null, null, EmptyProgressListener.get());
+            return true;
+        } else {
+            _logger.error("Failed creating structure of type!");
+            PathUtilities.deletePath(Paths.get(project.getPathToClonedProject() + File.separator));
+            _git.commitAndPush(projects, "Created new project", true, null, null, null, null, EmptyProgressListener.get());
+            PathUtilities.deletePath(Paths.get(project.getPathToClonedProject()));
+            return false;
+        }
     }
 
     @Override
     public Project createProject(Group group, String name, String idProjectType) {
-        _logger.info("Started creating project...");
+        _logger.info("Started creating project in the " + group.getName() + " group.");
         Project project = createRemoteProject(group, name);
         if (project == null) {
             _logger.error("Failed creating remote project!");
+            return project;
+        } else {
+            _logger.info("Remote project was successfully created!");
         }
-        _logger.info("Create local project...");
+        _logger.info("Creating local project...");
         boolean result = createLocalProject(project, group.getPathToClonedGroup(), idProjectType);
         if (result) {
             _logger.info("Local project was successfully created!");

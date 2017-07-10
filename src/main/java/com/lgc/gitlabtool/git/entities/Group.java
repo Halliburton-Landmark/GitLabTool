@@ -154,4 +154,13 @@ public class Group {
         }
         return true;
     }
+
+    public void setId(int i) {
+        id = i;
+
+    }
+
+    public void setName(String string) {
+        name = string;
+    }
 }

@@ -59,7 +59,8 @@ abstract class ProjectTypeImpl implements ProjectType {
         }
     }
 
-    protected Set<String> getStructures() {
+    @Override
+    public Set<String> getStructures() {
         return Collections.unmodifiableSet(_structures);
     }
 

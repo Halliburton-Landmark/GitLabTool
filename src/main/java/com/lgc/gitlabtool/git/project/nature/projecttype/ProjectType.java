@@ -62,4 +62,10 @@ public interface ProjectType {
      * @return available operations
      */
     Set<Operation> getAvailableOperations();
+
+    /**
+     *
+     * @return
+     */
+    Set<String> getStructures();
 }

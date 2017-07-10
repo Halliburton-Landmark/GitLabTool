@@ -27,5 +27,12 @@ public interface ProjectService {
      */
     Collection<Project> loadProjects(Group group);
 
+    /**
+     *
+     * @param group
+     * @param name
+     * @param idProjectType
+     * @return
+     */
     Project createProject(Group group, String name, String idProjectType);
 }
