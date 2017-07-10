@@ -201,11 +201,11 @@ public class GroupWindowController {
             FXMLLoader fxmlLoader = new FXMLLoader(modularWindow);
             Parent root = fxmlLoader.load();
 
-            ModularController myControllerHandle = fxmlLoader.getController();
-            myControllerHandle.loadMainWindow(group);
-
             Stage previousStage = (Stage) groupList.getScene().getWindow();
             previousStage.setScene(new Scene(root));
+
+            ModularController myControllerHandle = fxmlLoader.getController();
+            myControllerHandle.loadMainWindow(group);
 
         } catch (IOException e) {
             _logger.error("Could not load fxml resource: " + e.getMessage());
