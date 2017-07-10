@@ -80,7 +80,7 @@ public class MainWindowController {
         preferences = getPreferences(DIVIDER_PROPERTY_NODE);
 
         if (preferences != null) {
-            double splitPaneDivider = preferences.getDouble(_groupTitle, .25);
+            double splitPaneDivider = preferences.getDouble(_groupTitle, 0.3);
             splitPanelMain.setDividerPositions(splitPaneDivider);
         }
 
