@@ -145,7 +145,7 @@ public class MainWindowController {
         projectsList.setItems(projectsObservableList);
     }
 
-    // Get preferences by key, could return null
+    // Gets preferences by key, could return null
     private Preferences getPreferences(String key) {
         try {
             return Preferences.userRoot().node(key);
@@ -154,6 +154,9 @@ public class MainWindowController {
             return null;
         } catch (IllegalStateException ise) {
             _logger.error("Node has been removed with the removeNode() method");
+            return null;
+        } catch (NullPointerException npe){
+            _logger.error("Key is null");
             return null;
         }
     }
