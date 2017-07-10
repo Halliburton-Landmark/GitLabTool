@@ -28,14 +28,5 @@ public interface ProjectService {
      */
     Collection<Project> loadProjects(Group group);
 
-
-    Project createProjectInGitLab(Group group, String name);
-
-    /**
-     *
-     *
-     * @param name
-     * @return
-     */
-    boolean createProjectByProjectType(String name, ProjectType typeproject);
+    Project createProject(Group group, String name, String path, ProjectType typeProject);
 }

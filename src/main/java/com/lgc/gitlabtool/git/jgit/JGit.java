@@ -674,6 +674,8 @@ public class JGit {
             PathUtilities.deletePath(Paths.get(path));
             return false;
         }
+        project.setClonedStatus(true);
+        project.setPathToClonedProject(path);
         return true;
     }
 

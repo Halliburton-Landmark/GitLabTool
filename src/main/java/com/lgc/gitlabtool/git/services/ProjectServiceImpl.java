@@ -3,6 +3,7 @@ package com.lgc.gitlabtool.git.services;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -18,6 +19,7 @@ import com.lgc.gitlabtool.git.connections.RESTConnector;
 import com.lgc.gitlabtool.git.connections.token.CurrentUser;
 import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.Project;
+import com.lgc.gitlabtool.git.jgit.JGit;
 import com.lgc.gitlabtool.git.project.nature.projecttype.ProjectType;
 import com.lgc.gitlabtool.git.util.JSONParser;
 import com.lgc.gitlabtool.git.util.PathUtilities;
@@ -36,6 +38,7 @@ public class ProjectServiceImpl implements ProjectService {
     private static final Logger _logger = LogManager.getLogger(ProjectServiceImpl.class);
     private static ProjectTypeService _projectTypeService;
     private static CurrentUser _currentUser = CurrentUser.getInstance();
+    private static JGit _git = JGit.getInstance();
 
     public ProjectServiceImpl(RESTConnector connector, ProjectTypeService projectTypeService) {
         setConnector(connector);
@@ -128,23 +131,43 @@ public class ProjectServiceImpl implements ProjectService {
         project.setProjectType(_projectTypeService.getProjectType(project));
     }
 
-    @Override
-    public Project createProjectInGitLab(Group group, String name) {
+    private Project createRemoteProject(Group group, String name) {
         Map<String, String> param = new HashMap<>();
         param.put("name", name);
         param.put("namespace_id", String.valueOf(group.getId()));
 
         Map<String, String> header = getCurrentPrivateToken();
         if(!header.isEmpty()) {
+            _logger.info("Create remote project...");
             Object obj = getConnector().sendPost("/projects", param, header).getBody();
             return JSONParser.parseToObject(obj, Project.class);
         }
         return null;
     }
 
-    @Override
-    public boolean createProjectByProjectType(String name, ProjectType typeproject) {
-        // TODO Auto-generated method stub
+    private boolean createLocalProject(Project project, String path, ProjectType typeProject) {
+        List<Project> projects = Arrays.asList(project);
+        _git.clone(projects, path, EmptyProgressListener.get());
+        _git.commitAndPush(projects, "Created new project", true, null, null, null, null, EmptyProgressListener.get());
+
+
         return false;
+    }
+
+    @Override
+    public Project createProject(Group group, String name, String path, ProjectType typeProject) {
+        _logger.info("Started creating project...");
+        Project project = createRemoteProject(group, name);
+        if (project == null) {
+            _logger.error("Failed creating remote project!");
+        }
+        _logger.info("Create local project...");
+        boolean result = createLocalProject(project, path, typeProject);
+        if (result) {
+            _logger.info("Local project was successfully created!");
+        } else {
+            _logger.error("Failed creating local project!");
+        }
+        return project;
     }
 }
