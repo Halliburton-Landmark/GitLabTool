@@ -1,9 +1,11 @@
 package com.lgc.gitlabtool.git.services;
 
 import java.util.Collection;
+import java.util.Map;
 
 import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.Project;
+import com.lgc.gitlabtool.git.project.nature.projecttype.ProjectType;
 
 public interface ProjectService {
 
@@ -31,8 +33,16 @@ public interface ProjectService {
      *
      * @param group
      * @param name
-     * @param idProjectType
+     * @param projectType
      * @return
      */
-    Project createProject(Group group, String name, String idProjectType);
+    Map<Project, String> createProject(Group group, String name, ProjectType projectType);
+
+    /**
+     *
+     * @param group
+     * @param nameProject
+     * @return
+     */
+    boolean isProjectExists(Group group, String nameProject);
 }

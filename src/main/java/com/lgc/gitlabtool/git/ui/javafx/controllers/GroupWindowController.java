@@ -79,17 +79,6 @@ public class GroupWindowController {
         configureToolbarEnablers(groupListBooleanBinding);
 
         userId.setText(_loginService.getCurrentUser().getName());
-//
-//        ProjectService service = (ProjectService) ServiceProvider.getInstance()
-//                .getService(ProjectService.class.getName());
-//
-//        Group group = new Group();
-//        group.setId(1348279);
-//        group.setName("apitest_group");
-//        group.setPathToClonedGroup("D:\\TEST STG\\apitest_group");
-//        group.setClonedStatus(true);
-//
-//        service.createProject(group, "create_empty_project", UnknownProjectType.ID_KEY);
 
         configureToolbarCommands();
         configureMainMenuCommands();

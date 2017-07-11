@@ -4,8 +4,10 @@ package com.lgc.gitlabtool.git.ui.javafx.controllers;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.services.LoginService;
+import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.javafx.CreateNewBranchDialog;
 import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuItems;
@@ -36,10 +38,13 @@ public class MainWindowController {
     private static final String SELECT_ALL_IMAGE_URL = "icons/main/select_all.png";
 
     private List<Project> _projects;
-    private String _groupTitle;
+    private Group _currentGroup;
 
-    private final LoginService _loginService =
+    private static final LoginService _loginService =
             (LoginService) ServiceProvider.getInstance().getService(LoginService.class.getName());
+
+    private static final ProjectService _projectService =
+            (ProjectService) ServiceProvider.getInstance().getService(ProjectService.class.getName());
 
     @FXML
     private ListView<Project> projectsList;
@@ -57,23 +62,15 @@ public class MainWindowController {
         String username = _loginService.getCurrentUser().getName();
         userId.setText(username);
 
-        String currentGroupname = _groupTitle;
-        leftLabel.setText(HEDER_GROUP_TITLE + currentGroupname);
+        String groupTitle = _currentGroup.getName() + " [" + _currentGroup.getPathToClonedGroup() + "]";
+        leftLabel.setText(HEDER_GROUP_TITLE + groupTitle);
 
         Image imageSelectAll = new Image(getClass().getClassLoader().getResource(SELECT_ALL_IMAGE_URL).toExternalForm());
         selectAllButton.setGraphic(new ImageView(imageSelectAll));
 
         configureListView(projectsList);
 
-        BooleanBinding booleanBinding = projectsList.getSelectionModel().selectedItemProperty().isNull();
-        ToolbarManager.getInstance().getAllButtonsForCurrentView()
-                .forEach(x -> x.disableProperty().bind(booleanBinding));
-
-        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_SWITCH_BRANCH).disableProperty()
-                .bind(booleanBinding);
-
-        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_CREATE_BRANCH).disableProperty()
-                .bind(booleanBinding);
+        setDisablePropertyForButtons();
 
         //TODO: Additional thread should be placed to services
         Thread t = new Thread(this::updateProjectList);
@@ -84,9 +81,23 @@ public class MainWindowController {
         initNewBranchButton();
     }
 
-    public void setSelectedGroup(List<Project> projects, String groupTitle) {
+    private void setDisablePropertyForButtons() {
+        BooleanBinding booleanBinding = projectsList.getSelectionModel().selectedItemProperty().isNull();
+
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.NEW_BRANCH_BUTTON.getId()).disableProperty()
+                .bind(booleanBinding);
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.SWITCH_BRANCH_BUTTON.getId()).disableProperty()
+                .bind(booleanBinding);
+
+        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_SWITCH_BRANCH).disableProperty()
+                .bind(booleanBinding);
+        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_CREATE_BRANCH).disableProperty()
+                .bind(booleanBinding);
+    }
+
+    public void setSelectedGroup(List<Project> projects, Group group) {
         _projects = projects;
-        _groupTitle = groupTitle;
+        _currentGroup = group;
     }
 
     public void refreshProjectsList(){
@@ -177,6 +188,9 @@ public class MainWindowController {
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.NEW_BRANCH_BUTTON.getId())
                 .setOnAction(this::onNewBranchButton);
 
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.CREATE_PROJECT_BUTTON.getId())
+                .setOnAction(this::createProjectButton);
+
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_CREATE_BRANCH)
                 .setOnAction(this::onNewBranchButton);
 
@@ -186,6 +200,21 @@ public class MainWindowController {
     public void onNewBranchButton(ActionEvent actionEvent) {
         showCreateNewBranchDialog();
         refreshProjectsList();
+    }
+
+    @FXML
+    public void createProjectButton(ActionEvent actionEvent) {
+        // dialog
+
+        //_projectService.createProject();
+
+//      Group group = new Group();
+//      group.setId(1348279);
+//      group.setName("apitest_group");
+//      group.setPathToClonedGroup("D:\\TEST STG\\apitest_group");
+//      group.setClonedStatus(true);
+//
+//      service.createProject(group, "create_empty_project", UnknownProjectType.ID_KEY);
     }
 
     private void showCreateNewBranchDialog() {

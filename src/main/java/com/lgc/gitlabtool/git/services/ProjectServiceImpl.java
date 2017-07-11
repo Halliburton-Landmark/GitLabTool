@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -147,12 +148,11 @@ public class ProjectServiceImpl implements ProjectService {
         return null;
     }
 
-    private boolean createLocalProject(Project project, String path, String idProjectType) {
+    private boolean createLocalProject(Project project, String path, ProjectType projectType) {
         List<Project> projects = Arrays.asList(project);
         _git.clone(projects, path, EmptyProgressListener.get());
-        ProjectType projectType = _projectTypeService.getTypeById(idProjectType);
-        Set<String> structures = projectType.getStructures();
 
+        Set<String> structures = projectType.getStructures();
         List<String> files = structures.stream()
                                .filter(stucture -> PathUtilities.createPath(
                                        Paths.get(project.getPathToClonedProject() + File.separator + stucture)))
@@ -176,22 +176,48 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public Project createProject(Group group, String name, String idProjectType) {
+    public Map<Project, String> createProject(Group group, String name, ProjectType projectType) {
+        if(group == null || !group.isCloned() || name == null || name.isEmpty() || projectType == null) {
+            throw new IllegalArgumentException("Invalid paramenters");
+        }
+        Map<Project, String> result = new HashMap<>();
+
+        boolean isExists = isProjectExists(group, name);
+        if (isExists) {
+            result.put(null, "Project with this name already exists!");
+            return result;
+        }
+
         _logger.info("Started creating project in the " + group.getName() + " group.");
         Project project = createRemoteProject(group, name);
         if (project == null) {
             _logger.error("Failed creating remote project!");
-            return project;
+            result.put(project, "Failed creating remote project!");
+            return result;
         } else {
             _logger.info("Remote project was successfully created!");
         }
-        _logger.info("Creating local project...");
-        boolean result = createLocalProject(project, group.getPathToClonedGroup(), idProjectType);
-        if (result) {
+
+        boolean isCreated = createLocalProject(project, group.getPathToClonedGroup(), projectType);
+        if (isCreated) {
             _logger.info("Local project was successfully created!");
+            result.put(project, "Local project was successfully created!");
         } else {
             _logger.error("Failed creating local project!");
+            result.put(project, "Failed creating local project!");
         }
-        return project;
+        return result;
+    }
+
+    @Override
+    public boolean isProjectExists(Group group, String nameProject) {
+        if(group == null || !group.isCloned() || nameProject == null || nameProject.isEmpty()) {
+            throw new IllegalArgumentException("Invalid paramenters");
+        }
+        Collection<Project> projects = getProjects(group);
+        Optional<Project> resultProject = projects.stream()
+                                                  .filter(project -> project.getName().equals(nameProject))
+                                                  .findAny();
+        return !resultProject.isPresent();
     }
 }
