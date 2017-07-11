@@ -9,10 +9,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.lgc.gitlabtool.git.entities.Group;
-import com.lgc.gitlabtool.git.project.nature.projecttype.DSGProjectType;
 import com.lgc.gitlabtool.git.services.ClonedGroupsService;
 import com.lgc.gitlabtool.git.services.LoginService;
-import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.ViewKey;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
@@ -81,17 +79,17 @@ public class GroupWindowController {
         configureToolbarEnablers(groupListBooleanBinding);
 
         userId.setText(_loginService.getCurrentUser().getName());
-
-        ProjectService service = (ProjectService) ServiceProvider.getInstance()
-                .getService(ProjectService.class.getName());
-
-        Group group = new Group();
-        group.setId(1348279);
-        group.setName("apitest_group");
-        group.setPathToClonedGroup("D:\\TEST STG\\apitest_group");
-        group.setClonedStatus(true);
-
-        service.createProject(group, "create_dsg_project", DSGProjectType.TYPE_NAME);
+//
+//        ProjectService service = (ProjectService) ServiceProvider.getInstance()
+//                .getService(ProjectService.class.getName());
+//
+//        Group group = new Group();
+//        group.setId(1348279);
+//        group.setName("apitest_group");
+//        group.setPathToClonedGroup("D:\\TEST STG\\apitest_group");
+//        group.setClonedStatus(true);
+//
+//        service.createProject(group, "create_empty_project", UnknownProjectType.ID_KEY);
 
         configureToolbarCommands();
         configureMainMenuCommands();

@@ -1,5 +1,6 @@
 package com.lgc.gitlabtool.git.project.nature.projecttype;
 
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -105,7 +106,7 @@ abstract class ProjectTypeImpl implements ProjectType {
             return false;
         }
         for (String structure : getStructures()) {
-            Path path = Paths.get(projectPath + structure);
+            Path path = Paths.get(projectPath + File.separator + structure);
             if (!isPathCorrespondsToType(path)) {
                 return false;
             }

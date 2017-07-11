@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -152,17 +153,23 @@ public class ProjectServiceImpl implements ProjectService {
         ProjectType projectType = _projectTypeService.getTypeById(idProjectType);
         Set<String> structures = projectType.getStructures();
 
-        long count = structures.stream()
-                               .filter(stucture -> PathUtilities.createPath(Paths.get(stucture)))
-                               .count();
-        if (count == structures.size()) {
+        List<String> files = structures.stream()
+                               .filter(stucture -> PathUtilities.createPath(
+                                       Paths.get(project.getPathToClonedProject() + File.separator + stucture)))
+                               .collect(Collectors.toList());
+
+        if (files.size() == structures.size()) {
             _logger.info("Structure of type was successfully created!");
-            _git.commitAndPush(projects, "Created new project", true, null, null, null, null, EmptyProgressListener.get());
+            if (structures.size() > 0) {
+                _git.addUntrackedFileForCommit(structures, project);
+            }
+            _git.commitAndPush(projects, "Created new project", true, null, null, null, null,
+                    EmptyProgressListener.get());
             return true;
         } else {
             _logger.error("Failed creating structure of type!");
-            PathUtilities.deletePath(Paths.get(project.getPathToClonedProject() + File.separator));
-            _git.commitAndPush(projects, "Created new project", true, null, null, null, null, EmptyProgressListener.get());
+            _git.commitAndPush(projects, "Created new project", true, null, null, null, null,
+                    EmptyProgressListener.get());
             PathUtilities.deletePath(Paths.get(project.getPathToClonedProject()));
             return false;
         }
