@@ -111,8 +111,8 @@ public class CreateProjectDialog extends Dialog<String> {
     private void onCreateButton(ActionEvent event) {
         String idType = _typeComboBox.getSelectionModel().getSelectedItem();
         ProjectType projectType = _typeServies.getTypeById(idType);
-        Map<Project, String> results = _projectService
-                .createProject(_selectGroup, _projectNameField.getText(), projectType, _progressListener);
+        Map<Project, String> results = _projectService.createProject(
+                _selectGroup, _projectNameField.getText(), projectType, _progressListener);
         closeDialog();
 
         for (Entry<Project, String> result : results.entrySet()) {

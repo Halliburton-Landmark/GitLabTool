@@ -206,6 +206,9 @@ public class MainWindowController {
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.CREATE_PROJECT_BUTTON.getId())
                 .setOnAction(this::createProjectButton);
 
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.UPDATE_PROJECTS.getId())
+        .setOnAction(this::refreshLoadProjects);
+
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_CREATE_BRANCH)
                 .setOnAction(this::onNewBranchButton);
 
@@ -235,7 +238,8 @@ public class MainWindowController {
         dialog.showAndWait();
     }
 
-    private void refreshLoadProjects() {
+    @FXML
+    public void refreshLoadProjects(ActionEvent actionEvent) {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.submit(() -> {
             _logger.info("Updating projects...");
@@ -262,7 +266,7 @@ public class MainWindowController {
 
         @Override
         public void onFinish(Object... t) {
-            refreshLoadProjects();
+            refreshLoadProjects(null);
         }
     }
 }

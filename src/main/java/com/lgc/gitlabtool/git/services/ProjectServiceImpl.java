@@ -149,9 +149,17 @@ public class ProjectServiceImpl implements ProjectService {
     private boolean createLocalProject(Project project, String path, ProjectType projectType) {
         List<Project> projects = Arrays.asList(project);
         _git.clone(projects, path, EmptyProgressListener.get());
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            _logger.error(e);
 
-
-
+        }
+        if (!PathUtilities.isExistsAndDirectory(Paths.get(project.getPathToClonedProject()))) {
+            _logger.error("Error cloning the " + project.getName() +
+                          " project in the folder: " + project.getPathToClonedProject());
+            return false;
+        }
         Set<String> structures = projectType.getStructures();
         long count = structures.stream()
                                .filter(structure -> PathUtilities.createPath(
@@ -220,33 +228,5 @@ public class ProjectServiceImpl implements ProjectService {
                                                   .filter(project -> project.getName().equals(nameProject))
                                                   .findAny();
         return resultProject.isPresent();
-    }
-
-    class CreateLocalProjectListener implements ProgressListener {
-
-        @Override
-        public void onSuccess(Object... t) {
-            // TODO Auto-generated method stub
-
-        }
-
-        @Override
-        public void onError(Object... t) {
-            // TODO Auto-generated method stub
-
-        }
-
-        @Override
-        public void onStart(Object... t) {
-            // TODO Auto-generated method stub
-
-        }
-
-        @Override
-        public void onFinish(Object... t) {
-            // TODO Auto-generated method stub
-
-        }
-
     }
 }
