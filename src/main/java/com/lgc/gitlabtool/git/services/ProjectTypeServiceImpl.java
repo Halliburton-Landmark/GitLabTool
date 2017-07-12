@@ -1,6 +1,10 @@
 package com.lgc.gitlabtool.git.services;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import com.lgc.gitlabtool.git.entities.Project;
@@ -54,5 +58,13 @@ public class ProjectTypeServiceImpl implements ProjectTypeService {
 
     protected Set<ProjectType> getSetProjectTypes() {
         return _types;
+    }
+
+    @Override
+    public Collection<String> getAllIdTypes() {
+        List<String> ids = new ArrayList<>();
+        _types.forEach(type -> ids.add(type.getId()));
+        ids.add(UNKNOWN_TYPE.getId());
+        return Collections.unmodifiableList(ids);
     }
 }

@@ -52,7 +52,6 @@ public class ProjectServiceImpl implements ProjectService {
         if (projectTypeService != null) {
             _projectTypeService = projectTypeService;
         }
-
     }
 
     @Override
@@ -201,10 +200,10 @@ public class ProjectServiceImpl implements ProjectService {
         boolean isCreated = createLocalProject(project, group.getPathToClonedGroup(), projectType);
         if (isCreated) {
             _logger.info("Local project was successfully created!");
-            result.put(project, "Local project was successfully created!");
+            result.put(project, "The " + name + " project was successfully created!");
         } else {
             _logger.error("Failed creating local project!");
-            result.put(project, "Failed creating local project!");
+            result.put(null, "Failed creating local project!");
         }
         return result;
     }

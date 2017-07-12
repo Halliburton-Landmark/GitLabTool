@@ -10,6 +10,7 @@ import com.lgc.gitlabtool.git.services.LoginService;
 import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.javafx.CreateNewBranchDialog;
+import com.lgc.gitlabtool.git.ui.javafx.CreateProjectDialog;
 import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuItems;
 import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuManager;
 import com.lgc.gitlabtool.git.ui.selection.ListViewKey;
@@ -205,16 +206,9 @@ public class MainWindowController {
     @FXML
     public void createProjectButton(ActionEvent actionEvent) {
         // dialog
-
-        //_projectService.createProject();
-
-//      Group group = new Group();
-//      group.setId(1348279);
-//      group.setName("apitest_group");
-//      group.setPathToClonedGroup("D:\\TEST STG\\apitest_group");
-//      group.setClonedStatus(true);
-//
-//      service.createProject(group, "create_empty_project", UnknownProjectType.ID_KEY);
+        CreateProjectDialog dialog = new CreateProjectDialog(_currentGroup);
+        dialog.showAndWait();
+        refreshLoadProjects();
     }
 
     private void showCreateNewBranchDialog() {
@@ -228,4 +222,8 @@ public class MainWindowController {
         dialog.showAndWait();
     }
 
+    private void refreshLoadProjects() {
+        _projects = (List<Project>) _projectService.getProjects(_currentGroup);
+        updateProjectList();
+    }
 }
