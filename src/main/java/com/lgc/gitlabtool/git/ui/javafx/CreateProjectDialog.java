@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.project.nature.projecttype.ProjectType;
+import com.lgc.gitlabtool.git.services.ProgressListener;
 import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ProjectTypeService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
@@ -39,7 +40,8 @@ public class CreateProjectDialog extends Dialog<String> {
     private final Button _createButton;
     private final Button _cancelButton;
 
-    private static Group _selectGroup;
+    private final Group _selectGroup;
+    private final ProgressListener _progressListener;
 
     private static final ProjectTypeService _typeServies = (ProjectTypeService) ServiceProvider.getInstance()
             .getService(ProjectTypeService.class.getName());
@@ -48,8 +50,9 @@ public class CreateProjectDialog extends Dialog<String> {
             (ProjectService) ServiceProvider.getInstance().getService(ProjectService.class.getName());
 
 
-    public CreateProjectDialog(Group selectGroup) {
+    public CreateProjectDialog(Group selectGroup, ProgressListener progress) {
         _selectGroup = selectGroup;
+        _progressListener = progress;
 
         GridPane grid = new GridPane();
         grid.setAlignment(Pos.CENTER_LEFT);
@@ -81,7 +84,7 @@ public class CreateProjectDialog extends Dialog<String> {
 
         _cancelButton = new Button("Cancel");
         _cancelButton.setOnAction(event -> {
-            getStage().close();
+            closeDialog();
         });
 
         HBox hbBtn = new HBox(10);
@@ -91,7 +94,7 @@ public class CreateProjectDialog extends Dialog<String> {
 
         getDialogPane().setContent(grid);
         Image appIcon = AppIconHolder.getInstance().getAppIcoImage();
-        Stage stage = getStage();
+        Stage stage = (Stage) getDialogPane().getScene().getWindow();
         stage.setResizable(false);
         stage.setTitle(DIALOG_TITLE);
         stage.getIcons().add(appIcon);
@@ -101,29 +104,33 @@ public class CreateProjectDialog extends Dialog<String> {
 
         Window window = getDialogPane().getScene().getWindow();
         window.setOnCloseRequest(event -> {
-            getStage().close();
+            closeDialog();
         });
     }
 
     private void onCreateButton(ActionEvent event) {
         String idType = _typeComboBox.getSelectionModel().getSelectedItem();
         ProjectType projectType = _typeServies.getTypeById(idType);
+        Map<Project, String> results = _projectService
+                .createProject(_selectGroup, _projectNameField.getText(), projectType, _progressListener);
+        closeDialog();
 
-        Map<Project, String> results = _projectService.createProject(_selectGroup, _projectNameField.getText(), projectType);
         for (Entry<Project, String> result : results.entrySet()) {
             Project project = result.getKey();
             String contantMessage = result.getValue();
 
             String headerMessage = (project == null) ?
                         "Error creating project in the " + _selectGroup.getName() + " group." :
-                        "Success creating project the the " + _selectGroup.getName() + " group.";
+                        "Success creating project in the " + _selectGroup.getName() + " group.";
 
             StatusDialog statusDialog = new StatusDialog("Status of creating project", headerMessage, contantMessage);
             statusDialog.showAndWait();
         }
     }
 
-    private Stage getStage() {
-        return (Stage) getDialogPane().getScene().getWindow();
+    private void closeDialog() {
+        Stage stage = (Stage) getDialogPane().getScene().getWindow();
+        stage.close();
     }
+
 }

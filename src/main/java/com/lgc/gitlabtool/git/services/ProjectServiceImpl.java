@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -151,13 +150,15 @@ public class ProjectServiceImpl implements ProjectService {
         List<Project> projects = Arrays.asList(project);
         _git.clone(projects, path, EmptyProgressListener.get());
 
-        Set<String> structures = projectType.getStructures();
-        List<String> files = structures.stream()
-                               .filter(stucture -> PathUtilities.createPath(
-                                       Paths.get(project.getPathToClonedProject() + File.separator + stucture)))
-                               .collect(Collectors.toList());
 
-        if (files.size() == structures.size()) {
+
+        Set<String> structures = projectType.getStructures();
+        long count = structures.stream()
+                               .filter(structure -> PathUtilities.createPath(
+                                   Paths.get(project.getPathToClonedProject() + File.separator + structure)))
+                               .count();
+
+        if (count == structures.size()) {
             _logger.info("Structure of type was successfully created!");
             if (structures.size() > 0) {
                 _git.addUntrackedFileForCommit(structures, project);
@@ -175,7 +176,7 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public Map<Project, String> createProject(Group group, String name, ProjectType projectType) {
+    public Map<Project, String> createProject(Group group, String name, ProjectType projectType, ProgressListener progress) {
         if(group == null || !group.isCloned() || name == null || name.isEmpty() || projectType == null) {
             throw new IllegalArgumentException("Invalid paramenters");
         }
@@ -205,6 +206,7 @@ public class ProjectServiceImpl implements ProjectService {
             _logger.error("Failed creating local project!");
             result.put(null, "Failed creating local project!");
         }
+        progress.onFinish();
         return result;
     }
 
@@ -217,6 +219,34 @@ public class ProjectServiceImpl implements ProjectService {
         Optional<Project> resultProject = projects.stream()
                                                   .filter(project -> project.getName().equals(nameProject))
                                                   .findAny();
-        return !resultProject.isPresent();
+        return resultProject.isPresent();
+    }
+
+    class CreateLocalProjectListener implements ProgressListener {
+
+        @Override
+        public void onSuccess(Object... t) {
+            // TODO Auto-generated method stub
+
+        }
+
+        @Override
+        public void onError(Object... t) {
+            // TODO Auto-generated method stub
+
+        }
+
+        @Override
+        public void onStart(Object... t) {
+            // TODO Auto-generated method stub
+
+        }
+
+        @Override
+        public void onFinish(Object... t) {
+            // TODO Auto-generated method stub
+
+        }
+
     }
 }

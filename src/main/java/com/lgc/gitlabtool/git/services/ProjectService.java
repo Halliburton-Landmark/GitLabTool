@@ -34,9 +34,10 @@ public interface ProjectService {
      * @param group
      * @param name
      * @param projectType
+     * @param progress
      * @return
      */
-    Map<Project, String> createProject(Group group, String name, ProjectType projectType);
+    Map<Project, String> createProject(Group group, String name, ProjectType projectType, ProgressListener progress);
 
     /**
      *

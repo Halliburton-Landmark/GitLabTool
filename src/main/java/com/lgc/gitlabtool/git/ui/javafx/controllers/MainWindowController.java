@@ -2,11 +2,17 @@ package com.lgc.gitlabtool.git.ui.javafx.controllers;
 
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.services.LoginService;
+import com.lgc.gitlabtool.git.services.ProgressListener;
 import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.javafx.CreateNewBranchDialog;
@@ -18,6 +24,7 @@ import com.lgc.gitlabtool.git.ui.selection.SelectionsProvider;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarButtons;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarManager;
 
+import javafx.application.Platform;
 import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -40,6 +47,8 @@ public class MainWindowController {
 
     private List<Project> _projects;
     private Group _currentGroup;
+
+    private static final Logger _logger = LogManager.getLogger(MainWindowController.class);
 
     private static final LoginService _loginService =
             (LoginService) ServiceProvider.getInstance().getService(LoginService.class.getName());
@@ -123,11 +132,16 @@ public class MainWindowController {
     }
 
     private void updateProjectList() {
-        List<Project> sortedProjectList = _projects.stream()
-                .sorted((project1, project2) -> Boolean.compare(project2.isCloned(), project1.isCloned()))
-                .collect(Collectors.toList());
-        ObservableList<Project> projectsObservableList = FXCollections.observableList(sortedProjectList);
-        projectsList.setItems(projectsObservableList);
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                List<Project> sortedProjectList = _projects.stream()
+                        .sorted((project1, project2) -> Boolean.compare(project2.isCloned(), project1.isCloned()))
+                        .collect(Collectors.toList());
+                ObservableList<Project> projectsObservableList = FXCollections.observableList(sortedProjectList);
+                projectsList.setItems(projectsObservableList);
+            }
+        });
     }
 
     private void configureListView(ListView<Project> listView) {
@@ -206,9 +220,8 @@ public class MainWindowController {
     @FXML
     public void createProjectButton(ActionEvent actionEvent) {
         // dialog
-        CreateProjectDialog dialog = new CreateProjectDialog(_currentGroup);
+        CreateProjectDialog dialog = new CreateProjectDialog(_currentGroup, new CreateProjectProgressListener());
         dialog.showAndWait();
-        refreshLoadProjects();
     }
 
     private void showCreateNewBranchDialog() {
@@ -223,7 +236,33 @@ public class MainWindowController {
     }
 
     private void refreshLoadProjects() {
-        _projects = (List<Project>) _projectService.getProjects(_currentGroup);
-        updateProjectList();
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.submit(() -> {
+            _logger.info("Updating projects...");
+            _projects = (List<Project>) _projectService.loadProjects(_currentGroup);
+            updateProjectList();
+            _logger.info("Projects was updated!");
+        });
+        executor.shutdown();
+    }
+
+    class CreateProjectProgressListener implements ProgressListener {
+
+        @Override
+        public void onSuccess(Object... t) {
+        }
+
+        @Override
+        public void onError(Object... t) {
+        }
+
+        @Override
+        public void onStart(Object... t) {
+        }
+
+        @Override
+        public void onFinish(Object... t) {
+            refreshLoadProjects();
+        }
     }
 }
