@@ -16,6 +16,7 @@ import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.ProgressListener;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
+import com.lgc.gitlabtool.git.util.NullCheckUtil;
 import com.lgc.gitlabtool.git.util.ScreenUtil;
 
 import javafx.scene.control.Alert;
@@ -24,9 +25,13 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
-public class SwitchBranchConfirmDialog extends Alert {
+/**
+ * This is the instance of {@link Alert} dialog</br>
+ * Could be shown to prevent some processes execution if we have uncommitted changes in projects
+ */
+public class ChangesCheckDialog extends Alert {
 
-    private static final Logger logger = LogManager.getLogger(SwitchBranchConfirmDialog.class);
+    private static final Logger logger = LogManager.getLogger(ChangesCheckDialog.class);
 
     private static final Image _appIcon = AppIconHolder.getInstance().getAppIcoImage();
 
@@ -50,7 +55,7 @@ public class SwitchBranchConfirmDialog extends Alert {
     private ButtonType discardButton;
     private ButtonType cancelButton;
 
-    public SwitchBranchConfirmDialog() {
+    public ChangesCheckDialog() {
         super(AlertType.WARNING);
 
         commitButton = new ButtonType("Commit changes");
@@ -86,7 +91,7 @@ public class SwitchBranchConfirmDialog extends Alert {
 
             commitMessage = dialog.getCommitMessage();
             Map<Project, JGitStatus> commitStatuses = _gitService.commitChanges(projects, commitMessage, isPush,
-                    new SwitchBranchProgressListener());
+                    new ChangesCheckProgressListener());
 
             String headerMessage = "All changes was successfully commited";
             String failedMessage = "Committing changes was failed";
@@ -158,17 +163,37 @@ public class SwitchBranchConfirmDialog extends Alert {
         return cancelButton;
     }
     
-    public void launchSwitchBranchConfirmation(List<Project> changedProjects, List<Project> selectedProjects,
-            String selectedBranchName, BiConsumer<List<Project>, String> consumer) {
+    /**
+     * Launches the instance of this dialog and provides different 
+     * actions depends on pushed button type.
+     * <p>
+     * If button type equals to commit button the {@link CommitDialog} will be invoked and
+     * after that the code from <code>biConsumer</code> will be invoked</br>
+     * If button type equals to {@link ButtonType#CANCEL} - discard logic will be run 
+     * and after that the code from <code>biConsumer</code> will be invoked</br>
+     * Else the window will be closed
+     * 
+     * @param changedProjects - list of projects have been changed
+     * @param selectedProjects - total list of selected projects
+     * @param selectedBranchName - name of the selected branch
+     * @param biConsumer - the code that should be performed if <code>changedProjects</code>
+     *                     list is not empty. </br>
+     *                     The parameters in <code>biConsumer</code> are:</br>
+     *                     <code>List&lt;Project&gt;</code> is a list of projects</br>
+     *                     <code>String</code> is a name of the branch
+     * @see {@link BiConsumer}
+     */
+    public void launchConfirmationDialog(List<Project> changedProjects, List<Project> selectedProjects,
+            String selectedBranchName, BiConsumer<List<Project>, String> biConsumer) {
 
-        SwitchBranchConfirmDialog alert = this;
+        ChangesCheckDialog alert = this;
         Optional<ButtonType> result = alert.showAndWait();
 
         if (alert.getCommitButton().equals(result.orElse(ButtonType.CANCEL))) {
             ButtonType resultCommitPushDialog = alert.showCommitPushDialog(changedProjects);
 
             if (!resultCommitPushDialog.getButtonData().equals(ButtonBar.ButtonData.CANCEL_CLOSE)) {
-                consumer.accept(selectedProjects, selectedBranchName);
+                NullCheckUtil.acceptBiConsumer(biConsumer, selectedProjects, selectedBranchName);
             }
         } else if (alert.getDiscardButton().equals(result.orElse(ButtonType.CANCEL))) {
             Map<Project, JGitStatus> discardStatuses = _gitService.discardChanges(changedProjects);
@@ -179,13 +204,13 @@ public class SwitchBranchConfirmDialog extends Alert {
                     STATUS_DISCARD_DIALOG_TITLE, 
                     STATUS_DISCARD_DIALOG_HEADER);
 
-            consumer.accept(selectedProjects, selectedBranchName);
+            NullCheckUtil.acceptBiConsumer(biConsumer, selectedProjects, selectedBranchName);
         } else {
             alert.close();
         }
     }
 
-    class SwitchBranchProgressListener implements ProgressListener {
+    class ChangesCheckProgressListener implements ProgressListener {
 
         @Override
         public void onSuccess(Object... t) {

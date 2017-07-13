@@ -166,8 +166,8 @@ public class CreateNewBranchDialog extends Dialog<String> {
             // In the same time we could see that branch is changed on the projects list panel
             _gitService.switchTo(projects, branchName, false);
         } else {
-            SwitchBranchConfirmDialog alert = new SwitchBranchConfirmDialog();
-            alert.launchSwitchBranchConfirmation(changedProjects, projects, branchName, this::switchBranch);
+            ChangesCheckDialog alert = new ChangesCheckDialog();
+            alert.launchConfirmationDialog(changedProjects, projects, branchName, this::switchBranch);
         }
     }
 
@@ -176,6 +176,6 @@ public class CreateNewBranchDialog extends Dialog<String> {
 
         StatusDialog statusDialog = new StatusDialog(STATUS_DIALOG_TITLE, STATUS_DIALOG_HEADER);
         statusDialog.showMessage(results, projects.size(), collapsedMessage);
-        statusDialog.showAndWait();
+        statusDialog.show();
     }
 }

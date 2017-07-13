@@ -21,7 +21,7 @@ import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 import com.lgc.gitlabtool.git.ui.icon.LocalRemoteIconHolder;
 import com.lgc.gitlabtool.git.ui.javafx.StatusDialog;
-import com.lgc.gitlabtool.git.ui.javafx.SwitchBranchConfirmDialog;
+import com.lgc.gitlabtool.git.ui.javafx.ChangesCheckDialog;
 import com.lgc.gitlabtool.git.ui.selection.SelectionsProvider;
 import com.lgc.gitlabtool.git.util.ScreenUtil;
 
@@ -132,8 +132,8 @@ public class SwitchBranchWindowController {
     private void launchSwitchBranchConfirmation(List<Project> changedProjects,
                                                 List<Project> selectedProjects, String selectedBranchName) {
 
-        SwitchBranchConfirmDialog alert = new SwitchBranchConfirmDialog();
-        alert.launchSwitchBranchConfirmation(changedProjects, selectedProjects, selectedBranchName, this::switchBranch);
+        ChangesCheckDialog alert = new ChangesCheckDialog();
+        alert.launchConfirmationDialog(changedProjects, selectedProjects, selectedBranchName, this::switchBranch);
     }
 
     public void onClose(ActionEvent actionEvent) {
