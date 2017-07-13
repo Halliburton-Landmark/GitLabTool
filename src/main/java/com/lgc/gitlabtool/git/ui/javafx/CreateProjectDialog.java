@@ -2,11 +2,11 @@ package com.lgc.gitlabtool.git.ui.javafx;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.Consumer;
 
 import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.project.nature.projecttype.ProjectType;
-import com.lgc.gitlabtool.git.services.ProgressListener;
 import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ProjectTypeService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
@@ -41,7 +41,7 @@ public class CreateProjectDialog extends Dialog<String> {
     private final Button _cancelButton;
 
     private final Group _selectGroup;
-    private final ProgressListener _progressListener;
+    private final Consumer<Object> _onSuccessAction;
 
     private static final ProjectTypeService _typeServies = (ProjectTypeService) ServiceProvider.getInstance()
             .getService(ProjectTypeService.class.getName());
@@ -50,9 +50,9 @@ public class CreateProjectDialog extends Dialog<String> {
             (ProjectService) ServiceProvider.getInstance().getService(ProjectService.class.getName());
 
 
-    public CreateProjectDialog(Group selectGroup, ProgressListener progress) {
+    public CreateProjectDialog(Group selectGroup, Consumer<Object> onSuccessAction) {
         _selectGroup = selectGroup;
-        _progressListener = progress;
+        _onSuccessAction = onSuccessAction;
 
         GridPane grid = new GridPane();
         grid.setAlignment(Pos.CENTER_LEFT);
@@ -112,7 +112,7 @@ public class CreateProjectDialog extends Dialog<String> {
         String idType = _typeComboBox.getSelectionModel().getSelectedItem();
         ProjectType projectType = _typeServies.getTypeById(idType);
         Map<Project, String> results = _projectService.createProject(
-                _selectGroup, _projectNameField.getText(), projectType, _progressListener);
+                _selectGroup, _projectNameField.getText(), projectType, _onSuccessAction);
         closeDialog();
 
         for (Entry<Project, String> result : results.entrySet()) {

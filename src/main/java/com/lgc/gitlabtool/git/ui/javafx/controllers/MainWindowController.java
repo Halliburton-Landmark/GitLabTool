@@ -12,7 +12,6 @@ import org.apache.logging.log4j.Logger;
 import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.services.LoginService;
-import com.lgc.gitlabtool.git.services.ProgressListener;
 import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.javafx.CreateNewBranchDialog;
@@ -223,7 +222,7 @@ public class MainWindowController {
     @FXML
     public void createProjectButton(ActionEvent actionEvent) {
         // dialog
-        CreateProjectDialog dialog = new CreateProjectDialog(_currentGroup, new CreateProjectProgressListener());
+        CreateProjectDialog dialog = new CreateProjectDialog(_currentGroup, (obj) -> refreshLoadProjects(null));
         dialog.showAndWait();
     }
 
@@ -248,25 +247,5 @@ public class MainWindowController {
             _logger.info("Projects was updated!");
         });
         executor.shutdown();
-    }
-
-    class CreateProjectProgressListener implements ProgressListener {
-
-        @Override
-        public void onSuccess(Object... t) {
-        }
-
-        @Override
-        public void onError(Object... t) {
-        }
-
-        @Override
-        public void onStart(Object... t) {
-        }
-
-        @Override
-        public void onFinish(Object... t) {
-            refreshLoadProjects(null);
-        }
     }
 }

@@ -202,10 +202,11 @@ public class JGit {
                     if (!clone(project, groupPath)) {
                         String errorMsg = "Cloning error of the " + project.getName() + " project";
                         progressListener.onError(currentProgress, errorMsg);
-                        logger.debug(errorMsg);
+                        logger.error(errorMsg);
                         continue;
                     }
                     progressListener.onSuccess(project, currentProgress);
+                    logger.info("The " + project.getName() + " project was successfully cloned.");
                 }
             }
             progressListener.onFinish(_isCloneCancelled ? CANCEL_CLONE_MESSAGE : FINISH_CLONE_MESSAGE);

@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -24,6 +25,7 @@ import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.jgit.JGit;
 import com.lgc.gitlabtool.git.project.nature.projecttype.ProjectType;
 import com.lgc.gitlabtool.git.util.JSONParser;
+import com.lgc.gitlabtool.git.util.NullCheckUtil;
 import com.lgc.gitlabtool.git.util.PathUtilities;
 
 public class ProjectServiceImpl implements ProjectService {
@@ -36,6 +38,14 @@ public class ProjectServiceImpl implements ProjectService {
     private static final String PREFIX_SUCCESSFUL_LOAD = " group have been successfully loaded";
     private static final String TOTAL_PAGES_COUNT_HEADER = "X-Total-Pages";
     private static final int MAX_PROJECTS_COUNT_ON_THE_PAGE = 100;
+
+    private static final String CREATE_LOCAL_PROJECT_SUCCESS_MESSAGE = "Local project was successfully created!";
+    private static final String CREATE_LOCAL_PROJECT_FAILED_MESSAGE = "Failed creating local project!";
+    private static final String CREATE_REMOTE_PROJECT_SUCCESS_MESSAGE = "Remote project was successfully created!";
+    private static final String CREATE_REMOTE_PROJECT_FAILED_MESSAGE = "Failed creating remote project!";
+    private static final String CREATE_STRUCTURES_TYPE_SUCCESS_MESSAGE = "Structure of type was successfully created!";
+    private static final String CREATE_STRUCTURES_TYPE_FAILED_MESSAGE = "Failed creating structure of type!";
+    private static final String PROJECT_ALREADY_EXISTS_MESSAGE = "Project with this name already exists!";
 
     private static final Logger _logger = LogManager.getLogger(ProjectServiceImpl.class);
     private static ProjectTypeService _projectTypeService;
@@ -146,76 +156,73 @@ public class ProjectServiceImpl implements ProjectService {
         return null;
     }
 
-    private boolean createLocalProject(Project project, String path, ProjectType projectType) {
+    private Map<Project, String> createLocalProject(Project project, String path, ProjectType projectType, Consumer<Object> progress) {
         List<Project> projects = Arrays.asList(project);
-        _git.clone(projects, path, EmptyProgressListener.get());
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            _logger.error(e);
+        Map<Project, String> result = new HashMap<>();
 
-        }
-        if (!PathUtilities.isExistsAndDirectory(Paths.get(project.getPathToClonedProject()))) {
-            _logger.error("Error cloning the " + project.getName() +
-                          " project in the folder: " + project.getPathToClonedProject());
-            return false;
-        }
-        Set<String> structures = projectType.getStructures();
-        long count = structures.stream()
-                               .filter(structure -> PathUtilities.createPath(
-                                   Paths.get(project.getPathToClonedProject() + File.separator + structure)))
-                               .count();
-
-        if (count == structures.size()) {
-            _logger.info("Structure of type was successfully created!");
-            if (structures.size() > 0) {
-                _git.addUntrackedFileForCommit(structures, project);
+        _git.clone(projects, path, new ProgressListener() {
+            @Override
+            public void onSuccess(Object... t) {
+                Set<String> structures = projectType.getStructures();
+                long count = structures.stream()
+                                       .filter(structure -> PathUtilities.createPath(
+                                           Paths.get(project.getPathToClonedProject() + File.separator + structure)))
+                                       .count();
+                if (count == structures.size()) {
+                    _logger.info(CREATE_STRUCTURES_TYPE_SUCCESS_MESSAGE);
+                    if (structures.size() > 0) {
+                        _git.addUntrackedFileForCommit(structures, project);
+                    }
+                    _git.commitAndPush(projects, "Created new project", true, null, null, null, null,
+                            EmptyProgressListener.get());
+                    result.put(project, "The " + project.getName() + " project was successfully created!");
+                    _logger.info(CREATE_LOCAL_PROJECT_SUCCESS_MESSAGE);
+                } else {
+                    _logger.error(CREATE_STRUCTURES_TYPE_FAILED_MESSAGE);
+                    _git.commitAndPush(projects, "Created new project", true, null, null, null, null,
+                            EmptyProgressListener.get());
+                    PathUtilities.deletePath(Paths.get(project.getPathToClonedProject()));
+                    result.put(null, "Failed creating the " + project.getName() + " project!");
+                    _logger.error(CREATE_LOCAL_PROJECT_FAILED_MESSAGE);
+                }
+                NullCheckUtil.acceptConsumer(progress, null);
             }
-            _git.commitAndPush(projects, "Created new project", true, null, null, null, null,
-                    EmptyProgressListener.get());
-            return true;
-        } else {
-            _logger.error("Failed creating structure of type!");
-            _git.commitAndPush(projects, "Created new project", true, null, null, null, null,
-                    EmptyProgressListener.get());
-            PathUtilities.deletePath(Paths.get(project.getPathToClonedProject()));
-            return false;
-        }
+            @Override
+            public void onError(Object... t) {
+                _logger.error("Failed creating remote project!");
+                result.put(project, "Failed creating remote project!");
+            }
+            @Override
+            public void onStart(Object... t) { }
+
+            @Override
+            public void onFinish(Object... t) {}
+        });
+        return result;
     }
 
     @Override
-    public Map<Project, String> createProject(Group group, String name, ProjectType projectType, ProgressListener progress) {
+    public Map<Project, String> createProject(Group group, String name, ProjectType projectType, Consumer<Object> onSuccessAction) {
         if(group == null || !group.isCloned() || name == null || name.isEmpty() || projectType == null) {
             throw new IllegalArgumentException("Invalid paramenters");
         }
         Map<Project, String> result = new HashMap<>();
-
         boolean isExists = isProjectExists(group, name);
         if (isExists) {
-            result.put(null, "Project with this name already exists!");
+            result.put(null, PROJECT_ALREADY_EXISTS_MESSAGE);
             return result;
         }
 
         _logger.info("Started creating project in the " + group.getName() + " group.");
         Project project = createRemoteProject(group, name);
         if (project == null) {
-            _logger.error("Failed creating remote project!");
-            result.put(project, "Failed creating remote project!");
+            _logger.error(CREATE_REMOTE_PROJECT_FAILED_MESSAGE);
+            result.put(project, CREATE_REMOTE_PROJECT_FAILED_MESSAGE);
             return result;
         } else {
-            _logger.info("Remote project was successfully created!");
+            _logger.info(CREATE_REMOTE_PROJECT_SUCCESS_MESSAGE);
         }
-
-        boolean isCreated = createLocalProject(project, group.getPathToClonedGroup(), projectType);
-        if (isCreated) {
-            _logger.info("Local project was successfully created!");
-            result.put(project, "The " + name + " project was successfully created!");
-        } else {
-            _logger.error("Failed creating local project!");
-            result.put(null, "Failed creating local project!");
-        }
-        progress.onFinish();
-        return result;
+        return createLocalProject(project, group.getPathToClonedGroup(), projectType, onSuccessAction);
     }
 
     @Override
