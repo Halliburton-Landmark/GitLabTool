@@ -1,8 +1,6 @@
 package com.lgc.gitlabtool.git.services;
 
 import java.util.Collection;
-import java.util.Map;
-import java.util.function.Consumer;
 
 import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.Project;
@@ -35,10 +33,10 @@ public interface ProjectService {
      * @param group
      * @param name
      * @param projectType
-     * @param onSuccessAction
+     * @param progressListener
      * @return
      */
-    Map<Project, String> createProject(Group group, String name, ProjectType projectType, Consumer<Object> onSuccessAction);
+    void createProject(Group group, String name, ProjectType projectType, ProgressListener progressListener);
 
     /**
      *

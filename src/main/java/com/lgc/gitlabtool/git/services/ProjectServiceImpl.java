@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Consumer;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -25,7 +24,6 @@ import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.jgit.JGit;
 import com.lgc.gitlabtool.git.project.nature.projecttype.ProjectType;
 import com.lgc.gitlabtool.git.util.JSONParser;
-import com.lgc.gitlabtool.git.util.NullCheckUtil;
 import com.lgc.gitlabtool.git.util.PathUtilities;
 
 public class ProjectServiceImpl implements ProjectService {
@@ -142,24 +140,25 @@ public class ProjectServiceImpl implements ProjectService {
         project.setProjectType(_projectTypeService.getProjectType(project));
     }
 
-    private Project createRemoteProject(Group group, String name) {
+    private Project createRemoteProject(Group group, String name, ProgressListener progressListener) {
         Map<String, String> param = new HashMap<>();
         param.put("name", name);
         param.put("namespace_id", String.valueOf(group.getId()));
 
         Map<String, String> header = getCurrentPrivateToken();
         if(!header.isEmpty()) {
-            _logger.info("Creating remote project...");
+            String startCreatingMessage = "Creating remote project...";
+            _logger.info(startCreatingMessage);
+            progressListener.onStart(startCreatingMessage);
             Object obj = getConnector().sendPost("/projects", param, header).getBody();
             return JSONParser.parseToObject(obj, Project.class);
         }
         return null;
     }
 
-    private Map<Project, String> createLocalProject(Project project, String path, ProjectType projectType, Consumer<Object> progress) {
+    private void createLocalProject(Project project, String path, ProjectType projectType, ProgressListener progressListener) {
         List<Project> projects = Arrays.asList(project);
-        Map<Project, String> result = new HashMap<>();
-
+        progressListener.onStart("Cloning of created project");
         _git.clone(projects, path, new ProgressListener() {
             @Override
             public void onSuccess(Object... t) {
@@ -169,28 +168,30 @@ public class ProjectServiceImpl implements ProjectService {
                                            Paths.get(project.getPathToClonedProject() + File.separator + structure)))
                                        .count();
                 if (count == structures.size()) {
+                    progressListener.onStart(CREATE_STRUCTURES_TYPE_SUCCESS_MESSAGE);
                     _logger.info(CREATE_STRUCTURES_TYPE_SUCCESS_MESSAGE);
                     if (structures.size() > 0) {
                         _git.addUntrackedFileForCommit(structures, project);
                     }
                     _git.commitAndPush(projects, "Created new project", true, null, null, null, null,
                             EmptyProgressListener.get());
-                    result.put(project, "The " + project.getName() + " project was successfully created!");
                     _logger.info(CREATE_LOCAL_PROJECT_SUCCESS_MESSAGE);
+                    progressListener.onFinish(project, "The " + project.getName() + " project was successfully created!");
                 } else {
+                    progressListener.onStart(CREATE_STRUCTURES_TYPE_FAILED_MESSAGE);
                     _logger.error(CREATE_STRUCTURES_TYPE_FAILED_MESSAGE);
                     _git.commitAndPush(projects, "Created new project", true, null, null, null, null,
                             EmptyProgressListener.get());
                     PathUtilities.deletePath(Paths.get(project.getPathToClonedProject()));
-                    result.put(null, "Failed creating the " + project.getName() + " project!");
                     _logger.error(CREATE_LOCAL_PROJECT_FAILED_MESSAGE);
+                    progressListener.onFinish(null, "Failed creating the " + project.getName() + " project!");
                 }
-                NullCheckUtil.acceptConsumer(progress, null);
+                progressListener.onSuccess();
             }
             @Override
             public void onError(Object... t) {
-                _logger.error("Failed creating remote project!");
-                result.put(project, "Failed creating remote project!");
+                _logger.error(CREATE_LOCAL_PROJECT_FAILED_MESSAGE);
+                progressListener.onFinish((Object)null, "Failed creating the " + project.getName() + " project!");
             }
             @Override
             public void onStart(Object... t) { }
@@ -198,31 +199,28 @@ public class ProjectServiceImpl implements ProjectService {
             @Override
             public void onFinish(Object... t) {}
         });
-        return result;
     }
 
     @Override
-    public Map<Project, String> createProject(Group group, String name, ProjectType projectType, Consumer<Object> onSuccessAction) {
+    public void createProject(Group group, String name, ProjectType projectType, ProgressListener progressListener) {
         if(group == null || !group.isCloned() || name == null || name.isEmpty() || projectType == null) {
             throw new IllegalArgumentException("Invalid paramenters");
         }
-        Map<Project, String> result = new HashMap<>();
         boolean isExists = isProjectExists(group, name);
         if (isExists) {
-            result.put(null, PROJECT_ALREADY_EXISTS_MESSAGE);
-            return result;
+            progressListener.onFinish(null, PROJECT_ALREADY_EXISTS_MESSAGE);
+            return;
         }
-
         _logger.info("Started creating project in the " + group.getName() + " group.");
-        Project project = createRemoteProject(group, name);
+        Project project = createRemoteProject(group, name, progressListener);
         if (project == null) {
             _logger.error(CREATE_REMOTE_PROJECT_FAILED_MESSAGE);
-            result.put(project, CREATE_REMOTE_PROJECT_FAILED_MESSAGE);
-            return result;
+            progressListener.onFinish(project, CREATE_REMOTE_PROJECT_FAILED_MESSAGE);
+            return;
         } else {
             _logger.info(CREATE_REMOTE_PROJECT_SUCCESS_MESSAGE);
         }
-        return createLocalProject(project, group.getPathToClonedGroup(), projectType, onSuccessAction);
+        createLocalProject(project, group.getPathToClonedGroup(), projectType, progressListener);
     }
 
     @Override

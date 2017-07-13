@@ -49,7 +49,6 @@ public class CloneProgressDialog extends Dialog<DialogDTO> {
 
     public CloneProgressDialog(Stage primaryStage, String groupName) {
         setTitle("Cloning groups...");
-
         GridPane grid = new GridPane();
         grid.setAlignment(Pos.CENTER_LEFT);
         grid.setHgap(10);
@@ -117,6 +116,7 @@ public class CloneProgressDialog extends Dialog<DialogDTO> {
         primaryStage.setTitle("Cloning groups...");
         primaryStage.getIcons().add(appIcon);
 
+        //primaryStage.initStyle(StageStyle.);
         /* Set size and position */
         ScreenUtil.adaptForMultiScreens(primaryStage, 500, 350);
 

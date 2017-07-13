@@ -1,18 +1,23 @@
 package com.lgc.gitlabtool.git.ui.javafx;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
 import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.project.nature.projecttype.ProjectType;
+import com.lgc.gitlabtool.git.services.ProgressListener;
 import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ProjectTypeService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
+import com.lgc.gitlabtool.git.util.NullCheckUtil;
 import com.lgc.gitlabtool.git.util.ScreenUtil;
 
+import javafx.application.Platform;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -22,12 +27,12 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
-import javafx.stage.Window;
 
 public class CreateProjectDialog extends Dialog<String> {
 
@@ -43,18 +48,21 @@ public class CreateProjectDialog extends Dialog<String> {
     private final Group _selectGroup;
     private final Consumer<Object> _onSuccessAction;
 
+    private final Label _progressLabel;
+    private final ProgressBar _progressBar = new ProgressBar();
+
     private static final ProjectTypeService _typeServies = (ProjectTypeService) ServiceProvider.getInstance()
             .getService(ProjectTypeService.class.getName());
 
     private static final ProjectService _projectService =
             (ProjectService) ServiceProvider.getInstance().getService(ProjectService.class.getName());
 
+    private final GridPane grid = new GridPane();
 
     public CreateProjectDialog(Group selectGroup, Consumer<Object> onSuccessAction) {
         _selectGroup = selectGroup;
         _onSuccessAction = onSuccessAction;
 
-        GridPane grid = new GridPane();
         grid.setAlignment(Pos.CENTER_LEFT);
         grid.setHgap(10);
         grid.setVgap(10);
@@ -77,6 +85,8 @@ public class CreateProjectDialog extends Dialog<String> {
         _typeComboBox.getSelectionModel().select(idsTypes.get(idsTypes.size()-1));
         grid.add(_typeComboBox, 1, 3);
 
+        _progressLabel = new Label();
+
         _createButton = new Button("Create Project");
         //_createButton.setDisable(true);
         _createButton.setOnAction(this::onCreateButton);
@@ -90,47 +100,94 @@ public class CreateProjectDialog extends Dialog<String> {
         HBox hbBtn = new HBox(10);
         hbBtn.setAlignment(Pos.BOTTOM_RIGHT);
         hbBtn.getChildren().addAll(_createButton, _cancelButton);
-        grid.add(hbBtn, 2, 6);
+        grid.add(hbBtn, 2, 7);
 
         getDialogPane().setContent(grid);
+
         Image appIcon = AppIconHolder.getInstance().getAppIcoImage();
         Stage stage = (Stage) getDialogPane().getScene().getWindow();
         stage.setResizable(false);
         stage.setTitle(DIALOG_TITLE);
         stage.getIcons().add(appIcon);
 
-         /* Set sizing and position */
-        ScreenUtil.adaptForMultiScreens(stage, 300, 150);
 
-        Window window = getDialogPane().getScene().getWindow();
-        window.setOnCloseRequest(event -> {
-            closeDialog();
-        });
+         /* Set sizing and position */
+        ScreenUtil.adaptForMultiScreens(stage, 350, 150);
     }
 
     private void onCreateButton(ActionEvent event) {
-        String idType = _typeComboBox.getSelectionModel().getSelectedItem();
-        ProjectType projectType = _typeServies.getTypeById(idType);
-        Map<Project, String> results = _projectService.createProject(
-                _selectGroup, _projectNameField.getText(), projectType, _onSuccessAction);
-        closeDialog();
+        _createButton.setDisable(true);
+        _cancelButton.setDisable(true);
+        _typeComboBox.setDisable(true);
+        _projectNameField.setDisable(true);
 
-        for (Entry<Project, String> result : results.entrySet()) {
-            Project project = result.getKey();
-            String contantMessage = result.getValue();
+        addProgressBar(0);
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.submit(() -> {
+            String idType = _typeComboBox.getSelectionModel().getSelectedItem();
+            ProjectType projectType = _typeServies.getTypeById(idType);
+            _projectService.createProject(_selectGroup, _projectNameField.getText(), projectType,
+                    new CreateProjectProgressListener());
+        });
+        executor.shutdown();
+    }
 
-            String headerMessage = (project == null) ?
-                        "Error creating project in the " + _selectGroup.getName() + " group." :
-                        "Success creating project in the " + _selectGroup.getName() + " group.";
+    class CreateProjectProgressListener implements ProgressListener {
 
-            StatusDialog statusDialog = new StatusDialog("Status of creating project", headerMessage, contantMessage);
-            statusDialog.showAndWait();
+        @Override
+        public void onSuccess(Object... t) {
+            NullCheckUtil.acceptConsumer(_onSuccessAction, null);
+        }
+
+        @Override
+        public void onError(Object... t) {}
+
+        @Override
+        public void onStart(Object... t) {
+            if (t[0] instanceof String) {
+                updateProgressLabel((String)t[0]);
+            }
+        }
+
+        @Override
+        public void onFinish(Object... t) {
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    Project project = t[0] == null ? null : (Project) t[0];
+                    String contantMessage = (String) t[1];
+
+                    String headerMessage = (project == null)
+                            ? "Error creating project in the " + _selectGroup.getName() + " group."
+                            : "Success creating project in the " + _selectGroup.getName() + " group.";
+                    closeDialog();
+                    StatusDialog statusDialog = new StatusDialog("Status of creating project", headerMessage,
+                            contantMessage);
+                    statusDialog.showAndWait();
+                }
+            });
         }
     }
 
     private void closeDialog() {
         Stage stage = (Stage) getDialogPane().getScene().getWindow();
         stage.close();
+    }
+
+    private void addProgressBar(final double counter) {
+        grid.add(_progressBar, 0, 4);
+        grid.add(_progressLabel, 1, 4, 3, 1);
+    }
+
+    private void updateProgressLabel(String progressLabel) {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                StringProperty projectProperty = new SimpleStringProperty("");
+                projectProperty.set(progressLabel);
+                _progressLabel.textProperty().bind(projectProperty);
+            }
+        });
     }
 
 }
