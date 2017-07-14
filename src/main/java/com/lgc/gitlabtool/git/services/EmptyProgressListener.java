@@ -7,7 +7,7 @@ package com.lgc.gitlabtool.git.services;
  */
 public class EmptyProgressListener implements ProgressListener {
 
-    private static final EmptyProgressListener _emptyListener = new EmptyProgressListener();;
+    private static final EmptyProgressListener _emptyListener = new EmptyProgressListener();
 
     /**
      * Gets instance of empty listener
