@@ -12,12 +12,14 @@ import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ProjectTypeService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
+import com.lgc.gitlabtool.git.util.NameValidator;
 import com.lgc.gitlabtool.git.util.NullCheckUtil;
 import com.lgc.gitlabtool.git.util.ScreenUtil;
 
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -50,6 +52,7 @@ public class CreateProjectDialog extends Dialog<String> {
 
     private final Label _progressLabel;
     private final ProgressBar _progressBar = new ProgressBar();
+    private final NameValidator _validator = new NameValidator();
 
     private static final ProjectTypeService _typeServies = (ProjectTypeService) ServiceProvider.getInstance()
             .getService(ProjectTypeService.class.getName());
@@ -71,26 +74,25 @@ public class CreateProjectDialog extends Dialog<String> {
         _nameLabel = new Label("Name project: ");
         grid.add(_nameLabel, 0, 2);
         _projectNameField = new TextField();
-        //_branchNameField.textProperty().addListener(getInputFilter());
-
+        _projectNameField.textProperty().addListener(getInputFilter());
         grid.add(_projectNameField, 1, 2, 2, 1);
-        ProjectTypeService typeServies = (ProjectTypeService) ServiceProvider.getInstance().getService(ProjectTypeService.class.getName());
-        List<String> idsTypes = (List<String>) typeServies.getAllIdTypes();
 
         _typeLabel = new Label("Type project: ");
         grid.add(_typeLabel, 0, 3);
 
+        List<String> idsTypes = (List<String>) _typeServies.getAllIdTypes();
         ObservableList<String> options = FXCollections.observableArrayList(idsTypes);
         _typeComboBox = new ComboBox<String>(options);
         _typeComboBox.getSelectionModel().select(idsTypes.get(idsTypes.size()-1));
         grid.add(_typeComboBox, 1, 3);
 
-        _progressLabel = new Label();
+        _progressLabel = new Label("...");
 
         _createButton = new Button("Create Project");
-        //_createButton.setDisable(true);
         _createButton.setOnAction(this::onCreateButton);
         _createButton.setDefaultButton(true);
+        _createButton.setDisable(true);
+        _projectNameField.setStyle("-fx-border-color: red;");
 
         _cancelButton = new Button("Cancel");
         _cancelButton.setOnAction(event -> {
@@ -120,7 +122,7 @@ public class CreateProjectDialog extends Dialog<String> {
         _typeComboBox.setDisable(true);
         _projectNameField.setDisable(true);
 
-        addProgressBar(0);
+        addProgressBarOnPanel();
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.submit(() -> {
             String idType = _typeComboBox.getSelectionModel().getSelectedItem();
@@ -160,8 +162,8 @@ public class CreateProjectDialog extends Dialog<String> {
                             ? "Error creating project in the " + _selectGroup.getName() + " group."
                             : "Success creating project in the " + _selectGroup.getName() + " group.";
                     closeDialog();
-                    StatusDialog statusDialog = new StatusDialog("Status of creating project", headerMessage,
-                            contantMessage);
+                    StatusDialog statusDialog = new StatusDialog(
+                            "Status of creating project", headerMessage, contantMessage);
                     statusDialog.showAndWait();
                 }
             });
@@ -173,7 +175,7 @@ public class CreateProjectDialog extends Dialog<String> {
         stage.close();
     }
 
-    private void addProgressBar(final double counter) {
+    private void addProgressBarOnPanel() {
         grid.add(_progressBar, 0, 4);
         grid.add(_progressLabel, 1, 4, 3, 1);
     }
@@ -189,4 +191,19 @@ public class CreateProjectDialog extends Dialog<String> {
         });
     }
 
+    private ChangeListener<? super String> getInputFilter() {
+        return (observable, oldValue, newValue) -> {
+            if (!_projectNameField.getText().isEmpty() && isInputValid(_projectNameField.getText())) {
+                _createButton.setDisable(false);
+                _projectNameField.setStyle("-fx-border-color: green;");
+            } else {
+                _createButton.setDisable(true);
+                _projectNameField.setStyle("-fx-border-color: red;");
+            }
+        };
+    }
+
+    private boolean isInputValid(String input) {
+        return _validator.validateProjectName(input);
+    }
 }

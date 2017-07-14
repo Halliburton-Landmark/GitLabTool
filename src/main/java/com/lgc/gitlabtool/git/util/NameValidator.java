@@ -3,9 +3,11 @@ package com.lgc.gitlabtool.git.util;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-public class BranchValidator {
-    
+public class NameValidator {
+
     /**
      * Validates the branch name according to the next rules.
      * <p>
@@ -18,17 +20,17 @@ public class BranchValidator {
      * <li>Contain a "\" (backslash)</li>
      * <li>Contain whitespace</li>
      * <li>Contain "@" character or "@{" sequence</li>
-     * <li>Contain "?", asterisk "*", or open bracket "["</li> 
-     * 
+     * <li>Contain "?", asterisk "*", or open bracket "["</li>
+     *
      * @param branchName name of branch for validation
      * @return <code>true</code> if branchName is valid or <code>false</code> otherwise
-     * 
+     *
      * @see <a href="https://www.kernel.org/pub/software/scm/git/docs/git-check-ref-format.html">Branch naming
      *      restrictions</a>
      *      <p>
      *      <a href="https://git-scm.com/docs/git-check-ref-format">look on git</a>
      */
-    public boolean validate(String branchName) {
+    public boolean validateBranchName(String branchName) {
         if (branchName.startsWith(".")) {
             return false;
         }
@@ -41,6 +43,28 @@ public class BranchValidator {
                 .findFirst();
 
         return !matches.isPresent();
+    }
+
+    /**
+     * Name can contain only letters, digits, '_', '.', dash, space. It must start with letter, digit or '_'.
+     * Path can contain only letters, digits, '_', '-' and '.'. Cannot start with '-' or end in '.', '.git' or '.atom'.
+     *
+     * @param projectName the name of project for validation
+     * @return <code>true</code> if project name is valid or <code>false</code> otherwise
+     */
+    public boolean validateProjectName(String projectName) {
+        if (projectName.isEmpty() || projectName == null) {
+            return false;
+        }
+        if (projectName.startsWith("-")) {
+            return false;
+        }
+        if (projectName.endsWith(".") || projectName.endsWith(".git") || projectName.endsWith(".atom")) {
+            return false;
+        }
+        Pattern p = Pattern.compile("[a-zA-Z0-9._-]+");
+        Matcher m = p.matcher(projectName);
+        return m.matches();
     }
 
 }

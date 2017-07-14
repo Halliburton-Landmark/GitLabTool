@@ -22,7 +22,7 @@ public class BranchValidatorTest {
     
     @Test
     public void inputIsValid() {
-        boolean actualResult = new BranchValidator().validate(testData);
+        boolean actualResult = new NameValidator().validateBranchName(testData);
         
         assertEquals(expectedResult, actualResult);
     }

@@ -49,6 +49,7 @@ public class CloneProgressDialog extends Dialog<DialogDTO> {
 
     public CloneProgressDialog(Stage primaryStage, String groupName) {
         setTitle("Cloning groups...");
+
         GridPane grid = new GridPane();
         grid.setAlignment(Pos.CENTER_LEFT);
         grid.setHgap(10);

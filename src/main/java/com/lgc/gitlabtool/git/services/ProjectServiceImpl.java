@@ -27,11 +27,6 @@ import com.lgc.gitlabtool.git.util.JSONParser;
 import com.lgc.gitlabtool.git.util.PathUtilities;
 
 public class ProjectServiceImpl implements ProjectService {
-    private RESTConnector _connector;
-
-    private static String privateTokenKey;
-    private static String privateTokenValue;
-
     private static final String GROUP_DOESNT_HAVE_PROJECTS_MESSAGE = "The group has no projects.";
     private static final String PREFIX_SUCCESSFUL_LOAD = " group have been successfully loaded";
     private static final String TOTAL_PAGES_COUNT_HEADER = "X-Total-Pages";
@@ -46,9 +41,11 @@ public class ProjectServiceImpl implements ProjectService {
     private static final String PROJECT_ALREADY_EXISTS_MESSAGE = "Project with this name already exists!";
 
     private static final Logger _logger = LogManager.getLogger(ProjectServiceImpl.class);
-    private static ProjectTypeService _projectTypeService;
-    private static CurrentUser _currentUser = CurrentUser.getInstance();
-    private static JGit _git = JGit.getInstance();
+    private static final CurrentUser _currentUser = CurrentUser.getInstance();
+    private static final JGit _git = JGit.getInstance();
+
+    private ProjectTypeService _projectTypeService;
+    private RESTConnector _connector;
 
     public ProjectServiceImpl(RESTConnector connector, ProjectTypeService projectTypeService) {
         setConnector(connector);
@@ -121,8 +118,8 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     private Map<String, String> getCurrentPrivateToken() {
-        privateTokenValue = _currentUser.getPrivateTokenValue();
-        privateTokenKey = _currentUser.getPrivateTokenKey();
+        String privateTokenValue = _currentUser.getPrivateTokenValue();
+        String privateTokenKey = _currentUser.getPrivateTokenKey();
 
         Map<String, String> header = new HashMap<>();
         if (privateTokenValue != null) {
@@ -228,7 +225,7 @@ public class ProjectServiceImpl implements ProjectService {
                                              ProgressListener progressListener) {
 
         String statusCreatedStructureMessage = isCreatedStructure ? CREATE_STRUCTURES_TYPE_SUCCESS_MESSAGE
-                                                                  : CREATE_LOCAL_PROJECT_FAILED_MESSAGE;
+                                                                  : CREATE_STRUCTURES_TYPE_FAILED_MESSAGE;
         progressListener.onStart(statusCreatedStructureMessage);
         _logger.info(statusCreatedStructureMessage);
 
@@ -248,8 +245,9 @@ public class ProjectServiceImpl implements ProjectService {
                                                               : CREATE_LOCAL_PROJECT_FAILED_MESSAGE;
         _logger.info(createLocalProjectMessage);
 
-        String fineshedMessage = isCreatedStructure ? "The " + cteatedProject.getName() + " project was successfully created!"
-                                                    : "Failed creating the " + cteatedProject.getName() + " project!";
+        String fineshedMessage = isCreatedStructure
+                ? "The " + cteatedProject.getName() + " project was successfully created!"
+                : "Failed creating the " + cteatedProject.getName() + " project!";
         progressListener.onFinish(isCreatedStructure ? cteatedProject : null, fineshedMessage);
     }
 }

@@ -30,6 +30,10 @@ public interface ProjectTypeService {
      */
     ProjectType getTypeById(String idType);
 
-
+    /**
+     * Gets collection of all existing types. Collection has types' names(ids).
+     *
+     * @return collection of types' names
+     */
     Collection<String> getAllIdTypes();
 }
