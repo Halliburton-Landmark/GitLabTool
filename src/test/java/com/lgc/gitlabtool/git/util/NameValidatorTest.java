@@ -10,12 +10,12 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 @RunWith(Parameterized.class)
-public class BranchValidatorTest {
+public class NameValidatorTest {
 
     private final String testData;
     private final boolean expectedResult;
     
-    public BranchValidatorTest(String testData, boolean expectedResult) {
+    public NameValidatorTest(String testData, boolean expectedResult) {
         this.testData = testData;
         this.expectedResult = expectedResult;
     }
