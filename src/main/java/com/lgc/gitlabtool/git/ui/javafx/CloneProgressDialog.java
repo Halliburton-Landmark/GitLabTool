@@ -116,7 +116,6 @@ public class CloneProgressDialog extends Dialog<DialogDTO> {
         primaryStage.setTitle("Cloning groups...");
         primaryStage.getIcons().add(appIcon);
 
-        //primaryStage.initStyle(StageStyle.);
         /* Set size and position */
         ScreenUtil.adaptForMultiScreens(primaryStage, 500, 350);
 

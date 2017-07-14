@@ -110,7 +110,6 @@ public class CreateProjectDialog extends Dialog<String> {
         stage.setTitle(DIALOG_TITLE);
         stage.getIcons().add(appIcon);
 
-
          /* Set sizing and position */
         ScreenUtil.adaptForMultiScreens(stage, 350, 150);
     }
