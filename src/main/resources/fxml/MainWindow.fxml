@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<BorderPane xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.lgc.gitlabtool.git.ui.javafx.controllers.MainWindowController">
+<BorderPane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.lgc.gitlabtool.git.ui.javafx.controllers.MainWindowController">
     <top>
         <GridPane maxHeight="17.0" style="-fx-background-color: #838EA9;" BorderPane.alignment="CENTER">
             <columnConstraints>
@@ -34,7 +34,7 @@
     </top>
 
     <center>
-        <SplitPane dividerPositions="0.3" BorderPane.alignment="CENTER">
+        <SplitPane fx:id="splitPanelMain" dividerPositions="0.3" BorderPane.alignment="CENTER">
 
                 <AnchorPane>
                     <ListView fx:id="projectsList" prefHeight="400.0" prefWidth="248.0" AnchorPane.bottomAnchor="25.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
