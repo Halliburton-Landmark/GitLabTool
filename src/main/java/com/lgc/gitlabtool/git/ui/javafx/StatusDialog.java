@@ -1,6 +1,6 @@
 package com.lgc.gitlabtool.git.ui.javafx;
 
-import java.util.List;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -71,13 +71,13 @@ public class StatusDialog extends Alert {
      * then collapsed message will be shown.
      * Else detailed information about statuses will be shown.
      * 
-     * @param statuses - statuses of JGit action
+     * @param statuses -        statuses of JGit action
      * @param countOfProjects - total count of selected projects
-     * @param collapsedMessageTemplate - template of the message that will be shown if count of statuses
-     *                           more than {@link #MAX_ROW_COUNT_IN_STATUS_DIALOG}
+     * @param formatStrings -   parameters for message that will be shown if count of statuses
+     *                          more than {@link #MAX_ROW_COUNT_IN_STATUS_DIALOG}
      * @return massage that will be shown
      */
-    public String showMessage(Map<Project, JGitStatus> statuses, int countOfProjects, String collapsedMessageTemplate) {
+    public String showMessage(Map<Project, JGitStatus> statuses, int countOfProjects, String... formatStrings) {
         int size = statuses.size();
         if (size > 0 && size < MAX_ROW_COUNT_IN_STATUS_DIALOG) {
             String detailedMessage = statuses.entrySet().stream()
@@ -86,12 +86,19 @@ public class StatusDialog extends Alert {
             setContentText(detailedMessage);
             return detailedMessage;
         } else {
-            String formattedMessage = String.format(collapsedMessageTemplate, getSomeOfManySuffix(statuses, countOfProjects));
+            String formattedMessage = "";
+            if (formatStrings.length == 1) {
+                formattedMessage = String.format(formatStrings[0], getSomeOfManySuffix(statuses, countOfProjects));
+            } else {
+                int paramsSize = formatStrings.length;
+                String[] params = Arrays.copyOfRange(formatStrings, 1, paramsSize - 1);
+                formattedMessage = String.format(formatStrings[0], params);
+            }
             setContentText(formattedMessage);
-            return collapsedMessageTemplate;
+            return formattedMessage;
         }
     }
-    
+
     private String getSomeOfManySuffix(Map<Project, JGitStatus> statuses, int countOfProjects) {
         int countOfSuccessfulStatuses =
                 (int) statuses.entrySet().stream()

@@ -6,14 +6,9 @@ import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.services.GitService;
-import com.lgc.gitlabtool.git.services.ProgressListener;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 import com.lgc.gitlabtool.git.util.NullCheckUtil;
@@ -31,19 +26,11 @@ import javafx.stage.Stage;
  */
 public class ChangesCheckDialog extends Alert {
 
-    private static final Logger logger = LogManager.getLogger(ChangesCheckDialog.class);
-
     private static final Image _appIcon = AppIconHolder.getInstance().getAppIcoImage();
 
     private final GitService _gitService =
             (GitService) ServiceProvider.getInstance().getService(GitService.class.getName());
 
-    private static final String STATUS_COMMIT_DIALOG_TITLE = "Committing changes status";
-    private static final String STATUS_COMMIT_DIALOG_HEADER = "Committing changes info";
-
-    private static final String STATUS_PUSH_DIALOG_TITLE = "Pushing changes status";
-    private static final String STATUS_PUSH_DIALOG_HEADER = "Pushing changes info";
-    
     private static final String STATUS_DISCARD_DIALOG_TITLE = "Discarding changes status";
     private static final String STATUS_DISCARD_DIALOG_HEADER = "Discarding changes info";
     
@@ -64,7 +51,7 @@ public class ChangesCheckDialog extends Alert {
 
         setTitle("Switch branch confirmation");
         setHeaderText("This projects have uncommited changes");
-        setContentText("Would you like to commit the changes or discard ?");
+        setContentText("Would you like to commit changes or discard?");
 
         getDialogPane().getButtonTypes().setAll(commitButton, discardButton, cancelButton);
 
@@ -75,52 +62,24 @@ public class ChangesCheckDialog extends Alert {
         ScreenUtil.adaptForMultiScreens(stage, 300, 100);
     }
 
-    public ButtonType showCommitPushDialog(List<Project> projects) {
+    private Map<Project, JGitStatus> commitChanges(List<Project> projectsWithChanges) {
         CommitDialog dialog = new CommitDialog();
-        Optional<ButtonType> commitResult = dialog.showAndWait();
-
-        if (commitResult.get() == dialog.getCommitButton() || commitResult.get() == dialog.getCommitAndPushButton()) {
-            String commitMessage = StringUtils.EMPTY;
-
-            boolean isPush = commitResult.get().equals(dialog.getCommitAndPushButton());
-
-            if (dialog.getCommitMessage() == null || dialog.getCommitMessage().isEmpty()) {
-                showEmptyCommitMessageWarning();
-                return ButtonType.CANCEL;
-            }
-
-            commitMessage = dialog.getCommitMessage();
-            Map<Project, JGitStatus> commitStatuses = _gitService.commitChanges(projects, commitMessage, isPush,
-                    new ChangesCheckProgressListener());
-
-            String headerMessage = "All changes was successfully commited";
-            String failedMessage = "Committing changes was failed";
-            String dialogTitle = isPush ? STATUS_PUSH_DIALOG_TITLE : STATUS_COMMIT_DIALOG_TITLE;
-            String dialogHeader = isPush ? STATUS_PUSH_DIALOG_HEADER : STATUS_COMMIT_DIALOG_HEADER;
-            showStatusDialog(projects, commitStatuses,
-                    headerMessage, failedMessage, dialogTitle, dialogHeader);
-        }
-
-        return commitResult.get();
-
+        
+        Map<Project, JGitStatus> commitStatuses = dialog.commitChanges(projectsWithChanges);
+        
+        return commitStatuses;
     }
-
-    public void showEmptyCommitMessageWarning(){
-        // TODO: It's temporary solution. Should be rewrite CommitDialog for using Button instead ButtonTypes.
-        // After that we can use disablers on buttons.
-        Alert alert = new Alert(AlertType.WARNING);
-        alert.setTitle("Warning");
-        alert.setHeaderText("Empty commit message");
-        alert.setContentText("Please enter commit message");
-
-        Image appIcon = AppIconHolder.getInstance().getAppIcoImage();
-        Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
-        stage.getIcons().add(appIcon);
-
-         /* Set sizing and position */
-        ScreenUtil.adaptForMultiScreens(stage, 300, 100);
-
-        alert.showAndWait();
+    
+    private Map<Project, JGitStatus> discardChanges(List<Project> changedProjects) {
+        Map<Project, JGitStatus> discardStatuses = _gitService.discardChanges(changedProjects);
+        
+        showStatusDialog(changedProjects, discardStatuses, 
+                SUCCESSFUL_DISCARD_HEADER_MESSAGE, 
+                FAILED_DISCARDING_MESSAGE,
+                STATUS_DISCARD_DIALOG_TITLE, 
+                STATUS_DISCARD_DIALOG_HEADER);
+        
+        return discardStatuses;
     }
 
     public void showStatusDialog(List<Project> projects, Map<Project, JGitStatus> discardStatuses,
@@ -151,15 +110,15 @@ public class ChangesCheckDialog extends Alert {
         statusDialog.showAndWait();
     }
 
-    public ButtonType getCommitButton(){
+    public ButtonType getCommitButton() {
         return commitButton;
     }
 
-    public ButtonType getDiscardButton(){
+    public ButtonType getDiscardButton() {
         return discardButton;
     }
 
-    public ButtonType getCancelButton(){
+    public ButtonType getCancelButton() {
         return cancelButton;
     }
     
@@ -168,9 +127,9 @@ public class ChangesCheckDialog extends Alert {
      * actions depends on pushed button type.
      * <p>
      * If button type equals to commit button the {@link CommitDialog} will be invoked and
-     * after that the code from <code>biConsumer</code> will be invoked</br>
-     * If button type equals to {@link ButtonType#CANCEL} - discard logic will be run 
-     * and after that the code from <code>biConsumer</code> will be invoked</br>
+     * after that the code from <code>biConsumer</code> will be executed</br>
+     * If button type equals to discard button the discard logic will be run 
+     * and after that the code from <code>biConsumer</code> will be executed</br>
      * Else the window will be closed
      * 
      * @param changedProjects - list of projects have been changed
@@ -190,53 +149,40 @@ public class ChangesCheckDialog extends Alert {
         Optional<ButtonType> result = alert.showAndWait();
 
         if (alert.getCommitButton().equals(result.orElse(ButtonType.CANCEL))) {
-            ButtonType resultCommitPushDialog = alert.showCommitPushDialog(changedProjects);
+            Map<Project, JGitStatus> commitStatuses = commitChanges(changedProjects);
+            executeBiConsumer(biConsumer, commitStatuses, selectedProjects, selectedBranchName);
 
-            if (!resultCommitPushDialog.getButtonData().equals(ButtonBar.ButtonData.CANCEL_CLOSE)) {
-                NullCheckUtil.acceptBiConsumer(biConsumer, selectedProjects, selectedBranchName);
-            }
         } else if (alert.getDiscardButton().equals(result.orElse(ButtonType.CANCEL))) {
-            Map<Project, JGitStatus> discardStatuses = _gitService.discardChanges(changedProjects);
-
-            alert.showStatusDialog(changedProjects, discardStatuses, 
-                    SUCCESSFUL_DISCARD_HEADER_MESSAGE, 
-                    FAILED_DISCARDING_MESSAGE,
-                    STATUS_DISCARD_DIALOG_TITLE, 
-                    STATUS_DISCARD_DIALOG_HEADER);
-
-            NullCheckUtil.acceptBiConsumer(biConsumer, selectedProjects, selectedBranchName);
+            Map<Project, JGitStatus> discardStatuses = discardChanges(changedProjects);
+            executeBiConsumer(biConsumer, discardStatuses, selectedProjects, selectedBranchName);
         } else {
             alert.close();
         }
     }
+    
+    /**
+     * Executes code in biConsumer for each project that is not failed the commit or discard
+     * 
+     * @param biConsumer
+     * @param operationStatuses
+     * @param selectedProjects
+     * @param selectedBranchName
+     */
+    private void executeBiConsumer(BiConsumer<List<Project>, String> biConsumer,
+            Map<Project, JGitStatus> operationStatuses, List<Project> selectedProjects, String selectedBranchName) {
 
-    class ChangesCheckProgressListener implements ProgressListener {
+        List<Project> failedPojects = operationStatuses.entrySet().stream()
+                .filter(element -> element.getValue() == JGitStatus.FAILED)
+                .map(element -> element.getKey())
+                .collect(Collectors.toList());
 
-        @Override
-        public void onSuccess(Object... t) {
-            if (t[0] instanceof Integer) {
-                showProgress(t[0]);
-            }
-        }
+        List<Project> projectsForExecution = selectedProjects.stream()
+                .filter(element -> !failedPojects.contains(element))
+                .collect(Collectors.toList());
 
-        @Override
-        public void onError(Object... t) {
-            showProgress(t[0]);
-        }
-
-        private void showProgress(Object object) {
-            if (object instanceof Integer) {
-                logger.info("Progress: " + object + "%");
-            }
-        }
-
-        @Override
-        public void onStart(Object... t) {}
-
-        @Override
-        public void onFinish(Object... t) {}
-
+        NullCheckUtil.acceptBiConsumer(biConsumer, projectsForExecution, selectedBranchName);
     }
+
 }
 
 
