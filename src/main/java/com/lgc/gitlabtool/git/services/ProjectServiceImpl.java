@@ -55,12 +55,6 @@ public class ProjectServiceImpl implements ProjectService {
         setProjectTypeService(projectTypeService);
     }
 
-    private void setProjectTypeService(ProjectTypeService projectTypeService) {
-        if (projectTypeService != null) {
-            _projectTypeService = projectTypeService;
-        }
-    }
-
     @Override
     public Collection<Project> getProjects(Group group) {
         Map<String, String> header = getCurrentPrivateToken();
@@ -69,6 +63,61 @@ public class ProjectServiceImpl implements ProjectService {
             return getProjectsForAllPages(sendString, header);
         }
         return Collections.emptyList();
+    }
+
+    @Override
+    public Collection<Project> loadProjects(Group group) {
+        Collection<Project> projects = getProjects(group);
+        if (projects == null || projects.isEmpty()) {
+            _logger.error(GROUP_DOESNT_HAVE_PROJECTS_MESSAGE);
+            return Collections.emptyList();
+        }
+        String successMessage = "The projects of " + group.getName() + PREFIX_SUCCESSFUL_LOAD;
+        Path path = Paths.get(group.getPathToClonedGroup());
+        Collection<String> projectsName = PathUtilities.getFolders(path);
+        if (projectsName.isEmpty()) {
+            _logger.debug(successMessage);
+            return projects;
+        }
+        projects.stream()
+                .filter(project -> projectsName.contains(project.getName()))
+                .forEach((project) -> updateProjectStatus(project, group.getPathToClonedGroup()));
+        _logger.debug(successMessage);
+        return projects;
+    }
+
+    @Override
+    public void createProject(Group group, String name, ProjectType projectType, ProgressListener progressListener) {
+        if(group == null || !group.isCloned() || name == null || name.isEmpty() || projectType == null) {
+            throw new IllegalArgumentException("Invalid paramenters");
+        }
+        boolean isExists = isProjectExists(group, name);
+        if (isExists) {
+            progressListener.onFinish(null, PROJECT_ALREADY_EXISTS_MESSAGE);
+            return;
+        }
+        _logger.info("Started creating project in the " + group.getName() + " group.");
+        Project project = createRemoteProject(group, name, progressListener);
+        if (project == null) {
+            _logger.error(CREATE_REMOTE_PROJECT_FAILED_MESSAGE);
+            progressListener.onFinish(project, CREATE_REMOTE_PROJECT_FAILED_MESSAGE);
+            return;
+        } else {
+            _logger.info(CREATE_REMOTE_PROJECT_SUCCESS_MESSAGE);
+        }
+        createLocalProject(project, group.getPathToClonedGroup(), projectType, progressListener);
+    }
+
+    @Override
+    public boolean isProjectExists(Group group, String nameProject) {
+        if(group == null || !group.isCloned() || nameProject == null || nameProject.isEmpty()) {
+            throw new IllegalArgumentException("Invalid paramenters");
+        }
+        Collection<Project> projects = getProjects(group);
+        Optional<Project> resultProject = projects.stream()
+                                                  .filter(project -> project.getName().equals(nameProject))
+                                                  .findAny();
+        return resultProject.isPresent();
     }
 
     private Map<String, String> getCurrentPrivateToken() {
@@ -113,25 +162,10 @@ public class ProjectServiceImpl implements ProjectService {
         _connector = connector;
     }
 
-    @Override
-    public Collection<Project> loadProjects(Group group) {
-        Collection<Project> projects = getProjects(group);
-        if (projects == null || projects.isEmpty()) {
-            _logger.error(GROUP_DOESNT_HAVE_PROJECTS_MESSAGE);
-            return Collections.emptyList();
+    private void setProjectTypeService(ProjectTypeService projectTypeService) {
+        if (projectTypeService != null) {
+            _projectTypeService = projectTypeService;
         }
-        String successMessage = "The projects of " + group.getName() + PREFIX_SUCCESSFUL_LOAD;
-        Path path = Paths.get(group.getPathToClonedGroup());
-        Collection<String> projectsName = PathUtilities.getFolders(path);
-        if (projectsName.isEmpty()) {
-            _logger.debug(successMessage);
-            return projects;
-        }
-        projects.stream()
-                .filter(project -> projectsName.contains(project.getName()))
-                .forEach((project) -> updateProjectStatus(project, group.getPathToClonedGroup()));
-        _logger.debug(successMessage);
-        return projects;
     }
 
     private void updateProjectStatus(Project project, String pathGroup) {
@@ -159,34 +193,25 @@ public class ProjectServiceImpl implements ProjectService {
     private void createLocalProject(Project project, String path, ProjectType projectType, ProgressListener progressListener) {
         List<Project> projects = Arrays.asList(project);
         progressListener.onStart("Cloning of created project");
+
         _git.clone(projects, path, new ProgressListener() {
             @Override
             public void onSuccess(Object... t) {
                 Set<String> structures = projectType.getStructures();
-                long count = structures.stream()
-                                       .filter(structure -> PathUtilities.createPath(
-                                           Paths.get(project.getPathToClonedProject() + File.separator + structure)))
-                                       .count();
-                if (count == structures.size()) {
-                    progressListener.onStart(CREATE_STRUCTURES_TYPE_SUCCESS_MESSAGE);
-                    _logger.info(CREATE_STRUCTURES_TYPE_SUCCESS_MESSAGE);
-                    if (structures.size() > 0) {
-                        _git.addUntrackedFileForCommit(structures, project);
-                    }
-                    _git.commitAndPush(projects, "Created new project", true, null, null, null, null,
-                            EmptyProgressListener.get());
-                    _logger.info(CREATE_LOCAL_PROJECT_SUCCESS_MESSAGE);
-                    progressListener.onFinish(project, "The " + project.getName() + " project was successfully created!");
+                if (createStructuresType(structures, projectType, project)) {
+
+                    commitAndPushStructuresType(projects, structures, true,
+                                                CREATE_STRUCTURES_TYPE_SUCCESS_MESSAGE,
+                                                CREATE_LOCAL_PROJECT_SUCCESS_MESSAGE,
+                                                "The " + project.getName() + " project was successfully created!",
+                                                progressListener);
                 } else {
-                    progressListener.onStart(CREATE_STRUCTURES_TYPE_FAILED_MESSAGE);
-                    _logger.error(CREATE_STRUCTURES_TYPE_FAILED_MESSAGE);
-                    _git.commitAndPush(projects, "Created new project", true, null, null, null, null,
-                            EmptyProgressListener.get());
-                    PathUtilities.deletePath(Paths.get(project.getPathToClonedProject()));
-                    _logger.error(CREATE_LOCAL_PROJECT_FAILED_MESSAGE);
-                    progressListener.onFinish(null, "Failed creating the " + project.getName() + " project!");
+                    commitAndPushStructuresType(projects, structures, false,
+                                                CREATE_STRUCTURES_TYPE_FAILED_MESSAGE,
+                                                CREATE_LOCAL_PROJECT_FAILED_MESSAGE,
+                                                "Failed creating the " + project.getName() + " project!",
+                                                progressListener);
                 }
-                progressListener.onSuccess();
             }
             @Override
             public void onError(Object... t) {
@@ -201,37 +226,38 @@ public class ProjectServiceImpl implements ProjectService {
         });
     }
 
-    @Override
-    public void createProject(Group group, String name, ProjectType projectType, ProgressListener progressListener) {
-        if(group == null || !group.isCloned() || name == null || name.isEmpty() || projectType == null) {
-            throw new IllegalArgumentException("Invalid paramenters");
-        }
-        boolean isExists = isProjectExists(group, name);
-        if (isExists) {
-            progressListener.onFinish(null, PROJECT_ALREADY_EXISTS_MESSAGE);
-            return;
-        }
-        _logger.info("Started creating project in the " + group.getName() + " group.");
-        Project project = createRemoteProject(group, name, progressListener);
-        if (project == null) {
-            _logger.error(CREATE_REMOTE_PROJECT_FAILED_MESSAGE);
-            progressListener.onFinish(project, CREATE_REMOTE_PROJECT_FAILED_MESSAGE);
-            return;
-        } else {
-            _logger.info(CREATE_REMOTE_PROJECT_SUCCESS_MESSAGE);
-        }
-        createLocalProject(project, group.getPathToClonedGroup(), projectType, progressListener);
+    // return true if all files was created successfully
+    private boolean createStructuresType(Set<String> structures, ProjectType projectType, Project project) {
+        long count = structures.stream()
+                               .filter(structure -> PathUtilities.createPath(
+                                   Paths.get(project.getPathToClonedProject() + File.separator + structure)))
+                               .count();
+        return count == structures.size();
     }
 
-    @Override
-    public boolean isProjectExists(Group group, String nameProject) {
-        if(group == null || !group.isCloned() || nameProject == null || nameProject.isEmpty()) {
-            throw new IllegalArgumentException("Invalid paramenters");
+    private void commitAndPushStructuresType(List<Project> projects, Set<String> structures,
+                                             boolean isCreatedStructure,
+                                             String statusCreatedStructureMessage,
+                                             String createLocalProjectMessage,
+                                             String fineshedMessage,
+                                             ProgressListener progressListener) {
+        progressListener.onStart(statusCreatedStructureMessage);
+        _logger.info(statusCreatedStructureMessage);
+
+        Project cteatedProject = projects.get(0); // list of projects always has one element
+        if (structures.size() > 0 && isCreatedStructure) {
+            _git.addUntrackedFileForCommit(structures, cteatedProject);
         }
-        Collection<Project> projects = getProjects(group);
-        Optional<Project> resultProject = projects.stream()
-                                                  .filter(project -> project.getName().equals(nameProject))
-                                                  .findAny();
-        return resultProject.isPresent();
+        // make first commit to GitLab repository
+        _git.commitAndPush(projects, "Created new project", true, null, null, null, null,
+                EmptyProgressListener.get());
+
+        if (!isCreatedStructure) {
+            PathUtilities.deletePath(Paths.get(cteatedProject.getPathToClonedProject()));
+        }
+
+        _logger.info(createLocalProjectMessage);
+        progressListener.onSuccess();
+        progressListener.onFinish(isCreatedStructure ? cteatedProject : null, fineshedMessage);
     }
 }
