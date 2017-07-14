@@ -2,7 +2,11 @@ package com.lgc.gitlabtool.git.ui.javafx.controllers;
 
 
 import java.util.List;
+import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.services.LoginService;
@@ -27,6 +31,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
+import javafx.scene.control.SplitPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -34,18 +39,26 @@ import javafx.scene.input.MouseEvent;
 public class MainWindowController {
     private static final String HEDER_GROUP_TITLE = "Current group: ";
     private static final String SELECT_ALL_IMAGE_URL = "icons/main/select_all.png";
+    private static final String DIVIDER_PROPERTY_NODE = "MainWindowController_Dividers";
 
     private List<Project> _projects;
     private String _groupTitle;
+    private Preferences preferences;
 
     private final LoginService _loginService =
             (LoginService) ServiceProvider.getInstance().getService(LoginService.class.getName());
+
+    private static final Logger _logger =
+            LogManager.getLogger(MainWindowController.class);
 
     @FXML
     private ListView<Project> projectsList;
 
     @FXML
     private Label leftLabel;
+
+    @FXML
+    private SplitPane splitPanelMain;
 
     @FXML
     private Label userId;
@@ -63,7 +76,21 @@ public class MainWindowController {
         Image imageSelectAll = new Image(getClass().getClassLoader().getResource(SELECT_ALL_IMAGE_URL).toExternalForm());
         selectAllButton.setGraphic(new ImageView(imageSelectAll));
 
+        preferences = getPreferences(DIVIDER_PROPERTY_NODE);
+
+        if (preferences != null) {
+            double splitPaneDivider = preferences.getDouble(_groupTitle, 0.3);
+            splitPanelMain.setDividerPositions(splitPaneDivider);
+        }
+
         configureListView(projectsList);
+
+        splitPanelMain.getDividers().get(0).positionProperty().addListener(
+                (observable, oldValue, newValue) -> {
+                    if (preferences != null) {
+                        preferences.putDouble(_groupTitle, newValue.doubleValue());
+                    }
+                });
 
         BooleanBinding booleanBinding = projectsList.getSelectionModel().selectedItemProperty().isNull();
         ToolbarManager.getInstance().getAllButtonsForCurrentView()
@@ -116,6 +143,22 @@ public class MainWindowController {
                 .collect(Collectors.toList());
         ObservableList<Project> projectsObservableList = FXCollections.observableList(sortedProjectList);
         projectsList.setItems(projectsObservableList);
+    }
+
+    // Gets preferences by key, could return null
+    private Preferences getPreferences(String key) {
+        try {
+            return Preferences.userRoot().node(key);
+        } catch (IllegalArgumentException iae) {
+            _logger.error("Consecutive slashes in path");
+            return null;
+        } catch (IllegalStateException ise) {
+            _logger.error("Node has been removed with the removeNode() method");
+            return null;
+        } catch (NullPointerException npe){
+            _logger.error("Key is null");
+            return null;
+        }
     }
 
     private void configureListView(ListView<Project> listView) {
