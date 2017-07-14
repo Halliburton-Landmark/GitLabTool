@@ -50,7 +50,6 @@ public class MainWindowController {
     private List<Project> _projects;
 
     private Group _currentGroup;
-    private String _groupTitle;
     private Preferences preferences;
     private static final Logger _logger = LogManager.getLogger(MainWindowController.class);
 
@@ -88,7 +87,7 @@ public class MainWindowController {
         preferences = getPreferences(DIVIDER_PROPERTY_NODE);
 
         if (preferences != null) {
-            double splitPaneDivider = preferences.getDouble(_groupTitle, 0.3);
+            double splitPaneDivider = preferences.getDouble(groupTitle, 0.3);
             splitPanelMain.setDividerPositions(splitPaneDivider);
         }
 
@@ -97,7 +96,7 @@ public class MainWindowController {
         splitPanelMain.getDividers().get(0).positionProperty().addListener(
                 (observable, oldValue, newValue) -> {
                     if (preferences != null) {
-                        preferences.putDouble(_groupTitle, newValue.doubleValue());
+                        preferences.putDouble(groupTitle, newValue.doubleValue());
                     }
                 });
 
