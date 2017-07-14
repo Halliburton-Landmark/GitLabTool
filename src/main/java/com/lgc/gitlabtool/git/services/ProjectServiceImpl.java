@@ -198,20 +198,8 @@ public class ProjectServiceImpl implements ProjectService {
             @Override
             public void onSuccess(Object... t) {
                 Set<String> structures = projectType.getStructures();
-                if (createStructuresType(structures, projectType, project)) {
-
-                    commitAndPushStructuresType(projects, structures, true,
-                                                CREATE_STRUCTURES_TYPE_SUCCESS_MESSAGE,
-                                                CREATE_LOCAL_PROJECT_SUCCESS_MESSAGE,
-                                                "The " + project.getName() + " project was successfully created!",
-                                                progressListener);
-                } else {
-                    commitAndPushStructuresType(projects, structures, false,
-                                                CREATE_STRUCTURES_TYPE_FAILED_MESSAGE,
-                                                CREATE_LOCAL_PROJECT_FAILED_MESSAGE,
-                                                "Failed creating the " + project.getName() + " project!",
-                                                progressListener);
-                }
+                boolean isCreatedStructure = createStructuresType(structures, projectType, project);
+                commitAndPushStructuresType(projects, structures, isCreatedStructure, progressListener);
             }
             @Override
             public void onError(Object... t) {
@@ -237,10 +225,10 @@ public class ProjectServiceImpl implements ProjectService {
 
     private void commitAndPushStructuresType(List<Project> projects, Set<String> structures,
                                              boolean isCreatedStructure,
-                                             String statusCreatedStructureMessage,
-                                             String createLocalProjectMessage,
-                                             String fineshedMessage,
                                              ProgressListener progressListener) {
+
+        String statusCreatedStructureMessage = isCreatedStructure ? CREATE_STRUCTURES_TYPE_SUCCESS_MESSAGE
+                                                                  : CREATE_LOCAL_PROJECT_FAILED_MESSAGE;
         progressListener.onStart(statusCreatedStructureMessage);
         _logger.info(statusCreatedStructureMessage);
 
@@ -255,9 +243,13 @@ public class ProjectServiceImpl implements ProjectService {
         if (!isCreatedStructure) {
             PathUtilities.deletePath(Paths.get(cteatedProject.getPathToClonedProject()));
         }
-
-        _logger.info(createLocalProjectMessage);
         progressListener.onSuccess();
+        String createLocalProjectMessage = isCreatedStructure ? CREATE_LOCAL_PROJECT_SUCCESS_MESSAGE
+                                                              : CREATE_LOCAL_PROJECT_FAILED_MESSAGE;
+        _logger.info(createLocalProjectMessage);
+
+        String fineshedMessage = isCreatedStructure ? "The " + cteatedProject.getName() + " project was successfully created!"
+                                                    : "Failed creating the " + cteatedProject.getName() + " project!";
         progressListener.onFinish(isCreatedStructure ? cteatedProject : null, fineshedMessage);
     }
 }
