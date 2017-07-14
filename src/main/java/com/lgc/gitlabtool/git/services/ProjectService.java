@@ -29,20 +29,24 @@ public interface ProjectService {
     Collection<Project> loadProjects(Group group);
 
     /**
+     * Creates new project in the group on GitLab and creates its local copy.
      *
-     * @param group
-     * @param name
-     * @param projectType
-     * @param progressListener
-     * @return
+     * @param group the group where we create new project
+     * @param name  the name of new project
+     * @param projectType the type in accordance with which the file structure on the disk will be created
+     * @param progressListener the listener which processes the process of creating a project (returns
+     *        the status of the operation, the created project, transmits information for the UI)
+     *
+     * This method nothing return. We get all info from progressListener.
      */
     void createProject(Group group, String name, ProjectType projectType, ProgressListener progressListener);
 
     /**
+     * Checks that project with this name hasn't existed yet.
      *
-     * @param group
-     * @param nameProject
-     * @return
+     * @param group the group where we create new project
+     * @param nameProject the name of project
+     * @return true - if project with this name has already existed, otherwise - false.
      */
     boolean isProjectExists(Group group, String nameProject);
 }
