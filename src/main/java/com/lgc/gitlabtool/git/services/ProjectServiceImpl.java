@@ -215,10 +215,14 @@ public class ProjectServiceImpl implements ProjectService {
     // return true if all files was created successfully
     private boolean createStructuresType(Set<String> structures, ProjectType projectType, Project project) {
         long count = structures.stream()
-                               .filter(structure -> PathUtilities.createPath(
-                                   Paths.get(project.getPathToClonedProject() + File.separator + structure)))
+                               .filter(structure -> createStructure(project, structure))
                                .count();
         return count == structures.size();
+    }
+
+    private boolean createStructure(Project project, String structure) {
+        Path path = Paths.get(project.getPathToClonedProject() + File.separator + structure);
+        return PathUtilities.createPath(path);
     }
 
     private void commitAndPushStructuresType(List<Project> projects, Set<String> structures,
