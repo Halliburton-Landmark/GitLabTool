@@ -176,12 +176,23 @@ public class ChangesCheckDialog extends Alert {
     private void executeBiConsumer(BiConsumer<List<Project>, String> biConsumer,
             Map<Project, JGitStatus> operationStatuses, List<Project> selectedProjects, String selectedBranchName) {
 
-        List<Project> projectsForExecution = selectedProjects.stream() 
-                .filter(project -> operationStatuses.get(project) == null 
-                    || operationStatuses.get(project) != JGitStatus.FAILED)
+        List<Project> projectsForExecution = selectedProjects.stream()
+                .filter(project -> isNotFailedOperation(operationStatuses, project))
                 .collect(Collectors.toList());
 
         NullCheckUtil.acceptBiConsumer(biConsumer, projectsForExecution, selectedBranchName);
+    }
+
+    /**
+     * @param operationStatuses - statuses of executed operation (discard or commit)
+     * @param project - current project
+     * @return <code>true</code> if current project does not exist in <code>operationStatuses</code>
+     *                 or its status in <code>operationStatuses</code> does not equals to {@link JGitStatus#FAILED}
+     *                 else returns <code>false</code>
+     */
+    private boolean isNotFailedOperation(Map<Project, JGitStatus> operationStatuses, Project project) {
+        JGitStatus currentStatus = operationStatuses.get(project);
+        return currentStatus == null || currentStatus != JGitStatus.FAILED;
     }
 
 }
