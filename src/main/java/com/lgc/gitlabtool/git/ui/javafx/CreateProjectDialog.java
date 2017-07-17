@@ -156,14 +156,14 @@ public class CreateProjectDialog extends Dialog<String> {
                 @Override
                 public void run() {
                     Project project = t[0] == null ? null : (Project) t[0];
-                    String contantMessage = (String) t[1];
+                    String contentMessage = (String) t[1];
 
                     String headerMessage = (project == null)
                             ? "Error creating project in the " + _selectGroup.getName() + " group."
                             : "Success creating project in the " + _selectGroup.getName() + " group.";
                     closeDialog();
                     StatusDialog statusDialog = new StatusDialog(
-                            "Status of creating project", headerMessage, contantMessage);
+                            "Status of creating project", headerMessage, contentMessage);
                     statusDialog.showAndWait();
                 }
             });
