@@ -49,7 +49,7 @@ public class ChangesCheckDialog extends Alert {
         discardButton = new ButtonType("Discard changes");
         cancelButton = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
 
-        setTitle("Switch branch confirmation");
+        setTitle("Check changes dialog");
         setHeaderText("This projects have uncommited changes");
         setContentText("Would you like to commit changes or discard?");
 
@@ -161,23 +161,24 @@ public class ChangesCheckDialog extends Alert {
     }
     
     /**
-     * Executes code in biConsumer for each project that is not failed the commit or discard
+     * Executes code in biConsumer for each project that is not failed the commit or discard.
+     * <p>
+     * <code>operatinStatuses</code> is a map that contains the projects that had a changes
+     * and statuses of operation (discard or commit)<br>
+     * If operation status equals to {@link JGitStatus#FAILED} we should remove this project from 
+     * list for execution in biConsumer
      * 
-     * @param biConsumer
-     * @param operationStatuses
-     * @param selectedProjects
-     * @param selectedBranchName
+     * @param biConsumer - code that should be executed
+     * @param operationStatuses - statuses of executed operation (discard or commit)
+     * @param selectedProjects - list of selected projects
+     * @param selectedBranchName - branch name
      */
     private void executeBiConsumer(BiConsumer<List<Project>, String> biConsumer,
             Map<Project, JGitStatus> operationStatuses, List<Project> selectedProjects, String selectedBranchName) {
 
-        List<Project> failedPojects = operationStatuses.entrySet().stream()
-                .filter(element -> element.getValue() == JGitStatus.FAILED)
-                .map(element -> element.getKey())
-                .collect(Collectors.toList());
-
-        List<Project> projectsForExecution = selectedProjects.stream()
-                .filter(element -> !failedPojects.contains(element))
+        List<Project> projectsForExecution = selectedProjects.stream() 
+                .filter(project -> operationStatuses.get(project) == null 
+                    || operationStatuses.get(project) != JGitStatus.FAILED)
                 .collect(Collectors.toList());
 
         NullCheckUtil.acceptBiConsumer(biConsumer, projectsForExecution, selectedBranchName);

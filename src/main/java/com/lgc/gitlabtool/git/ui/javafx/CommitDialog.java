@@ -81,7 +81,7 @@ public class CommitDialog extends Dialog<String> {
         Stage stage = (Stage) getDialogPane().getScene().getWindow();
         stage.getIcons().add(_appIcon);
 
-        setTitle("Switch branch confirmation");
+        setTitle("Commit and Push dialog");
         setHeaderText("This projects have uncommited changes");
 
          /* Set sizing and position */
