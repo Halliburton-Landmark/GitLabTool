@@ -18,7 +18,7 @@ public class EmptyProgressListener implements ProgressListener {
         return _emptyListener;
     }
 
-    private EmptyProgressListener() {}
+    protected EmptyProgressListener() {}
 
     @Override
     public void onSuccess(Object... t) {

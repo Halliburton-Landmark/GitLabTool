@@ -103,8 +103,8 @@ public class MainWindowController {
         setDisablePropertyForButtons();
 
         //TODO: Additional thread should be placed to services
-        Thread t = new Thread(this::updateProjectList);
-        t.setName("Updating project list");
+        Thread t = new Thread(this::refreshProjectList);
+        t.setName("Refresh project list");
         t.start();
 
         configureToolbarCommands();
@@ -151,7 +151,7 @@ public class MainWindowController {
     private void configureToolbarCommands() {
     }
 
-    private void updateProjectList() {
+    private void refreshProjectList() {
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
@@ -242,7 +242,7 @@ public class MainWindowController {
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.CREATE_PROJECT_BUTTON.getId())
                 .setOnAction(this::createProjectButton);
 
-        ToolbarManager.getInstance().getButtonById(ToolbarButtons.UPDATE_PROJECTS.getId())
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.REFRESH_PROJECTS.getId())
         .setOnAction(this::refreshLoadProjects);
 
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_CREATE_BRANCH)
@@ -278,10 +278,10 @@ public class MainWindowController {
     public void refreshLoadProjects(ActionEvent actionEvent) {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.submit(() -> {
-            _logger.info("Updating projects...");
+            _logger.info("Refreshing projects...");
             _projects = (List<Project>) _projectService.loadProjects(_currentGroup);
-            updateProjectList();
-            _logger.info("Projects was updated!");
+            refreshProjectList();
+            _logger.info("Projects were refreshed!");
         });
         executor.shutdown();
     }
