@@ -31,7 +31,7 @@ public class StatusDialog extends Alert {
      */
     public static final int MAX_ROW_COUNT_IN_STATUS_DIALOG = 10;
     
-    private static final String NEW_LINE_SYMBOL = "\n";
+    private static final String NEW_LINE_SYMBOL = System.getProperty("line.separator");
 
     /**
      * Creates the instance of this class with Gitlab Tool icon
