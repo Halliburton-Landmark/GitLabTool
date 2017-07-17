@@ -79,4 +79,23 @@ public class PathUtilities {
         }
         return false;
     }
+
+    /**
+     *
+     * @param path
+     * @return
+     */
+    public static boolean createPath(Path path) {
+        try {
+            Path parent = path.getParent();
+            if (parent != null) {
+                Files.createDirectories(parent);
+            }
+            Files.createFile(path);
+            return true;
+        } catch (IOException e) {
+            logger.error("Error creating path: " + e.getMessage());
+        }
+        return false;
+    }
 }

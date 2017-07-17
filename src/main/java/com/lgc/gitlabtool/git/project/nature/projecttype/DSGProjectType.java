@@ -1,10 +1,10 @@
 package com.lgc.gitlabtool.git.project.nature.projecttype;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 
 import com.lgc.gitlabtool.git.project.nature.operation.Operation;
+import com.lgc.gitlabtool.git.util.PathUtilities;
 
 /**
  * Implementation of type for DSG projects
@@ -14,8 +14,8 @@ import com.lgc.gitlabtool.git.project.nature.operation.Operation;
 public class DSGProjectType extends ProjectTypeImpl {
 
     public static final String TYPE_NAME = "com.lgc.dsg";
-    private static final String STRUCTURE_OF_POM_FILE = "/pom.xml";
-    private static final String STRUCTURE_OF_PLUGINS_POM = "/plugins/pom.xml";
+    private static final String STRUCTURE_OF_POM_FILE = "pom.xml";
+    private static final String STRUCTURE_OF_PLUGINS_POM = "plugins/pom.xml";
     private static final String DS_PROJECT_ICON_URL = "icons/project/dsg_project.png";
 
     public DSGProjectType() {
@@ -31,7 +31,7 @@ public class DSGProjectType extends ProjectTypeImpl {
 
     @Override
     protected boolean isPathCorrespondsToType(Path path) {
-        return Files.exists(path) && Files.isRegularFile(path);
+        return PathUtilities.isExistsAndRegularFile(path);
     }
 
 }

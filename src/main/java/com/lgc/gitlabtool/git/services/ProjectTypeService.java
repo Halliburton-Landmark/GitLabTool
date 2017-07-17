@@ -1,7 +1,9 @@
 package com.lgc.gitlabtool.git.services;
 
-import com.lgc.gitlabtool.git.project.nature.projecttype.ProjectType;
+import java.util.Collection;
+
 import com.lgc.gitlabtool.git.entities.Project;
+import com.lgc.gitlabtool.git.project.nature.projecttype.ProjectType;
 import com.lgc.gitlabtool.git.project.nature.projecttype.UnknownProjectType;
 
 /**
@@ -28,4 +30,10 @@ public interface ProjectTypeService {
      */
     ProjectType getTypeById(String idType);
 
+    /**
+     * Gets collection of all existing types. Collection has types' names(ids).
+     *
+     * @return collection of types' names
+     */
+    Collection<String> getAllIdTypes();
 }

@@ -12,7 +12,7 @@ import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
-import com.lgc.gitlabtool.git.util.BranchValidator;
+import com.lgc.gitlabtool.git.util.NameValidator;
 import com.lgc.gitlabtool.git.util.ScreenUtil;
 
 import javafx.beans.value.ChangeListener;
@@ -52,7 +52,7 @@ public class CreateNewBranchDialog extends Dialog<String> {
     private final Button _cancelButton;
 
     private List<Project> _projects;
-    private final BranchValidator _branchValidator = new BranchValidator();
+    private final NameValidator _branchValidator = NameValidator.get();
 
     public List<Project> getProjects() {
         return _projects;
@@ -128,7 +128,7 @@ public class CreateNewBranchDialog extends Dialog<String> {
     }
 
     private boolean isInputValid(String input) {
-        return _branchValidator.validate(input);
+        return _branchValidator.validateBranchName(input);
     }
 
     private void initializeOnCloseEvent() {

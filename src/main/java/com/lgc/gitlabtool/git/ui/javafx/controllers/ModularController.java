@@ -141,9 +141,8 @@ public class ModularController {
 
         _mainWindowController = loader.getController();
 
-        String groupTitle = selectedGroup.getName() + " [" + selectedGroup.getPathToClonedGroup() + "]";
         List<Project> projects = (List<Project>) _projectService.loadProjects(selectedGroup);
-        _mainWindowController.setSelectedGroup(projects, groupTitle);
+        _mainWindowController.setSelectedGroup(projects, selectedGroup);
         _mainWindowController.beforeShowing();
 
         AnchorPane.setTopAnchor(node, 0.0);

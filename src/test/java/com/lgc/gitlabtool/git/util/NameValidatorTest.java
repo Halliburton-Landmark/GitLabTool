@@ -10,23 +10,23 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 @RunWith(Parameterized.class)
-public class BranchValidatorTest {
+public class NameValidatorTest {
 
     private final String testData;
     private final boolean expectedResult;
-    
-    public BranchValidatorTest(String testData, boolean expectedResult) {
+
+    public NameValidatorTest(String testData, boolean expectedResult) {
         this.testData = testData;
         this.expectedResult = expectedResult;
     }
-    
+
     @Test
     public void inputIsValid() {
-        boolean actualResult = new BranchValidator().validate(testData);
-        
+        boolean actualResult = NameValidator.get().validateBranchName(testData);
+
         assertEquals(expectedResult, actualResult);
     }
-    
+
     @Parameterized.Parameters
     public static List<Object[]> validationData() {
         return Arrays.asList(new Object[][] {

@@ -62,4 +62,13 @@ public interface ProjectType {
      * @return available operations
      */
     Set<Operation> getAvailableOperations();
+
+    /**
+     * Gets structures of type.
+     * We get set of string which has paths of files for this type.
+     * Set of string is unmodifiable set.
+     *
+     * @return paths of files for this type
+     */
+    Set<String> getStructures();
 }

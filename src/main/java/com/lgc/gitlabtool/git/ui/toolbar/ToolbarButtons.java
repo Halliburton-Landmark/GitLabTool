@@ -18,14 +18,15 @@ public enum ToolbarButtons {
     SELECT_GROUP_BUTTON(ViewKey.GROUP_WINDOW.getKey(), "group_selectGroup", "icons/group_window/select.png", "Load group", "Load selected group"),
 
     /* Temporary unavailable buttons
-    ADD_REPO_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "repo_addRepo", "icons/main/add.png", "Add repository", "Add repository"),
+    ADD_REPO_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "repo_addRepo", "", "Add repository", "Add repository"),
     REMOVE_REPO_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "repo_removeRepo", "icons/main/remove.png", "Remove repository", "Remove repository"),
     EDIT_REPO_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "repo_editRepo", "icons/main/edit.png", "Edit repository", "Edit repository"),
     DELETE_BRANCH_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "branch_deleteBranch", "icons/main/remove.png", "Remove branch", "Remove branch");
     */
+    CREATE_PROJECT_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "create_project_button", "icons/main/create_project.png", "Create project", "Create new project"),
     NEW_BRANCH_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "branch_newBranch", "icons/main/new_branch.png", "New branch", "Create new branch"),
-    SWITCH_BRANCH_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "branch_switchBranch", "icons/main/switch.png", "Switch branch", "Switch to another branch");
-
+    SWITCH_BRANCH_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "branch_switchBranch", "icons/main/switch.png", "Switch branch", "Switch to another branch"),
+    REFRESH_PROJECTS(ViewKey.MAIN_WINDOW.getKey(), "refresh_projects", "icons/main/refresh_projects.png", "Refresh projects", "Refresh projects' list");
 
     private final String viewKey;
     private final String id;

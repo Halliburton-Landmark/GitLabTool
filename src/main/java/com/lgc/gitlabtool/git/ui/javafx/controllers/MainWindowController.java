@@ -2,16 +2,21 @@ package com.lgc.gitlabtool.git.ui.javafx.controllers;
 
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.services.LoginService;
+import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.javafx.CreateNewBranchDialog;
+import com.lgc.gitlabtool.git.ui.javafx.CreateProjectDialog;
 import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuItems;
 import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuManager;
 import com.lgc.gitlabtool.git.ui.selection.ListViewKey;
@@ -19,6 +24,7 @@ import com.lgc.gitlabtool.git.ui.selection.SelectionsProvider;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarButtons;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarManager;
 
+import javafx.application.Platform;
 import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -42,14 +48,16 @@ public class MainWindowController {
     private static final String DIVIDER_PROPERTY_NODE = "MainWindowController_Dividers";
 
     private List<Project> _projects;
-    private String _groupTitle;
-    private Preferences preferences;
 
-    private final LoginService _loginService =
+    private Group _currentGroup;
+    private Preferences preferences;
+    private static final Logger _logger = LogManager.getLogger(MainWindowController.class);
+
+    private static final LoginService _loginService =
             (LoginService) ServiceProvider.getInstance().getService(LoginService.class.getName());
 
-    private static final Logger _logger =
-            LogManager.getLogger(MainWindowController.class);
+    private static final ProjectService _projectService =
+            (ProjectService) ServiceProvider.getInstance().getService(ProjectService.class.getName());
 
     @FXML
     private ListView<Project> projectsList;
@@ -70,8 +78,8 @@ public class MainWindowController {
         String username = _loginService.getCurrentUser().getName();
         userId.setText(username);
 
-        String currentGroupname = _groupTitle;
-        leftLabel.setText(HEDER_GROUP_TITLE + currentGroupname);
+        String groupTitle = _currentGroup.getName() + " [" + _currentGroup.getPathToClonedGroup() + "]";
+        leftLabel.setText(HEDER_GROUP_TITLE + groupTitle);
 
         Image imageSelectAll = new Image(getClass().getClassLoader().getResource(SELECT_ALL_IMAGE_URL).toExternalForm());
         selectAllButton.setGraphic(new ImageView(imageSelectAll));
@@ -79,7 +87,7 @@ public class MainWindowController {
         preferences = getPreferences(DIVIDER_PROPERTY_NODE);
 
         if (preferences != null) {
-            double splitPaneDivider = preferences.getDouble(_groupTitle, 0.3);
+            double splitPaneDivider = preferences.getDouble(groupTitle, 0.3);
             splitPanelMain.setDividerPositions(splitPaneDivider);
         }
 
@@ -88,32 +96,38 @@ public class MainWindowController {
         splitPanelMain.getDividers().get(0).positionProperty().addListener(
                 (observable, oldValue, newValue) -> {
                     if (preferences != null) {
-                        preferences.putDouble(_groupTitle, newValue.doubleValue());
+                        preferences.putDouble(groupTitle, newValue.doubleValue());
                     }
                 });
 
-        BooleanBinding booleanBinding = projectsList.getSelectionModel().selectedItemProperty().isNull();
-        ToolbarManager.getInstance().getAllButtonsForCurrentView()
-                .forEach(x -> x.disableProperty().bind(booleanBinding));
-
-        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_SWITCH_BRANCH).disableProperty()
-                .bind(booleanBinding);
-
-        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_CREATE_BRANCH).disableProperty()
-                .bind(booleanBinding);
+        setDisablePropertyForButtons();
 
         //TODO: Additional thread should be placed to services
-        Thread t = new Thread(this::updateProjectList);
-        t.setName("Updating project list");
+        Thread t = new Thread(this::refreshProjectList);
+        t.setName("Refresh project list");
         t.start();
 
         configureToolbarCommands();
         initNewBranchButton();
     }
 
-    public void setSelectedGroup(List<Project> projects, String groupTitle) {
+    private void setDisablePropertyForButtons() {
+        BooleanBinding booleanBinding = projectsList.getSelectionModel().selectedItemProperty().isNull();
+
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.NEW_BRANCH_BUTTON.getId()).disableProperty()
+                .bind(booleanBinding);
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.SWITCH_BRANCH_BUTTON.getId()).disableProperty()
+                .bind(booleanBinding);
+
+        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_SWITCH_BRANCH).disableProperty()
+                .bind(booleanBinding);
+        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_CREATE_BRANCH).disableProperty()
+                .bind(booleanBinding);
+    }
+
+    public void setSelectedGroup(List<Project> projects, Group group) {
         _projects = projects;
-        _groupTitle = groupTitle;
+        _currentGroup = group;
     }
 
     public void refreshProjectsList(){
@@ -137,12 +151,17 @@ public class MainWindowController {
     private void configureToolbarCommands() {
     }
 
-    private void updateProjectList() {
-        List<Project> sortedProjectList = _projects.stream()
-                .sorted((project1, project2) -> Boolean.compare(project2.isCloned(), project1.isCloned()))
-                .collect(Collectors.toList());
-        ObservableList<Project> projectsObservableList = FXCollections.observableList(sortedProjectList);
-        projectsList.setItems(projectsObservableList);
+    private void refreshProjectList() {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                List<Project> sortedProjectList = _projects.stream()
+                        .sorted((project1, project2) -> Boolean.compare(project2.isCloned(), project1.isCloned()))
+                        .collect(Collectors.toList());
+                ObservableList<Project> projectsObservableList = FXCollections.observableList(sortedProjectList);
+                projectsList.setItems(projectsObservableList);
+            }
+        });
     }
 
     // Gets preferences by key, could return null
@@ -220,6 +239,12 @@ public class MainWindowController {
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.NEW_BRANCH_BUTTON.getId())
                 .setOnAction(this::onNewBranchButton);
 
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.CREATE_PROJECT_BUTTON.getId())
+                .setOnAction(this::createProjectButton);
+
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.REFRESH_PROJECTS.getId())
+        .setOnAction(this::refreshLoadProjects);
+
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_CREATE_BRANCH)
                 .setOnAction(this::onNewBranchButton);
 
@@ -229,6 +254,13 @@ public class MainWindowController {
     public void onNewBranchButton(ActionEvent actionEvent) {
         showCreateNewBranchDialog();
         refreshProjectsList();
+    }
+
+    @FXML
+    public void createProjectButton(ActionEvent actionEvent) {
+        // dialog
+        CreateProjectDialog dialog = new CreateProjectDialog(_currentGroup, (obj) -> refreshLoadProjects(null));
+        dialog.showAndWait();
     }
 
     private void showCreateNewBranchDialog() {
@@ -242,4 +274,15 @@ public class MainWindowController {
         dialog.showAndWait();
     }
 
+    @FXML
+    public void refreshLoadProjects(ActionEvent actionEvent) {
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.submit(() -> {
+            _logger.info("Refreshing projects...");
+            _projects = (List<Project>) _projectService.loadProjects(_currentGroup);
+            refreshProjectList();
+            _logger.info("Projects were refreshed!");
+        });
+        executor.shutdown();
+    }
 }
