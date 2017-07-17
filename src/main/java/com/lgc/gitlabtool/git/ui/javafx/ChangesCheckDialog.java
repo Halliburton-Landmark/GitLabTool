@@ -184,10 +184,13 @@ public class ChangesCheckDialog extends Alert {
     }
 
     /**
+     * Checks if project has not been change</br> 
+     * If it was changed checks if operation (commit or discard) is not failed
+     * 
      * @param operationStatuses - statuses of executed operation (discard or commit)
      * @param project - current project
-     * @return <code>true</code> if current project does not exist in <code>operationStatuses</code>
-     *                 or its status in <code>operationStatuses</code> does not equals to {@link JGitStatus#FAILED}
+     * @return <code>true</code> if <code>operationStatuses</code> does not has current project
+     *                 or project's status in <code>operationStatuses</code> does not equals to {@link JGitStatus#FAILED}
      *                 else returns <code>false</code>
      */
     private boolean isNotFailedOperation(Map<Project, JGitStatus> operationStatuses, Project project) {
