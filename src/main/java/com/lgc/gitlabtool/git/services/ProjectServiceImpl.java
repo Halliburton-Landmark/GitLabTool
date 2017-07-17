@@ -59,13 +59,14 @@ public class ProjectServiceImpl implements ProjectService {
             String sendString = "/groups/" + group.getId() + "/projects?per_page=" + MAX_PROJECTS_COUNT_ON_THE_PAGE;
             return getProjectsForAllPages(sendString, header);
         }
+        _logger.debug("Error getting projects from the GitLab.");
         return Collections.emptyList();
     }
 
     @Override
     public Collection<Project> loadProjects(Group group) {
         Collection<Project> projects = getProjects(group);
-        if (projects == null || projects.isEmpty()) {
+        if (projects.isEmpty()) {
             _logger.error(GROUP_DOESNT_HAVE_PROJECTS_MESSAGE);
             return Collections.emptyList();
         }
@@ -229,16 +230,16 @@ public class ProjectServiceImpl implements ProjectService {
         progressListener.onStart(statusCreatedStructureMessage);
         _logger.info(statusCreatedStructureMessage);
 
-        Project cteatedProject = projects.get(0); // list of projects always has one element
+        Project createdProject = projects.get(0); // list of projects always has one element
         if (structures.size() > 0 && isCreatedStructure) {
-            _git.addUntrackedFileForCommit(structures, cteatedProject);
+            _git.addUntrackedFileForCommit(structures, createdProject);
         }
         // make first commit to GitLab repository
         _git.commitAndPush(projects, "Created new project", true, null, null, null, null,
                 EmptyProgressListener.get());
 
         if (!isCreatedStructure) {
-            PathUtilities.deletePath(Paths.get(cteatedProject.getPathToClonedProject()));
+            PathUtilities.deletePath(Paths.get(createdProject.getPathToClonedProject()));
         }
         progressListener.onSuccess();
         String createLocalProjectMessage = isCreatedStructure ? CREATE_LOCAL_PROJECT_SUCCESS_MESSAGE
@@ -246,8 +247,8 @@ public class ProjectServiceImpl implements ProjectService {
         _logger.info(createLocalProjectMessage);
 
         String fineshedMessage = isCreatedStructure
-                ? "The " + cteatedProject.getName() + " project was successfully created!"
-                : "Failed creating the " + cteatedProject.getName() + " project!";
-        progressListener.onFinish(isCreatedStructure ? cteatedProject : null, fineshedMessage);
+                ? "The " + createdProject.getName() + " project was successfully created!"
+                : "Failed creating the " + createdProject.getName() + " project!";
+        progressListener.onFinish(isCreatedStructure ? createdProject : null, fineshedMessage);
     }
 }

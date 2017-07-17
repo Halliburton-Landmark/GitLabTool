@@ -83,7 +83,7 @@ public class CreateProjectDialog extends Dialog<String> {
         List<String> idsTypes = (List<String>) _typeServies.getAllIdTypes();
         ObservableList<String> options = FXCollections.observableArrayList(idsTypes);
         _typeComboBox = new ComboBox<String>(options);
-        _typeComboBox.getSelectionModel().select(idsTypes.get(idsTypes.size()-1));
+        _typeComboBox.getSelectionModel().select(options.get(idsTypes.size()-1));
         grid.add(_typeComboBox, 1, 3);
 
         _progressLabel = new Label("...");
