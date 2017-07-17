@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import org.eclipse.jgit.api.Status;
 
@@ -51,14 +52,15 @@ public class GitServiceImpl implements GitService {
             throw new IllegalArgumentException("Wrong parameters for obtaining branches.");
         }
 
-        List<Project> changedProjects = new ArrayList<>();
-        for (Project project : projects) {
-            Optional<Status> status = _git.getStatusProject(project);
-            if (status.isPresent() && status.get().hasUncommittedChanges()) {
-                changedProjects.add(project);
-            }
-        }
+        List<Project> changedProjects = projects.parallelStream()
+                .filter(this::projectHasChanges)
+                .collect(Collectors.toList());
         return changedProjects;
+    }
+
+    private boolean projectHasChanges(Project project) {
+        Optional<Status> status = _git.getStatusProject(project);
+        return status.isPresent() && status.get().hasUncommittedChanges();
     }
 
     @Override

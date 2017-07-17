@@ -119,7 +119,7 @@ public class CreateNewBranchDialog extends Dialog<String> {
 
         boolean switchToBranch = _checkoutBox.isSelected();
         if (switchToBranch) {
-            _gitService.switchTo(getProjects(), newBranchName, false);
+            switchBranch(getProjects(), newBranchName);
         }
 
         getStage().close();
@@ -156,24 +156,26 @@ public class CreateNewBranchDialog extends Dialog<String> {
         _messageLabel.setText(message);
         _messageLabel.setTextFill(color);
     }
+    
+    private void switchBranch(List<Project> projects, String branchName) {
+        List<Project> changedProjects = _gitService.getProjectsWithChanges(getProjects());
+
+        if (changedProjects.isEmpty()) {
+            // we do not show switching on statuses here
+            // because we show the statuses of branches creation
+            // In the same time we could see that branch is changed on the projects list panel
+            _gitService.switchTo(projects, branchName, false);
+        } else {
+            ChangesCheckDialog alert = new ChangesCheckDialog();
+            alert.launchConfirmationDialog(changedProjects, projects, branchName, this::switchBranch);
+        }
+    }
 
     private void createAndShowStatusDialog(List<Project> projects, Map<Project, JGitStatus> results) {
-        int size = results.size();
-        String info = "";
-        if (size < StatusDialog.MAX_ROW_COUNT_IN_STATUS_DIALOG) {
-            info = results.entrySet().stream()
-                    .map(pair -> pair.getKey().getName() + " - " + pair.getValue())
-                    .collect(Collectors.joining("\n"));
-        } else {
-            int countOfCreatedBranches =
-                    (int) results.entrySet().stream()
-                    .map(pair -> pair.getValue())
-                    .filter(status -> status.equals(JGitStatus.SUCCESSFUL))
-                    .count();
-            info = "New branch has been created in " + countOfCreatedBranches
-                    + " of " + projects.size() + " selected projects";
-        }
-        Alert statusDialog = new StatusDialog(STATUS_DIALOG_TITLE, STATUS_DIALOG_HEADER, info);
-        statusDialog.showAndWait();
+        String collapsedMessage = "New branch has been created in %s selected projects";
+
+        StatusDialog statusDialog = new StatusDialog(STATUS_DIALOG_TITLE, STATUS_DIALOG_HEADER);
+        statusDialog.showMessage(results, projects.size(), collapsedMessage);
+        statusDialog.show();
     }
 }
