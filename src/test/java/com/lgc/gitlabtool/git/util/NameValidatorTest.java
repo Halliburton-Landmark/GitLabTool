@@ -14,19 +14,19 @@ public class NameValidatorTest {
 
     private final String testData;
     private final boolean expectedResult;
-    
+
     public NameValidatorTest(String testData, boolean expectedResult) {
         this.testData = testData;
         this.expectedResult = expectedResult;
     }
-    
+
     @Test
     public void inputIsValid() {
-        boolean actualResult = new NameValidator().validateBranchName(testData);
-        
+        boolean actualResult = NameValidator.get().validateBranchName(testData);
+
         assertEquals(expectedResult, actualResult);
     }
-    
+
     @Parameterized.Parameters
     public static List<Object[]> validationData() {
         return Arrays.asList(new Object[][] {

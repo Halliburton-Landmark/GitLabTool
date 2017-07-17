@@ -52,7 +52,7 @@ public class CreateProjectDialog extends Dialog<String> {
 
     private final Label _progressLabel;
     private final ProgressBar _progressBar = new ProgressBar();
-    private final NameValidator _validator = new NameValidator();
+    private final NameValidator _validator = NameValidator.get();
 
     private static final ProjectTypeService _typeServies = (ProjectTypeService) ServiceProvider.getInstance()
             .getService(ProjectTypeService.class.getName());

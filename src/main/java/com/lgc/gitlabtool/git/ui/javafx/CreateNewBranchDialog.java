@@ -52,7 +52,7 @@ public class CreateNewBranchDialog extends Dialog<String> {
     private final Button _cancelButton;
 
     private List<Project> _projects;
-    private final NameValidator _branchValidator = new NameValidator();
+    private final NameValidator _branchValidator = NameValidator.get();
 
     public List<Project> getProjects() {
         return _projects;

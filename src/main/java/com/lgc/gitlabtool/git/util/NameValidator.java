@@ -8,6 +8,18 @@ import java.util.regex.Pattern;
 
 public class NameValidator {
 
+    private static final NameValidator _validator;
+    static {
+        _validator = new NameValidator();
+    }
+
+    private NameValidator(){
+    }
+
+    public static NameValidator get() {
+        return _validator;
+    }
+
     /**
      * Validates the branch name according to the next rules.
      * <p>
@@ -53,7 +65,7 @@ public class NameValidator {
      * @return <code>true</code> if project name is valid or <code>false</code> otherwise
      */
     public boolean validateProjectName(String projectName) {
-        if (projectName.isEmpty() || projectName == null) {
+        if (projectName == null || projectName.isEmpty() ) {
             return false;
         }
         if (projectName.startsWith("-")) {
