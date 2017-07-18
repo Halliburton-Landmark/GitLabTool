@@ -135,7 +135,7 @@ public class MainWindowController {
                 .bind(booleanBinding);
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_CREATE_BRANCH).disableProperty()
                 .bind(booleanBinding);
-        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_COMNMIT_PUSH).disableProperty()
+        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_COMMIT_PUSH).disableProperty()
                 .bind(booleanBinding);
     }
 
@@ -266,7 +266,7 @@ public class MainWindowController {
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_CREATE_BRANCH)
                 .setOnAction(this::onNewBranchButton);
 
-        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_COMNMIT_PUSH)
+        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_COMMIT_PUSH)
                 .setOnAction(this::onCommitPushAction);
     }
 
