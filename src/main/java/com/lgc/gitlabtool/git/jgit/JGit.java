@@ -499,6 +499,7 @@ public class JGit {
      *
      * @param project      the cloned project
      * @param nameBranch   the name of the branch
+     * @param startPoint   corresponds to the start-point option; if <code>null</code>, the current HEAD will be used
      * @param force        if <code>true</code> and the branch with the given name
      *                     already exists, the start-point of an existing branch will be
      *                     set to a new start-point; if false, the existing branch will
@@ -506,7 +507,7 @@ public class JGit {
      * @return JGitStatus: SUCCESSFUL - if a new branch was created,
      *                     FAILED - if the branch could not be created.
      */
-    public JGitStatus createBranch(Project project, String nameBranch, boolean force) {
+    public JGitStatus createBranch(Project project, String nameBranch, String startPoint, boolean force) {
         if (project == null || nameBranch == null || nameBranch.isEmpty()) {
             throw new IllegalArgumentException(
                     "Incorrect data: project is " + project + ", nameBranch is " + nameBranch);
@@ -528,7 +529,11 @@ public class JGit {
             }
 
             CreateBranchCommand create = git.branchCreate();
-            Ref res = create.setUpstreamMode(SetupUpstreamMode.TRACK).setName(nameBranch).setForce(force).call();
+            Ref res = create.setUpstreamMode(SetupUpstreamMode.TRACK)
+                    .setName(nameBranch)
+                    .setStartPoint(startPoint)
+                    .setForce(force)
+                    .call();
             logger.info("!New branch has been created for the " + project.getName() + " project: " + res.getName());
             git.close();
             return JGitStatus.SUCCESSFUL;

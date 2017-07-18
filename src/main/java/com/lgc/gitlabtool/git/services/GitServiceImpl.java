@@ -83,11 +83,11 @@ public class GitServiceImpl implements GitService {
     }
 
     @Override
-    public Map<Project, JGitStatus> createBranch(List<Project> projects, String branchName, boolean force) {
+    public Map<Project, JGitStatus> createBranch(List<Project> projects, String branchName, String startPoint, boolean force) {
         Map<Project, JGitStatus> statuses = new ConcurrentHashMap<>();
         projects.parallelStream()
                 .filter(prj -> prj.isCloned())
-                .forEach((project) -> statuses.put(project, _git.createBranch(project, branchName, force)));
+                .forEach((project) -> statuses.put(project, _git.createBranch(project, branchName, startPoint, force)));
         return statuses;
     }
 
@@ -111,5 +111,18 @@ public class GitServiceImpl implements GitService {
                                                    ProgressListener progressListener) {
         // use null for getting default user-info
         return _git.commitAndPush(projects, commitMessage, true, null, null, null, null, progressListener);
+    }
+
+    @Override
+    public List<Branch> getBranches(List<Project> projects, BranchType branchType, boolean isOnlyCommon) {
+        List<Branch> branches = new ArrayList<>();
+        branches.addAll(_git.getBranches(projects, branchType, isOnlyCommon));
+        return branches != null ? branches : Collections.emptyList();
+    }
+
+    @Override
+    public String getCurrentBranchName(Project project) {
+        Optional<String> currentBranch = _git.getCurrentBranch(project);
+        return currentBranch.isPresent() ? currentBranch.get() : null;
     }
 }
