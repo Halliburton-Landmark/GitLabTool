@@ -128,15 +128,21 @@ public class MainWindowController {
                 .bind(booleanBinding);
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.SWITCH_BRANCH_BUTTON.getId()).disableProperty()
                 .bind(booleanBinding);
-        ToolbarManager.getInstance().getButtonById(ToolbarButtons.COMMIT_PUSH_BUTTON.getId()).disableProperty()
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.COMMIT_BUTTON.getId()).disableProperty()
                 .bind(booleanBinding);
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.PUSH_BUTTON.getId()).disableProperty()
+                .bind(booleanBinding);
+
 
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_SWITCH_BRANCH).disableProperty()
                 .bind(booleanBinding);
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_CREATE_BRANCH).disableProperty()
                 .bind(booleanBinding);
-        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_COMMIT_PUSH).disableProperty()
+        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_COMMIT).disableProperty()
                 .bind(booleanBinding);
+        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_PUSH).disableProperty()
+                .bind(booleanBinding);
+
     }
 
     public void setSelectedGroup(List<Project> projects, Group group) {
@@ -260,13 +266,13 @@ public class MainWindowController {
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.REFRESH_PROJECTS.getId())
         .setOnAction(this::refreshLoadProjects);
 
-        ToolbarManager.getInstance().getButtonById(ToolbarButtons.COMMIT_PUSH_BUTTON.getId())
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.COMMIT_BUTTON.getId())
                 .setOnAction(this::onCommitPushAction);
 
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_CREATE_BRANCH)
                 .setOnAction(this::onNewBranchButton);
 
-        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_COMMIT_PUSH)
+        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_COMMIT)
                 .setOnAction(this::onCommitPushAction);
     }
 
