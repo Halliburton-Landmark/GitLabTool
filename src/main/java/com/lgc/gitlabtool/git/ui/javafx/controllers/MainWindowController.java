@@ -312,8 +312,8 @@ public class MainWindowController {
 
         List<Project> projectWithChanges = _gitService.getProjectsWithChanges(allSelectedProjects);
 
-        if (projectWithChanges.size() == 0) {
-            String noChangesMessage = "Selected projects does not have a changes";
+        if (projectWithChanges.isEmpty()) {
+            String noChangesMessage = "Selected projects do not have changes";
             StatusDialog statusDialog = new StatusDialog(STATUS_DIALOG_TITLE, STATUS_DIALOG_HEADER,
                     noChangesMessage);
             statusDialog.showAndWait();
