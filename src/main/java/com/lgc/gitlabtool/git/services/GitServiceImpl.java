@@ -2,6 +2,7 @@ package com.lgc.gitlabtool.git.services;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -124,5 +125,10 @@ public class GitServiceImpl implements GitService {
     public String getCurrentBranchName(Project project) {
         Optional<String> currentBranch = _git.getCurrentBranch(project);
         return currentBranch.isPresent() ? currentBranch.get() : null;
+    }
+
+    @Override
+    public void pushProjectsToUpstream(List<Project> projects, ProgressListener progressListener) {
+        _git.push(projects, progressListener);
     }
 }

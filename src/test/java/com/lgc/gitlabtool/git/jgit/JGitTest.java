@@ -70,6 +70,7 @@ import org.mockito.Mockito;
 
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.User;
+import com.lgc.gitlabtool.git.services.EmptyProgressListener;
 import com.lgc.gitlabtool.git.services.ProgressListener;
 
 /**
@@ -366,17 +367,17 @@ public class JGitTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void pushProjectsIsNullTest() {
-        JGit.getInstance().push(null, null, null);
+        JGit.getInstance().push(null, null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void pushProjectsIsEmptyTest() {
-        JGit.getInstance().push(new ArrayList<>(), null, null);
+        JGit.getInstance().push(new ArrayList<>(), null);
     }
 
     @Test
     public void pushIncorrectDataTest() {
-        Assert.assertTrue(getJGitMock(null).push(getProjects(), null, null));
+        Assert.assertTrue(getJGitMock(null).push(getProjects(), new EmptyListener()));
 
         Git gitMock = getGitMock();
         PushCommand pushCommandMock = new PushCommand(getRepository()) {
@@ -386,7 +387,12 @@ public class JGitTest {
             }
         };
         Mockito.when(gitMock.push()).thenReturn(pushCommandMock);
-        Assert.assertTrue(getJGitMock(gitMock).push(getProjects(), null, null));
+        Assert.assertTrue(getJGitMock(gitMock).push(getProjects(), new EmptyListener()));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void pushDataWithEmptyListenerTest() {
+        Assert.assertTrue(getJGitMock(null).push(getProjects(), null));
     }
 
     @Test
@@ -399,9 +405,7 @@ public class JGitTest {
             }
         };
         Mockito.when(gitMock.push()).thenReturn(pushCommandMock);
-        Assert.assertTrue(getJGitMock(gitMock).push(getProjects(), (progress) -> {
-        }, (progress, message) -> {
-        }));
+        Assert.assertTrue(getJGitMock(gitMock).push(getProjects(), new EmptyListener()));
     }
 
     @Test(expected = IllegalArgumentException.class)

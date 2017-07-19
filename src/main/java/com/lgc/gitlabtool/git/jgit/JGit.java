@@ -455,41 +455,33 @@ public class JGit {
     /**
      * Push of all the projects in the group
      *
-     * @param projects   projects for push
-     * @param onSuccess  method for tracking the success progress of cloning,
-     *                   where <Integer> is a percentage of progress.
-     * @param onError    method for tracking the errors during cloning,
-     *                   where <Integer> is a percentage of progress, <String> error message.
-     * @return true   -  if the operation is completed successfully,
-     *         false  -  if an error occurred during execution
-     *
+     * @param projects         projects for push
+     * @param progressListener listener for obtaining data on the process of performing the operation
+     * @return <code>true</code> if the operation is completed successfully,
+     *         <code>false</code> if an error occurred during execution
+     * <p>
      * !Projects that failed to push will be displayed in the UI console.
      */
-    public boolean push (List<Project> projects, Consumer<Integer> onSuccess, BiConsumer<Integer, String> onError) {
-        if (projects == null || projects.isEmpty()) {
+    public boolean push(List<Project> projects, ProgressListener progressListener) {
+        if (projects == null || projects.isEmpty() || progressListener == null) {
             throw new IllegalArgumentException("Incorrect data: projects is " + projects);
         }
-        int aStepInProgress = 100 / projects.size();
-        int currentProgress = 0;
-        for (Project pr : projects) {
-            currentProgress += aStepInProgress;
-            if (pr == null) {
+        for (Project project : projects) {
+            if (project == null) {
                 continue;
             }
-            if (!pr.isCloned()) {
-                NullCheckUtil.acceptBiConsumer(onError, currentProgress, pr.getName() + ERROR_MSG_NOT_CLONED);
-                String errMessage = pr.getName() + ERROR_MSG_NOT_CLONED;
+            if (!project.isCloned()) {
+                String errMessage = project.getName() + ERROR_MSG_NOT_CLONED;
+                progressListener.onError(project);
                 logger.debug(errMessage);
                 continue;
             }
-            if(push(pr).equals(JGitStatus.FAILED)) {
-                NullCheckUtil.acceptBiConsumer(onError, currentProgress, "Failed to push " + pr.getName() + " project");
-                String errMessage = "Failed to push " + pr.getName() + " project";
-                logger.debug(errMessage);
+            JGitStatus pushStatus = push(project);
+            if (pushStatus.equals(JGitStatus.FAILED)) {
+                progressListener.onError(project);
                 continue;
             }
-            NullCheckUtil.acceptConsumer(onSuccess, currentProgress);
-            logger.debug("Push for projects is " + JGitStatus.SUCCESSFUL);
+            progressListener.onSuccess(project);
         }
         return true;
     }

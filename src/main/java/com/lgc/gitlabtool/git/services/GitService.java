@@ -2,6 +2,8 @@ package com.lgc.gitlabtool.git.services;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import com.lgc.gitlabtool.git.entities.Branch;
 import com.lgc.gitlabtool.git.entities.Project;
@@ -102,5 +104,13 @@ public interface GitService {
      * @return current branch name for selected project or <code>null</code> if project has no branches (unreachable state)
      */
     String getCurrentBranchName(Project project);
+
+    /**
+     * Pushed selected projects to upstream
+     * 
+     * @param projects -        list of projects
+     * @param progresListener - listener for obtaining data on the process of performing the operation
+     */
+    void pushProjectsToUpstream(List<Project> projects, ProgressListener progressListener);
 
 }

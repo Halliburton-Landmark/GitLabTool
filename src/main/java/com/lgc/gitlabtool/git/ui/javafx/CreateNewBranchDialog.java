@@ -12,6 +12,7 @@ import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.jgit.BranchType;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.services.GitService;
+import com.lgc.gitlabtool.git.services.ProgressListener;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 import com.lgc.gitlabtool.git.util.NameValidator;
@@ -97,8 +98,10 @@ public class CreateNewBranchDialog extends Dialog<String> {
         grid.add(_branchNameField, 1, 3, 2, 1);
 
         _checkoutBox = new CheckBox("Checkout new branch");
+        _checkoutBox.selectedProperty().addListener(getCheckoutListener());
         grid.add(_checkoutBox, 1, 4);
         _pushToUpstreamBox = new CheckBox("Push to upstream");
+        _pushToUpstreamBox.selectedProperty().addListener(getPushListener());
         grid.add(_pushToUpstreamBox, 2, 4);
 
         _createButton = new Button("Create Branch");
@@ -167,6 +170,10 @@ public class CreateNewBranchDialog extends Dialog<String> {
         if (switchToBranch) {
             switchBranch(getProjects(), newBranchName);
         }
+        boolean pushToUpstream = _pushToUpstreamBox.isSelected();
+        if (pushToUpstream && switchToBranch) {
+            pushBranches(getProjects());
+        }
 
         getStage().close();
 
@@ -214,6 +221,22 @@ public class CreateNewBranchDialog extends Dialog<String> {
         };
     }
 
+    private ChangeListener<? super Boolean> getPushListener() {
+        return (observableValue, oldValue, currentValue) -> {
+            if (currentValue.booleanValue()) {
+                _checkoutBox.setSelected(true);
+            }
+        };
+    }
+
+    private ChangeListener<? super Boolean> getCheckoutListener() {
+        return (observableValue, oldValue, currentValue) -> {
+            if (!currentValue.booleanValue()) {
+                _pushToUpstreamBox.setSelected(false);
+            }
+        };
+    }
+
     private void switchBranch(List<Project> projects, String branchName) {
         List<Project> changedProjects = _gitService.getProjectsWithChanges(getProjects());
 
@@ -234,5 +257,32 @@ public class CreateNewBranchDialog extends Dialog<String> {
         StatusDialog statusDialog = new StatusDialog(STATUS_DIALOG_TITLE, STATUS_DIALOG_HEADER);
         statusDialog.showMessage(results, projects.size(), collapsedMessage);
         statusDialog.show();
+    }
+
+    private void pushBranches(List<Project> projects) {
+        _gitService.pushProjectsToUpstream(projects, new PushProgressListener());
+    }
+
+    class PushProgressListener implements ProgressListener {
+
+        @Override
+        public void onSuccess(Object... t) {
+            String projectName = ((Project) t[0]).getName();
+            String successMessage = projectName + " successfully pushed to upstream";
+            _logger.debug(successMessage);
+        }
+
+        @Override
+        public void onError(Object... t) {
+            String projectName = ((Project) t[0]).getName();
+            String errorMessage = "Failed to push " + projectName + " project";
+            _logger.error(errorMessage);
+        }
+
+        @Override
+        public void onStart(Object... t) {}
+
+        @Override
+        public void onFinish(Object... t) {}
     }
 }
