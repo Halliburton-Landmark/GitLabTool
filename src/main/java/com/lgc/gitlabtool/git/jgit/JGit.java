@@ -456,16 +456,15 @@ public class JGit {
      * Push of all the projects in the group
      *
      * @param projects   projects for push
-     * @param onSuccess  method for tracking the success progress of cloning,
-     *                   where <Integer> is a percentage of progress.
-     * @param onError    method for tracking the errors during cloning,
-     *                   where <Integer> is a percentage of progress, <String> error message.
+     * @param progressListener Listener for obtaining data on the process of performing the operation.
+     *
      * @return true   -  if the operation is completed successfully,
      *         false  -  if an error occurred during execution
      *
      * !Projects that failed to push will be displayed in the UI console.
      */
-    public boolean push (List<Project> projects, Consumer<Integer> onSuccess, BiConsumer<Integer, String> onError) {
+    public Map<Project, JGitStatus> push (List<Project> projects, ProgressListener progressListener) {
+        Map<Project, JGitStatus> statuses = new HashMap<>();
         if (projects == null || projects.isEmpty()) {
             throw new IllegalArgumentException("Incorrect data: projects is " + projects);
         }
@@ -474,24 +473,28 @@ public class JGit {
         for (Project pr : projects) {
             currentProgress += aStepInProgress;
             if (pr == null) {
+                statuses.put(new Project(), JGitStatus.FAILED);
                 continue;
             }
             if (!pr.isCloned()) {
-                NullCheckUtil.acceptBiConsumer(onError, currentProgress, pr.getName() + ERROR_MSG_NOT_CLONED);
+                progressListener.onError(currentProgress);
                 String errMessage = pr.getName() + ERROR_MSG_NOT_CLONED;
-                logger.debug(errMessage);
+                statuses.put(pr, JGitStatus.FAILED);
+                logger.error(errMessage);
                 continue;
             }
             if(push(pr).equals(JGitStatus.FAILED)) {
-                NullCheckUtil.acceptBiConsumer(onError, currentProgress, "Failed to push " + pr.getName() + " project");
+                progressListener.onError(currentProgress);
                 String errMessage = "Failed to push " + pr.getName() + " project";
-                logger.debug(errMessage);
+                statuses.put(pr, JGitStatus.FAILED);
+                logger.error(errMessage);
                 continue;
             }
-            NullCheckUtil.acceptConsumer(onSuccess, currentProgress);
+            progressListener.onSuccess(currentProgress);
+            statuses.put(pr, JGitStatus.SUCCESSFUL);
             logger.debug("Push for projects is " + JGitStatus.SUCCESSFUL);
         }
-        return true;
+        return statuses;
     }
 
     /**

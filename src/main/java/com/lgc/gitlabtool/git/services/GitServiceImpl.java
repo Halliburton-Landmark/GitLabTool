@@ -112,4 +112,10 @@ public class GitServiceImpl implements GitService {
         // use null for getting default user-info
         return _git.commitAndPush(projects, commitMessage, true, null, null, null, null, progressListener);
     }
+
+    private Map<Project, JGitStatus> push(List<Project> projects,
+                                            ProgressListener progressListener) {
+        // use null for getting default user-info
+        return _git.push(projects, progressListener);
+    }
 }
