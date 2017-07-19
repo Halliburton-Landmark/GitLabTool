@@ -128,7 +128,7 @@ public class GitServiceImpl implements GitService {
     }
 
     @Override
-    public void pushProjectsToUpstream(List<Project> projects, ProgressListener progressListener) {
-        _git.push(projects, progressListener);
+    public Map<Project, JGitStatus> push(List<Project> projects, ProgressListener progressListener) {
+        return _git.push(projects, progressListener);
     }
 }

@@ -110,7 +110,8 @@ public interface GitService {
      * 
      * @param projects -        list of projects
      * @param progresListener - listener for obtaining data on the process of performing the operation
+     * @return map of operation statuses
      */
-    void pushProjectsToUpstream(List<Project> projects, ProgressListener progressListener);
+    Map<Project, JGitStatus> push(List<Project> projects, ProgressListener progressListener);
 
 }

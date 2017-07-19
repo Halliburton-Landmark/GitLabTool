@@ -462,28 +462,31 @@ public class JGit {
      * <p>
      * !Projects that failed to push will be displayed in the UI console.
      */
-    public boolean push(List<Project> projects, ProgressListener progressListener) {
+    public Map<Project, JGitStatus> push(List<Project> projects, ProgressListener progressListener) {
         if (projects == null || projects.isEmpty() || progressListener == null) {
             throw new IllegalArgumentException("Incorrect data: projects is " + projects);
         }
+        Map<Project, JGitStatus> statuses = new HashMap<>();
         for (Project project : projects) {
             if (project == null) {
+                statuses.put(null, JGitStatus.FAILED);
                 continue;
             }
             if (!project.isCloned()) {
-                String errMessage = project.getName() + ERROR_MSG_NOT_CLONED;
                 progressListener.onError(project);
-                logger.debug(errMessage);
+                statuses.put(project, JGitStatus.FAILED);
                 continue;
             }
             JGitStatus pushStatus = push(project);
             if (pushStatus.equals(JGitStatus.FAILED)) {
+                statuses.put(project, pushStatus);
                 progressListener.onError(project);
                 continue;
             }
+            statuses.put(project, pushStatus);
             progressListener.onSuccess(project);
         }
-        return true;
+        return statuses;
     }
 
     /**
