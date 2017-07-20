@@ -104,11 +104,6 @@ public class StateServiceImpl implements StateService {
         }
     }
 
-    @Override
-    public Set<StateListener> getListeners(ApplicationState state) {
-        return _listeners.get(state);
-    }
-
     private Set<StateListener> getSynchronizedSet() {
         return Collections.synchronizedSet(new HashSet<StateListener>());
     }
@@ -117,7 +112,7 @@ public class StateServiceImpl implements StateService {
         _logger.info("Notifying listerers about changing of " + changedState);
         final Set<StateListener> listeners = _listeners.get(changedState);
         if (listeners != null) {
-            listeners.forEach(listener -> listener.handleEvent());
+            listeners.forEach(listener -> listener.handleEvent(changedState, isActiveState(changedState)));
         }
     }
 }
