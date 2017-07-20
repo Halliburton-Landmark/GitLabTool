@@ -54,7 +54,7 @@ public class StateServiceImpl implements StateService {
         Integer newValue;
         if (value == null) {
             newValue = operation != DEACTIVATE_STATE ? operation : START_STATE;
-        } else if (value == DEACTIVATE_STATE) {
+        } else if (value < START_STATE) {
             // we have incorrect value in the map
             newValue = START_STATE;
         } else {
@@ -78,7 +78,7 @@ public class StateServiceImpl implements StateService {
     }
 
     private boolean isActive(Integer value) {
-        return value > START_STATE ? true : false;
+        return value != null && value > START_STATE ? true : false;
     }
 
     @Override
@@ -109,7 +109,7 @@ public class StateServiceImpl implements StateService {
     }
 
     private void notifyListenersByType(ApplicationState changedState) {
-        _logger.info("Notifying listerers about changing of " + changedState);
+        _logger.info("Notifying listeners about changing of " + changedState);
         final Set<StateListener> listeners = _listeners.get(changedState);
         if (listeners != null) {
             listeners.forEach(listener -> listener.handleEvent(changedState, isActiveState(changedState)));
