@@ -92,6 +92,9 @@ public class GitServiceImpl implements GitService {
 
     @Override
     public Map<Project, JGitStatus> push(List<Project> projects, ProgressListener progressListener) {
+        if(progressListener == null){
+            progressListener = EmptyProgressListener.get();
+        }
         return _git.push(projects, progressListener);
     }
 
