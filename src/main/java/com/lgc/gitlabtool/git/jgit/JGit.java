@@ -489,7 +489,6 @@ public class JGit {
             }
             progressListener.onSuccess(currentProgress);
             statuses.put(pr, JGitStatus.SUCCESSFUL);
-            logger.debug("Push for projects is " + JGitStatus.SUCCESSFUL);
         }
         return statuses;
     }
