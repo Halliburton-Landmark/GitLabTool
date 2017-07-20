@@ -237,14 +237,14 @@ public class CreateNewBranchDialog extends Dialog<String> {
         };
     }
 
-    private void switchBranch(List<Project> projects, String branchName) {
+    private void switchBranch(List<Project> projects, Object branchName) {
         List<Project> changedProjects = _gitService.getProjectsWithChanges(getProjects());
 
         if (changedProjects.isEmpty()) {
             // we do not show switching on statuses here
             // because we show the statuses of branches creation
             // In the same time we could see that branch is changed on the projects list panel
-            _gitService.switchTo(projects, branchName, false);
+            _gitService.switchTo(projects, (String) branchName, false);
         } else {
             ChangesCheckDialog alert = new ChangesCheckDialog();
             alert.launchConfirmationDialog(changedProjects, projects, branchName, this::switchBranch);

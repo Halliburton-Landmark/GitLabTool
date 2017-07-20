@@ -12,14 +12,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.eclipse.jgit.api.CreateBranchCommand;
 import org.eclipse.jgit.api.CreateBranchCommand.SetupUpstreamMode;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ListBranchCommand;
@@ -54,7 +51,6 @@ import com.lgc.gitlabtool.git.entities.Branch;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.User;
 import com.lgc.gitlabtool.git.services.ProgressListener;
-import com.lgc.gitlabtool.git.util.NullCheckUtil;
 import com.lgc.gitlabtool.git.util.PathUtilities;
 
 
@@ -523,13 +519,14 @@ public class JGit {
                 return JGitStatus.BRANCH_ALREADY_EXISTS;
             }
 
-            CreateBranchCommand create = git.branchCreate();
-            Ref res = create.setUpstreamMode(SetupUpstreamMode.TRACK)
+            git.branchCreate()
                     .setName(nameBranch)
+                    .setUpstreamMode(SetupUpstreamMode.SET_UPSTREAM)
                     .setStartPoint(startPoint)
                     .setForce(force)
                     .call();
-            logger.info("!New branch has been created for the " + project.getName() + " project: " + res.getName());
+
+            logger.info("!New branch has been created for the " + project.getName() + " project: " + nameBranch);
             git.close();
             return JGitStatus.SUCCESSFUL;
         } catch (GitAPIException | IOException e) {
