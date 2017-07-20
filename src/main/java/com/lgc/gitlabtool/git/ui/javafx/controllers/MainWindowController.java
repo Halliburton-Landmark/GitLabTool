@@ -342,8 +342,11 @@ public class MainWindowController {
     @FXML
     public void onPushAction(ActionEvent actionEvent) {
         List<Project> allSelectedProjects = projectsList.getSelectionModel().getSelectedItems();
+        List<Project> filteredProjects = allSelectedProjects.stream()
+                .filter(prj -> prj.isCloned())
+                .collect(Collectors.toList());
 
-        Map<Project, JGitStatus> commitStatuses = _gitService.push(allSelectedProjects,
+        Map<Project, JGitStatus> commitStatuses = _gitService.push(filteredProjects,
                 new PushProgressListener());
 
         String dialogMessage = "%s projects were pushed successfully";
