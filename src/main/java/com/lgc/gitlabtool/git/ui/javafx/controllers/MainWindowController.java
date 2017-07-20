@@ -346,11 +346,11 @@ public class MainWindowController {
                 .filter(prj -> prj.isCloned())
                 .collect(Collectors.toList());
 
-        Map<Project, JGitStatus> commitStatuses = _gitService.push(filteredProjects,
+        Map<Project, JGitStatus> pushStatuses = _gitService.push(filteredProjects,
                 EmptyProgressListener.get());
 
         String dialogMessage = "%s projects were pushed successfully";
-        showStatusDialog(commitStatuses, allSelectedProjects.size(), STATUS_DIALOG_TITLE,
+        showStatusDialog(pushStatuses, allSelectedProjects.size(), STATUS_DIALOG_TITLE,
                 STATUS_DIALOG_HEADER_PUSH, dialogMessage);
 
     }
