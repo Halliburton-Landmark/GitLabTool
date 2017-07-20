@@ -179,7 +179,7 @@ public class JGit {
      */
     public boolean clone(Collection<Project> projects, String localPath, ProgressListener progressListener) {
         _isCloneCancelled = false;
-        if (projects == null || localPath == null || projects.isEmpty()) {
+        if (projects == null || localPath == null) {
             String errorMsg = "Cloning error. Projects or local path is null or the group doesn't have projects.";
             progressListener.onError(1.0, errorMsg);
             progressListener.onFinish(null, FINISH_CLONE_MESSAGE);
@@ -205,11 +205,11 @@ public class JGit {
                         logger.info(errorMsg);
                         continue;
                     }
-                    progressListener.onSuccess(project, currentProgress);
+                    progressListener.onSuccess(project, currentProgress, null);
                     logger.info("The " + project.getName() + " project was successfully cloned.");
                 }
             }
-            progressListener.onFinish(_isCloneCancelled ? CANCEL_CLONE_MESSAGE : FINISH_CLONE_MESSAGE);
+            progressListener.onFinish(_isCloneCancelled ? CANCEL_CLONE_MESSAGE : FINISH_CLONE_MESSAGE, true);
         };
 
         Thread t = new Thread(task, "Clone Group Thread");

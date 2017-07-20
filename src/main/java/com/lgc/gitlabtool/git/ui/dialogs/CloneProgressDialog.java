@@ -1,10 +1,13 @@
-package com.lgc.gitlabtool.git.ui.javafx;
+package com.lgc.gitlabtool.git.ui.dialogs;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import com.lgc.gitlabtool.git.jgit.JGit;
+import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
+import com.lgc.gitlabtool.git.services.ServiceProvider;
+import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 import com.lgc.gitlabtool.git.ui.javafx.dto.DialogDTO;
 import com.lgc.gitlabtool.git.util.ScreenUtil;
@@ -47,7 +50,10 @@ public class CloneProgressDialog extends Dialog<DialogDTO> {
 
     private final String DEFAULT_PROJECT_LABEL = "...";
 
-    public CloneProgressDialog(Stage primaryStage, String groupName) {
+    private final StateService _stateService = (StateService) ServiceProvider.getInstance()
+            .getService(StateService.class.getName());
+
+    public CloneProgressDialog(Stage primaryStage, String groupName, ApplicationState state) {
         setTitle("Cloning groups...");
 
         GridPane grid = new GridPane();
@@ -91,7 +97,7 @@ public class CloneProgressDialog extends Dialog<DialogDTO> {
         });
         _messageConcole.setMouseTransparent(false);
         _messageConcole.setFocusTraversable(false);
-        _messageConcole.setMinSize(450, 150);
+        _messageConcole.setMinSize(600, 100);
         addMessageToConcole("The cloning process of the " + groupName + " group is started...", CloningMessageStatus.SIMPLE);
         grid.add(_messageConcole, 0, 3, 4, 3);
 
@@ -104,6 +110,8 @@ public class CloneProgressDialog extends Dialog<DialogDTO> {
         _cancelButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent e) {
+                _cancelButton.setDisable(true);
+                addMessageToConcole("Starting process cancel of cloning...", CloningMessageStatus.SIMPLE);
                 JGit.getInstance().cancelClone();
                 updateProgressBar(0.0);
             }
@@ -111,12 +119,17 @@ public class CloneProgressDialog extends Dialog<DialogDTO> {
         _progressIndicator.setMaxSize(20, 20);
 
         Image appIcon = AppIconHolder.getInstance().getAppIcoImage();
-        Scene scene = new Scene(grid, 500, 350);
+        Scene scene = new Scene(grid, 650, 350);
+        primaryStage.setMinWidth(650);
         primaryStage.setResizable(false);
         primaryStage.setScene(scene);
         primaryStage.setTitle("Cloning groups...");
         primaryStage.getIcons().add(appIcon);
-
+        primaryStage.setOnCloseRequest(event -> {
+            if (_stateService.isActiveState(state)) {
+                event.consume();
+            }
+        });
         /* Set size and position */
         ScreenUtil.adaptForMultiScreens(primaryStage, 500, 350);
 
@@ -156,6 +169,7 @@ public class CloneProgressDialog extends Dialog<DialogDTO> {
     }
 
     private void makeCancelButtonAsOk() {
+        _cancelButton.setDisable(false);
         _cancelButton.setText("OK");
         _cancelButton.setOnAction(event -> {
             getStage().close();
@@ -213,7 +227,7 @@ public class CloneProgressDialog extends Dialog<DialogDTO> {
          */
         public static String getCSSForStatus(CloningMessageStatus status) {
             if (status == null || status == CloningMessageStatus.SIMPLE) {
-                return null;
+                return "-fx-text-fill:black";
             }
             return status == CloningMessageStatus.ERROR ? "-fx-text-fill:red" : "-fx-text-fill:green";
         }

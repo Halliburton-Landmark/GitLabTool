@@ -1,24 +1,29 @@
 package com.lgc.gitlabtool.git.ui.javafx.controllers;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
 import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.jgit.JGit;
+import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.services.ClonedGroupsService;
 import com.lgc.gitlabtool.git.services.GroupsUserService;
 import com.lgc.gitlabtool.git.services.LoginService;
 import com.lgc.gitlabtool.git.services.ProgressListener;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
+import com.lgc.gitlabtool.git.services.StateService;
+import com.lgc.gitlabtool.git.ui.dialogs.CloneProgressDialog;
+import com.lgc.gitlabtool.git.ui.dialogs.CloneProgressDialog.CloningMessageStatus;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
-import com.lgc.gitlabtool.git.ui.javafx.CloneProgressDialog;
-import com.lgc.gitlabtool.git.ui.javafx.CloneProgressDialog.CloningMessageStatus;
+import com.lgc.gitlabtool.git.util.PathUtilities;
 import com.lgc.gitlabtool.git.util.ScreenUtil;
 
 import javafx.application.Platform;
-import javafx.beans.binding.BooleanBinding;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -50,6 +55,9 @@ public class CloningGroupsWindowController {
     private final ClonedGroupsService _clonedGroupsService = (ClonedGroupsService) ServiceProvider.getInstance()
             .getService(ClonedGroupsService.class.getName());
 
+    private final StateService _stateService = (StateService) ServiceProvider.getInstance()
+            .getService(StateService.class.getName());
+
     @FXML
     private TextField folderPath;
 
@@ -73,10 +81,19 @@ public class CloningGroupsWindowController {
         configureListView(projectsList);
         projectsList.setItems(myObservableList);
 
-        BooleanBinding booleanBinding = projectsList.getSelectionModel().selectedItemProperty().isNull()
-                .or(folderPath.textProperty().isEqualTo(""));
+        folderPath.textProperty().addListener(getInputFilter());
+        setStyleAndDisableForIncorrectData();
+    }
 
-        okButton.disableProperty().bind(booleanBinding);
+    private ChangeListener<? super String> getInputFilter() {
+        return (observable, oldValue, newValue) -> {
+            if (isIncorrectPath()) {
+                setStyleAndDisableForIncorrectData();
+            } else {
+                folderPath.setStyle("-fx-border-color: green;");
+                okButton.setDisable(false);
+            }
+        };
     }
 
     @FXML
@@ -98,8 +115,8 @@ public class CloningGroupsWindowController {
         List<Group> selectedGroups = projectsList.getSelectionModel().getSelectedItems();
 
         Group selectedGroup = selectedGroups.get(0);
-
-        CloneProgressDialog progressDialog = new CloneProgressDialog(stage, selectedGroup.getName());
+        CloneProgressDialog progressDialog = new CloneProgressDialog(stage, selectedGroup.getName(), ApplicationState.CLONE);
+        _stateService.stateON(ApplicationState.CLONE);
         _groupsService.cloneGroups(selectedGroups, destinationPath,
                 new CloneProgressListener(selectedGroup, destinationPath, progressDialog));
     }
@@ -179,6 +196,9 @@ public class CloningGroupsWindowController {
                 double progress = (Double) t[1];
                 _progressDialog.updateProgressBar(progress);
             }
+            if (t[2] instanceof String) {
+                _progressDialog.addMessageToConcole((String)t[2], CloningMessageStatus.SUCCESS);
+            }
         }
 
         @Override
@@ -203,19 +223,38 @@ public class CloningGroupsWindowController {
 
         @Override
         public void onFinish(Object... t) {
-            Platform.runLater(new Runnable() {
-                @Override
-                public void run() {
+            _stateService.stateOFF(ApplicationState.CLONE);
+            if (t[1] instanceof Boolean) {
+                if ((Boolean) t[1]) {
                     _group.setClonedStatus(true);
                     _group.setPathToClonedGroup(_localPath + File.separator + _group.getName());
                     _clonedGroupsService.addGroups(Arrays.asList(_group));
-
-                    final String messageStatus = t[0] instanceof String ? (String) t[0] : JGit.FINISH_CLONE_MESSAGE;
-                    _progressDialog.addMessageToConcole(messageStatus, CloningMessageStatus.SIMPLE);
+                }
+            }
+            String messageStatus = t[0] instanceof String ? (String) t[0] : JGit.FINISH_CLONE_MESSAGE;
+            _progressDialog.addMessageToConcole(messageStatus, CloningMessageStatus.SIMPLE);
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
                     _progressDialog.resetProgress();
                     cloningStatusDialog(messageStatus);
                 }
             });
+
         }
+    }
+
+    private boolean isIncorrectPath() {
+        String text = folderPath.textProperty().get();
+        if (text == null || text.isEmpty()) {
+            return true;
+        }
+        Path path = Paths.get(text);
+        return !PathUtilities.isExistsAndDirectory(path);
+    }
+
+    private void setStyleAndDisableForIncorrectData() {
+        folderPath.setStyle("-fx-border-color: red;");
+        okButton.setDisable(true);
     }
 }

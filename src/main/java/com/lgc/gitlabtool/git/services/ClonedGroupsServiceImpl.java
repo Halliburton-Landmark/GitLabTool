@@ -64,7 +64,7 @@ public class ClonedGroupsServiceImpl implements ClonedGroupsService {
                 username);
 
         _notExistGroups = groups.stream()
-                                .filter(group -> !PathUtilities.isExistsAndDirectory(Paths.get(group.getPathToClonedGroup())))
+                                .filter(group -> isNotExistsAndDirectory(group))
                                 .collect(Collectors.toList());
 
         groups.removeAll(_notExistGroups);
@@ -97,6 +97,14 @@ public class ClonedGroupsServiceImpl implements ClonedGroupsService {
     private void updateClonedGroupsInXML() {
         String username = _loginService.getCurrentUser().getUsername();
         _storageService.updateStorage(URLManager.trimServerURL(_loginService.getServerURL()), username);
+    }
+
+    private boolean isNotExistsAndDirectory(Group group) {
+        String path = group.getPathToClonedGroup();
+        if (path == null) {
+            return true;
+        }
+        return !PathUtilities.isExistsAndDirectory(Paths.get(path));
     }
 
 }

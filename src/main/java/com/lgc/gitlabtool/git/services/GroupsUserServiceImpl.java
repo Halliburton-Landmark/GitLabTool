@@ -64,9 +64,24 @@ public class GroupsUserServiceImpl implements GroupsUserService {
     }
 
     private void cloneGroup(Group group, String destinationPath, ProgressListener progressListener) {
+        String groupPath = destinationPath + File.separator + group.getName();
         Collection<Project> projects = _projectService.getProjects(group);
-        if (projects != null) {
-            String groupPath = destinationPath + File.separator + group.getName();
+        if (projects == null) {
+            String errorMessage = "Error getting project from the GitLab";
+            progressListener.onError(errorMessage);
+            progressListener.onFinish(null, false);
+            return;
+        } else if (projects.isEmpty()) {
+            boolean result = PathUtilities.createPath(Paths.get(groupPath), true);
+            String message = result ? "Group successfuly created!" : "Failed creation of group";
+            if (result) {
+                progressListener.onSuccess(null, 1, message);
+            } else {
+                progressListener.onError(1, message);
+            }
+            progressListener.onFinish(null, true);
+            return;
+        } else {
             JGit.getInstance().clone(projects, groupPath, progressListener);
         }
     }
@@ -93,7 +108,10 @@ public class GroupsUserServiceImpl implements GroupsUserService {
         }
         Path path = Paths.get(destinationPath);
         if (!PathUtilities.isExistsAndDirectory(path)) {
-            logger.error(path.toAbsolutePath() + " path is not exist or it is not a directory.");
+            String errorMessage = path.toAbsolutePath() + " path is not exist or it is not a directory.";
+            logger.error(errorMessage);
+            progressListener.onError(null, errorMessage);
+            progressListener.onFinish(null, false);
             return;
         }
         groups.forEach((group) -> cloneGroup(group, destinationPath, progressListener));

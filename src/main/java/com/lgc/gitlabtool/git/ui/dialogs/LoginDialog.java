@@ -1,4 +1,4 @@
-package com.lgc.gitlabtool.git.ui.javafx;
+package com.lgc.gitlabtool.git.ui.dialogs;
 
 import java.io.IOException;
 import java.util.ArrayList;

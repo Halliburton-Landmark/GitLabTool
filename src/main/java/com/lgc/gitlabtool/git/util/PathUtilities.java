@@ -83,10 +83,15 @@ public class PathUtilities {
     /**
      *
      * @param path
+     * @param ifFolder
      * @return
      */
-    public static boolean createPath(Path path) {
+    public static boolean createPath(Path path, boolean ifFolder) {
         try {
+            if (ifFolder) {
+                Files.createDirectories(path);
+                return true;
+            }
             Path parent = path.getParent();
             if (parent != null) {
                 Files.createDirectories(parent);
