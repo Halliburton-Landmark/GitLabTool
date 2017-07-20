@@ -33,5 +33,12 @@ public enum ApplicationState {
         public String toString() {
             return "pushing state";
         }
+    },
+
+    CREATE_PROJECT {
+        @Override
+        public String toString() {
+            return "state of creation project";
+        }
     }
 }

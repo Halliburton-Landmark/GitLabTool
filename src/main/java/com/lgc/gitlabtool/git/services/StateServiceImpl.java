@@ -28,12 +28,14 @@ public class StateServiceImpl implements StateService {
         _listeners.put(ApplicationState.PULL, getSynchronizedSet());
         _listeners.put(ApplicationState.COMMIT, getSynchronizedSet());
         _listeners.put(ApplicationState.PUSH, getSynchronizedSet());
+        _listeners.put(ApplicationState.CREATE_PROJECT, getSynchronizedSet());
 
         _states = new ConcurrentHashMap<>();
         _states.put(ApplicationState.CLONE, START_STATE);
         _states.put(ApplicationState.PULL, START_STATE);
         _states.put(ApplicationState.COMMIT, START_STATE);
         _states.put(ApplicationState.PUSH, START_STATE);
+        _states.put(ApplicationState.CREATE_PROJECT, START_STATE);
     }
 
     @Override
