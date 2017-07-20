@@ -12,8 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
@@ -37,6 +35,7 @@ import org.eclipse.jgit.dircache.DirCacheCheckout;
 import org.eclipse.jgit.errors.CorruptObjectException;
 import org.eclipse.jgit.errors.NoWorkTreeException;
 import org.eclipse.jgit.errors.RevisionSyntaxException;
+import org.eclipse.jgit.lib.BranchTrackingStatus;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.EmptyProgressMonitor;
 import org.eclipse.jgit.lib.ObjectId;
@@ -54,7 +53,6 @@ import com.lgc.gitlabtool.git.entities.Branch;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.User;
 import com.lgc.gitlabtool.git.services.ProgressListener;
-import com.lgc.gitlabtool.git.util.NullCheckUtil;
 import com.lgc.gitlabtool.git.util.PathUtilities;
 
 
@@ -160,6 +158,40 @@ public class JGit {
         }
 
         return JGitStatus.FAILED;
+    }
+
+    private int getAheadCounts(Repository repository, String branchName) {
+        try {
+            BranchTrackingStatus trackingStatus = BranchTrackingStatus.of(repository, branchName);
+
+            if (trackingStatus != null) {
+                return trackingStatus.getAheadCount();
+            } else {
+                logger.debug("No remote tracking of branch " + branchName);
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return 0;
+    }
+
+    private int getBehindCounts(Repository repository, String branchName) {
+        try {
+            BranchTrackingStatus trackingStatus = BranchTrackingStatus.of(repository, branchName);
+
+            if (trackingStatus != null) {
+                return trackingStatus.getBehindCount();
+            } else {
+                logger.debug("No remote tracking of branch " + branchName);
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return 0;
     }
 
     private <T> void mergeCollections(Collection<T> first, Collection<T> second, boolean onlyGeneral) {

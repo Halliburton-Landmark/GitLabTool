@@ -16,6 +16,7 @@ import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.LoginService;
+import com.lgc.gitlabtool.git.services.ProgressListener;
 import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.javafx.CommitDialog;
@@ -49,10 +50,11 @@ import javafx.scene.input.MouseEvent;
 
 public class MainWindowController {
     private static final String HEDER_GROUP_TITLE = "Current group: ";
-    private static final String SELECT_ALL_IMAGE_URL = "icons/main/select_all.png";
+    private static final String SELECT_ALL_IMAGE_URL = "icons/select_all_20x20.png";
     private static final String DIVIDER_PROPERTY_NODE = "MainWindowController_Dividers";
     private static final String STATUS_DIALOG_TITLE = "Status dialog";
-    private static final String STATUS_DIALOG_HEADER = "Commit and Push statuses";
+    private static final String STATUS_DIALOG_HEADER_COMMIT = "Commit statuses";
+    private static final String STATUS_DIALOG_HEADER_PUSH = "Push statuses";
 
     private List<Project> _projects;
 
@@ -267,13 +269,19 @@ public class MainWindowController {
         .setOnAction(this::refreshLoadProjects);
 
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.COMMIT_BUTTON.getId())
-                .setOnAction(this::onCommitPushAction);
+                .setOnAction(this::onCommitAction);
+
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.PUSH_BUTTON.getId())
+                .setOnAction(this::onPushAction);
 
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_CREATE_BRANCH)
                 .setOnAction(this::onNewBranchButton);
 
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_COMMIT)
-                .setOnAction(this::onCommitPushAction);
+                .setOnAction(this::onCommitAction);
+
+        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_PUSH)
+                .setOnAction(this::onPushAction);
     }
 
     @FXML
@@ -313,16 +321,12 @@ public class MainWindowController {
     }
 
     @FXML
-    public void onCommitPushAction(ActionEvent actionEvent) {
+    public void onCommitAction(ActionEvent actionEvent) {
         List<Project> allSelectedProjects = projectsList.getSelectionModel().getSelectedItems();
-
         List<Project> projectWithChanges = _gitService.getProjectsWithChanges(allSelectedProjects);
 
         if (projectWithChanges.isEmpty()) {
-            String noChangesMessage = "Selected projects do not have changes";
-            StatusDialog statusDialog = new StatusDialog(STATUS_DIALOG_TITLE, STATUS_DIALOG_HEADER,
-                    noChangesMessage);
-            statusDialog.showAndWait();
+            showProjectsWithoutChangesMessage();
             return;
         }
 
@@ -330,10 +334,55 @@ public class MainWindowController {
         Map<Project, JGitStatus> commitStatuses = dialog.commitChanges(projectWithChanges);
 
         String dialogMessage = "%s projects were pushed successfully";
+        showStatusDialog(commitStatuses, allSelectedProjects.size(), STATUS_DIALOG_TITLE,
+                STATUS_DIALOG_HEADER_COMMIT, dialogMessage);
 
-        StatusDialog statusDialog = new StatusDialog(STATUS_DIALOG_TITLE, STATUS_DIALOG_HEADER);
-        statusDialog.showMessage(commitStatuses, allSelectedProjects.size(), dialogMessage);
+    }
+
+    @FXML
+    public void onPushAction(ActionEvent actionEvent) {
+        List<Project> allSelectedProjects = projectsList.getSelectionModel().getSelectedItems();
+
+        Map<Project, JGitStatus> commitStatuses = _gitService.push(allSelectedProjects,
+                new PushProgressListener());
+
+        String dialogMessage = "%s projects were pushed successfully";
+        showStatusDialog(commitStatuses, allSelectedProjects.size(), STATUS_DIALOG_TITLE,
+                STATUS_DIALOG_HEADER_PUSH, dialogMessage);
+
+    }
+
+    private void showProjectsWithoutChangesMessage() {
+        String noChangesMessage = "Selected projects do not have changes";
+        StatusDialog statusDialog = new StatusDialog(STATUS_DIALOG_TITLE, STATUS_DIALOG_HEADER_COMMIT,
+                noChangesMessage);
         statusDialog.showAndWait();
+    }
+
+    private void showStatusDialog(Map<Project, JGitStatus> statuses, int countProjects, String title,
+                                  String header, String message) {
+        StatusDialog statusDialog = new StatusDialog(title, header);
+        statusDialog.showMessage(statuses, countProjects, message);
+        statusDialog.showAndWait();
+    }
+
+    class PushProgressListener implements ProgressListener {
+
+        @Override
+        public void onSuccess(Object... t) {
+        }
+
+        @Override
+        public void onError(Object... t) {
+        }
+
+        @Override
+        public void onStart(Object... t) {
+        }
+
+        @Override
+        public void onFinish(Object... t) {
+        }
 
     }
 }
