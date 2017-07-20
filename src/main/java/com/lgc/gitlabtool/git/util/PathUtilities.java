@@ -81,10 +81,11 @@ public class PathUtilities {
     }
 
     /**
+     * Creates path on the local disk.
      *
-     * @param path
-     * @param ifFolder
-     * @return
+     * @param path the path for creating
+     * @param ifFolder <true> if we create folder, <false> if we create file.
+     * @return status of operation
      */
     public static boolean createPath(Path path, boolean ifFolder) {
         try {
