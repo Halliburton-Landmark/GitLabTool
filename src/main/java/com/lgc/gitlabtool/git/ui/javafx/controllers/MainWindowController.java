@@ -14,9 +14,9 @@ import org.apache.logging.log4j.Logger;
 import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
+import com.lgc.gitlabtool.git.services.EmptyProgressListener;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.LoginService;
-import com.lgc.gitlabtool.git.services.ProgressListener;
 import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.javafx.CommitDialog;
@@ -347,7 +347,7 @@ public class MainWindowController {
                 .collect(Collectors.toList());
 
         Map<Project, JGitStatus> commitStatuses = _gitService.push(filteredProjects,
-                new PushProgressListener());
+                EmptyProgressListener.get());
 
         String dialogMessage = "%s projects were pushed successfully";
         showStatusDialog(commitStatuses, allSelectedProjects.size(), STATUS_DIALOG_TITLE,
@@ -369,23 +369,4 @@ public class MainWindowController {
         statusDialog.showAndWait();
     }
 
-    class PushProgressListener implements ProgressListener {
-
-        @Override
-        public void onSuccess(Object... t) {
-        }
-
-        @Override
-        public void onError(Object... t) {
-        }
-
-        @Override
-        public void onStart(Object... t) {
-        }
-
-        @Override
-        public void onFinish(Object... t) {
-        }
-
-    }
 }
