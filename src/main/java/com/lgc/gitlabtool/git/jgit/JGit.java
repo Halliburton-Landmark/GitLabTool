@@ -160,40 +160,6 @@ public class JGit {
         return JGitStatus.FAILED;
     }
 
-    private int getAheadCounts(Repository repository, String branchName) {
-        try {
-            BranchTrackingStatus trackingStatus = BranchTrackingStatus.of(repository, branchName);
-
-            if (trackingStatus != null) {
-                return trackingStatus.getAheadCount();
-            } else {
-                logger.debug("No remote tracking of branch " + branchName);
-            }
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return 0;
-    }
-
-    private int getBehindCounts(Repository repository, String branchName) {
-        try {
-            BranchTrackingStatus trackingStatus = BranchTrackingStatus.of(repository, branchName);
-
-            if (trackingStatus != null) {
-                return trackingStatus.getBehindCount();
-            } else {
-                logger.debug("No remote tracking of branch " + branchName);
-            }
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return 0;
-    }
-
     private <T> void mergeCollections(Collection<T> first, Collection<T> second, boolean onlyGeneral) {
         if (onlyGeneral && !first.isEmpty()) { // TODO: TEST IT (Can repository hasn't branches?)
             first.retainAll(second);
