@@ -101,7 +101,6 @@ public class GroupWindowController {
             stage.setTitle(CLONE_WINDOW_TITLE);
             stage.setResizable(false);
             stage.setScene(new Scene(root));
-            stage.setOnHidden(we -> updateClonedGroups());
             stage.getIcons().add(appIcon);
 
              /* Set sizing and position */
@@ -148,10 +147,10 @@ public class GroupWindowController {
     }
 
     private void updateClonedGroups() {
+        _logger.info("Updating groups...");
         List<Group> userGroups = _clonedGroupsService.loadClonedGroups();
         if (userGroups != null) {
             groupList.setItems(FXCollections.observableList(userGroups));
-
             showNotExistGroups(_clonedGroupsService.getNotExistGroup());
         }
     }

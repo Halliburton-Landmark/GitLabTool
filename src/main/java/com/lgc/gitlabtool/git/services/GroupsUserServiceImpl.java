@@ -69,21 +69,24 @@ public class GroupsUserServiceImpl implements GroupsUserService {
         if (projects == null) {
             String errorMessage = "Error getting project from the GitLab";
             progressListener.onError(errorMessage);
-            progressListener.onFinish(null, false);
+            progressListener.onFinish((Object)null);
             return;
-        } else if (projects.isEmpty()) {
-            boolean result = PathUtilities.createPath(Paths.get(groupPath), true);
-            String message = result ? "Group successfuly created!" : "Failed creation of group";
-            if (result) {
+        }
+        boolean resultCreation = PathUtilities.createPath(Paths.get(groupPath), true);
+        if (projects.isEmpty()) {
+            String message = resultCreation ? "Group successfuly created!" : "Failed creation of group";
+            if (resultCreation) {
                 progressListener.onSuccess(null, 1, message);
             } else {
                 progressListener.onError(1, message);
             }
-            progressListener.onFinish(null, true);
-            return;
+            progressListener.onFinish((Object)null);
         } else {
             JGit.getInstance().clone(projects, groupPath, progressListener);
         }
+        group.setClonedStatus(true);
+        group.setPathToClonedGroup(destinationPath + File.separator + group.getName());
+        _clonedGroupsService.addGroups(Arrays.asList(group));
     }
 
     @Override

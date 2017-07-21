@@ -120,20 +120,22 @@ public class CloneProgressDialog extends Dialog<DialogDTO> {
 
         Image appIcon = AppIconHolder.getInstance().getAppIcoImage();
         Scene scene = new Scene(grid, 650, 350);
-        primaryStage.setMinWidth(650);
-        primaryStage.setResizable(false);
-        primaryStage.setScene(scene);
-        primaryStage.setTitle("Cloning groups...");
-        primaryStage.getIcons().add(appIcon);
-        primaryStage.setOnCloseRequest(event -> {
+
+        Stage stage = new Stage(primaryStage.getStyle());
+        stage.setMinWidth(650);
+        stage.setResizable(false);
+        stage.setScene(scene);
+        stage.setTitle("Cloning groups...");
+        stage.getIcons().add(appIcon);
+        stage.setOnCloseRequest(event -> {
             if (_stateService.isActiveState(state)) {
                 event.consume();
             }
         });
         /* Set size and position */
-        ScreenUtil.adaptForMultiScreens(primaryStage, 500, 350);
+        ScreenUtil.adaptForMultiScreens(stage, 500, 350);
 
-        primaryStage.show();
+        stage.show();
     }
 
     public void addMessageToConcole(String message, CloningMessageStatus status) {

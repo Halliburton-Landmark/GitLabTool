@@ -13,11 +13,13 @@ import org.apache.logging.log4j.Logger;
 import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
+import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.services.EmptyProgressListener;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.LoginService;
 import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
+import com.lgc.gitlabtool.git.ui.javafx.CloneProgressDialog;
 import com.lgc.gitlabtool.git.ui.javafx.CommitDialog;
 import com.lgc.gitlabtool.git.ui.javafx.CreateNewBranchDialog;
 import com.lgc.gitlabtool.git.ui.javafx.CreateProjectDialog;
@@ -46,6 +48,7 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+import javafx.stage.Stage;
 
 public class MainWindowController {
     private static final String HEDER_GROUP_TITLE = "Current group: ";
@@ -259,7 +262,7 @@ public class MainWindowController {
             .setOnAction(this::refreshLoadProjects);
 
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.CLONE_PROJECT_BUTTON.getId())
-            .setOnAction(this::refreshLoadProjects);
+            .setOnAction(this::cloneShadowProject);
 
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.NEW_BRANCH_BUTTON.getId())
                 .setOnAction(this::onNewBranchButton);
@@ -294,7 +297,7 @@ public class MainWindowController {
     }
 
     private void showCreateNewBranchDialog() {
-        List<Project> allSelectedProjects = projectsList.getSelectionModel().getSelectedItems();
+        List<Project> allSelectedProjects = getSelectProjects();
         List<Project> clonedProjects = allSelectedProjects.stream().filter(prj -> prj.isCloned())
                 .collect(Collectors.toList());
         CreateNewBranchDialog dialog = new CreateNewBranchDialog(clonedProjects);
@@ -315,7 +318,7 @@ public class MainWindowController {
 
     @FXML
     public void onCommitAction(ActionEvent actionEvent) {
-        List<Project> allSelectedProjects = projectsList.getSelectionModel().getSelectedItems();
+        List<Project> allSelectedProjects = getSelectProjects();
         List<Project> projectWithChanges = _gitService.getProjectsWithChanges(allSelectedProjects);
 
         if (projectWithChanges.isEmpty()) {
@@ -334,7 +337,7 @@ public class MainWindowController {
 
     @FXML
     public void onPushAction(ActionEvent actionEvent) {
-        List<Project> allSelectedProjects = projectsList.getSelectionModel().getSelectedItems();
+        List<Project> allSelectedProjects = getSelectProjects();
         List<Project> filteredProjects = allSelectedProjects.stream().filter(prj -> prj.isCloned())
                 .collect(Collectors.toList());
 
@@ -344,6 +347,18 @@ public class MainWindowController {
         showStatusDialog(pushStatuses, allSelectedProjects.size(), STATUS_DIALOG_TITLE, STATUS_DIALOG_HEADER_PUSH,
                 dialogMessage);
 
+    }
+
+    @FXML
+    public void cloneShadowProject(ActionEvent actionEvent) {
+        List<Project> selectedProjects = projectsList.getSelectionModel().getSelectedItems();
+
+        Stage stage = (Stage) selectAllButton.getScene().getWindow();
+
+        String path = _currentGroup.getPathToClonedGroup();
+        CloneProgressDialog progressDialog = new CloneProgressDialog(stage, _currentGroup.getName(), ApplicationState.CLONE);
+        _projectService.clone(selectedProjects, path,
+                new CloneProgressListener(progressDialog, (obj) -> refreshLoadProjects(null)));
     }
 
     private void showProjectsWithoutChangesMessage() {
@@ -358,6 +373,10 @@ public class MainWindowController {
         StatusDialog statusDialog = new StatusDialog(title, header);
         statusDialog.showMessage(statuses, countProjects, message);
         statusDialog.showAndWait();
+    }
+
+    private List<Project> getSelectProjects() {
+        return projectsList.getSelectionModel().getSelectedItems();
     }
 
 }
