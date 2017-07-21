@@ -19,6 +19,7 @@ import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.LoginService;
 import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
+import com.lgc.gitlabtool.git.ui.javafx.ChangesCheckDialog;
 import com.lgc.gitlabtool.git.ui.javafx.CommitDialog;
 import com.lgc.gitlabtool.git.ui.javafx.CreateNewBranchDialog;
 import com.lgc.gitlabtool.git.ui.javafx.CreateProjectDialog;
@@ -385,11 +386,29 @@ public class MainWindowController {
                 .filter(project -> project.isCloned())
                 .collect(Collectors.toList());
         
-        Map<Project, JGitStatus> pullStatuses = _gitService.pull(projectsToPull);
-        String title = "Pull projects";
-        String header = "Pull projects";
-        String dialogMessage = "%s projects successfully pulled";
-        showStatusDialog(pullStatuses, selectedProjects.size(), title, header, dialogMessage);
+        checkChangesAndPull(projectsToPull, new Object());
+    }
+
+    private void checkChangesAndPull(List<Project> projects, Object item) {
+        List<Project> changedProjects = _gitService.getProjectsWithChanges(projects);
+
+        if (changedProjects.isEmpty()) {
+            // TODO: add Progress dialog here!!
+            // create method in JGit to pull a list of projects
+            // use the single project pull method on it
+            // add ProgressListener in it to manage the situations during pull
+            // use JGit::pull(projects) in GitService
+            // In this case you could use ProgressDialog. Profit!
+            
+            Map<Project, JGitStatus> pullStatuses = _gitService.pull(projects);
+            String title = "Pull projects";
+            String header = "Pull projects";
+            String dialogMessage = "%s projects successfully pulled";
+            showStatusDialog(pullStatuses, projects.size(), title, header, dialogMessage);
+        } else {
+            ChangesCheckDialog changesCheckDialog = new ChangesCheckDialog();
+            changesCheckDialog.launchConfirmationDialog(changedProjects, projects, item, this::checkChangesAndPull);
+        }
     }
 
 }
