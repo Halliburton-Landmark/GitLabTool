@@ -388,16 +388,12 @@ public class JGitTest {
         };
         Mockito.when(gitMock.push()).thenReturn(pushCommandMock);
         Map<Project, JGitStatus> results = getJGitMock(gitMock).push(getProjects(), new EmptyListener());
-<<<<<<< HEAD
         Assert.assertEquals(results.size(), getCountIncorrectStatuses(results));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void pushDataWithNullListenerTest() {
         getJGitMock(null).push(getProjects(), null);
-=======
-        Assert.assertEquals(results.size(),getCountIncorrectStatuses(results));
->>>>>>> refs/heads/master
     }
 
     @Test
@@ -412,10 +408,6 @@ public class JGitTest {
         Mockito.when(gitMock.push()).thenReturn(pushCommandMock);
         Map<Project, JGitStatus> statuses = getJGitMock(gitMock).push(getProjects(),  new EmptyListener());
         Assert.assertEquals(getCountCorrectStatuses(statuses),getCountCorrectProject(getProjects()));
-<<<<<<< HEAD
-=======
-
->>>>>>> refs/heads/master
     }
 
     @Test(expected = IllegalArgumentException.class)
