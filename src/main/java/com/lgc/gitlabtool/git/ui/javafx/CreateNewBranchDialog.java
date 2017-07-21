@@ -2,8 +2,10 @@ package com.lgc.gitlabtool.git.ui.javafx;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -43,7 +45,6 @@ public class CreateNewBranchDialog extends Dialog<String> {
     private static final String STATUS_DIALOG_HEADER = "Branch creating info";
     private static final String CHOOSE_BRANCH_NAME_MESSAGE = "Please choose a new branch name";
     private static final String WRONG_INPUT_MESSAGE = " is a wrong branch name. Please try again!";
-    private static final String EMPTY_STRING = "";
 
     private static final Logger _logger = LogManager.getLogger(CreateNewBranchDialog.class);
     private static final GitService _gitService = (GitService) ServiceProvider.getInstance()
@@ -137,10 +138,10 @@ public class CreateNewBranchDialog extends Dialog<String> {
     }
 
     private ObservableList<String> getBoxOptions() {
-        List<Branch> branches = _gitService.getBranches(getProjects(), BranchType.ALL, true);
-        List<String> branchesNames = branches.stream()
+        Set<Branch> branches = _gitService.getBranches(getProjects(), BranchType.ALL, true);
+        Set<String> branchesNames = branches.stream()
                 .map(branch -> branch.getBranchName())
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
         
         ObservableList<String> options = FXCollections.observableArrayList(branchesNames);
         return options;
@@ -150,7 +151,7 @@ public class CreateNewBranchDialog extends Dialog<String> {
         String currentBranchName = getCurrentCommonBranchName(getProjects());
         return options.stream()
                 .filter(element -> element.equals(currentBranchName))
-                .findFirst().orElse(EMPTY_STRING);
+                .findFirst().orElse(StringUtils.EMPTY);
     }
 
     private String getCurrentCommonBranchName(List<Project> projects) {
@@ -158,7 +159,7 @@ public class CreateNewBranchDialog extends Dialog<String> {
                 .map(project -> _gitService.getCurrentBranchName(project))
                 .distinct()
                 .collect(Collectors.toList());
-        return currentBranches.size() > 1 ? EMPTY_STRING : currentBranches.get(0);
+        return currentBranches.size() > 1 ? StringUtils.EMPTY : currentBranches.get(0);
     }
 
     private void onCreateButton(ActionEvent event) {
@@ -202,10 +203,8 @@ public class CreateNewBranchDialog extends Dialog<String> {
                 _comboBox.setStyle("-fx-border-color: red;");
                 _createButton.setDisable(true);
             } else {
-                String message = _branchNameField.getText() + WRONG_INPUT_MESSAGE;
                 _branchNameField.setStyle("-fx-border-color: red;");
                 _createButton.setDisable(true);
-                _logger.debug(message);
             }
         };
     }
@@ -267,16 +266,20 @@ public class CreateNewBranchDialog extends Dialog<String> {
 
         @Override
         public void onSuccess(Object... t) {
-            String projectName = ((Project) t[0]).getName();
-            String successMessage = projectName + " successfully pushed to upstream";
-            _logger.debug(successMessage);
+            if (t[0] instanceof Project) {
+                String projectName = ((Project) t[0]).getName();
+                String successMessage = projectName + " successfully pushed to upstream";
+                _logger.debug(successMessage);
+            }
         }
 
         @Override
         public void onError(Object... t) {
-            String projectName = ((Project) t[0]).getName();
-            String errorMessage = "Failed to push " + projectName + " project";
-            _logger.error(errorMessage);
+            if (t[0] instanceof Project) {
+                String projectName = ((Project) t[0]).getName();
+                String errorMessage = "Failed to push " + projectName + " project";
+                _logger.error(errorMessage);
+            }
         }
 
         @Override

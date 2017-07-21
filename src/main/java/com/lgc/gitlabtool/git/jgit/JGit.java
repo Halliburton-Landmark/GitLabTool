@@ -465,6 +465,7 @@ public class JGit {
         Map<Project, JGitStatus> statuses = new HashMap<>();
         for (Project project : projects) {
             if (project == null) {
+                progressListener.onError(project);
                 statuses.put(null, JGitStatus.FAILED);
                 continue;
             }

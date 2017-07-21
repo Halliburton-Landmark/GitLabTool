@@ -2,10 +2,10 @@ package com.lgc.gitlabtool.git.services;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -115,20 +115,28 @@ public class GitServiceImpl implements GitService {
     }
 
     @Override
-    public List<Branch> getBranches(List<Project> projects, BranchType branchType, boolean isOnlyCommon) {
-        List<Branch> branches = new ArrayList<>();
-        branches.addAll(_git.getBranches(projects, branchType, isOnlyCommon));
-        return branches != null ? branches : Collections.emptyList();
+    public Set<Branch> getBranches(List<Project> projects, BranchType branchType, boolean isOnlyCommon) {
+        if (projects == null || branchType == null) {
+            return Collections.emptySet();
+        }
+        Set<Branch> branches = _git.getBranches(projects, branchType, isOnlyCommon);
+        return branches != null ? branches : Collections.emptySet();
     }
 
     @Override
     public String getCurrentBranchName(Project project) {
+        if (project == null) {
+            return null;
+        }
         Optional<String> currentBranch = _git.getCurrentBranch(project);
         return currentBranch.isPresent() ? currentBranch.get() : null;
     }
 
     @Override
     public Map<Project, JGitStatus> push(List<Project> projects, ProgressListener progressListener) {
+        if (projects == null || progressListener == null) {
+            return Collections.emptyMap();
+        }
         return _git.push(projects, progressListener);
     }
 }

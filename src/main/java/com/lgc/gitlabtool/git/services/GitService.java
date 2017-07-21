@@ -2,8 +2,7 @@ package com.lgc.gitlabtool.git.services;
 
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
+import java.util.Set;
 
 import com.lgc.gitlabtool.git.entities.Branch;
 import com.lgc.gitlabtool.git.entities.Project;
@@ -88,14 +87,14 @@ public interface GitService {
     Map<Project, JGitStatus> createBranch(List<Project> projects, String branchName, String startPoint, boolean force);
 
     /**
-     * Returns the list of selected type of branches
+     * Returns the set of selected type of branches
      * 
      * @param projects     projects list
      * @param branchType   selected {@link BranchType}
      * @param isOnlyCommon if <code>true</code> returns only common branches for all projects and otherwise if <code>false</code>  
-     * @return list of the branches or empty list if such type of branches does not exist for this projects
+     * @return set of the branches or empty set if such type of branches does not exist for this projects
      */
-    List<Branch> getBranches(List<Project> projects, BranchType branchType, boolean isOnlyCommon);
+    Set<Branch> getBranches(List<Project> projects, BranchType branchType, boolean isOnlyCommon);
 
     /**
      * Returns current branch name for selected project
