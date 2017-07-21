@@ -24,11 +24,11 @@ public class StateServiceImpl implements StateService {
 
     public StateServiceImpl() {
         _listeners = new ConcurrentHashMap<>();
-        _listeners.put(ApplicationState.CLONE, getSynchronizedSet());
-        _listeners.put(ApplicationState.PULL, getSynchronizedSet());
-        _listeners.put(ApplicationState.COMMIT, getSynchronizedSet());
-        _listeners.put(ApplicationState.PUSH, getSynchronizedSet());
-        _listeners.put(ApplicationState.CREATE_PROJECT, getSynchronizedSet());
+        _listeners.put(ApplicationState.CLONE, createSynchronizedSet());
+        _listeners.put(ApplicationState.PULL, createSynchronizedSet());
+        _listeners.put(ApplicationState.COMMIT, createSynchronizedSet());
+        _listeners.put(ApplicationState.PUSH, createSynchronizedSet());
+        _listeners.put(ApplicationState.CREATE_PROJECT, createSynchronizedSet());
 
         _states = new ConcurrentHashMap<>();
         _states.put(ApplicationState.CLONE, START_STATE);
@@ -88,7 +88,7 @@ public class StateServiceImpl implements StateService {
         Set<StateListener> listeners = _listeners.get(state);
 
         if (listeners == null) {
-            Set<StateListener> newSet = getSynchronizedSet();
+            Set<StateListener> newSet = createSynchronizedSet();
             newSet.add(addListener);
             _listeners.put(state, newSet);
         } else {
@@ -104,7 +104,7 @@ public class StateServiceImpl implements StateService {
         }
     }
 
-    private Set<StateListener> getSynchronizedSet() {
+    private Set<StateListener> createSynchronizedSet() {
         return Collections.synchronizedSet(new HashSet<StateListener>());
     }
 
