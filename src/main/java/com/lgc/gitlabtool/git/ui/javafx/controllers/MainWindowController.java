@@ -2,6 +2,7 @@ package com.lgc.gitlabtool.git.ui.javafx.controllers;
 
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.prefs.Preferences;
@@ -12,11 +13,16 @@ import org.apache.logging.log4j.Logger;
 
 import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.Project;
+import com.lgc.gitlabtool.git.jgit.JGitStatus;
+import com.lgc.gitlabtool.git.services.EmptyProgressListener;
+import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.LoginService;
 import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
+import com.lgc.gitlabtool.git.ui.javafx.CommitDialog;
 import com.lgc.gitlabtool.git.ui.javafx.CreateNewBranchDialog;
 import com.lgc.gitlabtool.git.ui.javafx.CreateProjectDialog;
+import com.lgc.gitlabtool.git.ui.javafx.StatusDialog;
 import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuItems;
 import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuManager;
 import com.lgc.gitlabtool.git.ui.selection.ListViewKey;
@@ -44,8 +50,11 @@ import javafx.scene.input.MouseEvent;
 
 public class MainWindowController {
     private static final String HEDER_GROUP_TITLE = "Current group: ";
-    private static final String SELECT_ALL_IMAGE_URL = "icons/main/select_all.png";
+    private static final String SELECT_ALL_IMAGE_URL = "icons/select_all_20x20.png";
     private static final String DIVIDER_PROPERTY_NODE = "MainWindowController_Dividers";
+    private static final String STATUS_DIALOG_TITLE = "Status dialog";
+    private static final String STATUS_DIALOG_HEADER_COMMIT = "Commit statuses";
+    private static final String STATUS_DIALOG_HEADER_PUSH = "Push statuses";
 
     private List<Project> _projects;
 
@@ -58,6 +67,9 @@ public class MainWindowController {
 
     private static final ProjectService _projectService =
             (ProjectService) ServiceProvider.getInstance().getService(ProjectService.class.getName());
+
+    private static final GitService _gitService =
+            (GitService) ServiceProvider.getInstance().getService(GitService.class.getName());
 
     @FXML
     private ListView<Project> projectsList;
@@ -108,7 +120,7 @@ public class MainWindowController {
         t.start();
 
         configureToolbarCommands();
-        initNewBranchButton();
+        initToolbarMainMenuActions();
     }
 
     private void setDisablePropertyForButtons() {
@@ -118,11 +130,21 @@ public class MainWindowController {
                 .bind(booleanBinding);
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.SWITCH_BRANCH_BUTTON.getId()).disableProperty()
                 .bind(booleanBinding);
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.COMMIT_BUTTON.getId()).disableProperty()
+                .bind(booleanBinding);
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.PUSH_BUTTON.getId()).disableProperty()
+                .bind(booleanBinding);
+
 
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_SWITCH_BRANCH).disableProperty()
                 .bind(booleanBinding);
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_CREATE_BRANCH).disableProperty()
                 .bind(booleanBinding);
+        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_COMMIT).disableProperty()
+                .bind(booleanBinding);
+        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_PUSH).disableProperty()
+                .bind(booleanBinding);
+
     }
 
     public void setSelectedGroup(List<Project> projects, Group group) {
@@ -235,7 +257,8 @@ public class MainWindowController {
         return listView.getSelectionModel().getSelectedItems().size() == listView.getItems().size();
     }
 
-    private void initNewBranchButton() {
+    private void initToolbarMainMenuActions() {
+
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.NEW_BRANCH_BUTTON.getId())
                 .setOnAction(this::onNewBranchButton);
 
@@ -245,9 +268,20 @@ public class MainWindowController {
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.REFRESH_PROJECTS.getId())
         .setOnAction(this::refreshLoadProjects);
 
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.COMMIT_BUTTON.getId())
+                .setOnAction(this::onCommitAction);
+
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.PUSH_BUTTON.getId())
+                .setOnAction(this::onPushAction);
+
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_CREATE_BRANCH)
                 .setOnAction(this::onNewBranchButton);
 
+        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_COMMIT)
+                .setOnAction(this::onCommitAction);
+
+        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_PUSH)
+                .setOnAction(this::onPushAction);
     }
 
     @FXML
@@ -285,4 +319,54 @@ public class MainWindowController {
         });
         executor.shutdown();
     }
+
+    @FXML
+    public void onCommitAction(ActionEvent actionEvent) {
+        List<Project> allSelectedProjects = projectsList.getSelectionModel().getSelectedItems();
+        List<Project> projectWithChanges = _gitService.getProjectsWithChanges(allSelectedProjects);
+
+        if (projectWithChanges.isEmpty()) {
+            showProjectsWithoutChangesMessage();
+            return;
+        }
+
+        CommitDialog dialog = new CommitDialog();
+        Map<Project, JGitStatus> commitStatuses = dialog.commitChanges(projectWithChanges);
+
+        String dialogMessage = "%s projects were pushed successfully";
+        showStatusDialog(commitStatuses, allSelectedProjects.size(), STATUS_DIALOG_TITLE,
+                STATUS_DIALOG_HEADER_COMMIT, dialogMessage);
+
+    }
+
+    @FXML
+    public void onPushAction(ActionEvent actionEvent) {
+        List<Project> allSelectedProjects = projectsList.getSelectionModel().getSelectedItems();
+        List<Project> filteredProjects = allSelectedProjects.stream()
+                .filter(prj -> prj.isCloned())
+                .collect(Collectors.toList());
+
+        Map<Project, JGitStatus> pushStatuses = _gitService.push(filteredProjects,
+                EmptyProgressListener.get());
+
+        String dialogMessage = "%s projects were pushed successfully";
+        showStatusDialog(pushStatuses, allSelectedProjects.size(), STATUS_DIALOG_TITLE,
+                STATUS_DIALOG_HEADER_PUSH, dialogMessage);
+
+    }
+
+    private void showProjectsWithoutChangesMessage() {
+        String noChangesMessage = "Selected projects do not have changes";
+        StatusDialog statusDialog = new StatusDialog(STATUS_DIALOG_TITLE, STATUS_DIALOG_HEADER_COMMIT,
+                noChangesMessage);
+        statusDialog.showAndWait();
+    }
+
+    private void showStatusDialog(Map<Project, JGitStatus> statuses, int countProjects, String title,
+                                  String header, String message) {
+        StatusDialog statusDialog = new StatusDialog(title, header);
+        statusDialog.showMessage(statuses, countProjects, message);
+        statusDialog.showAndWait();
+    }
+
 }
