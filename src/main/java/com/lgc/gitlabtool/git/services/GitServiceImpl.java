@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -82,20 +83,12 @@ public class GitServiceImpl implements GitService {
     }
 
     @Override
-    public Map<Project, JGitStatus> createBranch(List<Project> projects, String branchName, boolean force) {
+    public Map<Project, JGitStatus> createBranch(List<Project> projects, String branchName, String startPoint, boolean force) {
         Map<Project, JGitStatus> statuses = new ConcurrentHashMap<>();
         projects.parallelStream()
                 .filter(prj -> prj.isCloned())
-                .forEach((project) -> statuses.put(project, _git.createBranch(project, branchName, force)));
+                .forEach((project) -> statuses.put(project, _git.createBranch(project, branchName, startPoint, force)));
         return statuses;
-    }
-
-    @Override
-    public Map<Project, JGitStatus> push(List<Project> projects, ProgressListener progressListener) {
-        if(progressListener == null){
-            progressListener = EmptyProgressListener.get();
-        }
-        return _git.push(projects, progressListener);
     }
 
     private void discardChanges(Project project, Map<Project, JGitStatus> results) {
@@ -120,4 +113,32 @@ public class GitServiceImpl implements GitService {
         return _git.commitAndPush(projects, commitMessage, true, null, null, null, null, progressListener);
     }
 
+    @Override
+    public Set<Branch> getBranches(List<Project> projects, BranchType branchType, boolean isOnlyCommon) {
+        if (projects == null || branchType == null) {
+            return Collections.emptySet();
+        }
+        Set<Branch> branches = _git.getBranches(projects, branchType, isOnlyCommon);
+        return branches != null ? branches : Collections.emptySet();
+    }
+
+    @Override
+    public String getCurrentBranchName(Project project) {
+        if (project == null) {
+            return null;
+        }
+        Optional<String> currentBranch = _git.getCurrentBranch(project);
+        return currentBranch.isPresent() ? currentBranch.get() : null;
+    }
+
+    @Override
+    public Map<Project, JGitStatus> push(List<Project> projects, ProgressListener progressListener) {
+        if (projects == null) {
+            return Collections.emptyMap();
+        }
+        if(progressListener == null){
+            progressListener = EmptyProgressListener.get();
+        }
+        return _git.push(projects, progressListener);
+    }
 }

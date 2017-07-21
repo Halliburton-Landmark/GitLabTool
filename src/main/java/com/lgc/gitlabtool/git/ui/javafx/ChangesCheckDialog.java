@@ -134,27 +134,24 @@ public class ChangesCheckDialog extends Alert {
      * 
      * @param changedProjects - list of projects have been changed
      * @param selectedProjects - total list of selected projects
-     * @param selectedBranchName - name of the selected branch
+     * @param selectedItem - parameter for biConsumer
      * @param biConsumer - the code that should be performed if <code>changedProjects</code>
-     *                     list is not empty. </br>
-     *                     The parameters in <code>biConsumer</code> are:</br>
-     *                     <code>List&lt;Project&gt;</code> is a list of projects</br>
-     *                     <code>String</code> is a name of the branch
+     *                     list is not empty.
      * @see {@link BiConsumer}
      */
     public void launchConfirmationDialog(List<Project> changedProjects, List<Project> selectedProjects,
-            String selectedBranchName, BiConsumer<List<Project>, String> biConsumer) {
+            Object selectedItem, BiConsumer<List<Project>, Object> biConsumer) {
 
         ChangesCheckDialog alert = this;
         Optional<ButtonType> result = alert.showAndWait();
 
         if (alert.getCommitButton().equals(result.orElse(ButtonType.CANCEL))) {
             Map<Project, JGitStatus> commitStatuses = commitChanges(changedProjects);
-            executeBiConsumer(biConsumer, commitStatuses, selectedProjects, selectedBranchName);
+            executeBiConsumer(biConsumer, commitStatuses, selectedProjects, selectedItem);
 
         } else if (alert.getDiscardButton().equals(result.orElse(ButtonType.CANCEL))) {
             Map<Project, JGitStatus> discardStatuses = discardChanges(changedProjects);
-            executeBiConsumer(biConsumer, discardStatuses, selectedProjects, selectedBranchName);
+            executeBiConsumer(biConsumer, discardStatuses, selectedProjects, selectedItem);
         } else {
             alert.close();
         }
@@ -171,16 +168,16 @@ public class ChangesCheckDialog extends Alert {
      * @param biConsumer - code that should be executed
      * @param operationStatuses - statuses of executed operation (discard or commit)
      * @param selectedProjects - list of selected projects
-     * @param selectedBranchName - branch name
+     * @param selectedItem - selected item
      */
-    private void executeBiConsumer(BiConsumer<List<Project>, String> biConsumer,
-            Map<Project, JGitStatus> operationStatuses, List<Project> selectedProjects, String selectedBranchName) {
+    private void executeBiConsumer(BiConsumer<List<Project>, Object> biConsumer,
+            Map<Project, JGitStatus> operationStatuses, List<Project> selectedProjects, Object selectedItem) {
 
         List<Project> projectsForExecution = selectedProjects.stream()
                 .filter(project -> isNotFailedOperation(operationStatuses, project))
                 .collect(Collectors.toList());
 
-        NullCheckUtil.acceptBiConsumer(biConsumer, projectsForExecution, selectedBranchName);
+        NullCheckUtil.acceptBiConsumer(biConsumer, projectsForExecution, selectedItem);
     }
 
     /**
