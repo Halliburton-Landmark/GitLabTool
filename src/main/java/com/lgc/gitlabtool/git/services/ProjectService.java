@@ -52,10 +52,11 @@ public interface ProjectService {
     boolean isProjectExists(Group group, String nameProject);
 
     /**
+     * Clones shadow projects
      *
-     * @param projects
-     * @param destinationPath
-     * @param progressListener
+     * @param projects         projects which didn't clone.
+     * @param destinationPath  the local path of parent group
+     * @param progressListener listener for obtaining data on the process of performing the operation.
      */
     void clone (List<Project> projects,  String destinationPath, ProgressListener progressListener);
 }

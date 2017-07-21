@@ -129,6 +129,8 @@ public class MainWindowController {
     private void setDisablePropertyForButtons() {
         BooleanBinding booleanBinding = projectsList.getSelectionModel().selectedItemProperty().isNull();
 
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.CLONE_PROJECT_BUTTON.getId()).disableProperty()
+                .bind(booleanBinding);
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.NEW_BRANCH_BUTTON.getId()).disableProperty()
                 .bind(booleanBinding);
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.SWITCH_BRANCH_BUTTON.getId()).disableProperty()
@@ -138,6 +140,7 @@ public class MainWindowController {
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.PUSH_BUTTON.getId()).disableProperty()
                 .bind(booleanBinding);
 
+        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_COMMIT).disableProperty().bind(booleanBinding);
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_SWITCH_BRANCH).disableProperty()
                 .bind(booleanBinding);
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_CREATE_BRANCH).disableProperty()
@@ -352,13 +355,14 @@ public class MainWindowController {
 
     @FXML
     public void cloneShadowProject(ActionEvent actionEvent) {
-        List<Project> selectedProjects = projectsList.getSelectionModel().getSelectedItems();
-
+        List<Project> shadowProjects = getSelectProjects().stream()
+                                                            .filter(project -> !project.isCloned())
+                                                            .collect(Collectors.toList());
         Stage stage = (Stage) selectAllButton.getScene().getWindow();
-
         String path = _currentGroup.getPathToClonedGroup();
+
         CloneProgressDialog progressDialog = new CloneProgressDialog(stage, _currentGroup.getName(), ApplicationState.CLONE);
-        _projectService.clone(selectedProjects, path,
+        _projectService.clone(shadowProjects, path,
                 new CloneProgressListener(progressDialog, (obj) -> refreshLoadProjects(null)));
     }
 
