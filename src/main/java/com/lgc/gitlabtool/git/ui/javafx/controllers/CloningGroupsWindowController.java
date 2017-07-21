@@ -16,9 +16,9 @@ import com.lgc.gitlabtool.git.services.LoginService;
 import com.lgc.gitlabtool.git.services.ProgressListener;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StateService;
-import com.lgc.gitlabtool.git.ui.dialogs.CloneProgressDialog;
-import com.lgc.gitlabtool.git.ui.dialogs.CloneProgressDialog.CloningMessageStatus;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
+import com.lgc.gitlabtool.git.ui.javafx.CloneProgressDialog;
+import com.lgc.gitlabtool.git.ui.javafx.CloneProgressDialog.CloningMessageStatus;
 import com.lgc.gitlabtool.git.util.PathUtilities;
 import com.lgc.gitlabtool.git.util.ScreenUtil;
 

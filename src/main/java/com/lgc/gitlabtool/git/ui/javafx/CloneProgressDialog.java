@@ -1,4 +1,4 @@
-package com.lgc.gitlabtool.git.ui.dialogs;
+package com.lgc.gitlabtool.git.ui.javafx;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;

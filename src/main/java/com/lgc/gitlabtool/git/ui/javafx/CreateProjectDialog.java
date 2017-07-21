@@ -1,4 +1,4 @@
-package com.lgc.gitlabtool.git.ui.dialogs;
+package com.lgc.gitlabtool.git.ui.javafx;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;

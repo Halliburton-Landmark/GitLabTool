@@ -1,4 +1,4 @@
-package com.lgc.gitlabtool.git.ui.dialogs;
+package com.lgc.gitlabtool.git.ui.javafx;
 
 import javafx.scene.Group;
 import javafx.scene.Node;

@@ -1,4 +1,4 @@
-package com.lgc.gitlabtool.git.ui.dialogs;
+package com.lgc.gitlabtool.git.ui.javafx;
 
 import java.util.Arrays;
 import java.util.Map;

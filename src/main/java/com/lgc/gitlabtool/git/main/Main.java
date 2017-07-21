@@ -11,7 +11,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.lgc.gitlabtool.git.connections.RESTConnector;
 import com.lgc.gitlabtool.git.ui.UserInterface;
-import com.lgc.gitlabtool.git.ui.dialogs.JavaFXUI;
+import com.lgc.gitlabtool.git.ui.javafx.JavaFXUI;
 import com.lgc.gitlabtool.git.util.ProjectPropertiesUtil;
 
 
