@@ -93,7 +93,6 @@ public class StateServiceImpl implements StateService {
             _listeners.put(state, newSet);
         } else {
             listeners.add(addListener);
-            _listeners.put(state, listeners);
         }
     }
 
@@ -102,7 +101,6 @@ public class StateServiceImpl implements StateService {
         Set<StateListener> listeners = _listeners.get(state);
         if (listeners != null && !listeners.isEmpty()) {
             listeners.remove(removeListener);
-            _listeners.put(state, listeners);
         }
     }
 

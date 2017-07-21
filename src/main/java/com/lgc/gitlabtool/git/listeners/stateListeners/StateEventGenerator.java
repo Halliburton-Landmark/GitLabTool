@@ -8,7 +8,7 @@ package com.lgc.gitlabtool.git.listeners.stateListeners;
 *
 * @author Lyudmila Lyska
 */
-public interface StateListenerGenerator {
+public interface StateEventGenerator {
 
     /**
      * Adds listener for tracking changing of the state

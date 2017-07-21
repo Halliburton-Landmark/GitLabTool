@@ -1,7 +1,7 @@
 package com.lgc.gitlabtool.git.services;
 
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
-import com.lgc.gitlabtool.git.listeners.stateListeners.StateListenerGenerator;
+import com.lgc.gitlabtool.git.listeners.stateListeners.StateEventGenerator;
 
 /**
  * State service stores data about all states our program.
@@ -14,7 +14,7 @@ import com.lgc.gitlabtool.git.listeners.stateListeners.StateListenerGenerator;
  *
  * @author Lyudmila Lyska
  */
-public interface StateService extends StateListenerGenerator {
+public interface StateService extends StateEventGenerator {
 
     /**
      * Activates the state.
