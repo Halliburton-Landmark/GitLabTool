@@ -81,7 +81,6 @@ public class JGitTest {
 
     private static final String NAME_BRANCH = "test_name";
     private static final String CORRECT_PATH = "/path";
-    private static final Integer COUNT_INCORRECT_PROJECT = 2;
 
     @Test(expected = IllegalArgumentException.class)
     public void cloneGroupIncorrectDataExceptionGroupTest() {
@@ -366,17 +365,18 @@ public class JGitTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void pushProjectsIsNullTest() {
-        JGit.getInstance().push(null, null, null);
+        JGit.getInstance().push(null, null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void pushProjectsIsEmptyTest() {
-        JGit.getInstance().push(new ArrayList<>(), null, null);
+        JGit.getInstance().push(new ArrayList<>(), null);
     }
 
     @Test
     public void pushIncorrectDataTest() {
-        Assert.assertTrue(getJGitMock(null).push(getProjects(), null, null));
+        Map<Project, JGitStatus> statuses = getJGitMock(null).push(getProjects(), new EmptyListener());
+        Assert.assertEquals(statuses.size(), getCountIncorrectStatuses(statuses));
 
         Git gitMock = getGitMock();
         PushCommand pushCommandMock = new PushCommand(getRepository()) {
@@ -386,7 +386,8 @@ public class JGitTest {
             }
         };
         Mockito.when(gitMock.push()).thenReturn(pushCommandMock);
-        Assert.assertTrue(getJGitMock(gitMock).push(getProjects(), null, null));
+        Map<Project, JGitStatus> results = getJGitMock(gitMock).push(getProjects(), new EmptyListener());
+        Assert.assertEquals(results.size(),getCountIncorrectStatuses(results));
     }
 
     @Test
@@ -399,9 +400,9 @@ public class JGitTest {
             }
         };
         Mockito.when(gitMock.push()).thenReturn(pushCommandMock);
-        Assert.assertTrue(getJGitMock(gitMock).push(getProjects(), (progress) -> {
-        }, (progress, message) -> {
-        }));
+        Map<Project, JGitStatus> statuses = getJGitMock(gitMock).push(getProjects(),  new EmptyListener());
+        Assert.assertEquals(getCountCorrectStatuses(statuses),getCountCorrectProject(getProjects()));
+
     }
 
     @Test(expected = IllegalArgumentException.class)

@@ -29,7 +29,7 @@ import javafx.stage.Stage;
  */
 public class ToolbarManager {
     private static final Logger logger = LogManager.getLogger(ToolbarManager.class);
-    private static final String CHANGE_GROUP_BUTTON_ICON_URL = "icons/main/change_group.png";
+    private static final String CHANGE_GROUP_BUTTON_ICON_URL = "icons/toolbar/change_group_20x20.png";
     private static final String CHANGE_GROUP_BUTTON_TEXT = "Change group";
     private static final String CHANGE_GROUP_BUTTON_TOOLTIP = "Change current group";
     private static final String CHANGE_GROUP_BUTTON_ID = "changeGroupButton";

@@ -12,21 +12,23 @@ import com.lgc.gitlabtool.git.ui.ViewKey;
  */
 public enum ToolbarButtons {
 
-    CLONE_GROUP_BUTTON(ViewKey.GROUP_WINDOW.getKey(), "group_cloneGroup", "icons/group_window/clone.png", "Clone group", "Clone group"),
-    REMOVE_GROUP_BUTTON(ViewKey.GROUP_WINDOW.getKey(), "group_removeGroup", "icons/group_window/remove.png", "Remove group", "Remove selected group"),
-    IMPORT_GROUP_BUTTON(ViewKey.GROUP_WINDOW.getKey(), "group_importGroup", "icons/group_window/import.png", "Import group", "Import group from disk"),
-    SELECT_GROUP_BUTTON(ViewKey.GROUP_WINDOW.getKey(), "group_selectGroup", "icons/group_window/select.png", "Load group", "Load selected group"),
+    CLONE_GROUP_BUTTON(ViewKey.GROUP_WINDOW.getKey(), "group_cloneGroup", "icons/toolbar/clone_20x20.png", "Clone group", "Clone group"),
+    REMOVE_GROUP_BUTTON(ViewKey.GROUP_WINDOW.getKey(), "group_removeGroup", "icons/toolbar/remove_20x20.png", "Remove group", "Remove selected group"),
+    IMPORT_GROUP_BUTTON(ViewKey.GROUP_WINDOW.getKey(), "group_importGroup", "icons/toolbar/import_20x20.png", "Import group", "Import group from disk"),
+    SELECT_GROUP_BUTTON(ViewKey.GROUP_WINDOW.getKey(), "group_selectGroup", "icons/toolbar/select_20x20.png", "Load group", "Load selected group"),
 
     /* Temporary unavailable buttons
     ADD_REPO_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "repo_addRepo", "", "Add repository", "Add repository"),
-    REMOVE_REPO_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "repo_removeRepo", "icons/main/remove.png", "Remove repository", "Remove repository"),
-    EDIT_REPO_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "repo_editRepo", "icons/main/edit.png", "Edit repository", "Edit repository"),
-    DELETE_BRANCH_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "branch_deleteBranch", "icons/main/remove.png", "Remove branch", "Remove branch");
+    REMOVE_REPO_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "repo_removeRepo", "icons/toolbar/remove_20x20.png", "Remove repository", "Remove repository"),
+    EDIT_REPO_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "repo_editRepo", "icons/toolbar/edit_20x20.png", "Edit repository", "Edit repository"),
+    DELETE_BRANCH_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "branch_deleteBranch", "icons/toolbar/remove_20x20.png", "Remove branch", "Remove branch");
     */
-    CREATE_PROJECT_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "create_project_button", "icons/main/create_project.png", "Create project", "Create new project"),
-    NEW_BRANCH_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "branch_newBranch", "icons/main/new_branch.png", "New branch", "Create new branch"),
-    SWITCH_BRANCH_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "branch_switchBranch", "icons/main/switch.png", "Switch branch", "Switch to another branch"),
-    REFRESH_PROJECTS(ViewKey.MAIN_WINDOW.getKey(), "refresh_projects", "icons/main/refresh_projects.png", "Refresh projects", "Refresh projects' list");
+    CREATE_PROJECT_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "create_project_button", "icons/toolbar/create_project_20x20.png", "Create project", "Create new project"),
+    NEW_BRANCH_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "branch_newBranch", "icons/toolbar/new_branch_20x20.png", "New branch", "Create new branch"),
+    SWITCH_BRANCH_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "branch_switchBranch", "icons/toolbar/switch_20x20.png", "Switch branch", "Switch to another branch"),
+    COMMIT_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "commit", "icons/toolbar/commit_20x20.png", "Commit", "Show commit dialog"),
+    PUSH_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "push", "icons/toolbar/push_20x20.png", "Push", "Show push dialog"),
+    REFRESH_PROJECTS(ViewKey.MAIN_WINDOW.getKey(), "refresh_projects", "icons/toolbar/refresh_projects_20x20.png", "Refresh projects", "Refresh projects' list");
 
     private final String viewKey;
     private final String id;
