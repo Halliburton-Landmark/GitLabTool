@@ -358,6 +358,10 @@ public class MainWindowController {
         List<Project> shadowProjects = getSelectProjects().stream()
                                                             .filter(project -> !project.isCloned())
                                                             .collect(Collectors.toList());
+        if (shadowProjects == null || shadowProjects.isEmpty()) {
+            _logger.info("Shadow projects for cloning have not been selected!");
+            return;
+        }
         Stage stage = (Stage) selectAllButton.getScene().getWindow();
         String path = _currentGroup.getPathToClonedGroup();
 
