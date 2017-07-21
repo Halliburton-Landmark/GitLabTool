@@ -2,7 +2,7 @@ package com.lgc.gitlabtool.git.listeners.stateListeners;
 
 /**
 * Allows to generate state changing application state and to send it to all listeners.
-* Generator can signs the listeners for several events and for a specific event.
+* Generator can sign the listeners for several events and for a specific event.
 *
 * Notifies the listeners about the application state change.
 *
