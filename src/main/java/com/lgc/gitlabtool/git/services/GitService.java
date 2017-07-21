@@ -113,4 +113,12 @@ public interface GitService {
      */
     Map<Project, JGitStatus> push(List<Project> projects, ProgressListener progressListener);
 
+    /**
+     * Pulls changes in selected projects from upstream
+     * 
+     * @param projects - selected projects
+     * @return map of operation statuses or empty collection if projects list is equals to null
+     */
+    Map<Project, JGitStatus> pull(List<Project> projects);
+
 }
