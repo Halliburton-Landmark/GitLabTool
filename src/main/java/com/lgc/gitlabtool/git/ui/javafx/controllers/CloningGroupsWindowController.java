@@ -242,8 +242,12 @@ public class CloningGroupsWindowController {
     }
 
     private void filterForOkButton() {
-        if (projectsList.getSelectionModel().selectedItemProperty().isNull().get() || isIncorrectPath()) {
+        if (isIncorrectPath()) {
             setStyleAndDisableForIncorrectData();
+            return;
+        } else if (projectsList.getSelectionModel().selectedItemProperty().isNull().get()) {
+            folderPath.setStyle("-fx-border-color: green;");
+            okButton.setDisable(true);
         } else {
             folderPath.setStyle("-fx-border-color: green;");
             okButton.setDisable(false);
