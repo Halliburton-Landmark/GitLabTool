@@ -1,6 +1,5 @@
 package com.lgc.gitlabtool.git.services;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -134,8 +133,11 @@ public class GitServiceImpl implements GitService {
 
     @Override
     public Map<Project, JGitStatus> push(List<Project> projects, ProgressListener progressListener) {
-        if (projects == null || progressListener == null) {
+        if (projects == null) {
             return Collections.emptyMap();
+        }
+        if(progressListener == null){
+            progressListener = EmptyProgressListener.get();
         }
         return _git.push(projects, progressListener);
     }

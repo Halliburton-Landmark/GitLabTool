@@ -332,7 +332,7 @@ public class JGit {
         for (Project pr : projects) {
             currentProgress += aStepInProgress;
             if (pr == null) {
-                statuses.put(new Project(), JGitStatus.FAILED);
+                statuses.put(pr, JGitStatus.FAILED);
                 continue;
             }
             if (!pr.isCloned()) {
@@ -423,7 +423,7 @@ public class JGit {
         for (Project pr : projects) {
             currentProgress += aStepInProgress;
             if (pr == null) {
-                statuses.put(new Project(), JGitStatus.FAILED);
+                statuses.put(pr, JGitStatus.FAILED);
                 continue;
             }
             if (!pr.isCloned()) {
@@ -443,7 +443,6 @@ public class JGit {
             }
             progressListener.onSuccess(currentProgress);
             statuses.put(pr, JGitStatus.SUCCESSFUL);
-            logger.debug("Commit and push for projects is " + JGitStatus.SUCCESSFUL);
         }
         return statuses;
     }
@@ -480,8 +479,8 @@ public class JGit {
                 progressListener.onError(project);
                 continue;
             }
-            statuses.put(project, pushStatus);
             progressListener.onSuccess(project);
+            statuses.put(project, pushStatus);
         }
         return statuses;
     }
