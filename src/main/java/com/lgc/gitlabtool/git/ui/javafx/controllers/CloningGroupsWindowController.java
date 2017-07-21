@@ -12,6 +12,7 @@ import com.lgc.gitlabtool.git.services.LoginService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.javafx.CloneProgressDialog;
+import com.lgc.gitlabtool.git.ui.javafx.CloneProgressListener;
 import com.lgc.gitlabtool.git.util.PathUtilities;
 
 import javafx.collections.FXCollections;
@@ -91,8 +92,7 @@ public class CloningGroupsWindowController {
     @FXML
     public void onOkButton() throws Exception {
         Stage stage = (Stage) okButton.getScene().getWindow();
-        //stage.close();
-
+        stage.close();
 
         String destinationPath = folderPath.getText();
         List<Group> selectedGroups = projectsList.getSelectionModel().getSelectedItems();
@@ -100,8 +100,7 @@ public class CloningGroupsWindowController {
 
         CloneProgressDialog progressDialog = new CloneProgressDialog(stage, group.getName(), ApplicationState.CLONE);
         _stateService.stateON(ApplicationState.CLONE);
-        _groupsService.cloneGroups(selectedGroups, destinationPath,
-                new CloneProgressListener(progressDialog, (obj) -> stage.close()));
+        _groupsService.cloneGroups(selectedGroups, destinationPath, new CloneProgressListener(progressDialog));
     }
 
     @FXML

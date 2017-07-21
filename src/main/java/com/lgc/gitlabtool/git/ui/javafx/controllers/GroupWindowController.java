@@ -9,9 +9,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.lgc.gitlabtool.git.entities.Group;
+import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
+import com.lgc.gitlabtool.git.listeners.stateListeners.StateListener;
 import com.lgc.gitlabtool.git.services.ClonedGroupsService;
 import com.lgc.gitlabtool.git.services.LoginService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
+import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.ViewKey;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 import com.lgc.gitlabtool.git.ui.javafx.StatusDialog;
@@ -50,7 +53,7 @@ import javafx.util.Callback;
 /**
  * @author Yevhen Strazhko
  */
-public class GroupWindowController {
+public class GroupWindowController implements StateListener {
     private static final Logger _logger = LogManager.getLogger(GroupWindowController.class);
 
     private static final String CLONE_WINDOW_TITLE = "Cloning window";
@@ -64,14 +67,18 @@ public class GroupWindowController {
     @FXML
     private ListView<Group> groupList;
 
-    private final LoginService _loginService = (LoginService) ServiceProvider.getInstance()
-            .getService(LoginService.class.getName());
+    private static final LoginService _loginService = (LoginService) ServiceProvider.getInstance()
+                    .getService(LoginService.class.getName());
 
-    private final ClonedGroupsService _clonedGroupsService = (ClonedGroupsService) ServiceProvider.getInstance()
-            .getService(ClonedGroupsService.class.getName());
+    private static final ClonedGroupsService _clonedGroupsService = (ClonedGroupsService) ServiceProvider.getInstance()
+                    .getService(ClonedGroupsService.class.getName());
+
+    private static final StateService _stateService = (StateService) ServiceProvider.getInstance()
+            .getService(StateService.class.getName());
 
     @FXML
     public void initialize() {
+        _stateService.addStateListener(ApplicationState.CLONE, this);
         configureListView(groupList);
         new Thread(this::updateClonedGroups).start();
 
@@ -147,12 +154,16 @@ public class GroupWindowController {
     }
 
     private void updateClonedGroups() {
-        _logger.info("Updating groups...");
-        List<Group> userGroups = _clonedGroupsService.loadClonedGroups();
-        if (userGroups != null) {
-            groupList.setItems(FXCollections.observableList(userGroups));
-            showNotExistGroups(_clonedGroupsService.getNotExistGroup());
-        }
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                List<Group> userGroups = _clonedGroupsService.loadClonedGroups();
+                if (userGroups != null) {
+                    groupList.setItems(FXCollections.observableList(userGroups));
+                    showNotExistGroups(_clonedGroupsService.getNotExistGroup());
+                }
+            }
+        });
     }
 
     private void showNotExistGroups(Collection<Group> groups) {
@@ -259,5 +270,12 @@ public class GroupWindowController {
     public void refreshGroupsList() {
         updateClonedGroups();
         groupList.refresh();
+    }
+
+    @Override
+    public void handleEvent(ApplicationState changedState, boolean isActivate) {
+        if (!isActivate) {
+            updateClonedGroups();
+        }
     }
 }

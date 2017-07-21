@@ -1,4 +1,4 @@
-package com.lgc.gitlabtool.git.ui.javafx.controllers;
+package com.lgc.gitlabtool.git.ui.javafx;
 import java.util.function.Consumer;
 
 import com.lgc.gitlabtool.git.entities.Project;
@@ -8,7 +8,6 @@ import com.lgc.gitlabtool.git.services.ProgressListener;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
-import com.lgc.gitlabtool.git.ui.javafx.CloneProgressDialog;
 import com.lgc.gitlabtool.git.ui.javafx.CloneProgressDialog.CloningMessageStatus;
 import com.lgc.gitlabtool.git.util.NullCheckUtil;
 import com.lgc.gitlabtool.git.util.ScreenUtil;
