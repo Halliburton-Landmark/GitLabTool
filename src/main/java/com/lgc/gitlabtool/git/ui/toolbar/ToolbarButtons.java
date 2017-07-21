@@ -28,6 +28,7 @@ public enum ToolbarButtons {
     SWITCH_BRANCH_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "branch_switchBranch", "icons/toolbar/switch_20x20.png", "Switch branch", "Switch to another branch"),
     COMMIT_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "commit", "icons/toolbar/commit_20x20.png", "Commit", "Show commit dialog"),
     PUSH_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "push", "icons/toolbar/push_20x20.png", "Push", "Show push dialog"),
+    PULL_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "pull", "icons/toolbar/pull_20x20.png", "Pull", "Pull projects"),
     REFRESH_PROJECTS(ViewKey.MAIN_WINDOW.getKey(), "refresh_projects", "icons/toolbar/refresh_projects_20x20.png", "Refresh projects", "Refresh projects' list");
 
     private final String viewKey;

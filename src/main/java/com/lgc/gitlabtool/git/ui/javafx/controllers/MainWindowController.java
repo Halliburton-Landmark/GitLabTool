@@ -134,6 +134,8 @@ public class MainWindowController {
                 .bind(booleanBinding);
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.PUSH_BUTTON.getId()).disableProperty()
                 .bind(booleanBinding);
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.PULL_BUTTON.getId()).disableProperty()
+        .bind(booleanBinding);
 
 
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_SWITCH_BRANCH).disableProperty()
@@ -144,6 +146,8 @@ public class MainWindowController {
                 .bind(booleanBinding);
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_PUSH).disableProperty()
                 .bind(booleanBinding);
+        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_PULL).disableProperty()
+        .bind(booleanBinding);
 
     }
 
@@ -274,6 +278,9 @@ public class MainWindowController {
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.PUSH_BUTTON.getId())
                 .setOnAction(this::onPushAction);
 
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.PULL_BUTTON.getId())
+        .setOnAction(this::onPullAction);
+
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_CREATE_BRANCH)
                 .setOnAction(this::onNewBranchButton);
 
@@ -282,6 +289,9 @@ public class MainWindowController {
 
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_PUSH)
                 .setOnAction(this::onPushAction);
+
+        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_PULL)
+        .setOnAction(this::onPullAction);
     }
 
     @FXML
@@ -366,6 +376,20 @@ public class MainWindowController {
         StatusDialog statusDialog = new StatusDialog(title, header);
         statusDialog.showMessage(statuses, countProjects, message);
         statusDialog.showAndWait();
+    }
+
+    @FXML
+    public void onPullAction(ActionEvent actionEvent) {
+        List<Project> selectedProjects = projectsList.getSelectionModel().getSelectedItems();
+        List<Project> projectsToPull = selectedProjects.stream()
+                .filter(project -> project.isCloned())
+                .collect(Collectors.toList());
+        
+        Map<Project, JGitStatus> pullStatuses = _gitService.pull(projectsToPull);
+        String title = "Pull projects";
+        String header = "Pull projects";
+        String dialogMessage = "%s projects successfully pulled";
+        showStatusDialog(pullStatuses, selectedProjects.size(), title, header, dialogMessage);
     }
 
 }
