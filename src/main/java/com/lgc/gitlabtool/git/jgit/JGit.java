@@ -69,7 +69,7 @@ public class JGit {
     private final String ERROR_MSG_NOT_CLONED = " project is not cloned. The operation is impossible";
 
     public static final String FINISH_CLONE_MESSAGE = "The cloning process is finished.";
-    private static final String CANCEL_CLONE_MESSAGE = "Cloning process of group was canceled.";
+    private static final String CANCEL_CLONE_MESSAGE = "Cloning process was canceled.";
     private static final String ORIGIN_PREFIX = "origin/";
     private static final String WRONG_PARAMETERS = "Wrong parameters for obtaining branches.";
 
@@ -175,8 +175,8 @@ public class JGit {
      */
     public boolean clone(Collection<Project> projects, String localPath, ProgressListener progressListener) {
         _isCloneCancelled = false;
-        if (projects == null || localPath == null || projects.isEmpty()) {
-            String errorMsg = "Cloning error. Projects or local path is null or the group doesn't have projects.";
+        if (projects == null || localPath == null) {
+            String errorMsg = "Cloning error. Projects or local path is null.";
             progressListener.onError(1.0, errorMsg);
             progressListener.onFinish(null, FINISH_CLONE_MESSAGE);
             throw new IllegalArgumentException(errorMsg);
@@ -201,11 +201,11 @@ public class JGit {
                         logger.info(errorMsg);
                         continue;
                     }
-                    progressListener.onSuccess(project, currentProgress);
+                    progressListener.onSuccess(project, currentProgress, null);
                     logger.info("The " + project.getName() + " project was successfully cloned.");
                 }
             }
-            progressListener.onFinish(_isCloneCancelled ? CANCEL_CLONE_MESSAGE : FINISH_CLONE_MESSAGE);
+            progressListener.onFinish(_isCloneCancelled ? CANCEL_CLONE_MESSAGE : FINISH_CLONE_MESSAGE, true);
         };
 
         Thread t = new Thread(task, "Clone Group Thread");

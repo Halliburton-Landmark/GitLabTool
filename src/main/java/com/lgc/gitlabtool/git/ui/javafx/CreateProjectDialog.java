@@ -6,11 +6,13 @@ import java.util.function.Consumer;
 
 import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.Project;
+import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.project.nature.projecttype.ProjectType;
 import com.lgc.gitlabtool.git.services.ProgressListener;
 import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ProjectTypeService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
+import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 import com.lgc.gitlabtool.git.util.NameValidator;
 import com.lgc.gitlabtool.git.util.NullCheckUtil;
@@ -59,6 +61,9 @@ public class CreateProjectDialog extends Dialog<String> {
 
     private static final ProjectService _projectService =
             (ProjectService) ServiceProvider.getInstance().getService(ProjectService.class.getName());
+
+    private final StateService _stateService = (StateService) ServiceProvider.getInstance()
+            .getService(StateService.class.getName());
 
     private final GridPane grid = new GridPane();
 
@@ -111,6 +116,11 @@ public class CreateProjectDialog extends Dialog<String> {
         stage.setResizable(false);
         stage.setTitle(DIALOG_TITLE);
         stage.getIcons().add(appIcon);
+        stage.setOnCloseRequest(event -> {
+            if (_stateService.isActiveState(ApplicationState.CREATE_PROJECT)) {
+                event.consume();
+            }
+        });
 
          /* Set sizing and position */
         ScreenUtil.adaptForMultiScreens(stage, 350, 150);
@@ -125,10 +135,12 @@ public class CreateProjectDialog extends Dialog<String> {
         addProgressBarOnPanel();
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.submit(() -> {
+            _stateService.stateON(ApplicationState.CREATE_PROJECT);
             String idType = _typeComboBox.getSelectionModel().getSelectedItem();
             ProjectType projectType = _typeServies.getTypeById(idType);
             _projectService.createProject(_selectGroup, _projectNameField.getText(), projectType,
                     new CreateProjectProgressListener());
+            _stateService.stateOFF(ApplicationState.CREATE_PROJECT);
         });
         executor.shutdown();
     }

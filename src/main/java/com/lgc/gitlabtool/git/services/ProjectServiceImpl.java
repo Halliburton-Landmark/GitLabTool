@@ -222,7 +222,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     private boolean createStructure(Project project, String structure) {
         Path path = Paths.get(project.getPathToClonedProject() + File.separator + structure);
-        return PathUtilities.createPath(path);
+        return PathUtilities.createPath(path, false);
     }
 
     private void commitAndPushStructuresType(List<Project> projects, Set<String> structures,
