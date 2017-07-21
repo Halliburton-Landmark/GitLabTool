@@ -255,4 +255,20 @@ public class ProjectServiceImpl implements ProjectService {
                 : "Failed creating the " + createdProject.getName() + " project!";
         progressListener.onFinish(isCreatedStructure ? createdProject : null, fineshedMessage);
     }
+
+    @Override
+    public void clone(List<Project> projects, String destinationPath, ProgressListener progressListener) {
+        if (projects == null || destinationPath == null || progressListener == null) {
+            throw new IllegalArgumentException("Invalid parameters.");
+        }
+        Path path = Paths.get(destinationPath);
+        if (!PathUtilities.isExistsAndDirectory(path)) {
+            String errorMessage = path.toAbsolutePath() + " path is not exist or it is not a directory.";
+            _logger.error(errorMessage);
+            progressListener.onError(null, errorMessage);
+            progressListener.onFinish(null, false);
+            return;
+        }
+        _git.clone(projects, destinationPath, progressListener);
+    }
 }

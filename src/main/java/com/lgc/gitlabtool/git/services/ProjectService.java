@@ -1,6 +1,7 @@
 package com.lgc.gitlabtool.git.services;
 
 import java.util.Collection;
+import java.util.List;
 
 import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.Project;
@@ -49,4 +50,12 @@ public interface ProjectService {
      * @return true - if project with this name has already existed, otherwise - false.
      */
     boolean isProjectExists(Group group, String nameProject);
+
+    /**
+     *
+     * @param projects
+     * @param destinationPath
+     * @param progressListener
+     */
+    void clone (List<Project> projects,  String destinationPath, ProgressListener progressListener);
 }

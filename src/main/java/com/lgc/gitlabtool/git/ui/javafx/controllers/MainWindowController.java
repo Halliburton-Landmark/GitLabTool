@@ -1,6 +1,5 @@
 package com.lgc.gitlabtool.git.ui.javafx.controllers;
 
-
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -62,14 +61,14 @@ public class MainWindowController {
     private Preferences preferences;
     private static final Logger _logger = LogManager.getLogger(MainWindowController.class);
 
-    private static final LoginService _loginService =
-            (LoginService) ServiceProvider.getInstance().getService(LoginService.class.getName());
+    private static final LoginService _loginService = (LoginService) ServiceProvider.getInstance()
+            .getService(LoginService.class.getName());
 
-    private static final ProjectService _projectService =
-            (ProjectService) ServiceProvider.getInstance().getService(ProjectService.class.getName());
+    private static final ProjectService _projectService = (ProjectService) ServiceProvider.getInstance()
+            .getService(ProjectService.class.getName());
 
-    private static final GitService _gitService =
-            (GitService) ServiceProvider.getInstance().getService(GitService.class.getName());
+    private static final GitService _gitService = (GitService) ServiceProvider.getInstance()
+            .getService(GitService.class.getName());
 
     @FXML
     private ListView<Project> projectsList;
@@ -93,7 +92,8 @@ public class MainWindowController {
         String groupTitle = _currentGroup.getName() + " [" + _currentGroup.getPathToClonedGroup() + "]";
         leftLabel.setText(HEDER_GROUP_TITLE + groupTitle);
 
-        Image imageSelectAll = new Image(getClass().getClassLoader().getResource(SELECT_ALL_IMAGE_URL).toExternalForm());
+        Image imageSelectAll = new Image(
+                getClass().getClassLoader().getResource(SELECT_ALL_IMAGE_URL).toExternalForm());
         selectAllButton.setGraphic(new ImageView(imageSelectAll));
 
         preferences = getPreferences(DIVIDER_PROPERTY_NODE);
@@ -105,16 +105,15 @@ public class MainWindowController {
 
         configureListView(projectsList);
 
-        splitPanelMain.getDividers().get(0).positionProperty().addListener(
-                (observable, oldValue, newValue) -> {
-                    if (preferences != null) {
-                        preferences.putDouble(groupTitle, newValue.doubleValue());
-                    }
-                });
+        splitPanelMain.getDividers().get(0).positionProperty().addListener((observable, oldValue, newValue) -> {
+            if (preferences != null) {
+                preferences.putDouble(groupTitle, newValue.doubleValue());
+            }
+        });
 
         setDisablePropertyForButtons();
 
-        //TODO: Additional thread should be placed to services
+        // TODO: Additional thread should be placed to services
         Thread t = new Thread(this::refreshProjectList);
         t.setName("Refresh project list");
         t.start();
@@ -135,15 +134,12 @@ public class MainWindowController {
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.PUSH_BUTTON.getId()).disableProperty()
                 .bind(booleanBinding);
 
-
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_SWITCH_BRANCH).disableProperty()
                 .bind(booleanBinding);
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_CREATE_BRANCH).disableProperty()
                 .bind(booleanBinding);
-        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_COMMIT).disableProperty()
-                .bind(booleanBinding);
-        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_PUSH).disableProperty()
-                .bind(booleanBinding);
+        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_COMMIT).disableProperty().bind(booleanBinding);
+        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_PUSH).disableProperty().bind(booleanBinding);
 
     }
 
@@ -152,7 +148,7 @@ public class MainWindowController {
         _currentGroup = group;
     }
 
-    public void refreshProjectsList(){
+    public void refreshProjectsList() {
         projectsList.refresh();
     }
 
@@ -163,7 +159,7 @@ public class MainWindowController {
         }
     }
 
-    public void onDeselectAll(){
+    public void onDeselectAll() {
         if (projectsList != null && projectsList.getItems() != null && !projectsList.getItems().isEmpty()) {
             projectsList.getSelectionModel().clearSelection();
             projectsList.requestFocus();
@@ -196,17 +192,17 @@ public class MainWindowController {
         } catch (IllegalStateException ise) {
             _logger.error("Node has been removed with the removeNode() method");
             return null;
-        } catch (NullPointerException npe){
+        } catch (NullPointerException npe) {
             _logger.error("Key is null");
             return null;
         }
     }
 
     private void configureListView(ListView<Project> listView) {
-        //config displayable string
+        // config displayable string
         listView.setCellFactory(p -> new ProjectListCell());
 
-        //setup selection
+        // setup selection
         listView.getSelectionModel().getSelectedItems().addListener((ListChangeListener<Project>) changed -> {
             if (areAllItemsSelected(listView)) {
                 selectAllButton.setText("Deselect all");
@@ -259,29 +255,29 @@ public class MainWindowController {
 
     private void initToolbarMainMenuActions() {
 
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.REFRESH_PROJECTS.getId())
+            .setOnAction(this::refreshLoadProjects);
+
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.CLONE_PROJECT_BUTTON.getId())
+            .setOnAction(this::refreshLoadProjects);
+
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.NEW_BRANCH_BUTTON.getId())
                 .setOnAction(this::onNewBranchButton);
 
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.CREATE_PROJECT_BUTTON.getId())
                 .setOnAction(this::createProjectButton);
 
-        ToolbarManager.getInstance().getButtonById(ToolbarButtons.REFRESH_PROJECTS.getId())
-        .setOnAction(this::refreshLoadProjects);
-
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.COMMIT_BUTTON.getId())
                 .setOnAction(this::onCommitAction);
 
-        ToolbarManager.getInstance().getButtonById(ToolbarButtons.PUSH_BUTTON.getId())
-                .setOnAction(this::onPushAction);
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.PUSH_BUTTON.getId()).setOnAction(this::onPushAction);
 
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_CREATE_BRANCH)
                 .setOnAction(this::onNewBranchButton);
 
-        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_COMMIT)
-                .setOnAction(this::onCommitAction);
+        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_COMMIT).setOnAction(this::onCommitAction);
 
-        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_PUSH)
-                .setOnAction(this::onPushAction);
+        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_PUSH).setOnAction(this::onPushAction);
     }
 
     @FXML
@@ -299,10 +295,8 @@ public class MainWindowController {
 
     private void showCreateNewBranchDialog() {
         List<Project> allSelectedProjects = projectsList.getSelectionModel().getSelectedItems();
-        List<Project> clonedProjects =
-                allSelectedProjects.stream()
-                        .filter(prj -> prj.isCloned())
-                        .collect(Collectors.toList());
+        List<Project> clonedProjects = allSelectedProjects.stream().filter(prj -> prj.isCloned())
+                .collect(Collectors.toList());
         CreateNewBranchDialog dialog = new CreateNewBranchDialog(clonedProjects);
         dialog.showAndWait();
     }
@@ -333,24 +327,22 @@ public class MainWindowController {
         Map<Project, JGitStatus> commitStatuses = dialog.commitChanges(projectWithChanges);
 
         String dialogMessage = "%s projects were pushed successfully";
-        showStatusDialog(commitStatuses, allSelectedProjects.size(), STATUS_DIALOG_TITLE,
-                STATUS_DIALOG_HEADER_COMMIT, dialogMessage);
+        showStatusDialog(commitStatuses, allSelectedProjects.size(), STATUS_DIALOG_TITLE, STATUS_DIALOG_HEADER_COMMIT,
+                dialogMessage);
 
     }
 
     @FXML
     public void onPushAction(ActionEvent actionEvent) {
         List<Project> allSelectedProjects = projectsList.getSelectionModel().getSelectedItems();
-        List<Project> filteredProjects = allSelectedProjects.stream()
-                .filter(prj -> prj.isCloned())
+        List<Project> filteredProjects = allSelectedProjects.stream().filter(prj -> prj.isCloned())
                 .collect(Collectors.toList());
 
-        Map<Project, JGitStatus> pushStatuses = _gitService.push(filteredProjects,
-                EmptyProgressListener.get());
+        Map<Project, JGitStatus> pushStatuses = _gitService.push(filteredProjects, EmptyProgressListener.get());
 
         String dialogMessage = "%s projects were pushed successfully";
-        showStatusDialog(pushStatuses, allSelectedProjects.size(), STATUS_DIALOG_TITLE,
-                STATUS_DIALOG_HEADER_PUSH, dialogMessage);
+        showStatusDialog(pushStatuses, allSelectedProjects.size(), STATUS_DIALOG_TITLE, STATUS_DIALOG_HEADER_PUSH,
+                dialogMessage);
 
     }
 
@@ -361,8 +353,8 @@ public class MainWindowController {
         statusDialog.showAndWait();
     }
 
-    private void showStatusDialog(Map<Project, JGitStatus> statuses, int countProjects, String title,
-                                  String header, String message) {
+    private void showStatusDialog(Map<Project, JGitStatus> statuses, int countProjects, String title, String header,
+            String message) {
         StatusDialog statusDialog = new StatusDialog(title, header);
         statusDialog.showMessage(statuses, countProjects, message);
         statusDialog.showAndWait();
