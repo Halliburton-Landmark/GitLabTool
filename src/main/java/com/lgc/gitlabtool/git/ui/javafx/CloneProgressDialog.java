@@ -111,7 +111,7 @@ public class CloneProgressDialog extends Dialog<DialogDTO> {
             @Override
             public void handle(ActionEvent e) {
                 _cancelButton.setDisable(true);
-                addMessageToConcole("Starting process cancel of cloning...", CloningMessageStatus.SIMPLE);
+                addMessageToConcole("Starting cancel process of cloning...", CloningMessageStatus.SIMPLE);
                 JGit.getInstance().cancelClone();
                 updateProgressBar(0.0);
             }

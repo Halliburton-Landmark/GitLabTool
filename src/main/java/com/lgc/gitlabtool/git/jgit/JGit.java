@@ -69,7 +69,7 @@ public class JGit {
     private final String ERROR_MSG_NOT_CLONED = " project is not cloned. The operation is impossible";
 
     public static final String FINISH_CLONE_MESSAGE = "The cloning process is finished.";
-    private static final String CANCEL_CLONE_MESSAGE = "Cloning process of group was canceled.";
+    private static final String CANCEL_CLONE_MESSAGE = "Cloning process was canceled.";
     private static final String ORIGIN_PREFIX = "origin/";
     private static final String WRONG_PARAMETERS = "Wrong parameters for obtaining branches.";
 
