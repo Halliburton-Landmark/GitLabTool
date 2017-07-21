@@ -2,6 +2,7 @@ package com.lgc.gitlabtool.git.services;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.lgc.gitlabtool.git.entities.Branch;
 import com.lgc.gitlabtool.git.entities.Project;
@@ -76,18 +77,37 @@ public interface GitService {
      *
      * @param projects     the projects that needs new branch
      * @param branchName   new branch name
+     * @param startPoint   corresponds to the start-point option; if <code>null</code>, the current HEAD will be used
      * @param force        if <code>true</code> and the branch with the given name
      *                     already exists, the start-point of an existing branch will be
      *                     set to a new start-point; if false, the existing branch will
      *                     not be changed
      * @return map with projects and theirs statuses of branch creating
      */
-    Map<Project, JGitStatus> createBranch(List<Project> projects, String branchName, boolean force);
+    Map<Project, JGitStatus> createBranch(List<Project> projects, String branchName, String startPoint, boolean force);
+
+    /**
+     * Returns the set of selected type of branches
+     * 
+     * @param projects     projects list
+     * @param branchType   selected {@link BranchType}
+     * @param isOnlyCommon if <code>true</code> returns only common branches for all projects and otherwise if <code>false</code>  
+     * @return set of the branches or empty set if such type of branches does not exist for this projects
+     */
+    Set<Branch> getBranches(List<Project> projects, BranchType branchType, boolean isOnlyCommon);
+
+    /**
+     * Returns current branch name for selected project
+     * 
+     * @param project - selected project
+     * @return current branch name for selected project or <code>null</code> if project has no branches (unreachable state)
+     */
+    String getCurrentBranchName(Project project);
 
     /**
      * Pushed selected projects to upstream
      *
-     * @param projects -        list of projects
+     * @param projects -         list of projects
      * @param progressListener - listener for obtaining data on the process of performing the operation
      * @return map of operation statuses
      */

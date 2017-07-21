@@ -114,14 +114,14 @@ public class SwitchBranchWindowController {
         List<Project> changedProjects = _gitService.getProjectsWithChanges(selectedProjects);
 
         if (changedProjects.isEmpty()) {
-            switchBranch(selectedProjects, selectedBranch.getBranchName());
+            switchBranch(selectedProjects, selectedBranch);
         } else {
-            launchSwitchBranchConfirmation(changedProjects, selectedProjects, selectedBranch.getBranchName());
+            launchSwitchBranchConfirmation(changedProjects, selectedProjects, selectedBranch);
         }
     }
 
-    private void switchBranch(List<Project> selectedProjects, String selectedBranchName) {
-        Map<Project, JGitStatus> switchStatuses = _gitService.switchTo(selectedProjects, selectedBranchName, false);
+    private void switchBranch(List<Project> selectedProjects, Object selectedBranch) {
+        Map<Project, JGitStatus> switchStatuses = _gitService.switchTo(selectedProjects, (Branch) selectedBranch);
 
         String dialogMessage = "%s projects were switched successfully";
 
@@ -130,10 +130,10 @@ public class SwitchBranchWindowController {
     }
 
     private void launchSwitchBranchConfirmation(List<Project> changedProjects,
-                                                List<Project> selectedProjects, String selectedBranchName) {
+                                                List<Project> selectedProjects, Branch selectedBranch) {
 
         ChangesCheckDialog alert = new ChangesCheckDialog();
-        alert.launchConfirmationDialog(changedProjects, selectedProjects, selectedBranchName, this::switchBranch);
+        alert.launchConfirmationDialog(changedProjects, selectedProjects, selectedBranch, this::switchBranch);
     }
 
     public void onClose(ActionEvent actionEvent) {

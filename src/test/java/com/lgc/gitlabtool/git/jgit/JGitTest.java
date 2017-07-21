@@ -70,6 +70,7 @@ import org.mockito.Mockito;
 
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.User;
+import com.lgc.gitlabtool.git.services.EmptyProgressListener;
 import com.lgc.gitlabtool.git.services.ProgressListener;
 
 /**
@@ -387,7 +388,12 @@ public class JGitTest {
         };
         Mockito.when(gitMock.push()).thenReturn(pushCommandMock);
         Map<Project, JGitStatus> results = getJGitMock(gitMock).push(getProjects(), new EmptyListener());
-        Assert.assertEquals(results.size(),getCountIncorrectStatuses(results));
+        Assert.assertEquals(results.size(), getCountIncorrectStatuses(results));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void pushDataWithNullListenerTest() {
+        getJGitMock(null).push(getProjects(), null);
     }
 
     @Test
@@ -402,7 +408,6 @@ public class JGitTest {
         Mockito.when(gitMock.push()).thenReturn(pushCommandMock);
         Map<Project, JGitStatus> statuses = getJGitMock(gitMock).push(getProjects(),  new EmptyListener());
         Assert.assertEquals(getCountCorrectStatuses(statuses),getCountCorrectProject(getProjects()));
-
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -458,23 +463,23 @@ public class JGitTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void createBranchProjectsIsNullTest() {
-        JGit.getInstance().createBranch(null, "__", false);
+        JGit.getInstance().createBranch(null, "__", null, false);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void createBranchNameBranchIsNullTest() {
-        JGit.getInstance().createBranch(new Project(), null, false);
+        JGit.getInstance().createBranch(new Project(), null, null, false);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void createBranchNameBranchIsEmptyTest() {
-        JGit.getInstance().createBranch(new Project(), "", false);
+        JGit.getInstance().createBranch(new Project(), "", null, false);
     }
 
     @Test
     public void createBranchIncorrectDataTest() {
-        Assert.assertEquals(JGit.getInstance().createBranch(new Project(), "__", false), JGitStatus.FAILED);
-        Assert.assertEquals(getJGitMock(null).createBranch(getProject(true), "__", false), JGitStatus.FAILED);
+        Assert.assertEquals(JGit.getInstance().createBranch(new Project(), "__", null, false), JGitStatus.FAILED);
+        Assert.assertEquals(getJGitMock(null).createBranch(getProject(true), "__", null, false), JGitStatus.FAILED);
 
         Git gitMock = getGitMock();
         ListBranchCommand listCommandMock = new ListBranchCommand(getRepository()) {
@@ -485,14 +490,14 @@ public class JGitTest {
 
         };
         Mockito.when(gitMock.branchList()).thenReturn(listCommandMock);
-        Assert.assertEquals(getJGitMock(gitMock).createBranch(getProject(true), NAME_BRANCH, false), JGitStatus.FAILED);
+        Assert.assertEquals(getJGitMock(gitMock).createBranch(getProject(true), NAME_BRANCH, null, false), JGitStatus.FAILED);
 
         Ref refMock = mock(Ref.class);
         listCommandMock = getListCommandMock(refMock);
         Mockito.when(refMock.getName()).thenReturn(Constants.R_REMOTES + NAME_BRANCH);
         Mockito.when(gitMock.branchList()).thenReturn(listCommandMock);
         System.err.println("NAME MY BRANCH " + refMock.getName());
-        Assert.assertEquals(getJGitMock(gitMock).createBranch(getProject(true), NAME_BRANCH, false),
+        Assert.assertEquals(getJGitMock(gitMock).createBranch(getProject(true), NAME_BRANCH, null, false),
                 JGitStatus.BRANCH_ALREADY_EXISTS);
 
         CreateBranchCommand createBranchCommandMock = new CreateBranchCommand(getRepository()) {
@@ -505,7 +510,7 @@ public class JGitTest {
         Mockito.when(refMock.toString()).thenReturn(Constants.R_HEADS);
         Mockito.when(refMock.getName()).thenReturn(Constants.R_HEADS + "Test");
         Mockito.when(gitMock.branchCreate()).thenReturn(createBranchCommandMock);
-        Assert.assertEquals(getJGitMock(gitMock).createBranch(getProject(true), NAME_BRANCH, false), JGitStatus.FAILED);
+        Assert.assertEquals(getJGitMock(gitMock).createBranch(getProject(true), NAME_BRANCH, null, false), JGitStatus.FAILED);
     }
 
     @Test
@@ -524,7 +529,7 @@ public class JGitTest {
         Mockito.when(refMock.toString()).thenReturn(Constants.R_HEADS);
         Mockito.when(refMock.getName()).thenReturn(Constants.R_HEADS + "Test");
         Mockito.when(gitMock.branchCreate()).thenReturn(createBranchCommandMock);
-        Assert.assertEquals(getJGitMock(gitMock).createBranch(getProject(true), NAME_BRANCH, true),
+        Assert.assertEquals(getJGitMock(gitMock).createBranch(getProject(true), NAME_BRANCH, null, true),
                 JGitStatus.SUCCESSFUL);
     }
 

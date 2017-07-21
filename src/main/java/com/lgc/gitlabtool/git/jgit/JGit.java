@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.eclipse.jgit.api.CreateBranchCommand;
 import org.eclipse.jgit.api.CreateBranchCommand.SetupUpstreamMode;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ListBranchCommand;
@@ -35,7 +34,6 @@ import org.eclipse.jgit.dircache.DirCacheCheckout;
 import org.eclipse.jgit.errors.CorruptObjectException;
 import org.eclipse.jgit.errors.NoWorkTreeException;
 import org.eclipse.jgit.errors.RevisionSyntaxException;
-import org.eclipse.jgit.lib.BranchTrackingStatus;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.EmptyProgressMonitor;
 import org.eclipse.jgit.lib.ObjectId;
@@ -452,43 +450,37 @@ public class JGit {
     /**
      * Push of all the projects in the group
      *
-     * @param projects   projects for push
-     * @param progressListener Listener for obtaining data on the process of performing the operation.
-     *
-     * @return true   -  if the operation is completed successfully,
-     *         false  -  if an error occurred during execution
-     *
+     * @param projects         projects for push
+     * @param progressListener listener for obtaining data on the process of performing the operation
+     * @return <code>true</code> if the operation is completed successfully,
+     *         <code>false</code> if an error occurred during execution
+     * <p>
      * !Projects that failed to push will be displayed in the UI console.
      */
-    public Map<Project, JGitStatus> push (List<Project> projects, ProgressListener progressListener) {
-        Map<Project, JGitStatus> statuses = new HashMap<>();
-        if (projects == null || projects.isEmpty()) {
+    public Map<Project, JGitStatus> push(List<Project> projects, ProgressListener progressListener) {
+        if (projects == null || projects.isEmpty() || progressListener == null) {
             throw new IllegalArgumentException("Incorrect data: projects is " + projects);
         }
-        int aStepInProgress = 100 / projects.size();
-        int currentProgress = 0;
-        for (Project pr : projects) {
-            currentProgress += aStepInProgress;
-            if (pr == null) {
-                statuses.put(pr, JGitStatus.FAILED);
+        Map<Project, JGitStatus> statuses = new HashMap<>();
+        for (Project project : projects) {
+            if (project == null) {
+                progressListener.onError(project);
+                statuses.put(null, JGitStatus.FAILED);
                 continue;
             }
-            if (!pr.isCloned()) {
-                progressListener.onError(currentProgress);
-                String errMessage = pr.getName() + ERROR_MSG_NOT_CLONED;
-                statuses.put(pr, JGitStatus.FAILED);
-                logger.error(errMessage);
+            if (!project.isCloned()) {
+                progressListener.onError(project);
+                statuses.put(project, JGitStatus.FAILED);
                 continue;
             }
-            if(push(pr).equals(JGitStatus.FAILED)) {
-                progressListener.onError(currentProgress);
-                String errMessage = "Failed to push " + pr.getName() + " project";
-                statuses.put(pr, JGitStatus.FAILED);
-                logger.error(errMessage);
+            JGitStatus pushStatus = push(project);
+            if (pushStatus.equals(JGitStatus.FAILED)) {
+                statuses.put(project, pushStatus);
+                progressListener.onError(project);
                 continue;
             }
-            progressListener.onSuccess(currentProgress);
-            statuses.put(pr, JGitStatus.SUCCESSFUL);
+            progressListener.onSuccess(project);
+            statuses.put(project, pushStatus);
         }
         return statuses;
     }
@@ -498,6 +490,7 @@ public class JGit {
      *
      * @param project      the cloned project
      * @param nameBranch   the name of the branch
+     * @param startPoint   corresponds to the start-point option; if <code>null</code>, the current HEAD will be used
      * @param force        if <code>true</code> and the branch with the given name
      *                     already exists, the start-point of an existing branch will be
      *                     set to a new start-point; if false, the existing branch will
@@ -505,7 +498,7 @@ public class JGit {
      * @return JGitStatus: SUCCESSFUL - if a new branch was created,
      *                     FAILED - if the branch could not be created.
      */
-    public JGitStatus createBranch(Project project, String nameBranch, boolean force) {
+    public JGitStatus createBranch(Project project, String nameBranch, String startPoint, boolean force) {
         if (project == null || nameBranch == null || nameBranch.isEmpty()) {
             throw new IllegalArgumentException(
                     "Incorrect data: project is " + project + ", nameBranch is " + nameBranch);
@@ -526,9 +519,14 @@ public class JGit {
                 return JGitStatus.BRANCH_ALREADY_EXISTS;
             }
 
-            CreateBranchCommand create = git.branchCreate();
-            Ref res = create.setUpstreamMode(SetupUpstreamMode.TRACK).setName(nameBranch).setForce(force).call();
-            logger.info("!New branch has been created for the " + project.getName() + " project: " + res.getName());
+            git.branchCreate()
+                    .setName(nameBranch)
+                    .setUpstreamMode(SetupUpstreamMode.SET_UPSTREAM)
+                    .setStartPoint(startPoint)
+                    .setForce(force)
+                    .call();
+
+            logger.info("!New branch has been created for the " + project.getName() + " project: " + nameBranch);
             git.close();
             return JGitStatus.SUCCESSFUL;
         } catch (GitAPIException | IOException e) {
