@@ -17,7 +17,7 @@ import javafx.stage.Stage;
  * This type of dialog should be used in Gitlab Tool
  * instead of pure <code>Alert</code> dialog
  * because it contains application icon and basic settings
- * 
+ *
  * @author Igor Khlaponin
  */
 public class StatusDialog extends Alert {
@@ -30,12 +30,12 @@ public class StatusDialog extends Alert {
      * <p>
      */
     public static final int MAX_ROW_COUNT_IN_STATUS_DIALOG = 10;
-    
+
     private static final String NEW_LINE_SYMBOL = System.getProperty("line.separator");
 
     /**
      * Creates the instance of this class with Gitlab Tool icon
-     * 
+     *
      * @param title - the title of the window
      * @param headerText - header of the message
      * @param content - message that should be shown
@@ -48,7 +48,7 @@ public class StatusDialog extends Alert {
     /**
      * Creates the instance of this class with Gitlab Tool icon
      * without content
-     * 
+     *
      * @param title - the title of the window
      * @param headerText - header of the message
      */
@@ -66,11 +66,11 @@ public class StatusDialog extends Alert {
     }
 
     /**
-     * Sets the content to be shown depends on count of projects. 
+     * Sets the content to be shown depends on count of projects.
      * If count of projects is more than {@link #MAX_ROW_COUNT_IN_STATUS_DIALOG}
      * then collapsed message will be shown.
      * Else detailed information about statuses will be shown.
-     * 
+     *
      * @param statuses -        statuses of JGit action
      * @param countOfProjects - total count of selected projects
      * @param formatStrings -   parameters for message that will be shown if count of statuses

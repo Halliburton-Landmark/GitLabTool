@@ -6,7 +6,6 @@ import static com.lgc.gitlabtool.git.util.ProjectPropertiesUtil.getProjectVersio
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -17,16 +16,13 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.lgc.gitlabtool.git.entities.Group;
-import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.services.GroupsUserService;
-import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.ViewKey;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 import com.lgc.gitlabtool.git.ui.javafx.AlertWithCheckBox;
 import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuItems;
 import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuManager;
-import com.lgc.gitlabtool.git.ui.selection.SelectionsProvider;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarButtons;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarManager;
 import com.lgc.gitlabtool.git.util.ScreenUtil;
@@ -106,9 +102,6 @@ public class ModularController {
     private final GroupsUserService _groupService = (GroupsUserService) ServiceProvider.getInstance()
             .getService(GroupsUserService.class.getName());
 
-    private final ProjectService _projectService =
-            (ProjectService) ServiceProvider.getInstance().getService(ProjectService.class.getName());
-
     public void loadGroupWindow() throws IOException {
         toolbar.getItems().addAll(ToolbarManager.getInstance().createToolbarItems(ViewKey.GROUP_WINDOW.getKey()));
         menuBar.getMenus().addAll(MainMenuManager.getInstance().createToolbarItems(ViewKey.GROUP_WINDOW.getKey()));
@@ -141,8 +134,7 @@ public class ModularController {
 
         _mainWindowController = loader.getController();
 
-        List<Project> projects = (List<Project>) _projectService.loadProjects(selectedGroup);
-        _mainWindowController.setSelectedGroup(projects, selectedGroup);
+        _mainWindowController.setSelectedGroup(selectedGroup);
         _mainWindowController.beforeShowing();
 
         AnchorPane.setTopAnchor(node, 0.0);
@@ -229,7 +221,6 @@ public class ModularController {
     }
 
     private void switchBranchAction(){
-        List<Project> allSelectedProjects = SelectionsProvider.getInstance().getSelectionItems("mainWindow_projectsList");
         showSwitchBranchWindow();
     }
 
@@ -237,7 +228,7 @@ public class ModularController {
         try {
             EventHandler<WindowEvent> confirmCloseEventHandler = event -> {
                 if (_mainWindowController != null) {
-                    _mainWindowController.refreshProjectsList();
+                    _mainWindowController.updateProjectsList();
                 }
             };
 
