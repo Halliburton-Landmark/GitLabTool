@@ -308,22 +308,22 @@ public class MainWindowController {
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
-                sortProjectList();
+                sortProjectsList();
                 projectsList.refresh();
             }
         });
-        checkProjectList();
+        checkProjectsList();
     }
 
     // shadow projects in the end list
-    private void sortProjectList() {
-        List<Project> sortedList = _projects.stream().sorted(this::compareProject)
+    private void sortProjectsList() {
+        List<Project> sortedList = _projects.stream().sorted(this::compareProjects)
                                                      .collect(Collectors.toList());
         ObservableList<Project> projectsObservableList = FXCollections.observableList(sortedList);
         projectsList.setItems(projectsObservableList);
     }
 
-    private int compareProject(Project firstProject, Project secondProject) {
+    private int compareProjects(Project firstProject, Project secondProject) {
         return Boolean.compare(secondProject.isCloned(), firstProject.isCloned());
     }
 
@@ -376,7 +376,7 @@ public class MainWindowController {
         statusDialog.showAndWait();
     }
 
-    private void checkProjectList() {
+    private void checkProjectsList() {
         List<Project> incorrectProjects = findIncorrectProjects();
         if (incorrectProjects.isEmpty()) {
             return;
