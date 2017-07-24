@@ -114,9 +114,10 @@ public interface GitService {
     Map<Project, JGitStatus> push(List<Project> projects, ProgressListener progressListener);
 
     /**
+     * Checks that project has any references.
      *
-     * @param project
-     * @return
+     * @param project the cloned project
+     * @return <true> if project has any references, <false> if project does not have references.
      */
     public boolean hasAtLeastOneReference(Project project);
 }

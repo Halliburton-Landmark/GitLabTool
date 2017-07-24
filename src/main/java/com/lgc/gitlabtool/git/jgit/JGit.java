@@ -87,12 +87,15 @@ public class JGit {
     }
 
     /**
+     * Checks that project has any references.
      *
-     * @param project
-     * @return
+     * @param project the cloned project
+     * @return <true> if project has any references, <false> if project does not have references.
      */
     public boolean hasAtLeastOneReference(Project project) {
-        // TODO: validation
+        if (project == null || !project.isCloned()) {
+            return false;
+        }
         try (Git git = getGit(project.getPath())) {
             Collection<Ref> refs = git.getRepository().getAllRefs().values();
             return !refs.isEmpty();

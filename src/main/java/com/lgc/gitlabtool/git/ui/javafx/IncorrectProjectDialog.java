@@ -6,6 +6,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.services.EmptyProgressListener;
@@ -22,7 +25,8 @@ import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 /**
- *
+ * Dialog for actions with incorrect projects.
+ * We can initialization of projects or delete projects from a local disk.
  *
  * @author Lyudmila Lyska
  */
@@ -32,6 +36,8 @@ public class IncorrectProjectDialog extends Alert {
 
     private final GitService _gitService = (GitService) ServiceProvider.getInstance()
             .getService(GitService.class.getName());
+
+    private static final Logger _logger = LogManager.getLogger(IncorrectProjectDialog.class);
 
     private final ButtonType _initButton;
     private final ButtonType _deleteButton;
@@ -56,14 +62,16 @@ public class IncorrectProjectDialog extends Alert {
     }
 
     /**
+     * Shows dialog
      *
-     * @param inccorectProjects
+     * @param inccorectProjects the incorrect projects (projects which don't have any references/commits)
+     * @param finalAction       the action that should be performed after initialization or delete.
      */
     public void showDialog(List<Project> inccorectProjects, Consumer<Object> finalAction) {
         IncorrectProjectDialog alert = this;
         Optional<ButtonType> result = alert.showAndWait();
         if (!result.isPresent()) {
-            // message in the log
+            _logger.error("Failed getting a button type in the IncorrectProjectDialog");
             alert.close();
             return;
         }
@@ -74,13 +82,14 @@ public class IncorrectProjectDialog extends Alert {
         Map<Project, JGitStatus> statuses = new HashMap<>();
 
         if (alert.getInitButton().equals(result.get())) {
+            _logger.info("Initialization of projects...");
             // make first commit to GitLab repository
             statuses = commitAndPush(inccorectProjects, "Project initialization");
-
             titleMessage = "Initialization status dialog";
             headerMessage = "Initialization of projects";
             contentMessage = null;
         } else {
+            _logger.info("Deleting projects from the local disk...");
             // delete folders with incorrect projects from the local disc
             long count = inccorectProjects.stream()
                                           .filter(project -> PathUtilities.deletePath(project.getPath()))
@@ -101,10 +110,6 @@ public class IncorrectProjectDialog extends Alert {
 
     private ButtonType getInitButton() {
         return _initButton;
-    }
-
-    private ButtonType getDeleteButton() {
-        return _deleteButton;
     }
 
     private Map<Project, JGitStatus> commitAndPush(List<Project> projects, String message) {
