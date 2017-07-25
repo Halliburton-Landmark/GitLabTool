@@ -4,23 +4,19 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
-import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
-import com.lgc.gitlabtool.git.util.ScreenUtil;
-
-import javafx.scene.control.Alert;
-import javafx.scene.image.Image;
-import javafx.stage.Stage;
 
 /**
  * This type of dialog should be used in Gitlab Tool
- * instead of pure <code>Alert</code> dialog
- * because it contains application icon and basic settings
+ * instead of <code>GLTAlert</code> or <code>Alert</code> dialog
+ * for displaying information about the status of the operation.
  *
  * @author Igor Khlaponin
  */
-public class StatusDialog extends Alert {
+public class StatusDialog extends GLTAlert {
 
     /**
      * If the the dialog message contains more than {@link #MAX_ROW_COUNT_IN_STATUS_DIALOG}
@@ -34,15 +30,14 @@ public class StatusDialog extends Alert {
     private static final String NEW_LINE_SYMBOL = System.getProperty("line.separator");
 
     /**
-     * Creates the instance of this class with Gitlab Tool icon
+     * Creates the instance of this class
      *
      * @param title - the title of the window
      * @param headerText - header of the message
      * @param content - message that should be shown
      */
     public StatusDialog(String title, String headerText, String content) {
-        this(title, headerText);
-        setContentText(content);
+        super(title, headerText, content);
     }
 
     /**
@@ -53,16 +48,7 @@ public class StatusDialog extends Alert {
      * @param headerText - header of the message
      */
     public StatusDialog(String title, String headerText) {
-        super(Alert.AlertType.INFORMATION);
-        setTitle(title);
-        setHeaderText(headerText);
-
-        Image appIcon = AppIconHolder.getInstance().getAppIcoImage();
-        Stage stage = (Stage) getDialogPane().getScene().getWindow();
-        stage.getIcons().add(appIcon);
-
-         /* Set sizing and position */
-        ScreenUtil.adaptForMultiScreens(stage, 300, 100);
+        super(title, headerText, StringUtils.EMPTY);
     }
 
     /**

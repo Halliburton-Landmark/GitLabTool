@@ -164,15 +164,10 @@ public class ModularController {
     private void removeGroupDialog(Group selectedGroup) {
         AlertWithCheckBox alert = new AlertWithCheckBox(AlertType.CONFIRMATION,
                 REMOVE_GROUP_DIALOG_TITLE,
-                "Are you sure you want to delete the " + selectedGroup.getName() + "?",
-                "",
+                "You want to remove the " + selectedGroup.getName() + " group.",
+                "Are you sure you want to delete it?",
                 "remove group from a local disk",
                 ButtonType.YES, ButtonType.NO);
-        Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
-        stage.getIcons().add(_appIcon);
-
-        /* Set sizing and position */
-        ScreenUtil.adaptForMultiScreens(stage, 300, 150);
 
         Optional<ButtonType> result = alert.showAndWait();
         if (result.get() == ButtonType.NO) {

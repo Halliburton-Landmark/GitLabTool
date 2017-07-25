@@ -14,15 +14,10 @@ import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.services.EmptyProgressListener;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
-import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 import com.lgc.gitlabtool.git.util.NullCheckUtil;
 import com.lgc.gitlabtool.git.util.PathUtilities;
-import com.lgc.gitlabtool.git.util.ScreenUtil;
 
-import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
-import javafx.scene.image.Image;
-import javafx.stage.Stage;
 
 /**
  * Dialog for actions with incorrect projects.
@@ -30,35 +25,24 @@ import javafx.stage.Stage;
  *
  * @author Lyudmila Lyska
  */
-public class IncorrectProjectDialog extends Alert {
+public class IncorrectProjectDialog extends GLTAlert {
 
-    private static final Image _appIcon = AppIconHolder.getInstance().getAppIcoImage();
+    private static final Logger _logger = LogManager.getLogger(IncorrectProjectDialog.class);
 
     private final GitService _gitService = (GitService) ServiceProvider.getInstance()
             .getService(GitService.class.getName());
-
-    private static final Logger _logger = LogManager.getLogger(IncorrectProjectDialog.class);
 
     private final ButtonType _initButton;
     private final ButtonType _deleteButton;
 
     public IncorrectProjectDialog() {
-        super(AlertType.WARNING);
+        super(AlertType.WARNING, "Incorrect projects dialog", "You have incorrect projects",
+              "Would you like to initialization of projects or delete projects from a disk?");
 
         _initButton = new ButtonType("Init projects");
         _deleteButton = new ButtonType("Delete projects");
 
-        setTitle("Incorrect projects dialog");
-        setHeaderText("You have incorrect projects");
-        setContentText("Would you like to initialization of projects or delete projects from a disk?");
-
         getDialogPane().getButtonTypes().setAll(_initButton, _deleteButton);
-
-        Stage stage = (Stage) getDialogPane().getScene().getWindow();
-        stage.getIcons().add(_appIcon);
-
-        /* Set sizing and position */
-        ScreenUtil.adaptForMultiScreens(stage, 300, 100);
     }
 
     /**
