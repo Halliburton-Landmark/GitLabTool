@@ -1,5 +1,7 @@
 package com.lgc.gitlabtool.git.ui.javafx.controllers;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -103,18 +105,22 @@ public class MainWindowController {
         preferences = getPreferences(DIVIDER_PROPERTY_NODE);
 
         if (preferences != null) {
-            double splitPaneDivider = preferences.getDouble(groupTitle, 0.3);
+            String key = String.valueOf(groupTitle.hashCode());
+            double splitPaneDivider = preferences.getDouble(key, 0.3);
             splitPanelMain.setDividerPositions(splitPaneDivider);
         }
 
         configureListView(projectsList);
 
-        splitPanelMain.getDividers().get(0).positionProperty().addListener((observable, oldValue, newValue) -> {
-            if (preferences != null) {
-                preferences.putDouble(groupTitle, newValue.doubleValue());
-            }
-        });
+        splitPanelMain.getDividers().get(0).positionProperty().addListener(
+                (observable, oldValue, newValue) -> {
+                    if (preferences != null) {
+                        String key = String.valueOf(groupTitle.hashCode());
+                        Double value = round(newValue.doubleValue(), 3);
 
+                        preferences.putDouble(key, value);
+                    }
+                });
         setDisablePropertyForButtons();
 
         // TODO: Additional thread should be placed to services
@@ -254,6 +260,17 @@ public class MainWindowController {
                         listView.getSelectionModel().getSelectedItems());
             }
         });
+    }
+
+    private static double round(double value, int places) {
+        if (places < 0) {
+            _logger.error("Incorrect input format");
+            return value;
+        }
+
+        BigDecimal bigDecimal = new BigDecimal(value);
+        bigDecimal = bigDecimal.setScale(places, RoundingMode.HALF_UP);
+        return bigDecimal.doubleValue();
     }
 
     private boolean areAllItemsSelected(ListView<?> listView) {
