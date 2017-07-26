@@ -1,6 +1,10 @@
 package com.lgc.gitlabtool.git.ui.javafx.controllers;
 
 
+import java.awt.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -39,18 +43,22 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.SplitPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 
 public class MainWindowController {
     private static final String HEDER_GROUP_TITLE = "Current group: ";
     private static final String SELECT_ALL_IMAGE_URL = "icons/select_all_20x20.png";
+    private static final String REFRESH_PROJECTS_IMAGE_URL = "icons/toolbar/refresh_projects_20x20.png";
     private static final String DIVIDER_PROPERTY_NODE = "MainWindowController_Dividers";
     private static final String STATUS_DIALOG_TITLE = "Status dialog";
     private static final String STATUS_DIALOG_HEADER_COMMIT = "Commit statuses";
@@ -84,7 +92,10 @@ public class MainWindowController {
     private Label userId;
 
     @FXML
-    public Button selectAllButton;
+    private Button selectAllButton;
+
+    @FXML
+    private Button refreshProjectsButton;
 
     public void beforeShowing() {
         String username = _loginService.getCurrentUser().getName();
@@ -94,7 +105,9 @@ public class MainWindowController {
         leftLabel.setText(HEDER_GROUP_TITLE + groupTitle);
 
         Image imageSelectAll = new Image(getClass().getClassLoader().getResource(SELECT_ALL_IMAGE_URL).toExternalForm());
+        Image imageRefreshProjects = new Image(getClass().getClassLoader().getResource(REFRESH_PROJECTS_IMAGE_URL).toExternalForm());
         selectAllButton.setGraphic(new ImageView(imageSelectAll));
+        refreshProjectsButton.setGraphic(new ImageView(imageRefreshProjects));
 
         preferences = getPreferences(DIVIDER_PROPERTY_NODE);
 
@@ -202,6 +215,45 @@ public class MainWindowController {
         }
     }
 
+    private void openFolder(String path) {
+        try {
+            Desktop.getDesktop().open(new File(path));
+        } catch (IOException e) {
+            _logger.error("The specified file has no associated application or the associated application fails to be launched");
+        } catch (NullPointerException npe) {
+            _logger.error("File is null");
+        } catch (UnsupportedOperationException uoe) {
+            _logger.error("Current platform does not support this action");
+        } catch (SecurityException se) {
+            _logger.error("Denied read access to the file");
+        } catch (IllegalArgumentException iae) {
+            _logger.error("The specified file doesn't exist");
+        }
+    }
+
+    private ContextMenu getContexMenu(Project project){
+        ContextMenu contextMenu = new ContextMenu();
+        List<MenuItem> menuItems = new ArrayList<>();
+
+        if (project.isCloned()) {
+            MenuItem editItem = new MenuItem();
+            String filepath = project.getPathToClonedProject();
+            editItem.setText("Open project folder");
+            editItem.setOnAction(action -> openFolder(filepath));
+
+            menuItems.add(editItem);
+        } else {
+            MenuItem cloneProject = new MenuItem();
+            cloneProject.setText("Clone shadow project");
+            cloneProject.setOnAction(action -> System.out.println("Clone shadow project mock"));
+
+            menuItems.add(cloneProject);
+        }
+
+        contextMenu.getItems().addAll(menuItems);
+        return contextMenu;
+    }
+
     private void configureListView(ListView<Project> listView) {
         //config displayable string
         listView.setCellFactory(p -> new ProjectListCell());
@@ -228,13 +280,17 @@ public class MainWindowController {
             if (node instanceof ListCell) {
                 evt.consume();
 
-                ListCell<?> cell = (ListCell<?>) node;
-                ListView<?> lv = cell.getListView();
+                ListCell<Project> cell = (ListCell<Project>) node;
+                ListView<Project> lv = cell.getListView();
 
                 lv.requestFocus();
-
                 if (!cell.isEmpty()) {
                     int index = cell.getIndex();
+                    if (evt.getButton() == MouseButton.SECONDARY) {
+                        cell.setContextMenu(getContexMenu(cell.getItem()));
+                        return;
+                    }
+
                     if (cell.isSelected()) {
                         lv.getSelectionModel().clearSelection(index);
                     } else {
