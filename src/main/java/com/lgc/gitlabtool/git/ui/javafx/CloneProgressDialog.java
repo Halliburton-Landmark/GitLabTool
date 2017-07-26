@@ -174,6 +174,10 @@ public class CloneProgressDialog extends Dialog<DialogDTO> {
         }
     }
 
+    /**
+     * The method displays a dialog.
+     * You should use it instead of the standard showAndWait() and show() methods in the Dialog<DialogDTO>.
+     */
     public void showDialog() {
         if (_startAction != null) {
             _startAction.get();
