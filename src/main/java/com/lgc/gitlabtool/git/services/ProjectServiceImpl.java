@@ -230,7 +230,7 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     private boolean createStructure(Project project, String structure) {
-        Path path = Paths.get(project.getPathToClonedProject() + File.separator + structure);
+        Path path = Paths.get(project.getPath() + File.separator + structure);
         return PathUtilities.createPath(path, false);
     }
 
@@ -252,7 +252,7 @@ public class ProjectServiceImpl implements ProjectService {
                 EmptyProgressListener.get());
 
         if (!isCreatedStructure) {
-            PathUtilities.deletePath(Paths.get(createdProject.getPathToClonedProject()));
+            PathUtilities.deletePath(Paths.get(createdProject.getPath()));
         }
         progressListener.onSuccess();
         String createLocalProjectMessage = isCreatedStructure ? CREATE_LOCAL_PROJECT_SUCCESS_MESSAGE

@@ -2,7 +2,6 @@ package com.lgc.gitlabtool.git.ui.javafx;
 
 import javafx.scene.Group;
 import javafx.scene.Node;
-import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.DialogPane;
@@ -21,7 +20,7 @@ import javafx.scene.control.DialogPane;
  *
  * @author Lyudmila Lyska
  */
-public class AlertWithCheckBox extends Alert {
+public class AlertWithCheckBox extends GLTAlert {
 
     private CheckBox _optOut;
 

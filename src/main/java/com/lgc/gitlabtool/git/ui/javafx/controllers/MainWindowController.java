@@ -26,6 +26,7 @@ import com.lgc.gitlabtool.git.ui.javafx.CloneProgressListener;
 import com.lgc.gitlabtool.git.ui.javafx.CommitDialog;
 import com.lgc.gitlabtool.git.ui.javafx.CreateNewBranchDialog;
 import com.lgc.gitlabtool.git.ui.javafx.CreateProjectDialog;
+import com.lgc.gitlabtool.git.ui.javafx.IncorrectProjectDialog;
 import com.lgc.gitlabtool.git.ui.javafx.StatusDialog;
 import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuItems;
 import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuManager;
@@ -122,12 +123,6 @@ public class MainWindowController {
                     }
                 });
         setDisablePropertyForButtons();
-
-        // TODO: Additional thread should be placed to services
-        Thread t = new Thread(this::refreshProjectList);
-        t.setName("Refresh project list");
-        t.start();
-
         configureToolbarCommands();
         initToolbarMainMenuActions();
     }
@@ -156,12 +151,15 @@ public class MainWindowController {
 
     }
 
-    public void setSelectedGroup(List<Project> projects, Group group) {
-        _projects = projects;
+    public void setSelectedGroup(Group group) {
         _currentGroup = group;
+        refreshLoadProjects();
     }
 
-    public void refreshProjectsList() {
+    /**
+     * Updates current projects list. Method don't load projects from the GitLab
+     */
+    public void updateProjectsList(){
         projectsList.refresh();
     }
 
@@ -180,19 +178,6 @@ public class MainWindowController {
     }
 
     private void configureToolbarCommands() {
-    }
-
-    private void refreshProjectList() {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                List<Project> sortedProjectList = _projects.stream()
-                        .sorted((project1, project2) -> Boolean.compare(project2.isCloned(), project1.isCloned()))
-                        .collect(Collectors.toList());
-                ObservableList<Project> projectsObservableList = FXCollections.observableList(sortedProjectList);
-                projectsList.setItems(projectsObservableList);
-            }
-        });
     }
 
     // Gets preferences by key, could return null
@@ -307,13 +292,13 @@ public class MainWindowController {
     @FXML
     public void onNewBranchButton(ActionEvent actionEvent) {
         showCreateNewBranchDialog();
-        refreshProjectsList();
+        updateProjectsList();
     }
 
     @FXML
     public void createProjectButton(ActionEvent actionEvent) {
         // dialog
-        CreateProjectDialog dialog = new CreateProjectDialog(_currentGroup, (obj) -> refreshLoadProjects(null));
+        CreateProjectDialog dialog = new CreateProjectDialog(_currentGroup, (obj) -> refreshLoadProjects());
         dialog.showAndWait();
     }
 
@@ -331,11 +316,34 @@ public class MainWindowController {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.submit(() -> {
             _logger.info("Refreshing projects...");
-            _projects = (List<Project>) _projectService.loadProjects(_currentGroup);
-            refreshProjectList();
+            refreshLoadProjects();
             _logger.info("Projects were refreshed!");
         });
         executor.shutdown();
+    }
+
+    private void refreshLoadProjects() {
+        _projects = (List<Project>) _projectService.loadProjects(_currentGroup);
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                sortProjectsList();
+                projectsList.refresh();
+            }
+        });
+        checkProjectsList();
+    }
+
+    // shadow projects in the end list
+    private void sortProjectsList() {
+        List<Project> sortedList = _projects.stream().sorted(this::compareProjects)
+                                                     .collect(Collectors.toList());
+        ObservableList<Project> projectsObservableList = FXCollections.observableList(sortedList);
+        projectsList.setItems(projectsObservableList);
+    }
+
+    private int compareProjects(Project firstProject, Project secondProject) {
+        return Boolean.compare(secondProject.isCloned(), firstProject.isCloned());
     }
 
     @FXML
@@ -408,8 +416,35 @@ public class MainWindowController {
         statusDialog.showAndWait();
     }
 
+
     private List<Project> getSelectProjects() {
         return projectsList.getSelectionModel().getSelectedItems();
     }
 
+    private void checkProjectsList() {
+        List<Project> incorrectProjects = findIncorrectProjects();
+        if (incorrectProjects.isEmpty()) {
+            return;
+        }
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                IncorrectProjectDialog dialog = new IncorrectProjectDialog();
+                dialog.showDialog(incorrectProjects, (obj) -> refreshLoadProjects());
+            }
+        });
+    }
+
+    private List<Project> findIncorrectProjects() {
+        return _projects.parallelStream()
+                        .filter(this::isIncorrectProject)
+                        .collect(Collectors.toList());
+    }
+
+    private boolean isIncorrectProject(Project project) {
+        if (!project.isCloned()) {
+            return false; // we check only cloned projects
+        }
+        return !_gitService.hasAtLeastOneReference(project);
+    }
 }

@@ -348,11 +348,11 @@ public class PomXMLServiceImpl implements PomXMLService {
     }
 
     private String findPathToPomXMLFile(Project pr) {
-        String pathToProject = pr.getPathToClonedProject();
+        String pathToProject = pr.getPath();
         if (pathToProject == null) {
             return null;
         }
-        Path projectPath = Paths.get(pr.getPathToClonedProject());
+        Path projectPath = Paths.get(pr.getPath());
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(projectPath)) {
             for (Path file : stream) {
                 if (Files.isRegularFile(file) && file.getName(file.getNameCount()-1).toString().equals(POM_NAME)) {
