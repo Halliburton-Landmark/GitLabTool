@@ -319,8 +319,9 @@ public class MainWindowController {
 
     private void showCreateNewBranchDialog() {
         List<Project> allSelectedProjects = getSelectProjects();
-        List<Project> clonedProjects = allSelectedProjects.stream().filter(prj -> prj.isCloned())
-                .collect(Collectors.toList());
+        List<Project> clonedProjects = allSelectedProjects.stream()
+                                                          .filter(prj -> prj.isCloned())
+                                                          .collect(Collectors.toList());
         CreateNewBranchDialog dialog = new CreateNewBranchDialog(clonedProjects);
         dialog.showAndWait();
     }
