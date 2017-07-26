@@ -36,6 +36,8 @@ import javafx.stage.Stage;
 
 /**
  * Dialog box for tracking the process of cloning a group.
+ * <p>
+ * Use {@link #showDialog()} method to show this dialog instead of the standard showAndWait() and show() methods
  *
  * @author Lyudmila Lyska
  */
@@ -176,7 +178,7 @@ public class CloneProgressDialog extends Dialog<DialogDTO> {
 
     /**
      * The method displays a dialog.
-     * You should use it instead of the standard showAndWait() and show() methods in the Dialog<DialogDTO>.
+     * You should use it instead of the standard {@link Dialog#showAndWait()} and {@link Dialog#show()} methods
      */
     public void showDialog() {
         if (_startAction != null) {
