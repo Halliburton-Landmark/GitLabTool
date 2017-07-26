@@ -152,4 +152,12 @@ public class GitServiceImpl implements GitService {
         }
         return _git.pull(projects, progressListener);
     }
+
+    @Override
+    public boolean hasAtLeastOneReference(Project project) {
+        if (project == null || !project.isCloned()) {
+            return false;
+        }
+        return _git.hasAtLeastOneReference(project);
+    }
 }

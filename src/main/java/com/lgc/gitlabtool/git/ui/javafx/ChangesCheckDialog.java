@@ -10,75 +10,57 @@ import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
-import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 import com.lgc.gitlabtool.git.util.NullCheckUtil;
-import com.lgc.gitlabtool.git.util.ScreenUtil;
 
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
-import javafx.scene.image.Image;
-import javafx.stage.Stage;
 
 /**
- * This is the instance of {@link Alert} dialog</br>
+ * This is the instance of {@link GLTAlert} dialog</br>
  * Could be shown to prevent some processes execution if we have uncommitted changes in projects
  */
-public class ChangesCheckDialog extends Alert {
-
-    private static final Image _appIcon = AppIconHolder.getInstance().getAppIcoImage();
+public class ChangesCheckDialog extends GLTAlert {
 
     private final GitService _gitService =
             (GitService) ServiceProvider.getInstance().getService(GitService.class.getName());
 
     private static final String STATUS_DISCARD_DIALOG_TITLE = "Discarding changes status";
     private static final String STATUS_DISCARD_DIALOG_HEADER = "Discarding changes info";
-    
+
     private static final String SUCCESSFUL_DISCARD_HEADER_MESSAGE = "All changes was successfully discarded";
     private static final String FAILED_DISCARDING_MESSAGE = "Discarding changes was failed";
-    
 
-    private ButtonType commitButton;
-    private ButtonType discardButton;
-    private ButtonType cancelButton;
+
+    private final ButtonType commitButton;
+    private final ButtonType discardButton;
+    private final ButtonType cancelButton;
 
     public ChangesCheckDialog() {
-        super(AlertType.WARNING);
+        super(AlertType.WARNING, "Check changes dialog", "This projects have uncommited changes",
+              "Would you like to commit changes or discard?");
 
         commitButton = new ButtonType("Commit changes");
         discardButton = new ButtonType("Discard changes");
-        cancelButton = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
-
-        setTitle("Check changes dialog");
-        setHeaderText("This projects have uncommited changes");
-        setContentText("Would you like to commit changes or discard?");
+        cancelButton = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);;
 
         getDialogPane().getButtonTypes().setAll(commitButton, discardButton, cancelButton);
-
-        Stage stage = (Stage) getDialogPane().getScene().getWindow();
-        stage.getIcons().add(_appIcon);
-
-         /* Set sizing and position */
-        ScreenUtil.adaptForMultiScreens(stage, 300, 100);
     }
 
     private Map<Project, JGitStatus> commitChanges(List<Project> projectsWithChanges) {
         CommitDialog dialog = new CommitDialog();
-        
-        Map<Project, JGitStatus> commitStatuses = dialog.commitChanges(projectsWithChanges);
-        
-        return commitStatuses;
+        return dialog.commitChanges(projectsWithChanges);
     }
-    
+
     private Map<Project, JGitStatus> discardChanges(List<Project> changedProjects) {
         Map<Project, JGitStatus> discardStatuses = _gitService.discardChanges(changedProjects);
-        
-        showStatusDialog(changedProjects, discardStatuses, 
-                SUCCESSFUL_DISCARD_HEADER_MESSAGE, 
+
+        showStatusDialog(changedProjects, discardStatuses,
+                SUCCESSFUL_DISCARD_HEADER_MESSAGE,
                 FAILED_DISCARDING_MESSAGE,
-                STATUS_DISCARD_DIALOG_TITLE, 
+                STATUS_DISCARD_DIALOG_TITLE,
                 STATUS_DISCARD_DIALOG_HEADER);
-        
+
         return discardStatuses;
     }
 
@@ -121,17 +103,17 @@ public class ChangesCheckDialog extends Alert {
     public ButtonType getCancelButton() {
         return cancelButton;
     }
-    
+
     /**
-     * Launches the instance of this dialog and provides different 
+     * Launches the instance of this dialog and provides different
      * actions depends on pushed button type.
      * <p>
      * If button type equals to commit button the {@link CommitDialog} will be invoked and
      * after that the code from <code>biConsumer</code> will be executed</br>
-     * If button type equals to discard button the discard logic will be run 
+     * If button type equals to discard button the discard logic will be run
      * and after that the code from <code>biConsumer</code> will be executed</br>
      * Else the window will be closed
-     * 
+     *
      * @param changedProjects - list of projects have been changed
      * @param selectedProjects - total list of selected projects
      * @param selectedItem - parameter for biConsumer
@@ -156,15 +138,15 @@ public class ChangesCheckDialog extends Alert {
             alert.close();
         }
     }
-    
+
     /**
      * Executes code in biConsumer for each project that is not failed the commit or discard.
      * <p>
      * <code>operatinStatuses</code> is a map that contains the projects that had a changes
      * and statuses of operation (discard or commit)<br>
-     * If operation status equals to {@link JGitStatus#FAILED} we should remove this project from 
+     * If operation status equals to {@link JGitStatus#FAILED} we should remove this project from
      * list for execution in biConsumer
-     * 
+     *
      * @param biConsumer - code that should be executed
      * @param operationStatuses - statuses of executed operation (discard or commit)
      * @param selectedProjects - list of selected projects
@@ -181,9 +163,9 @@ public class ChangesCheckDialog extends Alert {
     }
 
     /**
-     * Checks if project has not been change</br> 
+     * Checks if project has not been change</br>
      * If it was changed checks if operation (commit or discard) is not failed
-     * 
+     *
      * @param operationStatuses - statuses of executed operation (discard or commit)
      * @param project - current project
      * @return <code>true</code> if <code>operationStatuses</code> does not has current project

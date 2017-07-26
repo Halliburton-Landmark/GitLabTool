@@ -23,9 +23,10 @@ import com.lgc.gitlabtool.git.util.PathUtilities;
 import com.lgc.gitlabtool.git.util.ScreenUtil;
 
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -43,8 +44,8 @@ public class CloningGroupsWindowController {
     private static final String CLONING_STATUS_ALERT_TITLE = "Cloning info";
     private static final String CLONING_STATUS_ALERT_HEADER = "Cloning statuses:";
 
-    //Uncomment if you want to log something
-    //private static final Logger logger = LogManager.getLogger(CloningGroupsWindowController.class);
+    // Uncomment if you want to log something
+    // private static final Logger logger = LogManager.getLogger(CloningGroupsWindowController.class);
 
     private final LoginService _loginService = (LoginService) ServiceProvider.getInstance()
             .getService(LoginService.class.getName());
@@ -81,19 +82,14 @@ public class CloningGroupsWindowController {
         configureListView(projectsList);
         projectsList.setItems(myObservableList);
 
-        folderPath.textProperty().addListener(getInputFilter());
+        folderPath.textProperty().addListener((observable, oldValue, newValue) -> filterForOkButton());
+        projectsList.setOnMouseClicked(new EventHandler<Event>() {
+            @Override
+            public void handle(Event event) {
+                filterForOkButton();
+            };
+        });
         setStyleAndDisableForIncorrectData();
-    }
-
-    private ChangeListener<? super String> getInputFilter() {
-        return (observable, oldValue, newValue) -> {
-            if (isIncorrectPath()) {
-                setStyleAndDisableForIncorrectData();
-            } else {
-                folderPath.setStyle("-fx-border-color: green;");
-                okButton.setDisable(false);
-            }
-        };
     }
 
     @FXML
@@ -115,7 +111,8 @@ public class CloningGroupsWindowController {
         List<Group> selectedGroups = projectsList.getSelectionModel().getSelectedItems();
 
         Group selectedGroup = selectedGroups.get(0);
-        CloneProgressDialog progressDialog = new CloneProgressDialog(stage, selectedGroup.getName(), ApplicationState.CLONE);
+        CloneProgressDialog progressDialog = new CloneProgressDialog(stage, selectedGroup.getName(),
+                ApplicationState.CLONE);
         _stateService.stateON(ApplicationState.CLONE);
         _groupsService.cloneGroups(selectedGroups, destinationPath,
                 new CloneProgressListener(selectedGroup, destinationPath, progressDialog));
@@ -137,7 +134,7 @@ public class CloningGroupsWindowController {
         Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
         stage.getIcons().add(appIcon);
 
-         /* Set sizing and position */
+        /* Set sizing and position */
         ScreenUtil.adaptForMultiScreens(stage, 300, 300);
 
         alert.showAndWait();
@@ -197,7 +194,7 @@ public class CloningGroupsWindowController {
                 _progressDialog.updateProgressBar(progress);
             }
             if (t[2] instanceof String) {
-                _progressDialog.addMessageToConcole((String)t[2], CloningMessageStatus.SUCCESS);
+                _progressDialog.addMessageToConcole((String) t[2], CloningMessageStatus.SUCCESS);
             }
         }
 
@@ -241,6 +238,19 @@ public class CloningGroupsWindowController {
                 }
             });
 
+        }
+    }
+
+    private void filterForOkButton() {
+        if (isIncorrectPath()) {
+            setStyleAndDisableForIncorrectData();
+            return;
+        } else if (projectsList.getSelectionModel().selectedItemProperty().isNull().get()) {
+            folderPath.setStyle("-fx-border-color: green;");
+            okButton.setDisable(true);
+        } else {
+            folderPath.setStyle("-fx-border-color: green;");
+            okButton.setDisable(false);
         }
     }
 
