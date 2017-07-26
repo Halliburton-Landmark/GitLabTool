@@ -17,6 +17,7 @@ import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.services.EmptyProgressListener;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.LoginService;
+import com.lgc.gitlabtool.git.services.ProgressListener;
 import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.javafx.ChangesCheckDialog;
@@ -400,7 +401,7 @@ public class MainWindowController {
             // use JGit::pull(projects) in GitService
             // In this case you could use ProgressDialog. Profit!
             
-            Map<Project, JGitStatus> pullStatuses = _gitService.pull(projects);
+            Map<Project, JGitStatus> pullStatuses = _gitService.pull(projects, new PullProgressListener());
             String title = "Pull projects";
             String header = "Pull projects";
             String dialogMessage = "%s projects successfully pulled";
@@ -408,6 +409,29 @@ public class MainWindowController {
         } else {
             ChangesCheckDialog changesCheckDialog = new ChangesCheckDialog();
             changesCheckDialog.launchConfirmationDialog(changedProjects, projects, item, this::checkChangesAndPull);
+        }
+    }
+
+    class PullProgressListener implements ProgressListener {
+
+        @Override
+        public void onSuccess(Object... t) {
+            if (t[0] instanceof Project) {
+                System.out.println(((Project) t[0]).getName() + " - done"); // mock
+            }
+        }
+
+        @Override
+        public void onError(Object... t) {
+            
+        }
+
+        @Override
+        public void onStart(Object... t) {
+        }
+
+        @Override
+        public void onFinish(Object... t) {
         }
     }
 

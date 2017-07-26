@@ -143,15 +143,13 @@ public class GitServiceImpl implements GitService {
     }
 
     @Override
-    public Map<Project, JGitStatus> pull(List<Project> projects) {
+    public Map<Project, JGitStatus> pull(List<Project> projects, ProgressListener progressListener) {
         if (projects == null) {
             return Collections.emptyMap();
         }
-        Map<Project, JGitStatus> pullStatuses = new ConcurrentHashMap<>();
-        projects.parallelStream()
-                .filter(project -> project.isCloned())
-                .forEach(project -> pullStatuses.put(project, _git.pull(project)));
-
-        return pullStatuses;
+        if(progressListener == null){
+            progressListener = EmptyProgressListener.get();
+        }
+        return _git.pull(projects, progressListener);
     }
 }

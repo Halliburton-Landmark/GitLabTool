@@ -119,6 +119,6 @@ public interface GitService {
      * @param projects - selected projects
      * @return map of operation statuses or empty collection if projects list is equals to null
      */
-    Map<Project, JGitStatus> pull(List<Project> projects);
+    Map<Project, JGitStatus> pull(List<Project> projects, ProgressListener progressListener);
 
 }

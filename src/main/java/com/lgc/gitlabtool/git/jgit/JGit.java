@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
@@ -299,6 +300,30 @@ public class JGit {
             logger.error("Pull error for the " + project.getName() + " project: " + e.getMessage());
         }
         return JGitStatus.FAILED;
+    }
+
+    /**
+     * Pulls the list of projects from the upstream and shows the status in {@link ProgressListener}
+     * @param projects - list of projects to pull
+     * @param progressListener - progress listener for pull operation
+     * @return map of operation statuses
+     */
+    public Map<Project, JGitStatus> pull(List<Project> projects, ProgressListener progressListener) {
+        Map<Project, JGitStatus> pullStatuses = new ConcurrentHashMap<>();
+        projects.parallelStream()
+                .filter(project -> project.isCloned())
+                .forEach(project -> pullStatuses.put(project, pullProject(project, progressListener)));
+        return pullStatuses;
+    }
+
+    private JGitStatus pullProject(Project project, ProgressListener progressListener) {
+        JGitStatus pullResult = pull(project);
+        if (pullResult == JGitStatus.FAILED) {
+            progressListener.onError(project);
+        } else {
+            progressListener.onSuccess(project);
+        }
+        return pullResult;
     }
 
     /**
