@@ -86,6 +86,25 @@ public class JGit {
         return _jgit;
     }
 
+    /**
+     * Checks that project has any references.
+     *
+     * @param project the cloned project
+     * @return <true> if project has any references, <false> if project does not have references.
+     */
+    public boolean hasAtLeastOneReference(Project project) {
+        if (project == null || !project.isCloned()) {
+            return false;
+        }
+        try (Git git = getGit(project.getPath())) {
+            Collection<Ref> refs = git.getRepository().getAllRefs().values();
+            return !refs.isEmpty();
+        } catch (Exception e) {
+            logger.error("Error getting references!");
+        }
+        return false;
+    }
+
     private boolean _isCloneCancelled = false;
 
     /**
@@ -148,7 +167,7 @@ public class JGit {
             logger.debug(project.getName() + ERROR_MSG_NOT_CLONED);
             return JGitStatus.FAILED;
         }
-        try (Git git = getGit(project.getPathToClonedProject())) {
+        try (Git git = getGit(project.getPath())) {
             git.reset().setMode(ResetCommand.ResetType.HARD).call();
             return JGitStatus.SUCCESSFUL;
         } catch (GitAPIException | IOException e) {
@@ -230,7 +249,7 @@ public class JGit {
             logger.debug(project.getName() + ERROR_MSG_NOT_CLONED);
             return Optional.empty();
         }
-        String path = project.getPathToClonedProject();
+        String path = project.getPath();
 
         try (Git git = getGit(path)) {
             Status status = git.status().call();
@@ -254,7 +273,7 @@ public class JGit {
         if (files == null || project == null) {
             throw new IllegalArgumentException("Incorrect data: project is " + project + ", files is " + files);
         }
-        try (Git git = getGit(project.getPathToClonedProject())) {
+        try (Git git = getGit(project.getPath())) {
             files.stream().forEach((file) -> {
                 if (file != null) {
                     try {
@@ -268,7 +287,7 @@ public class JGit {
             git.close();
             return true;
         } catch (IOException e) {
-            logger.error("Error opening repository " + project.getPathToClonedProject() + " " + e.getMessage());
+            logger.error("Error opening repository " + project.getPath() + " " + e.getMessage());
         }
         return false;
     }
@@ -287,7 +306,7 @@ public class JGit {
             logger.debug(project.getName() + ERROR_MSG_NOT_CLONED);
             return JGitStatus.FAILED;
         }
-        try (Git git = getGit(project.getPathToClonedProject())) {
+        try (Git git = getGit(project.getPath())) {
             // check which files were changed to avoid conflicts
             if (isContinueMakePull(project, git)) {
                 PullResult pullResult = git.pull().call();
@@ -380,7 +399,7 @@ public class JGit {
         if (project == null) {
             throw new IllegalArgumentException("Incorrect data! Project is null");
         }
-        try (Git git = getGit(project.getPathToClonedProject())){
+        try (Git git = getGit(project.getPath())){
             PersonIdent author = getPersonIdent(nameAuthor, emailAuthor);
             PersonIdent comitter = getPersonIdent(nameCommitter, emailCommitter);
             git.commit().setAll(setAll).setMessage(message).setAuthor(author).setCommitter(comitter).call();
@@ -507,7 +526,7 @@ public class JGit {
             logger.debug(project.getName() + ERROR_MSG_NOT_CLONED);
             return JGitStatus.FAILED;
         }
-        try (Git git = getGit(project.getPathToClonedProject())) {
+        try (Git git = getGit(project.getPath())) {
             List<Branch> branches = getListShortNamesOfBranches(getRefs(project, null));
             if (branches.isEmpty()) {
                 return JGitStatus.FAILED;
@@ -569,7 +588,7 @@ public class JGit {
             logger.error("Failed " + prefixErrorMessage + JGitStatus.BRANCH_ALREADY_EXISTS);
             return JGitStatus.BRANCH_ALREADY_EXISTS;
         }
-        try (Git git = getGit(project.getPathToClonedProject())) {
+        try (Git git = getGit(project.getPath())) {
             if (isCurrentBranch(git, nameBranchWithoutAlias)) {
                 return JGitStatus.BRANCH_CURRENTLY_CHECKED_OUT;
             }
@@ -616,7 +635,7 @@ public class JGit {
             logger.debug(project.getName() + ERROR_MSG_NOT_CLONED);
             return Optional.empty();
         }
-        try (Git git = getGit(project.getPathToClonedProject())) {
+        try (Git git = getGit(project.getPath())) {
             Repository repo = git.getRepository();
             Optional<String> branch = Optional.ofNullable(repo.getBranch());
             repo.close();
@@ -651,13 +670,13 @@ public class JGit {
             logger.debug(project.getName() + ERROR_MSG_NOT_CLONED);
             return JGitStatus.FAILED;
         }
-        try (Git git = getGit(project.getPathToClonedProject())) {
+        try (Git git = getGit(project.getPath())) {
             if (isCurrentBranch(git, nameBranch)) {
                 logger.error("The current branch can not be deleted.");
                 return JGitStatus.FAILED;
             }
             git.branchDelete().setBranchNames(nameBranch).setForce(force).call();
-            logger.info("!Branch \"" + nameBranch + "\" deleted from the " + project.getPathToClonedProject());
+            logger.info("!Branch \"" + nameBranch + "\" deleted from the " + project.getPath());
             return JGitStatus.SUCCESSFUL;
         } catch (GitAPIException | IOException e) {
             logger.error("Error deleting branch for the " + project.getName() + " project: " + e.getMessage());
@@ -726,7 +745,7 @@ public class JGit {
     }
 
     private JGitStatus push(Project project) {
-        try (Git git = getGit(project.getPathToClonedProject())) {
+        try (Git git = getGit(project.getPath())) {
             git.push().call();
             git.close();
             logger.debug("Push " + JGitStatus.SUCCESSFUL + " (Project: " + project.getName() + ")");
@@ -782,7 +801,7 @@ public class JGit {
     }
 
     private List<Ref> getRefs(Project project, ListMode mode) {
-        try (Git git = getGit(project.getPathToClonedProject())) {
+        try (Git git = getGit(project.getPath())) {
             ListBranchCommand brCommand = git.branchList();
             if (mode != null) {
                 brCommand.setListMode(mode);

@@ -90,7 +90,7 @@ public class Project {
      * Gets path to the cloned project
      * @return path to the cloned project
      */
-    public String getPathToClonedProject() {
+    public String getPath() {
         return _pathToClonedProject;
     }
 
