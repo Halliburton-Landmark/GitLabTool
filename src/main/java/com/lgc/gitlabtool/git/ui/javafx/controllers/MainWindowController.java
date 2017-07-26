@@ -383,8 +383,14 @@ public class MainWindowController {
         String path = _currentGroup.getPathToClonedGroup();
 
         CloneProgressDialog progressDialog = new CloneProgressDialog(stage, _currentGroup.getName(), ApplicationState.CLONE);
+        progressDialog.setStartAction(() -> startClone(shadowProjects, path, progressDialog));
+        progressDialog.showDialog();
+    }
+
+    private boolean startClone(List<Project> shadowProjects, String path,  CloneProgressDialog progressDialog) {
         _projectService.clone(shadowProjects, path,
                 new CloneProgressListener(progressDialog, (obj) -> refreshLoadProjects(null)));
+        return true;
     }
 
     private void showProjectsWithoutChangesMessage() {

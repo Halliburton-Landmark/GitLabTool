@@ -3,6 +3,7 @@ package com.lgc.gitlabtool.git.ui.javafx;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.function.Supplier;
 
 import com.lgc.gitlabtool.git.jgit.JGit;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
@@ -30,6 +31,7 @@ import javafx.scene.control.ProgressIndicator;
 import javafx.scene.image.Image;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 /**
@@ -39,6 +41,7 @@ import javafx.stage.Stage;
  */
 public class CloneProgressDialog extends Dialog<DialogDTO> {
 
+    private final Stage _stage;
     private final ProgressBar _progressBar = new ProgressBar(0);
     private final ProgressIndicator _progressIndicator = new ProgressIndicator();
 
@@ -47,6 +50,7 @@ public class CloneProgressDialog extends Dialog<DialogDTO> {
 
     private final Button _cancelButton;
     private final ListView<CloningMessage> _messageConcole;
+    private Supplier<Object> _startAction;
 
     private final String DEFAULT_PROJECT_LABEL = "...";
 
@@ -132,10 +136,10 @@ public class CloneProgressDialog extends Dialog<DialogDTO> {
                 event.consume();
             }
         });
+        stage.initModality(Modality.APPLICATION_MODAL);
+        _stage = stage;
         /* Set size and position */
         ScreenUtil.adaptForMultiScreens(stage, 500, 350);
-
-        stage.show();
     }
 
     public void addMessageToConcole(String message, CloningMessageStatus status) {
@@ -157,6 +161,24 @@ public class CloneProgressDialog extends Dialog<DialogDTO> {
                 _currentProjectLabel.textProperty().bind(projectProperty);
             }
         });
+    }
+
+    /**
+     * Sets start action for this dialog
+     *
+     * @param action the action which will be launched before the dialog is displayed
+     */
+    public void setStartAction(Supplier<Object> action) {
+        if (action != null) {
+            _startAction = action;
+        }
+    }
+
+    public void showDialog() {
+        if (_startAction != null) {
+            _startAction.get();
+        }
+        _stage.showAndWait();
     }
 
     public void updateProgressBar(final double counter) {

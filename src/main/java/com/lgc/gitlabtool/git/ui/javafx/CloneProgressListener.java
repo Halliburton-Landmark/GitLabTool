@@ -7,15 +7,10 @@ import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.services.ProgressListener;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StateService;
-import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 import com.lgc.gitlabtool.git.ui.javafx.CloneProgressDialog.CloningMessageStatus;
 import com.lgc.gitlabtool.git.util.NullCheckUtil;
-import com.lgc.gitlabtool.git.util.ScreenUtil;
 
 import javafx.application.Platform;
-import javafx.scene.control.Alert;
-import javafx.scene.image.Image;
-import javafx.stage.Stage;
 
 /**
  * Listener for responding to the process of cloning a group
@@ -93,24 +88,10 @@ public class CloneProgressListener implements ProgressListener {
             public void run() {
                 _progressDialog.resetProgress();
                 NullCheckUtil.acceptConsumer(_finishedAction, null);
-                cloningStatusDialog(messageStatus);
+
+                StatusDialog dialog = new StatusDialog(CLONING_STATUS_ALERT_TITLE, CLONING_STATUS_ALERT_HEADER, messageStatus);
+                dialog.showAndWait();
             }
         });
-    }
-
-    private void cloningStatusDialog(String content) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle(CLONING_STATUS_ALERT_TITLE);
-        alert.setHeaderText(CLONING_STATUS_ALERT_HEADER);
-        alert.setContentText(content);
-
-        Image appIcon = AppIconHolder.getInstance().getAppIcoImage();
-        Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
-        stage.getIcons().add(appIcon);
-
-        /* Set sizing and position */
-        ScreenUtil.adaptForMultiScreens(stage, 300, 300);
-
-        alert.showAndWait();
     }
 }

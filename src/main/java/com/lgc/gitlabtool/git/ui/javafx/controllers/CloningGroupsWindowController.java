@@ -99,8 +99,13 @@ public class CloningGroupsWindowController {
         Group group = selectedGroups.get(0);
 
         CloneProgressDialog progressDialog = new CloneProgressDialog(stage, group.getName(), ApplicationState.CLONE);
-        _stateService.stateON(ApplicationState.CLONE);
+        progressDialog.setStartAction(() -> startClone(destinationPath, selectedGroups, progressDialog));
+        progressDialog.showDialog();
+    }
+
+    private boolean startClone(String destinationPath, List<Group> selectedGroups, CloneProgressDialog progressDialog) {
         _groupsService.cloneGroups(selectedGroups, destinationPath, new CloneProgressListener(progressDialog));
+        return true;
     }
 
     @FXML

@@ -22,6 +22,7 @@ import com.lgc.gitlabtool.git.connections.token.CurrentUser;
 import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.jgit.JGit;
+import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.project.nature.projecttype.ProjectType;
 import com.lgc.gitlabtool.git.util.JSONParser;
 import com.lgc.gitlabtool.git.util.PathUtilities;
@@ -44,12 +45,14 @@ public class ProjectServiceImpl implements ProjectService {
     private static final CurrentUser _currentUser = CurrentUser.getInstance();
     private static final JGit _git = JGit.getInstance();
 
-    private ProjectTypeService _projectTypeService;
-    private RESTConnector _connector;
+    private static ProjectTypeService _projectTypeService;
+    private static StateService _stateService;
+    private static RESTConnector _connector;
 
-    public ProjectServiceImpl(RESTConnector connector, ProjectTypeService projectTypeService) {
+    public ProjectServiceImpl(RESTConnector connector, ProjectTypeService projectTypeService, StateService stateService) {
         setConnector(connector);
         setProjectTypeService(projectTypeService);
+        setStateService(stateService);
     }
 
     @Override
@@ -166,6 +169,12 @@ public class ProjectServiceImpl implements ProjectService {
         }
     }
 
+    private void setStateService(StateService stateService) {
+        if (stateService != null) {
+            _stateService = stateService;
+        }
+    }
+
     private void updateProjectStatus(Project project, String pathGroup) {
         project.setClonedStatus(true);
         project.setPathToClonedProject(pathGroup + File.separator + project.getName());
@@ -261,6 +270,9 @@ public class ProjectServiceImpl implements ProjectService {
         if (projects == null || destinationPath == null || progressListener == null) {
             throw new IllegalArgumentException("Invalid parameters.");
         }
+        // we must call stateOFF for this state in the progressListener.onFinish method
+        _stateService.stateON(ApplicationState.CLONE);
+
         Path path = Paths.get(destinationPath);
         if (!PathUtilities.isExistsAndDirectory(path)) {
             String errorMessage = path.toAbsolutePath() + " path is not exist or it is not a directory.";

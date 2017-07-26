@@ -20,6 +20,7 @@ import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.User;
 import com.lgc.gitlabtool.git.jgit.JGit;
+import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.util.JSONParser;
 import com.lgc.gitlabtool.git.util.PathUtilities;
 
@@ -39,13 +40,16 @@ public class GroupsUserServiceImpl implements GroupsUserService {
 
     private static ClonedGroupsService _clonedGroupsService;
     private static ProjectService _projectService;
+    private static StateService _stateService;
 
     public GroupsUserServiceImpl(RESTConnector connector,
                                  ClonedGroupsService clonedGroupsService,
-                                 ProjectService projectService) {
+                                 ProjectService projectService,
+                                 StateService stateService) {
         setConnector(connector);
         setClonedGroupsService(clonedGroupsService);
         setProjectService(projectService);
+        setStateService(stateService);
     }
 
     @Override
@@ -109,6 +113,9 @@ public class GroupsUserServiceImpl implements GroupsUserService {
         if (groups == null || destinationPath == null) {
             throw new IllegalArgumentException("Invalid parameters.");
         }
+        // we must call stateOFF for this state in the progressListener.onFinish method
+        _stateService.stateON(ApplicationState.CLONE);
+
         Path path = Paths.get(destinationPath);
         if (!PathUtilities.isExistsAndDirectory(path)) {
             String errorMessage = path.toAbsolutePath() + " path is not exist or it is not a directory.";
@@ -149,6 +156,12 @@ public class GroupsUserServiceImpl implements GroupsUserService {
     private void setProjectService(ProjectService projectService) {
         if (projectService != null) {
             _projectService = projectService;
+        }
+    }
+
+    private void setStateService(StateService stateService) {
+        if (stateService != null) {
+            _stateService = stateService;
         }
     }
 

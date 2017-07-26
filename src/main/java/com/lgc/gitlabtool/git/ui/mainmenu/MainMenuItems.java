@@ -18,8 +18,8 @@ public enum MainMenuItems {
     GROUP_WINDOW_CLONE_GROUP(ViewKey.GROUP_WINDOW.getKey(), "Git", "group_window_group_clone", "icons/mainmenu/clone_16x16.png", "Clone"),
     GROUP_WINDOW_ABOUT(ViewKey.GROUP_WINDOW.getKey(), "Help", "group_window_help_about", "icons/mainmenu/about_16x16.png", "About"),
 
-    MAIN_CLONE_PROJECT(ViewKey.MAIN_WINDOW.getKey(), "Git", "main_clone_project", "icons/mainmenu/clone_16x16.png", "Clone"),
     MAIN_EXIT(ViewKey.MAIN_WINDOW.getKey(), "File", "main_file_exit", "icons/mainmenu/exit_16x16.png", "Exit"),
+    MAIN_CLONE_PROJECT(ViewKey.MAIN_WINDOW.getKey(), "Git", "main_git_clone_project", "icons/mainmenu/clone_16x16.png", "Clone"),
     MAIN_CREATE_BRANCH(ViewKey.MAIN_WINDOW.getKey(), "Git", "main_git_create_branch", "icons/mainmenu/newbranch_16x16.png", "New branch"),
     MAIN_SWITCH_BRANCH(ViewKey.MAIN_WINDOW.getKey(), "Git", "main_git_switch_branch", "icons/mainmenu/switchbranch_16x16.png", "Switch branch"),
     MAIN_COMMIT(ViewKey.MAIN_WINDOW.getKey(), "Git", "main_git_commit", "icons/mainmenu/commit_16x16.png", "Commit"),
