@@ -113,7 +113,7 @@ public class GroupsUserServiceImpl implements GroupsUserService {
         if (groups == null || destinationPath == null) {
             throw new IllegalArgumentException("Invalid parameters.");
         }
-        // we must call stateOFF for this state in the progressListener.onFinish method
+        // we must call StateService::stateOFF for this state in the ProgressListener::onFinish method
         _stateService.stateON(ApplicationState.CLONE);
 
         Path path = Paths.get(destinationPath);

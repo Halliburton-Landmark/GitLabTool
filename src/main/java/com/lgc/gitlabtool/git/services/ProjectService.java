@@ -57,6 +57,8 @@ public interface ProjectService {
      * @param projects         projects which didn't clone.
      * @param destinationPath  the local path of parent group
      * @param progressListener listener for obtaining data on the process of performing the operation.
+     *                         We must call StateService::stateOFF for this state
+     *                         in the ProgressListener::onFinish method.
      */
     void clone (List<Project> projects,  String destinationPath, ProgressListener progressListener);
 }

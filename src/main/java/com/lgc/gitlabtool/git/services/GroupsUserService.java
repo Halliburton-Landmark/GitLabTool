@@ -23,6 +23,8 @@ public interface GroupsUserService {
      * @param groups           List of groups for cloning
      * @param destinationPath  Local path of workspace
      * @param progressListener Listener for obtaining data on the process of performing the operation.
+     *                         We must call StateService::stateOFF for this state
+     *                         in the ProgressListener::onFinish method.
      */
     void cloneGroups(List<Group> groups, String destinationPath, ProgressListener progressListener);
 
