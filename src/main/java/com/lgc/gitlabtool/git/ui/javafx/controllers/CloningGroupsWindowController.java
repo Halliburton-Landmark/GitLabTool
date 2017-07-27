@@ -12,7 +12,7 @@ import com.lgc.gitlabtool.git.services.LoginService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.javafx.CloneProgressDialog;
-import com.lgc.gitlabtool.git.ui.javafx.CloneProgressListener;
+import com.lgc.gitlabtool.git.ui.javafx.listeners.CloneProgressListener;
 import com.lgc.gitlabtool.git.util.PathUtilities;
 
 import javafx.collections.FXCollections;

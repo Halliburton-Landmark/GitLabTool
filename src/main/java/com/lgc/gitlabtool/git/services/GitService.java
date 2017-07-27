@@ -8,6 +8,7 @@ import com.lgc.gitlabtool.git.entities.Branch;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.jgit.BranchType;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
+import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 
 /**
  * Service for working with Git features.
@@ -117,9 +118,10 @@ public interface GitService {
      * Pulls changes in selected projects from upstream
      * 
      * @param projects - selected projects
-     * @return map of operation statuses or empty collection if projects list is equals to null
+     * @param progressListener - instance of {@link OperationProgressListener}
+     * @return <code>true</code> if pull operation works well and <code>false</code> otherwise
      */
-    Map<Project, JGitStatus> pull(List<Project> projects, ProgressListener progressListener);
+    boolean pull(List<Project> projects, ProgressListener progressListener);
 
     /**
      * Checks that project has any references.

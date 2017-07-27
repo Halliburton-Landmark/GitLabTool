@@ -15,10 +15,16 @@ import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.jgit.BranchType;
 import com.lgc.gitlabtool.git.jgit.JGit;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
+import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 
 public class GitServiceImpl implements GitService {
 
     private static final JGit _git = JGit.getInstance();
+    private final StateService _stateService;
+
+    public GitServiceImpl(StateService stateService) {
+        _stateService = stateService;
+    }
 
     @Override
     public boolean containsBranches(Project project, List<Branch> branches, boolean isCommon) {
@@ -143,9 +149,11 @@ public class GitServiceImpl implements GitService {
     }
 
     @Override
-    public Map<Project, JGitStatus> pull(List<Project> projects, ProgressListener progressListener) {
+    public boolean pull(List<Project> projects, ProgressListener progressListener) {
+        // Switched on PULL application state. Should be switched of in onFinish() method of progressListener
+        _stateService.stateON(ApplicationState.PULL);
         if (projects == null) {
-            return Collections.emptyMap();
+            return false;
         }
         if(progressListener == null){
             progressListener = EmptyProgressListener.get();

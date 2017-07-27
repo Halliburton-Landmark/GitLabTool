@@ -324,23 +324,31 @@ public class JGit {
     /**
      * Pulls the list of projects from the upstream and shows the status in {@link ProgressListener}
      * @param projects - list of projects to pull
-     * @param progressListener - progress listener for pull operation
-     * @return map of operation statuses
+     * @param progressListener - instance of {@link OperationProgressListener}
+     * @return <code>true</code> if pull operation works well and <code>false</code> otherwise
      */
-    public Map<Project, JGitStatus> pull(List<Project> projects, ProgressListener progressListener) {
-        Map<Project, JGitStatus> pullStatuses = new ConcurrentHashMap<>();
-        projects.parallelStream()
-                .filter(project -> project.isCloned())
-                .forEach(project -> pullStatuses.put(project, pullProject(project, progressListener)));
-        return pullStatuses;
+    public boolean pull(List<Project> projects, ProgressListener progressListener) {
+        if (projects == null || progressListener == null) {
+            return false;
+        }
+        progressListener.onStart("Pull operation started");
+        Runnable pullTask = () -> {
+            projects.parallelStream()
+                    .filter(project -> project.isCloned())
+                    .forEach(project -> pullProject(project, progressListener));
+            progressListener.onFinish("Pull finished");
+        };
+        Thread pullThread = new Thread(pullTask, "Pull thread");
+        pullThread.start();
+        return true;
     }
 
     private JGitStatus pullProject(Project project, ProgressListener progressListener) {
         JGitStatus pullResult = pull(project);
         if (pullResult == JGitStatus.FAILED) {
-            progressListener.onError(project);
+            progressListener.onError(null, project);
         } else {
-            progressListener.onSuccess(project);
+            progressListener.onSuccess(null, project, pullResult);
         }
         return pullResult;
     }

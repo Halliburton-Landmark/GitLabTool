@@ -5,12 +5,10 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.function.Supplier;
 
-import com.lgc.gitlabtool.git.jgit.JGit;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
-import com.lgc.gitlabtool.git.ui.javafx.dto.DialogDTO;
 import com.lgc.gitlabtool.git.util.ScreenUtil;
 
 import javafx.application.Platform;
@@ -34,24 +32,16 @@ import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-/**
- * Dialog box for tracking the process of cloning a group.
- * <p>
- * Use {@link #showDialog()} method to show this dialog instead of the standard showAndWait() and show() methods
- *
- * @author Lyudmila Lyska
- */
-public class CloneProgressDialog extends Dialog<Void> {
+public abstract class ProgressDialog extends Dialog<Void> {
 
     private final Stage _stage;
     private final ProgressBar _progressBar = new ProgressBar(0);
     private final ProgressIndicator _progressIndicator = new ProgressIndicator();
 
-    private final Label _currentGroupLabel;
     private final Label _currentProjectLabel;
 
     private final Button _cancelButton;
-    private final ListView<CloningMessage> _messageConcole;
+    private final ListView<OperationMessage> _messageConcole;
     private Supplier<Object> _startAction;
 
     private final String DEFAULT_PROJECT_LABEL = "...";
@@ -59,7 +49,7 @@ public class CloneProgressDialog extends Dialog<Void> {
     private final StateService _stateService = (StateService) ServiceProvider.getInstance()
             .getService(StateService.class.getName());
 
-    public CloneProgressDialog(Stage primaryStage, String groupName, ApplicationState state) {
+    public ProgressDialog(String title, ApplicationState state) {
         setTitle("Cloning groups...");
 
         GridPane grid = new GridPane();
@@ -67,11 +57,6 @@ public class CloneProgressDialog extends Dialog<Void> {
         grid.setHgap(10);
         grid.setVgap(10);
         grid.setPadding(new Insets(25, 25, 25, 25));
-
-        Label groupsLabel = new Label("Group: ");
-        _currentGroupLabel = new Label(groupName == null ? "" : groupName);
-        grid.add(groupsLabel, 0, 1);
-        grid.add(_currentGroupLabel, 1, 1, 1, 1);
 
         _currentProjectLabel = new Label(DEFAULT_PROJECT_LABEL);
         _currentProjectLabel.setStyle("-fx-text-fill:blue");
@@ -84,17 +69,17 @@ public class CloneProgressDialog extends Dialog<Void> {
         grid.add(progressBox, 0, 2);
 
         _messageConcole = new ListView<>();
-        _messageConcole.setCellFactory(param -> new ListCell<CloningMessage>() {
+        _messageConcole.setCellFactory(param -> new ListCell<OperationMessage>() {
 
             @Override
-            protected void updateItem(CloningMessage item, boolean empty) {
+            protected void updateItem(OperationMessage item, boolean empty) {
                 super.updateItem(item, empty);
                 if (empty) {
                     setText(null);
                 }
 
                 if (item != null) {
-                    if (item.getStatus() != CloningMessageStatus.SIMPLE) {
+                    if (item.getStatus() != OperationMessageStatus.SIMPLE) {
                         setStyle(item.getCSSForStatus());
                     }
                     setText(item.getMessage());
@@ -104,7 +89,6 @@ public class CloneProgressDialog extends Dialog<Void> {
         _messageConcole.setMouseTransparent(false);
         _messageConcole.setFocusTraversable(false);
         _messageConcole.setMinSize(600, 100);
-        addMessageToConcole("The cloning process of the " + groupName + " group is started...", CloningMessageStatus.SIMPLE);
         grid.add(_messageConcole, 0, 3, 4, 3);
 
         _cancelButton = new Button("Cancel");
@@ -113,25 +97,17 @@ public class CloneProgressDialog extends Dialog<Void> {
         hbBtn.getChildren().add(_cancelButton);
         grid.add(hbBtn, 3, 7);
 
-        _cancelButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent e) {
-                _cancelButton.setDisable(true);
-                addMessageToConcole("Starting cancel process of cloning...", CloningMessageStatus.SIMPLE);
-                JGit.getInstance().cancelClone();
-                updateProgressBar(0.0);
-            }
-        });
+        _cancelButton.setOnAction(onCancelAction());
         _progressIndicator.setMaxSize(20, 20);
 
         Image appIcon = AppIconHolder.getInstance().getAppIcoImage();
         Scene scene = new Scene(grid, 650, 350);
 
-        Stage stage = new Stage(primaryStage.getStyle());
+        Stage stage = new Stage();
         stage.setMinWidth(650);
         stage.setResizable(false);
         stage.setScene(scene);
-        stage.setTitle("Cloning groups...");
+        stage.setTitle(title);
         stage.getIcons().add(appIcon);
         stage.setOnCloseRequest(event -> {
             if (_stateService.isActiveState(state)) {
@@ -144,11 +120,19 @@ public class CloneProgressDialog extends Dialog<Void> {
         ScreenUtil.adaptForMultiScreens(stage, 500, 350);
     }
 
-    public void addMessageToConcole(String message, CloningMessageStatus status) {
+    /**
+     * Returns {@link EventHandler} that holds the event for Cancel button.<br>
+     * It shows what should be done after Cancel button pressing.
+     * 
+     * @return EventHandler of onCancelAction
+     */
+    abstract EventHandler<ActionEvent> onCancelAction();
+
+    public void addMessageToConcole(String message, OperationMessageStatus status) {
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
-                _messageConcole.getItems().add(new CloningMessage(currentDateToString() + message, status));
+                _messageConcole.getItems().add(new OperationMessage(currentDateToString() + message, status));
                 _messageConcole.refresh();
             }
         });
@@ -201,13 +185,7 @@ public class CloneProgressDialog extends Dialog<Void> {
     private void makeCancelButtonAsOk() {
         _cancelButton.setDisable(false);
         _cancelButton.setText("OK");
-        _cancelButton.setOnAction(event -> {
-            getStage().close();
-        });
-    }
-
-    private Stage getStage() {
-        return (Stage) _cancelButton.getScene().getWindow();
+        _cancelButton.setOnAction(event -> close());
     }
 
     private String currentDateToString() {
@@ -215,12 +193,12 @@ public class CloneProgressDialog extends Dialog<Void> {
         Date date = new Date();
         return "[" + dateFormat.format(date) + "] ";
     }
-
-    class CloningMessage {
+    
+    class OperationMessage {
         private final StringProperty _message;
-        private final CloningMessageStatus _status;
+        private final OperationMessageStatus _status;
 
-        public CloningMessage(String message, CloningMessageStatus status) {
+        public OperationMessage(String message, OperationMessageStatus status) {
             if (message == null || status == null) {
                 throw new IllegalAccessError("Invalid parameters");
             }
@@ -232,21 +210,21 @@ public class CloneProgressDialog extends Dialog<Void> {
             return _message.get();
         }
 
-        public CloningMessageStatus getStatus() {
+        public OperationMessageStatus getStatus() {
             return _status;
         }
 
         public String getCSSForStatus() {
-            return CloningMessageStatus.getCSSForStatus(_status);
+            return OperationMessageStatus.getCSSForStatus(_status);
         }
     }
 
     /**
-     * Status of cloning message for the CloneProgressDialog. It class is needed to get CSS for each status.
+     * Status of operation message for the ProgressDialog. It class is needed to get CSS for each status.
      *
      * @author Lyudmila Lyska
      */
-    public enum CloningMessageStatus {
+    public enum OperationMessageStatus {
         ERROR, SUCCESS, SIMPLE;
 
         /**
@@ -255,11 +233,15 @@ public class CloneProgressDialog extends Dialog<Void> {
          * @param status for getting CSS
          * @return string with code style
          */
-        public static String getCSSForStatus(CloningMessageStatus status) {
-            if (status == null || status == CloningMessageStatus.SIMPLE) {
+        public static String getCSSForStatus(OperationMessageStatus status) {
+            if (status == null || status == OperationMessageStatus.SIMPLE) {
                 return "-fx-text-fill:black";
+            } else if (status == OperationMessageStatus.ERROR) {
+                return "-fx-text-fill:red";
+            } else {
+                return "-fx-text-fill:green";
             }
-            return status == CloningMessageStatus.ERROR ? "-fx-text-fill:red" : "-fx-text-fill:green";
+//            return status == OperationMessageStatus.ERROR ? "-fx-text-fill:red" : "-fx-text-fill:green";
         }
     }
 }

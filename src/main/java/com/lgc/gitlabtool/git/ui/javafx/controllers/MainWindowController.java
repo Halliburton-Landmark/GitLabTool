@@ -24,12 +24,15 @@ import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.javafx.ChangesCheckDialog;
 import com.lgc.gitlabtool.git.ui.javafx.CloneProgressDialog;
-import com.lgc.gitlabtool.git.ui.javafx.CloneProgressListener;
 import com.lgc.gitlabtool.git.ui.javafx.CommitDialog;
 import com.lgc.gitlabtool.git.ui.javafx.CreateNewBranchDialog;
 import com.lgc.gitlabtool.git.ui.javafx.CreateProjectDialog;
 import com.lgc.gitlabtool.git.ui.javafx.IncorrectProjectDialog;
+import com.lgc.gitlabtool.git.ui.javafx.ProgressDialog;
+import com.lgc.gitlabtool.git.ui.javafx.PullProgressDialog;
 import com.lgc.gitlabtool.git.ui.javafx.StatusDialog;
+import com.lgc.gitlabtool.git.ui.javafx.listeners.CloneProgressListener;
+import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuItems;
 import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuManager;
 import com.lgc.gitlabtool.git.ui.selection.ListViewKey;
@@ -143,7 +146,7 @@ public class MainWindowController {
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.PUSH_BUTTON.getId()).disableProperty()
                 .bind(booleanBinding);
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.PULL_BUTTON.getId()).disableProperty()
-        .bind(booleanBinding);
+                .bind(booleanBinding);
 
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_COMMIT).disableProperty().bind(booleanBinding);
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_SWITCH_BRANCH).disableProperty()
@@ -476,44 +479,16 @@ public class MainWindowController {
         List<Project> changedProjects = _gitService.getProjectsWithChanges(projects);
 
         if (changedProjects.isEmpty()) {
-            // TODO: add Progress dialog here!!
-            // create method in JGit to pull a list of projects
-            // use the single project pull method on it
-            // add ProgressListener in it to manage the situations during pull
-            // use JGit::pull(projects) in GitService
-            // In this case you could use ProgressDialog. Profit!
-            
-            Map<Project, JGitStatus> pullStatuses = _gitService.pull(projects, new PullProgressListener());
-            String title = "Pull projects";
-            String header = "Pull projects";
-            String dialogMessage = "%s projects successfully pulled";
-            showStatusDialog(pullStatuses, projects.size(), title, header, dialogMessage);
+            ProgressDialog progressDialog = new PullProgressDialog();
+            progressDialog.setStartAction(() -> {
+                ProgressListener pullProgressListener = new OperationProgressListener(progressDialog,
+                        ApplicationState.PULL);
+                return _gitService.pull(projects, pullProgressListener);
+            });
+            progressDialog.showDialog();
         } else {
             ChangesCheckDialog changesCheckDialog = new ChangesCheckDialog();
             changesCheckDialog.launchConfirmationDialog(changedProjects, projects, item, this::checkChangesAndPull);
-        }
-    }
-
-    class PullProgressListener implements ProgressListener {
-
-        @Override
-        public void onSuccess(Object... t) {
-            if (t[0] instanceof Project) {
-                System.out.println(((Project) t[0]).getName() + " - done"); // mock
-            }
-        }
-
-        @Override
-        public void onError(Object... t) {
-            
-        }
-
-        @Override
-        public void onStart(Object... t) {
-        }
-
-        @Override
-        public void onFinish(Object... t) {
         }
     }
 
