@@ -1,6 +1,7 @@
 package com.lgc.gitlabtool.git.services;
 
 import java.util.Collection;
+import java.util.List;
 
 import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.Project;
@@ -49,4 +50,15 @@ public interface ProjectService {
      * @return true - if project with this name has already existed, otherwise - false.
      */
     boolean isProjectExists(Group group, String nameProject);
+
+    /**
+     * Clones shadow projects
+     *
+     * @param projects         projects which didn't clone.
+     * @param destinationPath  the local path of parent group
+     * @param progressListener listener for obtaining data on the process of performing the operation.
+     *                         We must call StateService::stateOFF for this state
+     *                         in the ProgressListener::onFinish method.
+     */
+    void clone (List<Project> projects,  String destinationPath, ProgressListener progressListener);
 }

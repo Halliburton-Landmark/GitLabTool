@@ -224,7 +224,7 @@ public class JGit {
                     logger.info("The " + project.getName() + " project was successfully cloned.");
                 }
             }
-            progressListener.onFinish(_isCloneCancelled ? CANCEL_CLONE_MESSAGE : FINISH_CLONE_MESSAGE, true);
+            progressListener.onFinish(_isCloneCancelled ? CANCEL_CLONE_MESSAGE : FINISH_CLONE_MESSAGE);
         };
 
         Thread t = new Thread(task, "Clone Group Thread");
