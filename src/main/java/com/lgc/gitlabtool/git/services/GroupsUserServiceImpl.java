@@ -20,6 +20,7 @@ import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.User;
 import com.lgc.gitlabtool.git.jgit.JGit;
+import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.util.JSONParser;
 import com.lgc.gitlabtool.git.util.PathUtilities;
 
@@ -39,13 +40,16 @@ public class GroupsUserServiceImpl implements GroupsUserService {
 
     private static ClonedGroupsService _clonedGroupsService;
     private static ProjectService _projectService;
+    private static StateService _stateService;
 
     public GroupsUserServiceImpl(RESTConnector connector,
                                  ClonedGroupsService clonedGroupsService,
-                                 ProjectService projectService) {
+                                 ProjectService projectService,
+                                 StateService stateService) {
         setConnector(connector);
         setClonedGroupsService(clonedGroupsService);
         setProjectService(projectService);
+        setStateService(stateService);
     }
 
     @Override
@@ -69,21 +73,24 @@ public class GroupsUserServiceImpl implements GroupsUserService {
         if (projects == null) {
             String errorMessage = "Error getting project from the GitLab";
             progressListener.onError(errorMessage);
-            progressListener.onFinish(null, false);
+            progressListener.onFinish((Object)null);
             return;
-        } else if (projects.isEmpty()) {
-            boolean result = PathUtilities.createPath(Paths.get(groupPath), true);
-            String message = result ? "Group successfuly created!" : "Failed creation of group";
-            if (result) {
+        }
+        boolean resultCreation = PathUtilities.createPath(Paths.get(groupPath), true);
+        if (projects.isEmpty()) {
+            String message = resultCreation ? "Group successfuly created!" : "Failed creation of group";
+            if (resultCreation) {
                 progressListener.onSuccess(null, 1, message);
             } else {
                 progressListener.onError(1, message);
             }
-            progressListener.onFinish(null, true);
-            return;
+            progressListener.onFinish((Object)null);
         } else {
             JGit.getInstance().clone(projects, groupPath, progressListener);
         }
+        group.setClonedStatus(true);
+        group.setPathToClonedGroup(destinationPath + File.separator + group.getName());
+        _clonedGroupsService.addGroups(Arrays.asList(group));
     }
 
     @Override
@@ -106,6 +113,9 @@ public class GroupsUserServiceImpl implements GroupsUserService {
         if (groups == null || destinationPath == null) {
             throw new IllegalArgumentException("Invalid parameters.");
         }
+        // we must call StateService::stateOFF for this state in the ProgressListener::onFinish method
+        _stateService.stateON(ApplicationState.CLONE);
+
         Path path = Paths.get(destinationPath);
         if (!PathUtilities.isExistsAndDirectory(path)) {
             String errorMessage = path.toAbsolutePath() + " path is not exist or it is not a directory.";
@@ -146,6 +156,12 @@ public class GroupsUserServiceImpl implements GroupsUserService {
     private void setProjectService(ProjectService projectService) {
         if (projectService != null) {
             _projectService = projectService;
+        }
+    }
+
+    private void setStateService(StateService stateService) {
+        if (stateService != null) {
+            _stateService = stateService;
         }
     }
 

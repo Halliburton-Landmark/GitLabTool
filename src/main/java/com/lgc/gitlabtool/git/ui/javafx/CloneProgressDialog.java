@@ -3,6 +3,7 @@ package com.lgc.gitlabtool.git.ui.javafx;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.function.Supplier;
 
 import com.lgc.gitlabtool.git.jgit.JGit;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
@@ -30,15 +31,19 @@ import javafx.scene.control.ProgressIndicator;
 import javafx.scene.image.Image;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 /**
  * Dialog box for tracking the process of cloning a group.
+ * <p>
+ * Use {@link #showDialog()} method to show this dialog instead of the standard showAndWait() and show() methods
  *
  * @author Lyudmila Lyska
  */
 public class CloneProgressDialog extends Dialog<DialogDTO> {
 
+    private final Stage _stage;
     private final ProgressBar _progressBar = new ProgressBar(0);
     private final ProgressIndicator _progressIndicator = new ProgressIndicator();
 
@@ -47,6 +52,7 @@ public class CloneProgressDialog extends Dialog<DialogDTO> {
 
     private final Button _cancelButton;
     private final ListView<CloningMessage> _messageConcole;
+    private Supplier<Object> _startAction;
 
     private final String DEFAULT_PROJECT_LABEL = "...";
 
@@ -120,20 +126,22 @@ public class CloneProgressDialog extends Dialog<DialogDTO> {
 
         Image appIcon = AppIconHolder.getInstance().getAppIcoImage();
         Scene scene = new Scene(grid, 650, 350);
-        primaryStage.setMinWidth(650);
-        primaryStage.setResizable(false);
-        primaryStage.setScene(scene);
-        primaryStage.setTitle("Cloning groups...");
-        primaryStage.getIcons().add(appIcon);
-        primaryStage.setOnCloseRequest(event -> {
+
+        Stage stage = new Stage(primaryStage.getStyle());
+        stage.setMinWidth(650);
+        stage.setResizable(false);
+        stage.setScene(scene);
+        stage.setTitle("Cloning groups...");
+        stage.getIcons().add(appIcon);
+        stage.setOnCloseRequest(event -> {
             if (_stateService.isActiveState(state)) {
                 event.consume();
             }
         });
+        stage.initModality(Modality.APPLICATION_MODAL);
+        _stage = stage;
         /* Set size and position */
-        ScreenUtil.adaptForMultiScreens(primaryStage, 500, 350);
-
-        primaryStage.show();
+        ScreenUtil.adaptForMultiScreens(stage, 500, 350);
     }
 
     public void addMessageToConcole(String message, CloningMessageStatus status) {
@@ -155,6 +163,28 @@ public class CloneProgressDialog extends Dialog<DialogDTO> {
                 _currentProjectLabel.textProperty().bind(projectProperty);
             }
         });
+    }
+
+    /**
+     * Sets start action for this dialog
+     *
+     * @param action the action which will be launched before the dialog is displayed
+     */
+    public void setStartAction(Supplier<Object> action) {
+        if (action != null) {
+            _startAction = action;
+        }
+    }
+
+    /**
+     * The method displays a dialog.
+     * You should use it instead of the standard {@link Dialog#showAndWait()} and {@link Dialog#show()} methods
+     */
+    public void showDialog() {
+        if (_startAction != null) {
+            _startAction.get();
+        }
+        _stage.showAndWait();
     }
 
     public void updateProgressBar(final double counter) {

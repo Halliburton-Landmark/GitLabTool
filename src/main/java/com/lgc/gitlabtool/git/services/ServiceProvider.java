@@ -28,14 +28,15 @@ public class ServiceProvider {
         LoginService loginService = new LoginServiceImpl(restConnector);
         StorageService storageService = new StorageServiceImpl();
         ProjectTypeService projectTypeService = new ProjectTypeServiceImpl();
-        ProjectService projectService = new ProjectServiceImpl(restConnector, projectTypeService);
+        StateService stateService = new StateServiceImpl();
+        ProjectService projectService = new ProjectServiceImpl(restConnector, projectTypeService, stateService);
         ClonedGroupsService programProgertiesService = new ClonedGroupsServiceImpl(storageService, loginService);
 
         _services = new HashMap<>();
         _services.put(LoginService.class.getName(), loginService);
         _services.put(ClonedGroupsService.class.getName(), programProgertiesService);
         _services.put(GroupsUserService.class.getName(),
-                new GroupsUserServiceImpl(restConnector, programProgertiesService, projectService));
+                new GroupsUserServiceImpl(restConnector, programProgertiesService, projectService, stateService));
         _services.put(ProjectService.class.getName(), projectService);
         _services.put(StorageService.class.getName(), storageService);
         _services.put(ReplacementService.class.getName(), new ReplacementServiceImpl());
@@ -43,6 +44,6 @@ public class ServiceProvider {
         _services.put(ProjectTypeService.class.getName(), projectTypeService);
         _services.put(NetworkService.class.getName(), new NetworkServiceImpl());
         _services.put(GitService.class.getName(), new GitServiceImpl());
-        _services.put(StateService.class.getName(), new StateServiceImpl());
+        _services.put(StateService.class.getName(), stateService);
     }
 }
