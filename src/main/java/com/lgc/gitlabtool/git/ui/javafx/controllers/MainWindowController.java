@@ -56,6 +56,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.SplitPane;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
@@ -99,7 +100,7 @@ public class MainWindowController {
     private Label userId;
 
     @FXML
-    private Button selectAllButton;
+    private ToggleButton selectAllButton;
 
     @FXML
     private Button refreshProjectsButton;
@@ -212,43 +213,49 @@ public class MainWindowController {
         }
     }
 
-    private void openFolder(ActionEvent event) {
-        List<Project> clonedProjects = getSelectProjects().stream()
+    private void onOpenFolder(ActionEvent event) {
+        getSelectProjects().stream()
                 .filter(Project::isCloned)
-                .collect(Collectors.toList());
+                .collect(Collectors.toList())
+                .parallelStream()
+                .forEach(this::openProjectFolder);
+    }
 
-        clonedProjects.parallelStream()
-                .forEach(project -> {
-                    try {
-                        Desktop.getDesktop().open(new File(project.getPath()));
-                    } catch (IOException e) {
-                        _logger.error("The specified file has no associated application or the associated application fails to be launched");
-                    } catch (NullPointerException npe) {
-                        _logger.error("File is null");
-                    } catch (UnsupportedOperationException uoe) {
-                        _logger.error("Current platform does not support this action");
-                    } catch (SecurityException se) {
-                        _logger.error("Denied read access to the file");
-                    } catch (IllegalArgumentException iae) {
-                        _logger.error("The specified file doesn't exist");
-                    }
-                });
+    private void openProjectFolder(Project project){
+        try {
+            Desktop.getDesktop().open(new File(project.getPath()));
+        } catch (IOException e) {
+            _logger.error("The specified file has no associated application or the associated application fails to be launched");
+        } catch (NullPointerException npe) {
+            _logger.error("File is null");
+        } catch (UnsupportedOperationException uoe) {
+            _logger.error("Current platform does not support this action");
+        } catch (SecurityException se) {
+            _logger.error("Denied read access to the file");
+        } catch (IllegalArgumentException iae) {
+            _logger.error("The specified file doesn't exist");
+        }
     }
 
     private ContextMenu getContexMenu() {
+
         ContextMenu contextMenu = new ContextMenu();
         List<MenuItem> menuItems = new ArrayList<>();
 
-        MenuItem editItem = new MenuItem();
-        editItem.setText("Open project folder");
-        editItem.setOnAction(this::openFolder);
+        String openFolderIcoUrl = "icons/mainmenu/folder_16x16.png";
+        Image openFolderIco = new Image(getClass().getClassLoader().getResource(openFolderIcoUrl).toExternalForm());
+        MenuItem openFolder = new MenuItem();
+        openFolder.setText("Open project folder");
+        openFolder.setOnAction(this::onOpenFolder);
+        openFolder.setGraphic(new ImageView(openFolderIco));
+        menuItems.add(openFolder);
 
-        menuItems.add(editItem);
-
+        String cloneProjectIcoUrl = "icons/mainmenu/clone_16x16.png";
+        Image cloneProjectIco = new Image(getClass().getClassLoader().getResource(cloneProjectIcoUrl).toExternalForm());
         MenuItem cloneProject = new MenuItem();
         cloneProject.setText("Clone shadow project");
         cloneProject.setOnAction(this::cloneShadowProject);
-
+        cloneProject.setGraphic(new ImageView(cloneProjectIco));
         menuItems.add(cloneProject);
 
         contextMenu.getItems().addAll(menuItems);
@@ -262,10 +269,10 @@ public class MainWindowController {
         // setup selection
         listView.getSelectionModel().getSelectedItems().addListener((ListChangeListener<Project>) changed -> {
             if (areAllItemsSelected(listView)) {
-                selectAllButton.setText("Deselect all");
+                selectAllButton.setSelected(true);
                 selectAllButton.setOnAction(action -> onDeselectAll());
             } else {
-                selectAllButton.setText("Select all");
+                selectAllButton.setSelected(false);
                 selectAllButton.setOnAction(action -> onSelectAll());
             }
         });
