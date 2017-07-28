@@ -4,13 +4,14 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
-
 <BorderPane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.lgc.gitlabtool.git.ui.javafx.controllers.MainWindowController">
     <top>
         <GridPane maxHeight="17.0" style="-fx-background-color: #838EA9;" BorderPane.alignment="CENTER">
@@ -36,9 +37,23 @@
     <center>
         <SplitPane fx:id="splitPanelMain" dividerPositions="0.3" BorderPane.alignment="CENTER">
 
-                <AnchorPane>
-                    <ListView fx:id="projectsList" prefHeight="400.0" prefWidth="248.0" AnchorPane.bottomAnchor="25.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                    <Button fx:id="selectAllButton" maxHeight="25.0" onAction="#onSelectAll" text="Select all" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
+            <AnchorPane>
+                <ListView fx:id="projectsList" prefHeight="400.0" prefWidth="248.0" AnchorPane.bottomAnchor="0.0"
+                          AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0"/>
+                <HBox maxHeight="25.0">
+
+                    <ToggleButton fx:id="selectAllButton" maxHeight="25.0" onAction="#onSelectAll">
+                        <tooltip>
+                            <Tooltip text="Select all projects"/>
+                        </tooltip>
+                    </ToggleButton>
+                    <Button fx:id="refreshProjectsButton" maxHeight="25.0" onAction="#refreshLoadProjects">
+                        <tooltip>
+                            <Tooltip text="Refresh projects"/>
+                        </tooltip>
+                    </Button>
+
+            </HBox>
                 </AnchorPane>
                 <GridPane prefHeight="210.0" prefWidth="519.0">
                     <columnConstraints>

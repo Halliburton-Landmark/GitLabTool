@@ -1,7 +1,12 @@
 package com.lgc.gitlabtool.git.ui.javafx.controllers;
 
+
+import java.awt.*;
+import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -44,19 +49,24 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.SplitPane;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 
 public class MainWindowController {
     private static final String HEDER_GROUP_TITLE = "Current group: ";
     private static final String SELECT_ALL_IMAGE_URL = "icons/select_all_20x20.png";
+    private static final String REFRESH_PROJECTS_IMAGE_URL = "icons/toolbar/refresh_projects_20x20.png";
     private static final String DIVIDER_PROPERTY_NODE = "MainWindowController_Dividers";
     private static final String STATUS_DIALOG_TITLE = "Status dialog";
     private static final String STATUS_DIALOG_HEADER_COMMIT = "Commit statuses";
@@ -90,7 +100,10 @@ public class MainWindowController {
     private Label userId;
 
     @FXML
-    public Button selectAllButton;
+    private ToggleButton selectAllButton;
+
+    @FXML
+    private Button refreshProjectsButton;
 
     public void beforeShowing() {
         String username = _loginService.getCurrentUser().getName();
@@ -99,9 +112,13 @@ public class MainWindowController {
         String groupTitle = _currentGroup.getName() + " [" + _currentGroup.getPathToClonedGroup() + "]";
         leftLabel.setText(HEDER_GROUP_TITLE + groupTitle);
 
+
+        Image imageRefreshProjects = new Image(
+                getClass().getClassLoader().getResource(REFRESH_PROJECTS_IMAGE_URL).toExternalForm());
         Image imageSelectAll = new Image(
                 getClass().getClassLoader().getResource(SELECT_ALL_IMAGE_URL).toExternalForm());
         selectAllButton.setGraphic(new ImageView(imageSelectAll));
+        refreshProjectsButton.setGraphic(new ImageView(imageRefreshProjects));
 
         preferences = getPreferences(DIVIDER_PROPERTY_NODE);
 
@@ -196,6 +213,53 @@ public class MainWindowController {
         }
     }
 
+    private void onOpenFolder(ActionEvent event) {
+        getSelectProjects().parallelStream()
+                .filter(Project::isCloned)
+                .forEach(this::openProjectFolder);
+    }
+
+    private void openProjectFolder(Project project){
+        try {
+            Desktop.getDesktop().open(new File(project.getPath()));
+        } catch (IOException e) {
+            _logger.error("The specified file has no associated application or the associated application fails to be launched");
+        } catch (NullPointerException npe) {
+            _logger.error("File is null");
+        } catch (UnsupportedOperationException uoe) {
+            _logger.error("Current platform does not support this action");
+        } catch (SecurityException se) {
+            _logger.error("Denied read access to the file");
+        } catch (IllegalArgumentException iae) {
+            _logger.error("The specified file doesn't exist");
+        }
+    }
+
+    private ContextMenu getContexMenu() {
+
+        ContextMenu contextMenu = new ContextMenu();
+        List<MenuItem> menuItems = new ArrayList<>();
+
+        String openFolderIcoUrl = "icons/mainmenu/folder_16x16.png";
+        Image openFolderIco = new Image(getClass().getClassLoader().getResource(openFolderIcoUrl).toExternalForm());
+        MenuItem openFolder = new MenuItem();
+        openFolder.setText("Open project folder");
+        openFolder.setOnAction(this::onOpenFolder);
+        openFolder.setGraphic(new ImageView(openFolderIco));
+        menuItems.add(openFolder);
+
+        String cloneProjectIcoUrl = "icons/mainmenu/clone_16x16.png";
+        Image cloneProjectIco = new Image(getClass().getClassLoader().getResource(cloneProjectIcoUrl).toExternalForm());
+        MenuItem cloneProject = new MenuItem();
+        cloneProject.setText("Clone shadow project");
+        cloneProject.setOnAction(this::cloneShadowProject);
+        cloneProject.setGraphic(new ImageView(cloneProjectIco));
+        menuItems.add(cloneProject);
+
+        contextMenu.getItems().addAll(menuItems);
+        return contextMenu;
+    }
+
     private void configureListView(ListView<Project> listView) {
         // config displayable string
         listView.setCellFactory(p -> new ProjectListCell());
@@ -203,10 +267,10 @@ public class MainWindowController {
         // setup selection
         listView.getSelectionModel().getSelectedItems().addListener((ListChangeListener<Project>) changed -> {
             if (areAllItemsSelected(listView)) {
-                selectAllButton.setText("Deselect all");
+                selectAllButton.setSelected(true);
                 selectAllButton.setOnAction(action -> onDeselectAll());
             } else {
-                selectAllButton.setText("Select all");
+                selectAllButton.setSelected(false);
                 selectAllButton.setOnAction(action -> onSelectAll());
             }
         });
@@ -222,13 +286,26 @@ public class MainWindowController {
             if (node instanceof ListCell) {
                 evt.consume();
 
-                ListCell<?> cell = (ListCell<?>) node;
-                ListView<?> lv = cell.getListView();
+                ListCell<Project> cell = (ListCell<Project>) node;
+                ListView<Project> lv = cell.getListView();
 
                 lv.requestFocus();
+                if (cell.isEmpty()) {
+                    return;
+                }
 
-                if (!cell.isEmpty()) {
-                    int index = cell.getIndex();
+                int index = cell.getIndex();
+                if (lv.getSelectionModel().isEmpty()) {
+                    lv.setContextMenu(null);
+                }
+
+                if (evt.getButton() == MouseButton.SECONDARY) {
+                    if (!lv.getSelectionModel().isEmpty()) {
+                        lv.setContextMenu(getContexMenu());
+                    } else {
+                        lv.setContextMenu(null);
+                    }
+                } else if (evt.getButton() == MouseButton.PRIMARY) {
                     if (cell.isSelected()) {
                         lv.getSelectionModel().clearSelection(index);
                     } else {
