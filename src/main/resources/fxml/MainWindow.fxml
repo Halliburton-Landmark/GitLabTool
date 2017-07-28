@@ -4,6 +4,7 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
@@ -11,7 +12,6 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
-<?import javafx.scene.control.ToggleButton?>
 <BorderPane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.lgc.gitlabtool.git.ui.javafx.controllers.MainWindowController">
     <top>
         <GridPane maxHeight="17.0" style="-fx-background-color: #838EA9;" BorderPane.alignment="CENTER">
@@ -47,7 +47,11 @@
                             <Tooltip text="Select all projects"/>
                         </tooltip>
                     </ToggleButton>
-                        <Button fx:id="refreshProjectsButton" maxHeight="25.0" onAction="#refreshLoadProjects" />
+                    <Button fx:id="refreshProjectsButton" maxHeight="25.0" onAction="#refreshLoadProjects">
+                        <tooltip>
+                            <Tooltip text="Refresh projects"/>
+                        </tooltip>
+                    </Button>
 
             </HBox>
                 </AnchorPane>
