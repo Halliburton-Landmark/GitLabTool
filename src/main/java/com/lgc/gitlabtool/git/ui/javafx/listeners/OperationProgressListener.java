@@ -64,8 +64,8 @@ public class OperationProgressListener implements ProgressListener {
      */
     @Override
     public void onSuccess(Object... t) {
-        if (t[0] instanceof Double) {
-            double progress = (double) t[0];
+        if (t[0] instanceof Long) {
+            double progress = (long) t[0] * 0.01;
             _progressDialog.updateProgressBar(progress);
         }
         if (t.length >= 3 && t[1] instanceof Project && t[2] instanceof JGitStatus) {
@@ -106,16 +106,10 @@ public class OperationProgressListener implements ProgressListener {
         if (t[0] instanceof Project) {
             Project project = (Project) t[0];
             _progressDialog.updateProjectLabel(project.getName());
-            _progressDialog.addMessageToConcole(onStartMessage(project), OperationMessageStatus.SIMPLE);
         } else if (t[0] instanceof String) {
             _progressDialog.addMessageToConcole((String) t[0], OperationMessageStatus.SIMPLE);
         }
         _logger.info(_applicationState + ": started");
-    }
-
-    public String onStartMessage(Object param) {
-        return param instanceof Project ? "Operation started for " + ((Project) param).getName()
-                                        : "Operation started";
     }
 
     /**

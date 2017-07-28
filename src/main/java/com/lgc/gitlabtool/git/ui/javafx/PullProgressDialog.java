@@ -8,7 +8,7 @@ import javafx.event.EventHandler;
 public class PullProgressDialog extends ProgressDialog {
 
     public PullProgressDialog() {
-        super("Pull operation", ApplicationState.PULL);
+        super("Pull operation", ApplicationState.PULL, true);
     }
 
     @Override

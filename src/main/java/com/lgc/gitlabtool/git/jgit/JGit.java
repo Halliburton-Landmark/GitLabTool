@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
@@ -52,6 +52,7 @@ import com.lgc.gitlabtool.git.entities.Branch;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.User;
 import com.lgc.gitlabtool.git.services.ProgressListener;
+import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 import com.lgc.gitlabtool.git.util.PathUtilities;
 
 
@@ -329,13 +330,16 @@ public class JGit {
      */
     public boolean pull(List<Project> projects, ProgressListener progressListener) {
         if (projects == null || progressListener == null) {
+            logger.error("Error during pull! Projects: " + projects + "; progressListener: " + progressListener);
             return false;
         }
+        long step = 100 / projects.size();
+        AtomicLong progress = new AtomicLong(0);
         progressListener.onStart("Pull operation started");
         Runnable pullTask = () -> {
             projects.parallelStream()
                     .filter(project -> project.isCloned())
-                    .forEach(project -> pullProject(project, progressListener));
+                    .forEach(project -> pullProject(project, progressListener, progress, step));
             progressListener.onFinish("Pull finished");
         };
         Thread pullThread = new Thread(pullTask, "Pull thread");
@@ -343,12 +347,15 @@ public class JGit {
         return true;
     }
 
-    private JGitStatus pullProject(Project project, ProgressListener progressListener) {
+    private JGitStatus pullProject(Project project, ProgressListener progressListener, AtomicLong progress, long delta) {
+        progressListener.onStart(project);
         JGitStatus pullResult = pull(project);
+        progress.addAndGet(delta);
+        System.out.println("progress " + progress.get());
         if (pullResult == JGitStatus.FAILED) {
-            progressListener.onError(null, project);
+            progressListener.onError(progress.get(), project);
         } else {
-            progressListener.onSuccess(null, project, pullResult);
+            progressListener.onSuccess(progress.get(), project, pullResult);
         }
         return pullResult;
     }

@@ -49,7 +49,7 @@ public abstract class ProgressDialog extends Dialog<Void> {
     private final StateService _stateService = (StateService) ServiceProvider.getInstance()
             .getService(StateService.class.getName());
 
-    public ProgressDialog(String title, ApplicationState state) {
+    public ProgressDialog(String title, ApplicationState state, boolean disableCancelButton) {
         setTitle("Cloning groups...");
 
         GridPane grid = new GridPane();
@@ -69,23 +69,7 @@ public abstract class ProgressDialog extends Dialog<Void> {
         grid.add(progressBox, 0, 2);
 
         _messageConcole = new ListView<>();
-        _messageConcole.setCellFactory(param -> new ListCell<OperationMessage>() {
-
-            @Override
-            protected void updateItem(OperationMessage item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty) {
-                    setText(null);
-                }
-
-                if (item != null) {
-                    if (item.getStatus() != OperationMessageStatus.SIMPLE) {
-                        setStyle(item.getCSSForStatus());
-                    }
-                    setText(item.getMessage());
-                }
-            }
-        });
+        _messageConcole.setCellFactory(param -> getNewListCell());
         _messageConcole.setMouseTransparent(false);
         _messageConcole.setFocusTraversable(false);
         _messageConcole.setMinSize(600, 100);
@@ -96,8 +80,9 @@ public abstract class ProgressDialog extends Dialog<Void> {
         hbBtn.setAlignment(Pos.BOTTOM_RIGHT);
         hbBtn.getChildren().add(_cancelButton);
         grid.add(hbBtn, 3, 7);
-
         _cancelButton.setOnAction(onCancelAction());
+        _cancelButton.setDisable(disableCancelButton);
+
         _progressIndicator.setMaxSize(20, 20);
 
         Image appIcon = AppIconHolder.getInstance().getAppIcoImage();
@@ -120,6 +105,26 @@ public abstract class ProgressDialog extends Dialog<Void> {
         ScreenUtil.adaptForMultiScreens(stage, 500, 350);
     }
 
+    private ListCell<OperationMessage> getNewListCell() {
+        return new ListCell<OperationMessage>() {
+
+            @Override
+            protected void updateItem(OperationMessage item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setText(null);
+                }
+
+                if (item != null) {
+                    if (item.getStatus() != OperationMessageStatus.SIMPLE) {
+                        setStyle(item.getCSSForStatus());
+                    }
+                    setText(item.getMessage());
+                }
+            }
+        };
+    }
+
     /**
      * Returns {@link EventHandler} that holds the event for Cancel button.<br>
      * It shows what should be done after Cancel button pressing.
@@ -127,6 +132,10 @@ public abstract class ProgressDialog extends Dialog<Void> {
      * @return EventHandler of onCancelAction
      */
     abstract EventHandler<ActionEvent> onCancelAction();
+
+    public Button getCancelButton() {
+        return _cancelButton;
+    }
 
     public void addMessageToConcole(String message, OperationMessageStatus status) {
         Platform.runLater(new Runnable() {
@@ -185,7 +194,9 @@ public abstract class ProgressDialog extends Dialog<Void> {
     private void makeCancelButtonAsOk() {
         _cancelButton.setDisable(false);
         _cancelButton.setText("OK");
-        _cancelButton.setOnAction(event -> close());
+        _cancelButton.setOnAction(event -> {
+            ((Stage) _cancelButton.getScene().getWindow()).close();
+        });
     }
 
     private String currentDateToString() {
@@ -236,12 +247,8 @@ public abstract class ProgressDialog extends Dialog<Void> {
         public static String getCSSForStatus(OperationMessageStatus status) {
             if (status == null || status == OperationMessageStatus.SIMPLE) {
                 return "-fx-text-fill:black";
-            } else if (status == OperationMessageStatus.ERROR) {
-                return "-fx-text-fill:red";
-            } else {
-                return "-fx-text-fill:green";
-            }
-//            return status == OperationMessageStatus.ERROR ? "-fx-text-fill:red" : "-fx-text-fill:green";
+            } 
+            return status == OperationMessageStatus.ERROR ? "-fx-text-fill:red" : "-fx-text-fill:green";
         }
     }
 }

@@ -10,7 +10,7 @@ import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.javafx.CloneProgressDialog;
 import com.lgc.gitlabtool.git.ui.javafx.StatusDialog;
-import com.lgc.gitlabtool.git.ui.javafx.CloneProgressDialog.CloningMessageStatus;
+import com.lgc.gitlabtool.git.ui.javafx.ProgressDialog.OperationMessageStatus;
 import com.lgc.gitlabtool.git.util.NullCheckUtil;
 
 import javafx.application.Platform;
@@ -49,14 +49,14 @@ public class CloneProgressListener implements ProgressListener {
         if (t[0] instanceof Project) {
             Project project = (Project) t[0];
             _progressDialog.addMessageToConcole(project.getName() + " project is successful cloned!",
-                    CloningMessageStatus.SUCCESS);
+                    OperationMessageStatus.SUCCESS);
         }
         if (t[1] instanceof Double) {
             double progress = (Double) t[1];
             _progressDialog.updateProgressBar(progress);
         }
         if (t[2] instanceof String) {
-            _progressDialog.addMessageToConcole((String) t[2], CloningMessageStatus.SUCCESS);
+            _progressDialog.addMessageToConcole((String) t[2], OperationMessageStatus.SUCCESS);
         }
     }
 
@@ -68,7 +68,7 @@ public class CloneProgressListener implements ProgressListener {
         }
         if (t[1] instanceof String) {
             String message = (String) t[1];
-            _progressDialog.addMessageToConcole(message, CloningMessageStatus.ERROR);
+            _progressDialog.addMessageToConcole(message, OperationMessageStatus.ERROR);
         }
     }
 
@@ -85,7 +85,7 @@ public class CloneProgressListener implements ProgressListener {
         _stateService.stateOFF(ApplicationState.CLONE);
 
         String messageStatus = t[0] instanceof String ? (String) t[0] : JGit.FINISH_CLONE_MESSAGE;
-        _progressDialog.addMessageToConcole(messageStatus, CloningMessageStatus.SIMPLE);
+        _progressDialog.addMessageToConcole(messageStatus, OperationMessageStatus.SIMPLE);
         Platform.runLater(new Runnable() {
             @Override
             public void run() {

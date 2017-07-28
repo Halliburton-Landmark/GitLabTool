@@ -96,9 +96,8 @@ public class CloningGroupsWindowController {
 
         String destinationPath = folderPath.getText();
         List<Group> selectedGroups = projectsList.getSelectionModel().getSelectedItems();
-        Group group = selectedGroups.get(0);
 
-        CloneProgressDialog progressDialog = new CloneProgressDialog(stage, group.getName(), ApplicationState.CLONE);
+        CloneProgressDialog progressDialog = new CloneProgressDialog();
         progressDialog.setStartAction(() -> startClone(destinationPath, selectedGroups, progressDialog));
         progressDialog.showDialog();
     }

@@ -408,7 +408,7 @@ public class MainWindowController {
         Stage stage = (Stage) selectAllButton.getScene().getWindow();
         String path = _currentGroup.getPathToClonedGroup();
 
-        CloneProgressDialog progressDialog = new CloneProgressDialog(stage, _currentGroup.getName(), ApplicationState.CLONE);
+        CloneProgressDialog progressDialog = new CloneProgressDialog();
         progressDialog.setStartAction(() -> startClone(shadowProjects, path, progressDialog));
         progressDialog.showDialog();
     }
