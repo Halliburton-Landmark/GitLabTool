@@ -330,8 +330,11 @@ public class JGit {
      * @return <code>true</code> if pull operation works well and <code>false</code> otherwise
      */
     public boolean pull(List<Project> projects, ProgressListener progressListener) {
-        if (projects == null || progressListener == null) {
+        if (projects == null || projects.size() == 0 || progressListener == null) {
             logger.error("Error during pull! Projects: " + projects + "; progressListener: " + progressListener);
+            String errorMessage = projects.size() == 0 ? "Error during pull! Project list has no cloned projects"
+                                                       : "Error during pull!";
+            progressListener.onFinish(errorMessage);
             return false;
         }
         long step = 100 / projects.size();
@@ -341,7 +344,7 @@ public class JGit {
             projects.parallelStream()
                     .filter(project -> project.isCloned())
                     .forEach(project -> pullProject(project, progressListener, progress, step));
-            progressListener.onFinish("Pull finished");
+            progressListener.onFinish("Pull process was finished");
         };
         Thread pullThread = new Thread(pullTask, "Pull thread");
         pullThread.start();
@@ -352,7 +355,6 @@ public class JGit {
         progressListener.onStart(project);
         JGitStatus pullResult = pull(project);
         progress.addAndGet(delta);
-        System.out.println("progress " + progress.get());
         if (pullResult == JGitStatus.FAILED) {
             progressListener.onError(progress.get(), project);
         } else {

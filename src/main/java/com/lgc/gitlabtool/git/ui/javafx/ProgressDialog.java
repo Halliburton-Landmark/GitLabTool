@@ -9,6 +9,7 @@ import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
+import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 import com.lgc.gitlabtool.git.util.ScreenUtil;
 
 import javafx.application.Platform;
@@ -33,6 +34,9 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 /**
+ * Displays the progress of some Git operation: pull, push, clone, etc.
+ * <p>
+ * The instance of {@link OperationProgressListener} should be used to show progress correctly
  * 
  * @author Igor Khlaponin
  * @author Lyudmila Lyska
@@ -55,6 +59,14 @@ public abstract class ProgressDialog extends Dialog<Void> {
     private final StateService _stateService = (StateService) ServiceProvider.getInstance()
             .getService(StateService.class.getName());
 
+    /**
+     * Creates the instance of this class
+     * 
+     * @param title -               title of the dialog
+     * @param state -               {@link ApplicationState} - need to show which operation executed 
+     * @param disableCancelButton - dialog shows disabled Cancel button if <code>true</code> and enables it otherwise<br>
+     *                              It is needed if we don't have some cancel logic
+     */
     public ProgressDialog(String title, ApplicationState state, boolean disableCancelButton) {
         setTitle("Cloning groups...");
 

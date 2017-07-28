@@ -20,7 +20,7 @@ import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 public class GitServiceImpl implements GitService {
 
     private static final JGit _git = JGit.getInstance();
-    private final StateService _stateService;
+    private static StateService _stateService;
 
     public GitServiceImpl(StateService stateService) {
         _stateService = stateService;
