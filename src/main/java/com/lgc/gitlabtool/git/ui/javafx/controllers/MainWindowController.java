@@ -214,10 +214,8 @@ public class MainWindowController {
     }
 
     private void onOpenFolder(ActionEvent event) {
-        getSelectProjects().stream()
+        getSelectProjects().parallelStream()
                 .filter(Project::isCloned)
-                .collect(Collectors.toList())
-                .parallelStream()
                 .forEach(this::openProjectFolder);
     }
 
