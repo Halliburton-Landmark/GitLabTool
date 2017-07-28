@@ -29,7 +29,7 @@ public class ProjectTypeServiceImpl implements ProjectTypeService {
         if (project == null) {
             throw new IllegalArgumentException("Invalid data. Project is null.");
         }
-        String path = project.getPathToClonedProject();
+        String path = project.getPath();
         if (path != null) {
             for (ProjectType projectType : _types) {
                 if (projectType.isProjectCorrespondsType(path)) {

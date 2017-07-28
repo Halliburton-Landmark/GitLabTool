@@ -88,17 +88,17 @@ public interface GitService {
 
     /**
      * Returns the set of selected type of branches
-     * 
+     *
      * @param projects     projects list
      * @param branchType   selected {@link BranchType}
-     * @param isOnlyCommon if <code>true</code> returns only common branches for all projects and otherwise if <code>false</code>  
+     * @param isOnlyCommon if <code>true</code> returns only common branches for all projects and otherwise if <code>false</code>
      * @return set of the branches or empty set if such type of branches does not exist for this projects
      */
     Set<Branch> getBranches(List<Project> projects, BranchType branchType, boolean isOnlyCommon);
 
     /**
      * Returns current branch name for selected project
-     * 
+     *
      * @param project - selected project
      * @return current branch name for selected project or <code>null</code> if project has no branches (unreachable state)
      */
@@ -113,4 +113,11 @@ public interface GitService {
      */
     Map<Project, JGitStatus> push(List<Project> projects, ProgressListener progressListener);
 
+    /**
+     * Checks that project has any references.
+     *
+     * @param project the cloned project
+     * @return <true> if project has any references, <false> if project does not have references.
+     */
+    public boolean hasAtLeastOneReference(Project project);
 }

@@ -5,6 +5,8 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -26,6 +28,7 @@ import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.javafx.CommitDialog;
 import com.lgc.gitlabtool.git.ui.javafx.CreateNewBranchDialog;
 import com.lgc.gitlabtool.git.ui.javafx.CreateProjectDialog;
+import com.lgc.gitlabtool.git.ui.javafx.IncorrectProjectDialog;
 import com.lgc.gitlabtool.git.ui.javafx.StatusDialog;
 import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuItems;
 import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuManager;
@@ -112,7 +115,8 @@ public class MainWindowController {
         preferences = getPreferences(DIVIDER_PROPERTY_NODE);
 
         if (preferences != null) {
-            double splitPaneDivider = preferences.getDouble(groupTitle, 0.3);
+            String key = String.valueOf(groupTitle.hashCode());
+            double splitPaneDivider = preferences.getDouble(key, 0.3);
             splitPanelMain.setDividerPositions(splitPaneDivider);
         }
 
@@ -121,17 +125,14 @@ public class MainWindowController {
         splitPanelMain.getDividers().get(0).positionProperty().addListener(
                 (observable, oldValue, newValue) -> {
                     if (preferences != null) {
-                        preferences.putDouble(groupTitle, newValue.doubleValue());
+                        String key = String.valueOf(groupTitle.hashCode());
+                        Double value = round(newValue.doubleValue(), 3);
+
+                        preferences.putDouble(key, value);
                     }
                 });
 
         setDisablePropertyForButtons();
-
-        //TODO: Additional thread should be placed to services
-        Thread t = new Thread(this::refreshProjectList);
-        t.setName("Refresh project list");
-        t.start();
-
         configureToolbarCommands();
         initToolbarMainMenuActions();
     }
@@ -160,12 +161,15 @@ public class MainWindowController {
 
     }
 
-    public void setSelectedGroup(List<Project> projects, Group group) {
-        _projects = projects;
+    public void setSelectedGroup(Group group) {
         _currentGroup = group;
+        refreshLoadProjects();
     }
 
-    public void refreshProjectsList(){
+    /**
+     * Updates current projects list. Method don't load projects from the GitLab
+     */
+    public void updateProjectsList(){
         projectsList.refresh();
     }
 
@@ -184,19 +188,6 @@ public class MainWindowController {
     }
 
     private void configureToolbarCommands() {
-    }
-
-    private void refreshProjectList() {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                List<Project> sortedProjectList = _projects.stream()
-                        .sorted((project1, project2) -> Boolean.compare(project2.isCloned(), project1.isCloned()))
-                        .collect(Collectors.toList());
-                ObservableList<Project> projectsObservableList = FXCollections.observableList(sortedProjectList);
-                projectsList.setItems(projectsObservableList);
-            }
-        });
     }
 
     // Gets preferences by key, could return null
@@ -237,7 +228,7 @@ public class MainWindowController {
 
         if (project.isCloned()) {
             MenuItem editItem = new MenuItem();
-            String filepath = project.getPathToClonedProject();
+            String filepath = project.getPath();
             editItem.setText("Open project folder");
             editItem.setOnAction(action -> openFolder(filepath));
 
@@ -309,6 +300,17 @@ public class MainWindowController {
         });
     }
 
+    private static double round(double value, int places) {
+        if (places < 0) {
+            _logger.error("Incorrect input format");
+            return value;
+        }
+
+        BigDecimal bigDecimal = new BigDecimal(value);
+        bigDecimal = bigDecimal.setScale(places, RoundingMode.HALF_UP);
+        return bigDecimal.doubleValue();
+    }
+
     private boolean areAllItemsSelected(ListView<?> listView) {
         return listView.getSelectionModel().getSelectedItems().size() == listView.getItems().size();
     }
@@ -343,13 +345,13 @@ public class MainWindowController {
     @FXML
     public void onNewBranchButton(ActionEvent actionEvent) {
         showCreateNewBranchDialog();
-        refreshProjectsList();
+        updateProjectsList();
     }
 
     @FXML
     public void createProjectButton(ActionEvent actionEvent) {
         // dialog
-        CreateProjectDialog dialog = new CreateProjectDialog(_currentGroup, (obj) -> refreshLoadProjects(null));
+        CreateProjectDialog dialog = new CreateProjectDialog(_currentGroup, (obj) -> refreshLoadProjects());
         dialog.showAndWait();
     }
 
@@ -368,11 +370,34 @@ public class MainWindowController {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.submit(() -> {
             _logger.info("Refreshing projects...");
-            _projects = (List<Project>) _projectService.loadProjects(_currentGroup);
-            refreshProjectList();
+            refreshLoadProjects();
             _logger.info("Projects were refreshed!");
         });
         executor.shutdown();
+    }
+
+    private void refreshLoadProjects() {
+        _projects = (List<Project>) _projectService.loadProjects(_currentGroup);
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                sortProjectsList();
+                projectsList.refresh();
+            }
+        });
+        checkProjectsList();
+    }
+
+    // shadow projects in the end list
+    private void sortProjectsList() {
+        List<Project> sortedList = _projects.stream().sorted(this::compareProjects)
+                                                     .collect(Collectors.toList());
+        ObservableList<Project> projectsObservableList = FXCollections.observableList(sortedList);
+        projectsList.setItems(projectsObservableList);
+    }
+
+    private int compareProjects(Project firstProject, Project secondProject) {
+        return Boolean.compare(secondProject.isCloned(), firstProject.isCloned());
     }
 
     @FXML
@@ -424,4 +449,30 @@ public class MainWindowController {
         statusDialog.showAndWait();
     }
 
+    private void checkProjectsList() {
+        List<Project> incorrectProjects = findIncorrectProjects();
+        if (incorrectProjects.isEmpty()) {
+            return;
+        }
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                IncorrectProjectDialog dialog = new IncorrectProjectDialog();
+                dialog.showDialog(incorrectProjects, (obj) -> refreshLoadProjects());
+            }
+        });
+    }
+
+    private List<Project> findIncorrectProjects() {
+        return _projects.parallelStream()
+                        .filter(this::isIncorrectProject)
+                        .collect(Collectors.toList());
+    }
+
+    private boolean isIncorrectProject(Project project) {
+        if (!project.isCloned()) {
+            return false; // we check only cloned projects
+        }
+        return !_gitService.hasAtLeastOneReference(project);
+    }
 }

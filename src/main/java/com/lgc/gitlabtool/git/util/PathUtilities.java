@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -78,6 +79,20 @@ public class PathUtilities {
             logger.error("Error deleting path: " + e.getMessage());
         }
         return false;
+    }
+
+    /**
+     * Delete path from a local disk
+     *
+     * @param  string the path on the local disk
+     * @return true - if it was deleted successful, otherwise - false.
+     */
+    public static boolean deletePath(String string) {
+        if (string == null) {
+            return false;
+        }
+        Path path = Paths.get(string);
+        return deletePath(path);
     }
 
     /**
