@@ -198,7 +198,7 @@ public class GroupsUserServiceImpl implements GroupsUserService {
             return result;
         }
         if (isRemoveFromLocalDisk) {
-            logger.error("Deleting group from local disk is started ...");
+            logger.info("Deleting group from local disk is started ...");
             return deleteGroupFromDirectory(removeGroup.getPathToClonedGroup());
         }
         logger.info("Successful deleting of group from the workspace.");

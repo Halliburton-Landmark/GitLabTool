@@ -84,8 +84,8 @@ public class OperationProgressListener implements ProgressListener {
      */
     @Override
     public void onError(Object... t) {
-        if (t[0] instanceof Double) {
-            double progress = (Double) t[0];
+        if (t[0] instanceof Long) {
+            double progress = (long) t[0] * 0.01;
             _progressDialog.updateProgressBar(progress);
         }
         if (t.length >= 2 && t[1] instanceof String) {
@@ -98,8 +98,11 @@ public class OperationProgressListener implements ProgressListener {
     /**
      * Action that will be executed if operation is started
      * <p>
-     * <b>Should always contains 1 parameter in this realization:</b>
+     * <b>Should always contains 1 parameter in this realization.</b>
+     * It could be:
      * <li><code>project</code> instance of <code>Project</code> - a project for which operation performs</li>
+     * or
+     * <li><code>message</code> instance of <code>String</code> - start message</li>
      */
     @Override
     public void onStart(Object... t) {

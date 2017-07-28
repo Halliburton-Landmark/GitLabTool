@@ -18,5 +18,4 @@ public class PullProgressDialog extends ProgressDialog {
         };
     }
 
-    
 }

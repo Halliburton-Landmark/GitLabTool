@@ -198,8 +198,8 @@ public class JGit {
         _isCloneCancelled = false;
         if (projects == null || localPath == null) {
             String errorMsg = "Cloning error. Projects or local path is null.";
-            progressListener.onError(1.0, errorMsg);
-            progressListener.onFinish(null, FINISH_CLONE_MESSAGE);
+            progressListener.onError(100, errorMsg);
+            progressListener.onFinish(FINISH_CLONE_MESSAGE);
             throw new IllegalArgumentException(errorMsg);
         }
         cloneGroupInBackgroundThread(projects, progressListener, localPath);
@@ -210,19 +210,20 @@ public class JGit {
                                          ProgressListener progressListener,
                                          String groupPath) {
         Runnable task = () -> {
-            double step = 1.0 / projects.size();
-            double currentProgress = 0.0;
+            progressListener.onStart("Clonning process started");
+            long step = 100 / projects.size();
+            long currentProgress = 0;
             for (Project project : projects) {
                 if (!_isCloneCancelled) {
                     currentProgress += step;
-                    progressListener.onStart(project, currentProgress);
+                    progressListener.onStart(project);
                     if (!clone(project, groupPath)) {
                         String errorMsg = "Cloning error of the " + project.getName() + " project";
                         progressListener.onError(currentProgress, errorMsg);
                         logger.info(errorMsg);
                         continue;
                     }
-                    progressListener.onSuccess(project, currentProgress, null);
+                    progressListener.onSuccess(currentProgress, project, JGitStatus.SUCCESSFUL);
                     logger.info("The " + project.getName() + " project was successfully cloned.");
                 }
             }

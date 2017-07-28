@@ -12,7 +12,7 @@ import com.lgc.gitlabtool.git.services.LoginService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.javafx.CloneProgressDialog;
-import com.lgc.gitlabtool.git.ui.javafx.listeners.CloneProgressListener;
+import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 import com.lgc.gitlabtool.git.util.PathUtilities;
 
 import javafx.collections.FXCollections;
@@ -103,7 +103,8 @@ public class CloningGroupsWindowController {
     }
 
     private boolean startClone(String destinationPath, List<Group> selectedGroups, CloneProgressDialog progressDialog) {
-        _groupsService.cloneGroups(selectedGroups, destinationPath, new CloneProgressListener(progressDialog));
+        _groupsService.cloneGroups(selectedGroups, destinationPath, 
+                new OperationProgressListener(progressDialog, ApplicationState.CLONE));
         return true;
     }
 

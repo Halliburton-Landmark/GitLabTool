@@ -32,6 +32,12 @@ import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+/**
+ * 
+ * @author Igor Khlaponin
+ * @author Lyudmila Lyska
+ *
+ */
 public abstract class ProgressDialog extends Dialog<Void> {
 
     private final Stage _stage;

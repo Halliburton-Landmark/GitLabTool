@@ -31,7 +31,6 @@ import com.lgc.gitlabtool.git.ui.javafx.IncorrectProjectDialog;
 import com.lgc.gitlabtool.git.ui.javafx.ProgressDialog;
 import com.lgc.gitlabtool.git.ui.javafx.PullProgressDialog;
 import com.lgc.gitlabtool.git.ui.javafx.StatusDialog;
-import com.lgc.gitlabtool.git.ui.javafx.listeners.CloneProgressListener;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuItems;
 import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuManager;
@@ -57,7 +56,6 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
-import javafx.stage.Stage;
 
 public class MainWindowController {
     private static final String HEDER_GROUP_TITLE = "Current group: ";
@@ -405,7 +403,6 @@ public class MainWindowController {
             _logger.info("Shadow projects for cloning have not been selected!");
             return;
         }
-        Stage stage = (Stage) selectAllButton.getScene().getWindow();
         String path = _currentGroup.getPathToClonedGroup();
 
         CloneProgressDialog progressDialog = new CloneProgressDialog();
@@ -415,7 +412,7 @@ public class MainWindowController {
 
     private boolean startClone(List<Project> shadowProjects, String path,  CloneProgressDialog progressDialog) {
         _projectService.clone(shadowProjects, path,
-                new CloneProgressListener(progressDialog, (obj) -> refreshLoadProjects(null)));
+                new OperationProgressListener(progressDialog, ApplicationState.CLONE, (obj) -> refreshLoadProjects(null)));
         return true;
     }
 
