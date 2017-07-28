@@ -355,8 +355,8 @@ public class JGit {
         progressListener.onStart(project);
         JGitStatus pullResult = pull(project);
         progress.addAndGet(delta);
-        if (pullResult == JGitStatus.FAILED) {
-            progressListener.onError(progress.get(), project);
+        if (pullResult == JGitStatus.FAILED || pullResult == JGitStatus.CONFLICTING) {
+            progressListener.onError(progress.get(), project, pullResult);
         } else {
             progressListener.onSuccess(progress.get(), project, pullResult);
         }
