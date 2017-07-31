@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,8 @@ import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.LoginService;
 import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
+import com.lgc.gitlabtool.git.ui.ViewKey;
+import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 import com.lgc.gitlabtool.git.ui.javafx.CloneProgressDialog;
 import com.lgc.gitlabtool.git.ui.javafx.CloneProgressListener;
 import com.lgc.gitlabtool.git.ui.javafx.CommitDialog;
@@ -39,6 +42,7 @@ import com.lgc.gitlabtool.git.ui.selection.ListViewKey;
 import com.lgc.gitlabtool.git.ui.selection.SelectionsProvider;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarButtons;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarManager;
+import com.lgc.gitlabtool.git.util.ScreenUtil;
 
 import javafx.application.Platform;
 import javafx.beans.binding.BooleanBinding;
@@ -46,8 +50,13 @@ import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
@@ -61,7 +70,10 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.stage.Modality;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 public class MainWindowController {
     private static final String HEDER_GROUP_TITLE = "Current group: ";
@@ -71,6 +83,7 @@ public class MainWindowController {
     private static final String STATUS_DIALOG_TITLE = "Status dialog";
     private static final String STATUS_DIALOG_HEADER_COMMIT = "Commit statuses";
     private static final String STATUS_DIALOG_HEADER_PUSH = "Push statuses";
+    private static final String EDIT_PROJECT_PROPERTIES = "Edit project properties";
 
     private List<Project> _projects;
 
@@ -358,6 +371,9 @@ public class MainWindowController {
 
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.PUSH_BUTTON.getId()).setOnAction(this::onPushAction);
 
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.EDIT_PROJECT_PROPERTIES_BUTTON.getId())
+                .setOnAction(event -> showEditProjectPropertiesWindow());
+
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_CREATE_BRANCH)
                 .setOnAction(this::onNewBranchButton);
 
@@ -471,6 +487,38 @@ public class MainWindowController {
         CloneProgressDialog progressDialog = new CloneProgressDialog(stage, _currentGroup.getName(), ApplicationState.CLONE);
         progressDialog.setStartAction(() -> startClone(shadowProjects, path, progressDialog));
         progressDialog.showDialog();
+    }
+
+    private void showEditProjectPropertiesWindow() {
+        try {
+
+            URL switchBranchWindowUrl = getClass().getClassLoader().getResource(ViewKey.EDIT_PROJECT_PROPERTIES.getPath());
+            FXMLLoader loader = new FXMLLoader(switchBranchWindowUrl);
+            Parent root = loader.load();
+
+            Scene scene = new Scene(root);
+            Stage stage = new Stage();
+            stage.setScene(scene);
+            stage.getIcons().add(AppIconHolder.getInstance().getAppIcoImage());
+            stage.setTitle(EDIT_PROJECT_PROPERTIES);
+            stage.initModality(Modality.APPLICATION_MODAL);
+
+            /* Set size and position */
+            Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
+            double dialogWidth = primaryScreenBounds.getMaxX() / 2;
+            double dialogHeight = primaryScreenBounds.getMaxY() / 2;
+
+            ScreenUtil.adaptForMultiScreens(stage, dialogWidth, dialogHeight);
+
+            stage.setWidth(dialogWidth);
+            stage.setHeight(dialogHeight);
+            stage.setMinWidth(dialogWidth / 2);
+            stage.setMinHeight(dialogHeight / 2);
+
+            stage.show();
+        } catch (IOException e) {
+            _logger.error("Could not load fxml resource", e);
+        }
     }
 
     private boolean startClone(List<Project> shadowProjects, String path,  CloneProgressDialog progressDialog) {
