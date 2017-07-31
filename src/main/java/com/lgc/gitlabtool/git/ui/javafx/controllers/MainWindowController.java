@@ -45,6 +45,7 @@ import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -67,6 +68,7 @@ public class MainWindowController {
     private static final String HEDER_GROUP_TITLE = "Current group: ";
     private static final String SELECT_ALL_IMAGE_URL = "icons/select_all_20x20.png";
     private static final String REFRESH_PROJECTS_IMAGE_URL = "icons/toolbar/refresh_projects_20x20.png";
+    private static final String FILTER_SHADOW_PROJECTS_IMAGE_URL = "icons/toolbar/filter_shadow_projects_20x20.png";
     private static final String DIVIDER_PROPERTY_NODE = "MainWindowController_Dividers";
     private static final String STATUS_DIALOG_TITLE = "Status dialog";
     private static final String STATUS_DIALOG_HEADER_COMMIT = "Commit statuses";
@@ -105,6 +107,9 @@ public class MainWindowController {
     @FXML
     private Button refreshProjectsButton;
 
+    @FXML
+    private ToggleButton filterShadowProjects;
+
     public void beforeShowing() {
         String username = _loginService.getCurrentUser().getName();
         userId.setText(username);
@@ -117,8 +122,11 @@ public class MainWindowController {
                 getClass().getClassLoader().getResource(REFRESH_PROJECTS_IMAGE_URL).toExternalForm());
         Image imageSelectAll = new Image(
                 getClass().getClassLoader().getResource(SELECT_ALL_IMAGE_URL).toExternalForm());
+        Image imageFilterShadow = new Image(
+                getClass().getClassLoader().getResource(FILTER_SHADOW_PROJECTS_IMAGE_URL).toExternalForm());
         selectAllButton.setGraphic(new ImageView(imageSelectAll));
         refreshProjectsButton.setGraphic(new ImageView(imageRefreshProjects));
+        filterShadowProjects.setGraphic(new ImageView(imageFilterShadow));
 
         preferences = getPreferences(DIVIDER_PROPERTY_NODE);
 
@@ -471,6 +479,17 @@ public class MainWindowController {
         CloneProgressDialog progressDialog = new CloneProgressDialog(stage, _currentGroup.getName(), ApplicationState.CLONE);
         progressDialog.setStartAction(() -> startClone(shadowProjects, path, progressDialog));
         progressDialog.showDialog();
+    }
+
+    @FXML
+    public void onShowHideShadowProjects(ActionEvent actionEvent) {
+        if (filterShadowProjects.isSelected()) {
+            FilteredList<Project> list = new FilteredList<>(FXCollections.observableArrayList(_projects), Project::isCloned);
+            projectsList.setItems(list);
+        } else {
+            projectsList.setItems(FXCollections.observableArrayList(_projects));
+            sortProjectsList();
+        }
     }
 
     private boolean startClone(List<Project> shadowProjects, String path,  CloneProgressDialog progressDialog) {

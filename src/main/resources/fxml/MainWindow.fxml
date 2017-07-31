@@ -52,6 +52,11 @@
                             <Tooltip text="Refresh projects"/>
                         </tooltip>
                     </Button>
+                    <ToggleButton fx:id="filterShadowProjects" maxHeight="25.0" onAction="#onShowHideShadowProjects">
+                        <tooltip>
+                            <Tooltip text="Enable\disable shadow projects"/>
+                        </tooltip>
+                    </ToggleButton>
 
             </HBox>
                 </AnchorPane>
