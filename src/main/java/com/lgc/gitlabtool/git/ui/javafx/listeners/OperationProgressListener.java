@@ -43,7 +43,7 @@ public class OperationProgressListener implements ProgressListener {
 
     public OperationProgressListener(ProgressDialog progressDialog, ApplicationState applicationState) {
         if (progressDialog == null || applicationState == null) {
-            throw new IllegalAccessError("Invalid parameters");
+            throw new IllegalArgumentException("Invalid parameters");
         }
         _progressDialog = progressDialog;
         _applicationState = applicationState;
@@ -127,10 +127,16 @@ public class OperationProgressListener implements ProgressListener {
      * <li><code>message</code> instance of <code>String</code> - message that should be shown</li>
      */
     @Override
-    public void onFinish(Object... t) {
-        /* {@link ApplicationState} should be switched off after the finishing the operation*/
-        _stateService.stateOFF(_applicationState);
+    public final void onFinish(Object... t) {
+        try {
+            doOnFinishJob(t);
+        } finally {
+            /* {@link ApplicationState} should be switched off after the finishing the operation*/
+            _stateService.stateOFF(_applicationState);
+        }
+    }
 
+    protected void doOnFinishJob(Object... t) {
         _progressDialog.addMessageToConcole(onFinishMessage(t[0]), OperationMessageStatus.SIMPLE);
         _logger.info(_applicationState + ": finished");
         Platform.runLater(new Runnable() {
@@ -143,11 +149,11 @@ public class OperationProgressListener implements ProgressListener {
         });
     }
 
-    public String onFinishMessage(Object param) {
+    protected String onFinishMessage(Object param) {
         return param instanceof String ? (String) param : "Operation finished";
     }
 
-    void showStatusDialog(String message) {
+    protected void showStatusDialog(String message) {
         StatusDialog statusDialog = new StatusDialog(_applicationState.toString(), 
                 _applicationState.toString()+ " info", message);
         statusDialog.showAndWait();

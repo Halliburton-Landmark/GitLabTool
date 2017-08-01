@@ -14,11 +14,11 @@ import javafx.event.EventHandler;
 public class CloneProgressDialog extends ProgressDialog {
 
     public CloneProgressDialog() {
-        super("Clonning dialog", ApplicationState.CLONE, false);
+        super("Clonning dialog", ApplicationState.CLONE, CancelButtonStatus.ACTIVATED);
     }
 
     @Override
-    EventHandler<ActionEvent> onCancelAction() {
+    protected EventHandler<ActionEvent> onCancelAction() {
         return new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent e) {

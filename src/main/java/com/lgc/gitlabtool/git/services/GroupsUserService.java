@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.User;
+import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 
 public interface GroupsUserService {
 
@@ -26,7 +27,7 @@ public interface GroupsUserService {
      *                         We must call StateService::stateOFF for this state
      *                         in the ProgressListener::onFinish method.
      */
-    void cloneGroups(List<Group> groups, String destinationPath, ProgressListener progressListener);
+    void cloneGroups(List<Group> groups, String destinationPath, OperationProgressListener progressListener);
 
     /**
      * Gets group by id

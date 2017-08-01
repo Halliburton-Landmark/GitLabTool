@@ -41,13 +41,13 @@ public class StateServiceImpl implements StateService {
     @Override
     public void stateON(ApplicationState state) {
         setState(state, ACTIVATE_STATE);
-        _logger.info("Activated " + state.getState());
+        _logger.info(state.getState() + " activated");
     }
 
     @Override
     public void stateOFF(ApplicationState state) {
         setState(state, DEACTIVATE_STATE);
-        _logger.info("Deactivate " + state.getState());
+        _logger.info(state.getState() + " deactivated");
     }
 
     private void setState(ApplicationState state, int operation) {

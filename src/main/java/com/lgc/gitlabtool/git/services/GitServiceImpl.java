@@ -16,6 +16,7 @@ import com.lgc.gitlabtool.git.jgit.BranchType;
 import com.lgc.gitlabtool.git.jgit.JGit;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
+import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 
 public class GitServiceImpl implements GitService {
 
@@ -149,14 +150,12 @@ public class GitServiceImpl implements GitService {
     }
 
     @Override
-    public boolean pull(List<Project> projects, ProgressListener progressListener) {
+    public boolean pull(List<Project> projects, OperationProgressListener progressListener) {
         // Switched on PULL application state. Should be switched of in onFinish() method of progressListener
         _stateService.stateON(ApplicationState.PULL);
-        if (projects == null) {
+        if (projects == null || progressListener == null) {
+            _stateService.stateOFF(ApplicationState.PULL);
             return false;
-        }
-        if(progressListener == null){
-            progressListener = EmptyProgressListener.get();
         }
         return _git.pull(projects, progressListener);
     }

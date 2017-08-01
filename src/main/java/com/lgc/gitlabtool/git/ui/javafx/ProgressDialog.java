@@ -64,11 +64,11 @@ public abstract class ProgressDialog extends Dialog<Void> {
      * 
      * @param title -               title of the dialog
      * @param state -               {@link ApplicationState} - need to show which operation executed 
-     * @param disableCancelButton - dialog shows disabled Cancel button if <code>true</code> and enables it otherwise<br>
+     * @param cancelButtonStatus -  dialog shows disabled Cancel button if {@link CancelButtonStatus#DEACTIVATED}<br>
+     *                              and enables it otherwise<br>
      *                              It is needed if we don't have some cancel logic
      */
-    public ProgressDialog(String title, ApplicationState state, boolean disableCancelButton) {
-        setTitle("Cloning groups...");
+    public ProgressDialog(String title, ApplicationState state, CancelButtonStatus cancelButtonStatus) {
 
         GridPane grid = new GridPane();
         grid.setAlignment(Pos.CENTER_LEFT);
@@ -99,7 +99,7 @@ public abstract class ProgressDialog extends Dialog<Void> {
         hbBtn.getChildren().add(_cancelButton);
         grid.add(hbBtn, 3, 7);
         _cancelButton.setOnAction(onCancelAction());
-        _cancelButton.setDisable(disableCancelButton);
+        _cancelButton.setDisable(disactivateCancelButton(cancelButtonStatus));
 
         _progressIndicator.setMaxSize(20, 20);
 
@@ -121,6 +121,10 @@ public abstract class ProgressDialog extends Dialog<Void> {
         _stage = stage;
         /* Set size and position */
         ScreenUtil.adaptForMultiScreens(stage, 500, 350);
+    }
+
+    private boolean disactivateCancelButton(CancelButtonStatus status) {
+        return status == CancelButtonStatus.DEACTIVATED ? true : false;
     }
 
     private ListCell<OperationMessage> getNewListCell() {
@@ -149,9 +153,20 @@ public abstract class ProgressDialog extends Dialog<Void> {
      * 
      * @return EventHandler of onCancelAction
      */
-    abstract EventHandler<ActionEvent> onCancelAction();
+    protected EventHandler<ActionEvent> onCancelAction() {
+        return event -> {
+            // apply onCancel behavior here
+        };
+    }
 
-    public Button getCancelButton() {
+    /**
+     * Handles the event for OK button
+     */
+    protected void onOkButton(ActionEvent event) {
+        ((Stage) _cancelButton.getScene().getWindow()).close();
+    }
+
+    protected Button getCancelButton() {
         return _cancelButton;
     }
 
@@ -212,9 +227,7 @@ public abstract class ProgressDialog extends Dialog<Void> {
     private void makeCancelButtonAsOk() {
         _cancelButton.setDisable(false);
         _cancelButton.setText("OK");
-        _cancelButton.setOnAction(event -> {
-            ((Stage) _cancelButton.getScene().getWindow()).close();
-        });
+        _cancelButton.setOnAction(this::onOkButton);
     }
 
     private String currentDateToString() {
@@ -223,11 +236,11 @@ public abstract class ProgressDialog extends Dialog<Void> {
         return "[" + dateFormat.format(date) + "] ";
     }
     
-    class OperationMessage {
+    private class OperationMessage {
         private final StringProperty _message;
         private final OperationMessageStatus _status;
 
-        public OperationMessage(String message, OperationMessageStatus status) {
+        private OperationMessage(String message, OperationMessageStatus status) {
             if (message == null || status == null) {
                 throw new IllegalAccessError("Invalid parameters");
             }
@@ -268,5 +281,13 @@ public abstract class ProgressDialog extends Dialog<Void> {
             } 
             return status == OperationMessageStatus.ERROR ? "-fx-text-fill:red" : "-fx-text-fill:green";
         }
+    }
+
+    /**
+     * Shows if we need to activate Cancel button for the {@link ProgressDialog}
+     */
+    public enum CancelButtonStatus {
+        ACTIVATED, 
+        DEACTIVATED
     }
 }

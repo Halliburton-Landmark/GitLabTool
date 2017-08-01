@@ -121,7 +121,7 @@ public interface GitService {
      * @param progressListener - instance of {@link OperationProgressListener}
      * @return <code>true</code> if pull operation works well and <code>false</code> otherwise
      */
-    boolean pull(List<Project> projects, ProgressListener progressListener);
+    boolean pull(List<Project> projects, OperationProgressListener progressListener);
 
     /**
      * Checks that project has any references.

@@ -21,6 +21,7 @@ import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.User;
 import com.lgc.gitlabtool.git.jgit.JGit;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
+import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 import com.lgc.gitlabtool.git.util.JSONParser;
 import com.lgc.gitlabtool.git.util.PathUtilities;
 
@@ -67,7 +68,7 @@ public class GroupsUserServiceImpl implements GroupsUserService {
         return null;
     }
 
-    private void cloneGroup(Group group, String destinationPath, ProgressListener progressListener) {
+    private void cloneGroup(Group group, String destinationPath, OperationProgressListener progressListener) {
         String groupPath = destinationPath + File.separator + group.getName();
         Collection<Project> projects = _projectService.getProjects(group);
         if (projects == null) {
@@ -109,7 +110,7 @@ public class GroupsUserServiceImpl implements GroupsUserService {
     }
 
     @Override
-    public void cloneGroups(List<Group> groups, String destinationPath, ProgressListener progressListener) {
+    public void cloneGroups(List<Group> groups, String destinationPath, OperationProgressListener progressListener) {
         if (groups == null || destinationPath == null) {
             throw new IllegalArgumentException("Invalid parameters.");
         }

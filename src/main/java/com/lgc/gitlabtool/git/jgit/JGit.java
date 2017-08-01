@@ -194,7 +194,7 @@ public class JGit {
      * @param localPath  localPath the path to where will clone all the projects of the group
      * @param progressListener listener for obtaining data on the process of performing the operation.
      */
-    public boolean clone(Collection<Project> projects, String localPath, ProgressListener progressListener) {
+    public boolean clone(Collection<Project> projects, String localPath, OperationProgressListener progressListener) {
         _isCloneCancelled = false;
         if (projects == null || localPath == null) {
             String errorMsg = "Cloning error. Projects or local path is null.";
@@ -207,7 +207,7 @@ public class JGit {
     }
 
     private void cloneGroupInBackgroundThread(Collection<Project> projects,
-                                         ProgressListener progressListener,
+                                         OperationProgressListener progressListener,
                                          String groupPath) {
         Runnable task = () -> {
             progressListener.onStart("Clonning process started");
@@ -329,7 +329,7 @@ public class JGit {
      * @param progressListener - instance of {@link OperationProgressListener}
      * @return <code>true</code> if pull operation works well and <code>false</code> otherwise
      */
-    public boolean pull(List<Project> projects, ProgressListener progressListener) {
+    public boolean pull(List<Project> projects, OperationProgressListener progressListener) {
         if (projects == null || projects.size() == 0 || progressListener == null) {
             logger.error("Error during pull! Projects: " + projects + "; progressListener: " + progressListener);
             String errorMessage = projects.size() == 0 ? "Error during pull! Project list has no cloned projects"

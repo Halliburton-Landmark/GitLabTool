@@ -478,7 +478,7 @@ public class MainWindowController {
         if (changedProjects.isEmpty()) {
             ProgressDialog progressDialog = new PullProgressDialog();
             progressDialog.setStartAction(() -> {
-                ProgressListener pullProgressListener = new OperationProgressListener(progressDialog,
+                OperationProgressListener pullProgressListener = new OperationProgressListener(progressDialog,
                         ApplicationState.PULL);
                 return _gitService.pull(projects, pullProgressListener);
             });
