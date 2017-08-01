@@ -153,8 +153,13 @@ public class GitServiceImpl implements GitService {
     public boolean pull(List<Project> projects, OperationProgressListener progressListener) {
         // Switched on PULL application state. Should be switched of in onFinish() method of progressListener
         _stateService.stateON(ApplicationState.PULL);
-        if (projects == null || progressListener == null) {
-            _stateService.stateOFF(ApplicationState.PULL);
+        if (projects == null || projects.isEmpty()) {
+            if (progressListener == null) {
+                _stateService.stateOFF(ApplicationState.PULL);
+            } else {
+                String errorMessage = "Error during pull! Have no selected projects to pull";
+                progressListener.onFinish(errorMessage);
+            }
             return false;
         }
         return _git.pull(projects, progressListener);

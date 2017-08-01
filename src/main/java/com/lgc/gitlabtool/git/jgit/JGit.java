@@ -332,9 +332,6 @@ public class JGit {
     public boolean pull(List<Project> projects, OperationProgressListener progressListener) {
         if (projects == null || projects.size() == 0 || progressListener == null) {
             logger.error("Error during pull! Projects: " + projects + "; progressListener: " + progressListener);
-            String errorMessage = projects.size() == 0 ? "Error during pull! Project list has no cloned projects"
-                                                       : "Error during pull!";
-            progressListener.onFinish(errorMessage);
             return false;
         }
         long step = 100 / projects.size();
