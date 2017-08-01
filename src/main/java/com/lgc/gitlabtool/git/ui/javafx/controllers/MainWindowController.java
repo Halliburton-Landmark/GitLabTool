@@ -318,7 +318,7 @@ public class MainWindowController {
     }
 
     private void showCreateNewBranchDialog() {
-        List<Project> allSelectedProjects = getSelectProjects();
+        List<Project> allSelectedProjects = getSelectedProjects();
         List<Project> clonedProjects = allSelectedProjects.stream()
                                                           .filter(prj -> prj.isCloned())
                                                           .collect(Collectors.toList());
@@ -363,7 +363,7 @@ public class MainWindowController {
 
     @FXML
     public void onCommitAction(ActionEvent actionEvent) {
-        List<Project> allSelectedProjects = getSelectProjects();
+        List<Project> allSelectedProjects = getSelectedProjects();
         List<Project> projectWithChanges = _gitService.getProjectsWithChanges(allSelectedProjects);
 
         if (projectWithChanges.isEmpty()) {
@@ -382,7 +382,7 @@ public class MainWindowController {
 
     @FXML
     public void onPushAction(ActionEvent actionEvent) {
-        List<Project> allSelectedProjects = getSelectProjects();
+        List<Project> allSelectedProjects = getSelectedProjects();
         List<Project> filteredProjects = allSelectedProjects.stream().filter(prj -> prj.isCloned())
                 .collect(Collectors.toList());
 
@@ -396,7 +396,7 @@ public class MainWindowController {
 
     @FXML
     public void cloneShadowProject(ActionEvent actionEvent) {
-        List<Project> shadowProjects = getSelectProjects().stream()
+        List<Project> shadowProjects = getSelectedProjects().stream()
                                                             .filter(project -> !project.isCloned())
                                                             .collect(Collectors.toList());
         if (shadowProjects == null || shadowProjects.isEmpty()) {
@@ -431,7 +431,7 @@ public class MainWindowController {
     }
 
 
-    private List<Project> getSelectProjects() {
+    private List<Project> getSelectedProjects() {
         return projectsList.getSelectionModel().getSelectedItems();
     }
 
@@ -464,8 +464,7 @@ public class MainWindowController {
 
     @FXML
     public void onPullAction(ActionEvent actionEvent) {
-        List<Project> selectedProjects = projectsList.getSelectionModel().getSelectedItems();
-        List<Project> projectsToPull = selectedProjects.stream()
+        List<Project> projectsToPull = getSelectedProjects().stream()
                 .filter(project -> project.isCloned())
                 .collect(Collectors.toList());
         
