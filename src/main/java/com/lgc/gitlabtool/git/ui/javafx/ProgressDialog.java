@@ -52,7 +52,7 @@ public abstract class ProgressDialog extends Dialog<Void> {
 
     private final Button _cancelButton;
     private final ListView<OperationMessage> _messageConcole;
-    private Supplier<Object> _startAction;
+    private Runnable _startAction;
 
     private final String DEFAULT_PROJECT_LABEL = "...";
 
@@ -196,7 +196,7 @@ public abstract class ProgressDialog extends Dialog<Void> {
      *
      * @param action the action which will be launched before the dialog is displayed
      */
-    public void setStartAction(Supplier<Object> action) {
+    public void setStartAction(Runnable action) {
         if (action != null) {
             _startAction = action;
         }
@@ -208,7 +208,7 @@ public abstract class ProgressDialog extends Dialog<Void> {
      */
     public void showDialog() {
         if (_startAction != null) {
-            _startAction.get();
+            _startAction.run();
         }
         _stage.showAndWait();
     }

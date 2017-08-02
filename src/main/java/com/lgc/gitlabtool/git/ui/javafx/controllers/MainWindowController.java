@@ -476,16 +476,18 @@ public class MainWindowController {
 
         if (changedProjects.isEmpty()) {
             ProgressDialog progressDialog = new PullProgressDialog();
-            progressDialog.setStartAction(() -> {
-                OperationProgressListener pullProgressListener = new OperationProgressListener(progressDialog,
-                        ApplicationState.PULL);
-                return _gitService.pull(projects, pullProgressListener);
-            });
+            progressDialog.setStartAction(() -> startPull(projects, progressDialog));
             progressDialog.showDialog();
         } else {
             ChangesCheckDialog changesCheckDialog = new ChangesCheckDialog();
             changesCheckDialog.launchConfirmationDialog(changedProjects, projects, item, this::checkChangesAndPull);
         }
+    }
+
+    private void startPull(List<Project> projects, ProgressDialog progressDialog) {
+        OperationProgressListener pullProgressListener = 
+                new OperationProgressListener(progressDialog, ApplicationState.PULL);
+        _gitService.pull(projects, pullProgressListener);
     }
 
 }
