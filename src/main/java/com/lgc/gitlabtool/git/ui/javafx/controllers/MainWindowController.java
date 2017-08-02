@@ -228,7 +228,7 @@ public class MainWindowController {
     }
 
     private void onOpenFolder(ActionEvent event) {
-        getSelectProjects().parallelStream()
+        getSelectedProjects().parallelStream()
                 .filter(Project::isCloned)
                 .forEach(this::openProjectFolder);
     }
