@@ -24,8 +24,6 @@ import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.jgit.JGit;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.project.nature.projecttype.ProjectType;
-import com.lgc.gitlabtool.git.ui.javafx.CloneProgressDialog;
-import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 import com.lgc.gitlabtool.git.util.JSONParser;
 import com.lgc.gitlabtool.git.util.PathUtilities;
 
@@ -203,7 +201,7 @@ public class ProjectServiceImpl implements ProjectService {
         List<Project> projects = Arrays.asList(project);
         progressListener.onStart("Cloning of created project");
 
-        _git.clone(projects, path, new OperationProgressListener(new CloneProgressDialog(), ApplicationState.CLONE) {
+        _git.clone(projects, path, new ProgressListener() {
             @Override
             public void onSuccess(Object... t) {
                 Set<String> structures = projectType.getStructures();
@@ -217,6 +215,9 @@ public class ProjectServiceImpl implements ProjectService {
             }
             @Override
             public void onStart(Object... t) { }
+
+            @Override
+            public void onFinish(Object... t) {}
         });
     }
 
@@ -265,7 +266,7 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public void clone(List<Project> projects, String destinationPath, OperationProgressListener progressListener) {
+    public void clone(List<Project> projects, String destinationPath, ProgressListener progressListener) {
         if (projects == null || destinationPath == null || progressListener == null) {
             throw new IllegalArgumentException("Invalid parameters.");
         }

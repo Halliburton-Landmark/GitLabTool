@@ -8,8 +8,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.eclipse.jgit.api.Status;
 
 import com.lgc.gitlabtool.git.entities.Branch;
@@ -17,19 +15,10 @@ import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.jgit.BranchType;
 import com.lgc.gitlabtool.git.jgit.JGit;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
-import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
-import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 
 public class GitServiceImpl implements GitService {
 
-    private static final Logger _logger = LogManager.getLogger(GitServiceImpl.class);
-
     private static final JGit _git = JGit.getInstance();
-    private static StateService _stateService;
-
-    public GitServiceImpl(StateService stateService) {
-        _stateService = stateService;
-    }
 
     @Override
     public boolean containsBranches(Project project, List<Branch> branches, boolean isCommon) {
@@ -151,23 +140,6 @@ public class GitServiceImpl implements GitService {
             progressListener = EmptyProgressListener.get();
         }
         return _git.push(projects, progressListener);
-    }
-
-    @Override
-    public boolean pull(List<Project> projects, OperationProgressListener progressListener) {
-        // Switched on PULL application state. Should be switched of in onFinish() method of progressListener
-        _stateService.stateON(ApplicationState.PULL);
-        if (projects == null || projects.isEmpty()) {
-            if (progressListener == null) {
-                _stateService.stateOFF(ApplicationState.PULL);
-            } else {
-                String errorMessage = "Error during pull! Have no selected projects to pull";
-                progressListener.onFinish(errorMessage);
-            }
-            _logger.error("Error during pull! Projects: " + projects + "; progressListener: " + progressListener);
-            return false;
-        }
-        return _git.pull(projects, progressListener);
     }
 
     @Override

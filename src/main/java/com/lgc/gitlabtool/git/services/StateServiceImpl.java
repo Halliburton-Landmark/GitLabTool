@@ -41,13 +41,13 @@ public class StateServiceImpl implements StateService {
     @Override
     public void stateON(ApplicationState state) {
         setState(state, ACTIVATE_STATE);
-        _logger.info(state.getState() + " activated");
+        _logger.info("Activated " + state);
     }
 
     @Override
     public void stateOFF(ApplicationState state) {
         setState(state, DEACTIVATE_STATE);
-        _logger.info(state.getState() + " deactivated");
+        _logger.info("Deactivate " + state);
     }
 
     private void setState(ApplicationState state, int operation) {
@@ -109,7 +109,7 @@ public class StateServiceImpl implements StateService {
     }
 
     private void notifyListenersByType(ApplicationState changedState) {
-        _logger.info("Notifying listeners about changing of " + changedState.getState());
+        _logger.info("Notifying listeners about changing of " + changedState);
         final Set<StateListener> listeners = _listeners.get(changedState);
         if (listeners != null) {
             listeners.forEach(listener -> listener.handleEvent(changedState, isActiveState(changedState)));
