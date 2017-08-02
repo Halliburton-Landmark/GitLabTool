@@ -24,15 +24,19 @@ import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.services.EmptyProgressListener;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.LoginService;
+import com.lgc.gitlabtool.git.services.ProgressListener;
 import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
+import com.lgc.gitlabtool.git.ui.javafx.ChangesCheckDialog;
 import com.lgc.gitlabtool.git.ui.javafx.CloneProgressDialog;
-import com.lgc.gitlabtool.git.ui.javafx.CloneProgressListener;
 import com.lgc.gitlabtool.git.ui.javafx.CommitDialog;
 import com.lgc.gitlabtool.git.ui.javafx.CreateNewBranchDialog;
 import com.lgc.gitlabtool.git.ui.javafx.CreateProjectDialog;
 import com.lgc.gitlabtool.git.ui.javafx.IncorrectProjectDialog;
+import com.lgc.gitlabtool.git.ui.javafx.ProgressDialog;
+import com.lgc.gitlabtool.git.ui.javafx.PullProgressDialog;
 import com.lgc.gitlabtool.git.ui.javafx.StatusDialog;
+import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuItems;
 import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuManager;
 import com.lgc.gitlabtool.git.ui.selection.ListViewKey;
@@ -62,7 +66,6 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.stage.Stage;
 
 public class MainWindowController {
     private static final String HEDER_GROUP_TITLE = "Current group: ";
@@ -165,6 +168,8 @@ public class MainWindowController {
                 .bind(booleanBinding);
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.PUSH_BUTTON.getId()).disableProperty()
                 .bind(booleanBinding);
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.PULL_BUTTON.getId()).disableProperty()
+                .bind(booleanBinding);
 
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_COMMIT).disableProperty().bind(booleanBinding);
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_SWITCH_BRANCH).disableProperty()
@@ -173,6 +178,7 @@ public class MainWindowController {
                 .bind(booleanBinding);
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_COMMIT).disableProperty().bind(booleanBinding);
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_PUSH).disableProperty().bind(booleanBinding);
+        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_PULL).disableProperty().bind(booleanBinding);
 
     }
 
@@ -350,10 +356,10 @@ public class MainWindowController {
     private void initToolbarMainMenuActions() {
 
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.REFRESH_PROJECTS.getId())
-            .setOnAction(this::refreshLoadProjects);
+                .setOnAction(this::refreshLoadProjects);
 
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.CLONE_PROJECT_BUTTON.getId())
-            .setOnAction(this::cloneShadowProject);
+                .setOnAction(this::cloneShadowProject);
 
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.NEW_BRANCH_BUTTON.getId())
                 .setOnAction(this::onNewBranchButton);
@@ -364,14 +370,23 @@ public class MainWindowController {
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.COMMIT_BUTTON.getId())
                 .setOnAction(this::onCommitAction);
 
-        ToolbarManager.getInstance().getButtonById(ToolbarButtons.PUSH_BUTTON.getId()).setOnAction(this::onPushAction);
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.PUSH_BUTTON.getId())
+                .setOnAction(this::onPushAction);
+
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.PULL_BUTTON.getId())
+                .setOnAction(this::onPullAction);
 
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_CREATE_BRANCH)
                 .setOnAction(this::onNewBranchButton);
 
-        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_COMMIT).setOnAction(this::onCommitAction);
+        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_COMMIT)
+                .setOnAction(this::onCommitAction);
 
-        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_PUSH).setOnAction(this::onPushAction);
+        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_PUSH)
+                .setOnAction(this::onPushAction);
+
+        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_PULL)
+                .setOnAction(this::onPullAction);
     }
 
     @FXML
@@ -388,7 +403,7 @@ public class MainWindowController {
     }
 
     private void showCreateNewBranchDialog() {
-        List<Project> allSelectedProjects = getSelectProjects();
+        List<Project> allSelectedProjects = getSelectedProjects();
         List<Project> clonedProjects = allSelectedProjects.stream()
                                                           .filter(prj -> prj.isCloned())
                                                           .collect(Collectors.toList());
@@ -433,7 +448,7 @@ public class MainWindowController {
 
     @FXML
     public void onCommitAction(ActionEvent actionEvent) {
-        List<Project> allSelectedProjects = getSelectProjects();
+        List<Project> allSelectedProjects = getSelectedProjects();
         List<Project> projectWithChanges = _gitService.getProjectsWithChanges(allSelectedProjects);
 
         if (projectWithChanges.isEmpty()) {
@@ -452,7 +467,7 @@ public class MainWindowController {
 
     @FXML
     public void onPushAction(ActionEvent actionEvent) {
-        List<Project> allSelectedProjects = getSelectProjects();
+        List<Project> allSelectedProjects = getSelectedProjects();
         List<Project> filteredProjects = allSelectedProjects.stream().filter(prj -> prj.isCloned())
                 .collect(Collectors.toList());
 
@@ -466,17 +481,16 @@ public class MainWindowController {
 
     @FXML
     public void cloneShadowProject(ActionEvent actionEvent) {
-        List<Project> shadowProjects = getSelectProjects().stream()
+        List<Project> shadowProjects = getSelectedProjects().stream()
                                                             .filter(project -> !project.isCloned())
                                                             .collect(Collectors.toList());
         if (shadowProjects == null || shadowProjects.isEmpty()) {
             _logger.info("Shadow projects for cloning have not been selected!");
             return;
         }
-        Stage stage = (Stage) selectAllButton.getScene().getWindow();
         String path = _currentGroup.getPathToClonedGroup();
 
-        CloneProgressDialog progressDialog = new CloneProgressDialog(stage, _currentGroup.getName(), ApplicationState.CLONE);
+        CloneProgressDialog progressDialog = new CloneProgressDialog();
         progressDialog.setStartAction(() -> startClone(shadowProjects, path, progressDialog));
         progressDialog.showDialog();
     }
@@ -494,7 +508,7 @@ public class MainWindowController {
 
     private boolean startClone(List<Project> shadowProjects, String path,  CloneProgressDialog progressDialog) {
         _projectService.clone(shadowProjects, path,
-                new CloneProgressListener(progressDialog, (obj) -> refreshLoadProjects(null)));
+                new OperationProgressListener(progressDialog, ApplicationState.CLONE, (obj) -> refreshLoadProjects(null)));
         return true;
     }
 
@@ -513,7 +527,7 @@ public class MainWindowController {
     }
 
 
-    private List<Project> getSelectProjects() {
+    private List<Project> getSelectedProjects() {
         return projectsList.getSelectionModel().getSelectedItems();
     }
 
@@ -543,4 +557,33 @@ public class MainWindowController {
         }
         return !_gitService.hasAtLeastOneReference(project);
     }
+
+    @FXML
+    public void onPullAction(ActionEvent actionEvent) {
+        List<Project> projectsToPull = getSelectedProjects().stream()
+                .filter(project -> project.isCloned())
+                .collect(Collectors.toList());
+        
+        checkChangesAndPull(projectsToPull, new Object());
+    }
+
+    private void checkChangesAndPull(List<Project> projects, Object item) {
+        List<Project> changedProjects = _gitService.getProjectsWithChanges(projects);
+
+        if (changedProjects.isEmpty()) {
+            ProgressDialog progressDialog = new PullProgressDialog();
+            progressDialog.setStartAction(() -> startPull(projects, progressDialog));
+            progressDialog.showDialog();
+        } else {
+            ChangesCheckDialog changesCheckDialog = new ChangesCheckDialog();
+            changesCheckDialog.launchConfirmationDialog(changedProjects, projects, item, this::checkChangesAndPull);
+        }
+    }
+
+    private void startPull(List<Project> projects, ProgressDialog progressDialog) {
+        OperationProgressListener pullProgressListener = 
+                new OperationProgressListener(progressDialog, ApplicationState.PULL);
+        _gitService.pull(projects, pullProgressListener);
+    }
+
 }

@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
@@ -51,6 +52,7 @@ import com.lgc.gitlabtool.git.entities.Branch;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.User;
 import com.lgc.gitlabtool.git.services.ProgressListener;
+import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 import com.lgc.gitlabtool.git.util.PathUtilities;
 
 
@@ -192,12 +194,12 @@ public class JGit {
      * @param localPath  localPath the path to where will clone all the projects of the group
      * @param progressListener listener for obtaining data on the process of performing the operation.
      */
-    public boolean clone(Collection<Project> projects, String localPath, ProgressListener progressListener) {
+    public boolean clone(Collection<Project> projects, String localPath, OperationProgressListener progressListener) {
         _isCloneCancelled = false;
         if (projects == null || localPath == null) {
             String errorMsg = "Cloning error. Projects or local path is null.";
-            progressListener.onError(1.0, errorMsg);
-            progressListener.onFinish(null, FINISH_CLONE_MESSAGE);
+            progressListener.onError(100, errorMsg);
+            progressListener.onFinish(FINISH_CLONE_MESSAGE);
             throw new IllegalArgumentException(errorMsg);
         }
         cloneGroupInBackgroundThread(projects, progressListener, localPath);
@@ -205,22 +207,23 @@ public class JGit {
     }
 
     private void cloneGroupInBackgroundThread(Collection<Project> projects,
-                                         ProgressListener progressListener,
+                                         OperationProgressListener progressListener,
                                          String groupPath) {
         Runnable task = () -> {
-            double step = 1.0 / projects.size();
-            double currentProgress = 0.0;
+            progressListener.onStart("Clonning process started");
+            long step = 100 / projects.size();
+            long currentProgress = 0;
             for (Project project : projects) {
                 if (!_isCloneCancelled) {
                     currentProgress += step;
-                    progressListener.onStart(project, currentProgress);
+                    progressListener.onStart(project);
                     if (!clone(project, groupPath)) {
                         String errorMsg = "Cloning error of the " + project.getName() + " project";
                         progressListener.onError(currentProgress, errorMsg);
                         logger.info(errorMsg);
                         continue;
                     }
-                    progressListener.onSuccess(project, currentProgress, null);
+                    progressListener.onSuccess(currentProgress, project, JGitStatus.SUCCESSFUL);
                     logger.info("The " + project.getName() + " project was successfully cloned.");
                 }
             }
@@ -318,6 +321,43 @@ public class JGit {
             logger.error("Pull error for the " + project.getName() + " project: " + e.getMessage());
         }
         return JGitStatus.FAILED;
+    }
+
+    /**
+     * Pulls the list of projects from the upstream and shows the status in {@link ProgressListener}
+     * @param projects - list of projects to pull
+     * @param progressListener - instance of {@link OperationProgressListener}
+     * @return <code>true</code> if pull operation works well and <code>false</code> otherwise
+     */
+    public boolean pull(List<Project> projects, OperationProgressListener progressListener) {
+        if (projects == null || projects.size() == 0 || progressListener == null) {
+            logger.error("Error during pull! Projects: " + projects + "; progressListener: " + progressListener);
+            return false;
+        }
+        long step = 100 / projects.size();
+        AtomicLong progress = new AtomicLong(0);
+        progressListener.onStart("Pull operation started");
+        Runnable pullTask = () -> {
+            projects.parallelStream()
+                    .filter(project -> project.isCloned())
+                    .forEach(project -> pullProject(project, progressListener, progress, step));
+            progressListener.onFinish("Pull process was finished");
+        };
+        Thread pullThread = new Thread(pullTask, "Pull thread");
+        pullThread.start();
+        return true;
+    }
+
+    private JGitStatus pullProject(Project project, ProgressListener progressListener, AtomicLong progress, long delta) {
+        progressListener.onStart(project);
+        JGitStatus pullResult = pull(project);
+        progress.addAndGet(delta);
+        if (pullResult == JGitStatus.FAILED || pullResult == JGitStatus.CONFLICTING) {
+            progressListener.onError(progress.get(), project, pullResult);
+        } else {
+            progressListener.onSuccess(progress.get(), project, pullResult);
+        }
+        return pullResult;
     }
 
     /**

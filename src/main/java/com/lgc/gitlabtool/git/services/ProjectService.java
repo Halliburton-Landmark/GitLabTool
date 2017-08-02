@@ -6,6 +6,7 @@ import java.util.List;
 import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.project.nature.projecttype.ProjectType;
+import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 
 public interface ProjectService {
 
@@ -60,5 +61,5 @@ public interface ProjectService {
      *                         We must call StateService::stateOFF for this state
      *                         in the ProgressListener::onFinish method.
      */
-    void clone (List<Project> projects,  String destinationPath, ProgressListener progressListener);
+    void clone (List<Project> projects,  String destinationPath, OperationProgressListener progressListener);
 }

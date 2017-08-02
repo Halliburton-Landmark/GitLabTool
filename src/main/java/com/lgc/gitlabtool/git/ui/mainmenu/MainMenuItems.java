@@ -24,6 +24,7 @@ public enum MainMenuItems {
     MAIN_SWITCH_BRANCH(ViewKey.MAIN_WINDOW.getKey(), "Git", "main_git_switch_branch", "icons/mainmenu/switchbranch_16x16.png", "Switch branch"),
     MAIN_COMMIT(ViewKey.MAIN_WINDOW.getKey(), "Git", "main_git_commit", "icons/mainmenu/commit_16x16.png", "Commit"),
     MAIN_PUSH(ViewKey.MAIN_WINDOW.getKey(), "Git", "main_git_push", "icons/mainmenu/push_16x16.png", "Push"),
+    MAIN_PULL(ViewKey.MAIN_WINDOW.getKey(), "Git", "main_git_pull", "icons/mainmenu/pull_16x16.png", "Pull"),
     MAIN_ABOUT(ViewKey.MAIN_WINDOW.getKey(), "Help", "main_help_about", "icons/mainmenu/about_16x16.png", "About");
 
     private final String viewKey;

@@ -10,35 +10,39 @@ public enum ApplicationState {
 
         @Override
         public String toString() {
-            return "cloning state";
+            return "Cloning";
         }
     },
 
     PULL {
         @Override
         public String toString() {
-            return "pulling state";
+            return "Pulling";
         }
     },
 
     COMMIT {
         @Override
         public String toString() {
-            return "commiting state";
+            return "Commiting";
         }
     },
 
     PUSH {
         @Override
         public String toString() {
-            return "pushing state";
+            return "Pushing";
         }
     },
 
     CREATE_PROJECT {
         @Override
         public String toString() {
-            return "state of creation project";
+            return "Project creation";
         }
+    };
+
+    public String getState() {
+        return this.toString() + " state";
     }
 }
