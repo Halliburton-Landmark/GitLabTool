@@ -8,6 +8,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jgit.api.Status;
 
 import com.lgc.gitlabtool.git.entities.Branch;
@@ -19,6 +21,8 @@ import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 
 public class GitServiceImpl implements GitService {
+
+    private static final Logger _logger = LogManager.getLogger(GitServiceImpl.class);
 
     private static final JGit _git = JGit.getInstance();
     private static StateService _stateService;
@@ -160,6 +164,7 @@ public class GitServiceImpl implements GitService {
                 String errorMessage = "Error during pull! Have no selected projects to pull";
                 progressListener.onFinish(errorMessage);
             }
+            _logger.error("Error during pull! Projects: " + projects + "; progressListener: " + progressListener);
             return false;
         }
         return _git.pull(projects, progressListener);

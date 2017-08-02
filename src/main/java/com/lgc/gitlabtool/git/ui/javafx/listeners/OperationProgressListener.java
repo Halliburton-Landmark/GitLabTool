@@ -137,20 +137,17 @@ public class OperationProgressListener implements ProgressListener {
     }
 
     protected void doOnFinishJob(Object... t) {
-        _progressDialog.addMessageToConcole(onFinishMessage(t[0]), OperationMessageStatus.SIMPLE);
+        String onFinishMessage = t[0] instanceof String ? (String) t[0] : "Operation finished";
+        _progressDialog.addMessageToConcole(onFinishMessage, OperationMessageStatus.SIMPLE);
         _logger.info(_applicationState + ": finished");
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
                 _progressDialog.resetProgress();
                 NullCheckUtil.acceptConsumer(_finishedAction, null);
-                showStatusDialog(onFinishMessage(t[0]));
+                showStatusDialog(onFinishMessage);
             }
         });
-    }
-
-    protected String onFinishMessage(Object param) {
-        return param instanceof String ? (String) param : "Operation finished";
     }
 
     protected void showStatusDialog(String message) {
