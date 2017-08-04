@@ -133,13 +133,14 @@ public class CreateProjectDialog extends Dialog<String> {
         _projectNameField.setDisable(true);
 
         addProgressBarOnPanel();
+        CloneProgressDialog progressDialog = new CloneProgressDialog();
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.submit(() -> {
             _stateService.stateON(ApplicationState.CREATE_PROJECT);
             String idType = _typeComboBox.getSelectionModel().getSelectedItem();
             ProjectType projectType = _typeServies.getTypeById(idType);
             _projectService.createProject(_selectGroup, _projectNameField.getText(), projectType,
-                    new CreateProjectProgressListener());
+                    new CreateProjectProgressListener(), progressDialog);
             _stateService.stateOFF(ApplicationState.CREATE_PROJECT);
         });
         executor.shutdown();

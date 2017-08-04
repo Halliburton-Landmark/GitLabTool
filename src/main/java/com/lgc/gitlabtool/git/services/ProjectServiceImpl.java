@@ -25,6 +25,7 @@ import com.lgc.gitlabtool.git.jgit.JGit;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.project.nature.projecttype.ProjectType;
 import com.lgc.gitlabtool.git.ui.javafx.CloneProgressDialog;
+import com.lgc.gitlabtool.git.ui.javafx.ProgressDialog;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 import com.lgc.gitlabtool.git.util.JSONParser;
 import com.lgc.gitlabtool.git.util.PathUtilities;
@@ -90,7 +91,8 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public void createProject(Group group, String name, ProjectType projectType, ProgressListener progressListener) {
+    public void createProject(Group group, String name, ProjectType projectType, 
+            ProgressListener progressListener, ProgressDialog progressDialog) {
         if(group == null || !group.isCloned() || name == null || name.isEmpty() || projectType == null) {
             throw new IllegalArgumentException("Invalid paramenters");
         }
@@ -108,7 +110,7 @@ public class ProjectServiceImpl implements ProjectService {
         } else {
             _logger.info(CREATE_REMOTE_PROJECT_SUCCESS_MESSAGE);
         }
-        createLocalProject(project, group.getPathToClonedGroup(), projectType, progressListener);
+        createLocalProject(project, group.getPathToClonedGroup(), projectType, progressListener, progressDialog);
     }
 
     @Override
@@ -199,11 +201,12 @@ public class ProjectServiceImpl implements ProjectService {
         return null;
     }
 
-    private void createLocalProject(Project project, String path, ProjectType projectType, ProgressListener progressListener) {
+    private void createLocalProject(Project project, String path, ProjectType projectType, 
+            ProgressListener progressListener, ProgressDialog progressDialog) {
         List<Project> projects = Arrays.asList(project);
         progressListener.onStart("Cloning of created project");
 
-        _git.clone(projects, path, new OperationProgressListener(new CloneProgressDialog(), ApplicationState.CLONE) {
+        clone(projects, path, new OperationProgressListener(progressDialog, ApplicationState.CLONE) {
             @Override
             public void onSuccess(Object... t) {
                 Set<String> structures = projectType.getStructures();
@@ -215,8 +218,6 @@ public class ProjectServiceImpl implements ProjectService {
                 _logger.error(CREATE_LOCAL_PROJECT_FAILED_MESSAGE);
                 progressListener.onFinish((Object)null, "Failed creating the " + project.getName() + " project!");
             }
-            @Override
-            public void onStart(Object... t) { }
         });
     }
 
