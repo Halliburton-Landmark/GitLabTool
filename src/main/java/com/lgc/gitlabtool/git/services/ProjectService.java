@@ -6,6 +6,7 @@ import java.util.List;
 import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.project.nature.projecttype.ProjectType;
+import com.lgc.gitlabtool.git.ui.javafx.ProgressDialog;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 
 public interface ProjectService {
@@ -38,10 +39,11 @@ public interface ProjectService {
      * @param projectType the type in accordance with which the file structure on the disk will be created
      * @param progressListener the listener which processes the process of creating a project (returns
      *        the status of the operation, the created project, transmits information for the UI)
+     * @param progressDialog - instance of {@link ProgressDialog}
      *
      * This method nothing return. We get all info from progressListener.
      */
-    void createProject(Group group, String name, ProjectType projectType, ProgressListener progressListener);
+    void createProject(Group group, String name, ProjectType projectType, ProgressListener progressListener, ProgressDialog progressDialog);
 
     /**
      * Checks that project with this name hasn't existed yet.
