@@ -177,4 +177,16 @@ public class GitServiceImpl implements GitService {
         }
         return _git.hasAtLeastOneReference(project);
     }
+
+    @Override
+    public boolean projectHasConflicts(Project project) {
+        Optional<Status> status = _git.getStatusProject(project);
+        if (status.isPresent()) {
+            Set<String> conflicts = status.get().getConflicting();
+            if (conflicts.size() > 0) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

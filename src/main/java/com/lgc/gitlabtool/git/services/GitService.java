@@ -1,5 +1,6 @@
 package com.lgc.gitlabtool.git.services;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -127,7 +128,16 @@ public interface GitService {
      * Checks that project has any references.
      *
      * @param project the cloned project
-     * @return <true> if project has any references, <false> if project does not have references.
+     * @return <code>true</code> if project has any references, <code>false</code> if project does not have references.
      */
     public boolean hasAtLeastOneReference(Project project);
+
+    /**
+     * Checks if project has any conflicts 
+     * (e.g what you get if you
+     *       modify file that was modified by someone else in the meantime)
+     * @param project - the instance of project to check
+     * @return <code>true</code> if project has conflicts or <code>false</code> otherwise
+     */
+    public boolean projectHasConflicts(Project project);
 }

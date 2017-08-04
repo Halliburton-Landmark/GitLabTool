@@ -578,6 +578,7 @@ public class MainWindowController {
             ChangesCheckDialog changesCheckDialog = new ChangesCheckDialog();
             changesCheckDialog.launchConfirmationDialog(changedProjects, projects, item, this::checkChangesAndPull);
         }
+        updateProjectsList();
     }
 
     private void startPull(List<Project> projects, ProgressDialog progressDialog) {
