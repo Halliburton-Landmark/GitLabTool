@@ -314,7 +314,7 @@ public class MainWindowController {
                 ListView<Project> lv = cell.getListView();
 
                 if (evt.getButton() == MouseButton.SECONDARY) {
-                    if (!lv.getSelectionModel().isEmpty()) {
+                    if (!cell.isEmpty()) {
                         List<Project> selectedItems = lv.getSelectionModel().getSelectedItems();
                         lv.setContextMenu(getContextMenu(selectedItems));
                     } else {
