@@ -24,7 +24,6 @@ import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.services.EmptyProgressListener;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.LoginService;
-import com.lgc.gitlabtool.git.services.ProgressListener;
 import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.javafx.ChangesCheckDialog;
@@ -249,26 +248,38 @@ public class MainWindowController {
         }
     }
 
-    private ContextMenu getContexMenu() {
+    private ContextMenu getContextMenu(List<Project> items) {
 
         ContextMenu contextMenu = new ContextMenu();
         List<MenuItem> menuItems = new ArrayList<>();
 
-        String openFolderIcoUrl = "icons/mainmenu/folder_16x16.png";
-        Image openFolderIco = new Image(getClass().getClassLoader().getResource(openFolderIcoUrl).toExternalForm());
-        MenuItem openFolder = new MenuItem();
-        openFolder.setText("Open project folder");
-        openFolder.setOnAction(this::onOpenFolder);
-        openFolder.setGraphic(new ImageView(openFolderIco));
-        menuItems.add(openFolder);
+        boolean hasShadow = items.stream()
+                .filter(proj -> !proj.isCloned())
+                .count() > 0;
 
-        String cloneProjectIcoUrl = "icons/mainmenu/clone_16x16.png";
-        Image cloneProjectIco = new Image(getClass().getClassLoader().getResource(cloneProjectIcoUrl).toExternalForm());
-        MenuItem cloneProject = new MenuItem();
-        cloneProject.setText("Clone shadow project");
-        cloneProject.setOnAction(this::cloneShadowProject);
-        cloneProject.setGraphic(new ImageView(cloneProjectIco));
-        menuItems.add(cloneProject);
+        boolean hasCloned = items.stream()
+                .filter(Project::isCloned)
+                .count() > 0;
+
+        if (hasCloned) {
+            String openFolderIcoUrl = "icons/mainmenu/folder_16x16.png";
+            Image openFolderIco = new Image(getClass().getClassLoader().getResource(openFolderIcoUrl).toExternalForm());
+            MenuItem openFolder = new MenuItem();
+            openFolder.setText("Open project folder");
+            openFolder.setOnAction(this::onOpenFolder);
+            openFolder.setGraphic(new ImageView(openFolderIco));
+            menuItems.add(openFolder);
+        }
+
+        if (hasShadow) {
+            String cloneProjectIcoUrl = "icons/mainmenu/clone_16x16.png";
+            Image cloneProjectIco = new Image(getClass().getClassLoader().getResource(cloneProjectIcoUrl).toExternalForm());
+            MenuItem cloneProject = new MenuItem();
+            cloneProject.setText("Clone shadow project");
+            cloneProject.setOnAction(this::cloneShadowProject);
+            cloneProject.setGraphic(new ImageView(cloneProjectIco));
+            menuItems.add(cloneProject);
+        }
 
         contextMenu.getItems().addAll(menuItems);
         return contextMenu;
@@ -298,32 +309,16 @@ public class MainWindowController {
             }
 
             if (node instanceof ListCell) {
-                evt.consume();
 
                 ListCell<Project> cell = (ListCell<Project>) node;
                 ListView<Project> lv = cell.getListView();
 
-                lv.requestFocus();
-                if (cell.isEmpty()) {
-                    return;
-                }
-
-                int index = cell.getIndex();
-                if (lv.getSelectionModel().isEmpty()) {
-                    lv.setContextMenu(null);
-                }
-
                 if (evt.getButton() == MouseButton.SECONDARY) {
                     if (!lv.getSelectionModel().isEmpty()) {
-                        lv.setContextMenu(getContexMenu());
+                        List<Project> selectedItems = lv.getSelectionModel().getSelectedItems();
+                        lv.setContextMenu(getContextMenu(selectedItems));
                     } else {
                         lv.setContextMenu(null);
-                    }
-                } else if (evt.getButton() == MouseButton.PRIMARY) {
-                    if (cell.isSelected()) {
-                        lv.getSelectionModel().clearSelection(index);
-                    } else {
-                        lv.getSelectionModel().select(index);
                     }
                 }
             }
