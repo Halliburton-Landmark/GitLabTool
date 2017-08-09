@@ -51,9 +51,9 @@
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
             </rowConstraints>
             <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Release name:"/>
-            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Text" GridPane.columnIndex="1"/>
+            <Text fx:id="releaseNameText" strokeType="OUTSIDE" strokeWidth="0.0" text="" GridPane.columnIndex="1"/>
             <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Eclipse release:" GridPane.rowIndex="1"/>
-            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Text" GridPane.columnIndex="1"
+            <Text fx:id="eclipseVersionText" strokeType="OUTSIDE" strokeWidth="0.0" text="" GridPane.columnIndex="1"
                   GridPane.rowIndex="1"/>
 
         </GridPane>
@@ -63,13 +63,13 @@
                 <VBox spacing="10.0">
                     <Text text="Add new repository"/>
 
-                    <TextField promptText="ID"/>
-                    <TextField promptText="URL"/>
-                    <TextField promptText="LAYOUT"/>
+                    <TextField fx:id="addIdField" promptText="ID"/>
+                    <TextField fx:id="addUrlField" promptText="URL"/>
+                    <TextField fx:id="addLayoutField" promptText="LAYOUT"/>
                     <CheckBox text="Auto commit"/>
                     <TextArea promptText="Message"/>
                     <AnchorPane>
-                        <Button mnemonicParsing="false" text="Add"
+                        <Button fx:id="addButton" onAction="#onAddRepo" mnemonicParsing="false" text="Add"
                                 AnchorPane.rightAnchor="0.0"/>
                     </AnchorPane>
                     <padding>

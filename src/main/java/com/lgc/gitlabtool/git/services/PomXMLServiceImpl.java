@@ -5,7 +5,9 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -30,7 +32,7 @@ public class PomXMLServiceImpl implements PomXMLService {
     private static final Logger logger = LogManager.getLogger(PomXMLModel.class);
 
     private static final String RELEASE_NAME_KEY = "releaseName";
-    private static final String REPOSITORY_LAYOUT = "p2";
+    private static final String ECLIPSE_RELEASE_KEY = "eclipse.release";
     private static final String POM_NAME = "pom.xml";
     
     private static final String SUCCESSFUL_CHANGE_MESSAGE = "The pom.xml file was changed successfully.";
@@ -101,7 +103,7 @@ public class PomXMLServiceImpl implements PomXMLService {
     }
 
     @Override
-    public void addRepository(Collection<Project> projects, String id, String url) {
+    public void addRepository(Collection<Project> projects, String id, String url, String layout) {
         if (projects == null || !isValidString(id) || !isValidString(url)) {
             errorNotValidDataInLog();
             return;
@@ -111,7 +113,7 @@ public class PomXMLServiceImpl implements PomXMLService {
                 continue;
             }
             PomXMLModel model = getModel(project);
-            if(addRepository(model, id, url)) {
+            if(addRepository(model, id, url, layout)) {
                 model.writeToFile();
                 logger.info(SUCCESSFUL_CHANGE_MESSAGE);
             } else {
@@ -141,7 +143,7 @@ public class PomXMLServiceImpl implements PomXMLService {
     }
 
     @Override
-    public void modifyRepository(Collection<Project> projects, String oldId, String newId, String newUrl) {
+    public void modifyRepository(Collection<Project> projects, String oldId, String newId, String newUrl, String newLayout) {
         if (projects == null || !isValidString(oldId) || !isValidString(newId) || !isValidString(newUrl)) {
             errorNotValidDataInLog();
             return;
@@ -156,12 +158,76 @@ public class PomXMLServiceImpl implements PomXMLService {
                 continue;
             }
             List<Repository> rep = model.getRepositories();
-            if (modifyRepository(rep, oldId, newId, newUrl)) {
+            if (modifyRepository(rep, oldId, newId, newUrl, newLayout)) {
                 pomModel.writeToFile();
                 logger.info(SUCCESSFUL_CHANGE_MESSAGE);
             } else {
                 logger.error(CHANGE_ERROR_MESSAGE);
             }
+        }
+    }
+
+    @Override
+    public String getReleaseName(Collection<Project> projects) {
+        if (projects == null) {
+            errorNotValidDataInLog();
+            return "";
+        }
+
+        List<String> names = new ArrayList<>();
+
+        for (Project project : projects) {
+            if (project == null) {
+                continue;
+            }
+            PomXMLModel pomModel = getModel(project);
+            Model model = pomModel.getModelFile();
+
+            if (model == null) {
+                continue;
+            }
+
+            names.add(model.getProperties().getProperty(RELEASE_NAME_KEY));
+        }
+
+        boolean allEqual = new HashSet<>(names).size() == 1;
+
+        if (allEqual) {
+            return names.get(0);
+        } else {
+            return "[Different]";
+        }
+    }
+
+    @Override
+    public String getEclipseRelease(Collection<Project> projects) {
+        if (projects == null) {
+            errorNotValidDataInLog();
+            return "";
+        }
+
+        List<String> eclipseReleases = new ArrayList<>();
+
+        for (Project project : projects) {
+            if (project == null) {
+                continue;
+            }
+            PomXMLModel pomModel = getModel(project);
+            Model model = pomModel.getModelFile();
+
+            if (model == null) {
+                continue;
+            }
+
+            eclipseReleases.add(model.getProperties().getProperty(ECLIPSE_RELEASE_KEY));
+        }
+
+        boolean allEqual = new HashSet<>(eclipseReleases).size() == 1;
+
+        if (allEqual) {
+            return eclipseReleases.get(0);
+        } else {
+            return "[Different]";
         }
     }
 
@@ -265,7 +331,7 @@ public class PomXMLServiceImpl implements PomXMLService {
         return isChanged;
     }
 
-    private boolean addRepository(PomXMLModel pomMng, String id, String url) {
+    private boolean addRepository(PomXMLModel pomMng, String id, String url, String layout) {
         Model model = pomMng.getModelFile();
         if (model == null) {
             return false;
@@ -275,7 +341,7 @@ public class PomXMLServiceImpl implements PomXMLService {
         Repository repository = new Repository();
         repository.setId(id);
         repository.setUrl(url);
-        repository.setLayout(REPOSITORY_LAYOUT);
+        repository.setLayout(layout);
 
         if (!isListHasRepository(reps, repository)) {
             reps.add(repository);
@@ -284,7 +350,7 @@ public class PomXMLServiceImpl implements PomXMLService {
         return false;
     }
 
-    private boolean modifyRepository(List<Repository> reps, String oldId, String newId, String url) {
+    private boolean modifyRepository(List<Repository> reps, String oldId, String newId, String url, String layout) {
         if (reps == null) {
             return false;
         }
@@ -293,7 +359,7 @@ public class PomXMLServiceImpl implements PomXMLService {
             if (repository != null && repository.getId().equals(oldId)) {
                 repository.setId(newId);
                 repository.setUrl(url);
-                repository.setLayout(REPOSITORY_LAYOUT);
+                repository.setLayout(layout);
                 isChanged = true;
             }
         }

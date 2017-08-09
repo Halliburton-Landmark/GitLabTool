@@ -42,8 +42,9 @@ public interface PomXMLService {
     * @param projects collection of projects in which it is necessary to make a replacement
     * @param id of repository
     * @param url of repository
+    * @param layout of repository
     */
-    void addRepository(Collection<Project> projects, String id, String url);
+    void addRepository(Collection<Project> projects, String id, String url, String layout);
 
     /**
      * Removes repository from a list of repositories in a pom.xml
@@ -62,5 +63,19 @@ public interface PomXMLService {
      * @param newId   new repository id
      * @param newUrl  new repository url
      */
-   void modifyRepository(Collection<Project> projects, String oldId, String newId, String newUrl);
+    void modifyRepository(Collection<Project> projects, String oldId, String newId, String newUrl, String newLayout);
+
+    /**
+     * Gets the name of release
+     *
+     * @param projects collection of projects
+     */
+    String getReleaseName(Collection<Project> projects);
+
+    /**
+     * Gets the release of eclipse
+     *
+     * @param projects collection of projects
+     */
+    String getEclipseRelease(Collection<Project> projects);
 }

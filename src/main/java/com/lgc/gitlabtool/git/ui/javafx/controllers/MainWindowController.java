@@ -496,6 +496,9 @@ public class MainWindowController {
             FXMLLoader loader = new FXMLLoader(switchBranchWindowUrl);
             Parent root = loader.load();
 
+            EditProjectPropertiesController controller = loader.getController();
+            controller.beforeStart(getSelectProjects());
+
             Scene scene = new Scene(root);
             Stage stage = new Stage();
             stage.setScene(scene);
