@@ -2,8 +2,10 @@ package com.lgc.gitlabtool.git.ui.javafx.controllers;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.commons.lang.StringUtils;
+import org.eclipse.jgit.api.Status;
 
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.jgit.JGit;
@@ -27,7 +29,8 @@ public class ProjectListCell extends ListCell<Project> {
 
     private static final String SHADOW_PROJECT_ICON_URL = "icons/project/shadow_project.png";
     private static final String SHADOW_PROJECT_TOOLTIP = "The project is not cloned.";
-    private static final String PROJECT_WITH_CONFLICTS_ICON_URL = "icons/project/conflicts.png";
+    private static final String PROJECT_WITH_CONFLICTS_ICON_URL = "icons/project/list_icons/conflicts.png";
+    private static final String PROJECT_WITH_UNCOMMITTED_CHANGES_ICON_URL = "icons/project/list_icons/uncommitted_changes.png";
     private final Integer LIST_CELL_SPACING = 5;
     private final String LEFT_BRACKET = "[";
     private final String RIGHT_BRACKET = "]";
@@ -42,12 +45,16 @@ public class ProjectListCell extends ListCell<Project> {
             Image fxImage = getImageForProject(item);
             ImageView imageView = new ImageView(fxImage);
 
-            Text branchNameTextView = new Text(item.getName());
+            Text projectNameTextView = new Text(item.getName());
             Color textColor = item.isCloned() ? Color.BLACK : Color.DIMGRAY;
-            branchNameTextView.setFill(textColor);
+            projectNameTextView.setFill(textColor);
             Text currentBranchTextView = getCurrentBrantProjectText(item);
+            
+            String tooltipText = item.isCloned() ?
+                    item.getName() + " " + currentBranchTextView.getText() : SHADOW_PROJECT_TOOLTIP;
+            Tooltip.install(projectNameTextView, new Tooltip(tooltipText));
 
-            HBox hBoxItem = new HBox(imageView, branchNameTextView, currentBranchTextView);
+            HBox hBoxItem = new HBox(imageView, projectNameTextView, currentBranchTextView);
             hBoxItem.setSpacing(LIST_CELL_SPACING);
 
             HBox picItems = new HBox(LIST_CELL_SPACING, getProjectPics(item));
@@ -57,9 +64,7 @@ public class ProjectListCell extends ListCell<Project> {
             AnchorPane.setLeftAnchor(hBoxItem, 5.0);
             AnchorPane.setRightAnchor(picItems, 5.0);
 
-            String tooltipText = item.isCloned() ?
-                    item.getName() + " " + currentBranchTextView.getText() : SHADOW_PROJECT_TOOLTIP;
-            setTooltip(new Tooltip(tooltipText));
+//            setTooltip(new Tooltip(tooltipText));
             setGraphic(anchorPane);
         }
     }
@@ -82,24 +87,47 @@ public class ProjectListCell extends ListCell<Project> {
 
     private Node[] getProjectPics(Project item) {
         List<Node> pics = new ArrayList<>();
-
-        if (_gitService.projectHasConflicts(item)) {
-            ImageView conflictsImageView = new ImageView(getImageForConflicts());
-            pics.add(conflictsImageView);
+        if (!item.isCloned()) {
+            return new Node[0];
         }
 
-        // add another pics here
+        Optional<Status> projectStatus = _gitService.getProjectStatus(item);
+        if (projectStatus.isPresent()) {
+            addPicsDependOnStatus(projectStatus.get(), pics);
+        }
 
         return pics.toArray(new Node[pics.size()]);
     }
 
-    private Image getImageForConflicts() {
-        Image image = new Image(getClass().getClassLoader().getResource(PROJECT_WITH_CONFLICTS_ICON_URL).toExternalForm());
+    private void addPicsDependOnStatus(Status projectStatus, List<Node> pics) {
+        if (projectStatus.isClean()) {
+            return;
+        }
+
+        if (projectStatus.getConflicting().size() > 0) {
+            Node conflictsImageView = newStatusPic(getImage(PROJECT_WITH_CONFLICTS_ICON_URL), 
+                    "Project has conflicts");
+            pics.add(conflictsImageView);
+        }
+
+        if (projectStatus.hasUncommittedChanges()) {
+            Node uncommittedChangesImage = newStatusPic(getImage(PROJECT_WITH_UNCOMMITTED_CHANGES_ICON_URL), 
+                    "Project has uncommitted changes");
+            pics.add(uncommittedChangesImage);
+        }
+    }
+
+    private Image getImage(String path) {
+        Image image = new Image(getClass()
+                .getClassLoader()
+                .getResource(path).toExternalForm());
         return image;
     }
 
-    /*private Node newStatusPic(Image image) {
-        
-    }*/
+    private Node newStatusPic(Image image, String tooltip) {
+        ImageView imageView = new ImageView(image);
+        Tooltip.install(imageView, new Tooltip(tooltip));
+        return imageView;
+    }
 
 }

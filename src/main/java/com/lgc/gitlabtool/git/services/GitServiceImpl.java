@@ -179,14 +179,7 @@ public class GitServiceImpl implements GitService {
     }
 
     @Override
-    public boolean projectHasConflicts(Project project) {
-        Optional<Status> status = _git.getStatusProject(project);
-        if (status.isPresent()) {
-            Set<String> conflicts = status.get().getConflicting();
-            if (conflicts.size() > 0) {
-                return true;
-            }
-        }
-        return false;
+    public Optional<Status> getProjectStatus(Project project) {
+        return _git.getStatusProject(project);
     }
 }

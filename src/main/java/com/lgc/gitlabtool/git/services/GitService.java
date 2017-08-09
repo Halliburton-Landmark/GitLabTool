@@ -1,9 +1,11 @@
 package com.lgc.gitlabtool.git.services;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+
+import org.eclipse.jgit.api.Status;
 
 import com.lgc.gitlabtool.git.entities.Branch;
 import com.lgc.gitlabtool.git.entities.Project;
@@ -133,11 +135,9 @@ public interface GitService {
     public boolean hasAtLeastOneReference(Project project);
 
     /**
-     * Checks if project has any conflicts 
-     * (e.g what you get if you
-     *       modify file that was modified by someone else in the meantime)
-     * @param project - the instance of project to check
-     * @return <code>true</code> if project has conflicts or <code>false</code> otherwise
+     * Returns the {@link Optional} of project's {@link Status}
+     * @param project - the project
+     * @return optional of project's {@link Status}
      */
-    public boolean projectHasConflicts(Project project);
+    public Optional<Status> getProjectStatus(Project project);
 }
