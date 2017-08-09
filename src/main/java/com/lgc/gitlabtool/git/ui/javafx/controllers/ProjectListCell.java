@@ -64,7 +64,6 @@ public class ProjectListCell extends ListCell<Project> {
             AnchorPane.setLeftAnchor(hBoxItem, 5.0);
             AnchorPane.setRightAnchor(picItems, 5.0);
 
-//            setTooltip(new Tooltip(tooltipText));
             setGraphic(anchorPane);
         }
     }
@@ -95,6 +94,8 @@ public class ProjectListCell extends ListCell<Project> {
         if (projectStatus.isPresent()) {
             addPicsDependOnStatus(projectStatus.get(), pics);
         }
+
+        // add more icons here
 
         return pics.toArray(new Node[pics.size()]);
     }
