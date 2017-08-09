@@ -1,8 +1,10 @@
 package com.lgc.gitlabtool.git.services;
 
 import java.util.Collection;
+import java.util.Map;
 
 import com.lgc.gitlabtool.git.entities.Project;
+import com.lgc.gitlabtool.git.jgit.JGitStatus;
 
 /**
  * Service for changes of a group's pom.xml.
@@ -43,16 +45,20 @@ public interface PomXMLService {
     * @param id of repository
     * @param url of repository
     * @param layout of repository
+    *
+    * @return list of statuses
     */
-    void addRepository(Collection<Project> projects, String id, String url, String layout);
+    Map<Project, JGitStatus> addRepository(Collection<Project> projects, String id, String url, String layout);
 
     /**
      * Removes repository from a list of repositories in a pom.xml
      *
      * @param projects collection of projects in which it is necessary to make a replacement
      * @param id of repository for remove
+     *
+     * @return list of statuses
      */
-    void removeRepository(Collection<Project> projects, String id);
+    Map<Project, JGitStatus> removeRepository(Collection<Project> projects, String id);
 
 
     /**
@@ -62,8 +68,10 @@ public interface PomXMLService {
      * @param oldId   repository id
      * @param newId   new repository id
      * @param newUrl  new repository url
+     *
+     * @return list of statuses
      */
-    void modifyRepository(Collection<Project> projects, String oldId, String newId, String newUrl, String newLayout);
+    Map<Project, JGitStatus> modifyRepository(Collection<Project> projects, String oldId, String newId, String newUrl, String newLayout);
 
     /**
      * Gets the name of release

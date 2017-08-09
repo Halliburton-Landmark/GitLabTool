@@ -7,8 +7,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.regex.Pattern;
@@ -21,6 +23,7 @@ import org.apache.maven.model.Repository;
 import org.apache.maven.model.Scm;
 
 import com.lgc.gitlabtool.git.entities.Project;
+import com.lgc.gitlabtool.git.jgit.JGitStatus;
 
 /**
  * Service for changes of a group's pom.xml.
@@ -103,68 +106,87 @@ public class PomXMLServiceImpl implements PomXMLService {
     }
 
     @Override
-    public void addRepository(Collection<Project> projects, String id, String url, String layout) {
+    public Map<Project, JGitStatus> addRepository(Collection<Project> projects, String id, String url, String layout) {
+        Map<Project, JGitStatus> statuses = new HashMap<>();
         if (projects == null || !isValidString(id) || !isValidString(url)) {
             errorNotValidDataInLog();
-            return;
+            return statuses;
         }
         for (Project project : projects) {
             if (project == null) {
+                statuses.put(project, JGitStatus.FAILED);
                 continue;
             }
-            PomXMLModel model = getModel(project);
-            if(addRepository(model, id, url, layout)) {
-                model.writeToFile();
+            PomXMLModel pomModel = getModel(project);
+            if (addRepository(pomModel, id, url, layout)) {
+                pomModel.writeToFile();
+                statuses.put(project, JGitStatus.SUCCESSFUL);
                 logger.info(SUCCESSFUL_CHANGE_MESSAGE);
             } else {
+                statuses.put(project, JGitStatus.FAILED);
                 logger.error(CHANGE_ERROR_MESSAGE);
             }
         }
+
+        return statuses;
     }
 
     @Override
-    public void removeRepository(Collection<Project> projects, String id) {
+    public Map<Project, JGitStatus> removeRepository(Collection<Project> projects, String id) {
+        Map<Project, JGitStatus> statuses = new HashMap<>();
         if (projects == null || !isValidString(id)) {
             errorNotValidDataInLog();
-            return;
+            return statuses;
         }
         for (Project project : projects) {
             if (project == null) {
+                statuses.put(project, JGitStatus.FAILED);
                 continue;
             }
-            PomXMLModel model = getModel(project);
-            if (removeRepository(model, id)) {
-                model.writeToFile();
+            PomXMLModel pomModel = getModel(project);
+            if (removeRepository(pomModel, id)) {
+                pomModel.writeToFile();
+                statuses.put(project, JGitStatus.SUCCESSFUL);
                 logger.info(SUCCESSFUL_CHANGE_MESSAGE);
             } else {
+                statuses.put(project, JGitStatus.FAILED);
                 logger.error(CHANGE_ERROR_MESSAGE);
             }
         }
+
+        return statuses;
     }
 
     @Override
-    public void modifyRepository(Collection<Project> projects, String oldId, String newId, String newUrl, String newLayout) {
+    public Map<Project, JGitStatus> modifyRepository(Collection<Project> projects, String oldId, String newId, String newUrl, String newLayout) {
+        Map<Project, JGitStatus> statuses = new HashMap<>();
         if (projects == null || !isValidString(oldId) || !isValidString(newId) || !isValidString(newUrl)) {
             errorNotValidDataInLog();
-            return;
+            return statuses;
         }
         for (Project project : projects) {
             if (project == null) {
+                statuses.put(project, JGitStatus.FAILED);
                 continue;
             }
             PomXMLModel pomModel = getModel(project);
             Model model = pomModel.getModelFile();
             if (model == null) {
+                statuses.put(project, JGitStatus.FAILED);
                 continue;
             }
             List<Repository> rep = model.getRepositories();
             if (modifyRepository(rep, oldId, newId, newUrl, newLayout)) {
                 pomModel.writeToFile();
+                statuses.put(project, JGitStatus.SUCCESSFUL);
                 logger.info(SUCCESSFUL_CHANGE_MESSAGE);
             } else {
+                statuses.put(project, JGitStatus.FAILED);
                 logger.error(CHANGE_ERROR_MESSAGE);
             }
         }
+
+        return statuses;
     }
 
     @Override
