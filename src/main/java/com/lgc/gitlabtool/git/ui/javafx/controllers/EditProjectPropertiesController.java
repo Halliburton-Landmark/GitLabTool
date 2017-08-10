@@ -113,11 +113,18 @@ public class EditProjectPropertiesController {
             reloadEditReposComboBox();
         });
 
-        editListRepoCombo.setOnAction(event -> {
+        editListRepoCombo.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue == null) {
+                return;
+            }
+
             String idRepo = (String) editListRepoCombo.getValue();
             editIdField.setText(idRepo);
-            editLayoutField.setText(_pomXmlService.getLayout(selectedProjects, idRepo));
-            editUrlField.setText(_pomXmlService.getUrl(selectedProjects, idRepo));
+
+            List<Project> filteredProjects = currentProjectsListView.getItems();
+
+            editLayoutField.setText(_pomXmlService.getLayout(filteredProjects, idRepo));
+            editUrlField.setText(_pomXmlService.getUrl(filteredProjects, idRepo));
 
             filteringProjectsListView(idRepo);
         });
@@ -129,8 +136,11 @@ public class EditProjectPropertiesController {
         });
 
         removeListView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            String idRepo = (String)newValue;
+            if (newValue == null) {
+                return;
+            }
 
+            String idRepo = (String) newValue;
             filteringProjectsListView(idRepo);
         });
     }
@@ -154,7 +164,9 @@ public class EditProjectPropertiesController {
         String url = addUrlField.getText();
         String layout = addLayoutField.getText();
 
-        Map<Project, JGitStatus> addStatuses = _pomXmlService.addRepository(selectedProjects, id, url, layout);
+        List<Project> filteredProjects = currentProjectsListView.getItems();
+
+        Map<Project, JGitStatus> addStatuses = _pomXmlService.addRepository(filteredProjects, id, url, layout);
 
         showStatusDialog(addStatuses, selectedProjects.size(), ADDING_REPO_HEADER_MESSAGE, ADDING_REPO_COLLAPSED_MESSAGE);
 
@@ -163,28 +175,32 @@ public class EditProjectPropertiesController {
 
     @FXML
     public void onEditRepo(ActionEvent actionEvent) {
-        String oldId = (String)editListRepoCombo.getValue();
+        String oldId = (String) editListRepoCombo.getValue();
         String newId = editIdField.getText();
         String newUrl = editUrlField.getText();
         String newLayout = editLayoutField.getText();
 
-        Map<Project, JGitStatus> addStatuses = _pomXmlService.modifyRepository(selectedProjects,oldId, newId, newUrl, newLayout);
+        List<Project> filteredProjects = currentProjectsListView.getItems();
+
+        Map<Project, JGitStatus> addStatuses = _pomXmlService.modifyRepository(filteredProjects, oldId, newId, newUrl, newLayout);
         showStatusDialog(addStatuses, selectedProjects.size(), EDITING_REPO_HEADER_MESSAGE, EDITING_REPO_COLLAPSED_MESSAGE);
 
         refreshComponents();
     }
 
     @FXML
-    public void onRemove(ActionEvent actionEvent) {
-        String id = (String)removeListView.getSelectionModel().getSelectedItem();
+    public void onRemoveRepo(ActionEvent actionEvent) {
+        String id = (String) removeListView.getSelectionModel().getSelectedItem();
 
-        Map<Project, JGitStatus> addStatuses = _pomXmlService.removeRepository(selectedProjects, id);
+        List<Project> filteredProjects = currentProjectsListView.getItems();
+
+        Map<Project, JGitStatus> addStatuses = _pomXmlService.removeRepository(filteredProjects, id);
         showStatusDialog(addStatuses, selectedProjects.size(), REMOVING_REPO_HEADER_MESSAGE, REMOVING_REPO_COLLAPSED_MESSAGE);
 
         refreshComponents();
     }
 
-    private void refreshComponents(){
+    private void refreshComponents() {
         reloadEditReposComboBox();
         reloadRemoveReposList();
 
@@ -195,16 +211,19 @@ public class EditProjectPropertiesController {
         editIdField.setText("");
         editLayoutField.setText("");
         editUrlField.setText("");
+
+        currentProjectsListView.getItems().clear();
+        currentProjectsListView.setItems(FXCollections.observableArrayList(selectedProjects));
     }
 
-    private void reloadEditReposComboBox(){
+    private void reloadEditReposComboBox() {
         boolean editIsCommon = editOnlyCommon.isSelected();
         Set<String> editComboRepositories = _pomXmlService.getReposIds(selectedProjects, editIsCommon);
         editListRepoCombo.getItems().clear();
         editListRepoCombo.setItems(FXCollections.observableArrayList(editComboRepositories));
     }
 
-    private void reloadRemoveReposList(){
+    private void reloadRemoveReposList() {
         boolean removeIsCommon = removeOnlyCommon.isSelected();
         Set<String> removeListRepositories = _pomXmlService.getReposIds(selectedProjects, removeIsCommon);
         removeListView.getItems().clear();

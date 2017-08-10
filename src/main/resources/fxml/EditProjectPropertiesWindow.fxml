@@ -61,8 +61,6 @@
                  AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="60.0">
             <Tab closable="false" text="Add repository">
                 <VBox spacing="10.0">
-                    <Text text="Add new repository"/>
-
                     <TextField fx:id="addIdField" promptText="ID"/>
                     <TextField fx:id="addUrlField" promptText="URL"/>
                     <TextField fx:id="addLayoutField" promptText="LAYOUT"/>
@@ -79,7 +77,6 @@
             </Tab>
             <Tab closable="false" text="Edit repository">
                 <VBox prefHeight="200.0" prefWidth="100.0" spacing="10.0">
-                    <Text text="Edit repository"/>
                     <CheckBox fx:id="editOnlyCommon" text="Only common repositories"/>
                     <ComboBox fx:id="editListRepoCombo" promptText="Select repository"/>
                     <TextField fx:id="editIdField" promptText="ID"/>
@@ -104,7 +101,7 @@
                     <CheckBox text="Auto commit"/>
                     <TextArea promptText="Message"/>
                     <AnchorPane>
-                        <Button onAction="#onRemove" mnemonicParsing="false" text="Remove"
+                        <Button onAction="#onRemoveRepo" mnemonicParsing="false" text="Remove"
                                 AnchorPane.rightAnchor="0.0"/>
                     </AnchorPane>
 
