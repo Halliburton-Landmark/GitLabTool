@@ -34,11 +34,10 @@
         <SplitPane fx:id="parentPane" dividerPositions="0.95"
             orientation="VERTICAL">
             <AnchorPane fx:id="viewPane" />
-            <ScrollPane>
-                <TextFlow fx:id="_console"
-                    style="-fx-background-color: #D7DBE3;">
+            <ScrollPane fitToWidth="true" minHeight="150.0">
+                <TextFlow fx:id="_console" minHeight="150.0" style="-fx-background-color: #D7DBE3;">
                 </TextFlow>
-            <ScrollPane>
+            </ScrollPane>
         </SplitPane>
     </center>
 </BorderPane>

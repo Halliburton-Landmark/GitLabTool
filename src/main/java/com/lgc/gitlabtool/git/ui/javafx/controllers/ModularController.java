@@ -16,7 +16,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.lgc.gitlabtool.git.entities.Group;
-import com.lgc.gitlabtool.git.entities.MessageType;
 import com.lgc.gitlabtool.git.listeners.updateConsole.UpdateConsoleListener;
 import com.lgc.gitlabtool.git.services.ConsoleService;
 import com.lgc.gitlabtool.git.services.GroupsUserService;
@@ -128,20 +127,7 @@ public class ModularController implements UpdateConsoleListener {
         viewPane.getChildren().clear();
         viewPane.getChildren().add(node);
 
-        _consoleService.addMessage("line 1", MessageType.ERROR);
-        _consoleService.addMessage("line 2", MessageType.SIMPLE);
-        _consoleService.addMessage("line 3", MessageType.SUCCESS);
-        _consoleService.addMessage("", MessageType.ERROR);
-        _consoleService.addMessage("line 4", MessageType.SIMPLE);
-        _consoleService.addMessage("line 5", MessageType.SUCCESS);
-        _consoleService.addMessage("line 6", MessageType.ERROR);
-        _consoleService.addMessage("", MessageType.SIMPLE);
-        _consoleService.addMessage("line 7", MessageType.SUCCESS);
-        _consoleService.addMessage("line 8", MessageType.ERROR);
-        _consoleService.addMessage("line 9", MessageType.SIMPLE);
-        _consoleService.addMessage("line 10", MessageType.SUCCESS);
-
-        initConsole();
+        updateConsole();
     }
 
     public void loadMainWindow(Group selectedGroup) throws IOException {
@@ -163,7 +149,7 @@ public class ModularController implements UpdateConsoleListener {
         AnchorPane.setLeftAnchor(node, 0.0);
         AnchorPane.setBottomAnchor(node, 0.0);
 
-        initConsole();
+        updateConsole();
         viewPane.getChildren().clear();
         viewPane.getChildren().add(node);
     }
@@ -350,15 +336,6 @@ public class ModularController implements UpdateConsoleListener {
         });
     }
 
-    private void initConsole() {
-        _console.setMinHeight(100); // temporary solution
-        _console.setMaxHeight(200);
-
-//        ScrollPane scrollPane = new ScrollPane();
-//        scrollPane.setContent(_console);
-        updateConsole();
-    }
-
     @Override
     public void addNewMessage(Text message) {
         Platform.runLater(new Runnable() {
@@ -366,7 +343,6 @@ public class ModularController implements UpdateConsoleListener {
             public void run() {
                 if (message != null) {
                     _console.getChildren().add(message);
-                    _console.layout();
                 }
             }
         });
@@ -378,12 +354,8 @@ public class ModularController implements UpdateConsoleListener {
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
-                _console.setLineSpacing(10);
-                _console.requestFocus();
-
                 _console.getChildren().clear();
                 _console.getChildren().addAll(_consoleService.getMessages());
-                _console.layout();
             }
         });
     }
