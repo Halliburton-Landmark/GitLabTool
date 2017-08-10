@@ -10,6 +10,8 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 <?import javafx.stage.Screen?>
+<?import org.fxmisc.richtext.CodeArea?>
+
 <BorderPane id="background"
             prefHeight="${screen.visualBounds.maxY / 1.5}" prefWidth="${screen.visualBounds.maxX / 1.5}"
             xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
@@ -30,13 +32,13 @@
     <center>
         <SplitPane fx:id="parentPane" dividerPositions="0.95" orientation="VERTICAL">
             <AnchorPane fx:id="viewPane"/>
-            <Pane fx:id="consolePane" style="-fx-background-color: #D7DBE3;">
+            <CodeArea fx:id="consolePane" style="-fx-background-color: #D7DBE3;">
                 <Label alignment="CENTER" text="Console mock" textFill="#000000d7">
                     <font>
                         <Font size="18.0"/>
                     </font>
                 </Label>
-            </Pane>
+            </CodeArea>
         </SplitPane>
     </center>
 </BorderPane>

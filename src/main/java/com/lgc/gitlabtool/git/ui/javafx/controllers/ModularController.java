@@ -120,7 +120,8 @@ public class ModularController {
         viewPane.getChildren().clear();
         viewPane.getChildren().add(node);
 
-        parentPane.getItems().remove(consolePane);
+
+        //parentPane.getItems().remove(consolePane);
     }
 
     public void loadMainWindow(Group selectedGroup) throws IOException {
