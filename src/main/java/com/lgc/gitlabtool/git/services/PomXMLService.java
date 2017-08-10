@@ -115,4 +115,5 @@ public interface PomXMLService {
      */
     String getUrl(List<Project> projects, String id);
 
+    boolean containsRepository(Project project, String repo);
 }

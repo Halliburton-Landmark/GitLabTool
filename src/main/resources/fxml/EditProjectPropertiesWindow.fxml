@@ -16,7 +16,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Text?>
-<GridPane hgap="10.0" maxHeight="Infinity" maxWidth="Infinity"  vgap="10.0"
+<GridPane hgap="10.0" maxHeight="Infinity" maxWidth="Infinity" vgap="10.0"
           xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
           fx:controller="com.lgc.gitlabtool.git.ui.javafx.controllers.EditProjectPropertiesController">
     <columnConstraints>
@@ -59,7 +59,7 @@
         </GridPane>
         <TabPane fx:id="editingTabs" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
                  AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="60.0">
-            <Tab text="Add repository">
+            <Tab closable="false" text="Add repository">
                 <VBox spacing="10.0">
                     <Text text="Add new repository"/>
 
@@ -77,9 +77,10 @@
                     </padding>
                 </VBox>
             </Tab>
-            <Tab text="Edit repository">
+            <Tab closable="false" text="Edit repository">
                 <VBox prefHeight="200.0" prefWidth="100.0" spacing="10.0">
                     <Text text="Edit repository"/>
+                    <CheckBox fx:id="editOnlyCommon" text="Only common repositories"/>
                     <ComboBox fx:id="editListRepoCombo" promptText="Select repository"/>
                     <TextField fx:id="editIdField" promptText="ID"/>
                     <TextField fx:id="editUrlField" promptText="URL"/>
@@ -96,13 +97,14 @@
                     </padding>
                 </VBox>
             </Tab>
-            <Tab text="Remove repository">
+            <Tab closable="false" text="Remove repository">
                 <VBox prefHeight="200.0" prefWidth="100.0" spacing="10.0">
-                    <ListView prefHeight="200.0" prefWidth="200.0"/>
+                    <CheckBox fx:id="removeOnlyCommon" text="Only common repositories"/>
+                    <ListView fx:id="removeListView" prefHeight="200.0" prefWidth="200.0"/>
                     <CheckBox text="Auto commit"/>
                     <TextArea promptText="Message"/>
                     <AnchorPane>
-                        <Button mnemonicParsing="false" text="Remove"
+                        <Button onAction="#onRemove" mnemonicParsing="false" text="Remove"
                                 AnchorPane.rightAnchor="0.0"/>
                     </AnchorPane>
 

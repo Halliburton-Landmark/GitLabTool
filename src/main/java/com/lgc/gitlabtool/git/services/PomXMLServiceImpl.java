@@ -376,6 +376,22 @@ public class PomXMLServiceImpl implements PomXMLService {
         }
     }
 
+    @Override
+    public boolean containsRepository(Project project, String idRepo) {
+        if (project == null || idRepo == null) {
+            errorNotValidDataInLog();
+            return false;
+        }
+
+        PomXMLModel pomModel = getModel(project);
+        Model model = pomModel.getModelFile();
+
+        return model != null && model.getRepositories()
+                .stream()
+                .anyMatch(repo -> repo.getId().equals(idRepo));
+
+    }
+
     private <T> void mergeCollections(Collection<T> first, Collection<T> second, boolean onlyGeneral) {
         if (onlyGeneral && !first.isEmpty()) {
             first.retainAll(second);
