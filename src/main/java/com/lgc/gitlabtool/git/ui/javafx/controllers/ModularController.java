@@ -14,6 +14,7 @@ import java.util.concurrent.Executors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.fxmisc.richtext.CodeArea;
 
 import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.services.GroupsUserService;
@@ -80,7 +81,7 @@ public class ModularController {
     private GroupWindowController _groupWindowController;
 
     @FXML
-    public Pane consolePane;
+    public CodeArea consolePane;
 
     @FXML
     public AnchorPane viewPane;
