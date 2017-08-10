@@ -5,6 +5,7 @@ import java.util.function.Consumer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.lgc.gitlabtool.git.entities.MessageType;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.jgit.JGit;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
@@ -13,7 +14,6 @@ import com.lgc.gitlabtool.git.services.ProgressListener;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.javafx.ProgressDialog;
-import com.lgc.gitlabtool.git.ui.javafx.ProgressDialog.OperationMessageStatus;
 import com.lgc.gitlabtool.git.ui.javafx.StatusDialog;
 import com.lgc.gitlabtool.git.util.NullCheckUtil;
 
@@ -27,13 +27,13 @@ import javafx.application.Platform;
  * <b>Important!</b><br>
  * Realizations of methods have definite count of parameters (it is needed to use it with {@link ProgressDialog})<br>
  * Please see javadoc
- * 
+ *
  * @author Igor Khlaponin
  */
 public class OperationProgressListener implements ProgressListener {
 
     private static final Logger _logger = LogManager.getLogger(OperationProgressListener.class);
-    
+
     private final ProgressDialog _progressDialog;
     private Consumer<Object> _finishedAction;
     private final ApplicationState _applicationState;
@@ -69,8 +69,8 @@ public class OperationProgressListener implements ProgressListener {
             _progressDialog.updateProgressBar(progress);
         }
         if (t.length >= 3 && t[1] instanceof Project && t[2] instanceof JGitStatus) {
-            String message = ((Project) t[1]).getName() + " : " + (JGitStatus) t[2];
-            _progressDialog.addMessageToConcole(message, OperationMessageStatus.SUCCESS);
+            String message = ((Project) t[1]).getName() + " : " + t[2];
+            _progressDialog.addMessageToConcole(message, MessageType.SUCCESS);
             _logger.info(_applicationState + ": " + message);
         }
     }
@@ -90,12 +90,12 @@ public class OperationProgressListener implements ProgressListener {
         }
         if (t.length >= 2 && t[1] instanceof String) {
             String message = (String) t[1];
-            _progressDialog.addMessageToConcole(message, OperationMessageStatus.ERROR);
+            _progressDialog.addMessageToConcole(message, MessageType.ERROR);
             _logger.error(_applicationState + ": " + message);
         }
         if (t.length >= 3 && t[1] instanceof Project && t[2] instanceof JGitStatus) {
             String message = ((Project) t[1]).getName() + ": " + t[2];
-            _progressDialog.addMessageToConcole(message, OperationMessageStatus.ERROR);
+            _progressDialog.addMessageToConcole(message, MessageType.ERROR);
             _logger.error(_applicationState + ": " + message);
         }
     }
@@ -115,7 +115,7 @@ public class OperationProgressListener implements ProgressListener {
             Project project = (Project) t[0];
             _progressDialog.updateProjectLabel(project.getName());
         } else if (t[0] instanceof String) {
-            _progressDialog.addMessageToConcole((String) t[0], OperationMessageStatus.SIMPLE);
+            _progressDialog.addMessageToConcole((String) t[0], MessageType.SIMPLE);
         }
         _logger.info(_applicationState + ": started");
     }
@@ -138,7 +138,7 @@ public class OperationProgressListener implements ProgressListener {
 
     protected void doOnFinishJob(Object... t) {
         String onFinishMessage = t[0] instanceof String ? (String) t[0] : "Operation finished";
-        _progressDialog.addMessageToConcole(onFinishMessage, OperationMessageStatus.SIMPLE);
+        _progressDialog.addMessageToConcole(onFinishMessage, MessageType.SIMPLE);
         _logger.info(_applicationState + ": finished");
         Platform.runLater(new Runnable() {
             @Override
@@ -151,7 +151,7 @@ public class OperationProgressListener implements ProgressListener {
     }
 
     protected void showStatusDialog(String message) {
-        StatusDialog statusDialog = new StatusDialog(_applicationState.toString(), 
+        StatusDialog statusDialog = new StatusDialog(_applicationState.toString(),
                 _applicationState.toString()+ " info", message);
         statusDialog.showAndWait();
     }

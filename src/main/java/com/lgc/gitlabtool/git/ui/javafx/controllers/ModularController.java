@@ -14,9 +14,11 @@ import java.util.concurrent.Executors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.fxmisc.richtext.CodeArea;
 
 import com.lgc.gitlabtool.git.entities.Group;
+import com.lgc.gitlabtool.git.entities.MessageType;
+import com.lgc.gitlabtool.git.listeners.updateConsole.UpdateConsoleListener;
+import com.lgc.gitlabtool.git.services.ConsoleService;
 import com.lgc.gitlabtool.git.services.GroupsUserService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.ViewKey;
@@ -48,14 +50,15 @@ import javafx.scene.control.ToolBar;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.Pane;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
-public class ModularController {
+public class ModularController implements UpdateConsoleListener {
 
     private static final Logger logger = LogManager.getLogger(ModularController.class);
 
@@ -81,7 +84,7 @@ public class ModularController {
     private GroupWindowController _groupWindowController;
 
     @FXML
-    public CodeArea consolePane;
+    public TextFlow _console;
 
     @FXML
     public AnchorPane viewPane;
@@ -98,7 +101,11 @@ public class ModularController {
     @FXML
     public void initialize() {
         toolbar.getStylesheets().add(getClass().getClassLoader().getResource(CSS_PATH).toExternalForm());
+        _consoleService.addListener(this);
     }
+
+    private final ConsoleService _consoleService = (ConsoleService) ServiceProvider.getInstance()
+    .getService(ConsoleService.class.getName());
 
     private final GroupsUserService _groupService = (GroupsUserService) ServiceProvider.getInstance()
             .getService(GroupsUserService.class.getName());
@@ -121,8 +128,20 @@ public class ModularController {
         viewPane.getChildren().clear();
         viewPane.getChildren().add(node);
 
+        _consoleService.addMessage("line 1", MessageType.ERROR);
+        _consoleService.addMessage("line 2", MessageType.SIMPLE);
+        _consoleService.addMessage("line 3", MessageType.SUCCESS);
+        _consoleService.addMessage("", MessageType.ERROR);
+        _consoleService.addMessage("line 4", MessageType.SIMPLE);
+        _consoleService.addMessage("line 5", MessageType.SUCCESS);
+        _consoleService.addMessage("line 6", MessageType.ERROR);
+        _consoleService.addMessage("", MessageType.SIMPLE);
+        _consoleService.addMessage("line 7", MessageType.SUCCESS);
+        _consoleService.addMessage("line 8", MessageType.ERROR);
+        _consoleService.addMessage("line 9", MessageType.SIMPLE);
+        _consoleService.addMessage("line 10", MessageType.SUCCESS);
 
-        //parentPane.getItems().remove(consolePane);
+        initConsole();
     }
 
     public void loadMainWindow(Group selectedGroup) throws IOException {
@@ -136,7 +155,7 @@ public class ModularController {
 
         _mainWindowController = loader.getController();
 
-        _mainWindowController.setSelectedGroup(selectedGroup);
+        _mainWindowController.setSelectedGroup(selectedGroup, _console);
         _mainWindowController.beforeShowing();
 
         AnchorPane.setTopAnchor(node, 0.0);
@@ -144,6 +163,7 @@ public class ModularController {
         AnchorPane.setLeftAnchor(node, 0.0);
         AnchorPane.setBottomAnchor(node, 0.0);
 
+        initConsole();
         viewPane.getChildren().clear();
         viewPane.getChildren().add(node);
     }
@@ -326,6 +346,44 @@ public class ModularController {
                 ScreenUtil.adaptForMultiScreens(stage, 300, 150);
 
                 alert.showAndWait();
+            }
+        });
+    }
+
+    private void initConsole() {
+        _console.setMinHeight(100); // temporary solution
+        _console.setMaxHeight(200);
+
+//        ScrollPane scrollPane = new ScrollPane();
+//        scrollPane.setContent(_console);
+        updateConsole();
+    }
+
+    @Override
+    public void addNewMessage(Text message) {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                if (message != null) {
+                    _console.getChildren().add(message);
+                    _console.layout();
+                }
+            }
+        });
+
+    }
+
+    @Override
+    public void updateConsole() {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                _console.setLineSpacing(10);
+                _console.requestFocus();
+
+                _console.getChildren().clear();
+                _console.getChildren().addAll(_consoleService.getMessages());
+                _console.layout();
             }
         });
     }

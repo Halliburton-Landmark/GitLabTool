@@ -1,7 +1,7 @@
 package com.lgc.gitlabtool.git.ui.javafx.controllers;
 
 
-import java.awt.*;
+import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -24,7 +24,6 @@ import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.services.EmptyProgressListener;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.LoginService;
-import com.lgc.gitlabtool.git.services.ProgressListener;
 import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.javafx.ChangesCheckDialog;
@@ -66,6 +65,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.text.TextFlow;
 
 public class MainWindowController {
     private static final String HEDER_GROUP_TITLE = "Current group: ";
@@ -112,6 +112,8 @@ public class MainWindowController {
 
     @FXML
     private ToggleButton filterShadowProjects;
+
+    public TextFlow _console;
 
     public void beforeShowing() {
         String username = _loginService.getCurrentUser().getName();
@@ -182,8 +184,9 @@ public class MainWindowController {
 
     }
 
-    public void setSelectedGroup(Group group) {
+    public void setSelectedGroup(Group group, TextFlow console) {
         _currentGroup = group;
+        _console = console;
         refreshLoadProjects();
     }
 
@@ -563,7 +566,7 @@ public class MainWindowController {
         List<Project> projectsToPull = getSelectedProjects().stream()
                 .filter(project -> project.isCloned())
                 .collect(Collectors.toList());
-        
+
         checkChangesAndPull(projectsToPull, new Object());
     }
 
@@ -581,7 +584,7 @@ public class MainWindowController {
     }
 
     private void startPull(List<Project> projects, ProgressDialog progressDialog) {
-        OperationProgressListener pullProgressListener = 
+        OperationProgressListener pullProgressListener =
                 new OperationProgressListener(progressDialog, ApplicationState.PULL);
         _gitService.pull(projects, pullProgressListener);
     }

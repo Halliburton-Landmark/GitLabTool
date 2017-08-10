@@ -208,6 +208,7 @@ public class GroupWindowController implements StateListener {
         }
 
         try {
+
             FXMLLoader fxmlLoader = new FXMLLoader(modularWindow);
             Parent root = fxmlLoader.load();
 

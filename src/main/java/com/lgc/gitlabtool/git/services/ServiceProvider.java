@@ -45,5 +45,6 @@ public class ServiceProvider {
         _services.put(NetworkService.class.getName(), new NetworkServiceImpl());
         _services.put(GitService.class.getName(), new GitServiceImpl(stateService));
         _services.put(StateService.class.getName(), stateService);
+        _services.put(ConsoleService.class.getName(), new ConsoleServiceImpl());
     }
 }
