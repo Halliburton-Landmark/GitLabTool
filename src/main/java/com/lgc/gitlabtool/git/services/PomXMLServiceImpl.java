@@ -13,17 +13,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Parent;
 import org.apache.maven.model.Repository;
+import org.apache.maven.model.RepositoryBase;
 import org.apache.maven.model.Scm;
 
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
+
+import javafx.fxml.FXML;
 
 /**
  * Service for changes of a group's pom.xml.
@@ -36,6 +41,7 @@ public class PomXMLServiceImpl implements PomXMLService {
 
     private static final String RELEASE_NAME_KEY = "releaseName";
     private static final String ECLIPSE_RELEASE_KEY = "eclipse.release";
+    private static final String LAYOUT_KEY = "layout";
     private static final String POM_NAME = "pom.xml";
     
     private static final String SUCCESSFUL_CHANGE_MESSAGE = "The pom.xml file was changed successfully.";
@@ -103,6 +109,38 @@ public class PomXMLServiceImpl implements PomXMLService {
                 logger.error(CHANGE_ERROR_MESSAGE);
             }
         }
+    }
+
+    @FXML
+    public Set<String> getReposIds(List<Project> projects, Boolean isCommon){
+        Set<String> uniqueIds = new HashSet<>();
+
+        if (projects == null ) {
+            errorNotValidDataInLog();
+            return uniqueIds;
+        }
+
+        for (Project project : projects) {
+            List<String> projectIds = new ArrayList<>();
+
+            if (project == null) {
+                continue;
+            }
+
+            PomXMLModel pomModel = getModel(project);
+            Model model = pomModel.getModelFile();
+            if (model == null) {
+                continue;
+            }
+
+            projectIds = model.getRepositories().stream()
+                    .map(RepositoryBase::getId)
+                    .collect(Collectors.toList());
+
+            mergeCollections(uniqueIds, projectIds, isCommon);
+        }
+
+        return uniqueIds;
     }
 
     @Override
@@ -250,6 +288,99 @@ public class PomXMLServiceImpl implements PomXMLService {
             return eclipseReleases.get(0);
         } else {
             return "[Different]";
+        }
+    }
+
+    @Override
+    public String getLayout(List<Project> projects, String idRepo) {
+        if (projects == null) {
+            errorNotValidDataInLog();
+            return "";
+        }
+
+        List<String> projectsLayouts = new ArrayList<>();
+
+        for (Project project : projects) {
+            if (project == null) {
+                continue;
+            }
+            PomXMLModel pomModel = getModel(project);
+            Model model = pomModel.getModelFile();
+
+            if (model == null) {
+                continue;
+            }
+
+            List<Repository> repos = model.getRepositories()
+                    .stream()
+                    .filter(repo -> repo.getId().equals(idRepo))
+                    .collect(Collectors.toList());
+
+            if (repos.size() == 1) {
+                projectsLayouts.add(repos.get(0).getLayout());
+            } else {
+                projectsLayouts.add("[Different]");
+            }
+
+        }
+
+        boolean allEqual = new HashSet<>(projectsLayouts).size() == 1;
+
+        if (allEqual) {
+            return projectsLayouts.get(0);
+        } else {
+            return "[Different]";
+        }
+
+    }
+
+    @Override
+    public String getUrl(List<Project> projects, String idRepo) {
+        if (projects == null) {
+            errorNotValidDataInLog();
+            return "";
+        }
+
+        List<String> projectsUrls = new ArrayList<>();
+
+        for (Project project : projects) {
+            if (project == null) {
+                continue;
+            }
+            PomXMLModel pomModel = getModel(project);
+            Model model = pomModel.getModelFile();
+
+            if (model == null) {
+                continue;
+            }
+
+            List<Repository> repos = model.getRepositories()
+                    .stream()
+                    .filter(repo -> repo.getId().equals(idRepo))
+                    .collect(Collectors.toList());
+
+            if (repos.size() == 1) {
+                projectsUrls.add(repos.get(0).getUrl());
+            } else {
+                projectsUrls.add("[Different]");
+            }
+
+        }
+
+        boolean allEqual = new HashSet<>(projectsUrls).size() == 1;
+
+        if (allEqual) {
+            return projectsUrls.get(0);
+        } else {
+            return "[Different]";
+        }
+    }
+
+    private <T> void mergeCollections(Collection<T> first, Collection<T> second, boolean onlyGeneral) {
+        if (onlyGeneral && !first.isEmpty()) {
+            first.retainAll(second);
+        } else {
+            first.addAll(second);
         }
     }
 

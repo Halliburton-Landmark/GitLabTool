@@ -1,7 +1,9 @@
 package com.lgc.gitlabtool.git.services;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
@@ -38,23 +40,33 @@ public interface PomXMLService {
      */
     void changeReleaseName(Collection<Project> projects, String newName);
 
-   /**
-    * Adds repository to a list of repositories in a pom.xml
-    *
-    * @param projects collection of projects in which it is necessary to make a replacement
-    * @param id of repository
-    * @param url of repository
-    * @param layout of repository
-    *
-    * @return list of statuses
-    */
+    /**
+     * Gets set of repositories for selected projects
+     *
+     * @param projects collection of projects in which it is necessary to get list of repositories
+     * @param isCommon if true - would be returned common repositories for all selected branches, if false - for at least one of them
+     *
+     * @return set of repositories
+     */
+    Set<String> getReposIds(List<Project> projects, Boolean isCommon);
+
+    /**
+     * Adds repository to a list of repositories in a pom.xml
+     *
+     * @param projects collection of projects in which it is necessary to make a replacement
+     * @param id       of repository
+     * @param url      of repository
+     * @param layout   of repository
+     *
+     * @return list of statuses
+     */
     Map<Project, JGitStatus> addRepository(Collection<Project> projects, String id, String url, String layout);
 
     /**
      * Removes repository from a list of repositories in a pom.xml
      *
      * @param projects collection of projects in which it is necessary to make a replacement
-     * @param id of repository for remove
+     * @param id       of repository for remove
      *
      * @return list of statuses
      */
@@ -86,4 +98,21 @@ public interface PomXMLService {
      * @param projects collection of projects
      */
     String getEclipseRelease(Collection<Project> projects);
+
+    /**
+     * Gets the layout of repository
+     *
+     * @param projects collection of projects
+     * @param id if of repository
+     */
+    String getLayout(List<Project> projects, String id);
+
+    /**
+     * Gets the url of repository
+     *
+     * @param projects collection of projects
+     * @param id if of repository
+     */
+    String getUrl(List<Project> projects, String id);
+
 }

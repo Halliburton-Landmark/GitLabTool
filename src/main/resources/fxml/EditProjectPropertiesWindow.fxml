@@ -80,14 +80,14 @@
             <Tab text="Edit repository">
                 <VBox prefHeight="200.0" prefWidth="100.0" spacing="10.0">
                     <Text text="Edit repository"/>
-                    <ComboBox promptText="Select repository"/>
-                    <TextField promptText="ID"/>
-                    <TextField promptText="URL"/>
-                    <TextField promptText="LAYOUT"/>
+                    <ComboBox fx:id="editListRepoCombo" promptText="Select repository"/>
+                    <TextField fx:id="editIdField" promptText="ID"/>
+                    <TextField fx:id="editUrlField" promptText="URL"/>
+                    <TextField fx:id="editLayoutField" promptText="LAYOUT"/>
                     <CheckBox text="Auto commit"/>
                     <TextArea promptText="Message"/>
                     <AnchorPane>
-                        <Button mnemonicParsing="false" text="Edit"
+                        <Button onAction="#onEditRepo" mnemonicParsing="false" text="Edit"
                                 AnchorPane.rightAnchor="0.0"/>
                     </AnchorPane>
 
