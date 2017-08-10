@@ -64,9 +64,9 @@ public class PomXMLServiceImpl implements PomXMLService {
             PomXMLModel model = getModel(project);
             if (changeParentVersion(model, newVersion)) {
                 model.writeToFile();
-                logger.info(SUCCESSFUL_CHANGE_MESSAGE);
+                logger.info(SUCCESSFUL_CHANGE_MESSAGE + " [Project: " + project.getName() + "]");
             } else {
-                logger.error(CHANGE_ERROR_MESSAGE);
+                logger.error(CHANGE_ERROR_MESSAGE + " [Project: " + project.getName() + "]");
             }
         }
     }
@@ -84,9 +84,9 @@ public class PomXMLServiceImpl implements PomXMLService {
             PomXMLModel model = getModel(project);
             if (changeGroupName(model, oldName, newName)) {
                 model.writeToFile();
-                logger.info(SUCCESSFUL_CHANGE_MESSAGE);
+                logger.info(SUCCESSFUL_CHANGE_MESSAGE + " [Project: " + project.getName() + "]");
             } else {
-                logger.error(CHANGE_ERROR_MESSAGE);
+                logger.error(CHANGE_ERROR_MESSAGE + " [Project: " + project.getName() + "]");
             }
         }
     }
@@ -104,9 +104,9 @@ public class PomXMLServiceImpl implements PomXMLService {
             PomXMLModel model = getModel(project);
             if (changeReleaseName(model, newName)) {
                 model.writeToFile();
-                logger.info(SUCCESSFUL_CHANGE_MESSAGE);
+                logger.info(SUCCESSFUL_CHANGE_MESSAGE + " [Project: " + project.getName() + "]");
             } else {
-                logger.error(CHANGE_ERROR_MESSAGE);
+                logger.error(CHANGE_ERROR_MESSAGE + " [Project: " + project.getName() + "]");
             }
         }
     }
@@ -159,10 +159,10 @@ public class PomXMLServiceImpl implements PomXMLService {
             if (addRepository(pomModel, id, url, layout)) {
                 pomModel.writeToFile();
                 statuses.put(project, JGitStatus.SUCCESSFUL);
-                logger.info(SUCCESSFUL_CHANGE_MESSAGE);
+                logger.info(SUCCESSFUL_CHANGE_MESSAGE + " [Project: " + project.getName() + "]");
             } else {
                 statuses.put(project, JGitStatus.FAILED);
-                logger.error(CHANGE_ERROR_MESSAGE);
+                logger.error(CHANGE_ERROR_MESSAGE + " [Project: " + project.getName() + "]");
             }
         }
 
@@ -185,10 +185,10 @@ public class PomXMLServiceImpl implements PomXMLService {
             if (removeRepository(pomModel, id)) {
                 pomModel.writeToFile();
                 statuses.put(project, JGitStatus.SUCCESSFUL);
-                logger.info(SUCCESSFUL_CHANGE_MESSAGE);
+                logger.info(SUCCESSFUL_CHANGE_MESSAGE + " [Project: " + project.getName() + "]");
             } else {
                 statuses.put(project, JGitStatus.FAILED);
-                logger.error(CHANGE_ERROR_MESSAGE);
+                logger.error(CHANGE_ERROR_MESSAGE + " [Project: " + project.getName() + "]");
             }
         }
 
@@ -217,10 +217,10 @@ public class PomXMLServiceImpl implements PomXMLService {
             if (modifyRepository(rep, oldId, newId, newUrl, newLayout)) {
                 pomModel.writeToFile();
                 statuses.put(project, JGitStatus.SUCCESSFUL);
-                logger.info(SUCCESSFUL_CHANGE_MESSAGE);
+                logger.info(SUCCESSFUL_CHANGE_MESSAGE + " [Project: " + project.getName() + "]");
             } else {
                 statuses.put(project, JGitStatus.FAILED);
-                logger.error(CHANGE_ERROR_MESSAGE);
+                logger.error(CHANGE_ERROR_MESSAGE + " [Project: " + project.getName() + "]");
             }
         }
 
