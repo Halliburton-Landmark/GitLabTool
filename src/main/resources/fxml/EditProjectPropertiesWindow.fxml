@@ -85,7 +85,7 @@
                     <CheckBox text="Auto commit"/>
                     <TextArea promptText="Message"/>
                     <AnchorPane>
-                        <Button onAction="#onEditRepo" mnemonicParsing="false" text="Edit"
+                        <Button fx:id="editButton" onAction="#onEditRepo" mnemonicParsing="false" text="Edit"
                                 AnchorPane.rightAnchor="0.0"/>
                     </AnchorPane>
 
@@ -101,7 +101,7 @@
                     <CheckBox text="Auto commit"/>
                     <TextArea promptText="Message"/>
                     <AnchorPane>
-                        <Button onAction="#onRemoveRepo" mnemonicParsing="false" text="Remove"
+                        <Button fx:id="removeButton" onAction="#onRemoveRepo" mnemonicParsing="false" text="Remove"
                                 AnchorPane.rightAnchor="0.0"/>
                     </AnchorPane>
 

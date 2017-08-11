@@ -42,6 +42,12 @@ public class EditProjectPropertiesController {
             .getService(PomXMLService.class.getName());
 
     @FXML
+    private Button editButton;
+
+    @FXML
+    private Button removeButton;
+
+    @FXML
     private CheckBox removeOnlyCommon;
 
     @FXML
@@ -95,12 +101,20 @@ public class EditProjectPropertiesController {
         selectedProjects = items;
         configureProjectsListView(currentProjectsListView);
         currentProjectsListView.setItems(FXCollections.observableArrayList(items));
+
         releaseNameText.setText(_pomXmlService.getReleaseName(items));
         eclipseVersionText.setText(_pomXmlService.getEclipseRelease(items));
 
         addButton.disableProperty().bind(getEmptyBinding(addIdField).or
                 (getEmptyBinding(addLayoutField).or
                         (getEmptyBinding(addUrlField))));
+
+        editButton.disableProperty().bind(editListRepoCombo.valueProperty().isNull().or
+                (getEmptyBinding(editLayoutField).or
+                        (getEmptyBinding(editIdField).or
+                                (getEmptyBinding(editIdField)))));
+
+        removeButton.disableProperty().bind(removeListView.getSelectionModel().selectedItemProperty().isNull());
 
         configureEditTab();
         configureRemoveTab();
@@ -183,7 +197,7 @@ public class EditProjectPropertiesController {
         List<Project> filteredProjects = currentProjectsListView.getItems();
 
         Map<Project, JGitStatus> addStatuses = _pomXmlService.modifyRepository(filteredProjects, oldId, newId, newUrl, newLayout);
-        showStatusDialog(addStatuses, selectedProjects.size(), EDITING_REPO_HEADER_MESSAGE, EDITING_REPO_COLLAPSED_MESSAGE);
+        showStatusDialog(addStatuses, filteredProjects.size(), EDITING_REPO_HEADER_MESSAGE, EDITING_REPO_COLLAPSED_MESSAGE);
 
         refreshComponents();
     }
@@ -195,7 +209,7 @@ public class EditProjectPropertiesController {
         List<Project> filteredProjects = currentProjectsListView.getItems();
 
         Map<Project, JGitStatus> addStatuses = _pomXmlService.removeRepository(filteredProjects, id);
-        showStatusDialog(addStatuses, selectedProjects.size(), REMOVING_REPO_HEADER_MESSAGE, REMOVING_REPO_COLLAPSED_MESSAGE);
+        showStatusDialog(addStatuses, filteredProjects.size(), REMOVING_REPO_HEADER_MESSAGE, REMOVING_REPO_COLLAPSED_MESSAGE);
 
         refreshComponents();
     }
