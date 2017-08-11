@@ -24,7 +24,6 @@ import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.jgit.JGit;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.project.nature.projecttype.ProjectType;
-import com.lgc.gitlabtool.git.ui.javafx.CloneProgressDialog;
 import com.lgc.gitlabtool.git.ui.javafx.ProgressDialog;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 import com.lgc.gitlabtool.git.util.JSONParser;
@@ -282,5 +281,19 @@ public class ProjectServiceImpl implements ProjectService {
             return;
         }
         _git.clone(projects, destinationPath, progressListener);
+    }
+
+    @Override
+    public boolean hasShadow(List<Project> projects) {
+        return projects.stream()
+                .filter(proj -> !proj.isCloned())
+                .count() > 0;
+    }
+
+    @Override
+    public boolean hasCloned(List<Project> projects) {
+        return projects.stream()
+                .filter(Project::isCloned)
+                .count() > 0;
     }
 }

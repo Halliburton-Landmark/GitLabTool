@@ -253,13 +253,8 @@ public class MainWindowController {
         ContextMenu contextMenu = new ContextMenu();
         List<MenuItem> menuItems = new ArrayList<>();
 
-        boolean hasShadow = items.stream()
-                .filter(proj -> !proj.isCloned())
-                .count() > 0;
-
-        boolean hasCloned = items.stream()
-                .filter(Project::isCloned)
-                .count() > 0;
+        boolean hasShadow = _projectService.hasShadow(items);
+        boolean hasCloned = _projectService.hasCloned(items);
 
         if (hasCloned) {
             String openFolderIcoUrl = "icons/mainmenu/folder_16x16.png";
