@@ -15,7 +15,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Text?>
-<GridPane hgap="10.0" maxHeight="Infinity" maxWidth="Infinity" vgap="10.0" xmlns="http://javafx.com/javafx/8.0.112"
+<GridPane hgap="10.0" maxHeight="Infinity" maxWidth="Infinity" vgap="10.0" xmlns="http://javafx.com/javafx/8"
           xmlns:fx="http://javafx.com/fxml/1"
           fx:controller="com.lgc.gitlabtool.git.ui.javafx.controllers.EditProjectPropertiesController">
     <columnConstraints>
@@ -34,9 +34,9 @@
     </padding>
     <AnchorPane GridPane.rowSpan="3">
 
-        <ListView fx:id="currentProjectsListView" maxHeight="Infinity" AnchorPane.bottomAnchor="20.0"
+        <ListView fx:id="currentProjectsListView" maxHeight="Infinity" AnchorPane.bottomAnchor="25.0"
                   AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
-        <Label fx:id="projectsCountLabel" maxHeight="20.0" AnchorPane.bottomAnchor="0.0"/>
+        <Button fx:id="reloadButton" text="Reload" onAction="#onReloadButton" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"/>
 
     </AnchorPane>
     <AnchorPane GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowSpan="3">

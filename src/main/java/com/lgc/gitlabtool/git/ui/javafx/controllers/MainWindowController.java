@@ -26,6 +26,7 @@ import com.lgc.gitlabtool.git.project.nature.projecttype.DSGProjectType;
 import com.lgc.gitlabtool.git.services.EmptyProgressListener;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.LoginService;
+import com.lgc.gitlabtool.git.services.PomXMLService;
 import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.ViewKey;
@@ -100,6 +101,9 @@ public class MainWindowController {
     private static final GitService _gitService = (GitService) ServiceProvider.getInstance()
             .getService(GitService.class.getName());
 
+    private final PomXMLService _pomXmlService = (PomXMLService) ServiceProvider.getInstance()
+            .getService(PomXMLService.class.getName());
+
     @FXML
     private ListView<Project> projectsList;
 
@@ -170,12 +174,8 @@ public class MainWindowController {
                 .bind(booleanBinding);
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.PUSH_BUTTON.getId()).disableProperty()
                 .bind(booleanBinding);
-
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.EDIT_PROJECT_PROPERTIES_BUTTON.getId())
-                .disableProperty()
-                .bind(Bindings.createBooleanBinding(() -> projectsList.getSelectionModel().getSelectedItems().stream()
-                        .filter(proj -> !proj.getProjectType().getId().equals(DSGProjectType.ID_KEY))
-                        .count() > 0));
+                .disableProperty().bind(booleanBinding);
 
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_COMMIT).disableProperty().bind(booleanBinding);
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_SWITCH_BRANCH).disableProperty()
@@ -503,7 +503,9 @@ public class MainWindowController {
             Parent root = loader.load();
 
             EditProjectPropertiesController controller = loader.getController();
-            controller.beforeStart(getSelectProjects());
+
+            List<Project> filteredPomProjects = _pomXmlService.filterPomProjects(getSelectProjects());
+            controller.beforeStart(filteredPomProjects);
 
             Scene scene = new Scene(root);
             Stage stage = new Stage();

@@ -115,5 +115,20 @@ public interface PomXMLService {
      */
     String getUrl(List<Project> projects, String id);
 
+    /**
+     * Check that project contains selected repository
+     *
+     * @param project project for checking
+     * @param repo    repository for checking
+     * @return true if project contains selected repository
+     */
     boolean containsRepository(Project project, String repo);
+
+    /**
+     * Returns all projects that have Pom.xml file
+     *
+     * @param projects projects for checking
+     * @return projects that have Pom.xml
+     */
+    List<Project> filterPomProjects(List<Project> projects);
 }

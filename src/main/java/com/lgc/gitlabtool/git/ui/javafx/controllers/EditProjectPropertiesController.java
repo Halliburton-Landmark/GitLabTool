@@ -317,4 +317,8 @@ public class EditProjectPropertiesController {
 
     }
 
+    @FXML
+    public void onReloadButton(ActionEvent actionEvent) {
+        refreshComponents();
+    }
 }

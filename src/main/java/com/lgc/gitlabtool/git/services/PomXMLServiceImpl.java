@@ -392,6 +392,25 @@ public class PomXMLServiceImpl implements PomXMLService {
 
     }
 
+    @Override
+    public List<Project> filterPomProjects(List<Project> projects) {
+        if (projects == null) {
+            return new ArrayList<>();
+        }
+
+        List<Project> filteredProjects = new ArrayList<>();
+        for (Project project : projects) {
+            PomXMLModel pomModel = getModel(project);
+            Model model = pomModel.getModelFile();
+
+            if (model != null) {
+                filteredProjects.add(project);
+            }
+        }
+
+        return filteredProjects;
+    }
+
     private <T> void mergeCollections(Collection<T> first, Collection<T> second, boolean onlyGeneral) {
         if (onlyGeneral && !first.isEmpty()) {
             first.retainAll(second);
