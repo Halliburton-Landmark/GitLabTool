@@ -103,10 +103,10 @@ public class ModularController implements UpdateConsoleListener {
         _consoleService.addListener(this);
     }
 
-    private final ConsoleService _consoleService = (ConsoleService) ServiceProvider.getInstance()
-    .getService(ConsoleService.class.getName());
+    private static final ConsoleService _consoleService = (ConsoleService) ServiceProvider.getInstance()
+            .getService(ConsoleService.class.getName());
 
-    private final GroupsUserService _groupService = (GroupsUserService) ServiceProvider.getInstance()
+    private static final GroupsUserService _groupService = (GroupsUserService) ServiceProvider.getInstance()
             .getService(GroupsUserService.class.getName());
 
     public void loadGroupWindow() throws IOException {

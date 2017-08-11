@@ -1,21 +1,29 @@
 package com.lgc.gitlabtool.git.services;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.lgc.gitlabtool.git.entities.MessageType;
 import com.lgc.gitlabtool.git.listeners.updateConsole.UpdateConsoleListener;
-import com.sun.org.apache.xml.internal.serialize.LineSeparator;
 
 import javafx.scene.text.Text;
 
 public class ConsoleServiceImpl implements ConsoleService {
 
+    private static final Logger _log = LogManager.getLogger(ConsoleServiceImpl.class);
+
     private final List<Text> _messages;
     private final Set<UpdateConsoleListener> _listeners;
+    private static final String LINE_SEPARATOR = System.getProperty("line.separator") ;
 
     public ConsoleServiceImpl() {
         _messages = new ArrayList<>();
@@ -24,11 +32,9 @@ public class ConsoleServiceImpl implements ConsoleService {
 
     @Override
     public void addMessage(String message, MessageType type) {
-        if (message == null) {
-            //todo: logger
-            return;
-        }
-        Text newMessage = new Text(LineSeparator.Windows + message);
+        addMessageToLog(message, type);
+
+        Text newMessage = formMessage(message);
         newMessage.setFill(MessageType.getColor(type));
         _messages.add(newMessage);
         addNewLineToConsole(newMessage);
@@ -71,4 +77,31 @@ public class ConsoleServiceImpl implements ConsoleService {
         }
     }
 
+    private String currentTime() {
+        DateFormat dateFormat = new SimpleDateFormat("hh:mm:ss a");
+        Date date = new Date();
+        return "[" + dateFormat.format(date) + "] ";
+    }
+
+    private Text formMessage(String message) {
+        StringBuilder newMessage = new StringBuilder();
+        if (!_messages.isEmpty()) {
+            newMessage.append(LINE_SEPARATOR);
+        }
+        newMessage.append(currentTime());
+        newMessage.append("" + message);
+        return new Text(newMessage.toString());
+    }
+
+    private void addMessageToLog(String message, MessageType type) {
+        if (message == null) {
+            _log.error("Error adding message to the UI console. Message is null.");
+            return;
+        }
+        if (type == MessageType.ERROR) {
+            _log.error(message);
+        } else {
+            _log.info(message);
+        }
+    }
 }
