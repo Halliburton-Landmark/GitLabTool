@@ -12,16 +12,15 @@ import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.lgc.gitlabtool.git.entities.ConsoleMessage;
 import com.lgc.gitlabtool.git.entities.MessageType;
 import com.lgc.gitlabtool.git.listeners.updateConsole.UpdateConsoleListener;
-
-import javafx.scene.text.Text;
 
 public class ConsoleServiceImpl implements ConsoleService {
 
     private static final Logger _log = LogManager.getLogger(ConsoleServiceImpl.class);
 
-    private final List<Text> _messages;
+    private final List<ConsoleMessage> _messages;
     private final Set<UpdateConsoleListener> _listeners;
     private static final String LINE_SEPARATOR = System.getProperty("line.separator") ;
 
@@ -34,14 +33,13 @@ public class ConsoleServiceImpl implements ConsoleService {
     public void addMessage(String message, MessageType type) {
         addMessageToLog(message, type);
 
-        Text newMessage = formMessage(message);
-        newMessage.setFill(MessageType.getColor(type));
-        _messages.add(newMessage);
-        addNewLineToConsole(newMessage);
+        ConsoleMessage consoleMessage = new ConsoleMessage(formMessage(message), type);
+        _messages.add(consoleMessage);
+        addNewLineToConsole(consoleMessage);
     }
 
     @Override
-    public List<Text> getMessages() {
+    public List<ConsoleMessage> getMessages() {
         return Collections.unmodifiableList(_messages);
     }
 
@@ -65,7 +63,7 @@ public class ConsoleServiceImpl implements ConsoleService {
         }
     }
 
-    private void addNewLineToConsole(Text message) {
+    private void addNewLineToConsole(ConsoleMessage message) {
         if (_listeners != null) {
             _listeners.forEach(listener -> listener.addNewMessage(message));
         }
@@ -83,14 +81,14 @@ public class ConsoleServiceImpl implements ConsoleService {
         return "[" + dateFormat.format(date) + "] ";
     }
 
-    private Text formMessage(String message) {
+    private String formMessage(String message) {
         StringBuilder newMessage = new StringBuilder();
         if (!_messages.isEmpty()) {
             newMessage.append(LINE_SEPARATOR);
         }
         newMessage.append(currentTime());
         newMessage.append("" + message);
-        return new Text(newMessage.toString());
+        return newMessage.toString();
     }
 
     private void addMessageToLog(String message, MessageType type) {

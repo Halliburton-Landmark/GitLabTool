@@ -1,6 +1,6 @@
 package com.lgc.gitlabtool.git.listeners.updateConsole;
 
-import javafx.scene.text.Text;
+import com.lgc.gitlabtool.git.entities.ConsoleMessage;
 
 /**
  *
@@ -8,7 +8,7 @@ import javafx.scene.text.Text;
  */
 public interface UpdateConsoleListener {
 
-    void addNewMessage(Text message);
+    void addNewMessage(ConsoleMessage message);
 
     void updateConsole();
 }

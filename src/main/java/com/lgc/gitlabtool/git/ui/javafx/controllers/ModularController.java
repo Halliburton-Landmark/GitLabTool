@@ -6,6 +6,8 @@ import static com.lgc.gitlabtool.git.util.ProjectPropertiesUtil.getProjectVersio
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -15,7 +17,9 @@ import java.util.concurrent.Executors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.lgc.gitlabtool.git.entities.ConsoleMessage;
 import com.lgc.gitlabtool.git.entities.Group;
+import com.lgc.gitlabtool.git.entities.MessageType;
 import com.lgc.gitlabtool.git.listeners.updateConsole.UpdateConsoleListener;
 import com.lgc.gitlabtool.git.services.ConsoleService;
 import com.lgc.gitlabtool.git.services.GroupsUserService;
@@ -337,12 +341,12 @@ public class ModularController implements UpdateConsoleListener {
     }
 
     @Override
-    public void addNewMessage(Text message) {
+    public void addNewMessage(ConsoleMessage message) {
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
                 if (message != null) {
-                    _console.getChildren().add(message);
+                    _console.getChildren().add(getText(message));
                 }
             }
         });
@@ -355,9 +359,20 @@ public class ModularController implements UpdateConsoleListener {
             @Override
             public void run() {
                 _console.getChildren().clear();
-                _console.getChildren().addAll(_consoleService.getMessages());
+                _console.getChildren().addAll(convertConsoleMessageToText(_consoleService.getMessages()));
             }
         });
     }
 
+    private List<Text> convertConsoleMessageToText(List<ConsoleMessage> consoleMessages) {
+        List<Text> messages = new ArrayList<>();
+        consoleMessages.forEach(message -> messages.add(getText(message)));
+        return messages;
+    }
+
+    private Text getText(ConsoleMessage message) {
+        Text text = new Text(message.getMessage());
+        text.setFill(MessageType.getColor(message.getType()));
+        return text;
+    }
 }
