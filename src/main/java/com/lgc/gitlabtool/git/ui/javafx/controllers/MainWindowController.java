@@ -1,7 +1,7 @@
 package com.lgc.gitlabtool.git.ui.javafx.controllers;
 
 
-import java.awt.*;
+import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -24,7 +24,6 @@ import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.services.EmptyProgressListener;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.LoginService;
-import com.lgc.gitlabtool.git.services.ProgressListener;
 import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.javafx.ChangesCheckDialog;
@@ -354,10 +353,6 @@ public class MainWindowController {
     }
 
     private void initToolbarMainMenuActions() {
-
-        ToolbarManager.getInstance().getButtonById(ToolbarButtons.REFRESH_PROJECTS.getId())
-                .setOnAction(this::refreshLoadProjects);
-
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.CLONE_PROJECT_BUTTON.getId())
                 .setOnAction(this::cloneShadowProject);
 
@@ -563,7 +558,7 @@ public class MainWindowController {
         List<Project> projectsToPull = getSelectedProjects().stream()
                 .filter(project -> project.isCloned())
                 .collect(Collectors.toList());
-        
+
         checkChangesAndPull(projectsToPull, new Object());
     }
 
@@ -581,7 +576,7 @@ public class MainWindowController {
     }
 
     private void startPull(List<Project> projects, ProgressDialog progressDialog) {
-        OperationProgressListener pullProgressListener = 
+        OperationProgressListener pullProgressListener =
                 new OperationProgressListener(progressDialog, ApplicationState.PULL);
         _gitService.pull(projects, pullProgressListener);
     }
