@@ -47,6 +47,15 @@ public class EditProjectPropertiesController {
             .getService(PomXMLService.class.getName());
 
     @FXML
+    private CheckBox addIsCommit;
+
+    @FXML
+    private CheckBox editIsCommit;
+
+    @FXML
+    private CheckBox removeIsCommit;
+
+    @FXML
     private Button editButton;
 
     @FXML
@@ -174,7 +183,8 @@ public class EditProjectPropertiesController {
 
         //disabling selection
         listView.getSelectionModel().selectedIndexProperty().addListener(
-                (observable, oldvalue, newValue) -> Platform.runLater(() -> listView.getSelectionModel().select(-1)));
+                (observable, oldvalue, newValue) -> Platform.runLater(() ->
+                        listView.getSelectionModel().select(-1)));
     }
 
     @FXML
@@ -187,16 +197,14 @@ public class EditProjectPropertiesController {
 
         Map<Project, JGitStatus> addStatuses = _pomXmlService.addRepository(filteredProjects, id, url, layout);
 
-        showStatusDialog(addStatuses, selectedProjects.size(),EDIT_POM_TITLE, ADDING_REPO_HEADER_MESSAGE, ADDING_REPO_COLLAPSED_MESSAGE);
+        showStatusDialog(addStatuses, selectedProjects.size(), EDIT_POM_TITLE,
+                ADDING_REPO_HEADER_MESSAGE, ADDING_REPO_COLLAPSED_MESSAGE);
 
-        List<Project> projectWithChanges = addStatuses.entrySet()
-                .stream()
-                .filter( entry -> entry.getValue().equals(JGitStatus.SUCCESSFUL))
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toList());
+        if (addIsCommit.isSelected()) {
+            List<Project> projectWithChanges = getSuccessfulProjectsFromStatuses(addStatuses);
 
-        commitProjects(projectWithChanges);
-
+            commitProjects(projectWithChanges);
+        }
         refreshComponents();
     }
 
@@ -209,17 +217,16 @@ public class EditProjectPropertiesController {
 
         List<Project> filteredProjects = currentProjectsListView.getItems();
 
-        Map<Project, JGitStatus> addStatuses = _pomXmlService.modifyRepository(filteredProjects, oldId, newId, newUrl, newLayout);
-        showStatusDialog(addStatuses, filteredProjects.size(), EDIT_POM_TITLE, EDITING_REPO_HEADER_MESSAGE, EDITING_REPO_COLLAPSED_MESSAGE);
+        Map<Project, JGitStatus> editStatuses = _pomXmlService.modifyRepository(filteredProjects,
+                oldId, newId, newUrl, newLayout);
+        showStatusDialog(editStatuses, filteredProjects.size(), EDIT_POM_TITLE,
+                EDITING_REPO_HEADER_MESSAGE, EDITING_REPO_COLLAPSED_MESSAGE);
 
-        List<Project> projectWithChanges = addStatuses.entrySet()
-                .stream()
-                .filter( entry -> entry.getValue().equals(JGitStatus.SUCCESSFUL))
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toList());
+        if (editIsCommit.isSelected()) {
+            List<Project> projectWithChanges = getSuccessfulProjectsFromStatuses(editStatuses);
 
-        commitProjects(projectWithChanges);
-
+            commitProjects(projectWithChanges);
+        }
         refreshComponents();
     }
 
@@ -229,18 +236,24 @@ public class EditProjectPropertiesController {
 
         List<Project> filteredProjects = currentProjectsListView.getItems();
 
-        Map<Project, JGitStatus> addStatuses = _pomXmlService.removeRepository(filteredProjects, id);
-        showStatusDialog(addStatuses, filteredProjects.size(), EDIT_POM_TITLE, REMOVING_REPO_HEADER_MESSAGE, REMOVING_REPO_COLLAPSED_MESSAGE);
+        Map<Project, JGitStatus> removeStatuses = _pomXmlService.removeRepository(filteredProjects, id);
+        showStatusDialog(removeStatuses, filteredProjects.size(), EDIT_POM_TITLE,
+                REMOVING_REPO_HEADER_MESSAGE, REMOVING_REPO_COLLAPSED_MESSAGE);
 
-        List<Project> projectWithChanges = addStatuses.entrySet()
+        if (removeIsCommit.isSelected()) {
+            List<Project> projectWithChanges = getSuccessfulProjectsFromStatuses(removeStatuses);
+
+            commitProjects(projectWithChanges);
+        }
+        refreshComponents();
+    }
+
+    private List<Project> getSuccessfulProjectsFromStatuses(Map<Project, JGitStatus> statuses) {
+        return statuses.entrySet()
                 .stream()
-                .filter( entry -> entry.getValue().equals(JGitStatus.SUCCESSFUL))
+                .filter(entry -> entry.getValue().equals(JGitStatus.SUCCESSFUL))
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
-
-        commitProjects(projectWithChanges);
-
-        refreshComponents();
     }
 
     private void refreshComponents() {
@@ -287,18 +300,20 @@ public class EditProjectPropertiesController {
         currentProjectsListView.setItems(FXCollections.observableArrayList(filteredProjectList));
     }
 
-    private void showStatusDialog(Map<Project, JGitStatus> statuses, int countOfProjects,String title, String header, String collapsedMessage) {
+    private void showStatusDialog(Map<Project, JGitStatus> statuses, int countOfProjects,
+                                  String title, String header, String collapsedMessage) {
         StatusDialog statusDialog = new StatusDialog(title, header);
         statusDialog.showMessage(statuses, countOfProjects, collapsedMessage);
         statusDialog.showAndWait();
     }
 
-    private void commitProjects(List<Project> projects){
+    private void commitProjects(List<Project> projects) {
         CommitDialog dialog = new CommitDialog();
         Map<Project, JGitStatus> commitStatuses = dialog.commitChanges(projects);
 
         String dialogMessage = "%s projects were pushed successfully";
-        showStatusDialog(commitStatuses, projects.size(), COMMIT_TITLE, COMMITTING_HEADER_MESSAGE, COMMITTING_COLLAPSED_MESSAGE);
+        showStatusDialog(commitStatuses, projects.size(), COMMIT_TITLE,
+                COMMITTING_HEADER_MESSAGE, COMMITTING_COLLAPSED_MESSAGE);
 
     }
 
