@@ -92,6 +92,8 @@ public class ModularController implements UpdateConsoleListener {
     @FXML
     public AnchorPane viewPane;
 
+
+
     @FXML
     public ToolBar toolbar;
 
