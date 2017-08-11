@@ -255,7 +255,7 @@ public class PomXMLServiceImpl implements PomXMLService {
         if (allEqual) {
             return names.get(0);
         } else {
-            return "[Different]";
+            return "[Undefined]";
         }
     }
 
@@ -287,7 +287,7 @@ public class PomXMLServiceImpl implements PomXMLService {
         if (allEqual) {
             return eclipseReleases.get(0);
         } else {
-            return "[Different]";
+            return "[Undefined]";
         }
     }
 
@@ -319,7 +319,7 @@ public class PomXMLServiceImpl implements PomXMLService {
             if (repos.size() == 1) {
                 projectsLayouts.add(repos.get(0).getLayout());
             } else {
-                projectsLayouts.add("[Different]");
+                projectsLayouts.add("[Undefined]");
             }
 
         }
@@ -329,7 +329,7 @@ public class PomXMLServiceImpl implements PomXMLService {
         if (allEqual) {
             return projectsLayouts.get(0);
         } else {
-            return "[Different]";
+            return "[Undefined]";
         }
 
     }
@@ -362,7 +362,7 @@ public class PomXMLServiceImpl implements PomXMLService {
             if (repos.size() == 1) {
                 projectsUrls.add(repos.get(0).getUrl());
             } else {
-                projectsUrls.add("[Different]");
+                projectsUrls.add("[Undefined]");
             }
 
         }
@@ -372,7 +372,7 @@ public class PomXMLServiceImpl implements PomXMLService {
         if (allEqual) {
             return projectsUrls.get(0);
         } else {
-            return "[Different]";
+            return "[Undefined]";
         }
     }
 
