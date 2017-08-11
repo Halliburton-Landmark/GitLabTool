@@ -368,9 +368,10 @@ public class ModularController implements UpdateConsoleListener {
             public void run() {
                 _console.getChildren().addAll(convertConsoleMessageToText(_consoleService.getMessages()));
 
+                // move scroll bar. Fix for bug with set value 1.0 to scrollPane.setVValue
                 final Timeline timeline = new Timeline();
                 final KeyValue kv = new KeyValue(scrollPane.vvalueProperty(), 1.0);
-                final KeyFrame kf = new KeyFrame(Duration.millis(500), kv);
+                final KeyFrame kf = new KeyFrame(Duration.millis(1), kv);
                 timeline.getKeyFrames().add(kf);
                 timeline.play();
             }
