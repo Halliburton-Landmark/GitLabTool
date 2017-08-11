@@ -35,7 +35,7 @@
             orientation="VERTICAL">
             <AnchorPane fx:id="viewPane" />
             <ScrollPane fitToWidth="true" minHeight="150.0">
-                <TextFlow fx:id="_console" minHeight="150.0" style="-fx-background-color: #D7DBE3;">
+                <TextFlow fx:id="_console" minHeight="150.0">
                 </TextFlow>
             </ScrollPane>
         </SplitPane>
