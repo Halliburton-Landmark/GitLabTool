@@ -354,8 +354,8 @@ public class ModularController implements UpdateConsoleListener {
             @Override
             public void run() {
                 if (message != null) {
-                    _console.getChildren().remove(_console.getChildren().size()-1); // magic
                     _console.getChildren().add(getText(message));
+                    moveScrollToBottom();
                 }
             }
         });
@@ -367,13 +367,7 @@ public class ModularController implements UpdateConsoleListener {
             @Override
             public void run() {
                 _console.getChildren().addAll(convertConsoleMessageToText(_consoleService.getMessages()));
-
-                // move scroll bar. Fix for bug with set value 1.0 to scrollPane.setVValue
-                final Timeline timeline = new Timeline();
-                final KeyValue kv = new KeyValue(scrollPane.vvalueProperty(), 1.0);
-                final KeyFrame kf = new KeyFrame(Duration.millis(1), kv);
-                timeline.getKeyFrames().add(kf);
-                timeline.play();
+                moveScrollToBottom();
             }
         });
     }
@@ -388,5 +382,14 @@ public class ModularController implements UpdateConsoleListener {
         Text text = new Text(message.getMessage());
         text.setFill(MessageType.getColor(message.getType()));
         return text;
+    }
+
+    private void moveScrollToBottom() {
+        // move scroll bar. Fix for bug with set value 1.0 to scrollPane.setVValue
+        final Timeline timeline = new Timeline();
+        final KeyValue kv = new KeyValue(scrollPane.vvalueProperty(), 1.0);
+        final KeyFrame kf = new KeyFrame(Duration.millis(1), kv);
+        timeline.getKeyFrames().add(kf);
+        timeline.play();
     }
 }
