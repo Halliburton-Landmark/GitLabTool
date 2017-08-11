@@ -33,6 +33,9 @@ import com.lgc.gitlabtool.git.ui.toolbar.ToolbarButtons;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarManager;
 import com.lgc.gitlabtool.git.util.ScreenUtil;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -61,6 +64,7 @@ import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import javafx.util.Duration;
 
 public class ModularController implements UpdateConsoleListener {
 
@@ -350,8 +354,8 @@ public class ModularController implements UpdateConsoleListener {
             @Override
             public void run() {
                 if (message != null) {
+                    _console.getChildren().remove(_console.getChildren().size()-1); // magic
                     _console.getChildren().add(getText(message));
-                    scrollPane.setVvalue(1.0);
                 }
             }
         });
@@ -363,7 +367,12 @@ public class ModularController implements UpdateConsoleListener {
             @Override
             public void run() {
                 _console.getChildren().addAll(convertConsoleMessageToText(_consoleService.getMessages()));
-                scrollPane.setVvalue(1.0);
+
+                final Timeline timeline = new Timeline();
+                final KeyValue kv = new KeyValue(scrollPane.vvalueProperty(), 1.0);
+                final KeyFrame kf = new KeyFrame(Duration.millis(500), kv);
+                timeline.getKeyFrames().add(kf);
+                timeline.play();
             }
         });
     }

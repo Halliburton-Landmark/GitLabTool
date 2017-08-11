@@ -179,6 +179,7 @@ class LoginDialog extends Dialog<DialogDTO> {
                         updateLastUserName();
                         Platform.runLater(() -> {
                             _consoleService.addMessage("Login successfull", MessageType.SUCCESS);
+                            _consoleService.addMessage("Login successfull", MessageType.SIMPLE);
                             getStage().close();
                         });
                     } else if (responseCode == HttpStatus.SC_UNAUTHORIZED) {
