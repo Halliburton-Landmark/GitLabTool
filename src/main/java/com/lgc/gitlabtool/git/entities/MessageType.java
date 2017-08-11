@@ -3,12 +3,13 @@ package com.lgc.gitlabtool.git.entities;
 import javafx.scene.paint.Color;
 
 /**
- * Type of operation message for the ProgressDialog.
+ * Type of messages.
  * It class is needed to get CSS or color for each type.
  *
  * @author Lyudmila Lyska
  */
 public enum MessageType {
+
     ERROR, SUCCESS, SIMPLE;
 
     /**
