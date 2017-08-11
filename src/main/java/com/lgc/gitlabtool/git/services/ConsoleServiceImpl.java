@@ -19,8 +19,6 @@ public class ConsoleServiceImpl implements ConsoleService {
 
     public ConsoleServiceImpl() {
         _messages = new ArrayList<>();
-        _messages.add(new Text("..."));
-        addNewLineToConsole(new Text("..."));
         _listeners = new HashSet<UpdateConsoleListener>();
     }
 
