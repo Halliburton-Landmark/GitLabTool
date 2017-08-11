@@ -31,13 +31,13 @@
     </top>
 
     <center>
-        <SplitPane fx:id="parentPane" dividerPositions="0.6"
-            orientation="VERTICAL" style="-fx-background-color: #556be8">
-            <AnchorPane  fx:id="viewPane" />
-            <ScrollPane fitToWidth="true" style="-fx-background-color: #ff0000">
-                <TextFlow fx:id="_console" style="-fx-background-color: #D7DBE3;">
-                </TextFlow>
-            </ScrollPane>
+        <SplitPane fx:id="parentPane" dividerPositions="0.65" 
+            orientation="VERTICAL">
+            <AnchorPane fx:id="viewPane" />
+                <ScrollPane fx:id="scrollPane" fitToWidth="true" fitToHeight="true">
+                    <TextFlow fx:id="_console" style="-fx-background-color: #D7DBE3;">
+                    </TextFlow>
+                </ScrollPane>
         </SplitPane>
     </center>
 </BorderPane>

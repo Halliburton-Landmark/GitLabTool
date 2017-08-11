@@ -48,6 +48,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.ToolBar;
 import javafx.scene.image.Image;
@@ -92,8 +93,6 @@ public class ModularController implements UpdateConsoleListener {
     @FXML
     public AnchorPane viewPane;
 
-
-
     @FXML
     public ToolBar toolbar;
 
@@ -102,6 +101,9 @@ public class ModularController implements UpdateConsoleListener {
 
     @FXML
     public MenuBar menuBar;
+
+    @FXML
+    public ScrollPane scrollPane;
 
     @FXML
     public void initialize() {
@@ -349,6 +351,7 @@ public class ModularController implements UpdateConsoleListener {
             public void run() {
                 if (message != null) {
                     _console.getChildren().add(getText(message));
+                    scrollPane.setVvalue(1.0);
                 }
             }
         });
@@ -359,8 +362,8 @@ public class ModularController implements UpdateConsoleListener {
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
-                _console.getChildren().clear();
                 _console.getChildren().addAll(convertConsoleMessageToText(_consoleService.getMessages()));
+                scrollPane.setVvalue(1.0);
             }
         });
     }
