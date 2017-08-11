@@ -27,13 +27,12 @@ import javafx.application.Platform;
  * <b>Important!</b><br>
  * Realizations of methods have definite count of parameters (it is needed to use it with {@link ProgressDialog})<br>
  * Please see javadoc
- *
+ * 
  * @author Igor Khlaponin
  */
 public class OperationProgressListener implements ProgressListener {
 
     private static final Logger _logger = LogManager.getLogger(OperationProgressListener.class);
-
     private final ProgressDialog _progressDialog;
     private Consumer<Object> _finishedAction;
     private final ApplicationState _applicationState;
@@ -151,7 +150,7 @@ public class OperationProgressListener implements ProgressListener {
     }
 
     protected void showStatusDialog(String message) {
-        StatusDialog statusDialog = new StatusDialog(_applicationState.toString(),
+        StatusDialog statusDialog = new StatusDialog(_applicationState.toString(), 
                 _applicationState.toString()+ " info", message);
         statusDialog.showAndWait();
     }

@@ -9,14 +9,14 @@ package com.lgc.gitlabtool.git.listeners.updateConsole;
 public interface UpdateConsoleGenerator {
 
     /**
-     * Adds listener
+     * Adds new listener
      *
      * @param listener the listener
      */
     void addListener(UpdateConsoleListener listener);
 
     /**
-     * Remove listener
+     * Removes this listener
      *
      * @param listener the listener
      */

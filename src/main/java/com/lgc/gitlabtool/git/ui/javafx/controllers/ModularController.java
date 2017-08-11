@@ -145,7 +145,7 @@ public class ModularController implements UpdateConsoleListener {
 
         _mainWindowController = loader.getController();
 
-        _mainWindowController.setSelectedGroup(selectedGroup, _console);
+        _mainWindowController.setSelectedGroup(selectedGroup);
         _mainWindowController.beforeShowing();
 
         AnchorPane.setTopAnchor(node, 0.0);
@@ -350,7 +350,6 @@ public class ModularController implements UpdateConsoleListener {
                 }
             }
         });
-
     }
 
     @Override

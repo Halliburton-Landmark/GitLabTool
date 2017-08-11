@@ -65,7 +65,6 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.text.TextFlow;
 
 public class MainWindowController {
     private static final String HEDER_GROUP_TITLE = "Current group: ";
@@ -112,8 +111,6 @@ public class MainWindowController {
 
     @FXML
     private ToggleButton filterShadowProjects;
-
-    public TextFlow _console;
 
     public void beforeShowing() {
         String username = _loginService.getCurrentUser().getName();
@@ -184,9 +181,8 @@ public class MainWindowController {
 
     }
 
-    public void setSelectedGroup(Group group, TextFlow console) {
+    public void setSelectedGroup(Group group) {
         _currentGroup = group;
-        _console = console;
         refreshLoadProjects();
     }
 
@@ -566,7 +562,6 @@ public class MainWindowController {
         List<Project> projectsToPull = getSelectedProjects().stream()
                 .filter(project -> project.isCloned())
                 .collect(Collectors.toList());
-
         checkChangesAndPull(projectsToPull, new Object());
     }
 
@@ -584,7 +579,7 @@ public class MainWindowController {
     }
 
     private void startPull(List<Project> projects, ProgressDialog progressDialog) {
-        OperationProgressListener pullProgressListener =
+        OperationProgressListener pullProgressListener = 
                 new OperationProgressListener(progressDialog, ApplicationState.PULL);
         _gitService.pull(projects, pullProgressListener);
     }
