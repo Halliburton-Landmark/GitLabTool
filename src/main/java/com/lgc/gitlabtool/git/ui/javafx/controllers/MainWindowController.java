@@ -406,9 +406,7 @@ public class MainWindowController {
     public void refreshLoadProjects(ActionEvent actionEvent) {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.submit(() -> {
-            _consoleService.addMessage("Refreshing projects...", MessageType.SIMPLE);
             refreshLoadProjects();
-            _consoleService.addMessage("Projects were refreshed!", MessageType.SIMPLE);
         });
         executor.shutdown();
     }
@@ -505,7 +503,7 @@ public class MainWindowController {
 
     private void showProjectsWithoutChangesMessage() {
         String noChangesMessage = "Selected projects do not have changes";
-        _consoleService.addMessage(noChangesMessage, MessageType.SIMPLE);
+        _consoleService.addMessage("Selected projects do not have changes", MessageType.SIMPLE);
         StatusDialog statusDialog = new StatusDialog(STATUS_DIALOG_TITLE, STATUS_DIALOG_HEADER_COMMIT,
                 noChangesMessage);
         statusDialog.showAndWait();

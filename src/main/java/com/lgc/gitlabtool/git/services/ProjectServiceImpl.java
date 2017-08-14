@@ -231,6 +231,7 @@ public class ProjectServiceImpl implements ProjectService {
 
             @Override
             public void onFinish(Object... t) {
+                _stateService.stateOFF(ApplicationState.CLONE);
             }
         });
     }

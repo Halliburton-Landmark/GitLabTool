@@ -145,7 +145,6 @@ public class CreateProjectDialog extends Dialog<String> {
             ProjectType projectType = _typeServies.getTypeById(idType);
             _projectService.createProject(_selectGroup, _projectNameField.getText(), projectType,
                     new CreateProjectProgressListener());
-            _stateService.stateOFF(ApplicationState.CREATE_PROJECT);
         });
         executor.shutdown();
     }
@@ -183,6 +182,7 @@ public class CreateProjectDialog extends Dialog<String> {
                             "Status of creating project", headerMessage, contentMessage);
                     statusDialog.showAndWait();
                     _consoleService.addMessage(contentMessage, project == null ? MessageType.ERROR : MessageType.SUCCESS);
+                    _stateService.stateOFF(ApplicationState.CREATE_PROJECT);
                 }
             });
         }
