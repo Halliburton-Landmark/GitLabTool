@@ -6,6 +6,8 @@ import static com.lgc.gitlabtool.git.util.ProjectPropertiesUtil.getProjectVersio
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -15,7 +17,11 @@ import java.util.concurrent.Executors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.lgc.gitlabtool.git.entities.ConsoleMessage;
 import com.lgc.gitlabtool.git.entities.Group;
+import com.lgc.gitlabtool.git.entities.MessageType;
+import com.lgc.gitlabtool.git.listeners.updateConsole.UpdateConsoleListener;
+import com.lgc.gitlabtool.git.services.ConsoleService;
 import com.lgc.gitlabtool.git.services.GroupsUserService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.ViewKey;
@@ -27,6 +33,9 @@ import com.lgc.gitlabtool.git.ui.toolbar.ToolbarButtons;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarManager;
 import com.lgc.gitlabtool.git.util.ScreenUtil;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -42,19 +51,22 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.ToolBar;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.Pane;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import javafx.util.Duration;
 
-public class ModularController {
+public class ModularController implements UpdateConsoleListener {
 
     private static final Logger logger = LogManager.getLogger(ModularController.class);
 
@@ -80,7 +92,7 @@ public class ModularController {
     private GroupWindowController _groupWindowController;
 
     @FXML
-    public Pane consolePane;
+    public TextFlow _console;
 
     @FXML
     public AnchorPane viewPane;
@@ -95,11 +107,18 @@ public class ModularController {
     public MenuBar menuBar;
 
     @FXML
+    public ScrollPane scrollPane;
+
+    @FXML
     public void initialize() {
         toolbar.getStylesheets().add(getClass().getClassLoader().getResource(CSS_PATH).toExternalForm());
+        _consoleService.addListener(this);
     }
 
-    private final GroupsUserService _groupService = (GroupsUserService) ServiceProvider.getInstance()
+    private static final ConsoleService _consoleService = (ConsoleService) ServiceProvider.getInstance()
+            .getService(ConsoleService.class.getName());
+
+    private static final GroupsUserService _groupService = (GroupsUserService) ServiceProvider.getInstance()
             .getService(GroupsUserService.class.getName());
 
     public void loadGroupWindow() throws IOException {
@@ -120,7 +139,7 @@ public class ModularController {
         viewPane.getChildren().clear();
         viewPane.getChildren().add(node);
 
-        parentPane.getItems().remove(consolePane);
+        updateConsole();
     }
 
     public void loadMainWindow(Group selectedGroup) throws IOException {
@@ -142,6 +161,7 @@ public class ModularController {
         AnchorPane.setLeftAnchor(node, 0.0);
         AnchorPane.setBottomAnchor(node, 0.0);
 
+        updateConsole();
         viewPane.getChildren().clear();
         viewPane.getChildren().add(node);
     }
@@ -328,4 +348,48 @@ public class ModularController {
         });
     }
 
+    @Override
+    public void addNewMessage(ConsoleMessage message) {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                if (message != null) {
+                    _console.getChildren().add(getText(message));
+                    moveScrollToBottom();
+                }
+            }
+        });
+    }
+
+    @Override
+    public void updateConsole() {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                _console.getChildren().addAll(convertConsoleMessageToText(_consoleService.getMessages()));
+                moveScrollToBottom();
+            }
+        });
+    }
+
+    private List<Text> convertConsoleMessageToText(List<ConsoleMessage> consoleMessages) {
+        List<Text> messages = new ArrayList<>();
+        consoleMessages.forEach(message -> messages.add(getText(message)));
+        return messages;
+    }
+
+    private Text getText(ConsoleMessage message) {
+        Text text = new Text(message.getMessage());
+        text.setFill(MessageType.getColor(message.getType()));
+        return text;
+    }
+
+    private void moveScrollToBottom() {
+        // move scroll bar. Fix for bug with set value 1.0 to scrollPane.setVValue
+        final Timeline timeline = new Timeline();
+        final KeyValue kv = new KeyValue(scrollPane.vvalueProperty(), 1.0);
+        final KeyFrame kf = new KeyFrame(Duration.millis(1), kv);
+        timeline.getKeyFrames().add(kf);
+        timeline.play();
+    }
 }

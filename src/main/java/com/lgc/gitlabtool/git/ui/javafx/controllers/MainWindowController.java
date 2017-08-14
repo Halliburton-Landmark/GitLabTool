@@ -549,7 +549,6 @@ public class MainWindowController {
         List<Project> projectsToPull = getSelectedProjects().stream()
                 .filter(project -> project.isCloned())
                 .collect(Collectors.toList());
-
         checkChangesAndPull(projectsToPull, new Object());
     }
 

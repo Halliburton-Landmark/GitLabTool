@@ -10,12 +10,15 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 <?import javafx.stage.Screen?>
-<BorderPane id="background"
-            prefHeight="${screen.visualBounds.maxY / 1.5}" prefWidth="${screen.visualBounds.maxX / 1.5}"
-            xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.lgc.gitlabtool.git.ui.javafx.controllers.ModularController">
+<?import javafx.scene.text.TextFlow?>
+<?import javafx.scene.control.ScrollPane?>
+
+<BorderPane id="background" prefHeight="${screen.visualBounds.maxY / 1.5}"
+    prefWidth="${screen.visualBounds.maxX / 1.5}" xmlns="http://javafx.com/javafx/8"
+    xmlns:fx="http://javafx.com/fxml/1"
+    fx:controller="com.lgc.gitlabtool.git.ui.javafx.controllers.ModularController">
     <fx:define>
-        <Screen fx:factory="getPrimary" fx:id="screen"/>
+        <Screen fx:factory="getPrimary" fx:id="screen" />
     </fx:define>
     <top>
         <VBox BorderPane.alignment="CENTER">
@@ -28,15 +31,13 @@
     </top>
 
     <center>
-        <SplitPane fx:id="parentPane" dividerPositions="0.95" orientation="VERTICAL">
-            <AnchorPane fx:id="viewPane"/>
-            <Pane fx:id="consolePane" style="-fx-background-color: #D7DBE3;">
-                <Label alignment="CENTER" text="Console mock" textFill="#000000d7">
-                    <font>
-                        <Font size="18.0"/>
-                    </font>
-                </Label>
-            </Pane>
+        <SplitPane fx:id="parentPane" dividerPositions="0.65" 
+            orientation="VERTICAL">
+            <AnchorPane fx:id="viewPane" />
+                <ScrollPane fx:id="scrollPane" fitToWidth="true" fitToHeight="true">
+                    <TextFlow fx:id="_console" style="-fx-background-color: #D7DBE3;">
+                    </TextFlow>
+                </ScrollPane>
         </SplitPane>
     </center>
 </BorderPane>
