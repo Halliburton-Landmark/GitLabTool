@@ -18,9 +18,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.lgc.gitlabtool.git.entities.Group;
+import com.lgc.gitlabtool.git.entities.MessageType;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
+import com.lgc.gitlabtool.git.services.ConsoleService;
 import com.lgc.gitlabtool.git.services.EmptyProgressListener;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.LoginService;
@@ -90,6 +92,9 @@ public class MainWindowController {
 
     private static final GitService _gitService = (GitService) ServiceProvider.getInstance()
             .getService(GitService.class.getName());
+
+    private static final ConsoleService _consoleService = (ConsoleService) ServiceProvider.getInstance()
+            .getService(ConsoleService.class.getName());
 
     @FXML
     private ListView<Project> projectsList;
@@ -401,9 +406,9 @@ public class MainWindowController {
     public void refreshLoadProjects(ActionEvent actionEvent) {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.submit(() -> {
-            _logger.info("Refreshing projects...");
+            _consoleService.addMessage("Refreshing projects...", MessageType.SIMPLE);
             refreshLoadProjects();
-            _logger.info("Projects were refreshed!");
+            _consoleService.addMessage("Projects were refreshed!", MessageType.SIMPLE);
         });
         executor.shutdown();
     }
@@ -471,7 +476,7 @@ public class MainWindowController {
                                                             .filter(project -> !project.isCloned())
                                                             .collect(Collectors.toList());
         if (shadowProjects == null || shadowProjects.isEmpty()) {
-            _logger.info("Shadow projects for cloning have not been selected!");
+            _consoleService.addMessage("Shadow projects for cloning have not been selected!", MessageType.SIMPLE);
             return;
         }
         String path = _currentGroup.getPathToClonedGroup();
@@ -500,6 +505,7 @@ public class MainWindowController {
 
     private void showProjectsWithoutChangesMessage() {
         String noChangesMessage = "Selected projects do not have changes";
+        _consoleService.addMessage(noChangesMessage, MessageType.SIMPLE);
         StatusDialog statusDialog = new StatusDialog(STATUS_DIALOG_TITLE, STATUS_DIALOG_HEADER_COMMIT,
                 noChangesMessage);
         statusDialog.showAndWait();

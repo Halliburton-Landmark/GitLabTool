@@ -17,6 +17,7 @@ import com.google.gson.reflect.TypeToken;
 import com.lgc.gitlabtool.git.connections.RESTConnector;
 import com.lgc.gitlabtool.git.connections.token.CurrentUser;
 import com.lgc.gitlabtool.git.entities.Group;
+import com.lgc.gitlabtool.git.entities.MessageType;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.User;
 import com.lgc.gitlabtool.git.jgit.JGit;
@@ -42,15 +43,18 @@ public class GroupsUserServiceImpl implements GroupsUserService {
     private static ClonedGroupsService _clonedGroupsService;
     private static ProjectService _projectService;
     private static StateService _stateService;
+    private static ConsoleService _consoleService;
 
     public GroupsUserServiceImpl(RESTConnector connector,
                                  ClonedGroupsService clonedGroupsService,
                                  ProjectService projectService,
-                                 StateService stateService) {
+                                 StateService stateService,
+                                 ConsoleService consoleService) {
         setConnector(connector);
         setClonedGroupsService(clonedGroupsService);
         setProjectService(projectService);
         setStateService(stateService);
+        setConsoleService(consoleService);
     }
 
     @Override
@@ -130,11 +134,13 @@ public class GroupsUserServiceImpl implements GroupsUserService {
 
     @Override
     public Group importGroup(String groupPath) {
+        _consoleService.addMessage("Started import of group from: " + groupPath, MessageType.SIMPLE);
         if (groupPath == null || groupPath.isEmpty()) {
-            throw new IllegalArgumentException(INCCORECT_DATA_MESSAGE);
+            return null;
         }
         Path path = Paths.get(groupPath);
         if (!PathUtilities.isExistsAndDirectory(path)) {
+            _consoleService.addMessage("Path doesn't exist or it is not directory", MessageType.ERROR);
             return null;
         }
         return importGroup(path);
@@ -166,20 +172,26 @@ public class GroupsUserServiceImpl implements GroupsUserService {
         }
     }
 
+    private void setConsoleService(ConsoleService consoleService) {
+        if (consoleService != null) {
+            _consoleService = consoleService;
+        }
+    }
+
     private Group importGroup(Path groupPath) {
         String nameGroup = groupPath.getName(groupPath.getNameCount() - 1).toString();
         if (checkGroupIsLoaded(groupPath.toAbsolutePath().toString())) {
-            logger.debug(GROUP_ALREADY_LOADED_MESSAGE);
+            _consoleService.addMessage(GROUP_ALREADY_LOADED_MESSAGE, MessageType.SIMPLE);
             return null;
         }
         Optional<Group> optFoundGroup = getGroupByName(nameGroup);
         if (!optFoundGroup.isPresent()) {
-            logger.debug(GROUP_DOESNT_EXIST_MESSAGE);
+            _consoleService.addMessage(GROUP_DOESNT_EXIST_MESSAGE, MessageType.ERROR);
             return null;
         }
         Group foundGroup = getGroupById(optFoundGroup.get().getId());
         if (foundGroup == null) {
-            logger.debug(ERROR_GETTING_GROUP_MESSAGE);
+            _consoleService.addMessage(ERROR_GETTING_GROUP_MESSAGE, MessageType.ERROR);
             return null;
         }
         foundGroup.setPathToClonedGroup(groupPath.toString());
@@ -191,48 +203,53 @@ public class GroupsUserServiceImpl implements GroupsUserService {
     @Override
     public Map<Boolean, String> removeGroup(Group removeGroup, boolean isRemoveFromLocalDisk) {
         Map<Boolean, String> result = new HashMap<>();
-        logger.info("Deleting group is started ...");
+        _consoleService.addMessage("Deleting group is started ...", MessageType.SIMPLE);
         boolean isRemoved = _clonedGroupsService.removeGroups(Arrays.asList(removeGroup));
+        String message;
         if (!isRemoved) {
-            logger.warn("Failed deleting of group from the workspace.");
-            result.put(false, "Failed deleting of group from the workspace.");
+            message = "Failed deleting of group from the workspace.";
+            _consoleService.addMessage(message, MessageType.ERROR);
+            result.put(false, message);
             return result;
         }
         if (isRemoveFromLocalDisk) {
-            logger.info("Deleting group from local disk is started ...");
             return deleteGroupFromDirectory(removeGroup.getPathToClonedGroup());
         }
-        logger.info("Successful deleting of group from the workspace.");
-        result.put(isRemoved, "Successful deleting of group from the workspace.");
+        message = "Successful deleting of group from the workspace.";
+        _consoleService.addMessage(message, MessageType.SUCCESS);
+        result.put(isRemoved, message);
         return result;
     }
 
     private Map<Boolean, String> deleteGroupFromDirectory(String pathToClonedGroup) {
         Map<Boolean, String> result = new HashMap<>();
+        String message;
         if (pathToClonedGroup == null) {
-            logger.warn("Error removing. The path to the cloned group is not specified.");
-            result.put(false, "Error removing. The path to the cloned group is not specified.");
+            message = "Error removing. The path to the cloned group is not specified.";
+            _consoleService.addMessage(message, MessageType.ERROR);
+            result.put(false, message);
             return result;
         }
         Path path = Paths.get(pathToClonedGroup);
         if (!PathUtilities.isExistsAndDirectory(path)) {
-            logger.warn("Error removing. The specified path does not exist or is not a directory.");
-            result.put(false, "Error removing. The specified path does not exist or is not a directory.");
+            message = "Error removing. The specified path does not exist or is not a directory.";
+            _consoleService.addMessage(message, MessageType.ERROR);
+            result.put(false, message);
             return result;
         }
 
         boolean deleteResult = PathUtilities.deletePath(path);
         if (deleteResult) {
-            String successMessage = "The group was successfully deleted from " + path.toString();
-            logger.info(successMessage);
-            result.put(true, successMessage);
+            message = "The group was successfully deleted from " + path.toString();
+            _consoleService.addMessage(message, MessageType.SUCCESS);
+            result.put(true, message);
             return result;
         } else {
-            String errorMessage = "Error removing folder " + path.toString();
-            result.put(false, errorMessage);
-            logger.error(errorMessage);
+            message = "Error removing folder " + path.toString();
+            _consoleService.addMessage(message, MessageType.ERROR);
+            result.put(false, message);
+            return result;
         }
-        return result;
     }
 
     private Optional<Group> getGroupByName(String nameGroup) {

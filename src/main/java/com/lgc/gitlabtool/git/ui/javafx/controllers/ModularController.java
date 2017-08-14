@@ -122,6 +122,8 @@ public class ModularController implements UpdateConsoleListener {
             .getService(GroupsUserService.class.getName());
 
     public void loadGroupWindow() throws IOException {
+        updateConsole();
+
         toolbar.getItems().addAll(ToolbarManager.getInstance().createToolbarItems(ViewKey.GROUP_WINDOW.getKey()));
         menuBar.getMenus().addAll(MainMenuManager.getInstance().createToolbarItems(ViewKey.GROUP_WINDOW.getKey()));
         initActionsMainMenu(ViewKey.GROUP_WINDOW.getKey());
@@ -138,11 +140,11 @@ public class ModularController implements UpdateConsoleListener {
 
         viewPane.getChildren().clear();
         viewPane.getChildren().add(node);
-
-        updateConsole();
     }
 
     public void loadMainWindow(Group selectedGroup) throws IOException {
+        updateConsole();
+
         toolbar.getItems().addAll(ToolbarManager.getInstance().createToolbarItems(ViewKey.MAIN_WINDOW.getKey()));
         menuBar.getMenus().addAll(MainMenuManager.getInstance().createToolbarItems(ViewKey.MAIN_WINDOW.getKey()));
         initActionsMainMenu(ViewKey.MAIN_WINDOW.getKey());
@@ -161,7 +163,6 @@ public class ModularController implements UpdateConsoleListener {
         AnchorPane.setLeftAnchor(node, 0.0);
         AnchorPane.setBottomAnchor(node, 0.0);
 
-        updateConsole();
         viewPane.getChildren().clear();
         viewPane.getChildren().add(node);
     }
@@ -312,14 +313,17 @@ public class ModularController implements UpdateConsoleListener {
             }
             ExecutorService executor = Executors.newSingleThreadExecutor();
             executor.submit(() -> {
+
                 Group loadGroup = _groupService.importGroup(selectedDirectory.getAbsolutePath());
                 if (loadGroup == null) {
+                    _consoleService.addMessage(FAILED_IMPORT_MESSAGE, MessageType.ERROR);
                     showStatusDialog(IMPORT_DIALOG_TITLE, FAILED_IMPORT_MESSAGE,
                             "Failed to load group from " + selectedDirectory.getAbsolutePath());
                 } else {
                     Platform.runLater(new Runnable() {
                         @Override
                         public void run() {
+                            _consoleService.addMessage("Group successfully loaded.", MessageType.SUCCESS);
                             _groupWindowController.refreshGroupsList();
                         }
                     });
