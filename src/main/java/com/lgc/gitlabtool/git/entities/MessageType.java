@@ -41,8 +41,13 @@ public enum MessageType {
     }
 
     /**
+     * Gets MessageType by a text
      *
-     * @param text
+     * @param text the message
+     *
+     * @return MessageType.SUCCESS - if the text contains 'success';
+     *         MessageType.ERROR   - if the text contains 'error' or 'failed';
+     *         MessageType.SIMPLE  - otherwise.
      */
     public static MessageType getMessageType(String text) {
         if (StringUtils.containsIgnoreCase(text, "success")) {
@@ -55,9 +60,10 @@ public enum MessageType {
     }
 
     /**
+     * Gets MessageType
      *
-     * @param isSuccess
-     * @return
+     * @param isSuccess the result operation
+     * @return @return MessageType.SUCCESS - if the isSuccess is <true>, otherwise - MessageType.ERROR.
      */
     public static MessageType getMessageType(boolean isSuccess) {
         return isSuccess ? MessageType.SUCCESS : MessageType.ERROR;
