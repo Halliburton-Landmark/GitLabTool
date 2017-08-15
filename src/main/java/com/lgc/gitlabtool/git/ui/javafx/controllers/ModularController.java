@@ -133,9 +133,7 @@ public class ModularController {
         viewPane.getChildren().clear();
         viewPane.getChildren().add(node);
 
-        //updateConsole();
-        _consoleController.setComponents(_console, scrollPane);
-        _consoleController.updateConsole();
+        updateCurrentConsole();
     }
 
     public void loadMainWindow(Group selectedGroup) throws IOException {
@@ -159,8 +157,7 @@ public class ModularController {
         viewPane.getChildren().clear();
         viewPane.getChildren().add(node);
 
-        _consoleController.setComponents(_console, scrollPane);
-        _consoleController.updateConsole();
+        updateCurrentConsole();
     }
 
     private void initActionsToolBar(String windowId) {
@@ -347,82 +344,10 @@ public class ModularController {
             }
         });
     }
-//
-//    @Override
-//    public void addNewMessage(ConsoleMessage message) {
-//        Platform.runLater(new Runnable() {
-//            @Override
-//            public void run() {
-//                if (message != null) {
-//                    System.err.println(_console.getId());
-//                    _console.getChildren().add(getText(message));
-//                    moveScrollToBottom();
-//                }
-//            }
-//        });
-//    }
-//
-//    @Override
-//    public void updateConsole() {
-//        Platform.runLater(new Runnable() {
-//            @Override
-//            public void run() {
-//                System.err.println(_console.getId());
-//                _console.getChildren().addAll(convertConsoleMessageToText(_consoleService.getMessages()));
-//                moveScrollToBottom();
-//            }
-//        });
-//    }
-//
-//    private List<Text> convertConsoleMessageToText(List<ConsoleMessage> consoleMessages) {
-//        List<Text> messages = new ArrayList<>();
-//        consoleMessages.forEach(message -> messages.add(getText(message)));
-//        return messages;
-//    }
-//
-//    private Text getText(ConsoleMessage message) {
-//        Text text = new Text(message.getMessage());
-//        text.setFill(MessageType.getColor(message.getType()));
-//        return text;
-//    }
-//
-//    private void moveScrollToBottom() {
-//        // move scroll bar. Fix for bug with set value 1.0 to scrollPane.setVValue
-//        final Timeline timeline = new Timeline();
-//        final KeyValue kv = new KeyValue(scrollPane.vvalueProperty(), 1.0);
-//        final KeyFrame kf = new KeyFrame(Duration.millis(1), kv);
-//        timeline.getKeyFrames().add(kf);
-//        timeline.play();
-//    }
-//
-//    @Override
-//    public int hashCode() {
-//        final int prime = 31;
-//        int result = 1;
-//        result = prime * result + ((ID == null) ? 0 : ID.hashCode());
-//        return result;
-//    }
-//
-//    @Override
-//    public boolean equals(Object obj) {
-//        if (this == obj) {
-//            return true;
-//        }
-//        if (obj == null) {
-//            return false;
-//        }
-//        if (getClass() != obj.getClass()) {
-//            return false;
-//        }
-//        ModularController other = (ModularController) obj;
-//        if (ID == null) {
-//            if (other.ID != null) {
-//                return false;
-//            }
-//        } else if (!ID.equals(other.ID)) {
-//            return false;
-//        }
-//        return true;
-//    }
+
+    private void updateCurrentConsole() {
+        _consoleController.setComponents(_console, scrollPane);
+        _consoleController.updateConsole();
+    }
 
 }

@@ -174,14 +174,14 @@ public class CreateProjectDialog extends Dialog<String> {
                     Project project = t[0] == null ? null : (Project) t[0];
                     String contentMessage = (String) t[1];
 
-                    String headerMessage = (project == null)
-                            ? "Error creating project in the " + _selectGroup.getName() + " group."
+                    boolean isSuccess = project == null;
+                    String headerMessage = isSuccess ? "Error creating project in the " + _selectGroup.getName() + " group."
                             : "Success creating project in the " + _selectGroup.getName() + " group.";
                     closeDialog();
                     StatusDialog statusDialog = new StatusDialog(
                             "Status of creating project", headerMessage, contentMessage);
                     statusDialog.showAndWait();
-                    _consoleService.addMessage(contentMessage, project == null ? MessageType.ERROR : MessageType.SUCCESS);
+                    _consoleService.addMessage(contentMessage, MessageType.getMessageType(isSuccess));
                     _stateService.stateOFF(ApplicationState.CREATE_PROJECT);
                 }
             });
@@ -205,7 +205,8 @@ public class CreateProjectDialog extends Dialog<String> {
                 StringProperty projectProperty = new SimpleStringProperty("");
                 projectProperty.set(progressLabel);
                 _progressLabel.textProperty().bind(projectProperty);
-                _consoleService.addMessage(projectProperty.getValue(), MessageType.SIMPLE);
+                String message = projectProperty.getValue();
+                _consoleService.addMessage(message, MessageType.getMessageType(message));
             }
         });
     }

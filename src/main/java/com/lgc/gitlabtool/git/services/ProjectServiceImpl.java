@@ -49,7 +49,7 @@ public class ProjectServiceImpl implements ProjectService {
     private static ProjectTypeService _projectTypeService;
     private static StateService _stateService;
     private static RESTConnector _connector;
-    private static ConsoleService _consoleService;
+    private ConsoleService _consoleService;
 
     public ProjectServiceImpl(RESTConnector connector,
                               ProjectTypeService projectTypeService,
@@ -271,7 +271,7 @@ public class ProjectServiceImpl implements ProjectService {
         progressListener.onSuccess();
         String createLocalProjectMessage = isCreatedStructure ? CREATE_LOCAL_PROJECT_SUCCESS_MESSAGE
                                                               : CREATE_LOCAL_PROJECT_FAILED_MESSAGE;
-        _consoleService.addMessage(createLocalProjectMessage, getMessageType(isCreatedStructure));
+        _consoleService.addMessage(createLocalProjectMessage, MessageType.getMessageType(isCreatedStructure));
 
         String fineshedMessage = isCreatedStructure
                 ? "The " + createdProject.getName() + " project was successfully created!"
@@ -310,9 +310,5 @@ public class ProjectServiceImpl implements ProjectService {
         return projects.stream()
                 .filter(Project::isCloned)
                 .count() > 0;
-    }
-
-    private MessageType getMessageType(boolean status) {
-        return status ? MessageType.SUCCESS : MessageType.ERROR;
     }
 }

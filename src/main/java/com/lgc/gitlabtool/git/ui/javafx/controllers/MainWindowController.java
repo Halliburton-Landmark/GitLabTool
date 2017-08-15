@@ -9,6 +9,7 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.prefs.Preferences;
@@ -23,9 +24,9 @@ import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.services.ConsoleService;
-import com.lgc.gitlabtool.git.services.EmptyProgressListener;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.LoginService;
+import com.lgc.gitlabtool.git.services.ProgressListener;
 import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.javafx.ChangesCheckDialog;
@@ -460,12 +461,18 @@ public class MainWindowController {
         List<Project> filteredProjects = allSelectedProjects.stream().filter(prj -> prj.isCloned())
                 .collect(Collectors.toList());
 
-        Map<Project, JGitStatus> pushStatuses = _gitService.push(filteredProjects, EmptyProgressListener.get());
+        Map<Project, JGitStatus> pushStatuses = new ConcurrentHashMap<>();
 
-        String dialogMessage = "%s projects were pushed successfully";
-        showStatusDialog(pushStatuses, allSelectedProjects.size(), STATUS_DIALOG_TITLE, STATUS_DIALOG_HEADER_PUSH,
-                dialogMessage);
-
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.submit(() -> {
+            _consoleService.addMessage("Push projects is started...", MessageType.SIMPLE);
+            pushStatuses.putAll(_gitService.push(filteredProjects, new PushProgressListener()));
+//            String dialogMessage = "%s projects were pushed successfully";
+//            showStatusDialog(pushStatuses, allSelectedProjects.size(), STATUS_DIALOG_TITLE, STATUS_DIALOG_HEADER_PUSH,
+//                    dialogMessage);
+            _consoleService.addMessage("Push projects is finished!", MessageType.SIMPLE);
+        });
+        executor.shutdown();
     }
 
     @FXML
@@ -511,9 +518,14 @@ public class MainWindowController {
 
     private void showStatusDialog(Map<Project, JGitStatus> statuses, int countProjects, String title, String header,
             String message) {
-        StatusDialog statusDialog = new StatusDialog(title, header);
-        statusDialog.showMessage(statuses, countProjects, message);
-        statusDialog.showAndWait();
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                StatusDialog statusDialog = new StatusDialog(title, header);
+                statusDialog.showMessage(statuses, countProjects, message);
+                statusDialog.showAndWait();
+            }
+        });
     }
 
 
@@ -573,6 +585,31 @@ public class MainWindowController {
         OperationProgressListener pullProgressListener =
                 new OperationProgressListener(progressDialog, ApplicationState.PULL);
         _gitService.pull(projects, pullProgressListener);
+    }
+
+    public class PushProgressListener implements ProgressListener {
+
+        @Override
+        public void onSuccess(Object... t) {
+            if(t[0] instanceof Project) {
+                String message = "Pushing the " + ((Project)t[0]).getName() + " project is successful!";
+                _consoleService.addMessage(message, MessageType.SUCCESS);
+            }
+        }
+
+        @Override
+        public void onError(Object... t) {
+            if(t[0] instanceof Project) {
+                String message = "Failed pushing the " + ((Project)t[0]).getName() + " project!";
+                _consoleService.addMessage(message, MessageType.ERROR);
+            }
+        }
+
+        @Override
+        public void onStart(Object... t) {}
+
+        @Override
+        public void onFinish(Object... t) {}
     }
 
 }

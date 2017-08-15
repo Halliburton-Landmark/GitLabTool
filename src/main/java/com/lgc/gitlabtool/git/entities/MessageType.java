@@ -1,5 +1,7 @@
 package com.lgc.gitlabtool.git.entities;
 
+import org.apache.commons.lang.StringUtils;
+
 import javafx.scene.paint.Color;
 
 /**
@@ -36,5 +38,28 @@ public enum MessageType {
             return Color.BLACK;
         }
         return type == MessageType.ERROR ? Color.RED : Color.GREEN;
+    }
+
+    /**
+     *
+     * @param text
+     */
+    public static MessageType getMessageType(String text) {
+        if (StringUtils.containsIgnoreCase(text, "success")) {
+            return MessageType.SUCCESS;
+        }
+        if (StringUtils.containsIgnoreCase(text, "error") || StringUtils.containsIgnoreCase(text, "failed")) {
+            return MessageType.ERROR;
+        }
+        return MessageType.SIMPLE;
+    }
+
+    /**
+     *
+     * @param status
+     * @return
+     */
+    public static MessageType getMessageType(boolean status) {
+        return status ? MessageType.SUCCESS : MessageType.ERROR;
     }
 }

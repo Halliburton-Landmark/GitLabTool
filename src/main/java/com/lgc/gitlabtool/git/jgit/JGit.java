@@ -49,12 +49,9 @@ import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 
 import com.lgc.gitlabtool.git.connections.token.CurrentUser;
 import com.lgc.gitlabtool.git.entities.Branch;
-import com.lgc.gitlabtool.git.entities.MessageType;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.User;
-import com.lgc.gitlabtool.git.services.ConsoleService;
 import com.lgc.gitlabtool.git.services.ProgressListener;
-import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 import com.lgc.gitlabtool.git.util.PathUtilities;
 
@@ -78,13 +75,8 @@ public class JGit {
     private static final String ORIGIN_PREFIX = "origin/";
     private static final String WRONG_PARAMETERS = "Wrong parameters for obtaining branches.";
 
-
-    private static final ConsoleService _consoleService;
-
     static {
         _jgit = new JGit();
-        _consoleService = (ConsoleService) ServiceProvider.getInstance()
-                .getService(ConsoleService.class.getName());
     }
 
     /**
@@ -796,11 +788,11 @@ public class JGit {
         try (Git git = getGit(project.getPath())) {
             git.push().call();
             git.close();
-            _consoleService.addMessage("Pushing the " + project.getName() + " project is successful!", MessageType.SUCCESS);
+            //_consoleService.addMessage("Pushing the " + project.getName() + " project is successful!", MessageType.SUCCESS);
             return JGitStatus.SUCCESSFUL;
         } catch (GitAPIException | IOException e) {
-            _consoleService.addMessage("Failed pushing the " + project.getName() + " project: " + e.getMessage(),
-                    MessageType.ERROR);
+            //_consoleService.addMessage("Failed pushing the " + project.getName() + " project: " + e.getMessage(),
+                    //MessageType.ERROR);
         }
         return JGitStatus.FAILED;
     }
