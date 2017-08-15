@@ -788,11 +788,10 @@ public class JGit {
         try (Git git = getGit(project.getPath())) {
             git.push().call();
             git.close();
-            //_consoleService.addMessage("Pushing the " + project.getName() + " project is successful!", MessageType.SUCCESS);
+            logger.debug("Push " + JGitStatus.SUCCESSFUL + " (Project: " + project.getName() + ")");
             return JGitStatus.SUCCESSFUL;
         } catch (GitAPIException | IOException e) {
-            //_consoleService.addMessage("Failed pushing the " + project.getName() + " project: " + e.getMessage(),
-                    //MessageType.ERROR);
+            logger.error("Push error for the " + project.getName() + " project: " + e.getMessage());
         }
         return JGitStatus.FAILED;
     }
