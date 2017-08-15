@@ -99,7 +99,7 @@ public class CloningGroupsWindowController {
     }
 
     private boolean startClone(String destinationPath, List<Group> selectedGroups, CloneProgressDialog progressDialog) {
-        _groupsService.cloneGroups(selectedGroups, destinationPath,
+        _groupsService.cloneGroups(selectedGroups, destinationPath, 
                 new OperationProgressListener(progressDialog, ApplicationState.CLONE));
         return true;
     }

@@ -88,7 +88,7 @@ public class ModularController {
     private MainWindowController _mainWindowController;
     private GroupWindowController _groupWindowController;
 
-    private ConsoleController _consoleController;
+    private final ConsoleController _consoleController = ConsoleController.getInstance();
 
     @FXML
     public TextFlow _console;
@@ -111,8 +111,6 @@ public class ModularController {
     @FXML
     public void initialize() {
         toolbar.getStylesheets().add(getClass().getClassLoader().getResource(CSS_PATH).toExternalForm());
-        _consoleController = ConsoleController.getInstance(); // Fix bug
-        _consoleController.setComponents(_console, scrollPane);
     }
 
     public void loadGroupWindow() throws IOException {
