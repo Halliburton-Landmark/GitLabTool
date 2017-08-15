@@ -12,6 +12,7 @@ import com.lgc.gitlabtool.git.jgit.JGit;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.Tooltip;
@@ -31,8 +32,8 @@ public class ProjectListCell extends ListCell<Project> {
     private static final String SHADOW_PROJECT_TOOLTIP = "The project is not cloned.";
     private static final String PROJECT_WITH_CONFLICTS_ICON_URL = "icons/project/list_icons/conflicts.png";
     private static final String PROJECT_WITH_UNCOMMITTED_CHANGES_ICON_URL = "icons/project/list_icons/uncommitted_changes.png";
-    private static final String COMMITS_AHEAD_INDEX_ICON_URL = "icons/project/list_icons/ahead_index.png";
-    private static final String COMMITS_BEHIND_INDEX_ICON_URL = "icons/project/list_icons/behind_index.png";
+    private static final String COMMITS_AHEAD_INDEX_ICON_URL = "icons/project/list_icons/ahead_index_12x12.png";
+    private static final String COMMITS_BEHIND_INDEX_ICON_URL = "icons/project/list_icons/behind_index_12x12.png";
     private final Integer LIST_CELL_SPACING = 5;
     private final String LEFT_BRACKET = "[";
     private final String RIGHT_BRACKET = "]";
@@ -154,6 +155,7 @@ public class ProjectListCell extends ListCell<Project> {
             System.err.println(e);
         }
         HBox aheadBehindItems = new HBox(items.toArray(new Node[items.size()]));
+        aheadBehindItems.setAlignment(Pos.CENTER);
         return aheadBehindItems;
     }
 }
