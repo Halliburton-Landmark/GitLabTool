@@ -44,4 +44,9 @@ public interface StateService extends StateEventGenerator {
      */
     boolean isActiveState(ApplicationState state);
 
+    /**
+     *
+     * @return
+     */
+    boolean isBusy();
 }

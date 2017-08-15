@@ -174,9 +174,9 @@ public class CreateProjectDialog extends Dialog<String> {
                     Project project = t[0] == null ? null : (Project) t[0];
                     String contentMessage = (String) t[1];
 
-                    boolean isSuccess = project == null;
-                    String headerMessage = isSuccess ? "Error creating project in the " + _selectGroup.getName() + " group."
-                            : "Success creating project in the " + _selectGroup.getName() + " group.";
+                    boolean isSuccess = !(project == null);
+                    String headerMessage = isSuccess ? "Success creating project in the " + _selectGroup.getName() + " group."
+                            : "Error creating project in the " + _selectGroup.getName() + " group.";
                     closeDialog();
                     StatusDialog statusDialog = new StatusDialog(
                             "Status of creating project", headerMessage, contentMessage);

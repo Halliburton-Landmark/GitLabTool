@@ -522,25 +522,20 @@ public class JGit {
         }
         Map<Project, JGitStatus> statuses = new HashMap<>();
         for (Project project : projects) {
-            if (project == null) {
+            if (project == null || !project.isCloned()) {
                 progressListener.onError(project);
                 statuses.put(null, JGitStatus.FAILED);
                 continue;
             }
-            if (!project.isCloned()) {
-                progressListener.onError(project);
-                statuses.put(project, JGitStatus.FAILED);
-                continue;
-            }
             JGitStatus pushStatus = push(project);
             if (pushStatus.equals(JGitStatus.FAILED)) {
-                statuses.put(project, pushStatus);
                 progressListener.onError(project);
-                continue;
+            } else {
+                progressListener.onSuccess(project);
             }
-            progressListener.onSuccess(project);
             statuses.put(project, pushStatus);
         }
+        progressListener.onFinish();
         return statuses;
     }
 

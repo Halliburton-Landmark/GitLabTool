@@ -29,6 +29,7 @@ import com.lgc.gitlabtool.git.services.LoginService;
 import com.lgc.gitlabtool.git.services.ProgressListener;
 import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
+import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.javafx.ChangesCheckDialog;
 import com.lgc.gitlabtool.git.ui.javafx.CloneProgressDialog;
 import com.lgc.gitlabtool.git.ui.javafx.CommitDialog;
@@ -96,6 +97,9 @@ public class MainWindowController {
 
     private static final ConsoleService _consoleService = (ConsoleService) ServiceProvider.getInstance()
             .getService(ConsoleService.class.getName());
+
+    private static final StateService _stateService = (StateService) ServiceProvider.getInstance()
+            .getService(StateService.class.getName());
 
     @FXML
     private ListView<Project> projectsList;
@@ -466,6 +470,7 @@ public class MainWindowController {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.submit(() -> {
             _consoleService.addMessage("Push projects is started...", MessageType.SIMPLE);
+            _stateService.stateON(ApplicationState.PUSH);
             pushStatuses.putAll(_gitService.push(filteredProjects, new PushProgressListener()));
 //            String dialogMessage = "%s projects were pushed successfully";
 //            showStatusDialog(pushStatuses, allSelectedProjects.size(), STATUS_DIALOG_TITLE, STATUS_DIALOG_HEADER_PUSH,
@@ -609,7 +614,9 @@ public class MainWindowController {
         public void onStart(Object... t) {}
 
         @Override
-        public void onFinish(Object... t) {}
+        public void onFinish(Object... t) {
+            _stateService.stateOFF(ApplicationState.PUSH);
+        }
     }
 
 }

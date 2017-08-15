@@ -56,10 +56,10 @@ public enum MessageType {
 
     /**
      *
-     * @param status
+     * @param isSuccess
      * @return
      */
-    public static MessageType getMessageType(boolean status) {
-        return status ? MessageType.SUCCESS : MessageType.ERROR;
+    public static MessageType getMessageType(boolean isSuccess) {
+        return isSuccess ? MessageType.SUCCESS : MessageType.ERROR;
     }
 }

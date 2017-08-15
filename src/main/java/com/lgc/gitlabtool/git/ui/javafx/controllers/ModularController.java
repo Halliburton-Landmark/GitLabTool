@@ -20,6 +20,7 @@ import com.lgc.gitlabtool.git.entities.MessageType;
 import com.lgc.gitlabtool.git.services.ConsoleService;
 import com.lgc.gitlabtool.git.services.GroupsUserService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
+import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.ViewKey;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 import com.lgc.gitlabtool.git.ui.javafx.AlertWithCheckBox;
@@ -84,6 +85,9 @@ public class ModularController {
 
     private static final GroupsUserService _groupService = (GroupsUserService) ServiceProvider.getInstance()
             .getService(GroupsUserService.class.getName());
+
+    private static final StateService _stateService = (StateService) ServiceProvider.getInstance()
+            .getService(StateService.class.getName());
 
     private MainWindowController _mainWindowController;
     private GroupWindowController _groupWindowController;
@@ -209,14 +213,14 @@ public class ModularController {
     private void initActionsMainMenu(String windowId) {
         if (windowId.equals(ViewKey.GROUP_WINDOW.getKey())) {
             MenuItem exit = MainMenuManager.getInstance().getButtonById(MainMenuItems.GROUP_WINDOW_EXIT);
-            exit.setOnAction(event -> Platform.exit());
+            exit.setOnAction(event -> exit());
 
             MenuItem about = MainMenuManager.getInstance().getButtonById(MainMenuItems.GROUP_WINDOW_ABOUT);
             about.setOnAction(event -> showAboutPopup());
 
         } else if (windowId.equals(ViewKey.MAIN_WINDOW.getKey())) {
             MenuItem exit = MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_EXIT);
-            exit.setOnAction(event -> Platform.exit());
+            exit.setOnAction(event -> exit());
 
             MenuItem about = MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_ABOUT);
             about.setOnAction(event -> showAboutPopup());
@@ -346,6 +350,12 @@ public class ModularController {
     private void updateCurrentConsole() {
         _consoleController.setComponents(_console, scrollPane);
         _consoleController.updateConsole();
+    }
+
+    private void exit() {
+        if (!_stateService.isBusy()) {
+            Platform.exit();
+        }
     }
 
 }
