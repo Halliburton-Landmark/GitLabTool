@@ -140,4 +140,16 @@ public interface GitService {
      * @return optional of project's {@link Status}
      */
     public Optional<Status> getProjectStatus(Project project);
+
+    /**
+     * Returns count of commits ahead and behind index
+     * 
+     * @param project - project to show status
+     * @param branchName - the name of branch
+     * @return array of ahead and behind commits counts<br>
+     *         Array consists of two parameters: 
+     *         first is the count of commits ahead Index, <br>
+     *         second is the count of commits behind Index
+     */
+    public int[] getAheadBehindIndexCounts(Project project, String branchName);
 }
