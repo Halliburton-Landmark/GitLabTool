@@ -45,8 +45,10 @@ public interface StateService extends StateEventGenerator {
     boolean isActiveState(ApplicationState state);
 
     /**
+     * Checks that all processes finished (for example: clone, pull, push etc.)
      *
-     * @return
+     * @return <true> if any process doesn't finish,
+     *         <false> if all processes finished.
      */
     boolean isBusy();
 }
