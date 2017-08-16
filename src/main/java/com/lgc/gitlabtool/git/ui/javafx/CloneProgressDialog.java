@@ -1,5 +1,6 @@
 package com.lgc.gitlabtool.git.ui.javafx;
 
+import com.lgc.gitlabtool.git.entities.MessageType;
 import com.lgc.gitlabtool.git.jgit.JGit;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 
@@ -23,7 +24,7 @@ public class CloneProgressDialog extends ProgressDialog {
             @Override
             public void handle(ActionEvent e) {
                 getCancelButton().setDisable(true);
-                addMessageToConcole("Starting cancel process of cloning...", OperationMessageStatus.SIMPLE);
+                addMessageToConcole("Starting cancel process of cloning...", MessageType.SIMPLE);
                 JGit.getInstance().cancelClone();
                 updateProgressBar(0.0);
             }

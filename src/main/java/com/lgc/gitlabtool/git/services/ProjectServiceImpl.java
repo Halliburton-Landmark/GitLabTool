@@ -300,4 +300,18 @@ public class ProjectServiceImpl implements ProjectService {
         }
         _git.clone(projects, destinationPath, progressListener);
     }
+
+    @Override
+    public boolean hasShadow(List<Project> projects) {
+        return projects.stream()
+                .filter(proj -> !proj.isCloned())
+                .count() > 0;
+    }
+
+    @Override
+    public boolean hasCloned(List<Project> projects) {
+        return projects.stream()
+                .filter(Project::isCloned)
+                .count() > 0;
+    }
 }

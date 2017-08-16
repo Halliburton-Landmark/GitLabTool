@@ -3,8 +3,8 @@ package com.lgc.gitlabtool.git.ui.javafx;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.function.Supplier;
 
+import com.lgc.gitlabtool.git.entities.MessageType;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StateService;
@@ -37,7 +37,7 @@ import javafx.stage.Stage;
  * Displays the progress of some Git operation: pull, push, clone, etc.
  * <p>
  * The instance of {@link OperationProgressListener} should be used to show progress correctly
- * 
+ *
  * @author Igor Khlaponin
  * @author Lyudmila Lyska
  *
@@ -61,9 +61,9 @@ public abstract class ProgressDialog extends Dialog<Void> {
 
     /**
      * Creates the instance of this class
-     * 
+     *
      * @param title -               title of the dialog
-     * @param state -               {@link ApplicationState} - need to show which operation executed 
+     * @param state -               {@link ApplicationState} - need to show which operation executed
      * @param cancelButtonStatus -  dialog shows disabled Cancel button if {@link CancelButtonStatus#DEACTIVATED}<br>
      *                              and enables it otherwise<br>
      *                              It is needed if we don't have some cancel logic
@@ -138,7 +138,7 @@ public abstract class ProgressDialog extends Dialog<Void> {
                 }
 
                 if (item != null) {
-                    if (item.getStatus() != OperationMessageStatus.SIMPLE) {
+                    if (item.getStatus() != MessageType.SIMPLE) {
                         setStyle(item.getCSSForStatus());
                     }
                     setText(item.getMessage());
@@ -150,7 +150,7 @@ public abstract class ProgressDialog extends Dialog<Void> {
     /**
      * Returns {@link EventHandler} that holds the event for Cancel button.<br>
      * It shows what should be done after Cancel button pressing.
-     * 
+     *
      * @return EventHandler of onCancelAction
      */
     protected EventHandler<ActionEvent> onCancelAction() {
@@ -170,7 +170,7 @@ public abstract class ProgressDialog extends Dialog<Void> {
         return _cancelButton;
     }
 
-    public void addMessageToConcole(String message, OperationMessageStatus status) {
+    public void addMessageToConcole(String message, MessageType status) {
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
@@ -235,12 +235,12 @@ public abstract class ProgressDialog extends Dialog<Void> {
         Date date = new Date();
         return "[" + dateFormat.format(date) + "] ";
     }
-    
+
     private class OperationMessage {
         private final StringProperty _message;
-        private final OperationMessageStatus _status;
+        private final MessageType _status;
 
-        private OperationMessage(String message, OperationMessageStatus status) {
+        private OperationMessage(String message, MessageType status) {
             if (message == null || status == null) {
                 throw new IllegalAccessError("Invalid parameters");
             }
@@ -252,34 +252,12 @@ public abstract class ProgressDialog extends Dialog<Void> {
             return _message.get();
         }
 
-        public OperationMessageStatus getStatus() {
+        public MessageType getStatus() {
             return _status;
         }
 
         public String getCSSForStatus() {
-            return OperationMessageStatus.getCSSForStatus(_status);
-        }
-    }
-
-    /**
-     * Status of operation message for the ProgressDialog. It class is needed to get CSS for each status.
-     *
-     * @author Lyudmila Lyska
-     */
-    public enum OperationMessageStatus {
-        ERROR, SUCCESS, SIMPLE;
-
-        /**
-         * Gets CSS style for status
-         *
-         * @param status for getting CSS
-         * @return string with code style
-         */
-        public static String getCSSForStatus(OperationMessageStatus status) {
-            if (status == null || status == OperationMessageStatus.SIMPLE) {
-                return "-fx-text-fill:black";
-            } 
-            return status == OperationMessageStatus.ERROR ? "-fx-text-fill:red" : "-fx-text-fill:green";
+            return MessageType.getCSSForStatus(_status);
         }
     }
 
@@ -287,7 +265,7 @@ public abstract class ProgressDialog extends Dialog<Void> {
      * Shows if we need to activate Cancel button for the {@link ProgressDialog}
      */
     public enum CancelButtonStatus {
-        ACTIVATED, 
+        ACTIVATED,
         DEACTIVATED
     }
 }
