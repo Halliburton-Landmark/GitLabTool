@@ -24,6 +24,7 @@ public class Project {
     private String _pathToClonedProject;
     private boolean _isCloned;
     private ProjectType _type;
+    private ProjectStatus _projectStatus = ProjectStatus.DEFAULT;
 
     /**
      * Sets a project type
@@ -104,6 +105,22 @@ public class Project {
 
     public String getHttp_url_to_repo() {
         return http_url_to_repo;
+    }
+
+    public boolean hasUncommittedChanges() {
+        return _projectStatus == ProjectStatus.HAS_CHANGES;
+    }
+
+    public boolean hasConflicts() {
+        return _projectStatus == ProjectStatus.HAS_CONFLICTS;
+    }
+
+    public void setProjectStatus(ProjectStatus status) {
+        _projectStatus = status;
+    }
+
+    public ProjectStatus getProjectStatus() {
+        return _projectStatus;
     }
 
 }

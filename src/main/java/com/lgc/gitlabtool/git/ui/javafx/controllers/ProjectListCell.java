@@ -97,28 +97,25 @@ public class ProjectListCell extends ListCell<Project> {
             return new Node[0];
         }
 
-        Optional<Status> projectStatus = _gitService.getProjectStatus(item);
-        if (projectStatus.isPresent()) {
-            addPicsDependOnStatus(projectStatus.get(), pics);
-        }
+        addPicsDependOnStatus(item, pics);
 
         pics.add(getAheadBehindCountNode(item, branchName));
 
         return pics.toArray(new Node[pics.size()]);
     }
 
-    private void addPicsDependOnStatus(Status projectStatus, List<Node> pics) {
-        if (projectStatus.isClean()) {
+    private void addPicsDependOnStatus(Project project, List<Node> pics) {
+        if (project == null || pics == null) {
             return;
         }
 
-        if (projectStatus.getConflicting().size() > 0) {
+        if (project.hasConflicts()) {
             Node conflictsImageView = newStatusPic(getImage(PROJECT_WITH_CONFLICTS_ICON_URL), 
                     "Project has conflicts");
             pics.add(conflictsImageView);
         }
 
-        if (projectStatus.hasUncommittedChanges()) {
+        if (project.hasUncommittedChanges()) {
             Node uncommittedChangesImage = newStatusPic(getImage(PROJECT_WITH_UNCOMMITTED_CHANGES_ICON_URL), 
                     "Project has uncommitted changes");
             pics.add(uncommittedChangesImage);

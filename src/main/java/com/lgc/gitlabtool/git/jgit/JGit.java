@@ -940,14 +940,11 @@ public class JGit {
     public int[] getAheadBehindIndexCounts(Project project, String branchName) {
         int commitsAheadIndex = 0;
         int commitsBehindIndex = 0;
-        try {
-            Git git = getGit(project.getPath());
+        try (Git git = getGit(project.getPath())) {
             BranchTrackingStatus trackingStatus = BranchTrackingStatus.of(git.getRepository(), branchName);
             if (trackingStatus != null) {
                 commitsAheadIndex = trackingStatus.getAheadCount();
                 commitsBehindIndex = trackingStatus.getBehindCount();
-            } else {
-                logger.debug("Has no remote tracking of branch " + branchName);
             }
         } catch (IOException e) {
             logger.error("Could not get tracking status " + e.getMessage());

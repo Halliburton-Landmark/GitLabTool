@@ -14,6 +14,7 @@ import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.eclipse.jgit.api.Status;
 
 import com.google.gson.reflect.TypeToken;
 import com.lgc.gitlabtool.git.connections.HttpResponseHolder;
@@ -21,10 +22,10 @@ import com.lgc.gitlabtool.git.connections.RESTConnector;
 import com.lgc.gitlabtool.git.connections.token.CurrentUser;
 import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.Project;
+import com.lgc.gitlabtool.git.entities.ProjectStatus;
 import com.lgc.gitlabtool.git.jgit.JGit;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.project.nature.projecttype.ProjectType;
-import com.lgc.gitlabtool.git.ui.javafx.CloneProgressDialog;
 import com.lgc.gitlabtool.git.ui.javafx.ProgressDialog;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 import com.lgc.gitlabtool.git.util.JSONParser;
@@ -183,6 +184,22 @@ public class ProjectServiceImpl implements ProjectService {
         project.setClonedStatus(true);
         project.setPathToClonedProject(pathGroup + File.separator + project.getName());
         project.setProjectType(_projectTypeService.getProjectType(project));
+        modifyStatusByGit(project);
+    }
+
+    private void modifyStatusByGit(Project project) {
+        Optional<Status> status = _git.getStatusProject(project);
+        if (status.isPresent()) {
+            if (status.get().getConflicting().size() > 0) {
+                project.setProjectStatus(ProjectStatus.HAS_CONFLICTS);
+                return;
+            }
+            if (status.get().hasUncommittedChanges()) {
+                project.setProjectStatus(ProjectStatus.HAS_CHANGES);
+            } else {
+                project.setProjectStatus(ProjectStatus.DEFAULT);
+            }
+        }
     }
 
     private Project createRemoteProject(Group group, String name, ProgressListener progressListener) {
