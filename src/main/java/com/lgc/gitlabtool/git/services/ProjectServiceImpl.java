@@ -271,7 +271,7 @@ public class ProjectServiceImpl implements ProjectService {
         progressListener.onSuccess();
         String createLocalProjectMessage = isCreatedStructure ? CREATE_LOCAL_PROJECT_SUCCESS_MESSAGE
                                                               : CREATE_LOCAL_PROJECT_FAILED_MESSAGE;
-        _consoleService.addMessage(createLocalProjectMessage, MessageType.getMessageType(isCreatedStructure));
+        _consoleService.addMessage(createLocalProjectMessage, MessageType.determineMessageType(isCreatedStructure));
 
         String fineshedMessage = isCreatedStructure
                 ? "The " + createdProject.getName() + " project was successfully created!"

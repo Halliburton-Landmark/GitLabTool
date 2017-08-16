@@ -472,6 +472,7 @@ public class MainWindowController {
             _consoleService.addMessage("Push projects is started...", MessageType.SIMPLE);
             _stateService.stateON(ApplicationState.PUSH);
             pushStatuses.putAll(_gitService.push(filteredProjects, new PushProgressListener()));
+//            We don't need in the Status dialog here if we use UI console and executor
 //            String dialogMessage = "%s projects were pushed successfully";
 //            showStatusDialog(pushStatuses, allSelectedProjects.size(), STATUS_DIALOG_TITLE, STATUS_DIALOG_HEADER_PUSH,
 //                    dialogMessage);

@@ -181,7 +181,7 @@ public class CreateProjectDialog extends Dialog<String> {
                     StatusDialog statusDialog = new StatusDialog(
                             "Status of creating project", headerMessage, contentMessage);
                     statusDialog.showAndWait();
-                    _consoleService.addMessage(contentMessage, MessageType.getMessageType(isSuccess));
+                    _consoleService.addMessage(contentMessage, MessageType.determineMessageType(isSuccess));
                     _stateService.stateOFF(ApplicationState.CREATE_PROJECT);
                 }
             });
@@ -206,7 +206,7 @@ public class CreateProjectDialog extends Dialog<String> {
                 projectProperty.set(progressLabel);
                 _progressLabel.textProperty().bind(projectProperty);
                 String message = projectProperty.getValue();
-                _consoleService.addMessage(message, MessageType.getMessageType(message));
+                _consoleService.addMessage(message, MessageType.determineMessageType(message));
             }
         });
     }
