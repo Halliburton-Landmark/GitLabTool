@@ -194,7 +194,7 @@ public class JGit {
      * @param localPath  localPath the path to where will clone all the projects of the group
      * @param progressListener listener for obtaining data on the process of performing the operation.
      */
-    public boolean clone(Collection<Project> projects, String localPath, OperationProgressListener progressListener) {
+    public boolean clone(Collection<Project> projects, String localPath, ProgressListener progressListener) {
         _isCloneCancelled = false;
         if (projects == null || localPath == null) {
             String errorMsg = "Cloning error. Projects or local path is null.";
@@ -207,7 +207,7 @@ public class JGit {
     }
 
     private void cloneGroupInBackgroundThread(Collection<Project> projects,
-                                         OperationProgressListener progressListener,
+                                         ProgressListener progressListener,
                                          String groupPath) {
         Runnable task = () -> {
             progressListener.onStart("Clonning process started");
@@ -522,25 +522,20 @@ public class JGit {
         }
         Map<Project, JGitStatus> statuses = new HashMap<>();
         for (Project project : projects) {
-            if (project == null) {
+            if (project == null || !project.isCloned()) {
                 progressListener.onError(project);
                 statuses.put(null, JGitStatus.FAILED);
                 continue;
             }
-            if (!project.isCloned()) {
-                progressListener.onError(project);
-                statuses.put(project, JGitStatus.FAILED);
-                continue;
-            }
             JGitStatus pushStatus = push(project);
             if (pushStatus.equals(JGitStatus.FAILED)) {
-                statuses.put(project, pushStatus);
                 progressListener.onError(project);
-                continue;
+            } else {
+                progressListener.onSuccess(project);
             }
-            progressListener.onSuccess(project);
             statuses.put(project, pushStatus);
         }
+        progressListener.onFinish();
         return statuses;
     }
 
