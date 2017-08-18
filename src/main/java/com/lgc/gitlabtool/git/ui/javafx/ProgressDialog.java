@@ -138,9 +138,7 @@ public abstract class ProgressDialog extends Dialog<Void> {
                 }
 
                 if (item != null) {
-                    if (item.getStatus() != MessageType.SIMPLE) {
-                        setStyle(item.getCSSForStatus());
-                    }
+                    setStyle(item.getCSSForStatus());
                     setText(item.getMessage());
                 }
             }
