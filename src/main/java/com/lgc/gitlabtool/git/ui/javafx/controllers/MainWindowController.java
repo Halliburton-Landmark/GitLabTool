@@ -362,6 +362,9 @@ public class MainWindowController {
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.PULL_BUTTON.getId())
                 .setOnAction(this::onPullAction);
 
+        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_CLONE_PROJECT)
+                .setOnAction(this::cloneShadowProject);
+
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_CREATE_BRANCH)
                 .setOnAction(this::onNewBranchButton);
 
