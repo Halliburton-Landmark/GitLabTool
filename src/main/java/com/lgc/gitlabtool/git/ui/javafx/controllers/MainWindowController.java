@@ -390,10 +390,11 @@ public class MainWindowController {
 
     private void showCreateNewBranchDialog() {
         List<Project> allSelectedProjects = getSelectedProjects();
-        List<Project> clonedProjects = allSelectedProjects.stream()
-                                                          .filter(prj -> prj.isCloned())
-                                                          .collect(Collectors.toList());
-        CreateNewBranchDialog dialog = new CreateNewBranchDialog(clonedProjects);
+        List<Project> clonedProjectsWithoutConflicts = allSelectedProjects.stream()
+                .filter(Project::isCloned)
+                .filter(project -> !project.hasConflicts())
+                .collect(Collectors.toList());
+        CreateNewBranchDialog dialog = new CreateNewBranchDialog(clonedProjectsWithoutConflicts);
         dialog.showAndWait();
     }
 
@@ -414,7 +415,7 @@ public class MainWindowController {
             @Override
             public void run() {
                 sortProjectsList();
-                projectsList.refresh();
+                updateProjectsList();
             }
         });
         checkProjectsList();
@@ -445,6 +446,7 @@ public class MainWindowController {
         CommitDialog dialog = new CommitDialog();
         Map<Project, JGitStatus> commitStatuses = dialog.commitChanges(projectWithChanges);
 
+        refreshLoadProjects();
         String dialogMessage = "%s projects were pushed successfully";
         showStatusDialog(commitStatuses, allSelectedProjects.size(), STATUS_DIALOG_TITLE, STATUS_DIALOG_HEADER_COMMIT,
                 dialogMessage);
@@ -454,11 +456,14 @@ public class MainWindowController {
     @FXML
     public void onPushAction(ActionEvent actionEvent) {
         List<Project> allSelectedProjects = getSelectedProjects();
-        List<Project> filteredProjects = allSelectedProjects.stream().filter(prj -> prj.isCloned())
+        List<Project> filteredProjects = allSelectedProjects.stream()
+                .filter(Project::isCloned)
+                .filter(project -> !project.hasConflicts())
                 .collect(Collectors.toList());
 
         Map<Project, JGitStatus> pushStatuses = _gitService.push(filteredProjects, EmptyProgressListener.get());
 
+        refreshLoadProjects();
         String dialogMessage = "%s projects were pushed successfully";
         showStatusDialog(pushStatuses, allSelectedProjects.size(), STATUS_DIALOG_TITLE, STATUS_DIALOG_HEADER_PUSH,
                 dialogMessage);
@@ -547,7 +552,8 @@ public class MainWindowController {
     @FXML
     public void onPullAction(ActionEvent actionEvent) {
         List<Project> projectsToPull = getSelectedProjects().stream()
-                .filter(project -> project.isCloned())
+                .filter(Project::isCloned)
+                .filter(project -> !project.hasConflicts())
                 .collect(Collectors.toList());
         checkChangesAndPull(projectsToPull, new Object());
     }
@@ -563,7 +569,7 @@ public class MainWindowController {
             ChangesCheckDialog changesCheckDialog = new ChangesCheckDialog();
             changesCheckDialog.launchConfirmationDialog(changedProjects, projects, item, this::checkChangesAndPull);
         }
-        updateProjectsList();
+        refreshLoadProjects();
     }
 
     private void startPull(List<Project> projects, ProgressDialog progressDialog) {

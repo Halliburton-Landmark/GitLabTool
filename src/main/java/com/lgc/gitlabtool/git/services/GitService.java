@@ -135,13 +135,6 @@ public interface GitService {
     public boolean hasAtLeastOneReference(Project project);
 
     /**
-     * Returns the {@link Optional} of project's {@link Status}
-     * @param project - the project
-     * @return optional of project's {@link Status}
-     */
-    public Optional<Status> getProjectStatus(Project project);
-
-    /**
      * Returns count of commits ahead and behind index
      * 
      * @param project - project to show status

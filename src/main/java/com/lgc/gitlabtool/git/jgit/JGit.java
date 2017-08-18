@@ -938,6 +938,11 @@ public class JGit {
      *         second is the count of commits behind Index
      */
     public int[] getAheadBehindIndexCounts(Project project, String branchName) {
+        if (project == null || branchName == null || branchName.isEmpty()) {
+            logger.error("Wrong parameters! Project: " + project + "; branchName: " + branchName);
+            return new int[] {0, 0};
+        }
+
         int commitsAheadIndex = 0;
         int commitsBehindIndex = 0;
         try (Git git = getGit(project.getPath())) {
@@ -948,7 +953,6 @@ public class JGit {
             }
         } catch (IOException e) {
             logger.error("Could not get tracking status " + e.getMessage());
-            return new int[] {commitsAheadIndex, commitsBehindIndex};
         }
 
         int[] aheadBehind = {commitsAheadIndex, commitsBehindIndex};

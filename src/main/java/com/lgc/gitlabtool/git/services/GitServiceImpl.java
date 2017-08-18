@@ -179,16 +179,8 @@ public class GitServiceImpl implements GitService {
     }
 
     @Override
-    public Optional<Status> getProjectStatus(Project project) {
-        return _git.getStatusProject(project);
-    }
-
-    @Override
     public int[] getAheadBehindIndexCounts(Project project, String branchName) {
-        if (project == null || branchName == null || branchName.isEmpty()) {
-            throw new IllegalArgumentException("Wrong parameters!");
-        }
-        if (!project.isCloned()) {
+        if (project == null || branchName == null || branchName.isEmpty() || !project.isCloned()) {
             return new int[] {0, 0};
         }
         return _git.getAheadBehindIndexCounts(project, branchName);

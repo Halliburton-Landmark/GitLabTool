@@ -2,10 +2,10 @@ package com.lgc.gitlabtool.git.ui.javafx.controllers;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.jgit.api.Status;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.jgit.JGit;
@@ -25,6 +25,8 @@ import javafx.scene.text.Text;
 
 public class ProjectListCell extends ListCell<Project> {
 
+    private static final Logger _logger = LogManager.getLogger(ProjectListCell.class);
+
     private static final GitService _gitService = (GitService) ServiceProvider.getInstance()
             .getService(GitService.class.getName());
 
@@ -34,6 +36,8 @@ public class ProjectListCell extends ListCell<Project> {
     private static final String PROJECT_WITH_UNCOMMITTED_CHANGES_ICON_URL = "icons/project/list_icons/uncommitted_changes.png";
     private static final String COMMITS_AHEAD_INDEX_ICON_URL = "icons/project/list_icons/ahead_index_12x12.png";
     private static final String COMMITS_BEHIND_INDEX_ICON_URL = "icons/project/list_icons/behind_index_12x12.png";
+    private static final String COMMITS_AHEAD_TOOLTIP = "Count of commits ahead index";
+    private static final String COMMITS_BEHIND_TOOLTIP = "Count of commits behind index";
     private final Integer LIST_CELL_SPACING = 5;
     private final String LEFT_BRACKET = "[";
     private final String RIGHT_BRACKET = "]";
@@ -141,15 +145,15 @@ public class ProjectListCell extends ListCell<Project> {
         int[] aheadBehind = _gitService.getAheadBehindIndexCounts(item, branchName);
         try {
             if (aheadBehind[0] > 0) {
-                items.add(newStatusPic(getImage(COMMITS_AHEAD_INDEX_ICON_URL), "Count of commits ahead index"));
+                items.add(newStatusPic(getImage(COMMITS_AHEAD_INDEX_ICON_URL), COMMITS_AHEAD_TOOLTIP));
                 items.add(new Text(Integer.toString(aheadBehind[0])));
             }
             if (aheadBehind[1] > 0) {
-                items.add(newStatusPic(getImage(COMMITS_BEHIND_INDEX_ICON_URL), "Count of commits behind index"));
+                items.add(newStatusPic(getImage(COMMITS_BEHIND_INDEX_ICON_URL), COMMITS_BEHIND_TOOLTIP));
                 items.add(new Text(Integer.toString(aheadBehind[1])));
             }
         } catch (ArrayIndexOutOfBoundsException e) {
-            System.err.println(e);
+            _logger.error("", e);
         }
         HBox aheadBehindItems = new HBox(items.toArray(new Node[items.size()]));
         aheadBehindItems.setAlignment(Pos.CENTER);

@@ -184,10 +184,10 @@ public class ProjectServiceImpl implements ProjectService {
         project.setClonedStatus(true);
         project.setPathToClonedProject(pathGroup + File.separator + project.getName());
         project.setProjectType(_projectTypeService.getProjectType(project));
-        modifyStatusByGit(project);
+        modifyProjectStatusByGit(project);
     }
 
-    private void modifyStatusByGit(Project project) {
+    private void modifyProjectStatusByGit(Project project) {
         Optional<Status> status = _git.getStatusProject(project);
         if (status.isPresent()) {
             if (status.get().getConflicting().size() > 0) {
