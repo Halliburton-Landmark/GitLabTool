@@ -16,8 +16,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.lgc.gitlabtool.git.entities.Group;
+import com.lgc.gitlabtool.git.entities.MessageType;
+import com.lgc.gitlabtool.git.services.ConsoleService;
 import com.lgc.gitlabtool.git.services.GroupsUserService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
+import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.ViewKey;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 import com.lgc.gitlabtool.git.ui.javafx.AlertWithCheckBox;
@@ -42,12 +45,13 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.ToolBar;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.Pane;
+import javafx.scene.text.TextFlow;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
@@ -76,11 +80,25 @@ public class ModularController {
     private static final String CSS_PATH = "css/style.css";
     private static final Image _appIcon = AppIconHolder.getInstance().getAppIcoImage();
 
+    private static final ConsoleService _consoleService = (ConsoleService) ServiceProvider.getInstance()
+            .getService(ConsoleService.class.getName());
+
+    private static final GroupsUserService _groupService = (GroupsUserService) ServiceProvider.getInstance()
+            .getService(GroupsUserService.class.getName());
+
+    private static final StateService _stateService = (StateService) ServiceProvider.getInstance()
+            .getService(StateService.class.getName());
+
     private MainWindowController _mainWindowController;
     private GroupWindowController _groupWindowController;
 
+    private final ConsoleController _consoleController = ConsoleController.getInstance();
+
     @FXML
-    public Pane consolePane;
+    public TextFlow _console;
+
+    @FXML
+    public ScrollPane scrollPane;
 
     @FXML
     public AnchorPane viewPane;
@@ -98,9 +116,6 @@ public class ModularController {
     public void initialize() {
         toolbar.getStylesheets().add(getClass().getClassLoader().getResource(CSS_PATH).toExternalForm());
     }
-
-    private final GroupsUserService _groupService = (GroupsUserService) ServiceProvider.getInstance()
-            .getService(GroupsUserService.class.getName());
 
     public void loadGroupWindow() throws IOException {
         toolbar.getItems().addAll(ToolbarManager.getInstance().createToolbarItems(ViewKey.GROUP_WINDOW.getKey()));
@@ -120,7 +135,7 @@ public class ModularController {
         viewPane.getChildren().clear();
         viewPane.getChildren().add(node);
 
-        parentPane.getItems().remove(consolePane);
+        updateCurrentConsole();
     }
 
     public void loadMainWindow(Group selectedGroup) throws IOException {
@@ -132,8 +147,7 @@ public class ModularController {
         FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource(ViewKey.MAIN_WINDOW.getPath()));
         Node node = loader.load();
 
-        _mainWindowController = loader.getController();
-
+        _mainWindowController = loader.getController();;
         _mainWindowController.setSelectedGroup(selectedGroup);
         _mainWindowController.beforeShowing();
 
@@ -144,6 +158,8 @@ public class ModularController {
 
         viewPane.getChildren().clear();
         viewPane.getChildren().add(node);
+
+        updateCurrentConsole();
     }
 
     private void initActionsToolBar(String windowId) {
@@ -197,14 +213,14 @@ public class ModularController {
     private void initActionsMainMenu(String windowId) {
         if (windowId.equals(ViewKey.GROUP_WINDOW.getKey())) {
             MenuItem exit = MainMenuManager.getInstance().getButtonById(MainMenuItems.GROUP_WINDOW_EXIT);
-            exit.setOnAction(event -> Platform.exit());
+            exit.setOnAction(event -> exit());
 
             MenuItem about = MainMenuManager.getInstance().getButtonById(MainMenuItems.GROUP_WINDOW_ABOUT);
             about.setOnAction(event -> showAboutPopup());
 
         } else if (windowId.equals(ViewKey.MAIN_WINDOW.getKey())) {
             MenuItem exit = MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_EXIT);
-            exit.setOnAction(event -> Platform.exit());
+            exit.setOnAction(event -> exit());
 
             MenuItem about = MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_ABOUT);
             about.setOnAction(event -> showAboutPopup());
@@ -292,14 +308,17 @@ public class ModularController {
             }
             ExecutorService executor = Executors.newSingleThreadExecutor();
             executor.submit(() -> {
+
                 Group loadGroup = _groupService.importGroup(selectedDirectory.getAbsolutePath());
                 if (loadGroup == null) {
+                    _consoleService.addMessage(FAILED_IMPORT_MESSAGE, MessageType.ERROR);
                     showStatusDialog(IMPORT_DIALOG_TITLE, FAILED_IMPORT_MESSAGE,
                             "Failed to load group from " + selectedDirectory.getAbsolutePath());
                 } else {
                     Platform.runLater(new Runnable() {
                         @Override
                         public void run() {
+                            _consoleService.addMessage("Group successfully loaded.", MessageType.SUCCESS);
                             _groupWindowController.refreshGroupsList();
                         }
                     });
@@ -326,6 +345,17 @@ public class ModularController {
                 alert.showAndWait();
             }
         });
+    }
+
+    private void updateCurrentConsole() {
+        _consoleController.setComponents(_console, scrollPane);
+        _consoleController.updateConsole();
+    }
+
+    private void exit() {
+        if (!_stateService.isBusy()) {
+            Platform.exit();
+        }
     }
 
 }

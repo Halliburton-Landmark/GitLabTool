@@ -70,8 +70,10 @@ import org.mockito.Mockito;
 
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.User;
-import com.lgc.gitlabtool.git.services.EmptyProgressListener;
+import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.services.ProgressListener;
+import com.lgc.gitlabtool.git.ui.javafx.ProgressDialog;
+import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 
 /**
  * Tests for the JGit class.
@@ -85,12 +87,12 @@ public class JGitTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void cloneGroupIncorrectDataExceptionGroupTest() {
-        JGit.getInstance().clone(null, CORRECT_PATH, new EmptyListener());
+        JGit.getInstance().clone(null, CORRECT_PATH, getEmptyOperationProgressListener());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void cloneGroupIncorrectDataExceptionPathTest() {
-        JGit.getInstance().clone(new ArrayList<>(), null, new EmptyListener());
+        JGit.getInstance().clone(new ArrayList<>(), null, getEmptyOperationProgressListener());
     }
 
 
@@ -115,7 +117,7 @@ public class JGitTest {
             }
         };
 
-        Assert.assertTrue(jgit.clone(getCorrectProject(2), CORRECT_PATH, new EmptyListener()));
+        Assert.assertTrue(jgit.clone(getCorrectProject(2), CORRECT_PATH, getEmptyOperationProgressListener()));
     }
 
     @Test
@@ -127,7 +129,7 @@ public class JGitTest {
                 throw cancelException;
             }
         };
-        Assert.assertTrue(git.clone(getProjects(2), CORRECT_PATH, new EmptyListener()));
+        Assert.assertTrue(git.clone(getProjects(2), CORRECT_PATH, getEmptyOperationProgressListener()));
 
         git = new JGit() {
             @Override
@@ -135,7 +137,7 @@ public class JGitTest {
                 throw getGitAPIException();
             }
         };
-        Assert.assertTrue(git.clone(getProjects(2), CORRECT_PATH, new EmptyListener()));
+        Assert.assertTrue(git.clone(getProjects(2), CORRECT_PATH, getEmptyOperationProgressListener()));
     }
 
     @Test
@@ -237,12 +239,7 @@ public class JGitTest {
         Assert.assertEquals(getJGitMock(null).pull(getProject(true)), JGitStatus.FAILED);
 
         Git gitMock = getGitMock();
-        JGit jGitMock = new JGit() {
-            @Override
-            protected boolean isContinueMakePull(Project project, Git git) {
-                return false;
-            }
-        };
+        JGit jGitMock = new JGit();
         Assert.assertEquals(jGitMock.pull(getProject(true)), JGitStatus.FAILED);
 
         PullCommand pullCommandMock = new PullCommand(getRepository()) {
@@ -966,11 +963,6 @@ public class JGitTest {
 
         JGit correctJGitMock = new JGit() {
             @Override
-            protected boolean isContinueMakePull(Project project, Git git) {
-                return true;
-            }
-
-            @Override
             protected User getUserData() {
                 User user = new User("Lyudmila", "ld@email.com");
                 return user;
@@ -1179,5 +1171,20 @@ public class JGitTest {
             projects.add(pr);
         }
         return projects;
+    }
+
+    private OperationProgressListener getEmptyOperationProgressListener() {
+        return new OperationProgressListener(
+                Mockito.mock(ProgressDialog.class),
+                ApplicationState.CLONE) {
+            @Override
+            public void onSuccess(Object... t) {}
+            @Override
+            public void onError(Object... t) {}
+            @Override
+            public void onStart(Object... t) {}
+            @Override
+            public void doOnFinishJob(Object... t) {}
+        };
     }
 }

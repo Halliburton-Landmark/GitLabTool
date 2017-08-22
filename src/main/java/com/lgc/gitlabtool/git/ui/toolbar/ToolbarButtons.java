@@ -23,14 +23,14 @@ public enum ToolbarButtons {
     EDIT_REPO_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "repo_editRepo", "icons/toolbar/edit_20x20.png", "Edit repository", "Edit repository"),
     DELETE_BRANCH_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "branch_deleteBranch", "icons/toolbar/remove_20x20.png", "Remove branch", "Remove branch");
     */
-    REFRESH_PROJECTS(ViewKey.MAIN_WINDOW.getKey(), "refresh_projects", "icons/toolbar/refresh_projects_20x20.png", "Refresh projects", "Refresh projects' list"),
     CLONE_PROJECT_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "project_clone", "icons/toolbar/clone_20x20.png", "Clone", "Clone shadow project"),
     CREATE_PROJECT_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "create_project_button", "icons/toolbar/create_project_20x20.png", "Create project", "Create new project"),
     NEW_BRANCH_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "branch_newBranch", "icons/toolbar/new_branch_20x20.png", "New branch", "Create new branch"),
     SWITCH_BRANCH_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "branch_switchBranch", "icons/toolbar/switch_20x20.png", "Switch branch", "Switch to another branch"),
     COMMIT_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "commit", "icons/toolbar/commit_20x20.png", "Commit", "Show commit dialog"),
     PUSH_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "push", "icons/toolbar/push_20x20.png", "Push", "Show push dialog"),
-    EDIT_PROJECT_PROPERTIES_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "edit_project_propecties", "icons/toolbar/edit_properties_20x20.png", "Edit project properties", "Edit project properties");
+    EDIT_PROJECT_PROPERTIES_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "edit_project_propecties", "icons/toolbar/edit_properties_20x20.png", "Edit project properties", "Edit project properties"),
+    PULL_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "pull", "icons/toolbar/pull_20x20.png", "Pull", "Pull projects");
 
     private final String viewKey;
     private final String id;

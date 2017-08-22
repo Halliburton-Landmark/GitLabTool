@@ -41,13 +41,13 @@ public class StateServiceImpl implements StateService {
     @Override
     public void stateON(ApplicationState state) {
         setState(state, ACTIVATE_STATE);
-        _logger.info("Activated " + state);
+        _logger.info(state.getState() + " activated");
     }
 
     @Override
     public void stateOFF(ApplicationState state) {
         setState(state, DEACTIVATE_STATE);
-        _logger.info("Deactivate " + state);
+        _logger.info(state.getState() + " deactivated");
     }
 
     private void setState(ApplicationState state, int operation) {
@@ -104,12 +104,20 @@ public class StateServiceImpl implements StateService {
         }
     }
 
+    @Override
+    public boolean isBusy() {
+        return _states.entrySet().stream()
+                                 .filter(map -> isActive(map.getValue()))
+                                 .findAny()
+                                 .isPresent();
+    }
+
     private Set<StateListener> createSynchronizedSet() {
         return Collections.synchronizedSet(new HashSet<StateListener>());
     }
 
     private void notifyListenersByType(ApplicationState changedState) {
-        _logger.info("Notifying listeners about changing of " + changedState);
+        _logger.info("Notifying listeners about changing of " + changedState.getState());
         final Set<StateListener> listeners = _listeners.get(changedState);
         if (listeners != null) {
             listeners.forEach(listener -> listener.handleEvent(changedState, isActiveState(changedState)));

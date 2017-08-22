@@ -61,4 +61,20 @@ public interface ProjectService {
      *                         in the ProgressListener::onFinish method.
      */
     void clone (List<Project> projects,  String destinationPath, ProgressListener progressListener);
+
+    /**
+     * Indicates that projects contains at least one shadow project
+     *
+     * @param projects list of projects
+     * @return true if list contains shadow project
+     */
+    boolean hasShadow(List<Project> projects);
+
+    /**
+     * Indicates that projects contains at least one cloned project
+     *
+     * @param projects list of projects
+     * @return true if list contains cloned project
+     */
+    boolean hasCloned(List<Project> projects);
 }

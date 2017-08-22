@@ -6,6 +6,8 @@ import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.lgc.gitlabtool.git.services.ServiceProvider;
+import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.UserInterface;
 import com.lgc.gitlabtool.git.ui.ViewKey;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
@@ -30,6 +32,9 @@ import javafx.stage.WindowEvent;
 
 public class JavaFXUI extends Application implements UserInterface {
     private static final Logger logger = LogManager.getLogger(LoginDialog.class);
+
+    private static final StateService _stateService = (StateService) ServiceProvider.getInstance()
+            .getService(StateService.class.getName());
 
     private Image appIcon;
     private Stage mainStage;
@@ -77,6 +82,11 @@ public class JavaFXUI extends Application implements UserInterface {
     }
 
     private final EventHandler<WindowEvent> confirmCloseEventHandler = event -> {
+        if (_stateService.isBusy()) {
+            event.consume();
+            return;
+        }
+
         Alert closeConfirmation = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to exit?");
         Button exitButton = (Button) closeConfirmation.getDialogPane().lookupButton(ButtonType.OK);
 

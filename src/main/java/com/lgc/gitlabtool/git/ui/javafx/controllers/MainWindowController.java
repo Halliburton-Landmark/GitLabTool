@@ -1,7 +1,7 @@
 package com.lgc.gitlabtool.git.ui.javafx.controllers;
 
 
-import java.awt.*;
+import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -10,6 +10,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.prefs.Preferences;
@@ -19,11 +20,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.lgc.gitlabtool.git.entities.Group;
+import com.lgc.gitlabtool.git.entities.MessageType;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
-import com.lgc.gitlabtool.git.project.nature.projecttype.DSGProjectType;
-import com.lgc.gitlabtool.git.services.EmptyProgressListener;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.LoginService;
 import com.lgc.gitlabtool.git.services.PomXMLService;
@@ -31,13 +31,19 @@ import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.ViewKey;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
+import com.lgc.gitlabtool.git.services.ConsoleService;
+import com.lgc.gitlabtool.git.services.ProgressListener;
+import com.lgc.gitlabtool.git.services.StateService;
+import com.lgc.gitlabtool.git.ui.javafx.ChangesCheckDialog;
 import com.lgc.gitlabtool.git.ui.javafx.CloneProgressDialog;
-import com.lgc.gitlabtool.git.ui.javafx.CloneProgressListener;
 import com.lgc.gitlabtool.git.ui.javafx.CommitDialog;
 import com.lgc.gitlabtool.git.ui.javafx.CreateNewBranchDialog;
 import com.lgc.gitlabtool.git.ui.javafx.CreateProjectDialog;
 import com.lgc.gitlabtool.git.ui.javafx.IncorrectProjectDialog;
+import com.lgc.gitlabtool.git.ui.javafx.ProgressDialog;
+import com.lgc.gitlabtool.git.ui.javafx.PullProgressDialog;
 import com.lgc.gitlabtool.git.ui.javafx.StatusDialog;
+import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuItems;
 import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuManager;
 import com.lgc.gitlabtool.git.ui.selection.ListViewKey;
@@ -47,11 +53,11 @@ import com.lgc.gitlabtool.git.ui.toolbar.ToolbarManager;
 import com.lgc.gitlabtool.git.util.ScreenUtil;
 
 import javafx.application.Platform;
-import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -80,6 +86,7 @@ public class MainWindowController {
     private static final String HEDER_GROUP_TITLE = "Current group: ";
     private static final String SELECT_ALL_IMAGE_URL = "icons/select_all_20x20.png";
     private static final String REFRESH_PROJECTS_IMAGE_URL = "icons/toolbar/refresh_projects_20x20.png";
+    private static final String FILTER_SHADOW_PROJECTS_IMAGE_URL = "icons/toolbar/filter_shadow_projects_20x20.png";
     private static final String DIVIDER_PROPERTY_NODE = "MainWindowController_Dividers";
     private static final String STATUS_DIALOG_TITLE = "Status dialog";
     private static final String STATUS_DIALOG_HEADER_COMMIT = "Commit statuses";
@@ -104,6 +111,13 @@ public class MainWindowController {
     private final PomXMLService _pomXmlService = (PomXMLService) ServiceProvider.getInstance()
             .getService(PomXMLService.class.getName());
 
+    private static final ConsoleService _consoleService = (ConsoleService) ServiceProvider.getInstance()
+            .getService(ConsoleService.class.getName());
+
+    private static final StateService _stateService = (StateService) ServiceProvider.getInstance()
+            .getService(StateService.class.getName());
+
+
     @FXML
     private ListView<Project> projectsList;
 
@@ -122,6 +136,9 @@ public class MainWindowController {
     @FXML
     private Button refreshProjectsButton;
 
+    @FXML
+    private ToggleButton filterShadowProjects;
+
     public void beforeShowing() {
         String username = _loginService.getCurrentUser().getName();
         userId.setText(username);
@@ -134,8 +151,11 @@ public class MainWindowController {
                 getClass().getClassLoader().getResource(REFRESH_PROJECTS_IMAGE_URL).toExternalForm());
         Image imageSelectAll = new Image(
                 getClass().getClassLoader().getResource(SELECT_ALL_IMAGE_URL).toExternalForm());
+        Image imageFilterShadow = new Image(
+                getClass().getClassLoader().getResource(FILTER_SHADOW_PROJECTS_IMAGE_URL).toExternalForm());
         selectAllButton.setGraphic(new ImageView(imageSelectAll));
         refreshProjectsButton.setGraphic(new ImageView(imageRefreshProjects));
+        filterShadowProjects.setGraphic(new ImageView(imageFilterShadow));
 
         preferences = getPreferences(DIVIDER_PROPERTY_NODE);
 
@@ -176,6 +196,8 @@ public class MainWindowController {
                 .bind(booleanBinding);
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.EDIT_PROJECT_PROPERTIES_BUTTON.getId())
                 .disableProperty().bind(booleanBinding);
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.PULL_BUTTON.getId()).disableProperty()
+                .bind(booleanBinding);
 
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_COMMIT).disableProperty().bind(booleanBinding);
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_SWITCH_BRANCH).disableProperty()
@@ -184,6 +206,7 @@ public class MainWindowController {
                 .bind(booleanBinding);
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_COMMIT).disableProperty().bind(booleanBinding);
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_PUSH).disableProperty().bind(booleanBinding);
+        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_PULL).disableProperty().bind(booleanBinding);
 
     }
 
@@ -233,7 +256,7 @@ public class MainWindowController {
     }
 
     private void onOpenFolder(ActionEvent event) {
-        getSelectProjects().parallelStream()
+        getSelectedProjects().parallelStream()
                 .filter(Project::isCloned)
                 .forEach(this::openProjectFolder);
     }
@@ -254,26 +277,33 @@ public class MainWindowController {
         }
     }
 
-    private ContextMenu getContexMenu() {
+    private ContextMenu getContextMenu(List<Project> items) {
 
         ContextMenu contextMenu = new ContextMenu();
         List<MenuItem> menuItems = new ArrayList<>();
 
-        String openFolderIcoUrl = "icons/mainmenu/folder_16x16.png";
-        Image openFolderIco = new Image(getClass().getClassLoader().getResource(openFolderIcoUrl).toExternalForm());
-        MenuItem openFolder = new MenuItem();
-        openFolder.setText("Open project folder");
-        openFolder.setOnAction(this::onOpenFolder);
-        openFolder.setGraphic(new ImageView(openFolderIco));
-        menuItems.add(openFolder);
+        boolean hasShadow = _projectService.hasShadow(items);
+        boolean hasCloned = _projectService.hasCloned(items);
 
-        String cloneProjectIcoUrl = "icons/mainmenu/clone_16x16.png";
-        Image cloneProjectIco = new Image(getClass().getClassLoader().getResource(cloneProjectIcoUrl).toExternalForm());
-        MenuItem cloneProject = new MenuItem();
-        cloneProject.setText("Clone shadow project");
-        cloneProject.setOnAction(this::cloneShadowProject);
-        cloneProject.setGraphic(new ImageView(cloneProjectIco));
-        menuItems.add(cloneProject);
+        if (hasCloned) {
+            String openFolderIcoUrl = "icons/mainmenu/folder_16x16.png";
+            Image openFolderIco = new Image(getClass().getClassLoader().getResource(openFolderIcoUrl).toExternalForm());
+            MenuItem openFolder = new MenuItem();
+            openFolder.setText("Open project folder");
+            openFolder.setOnAction(this::onOpenFolder);
+            openFolder.setGraphic(new ImageView(openFolderIco));
+            menuItems.add(openFolder);
+        }
+
+        if (hasShadow) {
+            String cloneProjectIcoUrl = "icons/mainmenu/clone_16x16.png";
+            Image cloneProjectIco = new Image(getClass().getClassLoader().getResource(cloneProjectIcoUrl).toExternalForm());
+            MenuItem cloneProject = new MenuItem();
+            cloneProject.setText("Clone shadow project");
+            cloneProject.setOnAction(this::cloneShadowProject);
+            cloneProject.setGraphic(new ImageView(cloneProjectIco));
+            menuItems.add(cloneProject);
+        }
 
         contextMenu.getItems().addAll(menuItems);
         return contextMenu;
@@ -303,32 +333,16 @@ public class MainWindowController {
             }
 
             if (node instanceof ListCell) {
-                evt.consume();
 
                 ListCell<Project> cell = (ListCell<Project>) node;
                 ListView<Project> lv = cell.getListView();
 
-                lv.requestFocus();
-                if (cell.isEmpty()) {
-                    return;
-                }
-
-                int index = cell.getIndex();
-                if (lv.getSelectionModel().isEmpty()) {
-                    lv.setContextMenu(null);
-                }
-
                 if (evt.getButton() == MouseButton.SECONDARY) {
-                    if (!lv.getSelectionModel().isEmpty()) {
-                        lv.setContextMenu(getContexMenu());
+                    if (!cell.isEmpty()) {
+                        List<Project> selectedItems = lv.getSelectionModel().getSelectedItems();
+                        lv.setContextMenu(getContextMenu(selectedItems));
                     } else {
                         lv.setContextMenu(null);
-                    }
-                } else if (evt.getButton() == MouseButton.PRIMARY) {
-                    if (cell.isSelected()) {
-                        lv.getSelectionModel().clearSelection(index);
-                    } else {
-                        lv.getSelectionModel().select(index);
                     }
                 }
             }
@@ -359,12 +373,8 @@ public class MainWindowController {
     }
 
     private void initToolbarMainMenuActions() {
-
-        ToolbarManager.getInstance().getButtonById(ToolbarButtons.REFRESH_PROJECTS.getId())
-            .setOnAction(this::refreshLoadProjects);
-
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.CLONE_PROJECT_BUTTON.getId())
-            .setOnAction(this::cloneShadowProject);
+                .setOnAction(this::cloneShadowProject);
 
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.NEW_BRANCH_BUTTON.getId())
                 .setOnAction(this::onNewBranchButton);
@@ -375,7 +385,14 @@ public class MainWindowController {
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.COMMIT_BUTTON.getId())
                 .setOnAction(this::onCommitAction);
 
-        ToolbarManager.getInstance().getButtonById(ToolbarButtons.PUSH_BUTTON.getId()).setOnAction(this::onPushAction);
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.PUSH_BUTTON.getId())
+                .setOnAction(this::onPushAction);
+
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.PULL_BUTTON.getId())
+                .setOnAction(this::onPullAction);
+
+        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_CLONE_PROJECT)
+                .setOnAction(this::cloneShadowProject);
 
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.EDIT_PROJECT_PROPERTIES_BUTTON.getId())
                 .setOnAction(event -> showEditProjectPropertiesWindow());
@@ -383,9 +400,14 @@ public class MainWindowController {
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_CREATE_BRANCH)
                 .setOnAction(this::onNewBranchButton);
 
-        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_COMMIT).setOnAction(this::onCommitAction);
+        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_COMMIT)
+                .setOnAction(this::onCommitAction);
 
-        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_PUSH).setOnAction(this::onPushAction);
+        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_PUSH)
+                .setOnAction(this::onPushAction);
+
+        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_PULL)
+                .setOnAction(this::onPullAction);
     }
 
     @FXML
@@ -402,7 +424,7 @@ public class MainWindowController {
     }
 
     private void showCreateNewBranchDialog() {
-        List<Project> allSelectedProjects = getSelectProjects();
+        List<Project> allSelectedProjects = getSelectedProjects();
         List<Project> clonedProjects = allSelectedProjects.stream()
                                                           .filter(prj -> prj.isCloned())
                                                           .collect(Collectors.toList());
@@ -414,9 +436,7 @@ public class MainWindowController {
     public void refreshLoadProjects(ActionEvent actionEvent) {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.submit(() -> {
-            _logger.info("Refreshing projects...");
             refreshLoadProjects();
-            _logger.info("Projects were refreshed!");
         });
         executor.shutdown();
     }
@@ -447,7 +467,7 @@ public class MainWindowController {
 
     @FXML
     public void onCommitAction(ActionEvent actionEvent) {
-        List<Project> allSelectedProjects = getSelectProjects();
+        List<Project> allSelectedProjects = getSelectedProjects();
         List<Project> projectWithChanges = _gitService.getProjectsWithChanges(allSelectedProjects);
 
         if (projectWithChanges.isEmpty()) {
@@ -458,39 +478,47 @@ public class MainWindowController {
         CommitDialog dialog = new CommitDialog();
         Map<Project, JGitStatus> commitStatuses = dialog.commitChanges(projectWithChanges);
 
-        String dialogMessage = "%s projects were pushed successfully";
-        showStatusDialog(commitStatuses, allSelectedProjects.size(), STATUS_DIALOG_TITLE, STATUS_DIALOG_HEADER_COMMIT,
-                dialogMessage);
-
+        if (commitStatuses != null) {
+            String dialogMessage = "%s projects were pushed successfully";
+            showStatusDialog(commitStatuses, allSelectedProjects.size(), STATUS_DIALOG_TITLE, STATUS_DIALOG_HEADER_COMMIT,
+                    dialogMessage);
+        }
     }
 
     @FXML
     public void onPushAction(ActionEvent actionEvent) {
-        List<Project> allSelectedProjects = getSelectProjects();
+        List<Project> allSelectedProjects = getSelectedProjects();
         List<Project> filteredProjects = allSelectedProjects.stream().filter(prj -> prj.isCloned())
                 .collect(Collectors.toList());
 
-        Map<Project, JGitStatus> pushStatuses = _gitService.push(filteredProjects, EmptyProgressListener.get());
+        Map<Project, JGitStatus> pushStatuses = new ConcurrentHashMap<>();
 
-        String dialogMessage = "%s projects were pushed successfully";
-        showStatusDialog(pushStatuses, allSelectedProjects.size(), STATUS_DIALOG_TITLE, STATUS_DIALOG_HEADER_PUSH,
-                dialogMessage);
-
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.submit(() -> {
+            _consoleService.addMessage("Push projects is started...", MessageType.SIMPLE);
+            _stateService.stateON(ApplicationState.PUSH);
+            pushStatuses.putAll(_gitService.push(filteredProjects, new PushProgressListener()));
+//            We don't need in the Status dialog here if we use UI console and executor
+//            String dialogMessage = "%s projects were pushed successfully";
+//            showStatusDialog(pushStatuses, allSelectedProjects.size(), STATUS_DIALOG_TITLE, STATUS_DIALOG_HEADER_PUSH,
+//                    dialogMessage);
+            _consoleService.addMessage("Push projects is finished!", MessageType.SIMPLE);
+        });
+        executor.shutdown();
     }
 
     @FXML
     public void cloneShadowProject(ActionEvent actionEvent) {
-        List<Project> shadowProjects = getSelectProjects().stream()
+        List<Project> shadowProjects = getSelectedProjects().stream()
                                                             .filter(project -> !project.isCloned())
                                                             .collect(Collectors.toList());
         if (shadowProjects == null || shadowProjects.isEmpty()) {
-            _logger.info("Shadow projects for cloning have not been selected!");
+            _consoleService.addMessage("Shadow projects for cloning have not been selected!", MessageType.SIMPLE);
             return;
         }
-        Stage stage = (Stage) selectAllButton.getScene().getWindow();
         String path = _currentGroup.getPathToClonedGroup();
 
-        CloneProgressDialog progressDialog = new CloneProgressDialog(stage, _currentGroup.getName(), ApplicationState.CLONE);
+        CloneProgressDialog progressDialog = new CloneProgressDialog();
         progressDialog.setStartAction(() -> startClone(shadowProjects, path, progressDialog));
         progressDialog.showDialog();
     }
@@ -504,7 +532,7 @@ public class MainWindowController {
 
             EditProjectPropertiesController controller = loader.getController();
 
-            List<Project> filteredPomProjects = _pomXmlService.filterPomProjects(getSelectProjects());
+            List<Project> filteredPomProjects = _pomXmlService.filterPomProjects(getSelectedProjects());
             controller.beforeStart(filteredPomProjects);
 
             Scene scene = new Scene(root);
@@ -532,14 +560,26 @@ public class MainWindowController {
         }
     }
 
+    @FXML
+    public void onShowHideShadowProjects(ActionEvent actionEvent) {
+        if (filterShadowProjects.isSelected()) {
+            FilteredList<Project> list = new FilteredList<>(FXCollections.observableArrayList(_projects), Project::isCloned);
+            projectsList.setItems(list);
+        } else {
+            projectsList.setItems(FXCollections.observableArrayList(_projects));
+            sortProjectsList();
+        }
+    }
+
     private boolean startClone(List<Project> shadowProjects, String path,  CloneProgressDialog progressDialog) {
         _projectService.clone(shadowProjects, path,
-                new CloneProgressListener(progressDialog, (obj) -> refreshLoadProjects(null)));
+                new OperationProgressListener(progressDialog, ApplicationState.CLONE, (obj) -> refreshLoadProjects(null)));
         return true;
     }
 
     private void showProjectsWithoutChangesMessage() {
         String noChangesMessage = "Selected projects do not have changes";
+        _consoleService.addMessage("Selected projects do not have changes", MessageType.SIMPLE);
         StatusDialog statusDialog = new StatusDialog(STATUS_DIALOG_TITLE, STATUS_DIALOG_HEADER_COMMIT,
                 noChangesMessage);
         statusDialog.showAndWait();
@@ -547,13 +587,18 @@ public class MainWindowController {
 
     private void showStatusDialog(Map<Project, JGitStatus> statuses, int countProjects, String title, String header,
             String message) {
-        StatusDialog statusDialog = new StatusDialog(title, header);
-        statusDialog.showMessage(statuses, countProjects, message);
-        statusDialog.showAndWait();
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                StatusDialog statusDialog = new StatusDialog(title, header);
+                statusDialog.showMessage(statuses, countProjects, message);
+                statusDialog.showAndWait();
+            }
+        });
     }
 
 
-    private List<Project> getSelectProjects() {
+    private List<Project> getSelectedProjects() {
         return projectsList.getSelectionModel().getSelectedItems();
     }
 
@@ -583,4 +628,59 @@ public class MainWindowController {
         }
         return !_gitService.hasAtLeastOneReference(project);
     }
+
+    @FXML
+    public void onPullAction(ActionEvent actionEvent) {
+        List<Project> projectsToPull = getSelectedProjects().stream()
+                .filter(project -> project.isCloned())
+                .collect(Collectors.toList());
+        checkChangesAndPull(projectsToPull, new Object());
+    }
+
+    private void checkChangesAndPull(List<Project> projects, Object item) {
+        List<Project> changedProjects = _gitService.getProjectsWithChanges(projects);
+
+        if (changedProjects.isEmpty()) {
+            ProgressDialog progressDialog = new PullProgressDialog();
+            progressDialog.setStartAction(() -> startPull(projects, progressDialog));
+            progressDialog.showDialog();
+        } else {
+            ChangesCheckDialog changesCheckDialog = new ChangesCheckDialog();
+            changesCheckDialog.launchConfirmationDialog(changedProjects, projects, item, this::checkChangesAndPull);
+        }
+    }
+
+    private void startPull(List<Project> projects, ProgressDialog progressDialog) {
+        OperationProgressListener pullProgressListener =
+                new OperationProgressListener(progressDialog, ApplicationState.PULL);
+        _gitService.pull(projects, pullProgressListener);
+    }
+
+    public class PushProgressListener implements ProgressListener {
+
+        @Override
+        public void onSuccess(Object... t) {
+            if(t[0] instanceof Project) {
+                String message = "Pushing the " + ((Project)t[0]).getName() + " project is successful!";
+                _consoleService.addMessage(message, MessageType.SUCCESS);
+            }
+        }
+
+        @Override
+        public void onError(Object... t) {
+            if(t[0] instanceof Project) {
+                String message = "Failed pushing the " + ((Project)t[0]).getName() + " project!";
+                _consoleService.addMessage(message, MessageType.ERROR);
+            }
+        }
+
+        @Override
+        public void onStart(Object... t) {}
+
+        @Override
+        public void onFinish(Object... t) {
+            _stateService.stateOFF(ApplicationState.PUSH);
+        }
+    }
+
 }

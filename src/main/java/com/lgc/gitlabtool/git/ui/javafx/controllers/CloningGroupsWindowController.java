@@ -10,9 +10,8 @@ import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.services.GroupsUserService;
 import com.lgc.gitlabtool.git.services.LoginService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
-import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.javafx.CloneProgressDialog;
-import com.lgc.gitlabtool.git.ui.javafx.CloneProgressListener;
+import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 import com.lgc.gitlabtool.git.util.PathUtilities;
 
 import javafx.collections.FXCollections;
@@ -40,9 +39,6 @@ public class CloningGroupsWindowController {
 
     private final GroupsUserService _groupsService = (GroupsUserService) ServiceProvider.getInstance()
             .getService(GroupsUserService.class.getName());
-
-    private final StateService _stateService = (StateService) ServiceProvider.getInstance()
-            .getService(StateService.class.getName());
 
     @FXML
     private TextField folderPath;
@@ -96,15 +92,15 @@ public class CloningGroupsWindowController {
 
         String destinationPath = folderPath.getText();
         List<Group> selectedGroups = projectsList.getSelectionModel().getSelectedItems();
-        Group group = selectedGroups.get(0);
 
-        CloneProgressDialog progressDialog = new CloneProgressDialog(stage, group.getName(), ApplicationState.CLONE);
+        CloneProgressDialog progressDialog = new CloneProgressDialog();
         progressDialog.setStartAction(() -> startClone(destinationPath, selectedGroups, progressDialog));
         progressDialog.showDialog();
     }
 
     private boolean startClone(String destinationPath, List<Group> selectedGroups, CloneProgressDialog progressDialog) {
-        _groupsService.cloneGroups(selectedGroups, destinationPath, new CloneProgressListener(progressDialog));
+        _groupsService.cloneGroups(selectedGroups, destinationPath, 
+                new OperationProgressListener(progressDialog, ApplicationState.CLONE));
         return true;
     }
 

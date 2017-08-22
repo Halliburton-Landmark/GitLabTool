@@ -29,21 +29,24 @@ public class ServiceProvider {
         StorageService storageService = new StorageServiceImpl();
         ProjectTypeService projectTypeService = new ProjectTypeServiceImpl();
         StateService stateService = new StateServiceImpl();
-        ProjectService projectService = new ProjectServiceImpl(restConnector, projectTypeService, stateService);
+        ConsoleService consoleService = new ConsoleServiceImpl();
+        ProjectService projectService =
+                new ProjectServiceImpl(restConnector, projectTypeService, stateService, consoleService);
         ClonedGroupsService programProgertiesService = new ClonedGroupsServiceImpl(storageService, loginService);
 
         _services = new HashMap<>();
         _services.put(LoginService.class.getName(), loginService);
         _services.put(ClonedGroupsService.class.getName(), programProgertiesService);
-        _services.put(GroupsUserService.class.getName(),
-                new GroupsUserServiceImpl(restConnector, programProgertiesService, projectService, stateService));
+        _services.put(GroupsUserService.class.getName(), new GroupsUserServiceImpl(restConnector,
+                programProgertiesService, projectService, stateService, consoleService));
         _services.put(ProjectService.class.getName(), projectService);
         _services.put(StorageService.class.getName(), storageService);
         _services.put(ReplacementService.class.getName(), new ReplacementServiceImpl());
         _services.put(PomXMLService.class.getName(), new PomXMLServiceImpl());
         _services.put(ProjectTypeService.class.getName(), projectTypeService);
         _services.put(NetworkService.class.getName(), new NetworkServiceImpl());
-        _services.put(GitService.class.getName(), new GitServiceImpl());
+        _services.put(GitService.class.getName(), new GitServiceImpl(stateService));
         _services.put(StateService.class.getName(), stateService);
+        _services.put(ConsoleService.class.getName(), consoleService);
     }
 }

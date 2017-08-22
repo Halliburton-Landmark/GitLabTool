@@ -8,6 +8,8 @@ import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.lgc.gitlabtool.git.entities.MessageType;
+import com.lgc.gitlabtool.git.services.ConsoleService;
 import com.lgc.gitlabtool.git.services.LoginService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StorageService;
@@ -43,10 +45,14 @@ class LoginDialog extends Dialog<DialogDTO> {
 
     private static final Logger logger = LogManager.getLogger(LoginDialog.class);
 
-    private final StorageService storageService = (StorageService) ServiceProvider.getInstance()
+    private static final StorageService storageService = (StorageService) ServiceProvider.getInstance()
             .getService(StorageService.class.getName());
-    private final LoginService _loginService = (LoginService) ServiceProvider.getInstance()
+
+    private static final LoginService _loginService = (LoginService) ServiceProvider.getInstance()
             .getService(LoginService.class.getName());
+
+    private static final ConsoleService _consoleService = (ConsoleService) ServiceProvider.getInstance()
+            .getService(ConsoleService.class.getName());
 
     private final String WRONG_CREDENTIALS = "Wrong login or password! Please try again";
     private final String WAITING_MESSAGE = "Login... Please wait";
@@ -172,7 +178,7 @@ class LoginDialog extends Dialog<DialogDTO> {
                     if (responseCode == HttpStatus.SC_OK) {
                         updateLastUserName();
                         Platform.runLater(() -> {
-                            logger.info("Login successfull");
+                            _consoleService.addMessage("Login successfull", MessageType.SUCCESS);
                             getStage().close();
                         });
                     } else if (responseCode == HttpStatus.SC_UNAUTHORIZED) {

@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
@@ -28,7 +29,6 @@ import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.CheckoutConflictException;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.JGitInternalException;
-import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.dircache.DirCache;
 import org.eclipse.jgit.dircache.DirCacheCheckout;
 import org.eclipse.jgit.errors.CorruptObjectException;
@@ -36,21 +36,19 @@ import org.eclipse.jgit.errors.NoWorkTreeException;
 import org.eclipse.jgit.errors.RevisionSyntaxException;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.EmptyProgressMonitor;
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
-import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 
 import com.lgc.gitlabtool.git.connections.token.CurrentUser;
 import com.lgc.gitlabtool.git.entities.Branch;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.User;
 import com.lgc.gitlabtool.git.services.ProgressListener;
+import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 import com.lgc.gitlabtool.git.util.PathUtilities;
 
 
@@ -196,8 +194,8 @@ public class JGit {
         _isCloneCancelled = false;
         if (projects == null || localPath == null) {
             String errorMsg = "Cloning error. Projects or local path is null.";
-            progressListener.onError(1.0, errorMsg);
-            progressListener.onFinish(null, FINISH_CLONE_MESSAGE);
+            progressListener.onError(100, errorMsg);
+            progressListener.onFinish(FINISH_CLONE_MESSAGE);
             throw new IllegalArgumentException(errorMsg);
         }
         cloneGroupInBackgroundThread(projects, progressListener, localPath);
@@ -208,19 +206,20 @@ public class JGit {
                                          ProgressListener progressListener,
                                          String groupPath) {
         Runnable task = () -> {
-            double step = 1.0 / projects.size();
-            double currentProgress = 0.0;
+            progressListener.onStart("Clonning process started");
+            long step = 100 / projects.size();
+            long currentProgress = 0;
             for (Project project : projects) {
                 if (!_isCloneCancelled) {
                     currentProgress += step;
-                    progressListener.onStart(project, currentProgress);
+                    progressListener.onStart(project);
                     if (!clone(project, groupPath)) {
                         String errorMsg = "Cloning error of the " + project.getName() + " project";
                         progressListener.onError(currentProgress, errorMsg);
                         logger.info(errorMsg);
                         continue;
                     }
-                    progressListener.onSuccess(project, currentProgress, null);
+                    progressListener.onSuccess(currentProgress, project, JGitStatus.SUCCESSFUL);
                     logger.info("The " + project.getName() + " project was successfully cloned.");
                 }
             }
@@ -307,17 +306,51 @@ public class JGit {
             return JGitStatus.FAILED;
         }
         try (Git git = getGit(project.getPath())) {
-            // check which files were changed to avoid conflicts
-            if (isContinueMakePull(project, git)) {
-                PullResult pullResult = git.pull().call();
-                MergeResult mer = pullResult.getMergeResult();
-                git.close();
-                return JGitStatus.getStatus(mer.getMergeStatus().toString());
-            }
+            PullResult pullResult = git.pull().call();
+            MergeResult mer = pullResult.getMergeResult();
+            git.close();
+            return JGitStatus.getStatus(mer.getMergeStatus().toString());
         } catch (GitAPIException | IOException e) {
             logger.error("Pull error for the " + project.getName() + " project: " + e.getMessage());
         }
         return JGitStatus.FAILED;
+    }
+
+    /**
+     * Pulls the list of projects from the upstream and shows the status in {@link ProgressListener}
+     * @param projects - list of projects to pull
+     * @param progressListener - instance of {@link OperationProgressListener}
+     * @return <code>true</code> if pull operation works well and <code>false</code> otherwise
+     */
+    public boolean pull(List<Project> projects, OperationProgressListener progressListener) {
+        if (projects == null || projects.size() == 0 || progressListener == null) {
+            logger.error("Error during pull! Projects: " + projects + "; progressListener: " + progressListener);
+            return false;
+        }
+        long step = 100 / projects.size();
+        AtomicLong progress = new AtomicLong(0);
+        progressListener.onStart("Pull operation started");
+        Runnable pullTask = () -> {
+            projects.parallelStream()
+                    .filter(project -> project.isCloned())
+                    .forEach(project -> pullProject(project, progressListener, progress, step));
+            progressListener.onFinish("Pull process was finished");
+        };
+        Thread pullThread = new Thread(pullTask, "Pull thread");
+        pullThread.start();
+        return true;
+    }
+
+    private JGitStatus pullProject(Project project, ProgressListener progressListener, AtomicLong progress, long delta) {
+        progressListener.onStart(project);
+        JGitStatus pullResult = pull(project);
+        progress.addAndGet(delta);
+        if (pullResult == JGitStatus.FAILED || pullResult == JGitStatus.CONFLICTING) {
+            progressListener.onError(progress.get(), project, pullResult);
+        } else {
+            progressListener.onSuccess(progress.get(), project, pullResult);
+        }
+        return pullResult;
     }
 
     /**
@@ -482,25 +515,20 @@ public class JGit {
         }
         Map<Project, JGitStatus> statuses = new HashMap<>();
         for (Project project : projects) {
-            if (project == null) {
+            if (project == null || !project.isCloned()) {
                 progressListener.onError(project);
                 statuses.put(null, JGitStatus.FAILED);
                 continue;
             }
-            if (!project.isCloned()) {
-                progressListener.onError(project);
-                statuses.put(project, JGitStatus.FAILED);
-                continue;
-            }
             JGitStatus pushStatus = push(project);
             if (pushStatus.equals(JGitStatus.FAILED)) {
-                statuses.put(project, pushStatus);
                 progressListener.onError(project);
-                continue;
+            } else {
+                progressListener.onSuccess(project);
             }
-            progressListener.onSuccess(project);
             statuses.put(project, pushStatus);
         }
+        progressListener.onFinish();
         return statuses;
     }
 
@@ -754,50 +782,6 @@ public class JGit {
             logger.error("Push error for the " + project.getName() + " project: " + e.getMessage());
         }
         return JGitStatus.FAILED;
-    }
-
-    // Check if we will have conflicts after the pull command
-    boolean isContinueMakePull(Project project, Git git) {
-        Optional<List<DiffEntry>> optListDiffs = getListModifyFilesInLocalRepository(git);
-        Optional<Status> optStatus = getStatusProject(project);
-        if (!optListDiffs.isPresent() || !optStatus.isPresent()) {
-            return false;
-        }
-        return !isHaveCoincidences(optListDiffs.get(), optStatus.get().getModified());
-    }
-
-    // Get the list of modified files in the local repository
-    private Optional<List<DiffEntry>> getListModifyFilesInLocalRepository(Git git) {
-        try {
-            Repository repo = git.getRepository();
-            git.fetch().call();
-
-            ObjectId fetchHead = repo.resolve("FETCH_HEAD^{tree}");
-            ObjectReader reader = repo.newObjectReader();
-
-            CanonicalTreeParser newTreeIter = new CanonicalTreeParser();
-            newTreeIter.reset(reader, fetchHead);
-
-            return Optional.ofNullable(git.diff().setNewTree(newTreeIter).call());
-        } catch (IOException | GitAPIException e) {
-            logger.error("Error getting modify files in local repository: ", e.getMessage());
-        }
-        return Optional.empty();
-    }
-
-    // Check changed files in the local repository have coincidences with modified files in working directory
-    private boolean isHaveCoincidences(List<DiffEntry> diffFiles, Set<String> modifiedFiles) {
-        if (diffFiles == null || modifiedFiles == null) {
-            return false;
-        }
-        for (String file : modifiedFiles) {
-            for (DiffEntry diffFile : diffFiles) {
-                if (diffFile.toString().equals(file)) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
     private List<Ref> getRefs(Project project, ListMode mode) {

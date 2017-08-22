@@ -10,6 +10,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.lgc.gitlabtool.git.connections.RESTConnector;
+import com.lgc.gitlabtool.git.entities.MessageType;
+import com.lgc.gitlabtool.git.services.ConsoleService;
+import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.UserInterface;
 import com.lgc.gitlabtool.git.ui.javafx.JavaFXUI;
 import com.lgc.gitlabtool.git.util.ProjectPropertiesUtil;
@@ -19,12 +22,15 @@ public class Main {
 
     private static final Logger logger = LogManager.getLogger(Main.class);
 
+    private static final ConsoleService _consoleService = (ConsoleService) ServiceProvider.getInstance()
+            .getService(ConsoleService.class.getName());
+
     public static void main(String[] args) {
         final UserInterface ui = new JavaFXUI();
         logger.debug("==================== application started");
-        logger.info(ProjectPropertiesUtil.getProjectName().toUpperCase() +
-                " version: " + ProjectPropertiesUtil.getProjectVersion() +
-                " (" + ProjectPropertiesUtil.getCommitHash() + ")");
+        _consoleService.addMessage(ProjectPropertiesUtil.getProjectName().toUpperCase() +
+                                   " version: " + ProjectPropertiesUtil.getProjectVersion() +
+                                   " (" + ProjectPropertiesUtil.getCommitHash() + ")", MessageType.SIMPLE);
         detectProxy();
         ui.run(args);
     }
