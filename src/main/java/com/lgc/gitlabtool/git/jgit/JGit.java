@@ -29,7 +29,6 @@ import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.CheckoutConflictException;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.JGitInternalException;
-import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.dircache.DirCache;
 import org.eclipse.jgit.dircache.DirCacheCheckout;
 import org.eclipse.jgit.errors.CorruptObjectException;
@@ -38,15 +37,12 @@ import org.eclipse.jgit.errors.RevisionSyntaxException;
 import org.eclipse.jgit.lib.BranchTrackingStatus;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.EmptyProgressMonitor;
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
-import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 
 import com.lgc.gitlabtool.git.connections.token.CurrentUser;
 import com.lgc.gitlabtool.git.entities.Branch;
@@ -195,7 +191,7 @@ public class JGit {
      * @param localPath  localPath the path to where will clone all the projects of the group
      * @param progressListener listener for obtaining data on the process of performing the operation.
      */
-    public boolean clone(Collection<Project> projects, String localPath, OperationProgressListener progressListener) {
+    public boolean clone(Collection<Project> projects, String localPath, ProgressListener progressListener) {
         _isCloneCancelled = false;
         if (projects == null || localPath == null) {
             String errorMsg = "Cloning error. Projects or local path is null.";
@@ -208,7 +204,7 @@ public class JGit {
     }
 
     private void cloneGroupInBackgroundThread(Collection<Project> projects,
-                                         OperationProgressListener progressListener,
+                                         ProgressListener progressListener,
                                          String groupPath) {
         Runnable task = () -> {
             progressListener.onStart("Clonning process started");
@@ -311,13 +307,10 @@ public class JGit {
             return JGitStatus.FAILED;
         }
         try (Git git = getGit(project.getPath())) {
-            // check which files were changed to avoid conflicts
-            if (isContinueMakePull(project, git)) {
-                PullResult pullResult = git.pull().call();
-                MergeResult mer = pullResult.getMergeResult();
-                git.close();
-                return JGitStatus.getStatus(mer.getMergeStatus().toString());
-            }
+            PullResult pullResult = git.pull().call();
+            MergeResult mer = pullResult.getMergeResult();
+            git.close();
+            return JGitStatus.getStatus(mer.getMergeStatus().toString());
         } catch (GitAPIException | IOException e) {
             logger.error("Pull error for the " + project.getName() + " project: " + e.getMessage());
         }
@@ -523,25 +516,20 @@ public class JGit {
         }
         Map<Project, JGitStatus> statuses = new HashMap<>();
         for (Project project : projects) {
-            if (project == null) {
+            if (project == null || !project.isCloned()) {
                 progressListener.onError(project);
                 statuses.put(null, JGitStatus.FAILED);
                 continue;
             }
-            if (!project.isCloned()) {
-                progressListener.onError(project);
-                statuses.put(project, JGitStatus.FAILED);
-                continue;
-            }
             JGitStatus pushStatus = push(project);
             if (pushStatus.equals(JGitStatus.FAILED)) {
-                statuses.put(project, pushStatus);
                 progressListener.onError(project);
-                continue;
+            } else {
+                progressListener.onSuccess(project);
             }
-            progressListener.onSuccess(project);
             statuses.put(project, pushStatus);
         }
+        progressListener.onFinish();
         return statuses;
     }
 
@@ -795,50 +783,6 @@ public class JGit {
             logger.error("Push error for the " + project.getName() + " project: " + e.getMessage());
         }
         return JGitStatus.FAILED;
-    }
-
-    // Check if we will have conflicts after the pull command
-    boolean isContinueMakePull(Project project, Git git) {
-        Optional<List<DiffEntry>> optListDiffs = getListModifyFilesInLocalRepository(git);
-        Optional<Status> optStatus = getStatusProject(project);
-        if (!optListDiffs.isPresent() || !optStatus.isPresent()) {
-            return false;
-        }
-        return !isHaveCoincidences(optListDiffs.get(), optStatus.get().getModified());
-    }
-
-    // Get the list of modified files in the local repository
-    private Optional<List<DiffEntry>> getListModifyFilesInLocalRepository(Git git) {
-        try {
-            Repository repo = git.getRepository();
-            git.fetch().call();
-
-            ObjectId fetchHead = repo.resolve("FETCH_HEAD^{tree}");
-            ObjectReader reader = repo.newObjectReader();
-
-            CanonicalTreeParser newTreeIter = new CanonicalTreeParser();
-            newTreeIter.reset(reader, fetchHead);
-
-            return Optional.ofNullable(git.diff().setNewTree(newTreeIter).call());
-        } catch (IOException | GitAPIException e) {
-            logger.error("Error getting modify files in local repository: ", e.getMessage());
-        }
-        return Optional.empty();
-    }
-
-    // Check changed files in the local repository have coincidences with modified files in working directory
-    private boolean isHaveCoincidences(List<DiffEntry> diffFiles, Set<String> modifiedFiles) {
-        if (diffFiles == null || modifiedFiles == null) {
-            return false;
-        }
-        for (String file : modifiedFiles) {
-            for (DiffEntry diffFile : diffFiles) {
-                if (diffFile.toString().equals(file)) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
     private List<Ref> getRefs(Project project, ListMode mode) {

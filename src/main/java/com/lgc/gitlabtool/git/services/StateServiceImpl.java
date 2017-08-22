@@ -104,6 +104,14 @@ public class StateServiceImpl implements StateService {
         }
     }
 
+    @Override
+    public boolean isBusy() {
+        return _states.entrySet().stream()
+                                 .filter(map -> isActive(map.getValue()))
+                                 .findAny()
+                                 .isPresent();
+    }
+
     private Set<StateListener> createSynchronizedSet() {
         return Collections.synchronizedSet(new HashSet<StateListener>());
     }

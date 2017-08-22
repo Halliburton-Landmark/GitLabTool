@@ -5,9 +5,11 @@ import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
 import com.lgc.gitlabtool.git.entities.Group;
+import com.lgc.gitlabtool.git.entities.MessageType;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.project.nature.projecttype.ProjectType;
+import com.lgc.gitlabtool.git.services.ConsoleService;
 import com.lgc.gitlabtool.git.services.ProgressListener;
 import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ProjectTypeService;
@@ -64,6 +66,9 @@ public class CreateProjectDialog extends Dialog<String> {
 
     private final StateService _stateService = (StateService) ServiceProvider.getInstance()
             .getService(StateService.class.getName());
+
+    private static final ConsoleService _consoleService = (ConsoleService) ServiceProvider.getInstance()
+            .getService(ConsoleService.class.getName());
 
     private final GridPane grid = new GridPane();
 
@@ -133,15 +138,13 @@ public class CreateProjectDialog extends Dialog<String> {
         _projectNameField.setDisable(true);
 
         addProgressBarOnPanel();
-        CloneProgressDialog progressDialog = new CloneProgressDialog();
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.submit(() -> {
             _stateService.stateON(ApplicationState.CREATE_PROJECT);
             String idType = _typeComboBox.getSelectionModel().getSelectedItem();
             ProjectType projectType = _typeServies.getTypeById(idType);
             _projectService.createProject(_selectGroup, _projectNameField.getText(), projectType,
-                    new CreateProjectProgressListener(), progressDialog);
-            _stateService.stateOFF(ApplicationState.CREATE_PROJECT);
+                    new CreateProjectProgressListener());
         });
         executor.shutdown();
     }
@@ -171,13 +174,15 @@ public class CreateProjectDialog extends Dialog<String> {
                     Project project = t[0] == null ? null : (Project) t[0];
                     String contentMessage = (String) t[1];
 
-                    String headerMessage = (project == null)
-                            ? "Error creating project in the " + _selectGroup.getName() + " group."
-                            : "Success creating project in the " + _selectGroup.getName() + " group.";
+                    boolean isSuccess = !(project == null);
+                    String headerMessage = isSuccess ? "Success creating project in the " + _selectGroup.getName() + " group."
+                            : "Error creating project in the " + _selectGroup.getName() + " group.";
                     closeDialog();
                     StatusDialog statusDialog = new StatusDialog(
                             "Status of creating project", headerMessage, contentMessage);
                     statusDialog.showAndWait();
+                    _consoleService.addMessage(contentMessage, MessageType.determineMessageType(isSuccess));
+                    _stateService.stateOFF(ApplicationState.CREATE_PROJECT);
                 }
             });
         }
@@ -200,6 +205,8 @@ public class CreateProjectDialog extends Dialog<String> {
                 StringProperty projectProperty = new SimpleStringProperty("");
                 projectProperty.set(progressLabel);
                 _progressLabel.textProperty().bind(projectProperty);
+                String message = projectProperty.getValue();
+                _consoleService.addMessage(message, MessageType.determineMessageType(message));
             }
         });
     }

@@ -10,7 +10,6 @@ import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.services.GroupsUserService;
 import com.lgc.gitlabtool.git.services.LoginService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
-import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.javafx.CloneProgressDialog;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 import com.lgc.gitlabtool.git.util.PathUtilities;
@@ -40,9 +39,6 @@ public class CloningGroupsWindowController {
 
     private final GroupsUserService _groupsService = (GroupsUserService) ServiceProvider.getInstance()
             .getService(GroupsUserService.class.getName());
-
-    private final StateService _stateService = (StateService) ServiceProvider.getInstance()
-            .getService(StateService.class.getName());
 
     @FXML
     private TextField folderPath;
