@@ -71,10 +71,8 @@ import org.mockito.Mockito;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.User;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
-import com.lgc.gitlabtool.git.services.EmptyProgressListener;
 import com.lgc.gitlabtool.git.services.ProgressListener;
 import com.lgc.gitlabtool.git.ui.javafx.ProgressDialog;
-import com.lgc.gitlabtool.git.ui.javafx.ProgressDialog.CancelButtonStatus;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 
 /**
@@ -241,12 +239,7 @@ public class JGitTest {
         Assert.assertEquals(getJGitMock(null).pull(getProject(true)), JGitStatus.FAILED);
 
         Git gitMock = getGitMock();
-        JGit jGitMock = new JGit() {
-            @Override
-            protected boolean isContinueMakePull(Project project, Git git) {
-                return false;
-            }
-        };
+        JGit jGitMock = new JGit();
         Assert.assertEquals(jGitMock.pull(getProject(true)), JGitStatus.FAILED);
 
         PullCommand pullCommandMock = new PullCommand(getRepository()) {
@@ -970,11 +963,6 @@ public class JGitTest {
 
         JGit correctJGitMock = new JGit() {
             @Override
-            protected boolean isContinueMakePull(Project project, Git git) {
-                return true;
-            }
-
-            @Override
             protected User getUserData() {
                 User user = new User("Lyudmila", "ld@email.com");
                 return user;
@@ -1187,7 +1175,7 @@ public class JGitTest {
 
     private OperationProgressListener getEmptyOperationProgressListener() {
         return new OperationProgressListener(
-                Mockito.mock(ProgressDialog.class), 
+                Mockito.mock(ProgressDialog.class),
                 ApplicationState.CLONE) {
             @Override
             public void onSuccess(Object... t) {}
