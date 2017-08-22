@@ -29,7 +29,8 @@ public class ServiceProvider {
         StorageService storageService = new StorageServiceImpl();
         ProjectTypeService projectTypeService = new ProjectTypeServiceImpl();
         StateService stateService = new StateServiceImpl();
-        ProjectService projectService = new ProjectServiceImpl(restConnector, projectTypeService, stateService);
+        GitService gitService = new GitServiceImpl(stateService);
+        ProjectService projectService = new ProjectServiceImpl(restConnector, projectTypeService, stateService, gitService);
         ClonedGroupsService programProgertiesService = new ClonedGroupsServiceImpl(storageService, loginService);
 
         _services = new HashMap<>();
@@ -43,7 +44,7 @@ public class ServiceProvider {
         _services.put(PomXMLService.class.getName(), new PomXMLServiceImpl());
         _services.put(ProjectTypeService.class.getName(), projectTypeService);
         _services.put(NetworkService.class.getName(), new NetworkServiceImpl());
-        _services.put(GitService.class.getName(), new GitServiceImpl(stateService));
+        _services.put(GitService.class.getName(), gitService);
         _services.put(StateService.class.getName(), stateService);
         _services.put(ConsoleService.class.getName(), new ConsoleServiceImpl());
     }

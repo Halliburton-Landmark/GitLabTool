@@ -14,6 +14,7 @@ import org.eclipse.jgit.api.Status;
 
 import com.lgc.gitlabtool.git.entities.Branch;
 import com.lgc.gitlabtool.git.entities.Project;
+import com.lgc.gitlabtool.git.entities.ProjectStatus;
 import com.lgc.gitlabtool.git.jgit.BranchType;
 import com.lgc.gitlabtool.git.jgit.JGit;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
@@ -184,5 +185,21 @@ public class GitServiceImpl implements GitService {
             return new int[] {0, 0};
         }
         return _git.getAheadBehindIndexCounts(project, branchName);
+    }
+
+    @Override
+    public void modifyProjectStatusByGit(Project project) {
+        Optional<Status> status = _git.getStatusProject(project);
+        if (status.isPresent()) {
+            if (status.get().getConflicting().size() > 0) {
+                project.setProjectStatus(ProjectStatus.HAS_CONFLICTS);
+                return;
+            }
+            if (status.get().hasUncommittedChanges()) {
+                project.setProjectStatus(ProjectStatus.HAS_CHANGES);
+            } else {
+                project.setProjectStatus(ProjectStatus.DEFAULT);
+            }
+        }
     }
 }

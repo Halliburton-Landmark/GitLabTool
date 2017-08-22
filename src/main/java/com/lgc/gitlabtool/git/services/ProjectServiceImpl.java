@@ -52,11 +52,14 @@ public class ProjectServiceImpl implements ProjectService {
     private static ProjectTypeService _projectTypeService;
     private static StateService _stateService;
     private static RESTConnector _connector;
+    private static GitService _gitService;
 
-    public ProjectServiceImpl(RESTConnector connector, ProjectTypeService projectTypeService, StateService stateService) {
+    public ProjectServiceImpl(RESTConnector connector, ProjectTypeService projectTypeService, 
+            StateService stateService, GitService gitService) {
         setConnector(connector);
         setProjectTypeService(projectTypeService);
         setStateService(stateService);
+        setGitService(gitService);
     }
 
     @Override
@@ -184,22 +187,7 @@ public class ProjectServiceImpl implements ProjectService {
         project.setClonedStatus(true);
         project.setPathToClonedProject(pathGroup + File.separator + project.getName());
         project.setProjectType(_projectTypeService.getProjectType(project));
-        modifyProjectStatusByGit(project);
-    }
-
-    private void modifyProjectStatusByGit(Project project) {
-        Optional<Status> status = _git.getStatusProject(project);
-        if (status.isPresent()) {
-            if (status.get().getConflicting().size() > 0) {
-                project.setProjectStatus(ProjectStatus.HAS_CONFLICTS);
-                return;
-            }
-            if (status.get().hasUncommittedChanges()) {
-                project.setProjectStatus(ProjectStatus.HAS_CHANGES);
-            } else {
-                project.setProjectStatus(ProjectStatus.DEFAULT);
-            }
-        }
+        _gitService.modifyProjectStatusByGit(project);
     }
 
     private Project createRemoteProject(Group group, String name, ProgressListener progressListener) {
@@ -313,5 +301,11 @@ public class ProjectServiceImpl implements ProjectService {
         return projects.stream()
                 .filter(Project::isCloned)
                 .count() > 0;
+    }
+
+    private void setGitService(GitService gitService) {
+        if (gitService != null) {
+            _gitService = gitService;
+        }
     }
 }

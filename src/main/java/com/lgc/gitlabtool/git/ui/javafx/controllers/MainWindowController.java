@@ -187,7 +187,7 @@ public class MainWindowController {
     }
 
     /**
-     * Updates current projects list. Method don't load projects from the GitLab
+     * Updates current projects list. Method doesn't load projects from the GitLab
      */
     public void updateProjectsList(){
         projectsList.refresh();
@@ -394,11 +394,14 @@ public class MainWindowController {
     private void showCreateNewBranchDialog() {
         List<Project> allSelectedProjects = getSelectedProjects();
         List<Project> clonedProjectsWithoutConflicts = allSelectedProjects.stream()
-                .filter(Project::isCloned)
-                .filter(project -> !project.hasConflicts())
+                .filter(this::projectIsReadyForGitOperations)
                 .collect(Collectors.toList());
         CreateNewBranchDialog dialog = new CreateNewBranchDialog(clonedProjectsWithoutConflicts);
         dialog.showAndWait();
+    }
+
+    private boolean projectIsReadyForGitOperations(Project project) {
+        return project.isCloned() && !project.hasConflicts();
     }
 
     @FXML
@@ -460,8 +463,7 @@ public class MainWindowController {
     public void onPushAction(ActionEvent actionEvent) {
         List<Project> allSelectedProjects = getSelectedProjects();
         List<Project> filteredProjects = allSelectedProjects.stream()
-                .filter(Project::isCloned)
-                .filter(project -> !project.hasConflicts())
+                .filter(this::projectIsReadyForGitOperations)
                 .collect(Collectors.toList());
 
         Map<Project, JGitStatus> pushStatuses = _gitService.push(filteredProjects, EmptyProgressListener.get());
@@ -555,8 +557,7 @@ public class MainWindowController {
     @FXML
     public void onPullAction(ActionEvent actionEvent) {
         List<Project> projectsToPull = getSelectedProjects().stream()
-                .filter(Project::isCloned)
-                .filter(project -> !project.hasConflicts())
+                .filter(this::projectIsReadyForGitOperations)
                 .collect(Collectors.toList());
         checkChangesAndPull(projectsToPull, new Object());
     }
