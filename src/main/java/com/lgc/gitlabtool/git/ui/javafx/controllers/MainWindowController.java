@@ -456,10 +456,11 @@ public class MainWindowController {
         CommitDialog dialog = new CommitDialog();
         Map<Project, JGitStatus> commitStatuses = dialog.commitChanges(projectWithChanges);
 
-        String dialogMessage = "%s projects were pushed successfully";
-        showStatusDialog(commitStatuses, allSelectedProjects.size(), STATUS_DIALOG_TITLE, STATUS_DIALOG_HEADER_COMMIT,
-                dialogMessage);
-
+        if (commitStatuses != null) {
+            String dialogMessage = "%s projects were pushed successfully";
+            showStatusDialog(commitStatuses, allSelectedProjects.size(), STATUS_DIALOG_TITLE, STATUS_DIALOG_HEADER_COMMIT,
+                    dialogMessage);
+        }
     }
 
     @FXML
