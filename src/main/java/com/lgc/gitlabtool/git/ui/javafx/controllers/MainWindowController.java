@@ -535,7 +535,7 @@ public class MainWindowController {
 
             List<Project> selectedProjects = getSelectedProjects();
 
-            if(!isAvalibleEditPomXml(selectedProjects)){
+            if(!isAvailableEditPomXml(selectedProjects)){
                 _consoleService.addMessage(EDIT_POM_SELECTION_WARNING, MessageType.ERROR);
                 return;
             }
@@ -566,13 +566,16 @@ public class MainWindowController {
         }
     }
 
-    private boolean isAvalibleEditPomXml(List<Project> projects){
+    private boolean isAvailableEditPomXml(List<Project> projects) {
         boolean hasShadow = projects.parallelStream()
                 .filter(project -> !project.isCloned()).count() > 0;
         boolean hasPomFile = _pomXmlService.hasPomFile(projects);
 
+        //TODO: CREATE GENERAL FILTER FOR ALL OPERATION! (Shadow & Conflicts) + Specific filters
+
         return !(hasShadow || !hasPomFile);
     }
+
     @FXML
     public void onShowHideShadowProjects(ActionEvent actionEvent) {
         if (filterShadowProjects.isSelected()) {
