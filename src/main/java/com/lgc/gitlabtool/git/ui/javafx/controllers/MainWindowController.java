@@ -1,7 +1,7 @@
 package com.lgc.gitlabtool.git.ui.javafx.controllers;
 
 
-import java.awt.Desktop;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -24,16 +24,16 @@ import com.lgc.gitlabtool.git.entities.MessageType;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
+import com.lgc.gitlabtool.git.services.ConsoleService;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.LoginService;
 import com.lgc.gitlabtool.git.services.PomXMLService;
+import com.lgc.gitlabtool.git.services.ProgressListener;
 import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
+import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.ViewKey;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
-import com.lgc.gitlabtool.git.services.ConsoleService;
-import com.lgc.gitlabtool.git.services.ProgressListener;
-import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.javafx.ChangesCheckDialog;
 import com.lgc.gitlabtool.git.ui.javafx.CloneProgressDialog;
 import com.lgc.gitlabtool.git.ui.javafx.CommitDialog;
@@ -92,6 +92,7 @@ public class MainWindowController {
     private static final String STATUS_DIALOG_HEADER_COMMIT = "Commit statuses";
     private static final String STATUS_DIALOG_HEADER_PUSH = "Push statuses";
     private static final String EDIT_PROJECT_PROPERTIES = "Edit project properties";
+    private static final String EDIT_POM_SELECTION_WARNING = "Selected projects do not have Pom.xml file or contains shadow project";
 
     private List<Project> _projects;
 
@@ -108,7 +109,7 @@ public class MainWindowController {
     private static final GitService _gitService = (GitService) ServiceProvider.getInstance()
             .getService(GitService.class.getName());
 
-    private final PomXMLService _pomXmlService = (PomXMLService) ServiceProvider.getInstance()
+    private static final PomXMLService _pomXmlService = (PomXMLService) ServiceProvider.getInstance()
             .getService(PomXMLService.class.getName());
 
     private static final ConsoleService _consoleService = (ConsoleService) ServiceProvider.getInstance()
@@ -513,7 +514,7 @@ public class MainWindowController {
                                                             .filter(project -> !project.isCloned())
                                                             .collect(Collectors.toList());
         if (shadowProjects == null || shadowProjects.isEmpty()) {
-            _consoleService.addMessage("Shadow projects for cloning have not been selected!", MessageType.SIMPLE);
+            _consoleService.addMessage("Shadow projects for cloning have not been selected!", MessageType.ERROR);
             return;
         }
         String path = _currentGroup.getPathToClonedGroup();
@@ -532,9 +533,14 @@ public class MainWindowController {
 
             EditProjectPropertiesController controller = loader.getController();
 
-            List<Project> filteredPomProjects = _pomXmlService.filterPomProjects(getSelectedProjects());
-            controller.beforeStart(filteredPomProjects);
+            List<Project> selectedProjects = getSelectedProjects();
 
+            if(!isAvalibleEditPomXml(selectedProjects)){
+                _consoleService.addMessage(EDIT_POM_SELECTION_WARNING, MessageType.ERROR);
+                return;
+            }
+
+            controller.beforeStart(selectedProjects);
             Scene scene = new Scene(root);
             Stage stage = new Stage();
             stage.setScene(scene);
@@ -560,6 +566,13 @@ public class MainWindowController {
         }
     }
 
+    private boolean isAvalibleEditPomXml(List<Project> projects){
+        boolean hasShadow = projects.parallelStream()
+                .filter(project -> !project.isCloned()).count() > 0;
+        boolean hasPomFile = _pomXmlService.hasPomFile(projects);
+
+        return !(hasShadow || !hasPomFile);
+    }
     @FXML
     public void onShowHideShadowProjects(ActionEvent actionEvent) {
         if (filterShadowProjects.isSelected()) {

@@ -60,7 +60,7 @@ public interface PomXMLService {
      *
      * @return list of statuses
      */
-    Map<Project, JGitStatus> addRepository(Collection<Project> projects, String id, String url, String layout);
+    Map<Project, Boolean> addRepository(Collection<Project> projects, String id, String url, String layout);
 
     /**
      * Removes repository from a list of repositories in a pom.xml
@@ -70,7 +70,7 @@ public interface PomXMLService {
      *
      * @return list of statuses
      */
-    Map<Project, JGitStatus> removeRepository(Collection<Project> projects, String id);
+    Map<Project, Boolean> removeRepository(Collection<Project> projects, String id);
 
 
     /**
@@ -83,7 +83,7 @@ public interface PomXMLService {
      *
      * @return list of statuses
      */
-    Map<Project, JGitStatus> modifyRepository(Collection<Project> projects, String oldId, String newId, String newUrl, String newLayout);
+    Map<Project, Boolean> modifyRepository(Collection<Project> projects, String oldId, String newId, String newUrl, String newLayout);
 
     /**
      * Gets the name of release
@@ -125,10 +125,10 @@ public interface PomXMLService {
     boolean containsRepository(Project project, String repo);
 
     /**
-     * Returns all projects that have Pom.xml file
+     * Returns true if all projects have Pom.xml file
      *
      * @param projects projects for checking
-     * @return projects that have Pom.xml
+     * @return true if all projects have Pom.xml
      */
-    List<Project> filterPomProjects(List<Project> projects);
+    boolean hasPomFile(List<Project> projects);
 }

@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.lgc.gitlabtool.git.entities.Project;
+import com.lgc.gitlabtool.git.jgit.JGit;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.services.PomXMLService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
@@ -195,9 +196,9 @@ public class EditProjectPropertiesController {
 
         List<Project> filteredProjects = currentProjectsListView.getItems();
 
-        Map<Project, JGitStatus> addStatuses = _pomXmlService.addRepository(filteredProjects, id, url, layout);
+        Map<Project, Boolean> addStatuses = _pomXmlService.addRepository(filteredProjects, id, url, layout);
 
-        showStatusDialog(addStatuses, selectedProjects.size(), EDIT_POM_TITLE,
+        showSimpleStatusDialog(addStatuses, selectedProjects.size(), EDIT_POM_TITLE,
                 ADDING_REPO_HEADER_MESSAGE, ADDING_REPO_COLLAPSED_MESSAGE);
 
         if (addIsCommit.isSelected()) {
@@ -217,9 +218,9 @@ public class EditProjectPropertiesController {
 
         List<Project> filteredProjects = currentProjectsListView.getItems();
 
-        Map<Project, JGitStatus> editStatuses = _pomXmlService.modifyRepository(filteredProjects,
+        Map<Project, Boolean> editStatuses = _pomXmlService.modifyRepository(filteredProjects,
                 oldId, newId, newUrl, newLayout);
-        showStatusDialog(editStatuses, filteredProjects.size(), EDIT_POM_TITLE,
+        showSimpleStatusDialog(editStatuses, filteredProjects.size(), EDIT_POM_TITLE,
                 EDITING_REPO_HEADER_MESSAGE, EDITING_REPO_COLLAPSED_MESSAGE);
 
         if (editIsCommit.isSelected()) {
@@ -236,8 +237,8 @@ public class EditProjectPropertiesController {
 
         List<Project> filteredProjects = currentProjectsListView.getItems();
 
-        Map<Project, JGitStatus> removeStatuses = _pomXmlService.removeRepository(filteredProjects, id);
-        showStatusDialog(removeStatuses, filteredProjects.size(), EDIT_POM_TITLE,
+        Map<Project, Boolean> removeStatuses = _pomXmlService.removeRepository(filteredProjects, id);
+        showSimpleStatusDialog(removeStatuses, filteredProjects.size(), EDIT_POM_TITLE,
                 REMOVING_REPO_HEADER_MESSAGE, REMOVING_REPO_COLLAPSED_MESSAGE);
 
         if (removeIsCommit.isSelected()) {
@@ -248,10 +249,10 @@ public class EditProjectPropertiesController {
         refreshComponents();
     }
 
-    private List<Project> getSuccessfulProjectsFromStatuses(Map<Project, JGitStatus> statuses) {
+    private List<Project> getSuccessfulProjectsFromStatuses(Map<Project, Boolean> statuses) {
         return statuses.entrySet()
                 .stream()
-                .filter(entry -> entry.getValue().equals(JGitStatus.SUCCESSFUL))
+                .filter(entry -> entry.getValue().equals(true))
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
     }
@@ -300,10 +301,17 @@ public class EditProjectPropertiesController {
         currentProjectsListView.setItems(FXCollections.observableArrayList(filteredProjectList));
     }
 
-    private void showStatusDialog(Map<Project, JGitStatus> statuses, int countOfProjects,
-                                  String title, String header, String collapsedMessage) {
+    private void showJgitStatusDialog(Map<Project, JGitStatus> statuses, int countOfProjects,
+                                      String title, String header, String collapsedMessage) {
         StatusDialog statusDialog = new StatusDialog(title, header);
         statusDialog.showMessage(statuses, countOfProjects, collapsedMessage);
+        statusDialog.showAndWait();
+    }
+
+    private void showSimpleStatusDialog(Map<Project, Boolean> statuses, int countOfProjects,
+                                        String title, String header, String collapsedMessage) {
+        StatusDialog statusDialog = new StatusDialog(title, header);
+        statusDialog.showMessageForSimpleStatuses(statuses, countOfProjects, collapsedMessage);
         statusDialog.showAndWait();
     }
 
@@ -312,7 +320,7 @@ public class EditProjectPropertiesController {
         Map<Project, JGitStatus> commitStatuses = dialog.commitChanges(projects);
 
         String dialogMessage = "%s projects were pushed successfully";
-        showStatusDialog(commitStatuses, projects.size(), COMMIT_TITLE,
+        showJgitStatusDialog(commitStatuses, projects.size(), COMMIT_TITLE,
                 COMMITTING_HEADER_MESSAGE, COMMITTING_COLLAPSED_MESSAGE);
 
     }
