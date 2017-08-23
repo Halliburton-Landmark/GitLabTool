@@ -3,11 +3,11 @@ package com.lgc.gitlabtool.git.ui.javafx.controllers;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.lgc.gitlabtool.git.entities.Project;
-import com.lgc.gitlabtool.git.jgit.JGit;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.services.PomXMLService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
@@ -20,7 +20,9 @@ import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
@@ -28,6 +30,8 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
 import javafx.scene.text.Text;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 
 public class EditProjectPropertiesController {
 
@@ -235,6 +239,10 @@ public class EditProjectPropertiesController {
     public void onRemoveRepo(ActionEvent actionEvent) {
         String id = (String) removeListView.getSelectionModel().getSelectedItem();
 
+        if (!confirmDeleting(id)) {
+            return;
+        }
+
         List<Project> filteredProjects = currentProjectsListView.getItems();
 
         Map<Project, Boolean> removeStatuses = _pomXmlService.removeRepository(filteredProjects, id);
@@ -247,6 +255,20 @@ public class EditProjectPropertiesController {
             commitProjects(projectWithChanges);
         }
         refreshComponents();
+    }
+
+    private boolean confirmDeleting(String id) {
+        Alert closeConfirmation = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to delete?");
+        Button exitButton = (Button) closeConfirmation.getDialogPane().lookupButton(ButtonType.OK);
+
+        exitButton.setText("Delete");
+        closeConfirmation.setHeaderText("Confirm deleting '" + id + "' repository");
+        closeConfirmation.initModality(Modality.APPLICATION_MODAL);
+        Stage stage = (Stage) removeListView.getScene().getWindow();
+        closeConfirmation.initOwner(stage);
+
+        Optional<ButtonType> closeResponse = closeConfirmation.showAndWait();
+        return ButtonType.OK.equals(closeResponse.orElse(ButtonType.CANCEL));
     }
 
     private List<Project> getSuccessfulProjectsFromStatuses(Map<Project, Boolean> statuses) {
