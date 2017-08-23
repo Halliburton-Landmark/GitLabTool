@@ -23,6 +23,7 @@ import com.lgc.gitlabtool.git.entities.MessageType;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
+import com.lgc.gitlabtool.git.listeners.stateListeners.StateListener;
 import com.lgc.gitlabtool.git.services.ConsoleService;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.LoginService;
@@ -70,7 +71,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 
-public class MainWindowController {
+public class MainWindowController implements StateListener {
     private static final String HEDER_GROUP_TITLE = "Current group: ";
     private static final String SELECT_ALL_IMAGE_URL = "icons/select_all_20x20.png";
     private static final String REFRESH_PROJECTS_IMAGE_URL = "icons/toolbar/refresh_projects_20x20.png";
@@ -78,7 +79,6 @@ public class MainWindowController {
     private static final String DIVIDER_PROPERTY_NODE = "MainWindowController_Dividers";
     private static final String STATUS_DIALOG_TITLE = "Status dialog";
     private static final String STATUS_DIALOG_HEADER_COMMIT = "Commit statuses";
-    private static final String STATUS_DIALOG_HEADER_PUSH = "Push statuses";
 
     private List<Project> _projects;
 
@@ -121,6 +121,12 @@ public class MainWindowController {
 
     @FXML
     private ToggleButton filterShadowProjects;
+
+    {
+        _stateService.addStateListener(ApplicationState.COMMIT, this);
+        _stateService.addStateListener(ApplicationState.PUSH, this);
+        _stateService.addStateListener(ApplicationState.PULL, this);
+    }
 
     public void beforeShowing() {
         String username = _loginService.getCurrentUser().getName();
@@ -460,7 +466,7 @@ public class MainWindowController {
         CommitDialog dialog = new CommitDialog();
         Map<Project, JGitStatus> commitStatuses = dialog.commitChanges(projectWithChanges);
 
-        refreshLoadProjects();
+//        refreshLoadProjects();
         if (commitStatuses != null) {
             String dialogMessage = "%s projects were pushed successfully";
             showStatusDialog(commitStatuses, allSelectedProjects.size(), STATUS_DIALOG_TITLE, STATUS_DIALOG_HEADER_COMMIT,
@@ -489,7 +495,7 @@ public class MainWindowController {
             _consoleService.addMessage("Push projects is finished!", MessageType.SIMPLE);
         });
         executor.shutdown();
-        refreshLoadProjects();
+//        refreshLoadProjects();
     }
 
     @FXML
@@ -596,7 +602,7 @@ public class MainWindowController {
             ChangesCheckDialog changesCheckDialog = new ChangesCheckDialog();
             changesCheckDialog.launchConfirmationDialog(changedProjects, projects, item, this::checkChangesAndPull);
         }
-        refreshLoadProjects();
+//        refreshLoadProjects();
     }
 
     private void startPull(List<Project> projects, ProgressDialog progressDialog) {
@@ -629,6 +635,13 @@ public class MainWindowController {
         @Override
         public void onFinish(Object... t) {
             _stateService.stateOFF(ApplicationState.PUSH);
+        }
+    }
+
+    @Override
+    public void handleEvent(ApplicationState changedStat, boolean isActivate) {
+        if (!isActivate) {
+            refreshLoadProjects();
         }
     }
 
