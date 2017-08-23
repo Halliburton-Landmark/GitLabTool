@@ -1,11 +1,12 @@
 package com.lgc.gitlabtool.git.ui.javafx.controllers;
 
 
-import java.awt.Desktop;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -26,10 +27,13 @@ import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.services.ConsoleService;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.LoginService;
+import com.lgc.gitlabtool.git.services.PomXMLService;
 import com.lgc.gitlabtool.git.services.ProgressListener;
 import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StateService;
+import com.lgc.gitlabtool.git.ui.ViewKey;
+import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 import com.lgc.gitlabtool.git.ui.javafx.ChangesCheckDialog;
 import com.lgc.gitlabtool.git.ui.javafx.CloneProgressDialog;
 import com.lgc.gitlabtool.git.ui.javafx.CommitDialog;
@@ -46,6 +50,7 @@ import com.lgc.gitlabtool.git.ui.selection.ListViewKey;
 import com.lgc.gitlabtool.git.ui.selection.SelectionsProvider;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarButtons;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarManager;
+import com.lgc.gitlabtool.git.util.ScreenUtil;
 
 import javafx.application.Platform;
 import javafx.beans.binding.BooleanBinding;
@@ -55,7 +60,11 @@ import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
@@ -69,6 +78,9 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.stage.Modality;
+import javafx.stage.Screen;
+import javafx.stage.Stage;
 
 public class MainWindowController {
     private static final String HEDER_GROUP_TITLE = "Current group: ";
@@ -79,6 +91,8 @@ public class MainWindowController {
     private static final String STATUS_DIALOG_TITLE = "Status dialog";
     private static final String STATUS_DIALOG_HEADER_COMMIT = "Commit statuses";
     private static final String STATUS_DIALOG_HEADER_PUSH = "Push statuses";
+    private static final String EDIT_PROJECT_PROPERTIES = "Edit project properties";
+    private static final String EDIT_POM_SELECTION_WARNING = "Selected projects do not have Pom.xml file or contains shadow project";
 
     private List<Project> _projects;
 
@@ -95,11 +109,15 @@ public class MainWindowController {
     private static final GitService _gitService = (GitService) ServiceProvider.getInstance()
             .getService(GitService.class.getName());
 
+    private static final PomXMLService _pomXmlService = (PomXMLService) ServiceProvider.getInstance()
+            .getService(PomXMLService.class.getName());
+
     private static final ConsoleService _consoleService = (ConsoleService) ServiceProvider.getInstance()
             .getService(ConsoleService.class.getName());
 
     private static final StateService _stateService = (StateService) ServiceProvider.getInstance()
             .getService(StateService.class.getName());
+
 
     @FXML
     private ListView<Project> projectsList;
@@ -177,6 +195,8 @@ public class MainWindowController {
                 .bind(booleanBinding);
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.PUSH_BUTTON.getId()).disableProperty()
                 .bind(booleanBinding);
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.EDIT_PROJECT_PROPERTIES_BUTTON.getId())
+                .disableProperty().bind(booleanBinding);
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.PULL_BUTTON.getId()).disableProperty()
                 .bind(booleanBinding);
 
@@ -375,6 +395,9 @@ public class MainWindowController {
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_CLONE_PROJECT)
                 .setOnAction(this::cloneShadowProject);
 
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.EDIT_PROJECT_PROPERTIES_BUTTON.getId())
+                .setOnAction(event -> showEditProjectPropertiesWindow());
+
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_CREATE_BRANCH)
                 .setOnAction(this::onNewBranchButton);
 
@@ -454,13 +477,7 @@ public class MainWindowController {
         }
 
         CommitDialog dialog = new CommitDialog();
-        Map<Project, JGitStatus> commitStatuses = dialog.commitChanges(projectWithChanges);
-
-        if (commitStatuses != null) {
-            String dialogMessage = "%s projects were pushed successfully";
-            showStatusDialog(commitStatuses, allSelectedProjects.size(), STATUS_DIALOG_TITLE, STATUS_DIALOG_HEADER_COMMIT,
-                    dialogMessage);
-        }
+        dialog.commitChanges(projectWithChanges);
     }
 
     @FXML
@@ -491,7 +508,7 @@ public class MainWindowController {
                                                             .filter(project -> !project.isCloned())
                                                             .collect(Collectors.toList());
         if (shadowProjects == null || shadowProjects.isEmpty()) {
-            _consoleService.addMessage("Shadow projects for cloning have not been selected!", MessageType.SIMPLE);
+            _consoleService.addMessage("Shadow projects for cloning have not been selected!", MessageType.ERROR);
             return;
         }
         String path = _currentGroup.getPathToClonedGroup();
@@ -499,6 +516,58 @@ public class MainWindowController {
         CloneProgressDialog progressDialog = new CloneProgressDialog();
         progressDialog.setStartAction(() -> startClone(shadowProjects, path, progressDialog));
         progressDialog.showDialog();
+    }
+
+    private void showEditProjectPropertiesWindow() {
+        try {
+
+            URL switchBranchWindowUrl = getClass().getClassLoader().getResource(ViewKey.EDIT_PROJECT_PROPERTIES.getPath());
+            FXMLLoader loader = new FXMLLoader(switchBranchWindowUrl);
+            Parent root = loader.load();
+
+            EditProjectPropertiesController controller = loader.getController();
+
+            List<Project> selectedProjects = getSelectedProjects();
+
+            if(!isAvailableEditPomXml(selectedProjects)){
+                _consoleService.addMessage(EDIT_POM_SELECTION_WARNING, MessageType.ERROR);
+                return;
+            }
+
+            controller.beforeStart(selectedProjects);
+            Scene scene = new Scene(root);
+            Stage stage = new Stage();
+            stage.setScene(scene);
+            stage.getIcons().add(AppIconHolder.getInstance().getAppIcoImage());
+            stage.setTitle(EDIT_PROJECT_PROPERTIES);
+            stage.initModality(Modality.APPLICATION_MODAL);
+
+            /* Set size and position */
+            Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
+            double dialogWidth = primaryScreenBounds.getMaxX() / 2;
+            double dialogHeight = primaryScreenBounds.getMaxY() / 2;
+
+            ScreenUtil.adaptForMultiScreens(stage, dialogWidth, dialogHeight);
+
+            stage.setWidth(dialogWidth);
+            stage.setHeight(dialogHeight);
+            stage.setMinWidth(dialogWidth / 2);
+            stage.setMinHeight(dialogHeight / 2);
+
+            stage.show();
+        } catch (IOException e) {
+            _logger.error("Could not load fxml resource", e);
+        }
+    }
+
+    private boolean isAvailableEditPomXml(List<Project> projects) {
+        boolean hasShadow = projects.parallelStream()
+                .filter(project -> !project.isCloned()).count() > 0;
+        boolean hasPomFile = _pomXmlService.hasPomFile(projects);
+
+        //TODO: CREATE GENERAL FILTER FOR ALL OPERATION! (Shadow & Conflicts) + Specific filters
+
+        return !(hasShadow || !hasPomFile);
     }
 
     @FXML
@@ -525,19 +594,6 @@ public class MainWindowController {
                 noChangesMessage);
         statusDialog.showAndWait();
     }
-
-    private void showStatusDialog(Map<Project, JGitStatus> statuses, int countProjects, String title, String header,
-            String message) {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                StatusDialog statusDialog = new StatusDialog(title, header);
-                statusDialog.showMessage(statuses, countProjects, message);
-                statusDialog.showAndWait();
-            }
-        });
-    }
-
 
     private List<Project> getSelectedProjects() {
         return projectsList.getSelectionModel().getSelectedItems();

@@ -85,12 +85,63 @@ public class StatusDialog extends GLTAlert {
         }
     }
 
+    /**
+     * Sets the content to be shown depends on count of projects.
+     * If count of projects is more than {@link #MAX_ROW_COUNT_IN_STATUS_DIALOG}
+     * then collapsed message will be shown.
+     * Else detailed information about statuses will be shown.
+     *
+     * @param statuses -        statuses of action
+     * @param countOfProjects - total count of selected projects
+     * @param formatStrings -   parameters for message that will be shown if count of statuses
+     *                          more than {@link #MAX_ROW_COUNT_IN_STATUS_DIALOG}
+     * @return massage that will be shown
+     */
+    public String showMessageForSimpleStatuses(Map<Project, Boolean> statuses, int countOfProjects, String... formatStrings) {
+        int size = statuses.size();
+        if (size > 0 && size < MAX_ROW_COUNT_IN_STATUS_DIALOG) {
+            String detailedMessage = statuses.entrySet().stream()
+                    .map(pair -> pair.getKey().getName() + " - " + convertBooleanToMesasge(pair.getValue()))
+                    .collect(Collectors.joining(NEW_LINE_SYMBOL));
+            setContentText(detailedMessage);
+            return detailedMessage;
+        } else {
+            String formattedMessage = "";
+            if (formatStrings.length == 1) {
+                formattedMessage = String.format(formatStrings[0], getSomeOfManySuffixSimpleStatuses(statuses, countOfProjects));
+            } else {
+                int paramsSize = formatStrings.length;
+                String[] params = Arrays.copyOfRange(formatStrings, 1, paramsSize - 1);
+                formattedMessage = String.format(formatStrings[0], params);
+            }
+            setContentText(formattedMessage);
+            return formattedMessage;
+        }
+    }
+
+    private String convertBooleanToMesasge(boolean status){
+        if (status) {
+            return "Successful";
+        } else {
+            return "Failed";
+        }
+    }
+
     private String getSomeOfManySuffix(Map<Project, JGitStatus> statuses, int countOfProjects) {
         int countOfSuccessfulStatuses =
                 (int) statuses.entrySet().stream()
                 .map(pair -> pair.getValue())
                 .filter(status -> status.equals(JGitStatus.SUCCESSFUL))
                 .count();
+        return countOfSuccessfulStatuses + " of " + countOfProjects;
+    }
+
+    private String getSomeOfManySuffixSimpleStatuses(Map<Project, Boolean> statuses, int countOfProjects) {
+        int countOfSuccessfulStatuses =
+                (int) statuses.entrySet().stream()
+                        .map(pair -> pair.getValue())
+                        .filter(status -> status.equals(true))
+                        .count();
         return countOfSuccessfulStatuses + " of " + countOfProjects;
     }
 

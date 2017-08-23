@@ -49,7 +49,8 @@ public class ChangesCheckDialog extends GLTAlert {
 
     private Map<Project, JGitStatus> commitChanges(List<Project> projectsWithChanges) {
         CommitDialog dialog = new CommitDialog();
-        return dialog.commitChanges(projectsWithChanges);
+        dialog.commitChanges(projectsWithChanges);
+        return dialog.getStatuses();
     }
 
     private Map<Project, JGitStatus> discardChanges(List<Project> changedProjects) {
