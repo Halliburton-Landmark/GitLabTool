@@ -7,6 +7,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.services.PomXMLService;
@@ -115,6 +117,8 @@ public class EditProjectPropertiesController {
     private Label projectsCountLabel;
 
     private List<Project> selectedProjects;
+
+    private String EMPTY_STRING = StringUtils.EMPTY;
 
     public void beforeStart(List<Project> items) {
         selectedProjects = items;
@@ -283,13 +287,13 @@ public class EditProjectPropertiesController {
         reloadEditReposComboBox();
         reloadRemoveReposList();
 
-        addIdField.setText("");
-        addLayoutField.setText("");
-        addUrlField.setText("");
+        addIdField.setText(EMPTY_STRING);
+        addLayoutField.setText(EMPTY_STRING);
+        addUrlField.setText(EMPTY_STRING);
 
-        editIdField.setText("");
-        editLayoutField.setText("");
-        editUrlField.setText("");
+        editIdField.setText(EMPTY_STRING);
+        editLayoutField.setText(EMPTY_STRING);
+        editUrlField.setText(EMPTY_STRING);
 
         currentProjectsListView.getItems().clear();
         currentProjectsListView.setItems(FXCollections.observableArrayList(selectedProjects));
@@ -339,12 +343,7 @@ public class EditProjectPropertiesController {
 
     private void commitProjects(List<Project> projects) {
         CommitDialog dialog = new CommitDialog();
-        Map<Project, JGitStatus> commitStatuses = dialog.commitChanges(projects);
-
-        String dialogMessage = "%s projects were pushed successfully";
-        showJgitStatusDialog(commitStatuses, projects.size(), COMMIT_TITLE,
-                COMMITTING_HEADER_MESSAGE, COMMITTING_COLLAPSED_MESSAGE);
-
+        dialog.commitChanges(projects);
     }
 
     @FXML

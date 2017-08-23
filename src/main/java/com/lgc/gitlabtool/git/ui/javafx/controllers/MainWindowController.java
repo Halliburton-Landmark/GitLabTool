@@ -477,13 +477,7 @@ public class MainWindowController {
         }
 
         CommitDialog dialog = new CommitDialog();
-        Map<Project, JGitStatus> commitStatuses = dialog.commitChanges(projectWithChanges);
-
-        if (commitStatuses != null) {
-            String dialogMessage = "%s projects were pushed successfully";
-            showStatusDialog(commitStatuses, allSelectedProjects.size(), STATUS_DIALOG_TITLE, STATUS_DIALOG_HEADER_COMMIT,
-                    dialogMessage);
-        }
+        dialog.commitChanges(projectWithChanges);
     }
 
     @FXML
@@ -600,19 +594,6 @@ public class MainWindowController {
                 noChangesMessage);
         statusDialog.showAndWait();
     }
-
-    private void showStatusDialog(Map<Project, JGitStatus> statuses, int countProjects, String title, String header,
-            String message) {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                StatusDialog statusDialog = new StatusDialog(title, header);
-                statusDialog.showMessage(statuses, countProjects, message);
-                statusDialog.showAndWait();
-            }
-        });
-    }
-
 
     private List<Project> getSelectedProjects() {
         return projectsList.getSelectionModel().getSelectedItems();
