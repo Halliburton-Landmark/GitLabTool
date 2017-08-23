@@ -43,15 +43,17 @@ public class PomXMLServiceImpl implements PomXMLService {
 
     private static final String RELEASE_NAME_KEY = "releaseName";
     private static final String ECLIPSE_RELEASE_KEY = "eclipse.release";
-    private static final String LAYOUT_KEY = "layout";
     private static final String POM_NAME = "pom.xml";
 
     private static final String SUCCESSFUL_CHANGE_MESSAGE = "The pom.xml file was changed successfully.";
     private static final String CHANGE_ERROR_MESSAGE = "ERROR in changing the pom.xml file.";
 
-    private static final ConsoleService _consoleService = (ConsoleService) ServiceProvider.getInstance()
-            .getService(ConsoleService.class.getName());
+    private static ConsoleService _consoleService;
     public static final String UNDEFINED_TEXT = "[Undefined]";
+
+    public PomXMLServiceImpl(ConsoleService consoleService){
+        _consoleService = consoleService;
+    }
 
     private void errorNotValidDataInLog() {
         logger.error("Not valid data was submitted. Cannot modify the pom.xml files.");
