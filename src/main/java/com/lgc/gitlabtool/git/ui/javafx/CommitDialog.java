@@ -38,9 +38,11 @@ public class CommitDialog extends Dialog<String> {
 
     private static final String STATUS_COMMIT_DIALOG_TITLE = "Committing changes status";
     private static final String STATUS_COMMIT_DIALOG_HEADER = "Committing changes info";
+    private static final String STATUS_COMMIT_COLLAPSED_MESSAGE = "%s projects were commited successfully";
 
     private static final String STATUS_PUSH_DIALOG_TITLE = "Pushing changes status";
     private static final String STATUS_PUSH_DIALOG_HEADER = "Pushing changes info";
+    private static final String STATUS_PUSH_COLLAPSED_MESSAGE = "%s projects were pushed successfully";
 
     private Button _commitButton;
     private Button _commitAndPushButton;
@@ -152,6 +154,7 @@ public class CommitDialog extends Dialog<String> {
         statusDialog.showMessage(getCommitStatuses(), getProjectsWithChanges().size(), info, 
                 String.valueOf(countOfSuccessfulOperations), 
                 String.valueOf(getProjectsWithChanges().size() - countOfSuccessfulOperations));
+        statusDialog.showAndWait();
     }
 
     
@@ -159,12 +162,13 @@ public class CommitDialog extends Dialog<String> {
      * Shows the instance of this dialog and wait until committing will be performed
      * 
      * @param changedProjects - projects with changes that should be committed
-     * @return commit statuses
      */
-    public Map<Project, JGitStatus> commitChanges(List<Project> changedProjects) {
+    public void commitChanges(List<Project> changedProjects) {
         _projectsWithChanges = changedProjects;
         this.showAndWait();
+    }
 
+    public Map<Project, JGitStatus> getStatuses(){
         return _commitStatuses;
     }
 

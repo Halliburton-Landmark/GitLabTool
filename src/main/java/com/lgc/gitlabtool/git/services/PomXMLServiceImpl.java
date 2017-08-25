@@ -5,20 +5,32 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Properties;
+import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.Parent;
 import org.apache.maven.model.Repository;
+import org.apache.maven.model.RepositoryBase;
 import org.apache.maven.model.Scm;
 
+import com.lgc.gitlabtool.git.entities.MessageType;
 import com.lgc.gitlabtool.git.entities.Project;
+
+import javafx.fxml.FXML;
 
 /**
  * Service for changes of a group's pom.xml.
@@ -30,11 +42,18 @@ public class PomXMLServiceImpl implements PomXMLService {
     private static final Logger logger = LogManager.getLogger(PomXMLModel.class);
 
     private static final String RELEASE_NAME_KEY = "releaseName";
-    private static final String REPOSITORY_LAYOUT = "p2";
+    private static final String ECLIPSE_RELEASE_KEY = "eclipse.release";
     private static final String POM_NAME = "pom.xml";
-    
+
     private static final String SUCCESSFUL_CHANGE_MESSAGE = "The pom.xml file was changed successfully.";
     private static final String CHANGE_ERROR_MESSAGE = "ERROR in changing the pom.xml file.";
+
+    private static ConsoleService _consoleService;
+    public static final String UNDEFINED_TEXT = "[Undefined]";
+
+    public PomXMLServiceImpl(ConsoleService consoleService){
+        _consoleService = consoleService;
+    }
 
     private void errorNotValidDataInLog() {
         logger.error("Not valid data was submitted. Cannot modify the pom.xml files.");
@@ -46,16 +65,19 @@ public class PomXMLServiceImpl implements PomXMLService {
             errorNotValidDataInLog();
             return;
         }
+
         for (Project project : projects) {
-            if (project == null) {
+            if (project == null || !project.isCloned()) {
                 continue;
             }
             PomXMLModel model = getModel(project);
             if (changeParentVersion(model, newVersion)) {
                 model.writeToFile();
-                logger.info(SUCCESSFUL_CHANGE_MESSAGE);
+                _consoleService.addMessage(SUCCESSFUL_CHANGE_MESSAGE + " [Project: " + project.getName() + "]",
+                        MessageType.SUCCESS);
             } else {
-                logger.error(CHANGE_ERROR_MESSAGE);
+                _consoleService.addMessage(CHANGE_ERROR_MESSAGE + " [Project: " + project.getName() + "]",
+                        MessageType.ERROR);
             }
         }
     }
@@ -66,16 +88,19 @@ public class PomXMLServiceImpl implements PomXMLService {
             errorNotValidDataInLog();
             return;
         }
+
         for (Project project : projects) {
-            if (project == null) {
+            if (project == null || !project.isCloned()) {
                 continue;
             }
             PomXMLModel model = getModel(project);
             if (changeGroupName(model, oldName, newName)) {
                 model.writeToFile();
-                logger.info(SUCCESSFUL_CHANGE_MESSAGE);
+                _consoleService.addMessage(SUCCESSFUL_CHANGE_MESSAGE + " [Project: " + project.getName() + "]",
+                        MessageType.SUCCESS);
             } else {
-                logger.error(CHANGE_ERROR_MESSAGE);
+                _consoleService.addMessage(CHANGE_ERROR_MESSAGE + " [Project: " + project.getName() + "]",
+                        MessageType.ERROR);
             }
         }
     }
@@ -87,81 +112,285 @@ public class PomXMLServiceImpl implements PomXMLService {
             return;
         }
         for (Project project : projects) {
-            if (project == null) {
+            if (project == null || !project.isCloned()) {
                 continue;
             }
             PomXMLModel model = getModel(project);
             if (changeReleaseName(model, newName)) {
                 model.writeToFile();
-                logger.info(SUCCESSFUL_CHANGE_MESSAGE);
+                _consoleService.addMessage(SUCCESSFUL_CHANGE_MESSAGE + " [Project: " + project.getName() + "]",
+                        MessageType.SUCCESS);
             } else {
-                logger.error(CHANGE_ERROR_MESSAGE);
+                _consoleService.addMessage(CHANGE_ERROR_MESSAGE + " [Project: " + project.getName() + "]",
+                        MessageType.ERROR);
             }
         }
     }
 
+    @FXML
+    public Set<String> getReposIds(List<Project> projects, Boolean isCommon) {
+        Set<String> uniqueIds = new HashSet<>();
+        if (projects == null) {
+            errorNotValidDataInLog();
+            return uniqueIds;
+        }
+
+        List<Model> models = getModelFiles(projects);
+
+        models.forEach(model -> {
+            List<String> projectIds = model.getRepositories().stream()
+                    .map(RepositoryBase::getId)
+                    .collect(Collectors.toList());
+
+            mergeCollections(uniqueIds, projectIds, isCommon);
+        });
+
+        return uniqueIds;
+    }
+
     @Override
-    public void addRepository(Collection<Project> projects, String id, String url) {
+    public Map<Project, Boolean> addRepository(Collection<Project> projects, String id, String url, String layout) {
+        Map<Project, Boolean> statuses = new HashMap<>();
         if (projects == null || !isValidString(id) || !isValidString(url)) {
             errorNotValidDataInLog();
-            return;
+            return statuses;
         }
         for (Project project : projects) {
-            if (project == null) {
-                continue;
-            }
-            PomXMLModel model = getModel(project);
-            if(addRepository(model, id, url)) {
-                model.writeToFile();
-                logger.info(SUCCESSFUL_CHANGE_MESSAGE);
-            } else {
-                logger.error(CHANGE_ERROR_MESSAGE);
-            }
-        }
-    }
-
-    @Override
-    public void removeRepository(Collection<Project> projects, String id) {
-        if (projects == null || !isValidString(id)) {
-            errorNotValidDataInLog();
-            return;
-        }
-        for (Project project : projects) {
-            if (project == null) {
-                continue;
-            }
-            PomXMLModel model = getModel(project);
-            if (removeRepository(model, id)) {
-                model.writeToFile();
-                logger.info(SUCCESSFUL_CHANGE_MESSAGE);
-            } else {
-                logger.error(CHANGE_ERROR_MESSAGE);
-            }
-        }
-    }
-
-    @Override
-    public void modifyRepository(Collection<Project> projects, String oldId, String newId, String newUrl) {
-        if (projects == null || !isValidString(oldId) || !isValidString(newId) || !isValidString(newUrl)) {
-            errorNotValidDataInLog();
-            return;
-        }
-        for (Project project : projects) {
-            if (project == null) {
+            if (project == null || !project.isCloned()) {
+                statuses.put(project, false);
                 continue;
             }
             PomXMLModel pomModel = getModel(project);
+            if (addRepository(pomModel, id, url, layout)) {
+                pomModel.writeToFile();
+                statuses.put(project, true);
+                _consoleService.addMessage(SUCCESSFUL_CHANGE_MESSAGE + " [Project: " + project.getName() + "]",
+                        MessageType.SUCCESS);
+            } else {
+                statuses.put(project, false);
+                _consoleService.addMessage(CHANGE_ERROR_MESSAGE + " [Project: " + project.getName() + "]",
+                        MessageType.ERROR);
+            }
+        }
+
+        return statuses;
+    }
+
+    @Override
+    public Map<Project, Boolean> removeRepository(Collection<Project> projects, String id) {
+        Map<Project, Boolean> statuses = new HashMap<>();
+        if (projects == null || !isValidString(id)) {
+            errorNotValidDataInLog();
+            return statuses;
+        }
+        for (Project project : projects) {
+            if (project == null || !project.isCloned()) {
+                statuses.put(project, false);
+                continue;
+            }
+            PomXMLModel pomModel = getModel(project);
+            if (removeRepository(pomModel, id)) {
+                pomModel.writeToFile();
+                statuses.put(project, true);
+                _consoleService.addMessage(SUCCESSFUL_CHANGE_MESSAGE + " [Project: " + project.getName() + "]",
+                        MessageType.SUCCESS);
+            } else {
+                statuses.put(project, false);
+                _consoleService.addMessage(CHANGE_ERROR_MESSAGE + " [Project: " + project.getName() + "]",
+                        MessageType.ERROR);
+            }
+        }
+
+        return statuses;
+    }
+
+    @Override
+    public Map<Project, Boolean> modifyRepository(Collection<Project> projects, String oldId, String newId, String newUrl, String newLayout) {
+        Map<Project, Boolean> statuses = new HashMap<>();
+        if (projects == null || !isValidString(oldId) || !isValidString(newId) || !isValidString(newUrl)) {
+            errorNotValidDataInLog();
+            return statuses;
+        }
+
+
+        for (Project project : projects) {
+            if (project == null || !project.isCloned()) {
+                statuses.put(project, false);
+                continue;
+            }
+
+            PomXMLModel pomModel = getModel(project);
             Model model = pomModel.getModelFile();
+
             if (model == null) {
+                statuses.put(project, false);
                 continue;
             }
             List<Repository> rep = model.getRepositories();
-            if (modifyRepository(rep, oldId, newId, newUrl)) {
+            if (modifyRepository(rep, oldId, newId, newUrl, newLayout)) {
                 pomModel.writeToFile();
-                logger.info(SUCCESSFUL_CHANGE_MESSAGE);
+                statuses.put(project, true);
+                _consoleService.addMessage(SUCCESSFUL_CHANGE_MESSAGE + " [Project: " + project.getName() + "]",
+                        MessageType.SUCCESS);
             } else {
-                logger.error(CHANGE_ERROR_MESSAGE);
+                statuses.put(project, false);
+                _consoleService.addMessage(CHANGE_ERROR_MESSAGE + " [Project: " + project.getName() + "]",
+                        MessageType.ERROR);
             }
+        }
+
+        return statuses;
+    }
+
+    @Override
+    public String getReleaseName(Collection<Project> projects) {
+        if (projects == null) {
+            errorNotValidDataInLog();
+            return StringUtils.EMPTY;
+        }
+
+        return getPropertyByKey(projects, RELEASE_NAME_KEY);
+    }
+
+    @Override
+    public String getEclipseRelease(Collection<Project> projects) {
+        if (projects == null) {
+            errorNotValidDataInLog();
+            return StringUtils.EMPTY;
+        }
+
+        return getPropertyByKey(projects, ECLIPSE_RELEASE_KEY);
+    }
+
+    @Override
+    public String getLayout(List<Project> projects, String idRepo) {
+        if (projects == null) {
+            errorNotValidDataInLog();
+            return StringUtils.EMPTY;
+        }
+
+        List<String> projectsLayouts = new ArrayList<>();
+        List<Model> models = getModelFiles(projects);
+
+        models.forEach(model -> {
+
+            List<Repository> repos = model.getRepositories()
+                    .stream()
+                    .filter(repo -> repo.getId().equals(idRepo))
+                    .collect(Collectors.toList());
+
+            if (repos.size() == 1) {
+                projectsLayouts.add(repos.get(0).getLayout());
+            } else {
+                projectsLayouts.add(UNDEFINED_TEXT);
+            }
+        });
+
+        boolean allEqual = new HashSet<>(projectsLayouts).size() == 1;
+
+        return allEqual ? projectsLayouts.get(0) : UNDEFINED_TEXT;
+    }
+
+    @Override
+    public String getUrl(List<Project> projects, String idRepo) {
+        if (projects == null) {
+            errorNotValidDataInLog();
+            return StringUtils.EMPTY;
+        }
+
+        List<String> projectsUrls = new ArrayList<>();
+        List<Model> models = getModelFiles(projects);
+
+        models.forEach(model -> {
+            List<Repository> repos = model.getRepositories()
+                    .stream()
+                    .filter(repo -> repo.getId().equals(idRepo))
+                    .collect(Collectors.toList());
+
+            if (repos.size() == 1) {
+                projectsUrls.add(repos.get(0).getUrl());
+            } else {
+                projectsUrls.add(UNDEFINED_TEXT);
+            }
+        });
+
+        boolean allEqual = new HashSet<>(projectsUrls).size() == 1;
+
+        return allEqual ? projectsUrls.get(0) : UNDEFINED_TEXT;
+    }
+
+    @Override
+    public boolean containsRepository(Project project, String idRepo) {
+        if (project == null || idRepo == null || !project.isCloned()) {
+            errorNotValidDataInLog();
+            return false;
+        }
+
+        Model model = getModelFile(project);
+
+        return model != null && model.getRepositories()
+                .stream()
+                .anyMatch(repo -> repo.getId().equals(idRepo));
+
+    }
+
+    @Override
+    public boolean hasPomFile(List<Project> projects) {
+        if (projects == null) {
+            return false;
+        }
+
+        for (Project project : projects) {
+            PomXMLModel pomModel = getModel(project);
+            Model model = pomModel.getModelFile();
+
+            if (model == null) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private List<Model> getModelFiles(Collection<Project> projects) {
+        return projects.stream()
+                .filter(Objects::nonNull)
+                .filter(Project::isCloned)
+                .map(this::getModelFile)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
+
+    private String getPropertyByKey(Collection<Project> projects, String key) {
+        List<String> properties = new ArrayList<>();
+
+        for (Project project : projects) {
+            Model model = getModelFile(project);
+
+            if (model != null) {
+                properties.add(model.getProperties().getProperty(key));
+            }
+        }
+
+        boolean allEqual = new HashSet<>(properties).size() == 1;
+        return allEqual ? properties.get(0) : UNDEFINED_TEXT;
+    }
+
+
+    private Model getModelFile(Project project) {
+        if (project == null || !project.isCloned()) {
+            return null;
+        }
+
+        PomXMLModel pomModel = getModel(project);
+        return pomModel.getModelFile();
+    }
+
+    private <T> void mergeCollections(Collection<T> first, Collection<T> second, boolean onlyGeneral) {
+        if (onlyGeneral && !first.isEmpty()) {
+            first.retainAll(second);
+        } else {
+            first.addAll(second);
         }
     }
 
@@ -265,7 +494,7 @@ public class PomXMLServiceImpl implements PomXMLService {
         return isChanged;
     }
 
-    private boolean addRepository(PomXMLModel pomMng, String id, String url) {
+    private boolean addRepository(PomXMLModel pomMng, String id, String url, String layout) {
         Model model = pomMng.getModelFile();
         if (model == null) {
             return false;
@@ -275,7 +504,7 @@ public class PomXMLServiceImpl implements PomXMLService {
         Repository repository = new Repository();
         repository.setId(id);
         repository.setUrl(url);
-        repository.setLayout(REPOSITORY_LAYOUT);
+        repository.setLayout(layout);
 
         if (!isListHasRepository(reps, repository)) {
             reps.add(repository);
@@ -284,7 +513,7 @@ public class PomXMLServiceImpl implements PomXMLService {
         return false;
     }
 
-    private boolean modifyRepository(List<Repository> reps, String oldId, String newId, String url) {
+    private boolean modifyRepository(List<Repository> reps, String oldId, String newId, String url, String layout) {
         if (reps == null) {
             return false;
         }
@@ -293,7 +522,7 @@ public class PomXMLServiceImpl implements PomXMLService {
             if (repository != null && repository.getId().equals(oldId)) {
                 repository.setId(newId);
                 repository.setUrl(url);
-                repository.setLayout(REPOSITORY_LAYOUT);
+                repository.setLayout(layout);
                 isChanged = true;
             }
         }
@@ -348,6 +577,10 @@ public class PomXMLServiceImpl implements PomXMLService {
     }
 
     private String findPathToPomXMLFile(Project pr) {
+        if (pr == null) {
+            return null;
+        }
+
         String pathToProject = pr.getPath();
         if (pathToProject == null) {
             return null;
@@ -355,12 +588,12 @@ public class PomXMLServiceImpl implements PomXMLService {
         Path projectPath = Paths.get(pr.getPath());
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(projectPath)) {
             for (Path file : stream) {
-                if (Files.isRegularFile(file) && file.getName(file.getNameCount()-1).toString().equals(POM_NAME)) {
+                if (Files.isRegularFile(file) && file.getName(file.getNameCount() - 1).toString().equals(POM_NAME)) {
                     return file.toString();
                 }
             }
         } catch (IOException e) {
-            logger.error("", e);
+            logger.error(StringUtils.EMPTY, e);
         }
         return null;
     }

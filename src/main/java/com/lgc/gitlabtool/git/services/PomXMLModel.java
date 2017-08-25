@@ -35,7 +35,6 @@ public class PomXMLModel {
      */
     public PomXMLModel(String pomXmlPath) {
         if (pomXmlPath == null) {
-            logger.error("Could not create file model, passed invalid data.");
             return;
         }
         Path path = Paths.get(pomXmlPath);
