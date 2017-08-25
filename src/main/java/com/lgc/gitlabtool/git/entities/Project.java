@@ -24,6 +24,7 @@ public class Project {
     private String _pathToClonedProject;
     private boolean _isCloned;
     private ProjectType _type;
+    private ProjectStatus _projectStatus = ProjectStatus.DEFAULT;
 
     /**
      * Sets a project type
@@ -104,6 +105,42 @@ public class Project {
 
     public String getHttp_url_to_repo() {
         return http_url_to_repo;
+    }
+
+    /**
+     * Shows if project has uncommitted changes
+     * 
+     * @return <code>true</code> if project has uncommitted changes and <code>false</code> otherwise
+     */
+    public boolean hasUncommittedChanges() {
+        return _projectStatus == ProjectStatus.HAS_CHANGES;
+    }
+
+    /**
+     * Shows if project has conflicts
+     * 
+     * @return <code>true</code> if project has conflicts and <code>false</code> otherwise
+     */
+    public boolean hasConflicts() {
+        return _projectStatus == ProjectStatus.HAS_CONFLICTS;
+    }
+
+    /**
+     * Sets the status of project
+     * 
+     * @param status - instance of {@link ProjectStatus}
+     */
+    public void setProjectStatus(ProjectStatus status) {
+        _projectStatus = status;
+    }
+
+    /**
+     * Returns status of project
+     * 
+     * @return current {@link ProjectStatus}
+     */
+    public ProjectStatus getProjectStatus() {
+        return _projectStatus;
     }
 
 }

@@ -24,6 +24,7 @@ import com.lgc.gitlabtool.git.entities.MessageType;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
+import com.lgc.gitlabtool.git.listeners.stateListeners.StateListener;
 import com.lgc.gitlabtool.git.services.ConsoleService;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.LoginService;
@@ -82,7 +83,7 @@ import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
-public class MainWindowController {
+public class MainWindowController implements StateListener {
     private static final String HEDER_GROUP_TITLE = "Current group: ";
     private static final String SELECT_ALL_IMAGE_URL = "icons/select_all_20x20.png";
     private static final String REFRESH_PROJECTS_IMAGE_URL = "icons/toolbar/refresh_projects_20x20.png";
@@ -90,7 +91,6 @@ public class MainWindowController {
     private static final String DIVIDER_PROPERTY_NODE = "MainWindowController_Dividers";
     private static final String STATUS_DIALOG_TITLE = "Status dialog";
     private static final String STATUS_DIALOG_HEADER_COMMIT = "Commit statuses";
-    private static final String STATUS_DIALOG_HEADER_PUSH = "Push statuses";
     private static final String EDIT_PROJECT_PROPERTIES = "Edit project properties";
     private static final String EDIT_POM_SELECTION_WARNING = "Selected projects do not have Pom.xml file or contains shadow project";
 
@@ -139,6 +139,12 @@ public class MainWindowController {
 
     @FXML
     private ToggleButton filterShadowProjects;
+
+    {
+        _stateService.addStateListener(ApplicationState.COMMIT, this);
+        _stateService.addStateListener(ApplicationState.PUSH, this);
+        _stateService.addStateListener(ApplicationState.PULL, this);
+    }
 
     public void beforeShowing() {
         String username = _loginService.getCurrentUser().getName();
@@ -217,7 +223,7 @@ public class MainWindowController {
     }
 
     /**
-     * Updates current projects list. Method don't load projects from the GitLab
+     * Updates current projects list. Method doesn't load projects from the GitLab
      */
     public void updateProjectsList(){
         projectsList.refresh();
@@ -426,11 +432,15 @@ public class MainWindowController {
 
     private void showCreateNewBranchDialog() {
         List<Project> allSelectedProjects = getSelectedProjects();
-        List<Project> clonedProjects = allSelectedProjects.stream()
-                                                          .filter(prj -> prj.isCloned())
-                                                          .collect(Collectors.toList());
-        CreateNewBranchDialog dialog = new CreateNewBranchDialog(clonedProjects);
+        List<Project> clonedProjectsWithoutConflicts = allSelectedProjects.stream()
+                .filter(this::projectIsReadyForGitOperations)
+                .collect(Collectors.toList());
+        CreateNewBranchDialog dialog = new CreateNewBranchDialog(clonedProjectsWithoutConflicts);
         dialog.showAndWait();
+    }
+
+    private boolean projectIsReadyForGitOperations(Project project) {
+        return project.isCloned() && !project.hasConflicts();
     }
 
     @FXML
@@ -448,7 +458,7 @@ public class MainWindowController {
             @Override
             public void run() {
                 sortProjectsList();
-                projectsList.refresh();
+                updateProjectsList();
             }
         });
         checkProjectsList();
@@ -483,7 +493,8 @@ public class MainWindowController {
     @FXML
     public void onPushAction(ActionEvent actionEvent) {
         List<Project> allSelectedProjects = getSelectedProjects();
-        List<Project> filteredProjects = allSelectedProjects.stream().filter(prj -> prj.isCloned())
+        List<Project> filteredProjects = allSelectedProjects.stream()
+                .filter(this::projectIsReadyForGitOperations)
                 .collect(Collectors.toList());
 
         Map<Project, JGitStatus> pushStatuses = new ConcurrentHashMap<>();
@@ -500,6 +511,7 @@ public class MainWindowController {
             _consoleService.addMessage("Push projects is finished!", MessageType.SIMPLE);
         });
         executor.shutdown();
+//        refreshLoadProjects();
     }
 
     @FXML
@@ -629,7 +641,7 @@ public class MainWindowController {
     @FXML
     public void onPullAction(ActionEvent actionEvent) {
         List<Project> projectsToPull = getSelectedProjects().stream()
-                .filter(project -> project.isCloned())
+                .filter(this::projectIsReadyForGitOperations)
                 .collect(Collectors.toList());
         checkChangesAndPull(projectsToPull, new Object());
     }
@@ -677,6 +689,13 @@ public class MainWindowController {
         @Override
         public void onFinish(Object... t) {
             _stateService.stateOFF(ApplicationState.PUSH);
+        }
+    }
+
+    @Override
+    public void handleEvent(ApplicationState changedStat, boolean isActivate) {
+        if (!isActivate) {
+            refreshLoadProjects();
         }
     }
 

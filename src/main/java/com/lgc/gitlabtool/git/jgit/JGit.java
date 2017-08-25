@@ -34,6 +34,7 @@ import org.eclipse.jgit.dircache.DirCacheCheckout;
 import org.eclipse.jgit.errors.CorruptObjectException;
 import org.eclipse.jgit.errors.NoWorkTreeException;
 import org.eclipse.jgit.errors.RevisionSyntaxException;
+import org.eclipse.jgit.lib.BranchTrackingStatus;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.EmptyProgressMonitor;
 import org.eclipse.jgit.lib.PersonIdent;
@@ -868,5 +869,37 @@ public class JGit {
             logger.error("[is current branch] Error getting the repository: " + e.getMessage());
         }
         return false;
+    }
+
+    /**
+     * Returns count of commits ahead and behind index
+     * 
+     * @param project - project to show status
+     * @param branchName - the name of branch
+     * @return array of ahead and behind commits counts<br>
+     *         Array consists of two parameters: 
+     *         first is the count of commits ahead Index, <br>
+     *         second is the count of commits behind Index
+     */
+    public int[] getAheadBehindIndexCounts(Project project, String branchName) {
+        if (project == null || branchName == null || branchName.isEmpty()) {
+            logger.error("Wrong parameters! Project: " + project + "; branchName: " + branchName);
+            return new int[] {0, 0};
+        }
+
+        int commitsAheadIndex = 0;
+        int commitsBehindIndex = 0;
+        try (Git git = getGit(project.getPath())) {
+            BranchTrackingStatus trackingStatus = BranchTrackingStatus.of(git.getRepository(), branchName);
+            if (trackingStatus != null) {
+                commitsAheadIndex = trackingStatus.getAheadCount();
+                commitsBehindIndex = trackingStatus.getBehindCount();
+            }
+        } catch (IOException e) {
+            logger.error("Could not get tracking status " + e.getMessage());
+        }
+
+        int[] aheadBehind = {commitsAheadIndex, commitsBehindIndex};
+        return aheadBehind;
     }
 }

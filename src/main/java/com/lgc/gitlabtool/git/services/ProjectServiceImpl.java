@@ -50,15 +50,18 @@ public class ProjectServiceImpl implements ProjectService {
     private static StateService _stateService;
     private static RESTConnector _connector;
     private ConsoleService _consoleService;
+    private static GitService _gitService;
 
     public ProjectServiceImpl(RESTConnector connector,
-                              ProjectTypeService projectTypeService,
-                              StateService stateService,
-                              ConsoleService consoleService) {
+    													ProjectTypeService projectTypeService, 
+            									StateService stateService,
+            									ConsoleService consoleService,
+            									GitService gitService) {
         setConnector(connector);
         setProjectTypeService(projectTypeService);
         setStateService(stateService);
         setConsoleService(consoleService);
+        setGitService(gitService);
     }
 
     @Override
@@ -192,6 +195,7 @@ public class ProjectServiceImpl implements ProjectService {
         project.setClonedStatus(true);
         project.setPathToClonedProject(pathGroup + File.separator + project.getName());
         project.setProjectType(_projectTypeService.getProjectType(project));
+        _gitService.modifyProjectStatusByGit(project);
     }
 
     private Project createRemoteProject(Group group, String name, ProgressListener progressListener) {
@@ -310,5 +314,11 @@ public class ProjectServiceImpl implements ProjectService {
         return projects.stream()
                 .filter(Project::isCloned)
                 .count() > 0;
+    }
+
+    private void setGitService(GitService gitService) {
+        if (gitService != null) {
+            _gitService = gitService;
+        }
     }
 }
