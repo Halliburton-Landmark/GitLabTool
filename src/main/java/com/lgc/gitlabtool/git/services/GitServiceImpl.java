@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.jgit.api.Status;
@@ -189,17 +190,30 @@ public class GitServiceImpl implements GitService {
 
     @Override
     public void modifyProjectStatusByGit(Project project) {
+        Optional<String> optBranch = _git.getCurrentBranch(project);
+        String branchName = optBranch.isPresent() ? optBranch.get() : StringUtils.EMPTY;
+
         Optional<Status> status = _git.getStatusProject(project);
+        boolean hasConflicts = false;
+        boolean hasChanges = false;
         if (status.isPresent()) {
-            if (status.get().getConflicting().size() > 0) {
-                project.setProjectStatus(ProjectStatus.HAS_CONFLICTS);
+            hasConflicts = status.get().getConflicting().size() > 0;
+            if (hasConflicts) {
+                project.setProjectStatus(new ProjectStatus(hasConflicts, false, branchName));
                 return;
             }
-            if (status.get().hasUncommittedChanges()) {
-                project.setProjectStatus(ProjectStatus.HAS_CHANGES);
-            } else {
-                project.setProjectStatus(ProjectStatus.DEFAULT);
-            }
+            hasChanges = status.get().hasUncommittedChanges();
         }
+
+        int aheadIndex = 0;
+        int behindIndex = 0;
+        if (optBranch.isPresent()) {
+            int[] indexCount = getAheadBehindIndexCounts(project, branchName);
+            aheadIndex = indexCount[0];
+            behindIndex = indexCount[1];
+        }
+
+        ProjectStatus projectStatus = new ProjectStatus(hasConflicts, hasChanges, aheadIndex, behindIndex, branchName);
+        project.setProjectStatus(projectStatus);
     }
 }

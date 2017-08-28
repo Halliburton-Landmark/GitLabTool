@@ -4,13 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import com.lgc.gitlabtool.git.entities.Project;
-import com.lgc.gitlabtool.git.jgit.JGit;
-import com.lgc.gitlabtool.git.services.GitService;
-import com.lgc.gitlabtool.git.services.ServiceProvider;
+import com.lgc.gitlabtool.git.entities.ProjectStatus;
 
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -24,12 +20,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 
 public class ProjectListCell extends ListCell<Project> {
-
-    private static final Logger _logger = LogManager.getLogger(ProjectListCell.class);
-
-    private static final GitService _gitService = (GitService) ServiceProvider.getInstance()
-            .getService(GitService.class.getName());
-
     private static final String SHADOW_PROJECT_ICON_URL = "icons/project/shadow_project.png";
     private static final String SHADOW_PROJECT_TOOLTIP = "The project is not cloned.";
     private static final String PROJECT_WITH_CONFLICTS_ICON_URL = "icons/project/list_icons/conflicts.png";
@@ -56,7 +46,7 @@ public class ProjectListCell extends ListCell<Project> {
             Color textColor = item.isCloned() ? Color.BLACK : Color.DIMGRAY;
             projectNameTextView.setFill(textColor);
             Text currentBranchTextView = getCurrentBrantProjectText(item);
-            
+
             String tooltipText = item.isCloned() ?
                     item.getName() + " " + currentBranchTextView.getText() : SHADOW_PROJECT_TOOLTIP;
             Tooltip.install(projectNameTextView, new Tooltip(tooltipText));
@@ -64,7 +54,7 @@ public class ProjectListCell extends ListCell<Project> {
             HBox hBoxItem = new HBox(imageView, projectNameTextView, currentBranchTextView);
             hBoxItem.setSpacing(LIST_CELL_SPACING);
 
-            HBox picItems = new HBox(LIST_CELL_SPACING, getProjectPics(item, getCurrentBranchName(item)));
+            HBox picItems = new HBox(LIST_CELL_SPACING, getProjectPics(item));
 
             AnchorPane anchorPane = new AnchorPane();
             anchorPane.getChildren().addAll(hBoxItem, picItems);
@@ -90,12 +80,11 @@ public class ProjectListCell extends ListCell<Project> {
     }
 
     private String getCurrentBranchName(Project item) {
-        return item.isCloned()
-               ? JGit.getInstance().getCurrentBranch(item).orElse(StringUtils.EMPTY)
-               : StringUtils.EMPTY;
+        ProjectStatus projectStatus = item.getProjectStatus();
+        return projectStatus.getCurrentBranch();
     }
 
-    private Node[] getProjectPics(Project item, String branchName) {
+    private Node[] getProjectPics(Project item) {
         List<Node> pics = new ArrayList<>();
         if (!item.isCloned()) {
             return new Node[0];
@@ -103,7 +92,7 @@ public class ProjectListCell extends ListCell<Project> {
 
         addPicsDependOnStatus(item, pics);
 
-        pics.add(getAheadBehindCountNode(item, branchName));
+        pics.add(getAheadBehindCountNode(item));
 
         return pics.toArray(new Node[pics.size()]);
     }
@@ -112,15 +101,16 @@ public class ProjectListCell extends ListCell<Project> {
         if (project == null || pics == null) {
             return;
         }
-
-        if (project.hasConflicts()) {
-            Node conflictsImageView = newStatusPic(getImage(PROJECT_WITH_CONFLICTS_ICON_URL), 
+        ProjectStatus projectStatus = project.getProjectStatus();
+        if (projectStatus.isHasConflicts()) {
+            Node conflictsImageView = newStatusPic(getImage(PROJECT_WITH_CONFLICTS_ICON_URL),
                     "Project has conflicts");
             pics.add(conflictsImageView);
+            return;
         }
 
-        if (project.hasUncommittedChanges()) {
-            Node uncommittedChangesImage = newStatusPic(getImage(PROJECT_WITH_UNCOMMITTED_CHANGES_ICON_URL), 
+        if (projectStatus.isHasChanges()) {
+            Node uncommittedChangesImage = newStatusPic(getImage(PROJECT_WITH_UNCOMMITTED_CHANGES_ICON_URL),
                     "Project has uncommitted changes");
             pics.add(uncommittedChangesImage);
         }
@@ -139,22 +129,21 @@ public class ProjectListCell extends ListCell<Project> {
         return imageView;
     }
 
-    private Node getAheadBehindCountNode(Project item, String branchName) {
+    private Node getAheadBehindCountNode(Project item) {
         List<Node> items = new ArrayList<>();
-        
-        int[] aheadBehind = _gitService.getAheadBehindIndexCounts(item, branchName);
-        try {
-            if (aheadBehind[0] > 0) {
-                items.add(newStatusPic(getImage(COMMITS_AHEAD_INDEX_ICON_URL), COMMITS_AHEAD_TOOLTIP));
-                items.add(new Text(Integer.toString(aheadBehind[0])));
-            }
-            if (aheadBehind[1] > 0) {
-                items.add(newStatusPic(getImage(COMMITS_BEHIND_INDEX_ICON_URL), COMMITS_BEHIND_TOOLTIP));
-                items.add(new Text(Integer.toString(aheadBehind[1])));
-            }
-        } catch (ArrayIndexOutOfBoundsException e) {
-            _logger.error("", e);
+        ProjectStatus projectStatus = item.getProjectStatus();
+        int anhead = projectStatus.getAheadIndex();
+        if (anhead > 0) {
+            items.add(newStatusPic(getImage(COMMITS_AHEAD_INDEX_ICON_URL), COMMITS_AHEAD_TOOLTIP));
+            items.add(new Text(Integer.toString(anhead)));
         }
+
+        int behind = projectStatus.getBehindIndex();
+        if (behind > 0) {
+            items.add(newStatusPic(getImage(COMMITS_BEHIND_INDEX_ICON_URL), COMMITS_BEHIND_TOOLTIP));
+            items.add(new Text(Integer.toString(behind)));
+        }
+
         HBox aheadBehindItems = new HBox(items.toArray(new Node[items.size()]));
         aheadBehindItems.setAlignment(Pos.CENTER);
         return aheadBehindItems;
