@@ -198,10 +198,6 @@ public class GitServiceImpl implements GitService {
         boolean hasChanges = false;
         if (status.isPresent()) {
             hasConflicts = status.get().getConflicting().size() > 0;
-            if (hasConflicts) {
-                project.setProjectStatus(new ProjectStatus(hasConflicts, false, branchName));
-                return;
-            }
             hasChanges = status.get().hasUncommittedChanges();
         }
 
