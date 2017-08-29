@@ -72,8 +72,7 @@ public class GitServiceImpl implements GitService {
     }
 
     private boolean projectHasChanges(Project project) {
-        Optional<Status> status = _git.getStatusProject(project);
-        return status.isPresent() && status.get().hasUncommittedChanges();
+        return project.getProjectStatus().isHasChanges();
     }
 
     @Override
