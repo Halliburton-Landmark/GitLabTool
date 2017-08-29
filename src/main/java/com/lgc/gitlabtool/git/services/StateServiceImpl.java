@@ -29,6 +29,8 @@ public class StateServiceImpl implements StateService {
         _listeners.put(ApplicationState.COMMIT, createSynchronizedSet());
         _listeners.put(ApplicationState.PUSH, createSynchronizedSet());
         _listeners.put(ApplicationState.CREATE_PROJECT, createSynchronizedSet());
+        _listeners.put(ApplicationState.SWITCH_BRANCH, createSynchronizedSet());
+        _listeners.put(ApplicationState.EDIT_POM, createSynchronizedSet());
 
         _states = new ConcurrentHashMap<>();
         _states.put(ApplicationState.CLONE, START_STATE);
@@ -36,6 +38,8 @@ public class StateServiceImpl implements StateService {
         _states.put(ApplicationState.COMMIT, START_STATE);
         _states.put(ApplicationState.PUSH, START_STATE);
         _states.put(ApplicationState.CREATE_PROJECT, START_STATE);
+        _states.put(ApplicationState.SWITCH_BRANCH, START_STATE);
+        _states.put(ApplicationState.EDIT_POM, START_STATE);
     }
 
     @Override
