@@ -8,9 +8,11 @@ import org.apache.logging.log4j.Logger;
 
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
+import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.ProgressListener;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
+import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 import com.lgc.gitlabtool.git.util.ScreenUtil;
 
@@ -44,14 +46,14 @@ public class CommitDialog extends Dialog<String> {
     private static final String STATUS_PUSH_DIALOG_HEADER = "Pushing changes info";
     private static final String STATUS_PUSH_COLLAPSED_MESSAGE = "%s projects were pushed successfully";
 
-    private Button _commitButton;
-    private Button _commitAndPushButton;
-    private Button _cancelButton;
-    private TextArea _textArea;
-    
+    private final Button _commitButton;
+    private final Button _commitAndPushButton;
+    private final Button _cancelButton;
+    private final TextArea _textArea;
+
     private List<Project> _projectsWithChanges;
     private Map<Project, JGitStatus> _commitStatuses;
-    
+
     private final GitService _gitService =
             (GitService) ServiceProvider.getInstance().getService(GitService.class.getName());
 
@@ -70,7 +72,7 @@ public class CommitDialog extends Dialog<String> {
         HBox hbBtn = new HBox(10);
         hbBtn.setAlignment(Pos.BOTTOM_RIGHT);
         hbBtn.getChildren().addAll(_commitButton, _commitAndPushButton, _cancelButton);
-        
+
         Label label = new Label("Commit message:");
         _textArea = new TextArea();
         _textArea.textProperty().addListener(getInputListener());
@@ -78,7 +80,6 @@ public class CommitDialog extends Dialog<String> {
         VBox expContent = new VBox();
         expContent.getChildren().addAll(label, _textArea, hbBtn);
         getDialogPane().setContent(expContent);
-        
 
         Stage stage = (Stage) getDialogPane().getScene().getWindow();
         stage.getIcons().add(_appIcon);
@@ -94,7 +95,7 @@ public class CommitDialog extends Dialog<String> {
     private List<Project> getProjectsWithChanges() {
         return _projectsWithChanges;
     }
-    
+
     private Map<Project, JGitStatus> getCommitStatuses() {
         return _commitStatuses;
     }
@@ -124,10 +125,9 @@ public class CommitDialog extends Dialog<String> {
     }
 
     private void commitChanges(List<Project> projects, boolean pushToUpstream) {
-        
         String commitMessage = _textArea.getText();
         _commitStatuses = _gitService.commitChanges(projects, commitMessage, pushToUpstream,
-                new CommitProgressListener());
+                new CommitProgressListener(pushToUpstream ? ApplicationState.PUSH : ApplicationState.COMMIT));
     }
 
     private void onCancelButton(ActionEvent event) {
@@ -141,26 +141,26 @@ public class CommitDialog extends Dialog<String> {
     private void showStatusDialog(boolean isPushToUpstream) {
         String dialogTitle = isPushToUpstream ? STATUS_PUSH_DIALOG_TITLE : STATUS_COMMIT_DIALOG_TITLE;
         String dialogHeader = isPushToUpstream ? STATUS_PUSH_DIALOG_HEADER : STATUS_COMMIT_DIALOG_HEADER;
-        
+
         String info = "Successfully: %s project(s)\n"
                     + "Failed: %s project(s)";
-        
+
         long countOfSuccessfulOperations = getCommitStatuses().entrySet().stream()
                 .map(Map.Entry::getValue)
                 .filter(status -> status.equals(JGitStatus.SUCCESSFUL))
                 .count();
-        
+
         StatusDialog statusDialog = new StatusDialog(dialogTitle, dialogHeader);
-        statusDialog.showMessage(getCommitStatuses(), getProjectsWithChanges().size(), info, 
-                String.valueOf(countOfSuccessfulOperations), 
+        statusDialog.showMessage(getCommitStatuses(), getProjectsWithChanges().size(), info,
+                String.valueOf(countOfSuccessfulOperations),
                 String.valueOf(getProjectsWithChanges().size() - countOfSuccessfulOperations));
         statusDialog.showAndWait();
     }
 
-    
+
     /**
      * Shows the instance of this dialog and wait until committing will be performed
-     * 
+     *
      * @param changedProjects - projects with changes that should be committed
      */
     public void commitChanges(List<Project> changedProjects) {
@@ -173,6 +173,18 @@ public class CommitDialog extends Dialog<String> {
     }
 
     class CommitProgressListener implements ProgressListener {
+
+        private final StateService _stateService = (StateService) ServiceProvider.getInstance()
+                .getService(StateService.class.getName());
+
+        private final ApplicationState _currentState;
+
+        public CommitProgressListener(ApplicationState currentState) {
+            _currentState = currentState;
+            if (_currentState != null) {
+                _stateService.stateON(_currentState);
+            }
+        }
 
         @Override
         public void onSuccess(Object... t) {
@@ -196,7 +208,11 @@ public class CommitDialog extends Dialog<String> {
         public void onStart(Object... t) {}
 
         @Override
-        public void onFinish(Object... t) {}
+        public void onFinish(Object... t) {
+            if (_currentState != null) {
+                _stateService.stateOFF(_currentState);
+            }
+        }
 
     }
 

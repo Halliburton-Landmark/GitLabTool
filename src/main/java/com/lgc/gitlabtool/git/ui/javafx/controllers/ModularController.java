@@ -32,7 +32,6 @@ import com.lgc.gitlabtool.git.util.ScreenUtil;
 
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Rectangle2D;
@@ -56,7 +55,6 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
 
 public class ModularController {
 
@@ -237,11 +235,11 @@ public class ModularController {
 
     private void showSwitchBranchWindow() {
         try {
-            EventHandler<WindowEvent> confirmCloseEventHandler = event -> {
-                if (_mainWindowController != null) {
-                    _mainWindowController.updateProjectsList();
-                }
-            };
+//            EventHandler<WindowEvent> confirmCloseEventHandler = event -> {
+//                if (_mainWindowController != null) {
+//                    _mainWindowController.updateProjectsList();
+//                }
+//            };
 
             URL switchBranchWindowUrl = getClass().getClassLoader().getResource(ViewKey.SWITCH_BRANCH_WINDOW.getPath());
             FXMLLoader loader = new FXMLLoader(switchBranchWindowUrl);
@@ -253,7 +251,6 @@ public class ModularController {
             stage.getIcons().add(_appIcon);
             stage.setTitle(SWITCH_BRANCH_TITLE);
             stage.initModality(Modality.APPLICATION_MODAL);
-            stage.setOnHiding(confirmCloseEventHandler);
 
             /* Set size and position */
             Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();

@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -18,12 +17,11 @@ import com.lgc.gitlabtool.git.jgit.JGit;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
-import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
+import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.icon.LocalRemoteIconHolder;
 import com.lgc.gitlabtool.git.ui.javafx.ChangesCheckDialog;
 import com.lgc.gitlabtool.git.ui.javafx.StatusDialog;
 import com.lgc.gitlabtool.git.ui.selection.SelectionsProvider;
-import com.lgc.gitlabtool.git.util.ScreenUtil;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -32,10 +30,7 @@ import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBar;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
@@ -54,8 +49,11 @@ public class SwitchBranchWindowController {
     private static final String SWITCHTO_STATUS_ALERT_TITLE = "Switch branch info";
     private static final String SWITCHTO_STATUS_ALERT_HEADER = "Switch branch statuses:";
 
-    private final GitService _gitService =
+    private static final GitService _gitService =
             (GitService) ServiceProvider.getInstance().getService(GitService.class.getName());
+
+    private static final StateService _stateService =
+            (StateService) ServiceProvider.getInstance().getService(StateService.class.getName());
 
     private List<Branch> _allBranches = new ArrayList<>();
 

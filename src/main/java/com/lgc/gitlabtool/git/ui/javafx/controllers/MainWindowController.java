@@ -1,7 +1,7 @@
 package com.lgc.gitlabtool.git.ui.javafx.controllers;
 
 
-import java.awt.*;
+import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -9,8 +9,6 @@ import java.math.RoundingMode;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.prefs.Preferences;
@@ -22,7 +20,6 @@ import org.apache.logging.log4j.Logger;
 import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.MessageType;
 import com.lgc.gitlabtool.git.entities.Project;
-import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.listeners.stateListeners.StateListener;
 import com.lgc.gitlabtool.git.services.ConsoleService;
@@ -139,11 +136,12 @@ public class MainWindowController implements StateListener {
 
     @FXML
     private ToggleButton filterShadowProjects;
-
     {
+        _stateService.addStateListener(ApplicationState.CLONE, this);
         _stateService.addStateListener(ApplicationState.COMMIT, this);
         _stateService.addStateListener(ApplicationState.PUSH, this);
         _stateService.addStateListener(ApplicationState.PULL, this);
+        _stateService.addStateListener(ApplicationState.CREATE_PROJECT, this);
     }
 
     public void beforeShowing() {
@@ -219,15 +217,15 @@ public class MainWindowController implements StateListener {
 
     public void setSelectedGroup(Group group) {
         _currentGroup = group;
-        refreshLoadProjects();
+        loadProjects();
     }
 
-    /**
-     * Updates current projects list. Method doesn't load projects from the GitLab
-     */
-    public void updateProjectsList(){
-        projectsList.refresh();
-    }
+//    /**
+//     * Updates current projects list. Method doesn't load projects from the GitLab
+//     */
+//    public void updateProjectsList(){
+//        projectsList.refresh();
+//    }
 
     public void onSelectAll() {
         if (projectsList != null && projectsList.getItems() != null && !projectsList.getItems().isEmpty()) {
@@ -420,13 +418,12 @@ public class MainWindowController implements StateListener {
     @FXML
     public void onNewBranchButton(ActionEvent actionEvent) {
         showCreateNewBranchDialog();
-        updateProjectsList();
     }
 
     @FXML
     public void createProjectButton(ActionEvent actionEvent) {
         // dialog
-        CreateProjectDialog dialog = new CreateProjectDialog(_currentGroup, (obj) -> refreshLoadProjects());
+        CreateProjectDialog dialog = new CreateProjectDialog(_currentGroup, null);
         dialog.showAndWait();
     }
 
@@ -446,30 +443,28 @@ public class MainWindowController implements StateListener {
     @FXML
     public void refreshLoadProjects(ActionEvent actionEvent) {
         ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.submit(() -> {
-            refreshLoadProjects();
-        });
+        executor.submit(() -> loadProjects());
         executor.shutdown();
     }
 
-    private void refreshLoadProjects() {
+    private void loadProjects() {
         _projects = (List<Project>) _projectService.loadProjects(_currentGroup);
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                sortProjectsList();
-                updateProjectsList();
-            }
-        });
+        sortProjectsList();
         checkProjectsList();
     }
 
     // shadow projects in the end list
     private void sortProjectsList() {
-        List<Project> sortedList = _projects.stream().sorted(this::compareProjects)
-                                                     .collect(Collectors.toList());
-        ObservableList<Project> projectsObservableList = FXCollections.observableList(sortedList);
-        projectsList.setItems(projectsObservableList);
+        List<Project> sortedList = _projects.parallelStream()
+                                            .sorted(this::compareProjects)
+                                            .collect(Collectors.toList());
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                ObservableList<Project> projectsObservableList = FXCollections.observableList(sortedList);
+                projectsList.setItems(projectsObservableList);
+            }
+        });
     }
 
     private int compareProjects(Project firstProject, Project secondProject) {
@@ -493,25 +488,12 @@ public class MainWindowController implements StateListener {
     @FXML
     public void onPushAction(ActionEvent actionEvent) {
         List<Project> allSelectedProjects = getSelectedProjects();
-        List<Project> filteredProjects = allSelectedProjects.stream()
-                .filter(this::projectIsReadyForGitOperations)
-                .collect(Collectors.toList());
-
-        Map<Project, JGitStatus> pushStatuses = new ConcurrentHashMap<>();
-
+        List<Project> filteredProjects = allSelectedProjects.parallelStream()
+                                                            .filter(this::projectIsReadyForGitOperations)
+                                                            .collect(Collectors.toList());
         ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.submit(() -> {
-            _consoleService.addMessage("Push projects is started...", MessageType.SIMPLE);
-            _stateService.stateON(ApplicationState.PUSH);
-            pushStatuses.putAll(_gitService.push(filteredProjects, new PushProgressListener()));
-//            We don't need in the Status dialog here if we use UI console and executor
-//            String dialogMessage = "%s projects were pushed successfully";
-//            showStatusDialog(pushStatuses, allSelectedProjects.size(), STATUS_DIALOG_TITLE, STATUS_DIALOG_HEADER_PUSH,
-//                    dialogMessage);
-            _consoleService.addMessage("Push projects is finished!", MessageType.SIMPLE);
-        });
+        executor.submit(() -> _gitService.push(filteredProjects, new PushProgressListener()));
         executor.shutdown();
-//        refreshLoadProjects();
     }
 
     @FXML
@@ -595,7 +577,7 @@ public class MainWindowController implements StateListener {
 
     private boolean startClone(List<Project> shadowProjects, String path,  CloneProgressDialog progressDialog) {
         _projectService.clone(shadowProjects, path,
-                new OperationProgressListener(progressDialog, ApplicationState.CLONE, (obj) -> refreshLoadProjects(null)));
+                new OperationProgressListener(progressDialog, ApplicationState.CLONE, null));
         return true;
     }
 
@@ -620,7 +602,7 @@ public class MainWindowController implements StateListener {
             @Override
             public void run() {
                 IncorrectProjectDialog dialog = new IncorrectProjectDialog();
-                dialog.showDialog(incorrectProjects, (obj) -> refreshLoadProjects());
+                dialog.showDialog(incorrectProjects, (obj) -> loadProjects());
             }
         });
     }
@@ -667,6 +649,11 @@ public class MainWindowController implements StateListener {
 
     public class PushProgressListener implements ProgressListener {
 
+        public PushProgressListener() {
+            _consoleService.addMessage("Push projects is started...", MessageType.SIMPLE);
+            _stateService.stateON(ApplicationState.PUSH);
+        }
+
         @Override
         public void onSuccess(Object... t) {
             if(t[0] instanceof Project) {
@@ -689,13 +676,14 @@ public class MainWindowController implements StateListener {
         @Override
         public void onFinish(Object... t) {
             _stateService.stateOFF(ApplicationState.PUSH);
+            _consoleService.addMessage("Push projects is finished!", MessageType.SIMPLE);
         }
     }
 
     @Override
-    public void handleEvent(ApplicationState changedStat, boolean isActivate) {
+    public void handleEvent(ApplicationState state, boolean isActivate) {
         if (!isActivate) {
-            refreshLoadProjects();
+            refreshLoadProjects(null);
         }
     }
 

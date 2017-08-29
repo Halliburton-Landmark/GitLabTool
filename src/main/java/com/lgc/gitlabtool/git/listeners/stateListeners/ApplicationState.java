@@ -52,7 +52,7 @@ public enum ApplicationState {
     EDIT_POM {
         @Override
         public String toString() {
-            return "pom.xml file editing";
+            return "Editing pom.xml file";
         }
     };
 
