@@ -28,6 +28,7 @@ import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuItems;
 import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuManager;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarButtons;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarManager;
+import com.lgc.gitlabtool.git.util.FileLauncherUtil;
 import com.lgc.gitlabtool.git.util.ScreenUtil;
 
 import javafx.application.Platform;
@@ -76,6 +77,8 @@ public class ModularController {
     private static final String REMOVE_GROUP_DIALOG_TITLE = "Remove Group";
     private static final String REMOVE_GROUP_STATUS_DIALOG_TITLE = "Import Status Dialog";
     private static final String FAILED_REMOVE_GROUP_MESSAGE = "Removing of group is Failed";
+
+    private static final String USER_GUIDE_URL = "src/main/resources/user_guide.pdf";
 
     private static final String CSS_PATH = "css/style.css";
     private static final Image _appIcon = AppIconHolder.getInstance().getAppIcoImage();
@@ -218,12 +221,18 @@ public class ModularController {
             MenuItem about = MainMenuManager.getInstance().getButtonById(MainMenuItems.GROUP_WINDOW_ABOUT);
             about.setOnAction(event -> showAboutPopup());
 
+            MenuItem userGuide = MainMenuManager.getInstance().getButtonById(MainMenuItems.GROUP_WINDOW_USER_GUIDE);
+            userGuide.setOnAction(event -> openUserGuide());
+
         } else if (windowId.equals(ViewKey.MAIN_WINDOW.getKey())) {
             MenuItem exit = MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_EXIT);
             exit.setOnAction(event -> exit());
 
             MenuItem about = MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_ABOUT);
             about.setOnAction(event -> showAboutPopup());
+
+            MenuItem userGuide = MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_USER_GUIDE);
+            userGuide.setOnAction(event -> openUserGuide());
 
             MenuItem switchTo = MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_SWITCH_BRANCH);
             switchTo.setOnAction(event -> showSwitchBranchWindow());
@@ -356,6 +365,10 @@ public class ModularController {
         if (!_stateService.isBusy()) {
             Platform.exit();
         }
+    }
+
+    private void openUserGuide() {
+        FileLauncherUtil.open(USER_GUIDE_URL);
     }
 
 }
