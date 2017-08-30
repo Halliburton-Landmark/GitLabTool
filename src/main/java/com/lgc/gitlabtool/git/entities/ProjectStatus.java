@@ -22,7 +22,9 @@ public class ProjectStatus {
     /**
      * Constructs a ProjectStatus with default parameters.
      */
-    public ProjectStatus() {}
+    public ProjectStatus() {
+        this(false, false, 0, 0, null);
+    }
 
     /**
      * Constructs a ProjectStatus with a branch name parameter.
@@ -87,7 +89,7 @@ public class ProjectStatus {
      *
      * @return <true> if the project has conflicts <false> otherwise.
      */
-    public boolean isHasConflicts() {
+    public boolean hasConflicts() {
         return _hasConflicts;
     }
 
@@ -105,7 +107,7 @@ public class ProjectStatus {
      *
      * @return <true> if the project has conflicts <false> otherwise.
      */
-    public boolean isHasChanges() {
+    public boolean hasChanges() {
         return _hasChanges;
     }
 

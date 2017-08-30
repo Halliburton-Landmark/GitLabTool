@@ -442,7 +442,7 @@ public class MainWindowController implements StateListener {
 
     private boolean projectIsReadyForGitOperations(Project project) {
         ProjectStatus projectType = project.getProjectStatus();
-        return project.isCloned() && !projectType.isHasConflicts();
+        return project.isCloned() && !projectType.hasConflicts();
     }
 
     @FXML

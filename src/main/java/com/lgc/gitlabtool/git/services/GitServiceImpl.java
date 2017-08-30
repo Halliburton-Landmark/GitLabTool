@@ -72,7 +72,7 @@ public class GitServiceImpl implements GitService {
     }
 
     private boolean projectHasChanges(Project project) {
-        return project.getProjectStatus().isHasChanges();
+        return project.getProjectStatus().hasChanges();
     }
 
     @Override
@@ -190,7 +190,7 @@ public class GitServiceImpl implements GitService {
     @Override
     public void modifyProjectStatusByGit(Project project) {
         Optional<String> optBranch = _git.getCurrentBranch(project);
-        String branchName = optBranch.isPresent() ? optBranch.get() : StringUtils.EMPTY;
+        String branchName = optBranch.orElse(StringUtils.EMPTY);
 
         Optional<Status> status = _git.getStatusProject(project);
         boolean hasConflicts = false;

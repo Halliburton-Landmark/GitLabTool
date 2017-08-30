@@ -102,14 +102,14 @@ public class ProjectListCell extends ListCell<Project> {
             return;
         }
         ProjectStatus projectStatus = project.getProjectStatus();
-        if (projectStatus.isHasConflicts()) {
+        if (projectStatus.hasConflicts()) {
             Node conflictsImageView = newStatusPic(getImage(PROJECT_WITH_CONFLICTS_ICON_URL),
                     "Project has conflicts");
             pics.add(conflictsImageView);
             return;
         }
 
-        if (projectStatus.isHasChanges()) {
+        if (projectStatus.hasChanges()) {
             Node uncommittedChangesImage = newStatusPic(getImage(PROJECT_WITH_UNCOMMITTED_CHANGES_ICON_URL),
                     "Project has uncommitted changes");
             pics.add(uncommittedChangesImage);
