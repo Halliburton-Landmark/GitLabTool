@@ -147,7 +147,7 @@ public interface GitService {
     public int[] getAheadBehindIndexCounts(Project project, String branchName);
 
     /**
-     * Modifies project's field {@link ProjectStatus} according to the Git status
+     * Modifies project's field {@link ProjectStatus} according to the Git statuses
      * 
      * @param project - the project to be modified
      */

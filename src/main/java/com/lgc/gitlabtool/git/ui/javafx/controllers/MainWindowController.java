@@ -1,7 +1,7 @@
 package com.lgc.gitlabtool.git.ui.javafx.controllers;
 
 
-import java.awt.*;
+import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -22,6 +22,7 @@ import org.apache.logging.log4j.Logger;
 import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.MessageType;
 import com.lgc.gitlabtool.git.entities.Project;
+import com.lgc.gitlabtool.git.entities.ProjectStatus;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.listeners.stateListeners.StateListener;
@@ -440,7 +441,8 @@ public class MainWindowController implements StateListener {
     }
 
     private boolean projectIsReadyForGitOperations(Project project) {
-        return project.isCloned() && !project.hasConflicts();
+        ProjectStatus projectType = project.getProjectStatus();
+        return project.isCloned() && !projectType.hasConflicts();
     }
 
     @FXML
