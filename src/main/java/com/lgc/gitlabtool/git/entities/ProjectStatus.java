@@ -162,7 +162,7 @@ public class ProjectStatus {
      * @return a name (StringUtils.EMPTY if current branch isn't set).
      */
     public String getCurrentBranch() {
-        return _currentBranch;
+        return _currentBranch == null ? StringUtils.EMPTY : _currentBranch;
     }
 
     /**
