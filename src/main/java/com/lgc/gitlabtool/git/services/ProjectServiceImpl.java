@@ -53,7 +53,7 @@ public class ProjectServiceImpl implements ProjectService {
     private static GitService _gitService;
 
     public ProjectServiceImpl(RESTConnector connector,
-    													ProjectTypeService projectTypeService, 
+    													ProjectTypeService projectTypeService,
             									StateService stateService,
             									ConsoleService consoleService,
             									GitService gitService) {
@@ -218,7 +218,7 @@ public class ProjectServiceImpl implements ProjectService {
         List<Project> projects = Arrays.asList(project);
         progressListener.onStart("Cloning of created project");
 
-        clone(projects, path, new ProgressListener() {
+        cloneWithoutState(projects, path, new ProgressListener() {
             @Override
             public void onSuccess(Object... t) {
                 Set<String> structures = projectType.getStructures();
@@ -230,13 +230,10 @@ public class ProjectServiceImpl implements ProjectService {
                 progressListener.onFinish((Object)null, "Failed creating the " + project.getName() + " project!");
             }
             @Override
-            public void onStart(Object... t) {
-            }
+            public void onStart(Object... t) {}
 
             @Override
-            public void onFinish(Object... t) {
-                _stateService.stateOFF(ApplicationState.CLONE);
-            }
+            public void onFinish(Object... t) {}
         });
     }
 
@@ -290,7 +287,10 @@ public class ProjectServiceImpl implements ProjectService {
         }
         // we must call stateOFF for this state in the progressListener.onFinish method
         _stateService.stateON(ApplicationState.CLONE);
+        cloneWithoutState(projects, destinationPath, progressListener);
+    }
 
+    private void cloneWithoutState(List<Project> projects, String destinationPath, ProgressListener progressListener) {
         Path path = Paths.get(destinationPath);
         if (!PathUtilities.isExistsAndDirectory(path)) {
             String errorMessage = path.toAbsolutePath() + " path is not exist or it is not a directory.";

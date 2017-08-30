@@ -38,17 +38,14 @@ import javafx.stage.Stage;
 public class EditProjectPropertiesController {
 
     private static final String EDIT_POM_TITLE = "Editing project properties";
-    private static final String COMMIT_TITLE = "Commiting project properties";
 
     private static final String ADDING_REPO_COLLAPSED_MESSAGE = "Repository has been added in %s selected projects";
     private static final String EDITING_REPO_COLLAPSED_MESSAGE = "Repository has been edited in %s selected projects";
     private static final String REMOVING_REPO_COLLAPSED_MESSAGE = "Repository has been removed in %s selected projects";
-    private static final String COMMITTING_COLLAPSED_MESSAGE = "%s projects were commited successfully";
 
     private static final String ADDING_REPO_HEADER_MESSAGE = "Adding repository status";
     private static final String EDITING_REPO_HEADER_MESSAGE = "Editing repository status";
     private static final String REMOVING_REPO_HEADER_MESSAGE = "Removing repository status";
-    private static final String COMMITTING_HEADER_MESSAGE = "Committting repository status";
 
     private final PomXMLService _pomXmlService = (PomXMLService) ServiceProvider.getInstance()
             .getService(PomXMLService.class.getName());
@@ -118,7 +115,7 @@ public class EditProjectPropertiesController {
 
     private List<Project> selectedProjects;
 
-    private String EMPTY_STRING = StringUtils.EMPTY;
+    private final String EMPTY_STRING = StringUtils.EMPTY;
 
     public void beforeStart(List<Project> items) {
         selectedProjects = items;

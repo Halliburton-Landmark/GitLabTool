@@ -142,6 +142,8 @@ public class MainWindowController implements StateListener {
         _stateService.addStateListener(ApplicationState.PUSH, this);
         _stateService.addStateListener(ApplicationState.PULL, this);
         _stateService.addStateListener(ApplicationState.CREATE_PROJECT, this);
+        _stateService.addStateListener(ApplicationState.SWITCH_BRANCH, this);
+        _stateService.addStateListener(ApplicationState.EDIT_POM, this);
     }
 
     public void beforeShowing() {
@@ -150,7 +152,6 @@ public class MainWindowController implements StateListener {
 
         String groupTitle = _currentGroup.getName() + " [" + _currentGroup.getPathToClonedGroup() + "]";
         leftLabel.setText(HEDER_GROUP_TITLE + groupTitle);
-
 
         Image imageRefreshProjects = new Image(
                 getClass().getClassLoader().getResource(REFRESH_PROJECTS_IMAGE_URL).toExternalForm());
