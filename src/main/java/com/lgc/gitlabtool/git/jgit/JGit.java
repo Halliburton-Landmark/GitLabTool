@@ -405,7 +405,7 @@ public class JGit {
             statuses.put(pr, JGitStatus.SUCCESSFUL);
             logger.debug("Commit for the projects is " + JGitStatus.SUCCESSFUL);
         }
-
+        progressListener.onFinish();
         return statuses;
     }
 
@@ -497,6 +497,7 @@ public class JGit {
             progressListener.onSuccess(currentProgress);
             statuses.put(pr, JGitStatus.SUCCESSFUL);
         }
+        progressListener.onFinish();
         return statuses;
     }
 
@@ -873,11 +874,11 @@ public class JGit {
 
     /**
      * Returns count of commits ahead and behind index
-     * 
+     *
      * @param project - project to show status
      * @param branchName - the name of branch
      * @return array of ahead and behind commits counts<br>
-     *         Array consists of two parameters: 
+     *         Array consists of two parameters:
      *         first is the count of commits ahead Index, <br>
      *         second is the count of commits behind Index
      */
