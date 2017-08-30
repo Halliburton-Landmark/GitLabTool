@@ -17,7 +17,6 @@ import com.lgc.gitlabtool.git.jgit.JGit;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
-import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.icon.LocalRemoteIconHolder;
 import com.lgc.gitlabtool.git.ui.javafx.ChangesCheckDialog;
 import com.lgc.gitlabtool.git.ui.javafx.StatusDialog;
@@ -51,9 +50,6 @@ public class SwitchBranchWindowController {
 
     private static final GitService _gitService =
             (GitService) ServiceProvider.getInstance().getService(GitService.class.getName());
-
-    private static final StateService _stateService =
-            (StateService) ServiceProvider.getInstance().getService(StateService.class.getName());
 
     private List<Branch> _allBranches = new ArrayList<>();
 

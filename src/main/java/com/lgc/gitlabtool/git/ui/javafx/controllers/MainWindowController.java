@@ -221,13 +221,6 @@ public class MainWindowController implements StateListener {
         loadProjects();
     }
 
-//    /**
-//     * Updates current projects list. Method doesn't load projects from the GitLab
-//     */
-//    public void updateProjectsList(){
-//        projectsList.refresh();
-//    }
-
     public void onSelectAll() {
         if (projectsList != null && projectsList.getItems() != null && !projectsList.getItems().isEmpty()) {
             projectsList.getSelectionModel().selectAll();
