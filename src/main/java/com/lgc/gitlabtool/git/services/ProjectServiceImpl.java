@@ -78,7 +78,6 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public Collection<Project> loadProjects(Group group) {
-        _consoleService.addMessage("Starting the group download...", MessageType.SIMPLE);
         Collection<Project> projects = getProjects(group);
         if (projects.isEmpty()) {
             _consoleService.addMessage(GROUP_DOESNT_HAVE_PROJECTS_MESSAGE, MessageType.ERROR);
@@ -91,9 +90,11 @@ public class ProjectServiceImpl implements ProjectService {
             _consoleService.addMessage(successMessage, MessageType.SUCCESS);
             return projects;
         }
-        projects.stream()
+
+        _consoleService.addMessage("Getting statuses and types of projects...", MessageType.SIMPLE);
+        projects.parallelStream()
                 .filter(project -> projectsName.contains(project.getName()))
-                .forEach((project) -> updateProjectStatus(project, group.getPathToClonedGroup()));
+                .forEach((project) -> updateProjectTypeAndStatus(project, group.getPathToClonedGroup()));
         _consoleService.addMessage(successMessage, MessageType.SUCCESS);
         return projects;
     }
@@ -191,7 +192,7 @@ public class ProjectServiceImpl implements ProjectService {
         }
     }
 
-    private void updateProjectStatus(Project project, String pathGroup) {
+    private void updateProjectTypeAndStatus(Project project, String pathGroup) {
         project.setClonedStatus(true);
         project.setPathToClonedProject(pathGroup + File.separator + project.getName());
         project.setProjectType(_projectTypeService.getProjectType(project));

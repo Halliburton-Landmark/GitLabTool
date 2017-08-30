@@ -20,6 +20,7 @@ import org.apache.logging.log4j.Logger;
 import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.MessageType;
 import com.lgc.gitlabtool.git.entities.Project;
+import com.lgc.gitlabtool.git.entities.ProjectStatus;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.listeners.stateListeners.StateListener;
 import com.lgc.gitlabtool.git.services.ConsoleService;
@@ -431,7 +432,8 @@ public class MainWindowController implements StateListener {
     }
 
     private boolean projectIsReadyForGitOperations(Project project) {
-        return project.isCloned() && !project.hasConflicts();
+        ProjectStatus projectType = project.getProjectStatus();
+        return project.isCloned() && !projectType.hasConflicts();
     }
 
     @FXML

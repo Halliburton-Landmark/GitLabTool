@@ -250,10 +250,6 @@ public abstract class ProgressDialog extends Dialog<Void> {
             return _message.get();
         }
 
-        public MessageType getStatus() {
-            return _status;
-        }
-
         public String getCSSForStatus() {
             return MessageType.getCSSForStatus(_status);
         }
