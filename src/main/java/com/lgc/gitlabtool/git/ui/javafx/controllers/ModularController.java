@@ -78,7 +78,7 @@ public class ModularController {
     private static final String REMOVE_GROUP_STATUS_DIALOG_TITLE = "Import Status Dialog";
     private static final String FAILED_REMOVE_GROUP_MESSAGE = "Removing of group is Failed";
 
-    private static final String USER_GUIDE_URL = "src/main/resources/user_guide.pdf";
+    private static final String USER_GUIDE_URL = "src/main/resources/user_guide.htm";
 
     private static final String CSS_PATH = "css/style.css";
     private static final Image _appIcon = AppIconHolder.getInstance().getAppIcoImage();
