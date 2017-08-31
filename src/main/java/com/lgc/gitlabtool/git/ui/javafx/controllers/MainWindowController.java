@@ -93,7 +93,7 @@ public class MainWindowController implements StateListener {
     private static final String STATUS_DIALOG_TITLE = "Status dialog";
     private static final String STATUS_DIALOG_HEADER_COMMIT = "Commit statuses";
     private static final String EDIT_PROJECT_PROPERTIES = "Edit project properties";
-    private static final String EDIT_POM_SELECTION_WARNING = "Selected projects do not have Pom.xml file or contains shadow project";
+    private static final String EDIT_POM_SELECTION_WARNING = "This operation unavailable for some projects: ";
 
     private List<Project> _projects;
 
@@ -542,9 +542,16 @@ public class MainWindowController implements StateListener {
             EditProjectPropertiesController controller = loader.getController();
 
             List<Project> selectedProjects = getSelectedProjects();
+            List<Project> unavailableProjects = getUnavalibleProjectsForEditingPom(selectedProjects);
 
-            if(!isAvailableEditPomXml(selectedProjects)){
-                _consoleService.addMessage(EDIT_POM_SELECTION_WARNING, MessageType.ERROR);
+            if(!unavailableProjects.isEmpty()){
+                String failedProjectsNames = unavailableProjects.stream()
+                        .map(Project :: getName)
+                        .collect(Collectors.toList())
+                        .toString();
+
+                _consoleService.addMessage(EDIT_POM_SELECTION_WARNING
+                        + failedProjectsNames, MessageType.ERROR);
                 return;
             }
 
@@ -574,14 +581,13 @@ public class MainWindowController implements StateListener {
         }
     }
 
-    private boolean isAvailableEditPomXml(List<Project> projects) {
-        boolean hasShadow = projects.parallelStream()
-                .filter(project -> !project.isCloned()).count() > 0;
-        boolean hasPomFile = _pomXmlService.hasPomFile(projects);
-
+    private List<Project> getUnavalibleProjectsForEditingPom(List<Project> projects) {
         //TODO: CREATE GENERAL FILTER FOR ALL OPERATION! (Shadow & Conflicts) + Specific filters
-
-        return !(hasShadow || !hasPomFile);
+        return projects.parallelStream()
+                .filter(project -> !project.isCloned()
+                        || project.getProjectStatus().hasConflicts()
+                        || !_pomXmlService.hasPomFile(project))
+                .collect(Collectors.toList());
     }
 
     @FXML

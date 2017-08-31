@@ -348,6 +348,18 @@ public class PomXMLServiceImpl implements PomXMLService {
         return true;
     }
 
+    @Override
+    public boolean hasPomFile(Project project) {
+        if (project == null) {
+            return false;
+        }
+
+        PomXMLModel pomModel = getModel(project);
+        Model model = pomModel.getModelFile();
+
+        return model != null;
+    }
+
     private List<Model> getModelFiles(Collection<Project> projects) {
         return projects.stream()
                 .filter(Objects::nonNull)
