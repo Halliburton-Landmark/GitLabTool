@@ -158,12 +158,13 @@ public class EditProjectPropertiesController {
             String idRepo = (String) editListRepoCombo.getValue();
             editIdField.setText(idRepo);
 
+            filteringProjectsListView(idRepo);
+
             List<Project> filteredProjects = currentProjectsListView.getItems();
 
             editLayoutField.setText(_pomXmlService.getLayout(filteredProjects, idRepo));
             editUrlField.setText(_pomXmlService.getUrl(filteredProjects, idRepo));
 
-            filteringProjectsListView(idRepo);
         });
     }
 

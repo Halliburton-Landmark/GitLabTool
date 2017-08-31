@@ -281,8 +281,6 @@ public class PomXMLServiceImpl implements PomXMLService {
 
             if (repos.size() == 1) {
                 projectsLayouts.add(repos.get(0).getLayout());
-            } else {
-                projectsLayouts.add(UNDEFINED_TEXT);
             }
         });
 
@@ -309,8 +307,6 @@ public class PomXMLServiceImpl implements PomXMLService {
 
             if (repos.size() == 1) {
                 projectsUrls.add(repos.get(0).getUrl());
-            } else {
-                projectsUrls.add(UNDEFINED_TEXT);
             }
         });
 
