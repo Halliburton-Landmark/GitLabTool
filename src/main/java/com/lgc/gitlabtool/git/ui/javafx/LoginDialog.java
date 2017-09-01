@@ -1,6 +1,7 @@
 package com.lgc.gitlabtool.git.ui.javafx;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,7 +64,7 @@ class LoginDialog extends Dialog<DialogDTO> {
     private final String WAITING_MESSAGE = "Login... Please wait";
     private final String EMPTY_FIELD = "Login or password is empty!";
     private static final String INFO_IMAGE_URL = "icons/info_20x20.png";
-    private static final String USER_GUIDE_URL = "src/main/resources/user_guide.htm";
+    private static final String USER_GUIDE_URL = "user_guide.htm";
     private static final String CSS_PATH = "css/style.css";
 
     private final Text sceneTitle;
@@ -165,7 +166,7 @@ class LoginDialog extends Dialog<DialogDTO> {
 
         GridPane.setHalignment(infoButton, HPos.LEFT);
         infoButton.setTooltip(new Tooltip("Get info"));
-        infoButton.setOnAction((event) -> FileLauncherUtil.open(USER_GUIDE_URL)); 
+        infoButton.setOnAction((event) -> openUserGuide()); 
     }
 
     private ObservableList<String> getBoxOptions() {
@@ -276,8 +277,13 @@ class LoginDialog extends Dialog<DialogDTO> {
     private void addUserGuideKeyEvent() {
         getStage().getScene().setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.F1) {
-                FileLauncherUtil.open(USER_GUIDE_URL);
+                openUserGuide();
             }
         });
+    }
+
+    private void openUserGuide() {
+        String url = getClass().getClassLoader().getResource(USER_GUIDE_URL).getFile();
+        FileLauncherUtil.open(url);
     }
 }
