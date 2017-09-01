@@ -1,5 +1,6 @@
 package com.lgc.gitlabtool.git.services;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -29,6 +30,7 @@ import org.apache.maven.model.Scm;
 
 import com.lgc.gitlabtool.git.entities.MessageType;
 import com.lgc.gitlabtool.git.entities.Project;
+import com.lgc.gitlabtool.git.util.PathUtilities;
 
 import javafx.fxml.FXML;
 
@@ -570,33 +572,27 @@ public class PomXMLServiceImpl implements PomXMLService {
     }
 
     private PomXMLModel getModel(Project project) {
-        String pathToPomXML = findPathToPomXMLFile(project);
+        String pathToPomXML = findPathToAnyPomXMLFile(project);
         return new PomXMLModel(pathToPomXML);
     }
 
     private boolean hasCorrectPathToPom(Project project) {
-        String pathToPomXML = findPathToPomXMLFile(project);
-        if(pathToPomXML == null){
+        String pathToProject = project.getPath();
+
+        if (pathToProject == null) {
             return false;
         }
 
-        Path path = Paths.get(pathToPomXML);
-        if(path == null){
-            return false;
-        }
+        Path pomPath = Paths.get(pathToProject + File.separator + POM_NAME);
 
-        boolean exists = Files.exists(path);
-        boolean isFile = Files.isReadable(path);
-        boolean isExtensionCorrectly = POM_NAME.equals(path.getFileName().toString());
-
-        return exists && isFile && isExtensionCorrectly;
+        return PathUtilities.isExistsAndRegularFile(pomPath);
     }
 
     private boolean isValidString(String value) {
         return value != null && !value.isEmpty();
     }
 
-    private String findPathToPomXMLFile(Project pr) {
+    private String findPathToAnyPomXMLFile(Project pr) {
         if (pr == null) {
             return null;
         }
