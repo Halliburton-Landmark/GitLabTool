@@ -28,14 +28,14 @@ public class ProjectList {
     public static ProjectList get(Group group) {
         if (!_isLockCreating) {
             _isLockCreating = true;
-            _instance = new ProjectList(group);
+            _currentGroup = group;
+            _instance = new ProjectList();
         }
         return _instance;
     }
 
-    private ProjectList(Group group) {
-        if (group != null) {
-            _currentGroup = group;
+    private ProjectList() {
+        if (_currentGroup != null) {
             setProjects((List<Project>) _projectService.loadProjects(_currentGroup));
         }
     }

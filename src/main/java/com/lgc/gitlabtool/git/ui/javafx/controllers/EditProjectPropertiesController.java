@@ -11,7 +11,6 @@ import org.apache.commons.lang.StringUtils;
 
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.ProjectList;
-import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.services.PomXMLService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.javafx.CommitDialog;
@@ -73,7 +72,7 @@ public class EditProjectPropertiesController {
     private CheckBox editOnlyCommon;
 
     @FXML
-    private ListView removeListView;
+    private ListView<String> removeListView;
 
     @FXML
     private TextField editLayoutField;
@@ -85,7 +84,7 @@ public class EditProjectPropertiesController {
     private TextField editIdField;
 
     @FXML
-    private ComboBox editListRepoCombo;
+    private ComboBox<String> editListRepoCombo;
 
     @FXML
     private Button addButton;
@@ -109,7 +108,7 @@ public class EditProjectPropertiesController {
     private TabPane editingTabs;
 
     @FXML
-    private ListView currentProjectsListView;
+    private ListView<Project> currentProjectsListView;
 
     @FXML
     private Label projectsCountLabel;
@@ -117,19 +116,18 @@ public class EditProjectPropertiesController {
     private final String EMPTY_STRING = StringUtils.EMPTY;
 
     private List<Integer> _selectProjectsIds;
-    private ProjectList _projectList;
+    private final ProjectList _projectList = ProjectList.get(null);;
 
     private List<Project> getProjectsByIds() {
         return _projectList.getProjectsByIds(_selectProjectsIds);
     }
 
     public void beforeStart(List<Integer> items) {
-        configureProjectsListView(currentProjectsListView);
-        currentProjectsListView.setItems(FXCollections.observableArrayList(items));
-
         _selectProjectsIds = items;
-        _projectList = ProjectList.get(null);
         List<Project> projects = getProjectsByIds();
+
+        configureProjectsListView(currentProjectsListView);
+        currentProjectsListView.setItems(FXCollections.observableArrayList(projects));
 
         releaseNameText.setText(_pomXmlService.getReleaseName(projects));
         eclipseVersionText.setText(_pomXmlService.getEclipseRelease(projects));
@@ -161,7 +159,7 @@ public class EditProjectPropertiesController {
                 return;
             }
 
-            String idRepo = (String) editListRepoCombo.getValue();
+            String idRepo = editListRepoCombo.getValue();
             editIdField.setText(idRepo);
 
             filteringProjectsListView(idRepo);
@@ -184,7 +182,7 @@ public class EditProjectPropertiesController {
                 return;
             }
 
-            String idRepo = (String) newValue;
+            String idRepo = newValue;
             filteringProjectsListView(idRepo);
         });
     }
@@ -226,7 +224,7 @@ public class EditProjectPropertiesController {
 
     @FXML
     public void onEditRepo(ActionEvent actionEvent) {
-        String oldId = (String) editListRepoCombo.getValue();
+        String oldId = editListRepoCombo.getValue();
         String newId = editIdField.getText();
         String newUrl = editUrlField.getText();
         String newLayout = editLayoutField.getText();
@@ -248,7 +246,7 @@ public class EditProjectPropertiesController {
 
     @FXML
     public void onRemoveRepo(ActionEvent actionEvent) {
-        String id = (String) removeListView.getSelectionModel().getSelectedItem();
+        String id = removeListView.getSelectionModel().getSelectedItem();
 
         if (!confirmDeleting(id)) {
             return;
@@ -332,13 +330,6 @@ public class EditProjectPropertiesController {
 
         currentProjectsListView.getItems().clear();
         currentProjectsListView.setItems(FXCollections.observableArrayList(filteredProjectList));
-    }
-
-    private void showJgitStatusDialog(Map<Project, JGitStatus> statuses, int countOfProjects,
-                                      String title, String header, String collapsedMessage) {
-        StatusDialog statusDialog = new StatusDialog(title, header);
-        statusDialog.showMessage(statuses, countOfProjects, collapsedMessage);
-        statusDialog.showAndWait();
     }
 
     private void showSimpleStatusDialog(Map<Project, Boolean> statuses, int countOfProjects,
