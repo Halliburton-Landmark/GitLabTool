@@ -51,6 +51,8 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.control.ToolBar;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.TextFlow;
 import javafx.stage.DirectoryChooser;
@@ -223,6 +225,7 @@ public class ModularController {
 
             MenuItem userGuide = MainMenuManager.getInstance().getButtonById(MainMenuItems.GROUP_WINDOW_USER_GUIDE);
             userGuide.setOnAction(event -> openUserGuide());
+            userGuide.setAccelerator(new KeyCodeCombination(KeyCode.F1));
 
         } else if (windowId.equals(ViewKey.MAIN_WINDOW.getKey())) {
             MenuItem exit = MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_EXIT);
@@ -233,6 +236,7 @@ public class ModularController {
 
             MenuItem userGuide = MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_USER_GUIDE);
             userGuide.setOnAction(event -> openUserGuide());
+            userGuide.setAccelerator(new KeyCodeCombination(KeyCode.F1));
 
             MenuItem switchTo = MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_SWITCH_BRANCH);
             switchTo.setOnAction(event -> showSwitchBranchWindow());
