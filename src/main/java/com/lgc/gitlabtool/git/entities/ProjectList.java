@@ -12,6 +12,8 @@ import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StateService;
 
 /**
+ * Keeps data about projects of current group in the main window.
+ * Allows reloading projects and getting them or their ids.
  *
  * @author Lyudmila Lyska
  */
@@ -23,14 +25,22 @@ public class ProjectList {
     private final StateService _stateService = (StateService) ServiceProvider.getInstance()
             .getService(StateService.class.getName());
 
-
-    //TODO: write javadoc for it
+    /**
+     * We lock create new instance if _isLockCreating is <true>, we return exist instance.
+     * We can use one ProjectList for current group.
+     */
     private static boolean _isLockCreating = false;
     private static Group _currentGroup;
     private static List<Project> _projects = new ArrayList<>();
     private static ProjectList _instance;
 
-    //TODO: write javadoc for it
+    /**
+     * Gets instance of PrjectList.
+     *
+     * @param group the current group.
+     *        The group can be null if ProjectList have already created and _isLockCreating is <true>.
+     * @return instance
+     */
     public static ProjectList get(Group group) {
         if (!_isLockCreating) {
             _isLockCreating = true;
@@ -46,12 +56,18 @@ public class ProjectList {
         }
     }
 
-    //TODO: write javadoc for it
+    /**
+     * Gets project list of current group.
+     *
+     * @return a unmodifiable list of project
+     */
     public List<Project> getProjects() {
         return Collections.unmodifiableList(_projects);
     }
 
-    //TODO: write javadoc for it
+    /**
+     * Refreshes projects. Activates and deactivates ApplicationState.REFRESH_PROJECTS.
+     */
     public void refreshLoadProjects() {
         if (_currentGroup != null) {
             _stateService.stateON(ApplicationState.REFRESH_PROJECTS);
@@ -60,6 +76,12 @@ public class ProjectList {
         }
     }
 
+    /**
+     * Gets projects list by ids of projects other list.
+     *
+     * @param ids the ids of projects list
+     * @return a unmodifiable list of project
+     */
     public List<Project> getProjectsByIds(List<Integer> ids) {
         if (ids == null || ids.isEmpty()) {
             return Collections.emptyList();
@@ -78,6 +100,12 @@ public class ProjectList {
         return Collections.unmodifiableList(newList);
     }
 
+    /**
+     * Gets list of projects ids.
+     *
+     * @param projects the project list
+     * @return ids list
+     */
     public static List<Integer> getIdsProjects(List<Project> projects) {
         if (projects == null || projects.isEmpty()) {
             return Collections.emptyList();
@@ -87,6 +115,10 @@ public class ProjectList {
                        .collect(Collectors.toList());
     }
 
+    /**
+     * Resets ProjectList data. After this method _isLockCreating is <false>.
+     * This allows create new instance of ProjectList for another group.
+     */
     public static void reset() {
         _isLockCreating = false;
         _currentGroup = null;

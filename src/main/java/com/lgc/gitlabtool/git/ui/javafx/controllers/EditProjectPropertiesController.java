@@ -370,12 +370,17 @@ public class EditProjectPropertiesController implements StateListener {
     @Override
     public void handleEvent(ApplicationState changedState, boolean isActivate) {
         if (!isActivate) {
-            refreshProjectList();
-
             String idRepo = editListRepoCombo.getValue();
             if (idRepo != null) {
                 filteringProjectsListView(idRepo);
             }
+
+            idRepo = removeListView.getSelectionModel().getSelectedItem();
+            if (idRepo != null) {
+                filteringProjectsListView(idRepo);
+            }
+
+            refreshProjectList();
         }
     }
 }
