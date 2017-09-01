@@ -83,9 +83,6 @@ public class SwitchBranchWindowController {
 
     @FXML
     public void initialize() {
-        configureProjectsListView(currentProjectsListView);
-        configureBranchesListView(branchesListView);
-
         List<Project> projects = SelectionsProvider.getInstance().getSelectionItems("mainWindow_projectsList");
         _projectList = ProjectList.get(null);
         _selectedProjectsIds = ProjectList.getIdsProjects(projects);
@@ -93,6 +90,9 @@ public class SwitchBranchWindowController {
         projects = projects.stream().filter((item)-> item.isCloned())
                                     .collect(Collectors.toList());
         setProjectListItems(projects, currentProjectsListView);
+
+        configureProjectsListView(currentProjectsListView);
+        configureBranchesListView(branchesListView);
 
         searchField.textProperty().addListener((observable, oldValue, newValue) -> filterPlantList(oldValue, newValue));
 
@@ -170,7 +170,7 @@ public class SwitchBranchWindowController {
         branchesListView.setItems(FXCollections.observableArrayList(_allBranches));
 
         searchField.setText(StringUtils.EMPTY);
-        currentProjectsListView.setItems(FXCollections.observableArrayList(_selectedProjectsIds));
+        currentProjectsListView.setItems(FXCollections.observableArrayList(getProjectsByIds()));
     }
 
     private void filterPlantList(String oldValue, String newValue) {
@@ -179,7 +179,7 @@ public class SwitchBranchWindowController {
 
         if (searchField == null || searchField.getText().equals(StringUtils.EMPTY)) {
             branchesListView.setItems(FXCollections.observableArrayList(_allBranches));
-            currentProjectsListView.setItems(FXCollections.observableArrayList(_selectedProjectsIds));
+            currentProjectsListView.setItems(FXCollections.observableArrayList(getProjectsByIds()));
         } else {
             //filtering branches
             newValue = newValue.toUpperCase();

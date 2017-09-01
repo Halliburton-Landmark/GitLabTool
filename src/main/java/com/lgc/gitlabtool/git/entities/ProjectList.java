@@ -9,22 +9,25 @@ import java.util.stream.Collectors;
 import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 
+/**
+ *
+ * @author Lyudmila Lyska
+ */
 public class ProjectList {
-
-    private static ProjectList _instance;
 
     private final ProjectService _projectService = (ProjectService) ServiceProvider.getInstance()
             .getService(ProjectService.class.getName());
 
-    private List<Project> _projects = new ArrayList<>();
-
     //TODO: write javadoc for it
     private static boolean _isLockCreating = false;
     private static Group _currentGroup;
+    private static List<Project> _projects = new ArrayList<>();
+    private static ProjectList _instance;
 
     //TODO: write javadoc for it
     public static ProjectList get(Group group) {
         if (!_isLockCreating) {
+            _isLockCreating = true;
             _instance = new ProjectList(group);
         }
         return _instance;
@@ -35,10 +38,6 @@ public class ProjectList {
             _currentGroup = group;
             setProjects((List<Project>) _projectService.loadProjects(_currentGroup));
         }
-    }
-
-    public static void setLockCreating(boolean isLockCreating) {
-        _isLockCreating = isLockCreating;
     }
 
     //TODO: write javadoc for it
@@ -64,9 +63,8 @@ public class ProjectList {
                                             .filter(project -> project.getId() == id)
                                             .findFirst();
             if (pr.isPresent()) {
-                continue;
+                newList.add(pr.get());
             }
-            newList.add(pr.get());
         }
 
         return Collections.unmodifiableList(newList);
@@ -79,6 +77,12 @@ public class ProjectList {
         return projects.parallelStream()
                        .map(pr -> pr.getId())
                        .collect(Collectors.toList());
+    }
+
+    public static void reset() {
+        _isLockCreating = false;
+        _currentGroup = null;
+        _projects.clear();
     }
 
     private List<Project> loadProjects() {

@@ -222,9 +222,8 @@ public class MainWindowController implements StateListener {
 
     public void setSelectedGroup(Group group) {
         _currentGroup = group;
-        _projectsList.setLockCreating(false);
+        ProjectList.reset();
         _projectsList = ProjectList.get(_currentGroup);
-        _projectsList.setLockCreating(true);
         sortProjectsList();
     }
 
