@@ -64,6 +64,7 @@ class LoginDialog extends Dialog<DialogDTO> {
     private final String EMPTY_FIELD = "Login or password is empty!";
     private static final String INFO_IMAGE_URL = "icons/info_20x20.png";
     private static final String USER_GUIDE_URL = "src/main/resources/user_guide.htm";
+    private static final String CSS_PATH = "css/style.css";
 
     private final Text sceneTitle;
     private final Label userName;
@@ -149,7 +150,19 @@ class LoginDialog extends Dialog<DialogDTO> {
                 .getResource(INFO_IMAGE_URL).toExternalForm());
 
         infoButton.setGraphic(new ImageView(infoImage));
-        infoButton.setStyle("-fx-background-radius: 15 15 15 15;");
+
+        /* ROUND (30 px is optimal size but can be changed) */
+        infoButton.setStyle(
+                "-fx-background-radius: 5em; " +
+                        "-fx-min-width: 30px; " +
+                        "-fx-min-height: 30px; " +
+                        "-fx-max-width: 30px; " +
+                        "-fx-max-height: 30px;"
+        );
+
+        /* HOVER ANIMATION */
+        infoButton.getStylesheets().add(getClass().getClassLoader().getResource(CSS_PATH).toExternalForm());
+
         GridPane.setHalignment(infoButton, HPos.LEFT);
         infoButton.setTooltip(new Tooltip("Get info"));
         infoButton.setOnAction((event) -> FileLauncherUtil.open(USER_GUIDE_URL)); 
