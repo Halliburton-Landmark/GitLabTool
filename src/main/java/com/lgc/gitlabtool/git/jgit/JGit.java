@@ -168,6 +168,7 @@ public class JGit {
         }
         try (Git git = getGit(project.getPath())) {
             git.reset().setMode(ResetCommand.ResetType.HARD).call();
+            project.getProjectStatus().setHasChanges(false);
             return JGitStatus.SUCCESSFUL;
         } catch (GitAPIException | IOException e) {
             logger.error("Failed to discard changed for the " + project.getName() +" project: ", e);
@@ -873,11 +874,11 @@ public class JGit {
 
     /**
      * Returns count of commits ahead and behind index
-     * 
+     *
      * @param project - project to show status
      * @param branchName - the name of branch
      * @return array of ahead and behind commits counts<br>
-     *         Array consists of two parameters: 
+     *         Array consists of two parameters:
      *         first is the count of commits ahead Index, <br>
      *         second is the count of commits behind Index
      */
