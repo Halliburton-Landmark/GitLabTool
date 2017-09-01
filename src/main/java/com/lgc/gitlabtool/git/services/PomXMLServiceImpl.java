@@ -337,10 +337,7 @@ public class PomXMLServiceImpl implements PomXMLService {
         }
 
         for (Project project : projects) {
-            PomXMLModel pomModel = getModel(project);
-            Model model = pomModel.getModelFile();
-
-            if (model == null) {
+            if (!hasPomFile(project)){
                 return false;
             }
         }
@@ -350,14 +347,11 @@ public class PomXMLServiceImpl implements PomXMLService {
 
     @Override
     public boolean hasPomFile(Project project) {
-        if (project == null) {
+        if (project == null || !project.isCloned()) {
             return false;
         }
 
-        PomXMLModel pomModel = getModel(project);
-        Model model = pomModel.getModelFile();
-
-        return model != null;
+        return hasCorrectPathToPom(project);
     }
 
     private List<Model> getModelFiles(Collection<Project> projects) {
@@ -578,6 +572,24 @@ public class PomXMLServiceImpl implements PomXMLService {
     private PomXMLModel getModel(Project project) {
         String pathToPomXML = findPathToPomXMLFile(project);
         return new PomXMLModel(pathToPomXML);
+    }
+
+    private boolean hasCorrectPathToPom(Project project) {
+        String pathToPomXML = findPathToPomXMLFile(project);
+        if(pathToPomXML == null){
+            return false;
+        }
+
+        Path path = Paths.get(pathToPomXML);
+        if(path == null){
+            return false;
+        }
+
+        boolean exists = Files.exists(path);
+        boolean isFile = Files.isReadable(path);
+        boolean isExtensionCorrectly = POM_NAME.equals(path.getFileName().toString());
+
+        return exists && isFile && isExtensionCorrectly;
     }
 
     private boolean isValidString(String value) {
