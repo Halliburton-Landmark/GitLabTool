@@ -308,18 +308,8 @@ public class EditProjectPropertiesController implements StateListener {
     }
 
     private void refreshProjectList() {
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.submit(() -> {
-            Platform.runLater(new Runnable() {
-                @Override
-                public void run() {
-                    currentProjectsListView.getItems().clear();
-                    currentProjectsListView.setItems(FXCollections.observableArrayList(getProjectsByIds()));
-                }
-            });
-
-        });
-        executor.shutdown();
+        currentProjectsListView.getItems().clear();
+        currentProjectsListView.setItems(FXCollections.observableArrayList(getProjectsByIds()));
     }
 
     private void reloadEditReposComboBox() {
@@ -370,17 +360,31 @@ public class EditProjectPropertiesController implements StateListener {
     @Override
     public void handleEvent(ApplicationState changedState, boolean isActivate) {
         if (!isActivate) {
-            String idRepo = editListRepoCombo.getValue();
-            if (idRepo != null) {
-                filteringProjectsListView(idRepo);
-            }
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            executor.submit(() -> {
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        boolean isUpdated = false;
+                        String idRepo = editListRepoCombo.getValue();
+                        if (idRepo != null) {
+                            filteringProjectsListView(idRepo);
+                            isUpdated = true;
+                        }
 
-            idRepo = removeListView.getSelectionModel().getSelectedItem();
-            if (idRepo != null) {
-                filteringProjectsListView(idRepo);
-            }
+                        idRepo = removeListView.getSelectionModel().getSelectedItem();
+                        if (idRepo != null) {
+                            filteringProjectsListView(idRepo);
+                            isUpdated = true;
+                        }
 
-            refreshProjectList();
+                        if (!isUpdated) {
+                            refreshProjectList();
+                        }
+                    }
+                });
+            });
+            executor.shutdown();
         }
     }
 }

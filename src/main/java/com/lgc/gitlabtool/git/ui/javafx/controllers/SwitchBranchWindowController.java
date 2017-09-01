@@ -2,10 +2,13 @@ package com.lgc.gitlabtool.git.ui.javafx.controllers;
 
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
@@ -16,8 +19,11 @@ import com.lgc.gitlabtool.git.entities.ProjectList;
 import com.lgc.gitlabtool.git.jgit.BranchType;
 import com.lgc.gitlabtool.git.jgit.JGit;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
+import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
+import com.lgc.gitlabtool.git.listeners.stateListeners.StateListener;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
+import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.icon.LocalRemoteIconHolder;
 import com.lgc.gitlabtool.git.ui.javafx.ChangesCheckDialog;
 import com.lgc.gitlabtool.git.ui.javafx.StatusDialog;
@@ -43,7 +49,7 @@ import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 
 @SuppressWarnings("unchecked")
-public class SwitchBranchWindowController {
+public class SwitchBranchWindowController implements StateListener {
 
     private static final String TOTAL_CAPTION = "Total count: ";
     private static final String SWITCHTO_STATUS_ALERT_TITLE = "Switch branch info";
@@ -80,6 +86,13 @@ public class SwitchBranchWindowController {
 
     @FXML
     private Button switchButton;
+
+    private static final StateService _stateService = (StateService) ServiceProvider.getInstance()
+            .getService(StateService.class.getName());
+
+    {
+        _stateService.addStateListener(ApplicationState.REFRESH_PROJECTS, this);
+    }
 
     @FXML
     public void initialize() {
@@ -308,6 +321,30 @@ public class SwitchBranchWindowController {
                 branchIcon = LocalRemoteIconHolder.getInstance().getRemoteBranchIcoImage();
             }
             return branchIcon;
+        }
+    }
+
+    @Override
+    public void handleEvent(ApplicationState changedState, boolean isActivate) {
+        if (!isActivate) {
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            executor.submit(() -> {
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        String textSearch = searchField.getText();
+                        Branch branch = (Branch) branchesListView.getSelectionModel().getSelectedItem();
+                        if (textSearch != null && !textSearch.isEmpty() && branch == null) {
+                            filterPlantList(null, textSearch);
+                        } else if (branch != null) {
+                            filteringProjectsListView(Arrays.asList(branch));
+                        } else {
+                            currentProjectsListView.setItems(FXCollections.observableArrayList(getProjectsByIds()));
+                        }
+                    }
+                });
+            });
+            executor.shutdown();
         }
     }
 
