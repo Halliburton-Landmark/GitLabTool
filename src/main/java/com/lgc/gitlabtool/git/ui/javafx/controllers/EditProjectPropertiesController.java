@@ -5,14 +5,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.ProjectList;
+import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
+import com.lgc.gitlabtool.git.listeners.stateListeners.StateListener;
 import com.lgc.gitlabtool.git.services.PomXMLService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
+import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.javafx.CommitDialog;
 import com.lgc.gitlabtool.git.ui.javafx.StatusDialog;
 
@@ -35,7 +40,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-public class EditProjectPropertiesController {
+public class EditProjectPropertiesController implements StateListener {
 
     private static final String EDIT_POM_TITLE = "Editing project properties";
 
@@ -47,8 +52,15 @@ public class EditProjectPropertiesController {
     private static final String EDITING_REPO_HEADER_MESSAGE = "Editing repository status";
     private static final String REMOVING_REPO_HEADER_MESSAGE = "Removing repository status";
 
-    private final PomXMLService _pomXmlService = (PomXMLService) ServiceProvider.getInstance()
+    private static final PomXMLService _pomXmlService = (PomXMLService) ServiceProvider.getInstance()
             .getService(PomXMLService.class.getName());
+
+    private static final StateService _stateService = (StateService) ServiceProvider.getInstance()
+            .getService(StateService.class.getName());
+
+    {
+        _stateService.addStateListener(ApplicationState.REFRESH_PROJECTS, this);
+    }
 
     @FXML
     private CheckBox addIsCommit;
@@ -158,14 +170,12 @@ public class EditProjectPropertiesController {
             if (newValue == null) {
                 return;
             }
-
             String idRepo = editListRepoCombo.getValue();
             editIdField.setText(idRepo);
 
             filteringProjectsListView(idRepo);
 
             List<Project> filteredProjects = currentProjectsListView.getItems();
-
             editLayoutField.setText(_pomXmlService.getLayout(filteredProjects, idRepo));
             editUrlField.setText(_pomXmlService.getUrl(filteredProjects, idRepo));
 
@@ -208,16 +218,12 @@ public class EditProjectPropertiesController {
         String layout = addLayoutField.getText();
 
         List<Project> filteredProjects = currentProjectsListView.getItems();
-
         Map<Project, Boolean> addStatuses = _pomXmlService.addRepository(filteredProjects, id, url, layout);
-
         showSimpleStatusDialog(addStatuses, _selectProjectsIds.size(), EDIT_POM_TITLE,
                 ADDING_REPO_HEADER_MESSAGE, ADDING_REPO_COLLAPSED_MESSAGE);
 
         if (addIsCommit.isSelected()) {
-            List<Project> projectWithChanges = getSuccessfulProjectsFromStatuses(addStatuses);
-
-            commitProjects(projectWithChanges);
+            getStatusesAndCommitProjects(addStatuses);
         }
         refreshComponents();
     }
@@ -230,16 +236,13 @@ public class EditProjectPropertiesController {
         String newLayout = editLayoutField.getText();
 
         List<Project> filteredProjects = currentProjectsListView.getItems();
-
         Map<Project, Boolean> editStatuses = _pomXmlService.modifyRepository(filteredProjects,
                 oldId, newId, newUrl, newLayout);
         showSimpleStatusDialog(editStatuses, filteredProjects.size(), EDIT_POM_TITLE,
                 EDITING_REPO_HEADER_MESSAGE, EDITING_REPO_COLLAPSED_MESSAGE);
 
         if (editIsCommit.isSelected()) {
-            List<Project> projectWithChanges = getSuccessfulProjectsFromStatuses(editStatuses);
-
-            commitProjects(projectWithChanges);
+            getStatusesAndCommitProjects(editStatuses);
         }
         refreshComponents();
     }
@@ -247,23 +250,24 @@ public class EditProjectPropertiesController {
     @FXML
     public void onRemoveRepo(ActionEvent actionEvent) {
         String id = removeListView.getSelectionModel().getSelectedItem();
-
         if (!confirmDeleting(id)) {
             return;
         }
 
         List<Project> filteredProjects = currentProjectsListView.getItems();
-
         Map<Project, Boolean> removeStatuses = _pomXmlService.removeRepository(filteredProjects, id);
         showSimpleStatusDialog(removeStatuses, filteredProjects.size(), EDIT_POM_TITLE,
                 REMOVING_REPO_HEADER_MESSAGE, REMOVING_REPO_COLLAPSED_MESSAGE);
 
         if (removeIsCommit.isSelected()) {
-            List<Project> projectWithChanges = getSuccessfulProjectsFromStatuses(removeStatuses);
-
-            commitProjects(projectWithChanges);
+            getStatusesAndCommitProjects(removeStatuses);
         }
         refreshComponents();
+    }
+
+    private void getStatusesAndCommitProjects(Map<Project, Boolean> statuses) {
+        List<Project> projectWithChanges = getSuccessfulProjectsFromStatuses(statuses);
+        commitProjects(projectWithChanges);
     }
 
     private boolean confirmDeleting(String id) {
@@ -282,10 +286,10 @@ public class EditProjectPropertiesController {
 
     private List<Project> getSuccessfulProjectsFromStatuses(Map<Project, Boolean> statuses) {
         return statuses.entrySet()
-                .stream()
-                .filter(entry -> entry.getValue().equals(true))
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toList());
+                       .stream()
+                       .filter(entry -> entry.getValue().equals(true))
+                       .map(Map.Entry::getKey)
+                       .collect(Collectors.toList());
     }
 
     private void refreshComponents() {
@@ -300,8 +304,22 @@ public class EditProjectPropertiesController {
         editLayoutField.setText(EMPTY_STRING);
         editUrlField.setText(EMPTY_STRING);
 
-        currentProjectsListView.getItems().clear();
-        currentProjectsListView.setItems(FXCollections.observableArrayList(getProjectsByIds()));
+        refreshProjectList();
+    }
+
+    private void refreshProjectList() {
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.submit(() -> {
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    currentProjectsListView.getItems().clear();
+                    currentProjectsListView.setItems(FXCollections.observableArrayList(getProjectsByIds()));
+                }
+            });
+
+        });
+        executor.shutdown();
     }
 
     private void reloadEditReposComboBox() {
@@ -347,5 +365,17 @@ public class EditProjectPropertiesController {
     @FXML
     public void onReloadButton(ActionEvent actionEvent) {
         refreshComponents();
+    }
+
+    @Override
+    public void handleEvent(ApplicationState changedState, boolean isActivate) {
+        if (!isActivate) {
+            refreshProjectList();
+
+            String idRepo = editListRepoCombo.getValue();
+            if (idRepo != null) {
+                filteringProjectsListView(idRepo);
+            }
+        }
     }
 }

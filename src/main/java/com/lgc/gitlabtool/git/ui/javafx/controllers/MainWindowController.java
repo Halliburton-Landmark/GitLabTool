@@ -96,8 +96,6 @@ public class MainWindowController implements StateListener {
     private static final String EDIT_PROJECT_PROPERTIES = "Edit project properties";
     private static final String EDIT_POM_SELECTION_WARNING = "Selected projects do not have Pom.xml file or contains shadow project";
 
-    //private List<Project> _projects;
-
     private ProjectList _projectsList;
 
     private Group _currentGroup;

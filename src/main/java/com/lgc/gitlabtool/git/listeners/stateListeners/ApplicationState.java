@@ -40,6 +40,13 @@ public enum ApplicationState {
         public String toString() {
             return "Project creation";
         }
+    },
+
+    REFRESH_PROJECTS {
+        @Override
+        public String toString() {
+            return "Refresh projects";
+        }
     };
 
     public String getState() {
