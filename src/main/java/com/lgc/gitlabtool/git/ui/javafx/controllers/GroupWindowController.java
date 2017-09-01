@@ -212,7 +212,7 @@ public class GroupWindowController implements StateListener {
             Parent root = fxmlLoader.load();
 
             Stage previousStage = (Stage) groupList.getScene().getWindow();
-            previousStage.setScene(new Scene(root));
+            previousStage.getScene().setRoot(root);
 
             ModularController myControllerHandle = fxmlLoader.getController();
             myControllerHandle.loadMainWindow(group);

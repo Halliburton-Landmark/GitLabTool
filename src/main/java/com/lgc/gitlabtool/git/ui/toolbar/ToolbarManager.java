@@ -163,6 +163,6 @@ public class ToolbarManager {
         myControllerHandle.loadGroupWindow();
 
         Stage previousStage = (Stage) showWelcomButton.getScene().getWindow();
-        previousStage.setScene(new Scene(root));
+        previousStage.getScene().setRoot(root);
     }
 }
