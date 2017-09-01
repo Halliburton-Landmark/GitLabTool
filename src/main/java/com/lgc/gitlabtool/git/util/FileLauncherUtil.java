@@ -39,7 +39,7 @@ public class FileLauncherUtil {
             } else {
                 _logger.warn("There is no application registered to open file: " + document.getName());
             }
-        } catch (IOException e) {
+        } catch (IllegalArgumentException | IOException e) {
             _logger.debug(ERROR_MESSAGE + ": " + e.getMessage());
         }
     }

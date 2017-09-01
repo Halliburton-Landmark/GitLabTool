@@ -1,7 +1,6 @@
 package com.lgc.gitlabtool.git.ui.javafx;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
