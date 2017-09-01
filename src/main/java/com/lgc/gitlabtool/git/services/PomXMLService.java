@@ -131,4 +131,13 @@ public interface PomXMLService {
      * @return true if all projects have Pom.xml
      */
     boolean hasPomFile(List<Project> projects);
+
+    /**
+     * Returns true if project has Pom.xml file
+     *
+     * @param project project for checking
+     * @return true if projects has Pom.xml
+     */
+    boolean hasPomFile(Project project);
+
 }

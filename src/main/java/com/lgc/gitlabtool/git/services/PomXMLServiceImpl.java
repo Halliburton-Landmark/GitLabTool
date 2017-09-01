@@ -1,5 +1,6 @@
 package com.lgc.gitlabtool.git.services;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -29,6 +30,7 @@ import org.apache.maven.model.Scm;
 
 import com.lgc.gitlabtool.git.entities.MessageType;
 import com.lgc.gitlabtool.git.entities.Project;
+import com.lgc.gitlabtool.git.util.PathUtilities;
 
 import javafx.fxml.FXML;
 
@@ -337,15 +339,21 @@ public class PomXMLServiceImpl implements PomXMLService {
         }
 
         for (Project project : projects) {
-            PomXMLModel pomModel = getModel(project);
-            Model model = pomModel.getModelFile();
-
-            if (model == null) {
+            if (!hasPomFile(project)){
                 return false;
             }
         }
 
         return true;
+    }
+
+    @Override
+    public boolean hasPomFile(Project project) {
+        if (project == null || !project.isCloned()) {
+            return false;
+        }
+
+        return hasCorrectPathToPom(project);
     }
 
     private List<Model> getModelFiles(Collection<Project> projects) {
@@ -564,15 +572,27 @@ public class PomXMLServiceImpl implements PomXMLService {
     }
 
     private PomXMLModel getModel(Project project) {
-        String pathToPomXML = findPathToPomXMLFile(project);
+        String pathToPomXML = findPathToAnyPomXMLFile(project);
         return new PomXMLModel(pathToPomXML);
+    }
+
+    private boolean hasCorrectPathToPom(Project project) {
+        String pathToProject = project.getPath();
+
+        if (pathToProject == null) {
+            return false;
+        }
+
+        Path pomPath = Paths.get(pathToProject + File.separator + POM_NAME);
+
+        return PathUtilities.isExistsAndRegularFile(pomPath);
     }
 
     private boolean isValidString(String value) {
         return value != null && !value.isEmpty();
     }
 
-    private String findPathToPomXMLFile(Project pr) {
+    private String findPathToAnyPomXMLFile(Project pr) {
         if (pr == null) {
             return null;
         }

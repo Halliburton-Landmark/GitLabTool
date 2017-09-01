@@ -94,7 +94,7 @@ public class MainWindowController implements StateListener {
     private static final String STATUS_DIALOG_TITLE = "Status dialog";
     private static final String STATUS_DIALOG_HEADER_COMMIT = "Commit statuses";
     private static final String EDIT_PROJECT_PROPERTIES = "Edit project properties";
-    private static final String EDIT_POM_SELECTION_WARNING = "Selected projects do not have Pom.xml file or contains shadow project";
+    private static final String EDIT_POM_SELECTION_WARNING = "This operation unavailable for some projects: ";
 
     private ProjectList _projectsList;
 
@@ -542,8 +542,14 @@ public class MainWindowController implements StateListener {
             Parent root = loader.load();
 
             EditProjectPropertiesController controller = loader.getController();
-            if(!isAvailableEditPomXml(getCurrentProjects())){
-                _consoleService.addMessage(EDIT_POM_SELECTION_WARNING, MessageType.ERROR);
+
+            List<Project> unavailableProjects = getUnavalibleProjectsForEditingPom(getCurrentProjects());
+            if(!unavailableProjects.isEmpty()){
+                String failedProjectsNames = unavailableProjects.stream()
+                                                                .map(Project :: getName)
+                                                                .collect(Collectors.toList())
+                                                                .toString();
+                _consoleService.addMessage(EDIT_POM_SELECTION_WARNING + failedProjectsNames, MessageType.ERROR);
                 return;
             }
 
@@ -573,14 +579,11 @@ public class MainWindowController implements StateListener {
         }
     }
 
-    private boolean isAvailableEditPomXml(List<Project> projects) {
-        boolean hasShadow = projects.parallelStream()
-                .filter(project -> !project.isCloned()).count() > 0;
-        boolean hasPomFile = _pomXmlService.hasPomFile(projects);
-
-        //TODO: CREATE GENERAL FILTER FOR ALL OPERATION! (Shadow & Conflicts) + Specific filters
-
-        return !(hasShadow || !hasPomFile);
+    private List<Project> getUnavalibleProjectsForEditingPom(List<Project> projects) {
+        return projects.parallelStream()
+                .filter(project -> !projectIsReadyForGitOperations(project)
+                        || !_pomXmlService.hasPomFile(project))
+                .collect(Collectors.toList());
     }
 
     @FXML
