@@ -246,11 +246,11 @@ public class JGit {
         if (project == null) {
             return Optional.empty();
         }
-        if (!project.isCloned()) {
+        String path = project.getPath();
+        if (path == null) {
             logger.debug(project.getName() + ERROR_MSG_NOT_CLONED);
             return Optional.empty();
         }
-        String path = project.getPath();
 
         try (Git git = getGit(path)) {
             Status status = git.status().call();
@@ -662,11 +662,12 @@ public class JGit {
         if (project == null) {
             throw new IllegalArgumentException("Incorrect data: project is null");
         }
-        if (!project.isCloned()) {
+        String path = project.getPath();
+        if (path == null) {
             logger.debug(project.getName() + ERROR_MSG_NOT_CLONED);
             return Optional.empty();
         }
-        try (Git git = getGit(project.getPath())) {
+        try (Git git = getGit(path)) {
             Repository repo = git.getRepository();
             Optional<String> branch = Optional.ofNullable(repo.getBranch());
             repo.close();

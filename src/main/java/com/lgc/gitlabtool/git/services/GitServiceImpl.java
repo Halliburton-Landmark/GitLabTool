@@ -183,7 +183,7 @@ public class GitServiceImpl implements GitService {
 
     @Override
     public int[] getAheadBehindIndexCounts(Project project, String branchName) {
-        if (project == null || branchName == null || branchName.isEmpty() || !project.isCloned()) {
+        if (project == null || branchName == null || branchName.isEmpty() || project.getPath() == null) {
             return new int[] {0, 0};
         }
         return _git.getAheadBehindIndexCounts(project, branchName);

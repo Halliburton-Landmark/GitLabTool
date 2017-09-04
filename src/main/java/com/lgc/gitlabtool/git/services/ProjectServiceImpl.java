@@ -193,10 +193,10 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     private void updateProjectTypeAndStatus(Project project, String pathGroup) {
-        project.setClonedStatus(true);
         project.setPathToClonedProject(pathGroup + File.separator + project.getName());
         project.setProjectType(_projectTypeService.getProjectType(project));
         _gitService.modifyProjectStatusByGit(project);
+        project.setClonedStatus(true);
     }
 
     private Project createRemoteProject(Group group, String name, ProgressListener progressListener) {
