@@ -1,5 +1,6 @@
 package com.lgc.gitlabtool.git.ui.javafx;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -282,7 +283,10 @@ class LoginDialog extends Dialog<DialogDTO> {
     }
 
     private void openUserGuide() {
-        String url = getClass().getClassLoader().getResource(USER_GUIDE_URL).getFile();
-        FileLauncherUtil.open(url);
+        String location = LoginDialog.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+        java.io.File file = new java.io.File(location);
+        String parent = file.getParentFile().getPath();
+        String path = parent + File.separator + USER_GUIDE_URL;
+        FileLauncherUtil.open(path);
     }
 }

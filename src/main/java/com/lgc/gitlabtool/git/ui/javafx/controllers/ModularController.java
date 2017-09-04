@@ -372,8 +372,12 @@ public class ModularController {
     }
 
     private void openUserGuide() {
-        String url = getClass().getClassLoader().getResource(USER_GUIDE_URL).getFile();
-        FileLauncherUtil.open(url);
+//        String url = getClass().getClassLoader().getResource(USER_GUIDE_URL).getFile();
+        String location = ModularController.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+        java.io.File file = new java.io.File(location);
+        String parent = file.getParentFile().getPath();
+        String path = parent + File.separator + USER_GUIDE_URL;
+        FileLauncherUtil.open(path);
     }
 
 }

@@ -6,3 +6,5 @@ build:
  artifacts:
   paths:
   - target/GitlabTool-full.jar
+  - target/user_guide_files
+  - user_guide.htm
