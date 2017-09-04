@@ -7,4 +7,4 @@ build:
   paths:
   - target/GitlabTool-full.jar
   - target/user_guide_files
-  - user_guide.htm
+  - target/user_guide.htm
