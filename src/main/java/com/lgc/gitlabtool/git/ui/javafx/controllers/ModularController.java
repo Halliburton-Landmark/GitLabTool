@@ -235,12 +235,6 @@ public class ModularController {
 
     private void showSwitchBranchWindow() {
         try {
-//            EventHandler<WindowEvent> confirmCloseEventHandler = event -> {
-//                if (_mainWindowController != null) {
-//                    _mainWindowController.updateProjectsList();
-//                }
-//            };
-
             URL switchBranchWindowUrl = getClass().getClassLoader().getResource(ViewKey.SWITCH_BRANCH_WINDOW.getPath());
             FXMLLoader loader = new FXMLLoader(switchBranchWindowUrl);
             Parent root = loader.load();

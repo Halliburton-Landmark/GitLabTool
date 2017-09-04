@@ -54,6 +54,14 @@ public enum ApplicationState {
         public String toString() {
             return "Editing pom.xml file";
         }
+    },
+
+    REFRESH_PROJECTS {
+        @Override
+        public String toString() {
+            return "Refresh projects";
+
+        }
     };
 
     public String getState() {

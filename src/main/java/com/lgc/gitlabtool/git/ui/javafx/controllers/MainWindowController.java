@@ -20,6 +20,7 @@ import org.apache.logging.log4j.Logger;
 import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.MessageType;
 import com.lgc.gitlabtool.git.entities.Project;
+import com.lgc.gitlabtool.git.entities.ProjectList;
 import com.lgc.gitlabtool.git.entities.ProjectStatus;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.listeners.stateListeners.StateListener;
@@ -90,9 +91,9 @@ public class MainWindowController implements StateListener {
     private static final String STATUS_DIALOG_TITLE = "Status dialog";
     private static final String STATUS_DIALOG_HEADER_COMMIT = "Commit statuses";
     private static final String EDIT_PROJECT_PROPERTIES = "Edit project properties";
-    private static final String EDIT_POM_SELECTION_WARNING = "Selected projects do not have Pom.xml file or contains shadow project";
+    private static final String EDIT_POM_SELECTION_WARNING = "This operation unavailable for some projects: ";
 
-    private List<Project> _projects;
+    private ProjectList _projectsList;
 
     private Group _currentGroup;
     private Preferences preferences;
@@ -115,7 +116,6 @@ public class MainWindowController implements StateListener {
 
     private static final StateService _stateService = (StateService) ServiceProvider.getInstance()
             .getService(StateService.class.getName());
-
 
     @FXML
     private ListView<Project> projectsList;
@@ -219,7 +219,9 @@ public class MainWindowController implements StateListener {
 
     public void setSelectedGroup(Group group) {
         _currentGroup = group;
-        loadProjects();
+        ProjectList.reset();
+        _projectsList = ProjectList.get(_currentGroup);
+        sortProjectsList();
     }
 
     public void onSelectAll() {
@@ -256,9 +258,9 @@ public class MainWindowController implements StateListener {
     }
 
     private void onOpenFolder(ActionEvent event) {
-        getSelectedProjects().parallelStream()
-                .filter(Project::isCloned)
-                .forEach(this::openProjectFolder);
+        getCurrentProjects().parallelStream()
+                            .filter(Project::isCloned)
+                            .forEach(this::openProjectFolder);
     }
 
     private void openProjectFolder(Project project){
@@ -423,7 +425,7 @@ public class MainWindowController implements StateListener {
     }
 
     private void showCreateNewBranchDialog() {
-        List<Project> allSelectedProjects = getSelectedProjects();
+        List<Project> allSelectedProjects = getCurrentProjects();
         List<Project> clonedProjectsWithoutConflicts = allSelectedProjects.stream()
                 .filter(this::projectIsReadyForGitOperations)
                 .collect(Collectors.toList());
@@ -439,26 +441,27 @@ public class MainWindowController implements StateListener {
     @FXML
     public void refreshLoadProjects(ActionEvent actionEvent) {
         ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.submit(() -> loadProjects());
+        executor.submit(() -> refreshLoadProjects());
         executor.shutdown();
     }
 
-    private void loadProjects() {
-        _projects = (List<Project>) _projectService.loadProjects(_currentGroup);
+    private void refreshLoadProjects() {
+        _projectsList.refreshLoadProjects();
         sortProjectsList();
         checkProjectsList();
     }
 
     // shadow projects in the end list
     private void sortProjectsList() {
-        List<Project> sortedList = _projects.parallelStream()
-                                            .sorted(this::compareProjects)
-                                            .collect(Collectors.toList());
+        List<Project> sortedList = _projectsList.getProjects().stream().sorted(this::compareProjects)
+                .collect(Collectors.toList());
+
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
                 ObservableList<Project> projectsObservableList = FXCollections.observableList(sortedList);
                 projectsList.setItems(projectsObservableList);
+                projectsList.refresh();
             }
         });
     }
@@ -469,7 +472,7 @@ public class MainWindowController implements StateListener {
 
     @FXML
     public void onCommitAction(ActionEvent actionEvent) {
-        List<Project> allSelectedProjects = getSelectedProjects();
+        List<Project> allSelectedProjects = getCurrentProjects();
         List<Project> projectWithChanges = _gitService.getProjectsWithChanges(allSelectedProjects);
 
         if (projectWithChanges.isEmpty()) {
@@ -483,10 +486,9 @@ public class MainWindowController implements StateListener {
 
     @FXML
     public void onPushAction(ActionEvent actionEvent) {
-        List<Project> allSelectedProjects = getSelectedProjects();
-        List<Project> filteredProjects = allSelectedProjects.parallelStream()
-                                                            .filter(this::projectIsReadyForGitOperations)
-                                                            .collect(Collectors.toList());
+        List<Project> filteredProjects = getCurrentProjects().stream()
+                                                             .filter(this::projectIsReadyForGitOperations)
+                                                             .collect(Collectors.toList());
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.submit(() -> _gitService.push(filteredProjects, new PushProgressListener()));
         executor.shutdown();
@@ -494,9 +496,9 @@ public class MainWindowController implements StateListener {
 
     @FXML
     public void cloneShadowProject(ActionEvent actionEvent) {
-        List<Project> shadowProjects = getSelectedProjects().stream()
-                                                            .filter(project -> !project.isCloned())
-                                                            .collect(Collectors.toList());
+        List<Project> shadowProjects = getCurrentProjects().stream()
+                                                           .filter(project -> !project.isCloned())
+                                                           .collect(Collectors.toList());
         if (shadowProjects == null || shadowProjects.isEmpty()) {
             _consoleService.addMessage("Shadow projects for cloning have not been selected!", MessageType.ERROR);
             return;
@@ -517,14 +519,17 @@ public class MainWindowController implements StateListener {
 
             EditProjectPropertiesController controller = loader.getController();
 
-            List<Project> selectedProjects = getSelectedProjects();
-
-            if(!isAvailableEditPomXml(selectedProjects)){
-                _consoleService.addMessage(EDIT_POM_SELECTION_WARNING, MessageType.ERROR);
+            List<Project> unavailableProjects = getUnavalibleProjectsForEditingPom(getCurrentProjects());
+            if(!unavailableProjects.isEmpty()){
+                String failedProjectsNames = unavailableProjects.stream()
+                                                                .map(Project :: getName)
+                                                                .collect(Collectors.toList())
+                                                                .toString();
+                _consoleService.addMessage(EDIT_POM_SELECTION_WARNING + failedProjectsNames, MessageType.ERROR);
                 return;
             }
 
-            controller.beforeStart(selectedProjects);
+            controller.beforeStart(getIdSelectedProjects());
             Scene scene = new Scene(root);
             Stage stage = new Stage();
             stage.setScene(scene);
@@ -550,23 +555,21 @@ public class MainWindowController implements StateListener {
         }
     }
 
-    private boolean isAvailableEditPomXml(List<Project> projects) {
-        boolean hasShadow = projects.parallelStream()
-                .filter(project -> !project.isCloned()).count() > 0;
-        boolean hasPomFile = _pomXmlService.hasPomFile(projects);
-
-        //TODO: CREATE GENERAL FILTER FOR ALL OPERATION! (Shadow & Conflicts) + Specific filters
-
-        return !(hasShadow || !hasPomFile);
+    private List<Project> getUnavalibleProjectsForEditingPom(List<Project> projects) {
+        return projects.parallelStream()
+                .filter(project -> !projectIsReadyForGitOperations(project)
+                        || !_pomXmlService.hasPomFile(project))
+                .collect(Collectors.toList());
     }
 
     @FXML
     public void onShowHideShadowProjects(ActionEvent actionEvent) {
+        ObservableList<Project> obsList = FXCollections.observableArrayList(_projectsList.getProjects());
         if (filterShadowProjects.isSelected()) {
-            FilteredList<Project> list = new FilteredList<>(FXCollections.observableArrayList(_projects), Project::isCloned);
+            FilteredList<Project> list = new FilteredList<>(obsList, Project::isCloned);
             projectsList.setItems(list);
         } else {
-            projectsList.setItems(FXCollections.observableArrayList(_projects));
+            projectsList.setItems(obsList);
             sortProjectsList();
         }
     }
@@ -585,8 +588,14 @@ public class MainWindowController implements StateListener {
         statusDialog.showAndWait();
     }
 
-    private List<Project> getSelectedProjects() {
+    // WARNING!!!!!
+    private List<Project> getCurrentProjects() {
         return projectsList.getSelectionModel().getSelectedItems();
+    }
+
+    private List<Integer> getIdSelectedProjects() {
+        List<Project> projects = projectsList.getSelectionModel().getSelectedItems();
+        return ProjectList.getIdsProjects(projects);
     }
 
     private void checkProjectsList() {
@@ -598,15 +607,15 @@ public class MainWindowController implements StateListener {
             @Override
             public void run() {
                 IncorrectProjectDialog dialog = new IncorrectProjectDialog();
-                dialog.showDialog(incorrectProjects, (obj) -> loadProjects());
+                dialog.showDialog(incorrectProjects, (obj) -> refreshLoadProjects());
             }
         });
     }
 
     private List<Project> findIncorrectProjects() {
-        return _projects.parallelStream()
-                        .filter(this::isIncorrectProject)
-                        .collect(Collectors.toList());
+        return _projectsList.getProjects().parallelStream()
+                                          .filter(this::isIncorrectProject)
+                                          .collect(Collectors.toList());
     }
 
     private boolean isIncorrectProject(Project project) {
@@ -618,9 +627,9 @@ public class MainWindowController implements StateListener {
 
     @FXML
     public void onPullAction(ActionEvent actionEvent) {
-        List<Project> projectsToPull = getSelectedProjects().stream()
-                .filter(this::projectIsReadyForGitOperations)
-                .collect(Collectors.toList());
+        List<Project> projectsToPull = getCurrentProjects().stream()
+                                                           .filter(this::projectIsReadyForGitOperations)
+                                                           .collect(Collectors.toList());
         checkChangesAndPull(projectsToPull, new Object());
     }
 
