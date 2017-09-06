@@ -273,7 +273,7 @@ class LoginDialog extends Dialog<DialogDTO> {
     }
 
     private void addUserGuideKeyEvent() {
-        getStage().getScene().setOnKeyPressed(event -> {
+        getDialogPane().getScene().setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.F1) {
                 UserGuideUtil.openUserGuide();
             }
