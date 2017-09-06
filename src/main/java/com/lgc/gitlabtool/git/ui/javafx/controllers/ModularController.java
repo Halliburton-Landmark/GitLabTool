@@ -28,8 +28,8 @@ import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuItems;
 import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuManager;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarButtons;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarManager;
-import com.lgc.gitlabtool.git.util.FileLauncherUtil;
 import com.lgc.gitlabtool.git.util.ScreenUtil;
+import com.lgc.gitlabtool.git.util.UserGuideUtil;
 
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -79,8 +79,6 @@ public class ModularController {
     private static final String REMOVE_GROUP_DIALOG_TITLE = "Remove Group";
     private static final String REMOVE_GROUP_STATUS_DIALOG_TITLE = "Import Status Dialog";
     private static final String FAILED_REMOVE_GROUP_MESSAGE = "Removing of group is Failed";
-
-    private static final String USER_GUIDE_URL = "user_guide.htm";
 
     private static final String CSS_PATH = "css/style.css";
     private static final Image _appIcon = AppIconHolder.getInstance().getAppIcoImage();
@@ -224,7 +222,7 @@ public class ModularController {
             about.setOnAction(event -> showAboutPopup());
 
             MenuItem userGuide = MainMenuManager.getInstance().getButtonById(MainMenuItems.GROUP_WINDOW_USER_GUIDE);
-            userGuide.setOnAction(event -> openUserGuide());
+            userGuide.setOnAction(event -> UserGuideUtil.openUserGuide());
             userGuide.setAccelerator(new KeyCodeCombination(KeyCode.F1));
 
         } else if (windowId.equals(ViewKey.MAIN_WINDOW.getKey())) {
@@ -235,7 +233,7 @@ public class ModularController {
             about.setOnAction(event -> showAboutPopup());
 
             MenuItem userGuide = MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_USER_GUIDE);
-            userGuide.setOnAction(event -> openUserGuide());
+            userGuide.setOnAction(event -> UserGuideUtil.openUserGuide());
             userGuide.setAccelerator(new KeyCodeCombination(KeyCode.F1));
 
             MenuItem switchTo = MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_SWITCH_BRANCH);
@@ -369,15 +367,6 @@ public class ModularController {
         if (!_stateService.isBusy()) {
             Platform.exit();
         }
-    }
-
-    private void openUserGuide() {
-//        String url = getClass().getClassLoader().getResource(USER_GUIDE_URL).getFile();
-        String location = ModularController.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-        java.io.File file = new java.io.File(location);
-        String parent = file.getParentFile().getPath();
-        String path = parent + File.separator + USER_GUIDE_URL;
-        FileLauncherUtil.open(path);
     }
 
 }

@@ -1,6 +1,5 @@
 package com.lgc.gitlabtool.git.ui.javafx;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,8 +16,8 @@ import com.lgc.gitlabtool.git.services.StorageService;
 import com.lgc.gitlabtool.git.ui.ViewKey;
 import com.lgc.gitlabtool.git.ui.javafx.controllers.ServerInputWindowController;
 import com.lgc.gitlabtool.git.ui.javafx.dto.DialogDTO;
-import com.lgc.gitlabtool.git.util.FileLauncherUtil;
 import com.lgc.gitlabtool.git.util.URLManager;
+import com.lgc.gitlabtool.git.util.UserGuideUtil;
 import com.lgc.gitlabtool.git.xml.Server;
 
 import javafx.application.Platform;
@@ -64,7 +63,6 @@ class LoginDialog extends Dialog<DialogDTO> {
     private final String WAITING_MESSAGE = "Login... Please wait";
     private final String EMPTY_FIELD = "Login or password is empty!";
     private static final String INFO_IMAGE_URL = "icons/info_20x20.png";
-    private static final String USER_GUIDE_URL = "user_guide.htm";
     private static final String CSS_PATH = "css/style.css";
 
     private final Text sceneTitle;
@@ -166,7 +164,7 @@ class LoginDialog extends Dialog<DialogDTO> {
 
         GridPane.setHalignment(infoButton, HPos.LEFT);
         infoButton.setTooltip(new Tooltip("Get info"));
-        infoButton.setOnAction((event) -> openUserGuide()); 
+        infoButton.setOnAction((event) -> UserGuideUtil.openUserGuide()); 
     }
 
     private ObservableList<String> getBoxOptions() {
@@ -277,16 +275,9 @@ class LoginDialog extends Dialog<DialogDTO> {
     private void addUserGuideKeyEvent() {
         getStage().getScene().setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.F1) {
-                openUserGuide();
+                UserGuideUtil.openUserGuide();
             }
         });
     }
 
-    private void openUserGuide() {
-        String location = LoginDialog.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-        java.io.File file = new java.io.File(location);
-        String parent = file.getParentFile().getPath();
-        String path = parent + File.separator + USER_GUIDE_URL;
-        FileLauncherUtil.open(path);
-    }
 }
