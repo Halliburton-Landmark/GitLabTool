@@ -24,6 +24,7 @@ import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.ViewKey;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 import com.lgc.gitlabtool.git.ui.javafx.AlertWithCheckBox;
+import com.lgc.gitlabtool.git.ui.javafx.WorkIndicatorDialog;
 import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuItems;
 import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuManager;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarButtons;
@@ -50,6 +51,7 @@ import javafx.scene.control.ToolBar;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.text.TextFlow;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
@@ -142,20 +144,44 @@ public class ModularController {
         initActionsMainMenu(ViewKey.MAIN_WINDOW.getKey());
         initActionsToolBar(ViewKey.MAIN_WINDOW.getKey());
 
+        Stage stage = (Stage) toolbar.getScene().getWindow();
         FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource(ViewKey.MAIN_WINDOW.getPath()));
         Node node = loader.load();
 
-        _mainWindowController = loader.getController();;
-        _mainWindowController.setSelectedGroup(selectedGroup);
-        _mainWindowController.beforeShowing();
+        _mainWindowController = loader.getController();
 
-        AnchorPane.setTopAnchor(node, 0.0);
-        AnchorPane.setRightAnchor(node, 0.0);
-        AnchorPane.setLeftAnchor(node, 0.0);
-        AnchorPane.setBottomAnchor(node, 0.0);
+        WorkIndicatorDialog workIndicatorDialog = new WorkIndicatorDialog(stage, "Loading projects...");
 
-        viewPane.getChildren().clear();
-        viewPane.getChildren().add(node);
+        Runnable selectGroup = () ->{
+            _mainWindowController.setSelectedGroup(selectedGroup);
+
+            // UI updating
+            Platform.runLater(() -> {
+                _mainWindowController.beforeShowing();
+
+                AnchorPane.setTopAnchor(node, 0.0);
+                AnchorPane.setRightAnchor(node, 0.0);
+                AnchorPane.setLeftAnchor(node, 0.0);
+                AnchorPane.setBottomAnchor(node, 0.0);
+
+                viewPane.getChildren().clear();
+                viewPane.getChildren().add(node);
+            });
+        };
+
+        workIndicatorDialog.execute(selectGroup);
+
+        Parent loadingStage = workIndicatorDialog.getStage().getScene().getRoot();
+
+        StackPane pane = new StackPane();
+        pane.getChildren().add(loadingStage);
+
+        AnchorPane.setTopAnchor(pane, 0.0);
+        AnchorPane.setRightAnchor(pane, 0.0);
+        AnchorPane.setLeftAnchor(pane, 0.0);
+        AnchorPane.setBottomAnchor(pane, 0.0);
+
+        viewPane.getChildren().add(pane);
 
         updateCurrentConsole();
     }
