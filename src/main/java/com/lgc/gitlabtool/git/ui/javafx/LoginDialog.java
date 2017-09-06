@@ -38,6 +38,7 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -273,7 +274,7 @@ class LoginDialog extends Dialog<DialogDTO> {
     }
 
     private void addUserGuideKeyEvent() {
-        getDialogPane().getScene().setOnKeyPressed(event -> {
+        getDialogPane().getScene().addEventFilter(KeyEvent.KEY_PRESSED, event -> {
             if (event.getCode() == KeyCode.F1) {
                 UserGuideUtil.openUserGuide();
             }
