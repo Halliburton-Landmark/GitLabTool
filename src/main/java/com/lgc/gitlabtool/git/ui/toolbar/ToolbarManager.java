@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -15,7 +17,6 @@ import com.lgc.gitlabtool.git.ui.javafx.controllers.ModularController;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
@@ -33,6 +34,8 @@ public class ToolbarManager {
     private static final String CHANGE_GROUP_BUTTON_TEXT = "Change group";
     private static final String CHANGE_GROUP_BUTTON_TOOLTIP = "Change current group";
     private static final String CHANGE_GROUP_BUTTON_ID = "changeGroupButton";
+
+    private Map<String, Boolean> enableMap = new HashMap<>();
 
     private static ToolbarManager instance = null;
 
@@ -94,6 +97,40 @@ public class ToolbarManager {
                 .findFirst() //first match
                 .map(node -> (Button) node) //cast to button
                 .orElseGet(Button::new); //result or new Button
+    }
+
+    /**
+     * Temporary lock all buttons on toolbar and makes backup of disable states
+     */
+    public void lockButtons() {
+        if (items == null || enableMap == null) {
+            return;
+        }
+
+        items.stream().filter(x -> x instanceof Button)
+                .map(node -> (Button) node)
+                .forEach(button -> {
+                    enableMap.put(button.getId(), button.isDisable());
+                    button.setDisable(true);
+                });
+    }
+
+    /**
+     * Unlock all buttons on toolbar after locking and restore backup disable states
+     */
+    public void unlockButtons() {
+        if (items == null || enableMap == null) {
+            return;
+        }
+
+        items.stream()
+                .filter(x -> x instanceof Button)
+                .map(node -> (Button) node)
+                .forEach(button -> {
+                    if (enableMap.containsKey(button.getId())) {
+                        button.setDisable(enableMap.get(button.getId()));
+                    }
+                });
     }
 
     /**
