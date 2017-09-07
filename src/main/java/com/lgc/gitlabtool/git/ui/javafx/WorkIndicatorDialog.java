@@ -20,11 +20,11 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.Window;
 
-public class WorkIndicatorDialog<P> {
+public class WorkIndicatorDialog {
 
     private final ProgressIndicator progressIndicator = new ProgressIndicator(INDETERMINATE_PROGRESS);
     private static final Image _appIcon = AppIconHolder.getInstance().getAppIcoImage();
-    private final Stage stage = new Stage(StageStyle.UNDECORATED);
+    private final Stage stage = new Stage();
     private final Label label = new Label();
     private final Group root = new Group();
     private final Scene scene = new Scene(root);
@@ -107,7 +107,7 @@ public class WorkIndicatorDialog<P> {
         taskWorker.setOnSucceeded(eh);
         taskWorker.setOnFailed(eh);
 
-        new Thread(taskWorker, "azaza").start();
+        new Thread(taskWorker, "Worker thread").start();
     }
 
 }
