@@ -76,7 +76,7 @@ public class OperationProgressListener implements ProgressListener {
         	if (_applicationState == ApplicationState.CLONE) {
         		_projectService.updateProjectTypeAndStatus(project);
 			}
-            String message = ((Project) t[1]).getName() + " : " + t[2];
+            String message = project.getName() + " : " + t[2];
             _progressDialog.addMessageToConcole(message, MessageType.SUCCESS);
             _logger.info(_applicationState + ": " + message);
         }

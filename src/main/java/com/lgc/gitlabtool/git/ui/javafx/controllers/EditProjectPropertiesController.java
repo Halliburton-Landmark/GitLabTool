@@ -130,7 +130,6 @@ public class EditProjectPropertiesController implements StateListener {
     private List<Integer> _selectProjectsIds;
     private final ProjectList _projectList = ProjectList.get(null);;
 
-
     private List<Project> getProjectsByIds() {
         return _projectList.getProjectsByIds(_selectProjectsIds);
     }
