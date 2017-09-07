@@ -94,7 +94,7 @@ public class ProjectServiceImpl implements ProjectService {
         _consoleService.addMessage("Getting statuses and types of projects...", MessageType.SIMPLE);
         projects.parallelStream()
                 .filter(project -> projectsName.contains(project.getName()))
-                .forEach((project) -> updateProjectTypeAndStatus(project, group.getPathToClonedGroup()));
+                .forEach((project) -> updateDataProject(project, group.getPathToClonedGroup()));
         _consoleService.addMessage(successMessage, MessageType.SUCCESS);
         return projects;
     }
@@ -192,8 +192,16 @@ public class ProjectServiceImpl implements ProjectService {
         }
     }
 
-    private void updateProjectTypeAndStatus(Project project, String pathGroup) {
-        project.setPathToClonedProject(pathGroup + File.separator + project.getName());
+    private void updateDataProject(Project project, String pathGroup) {
+    	project.setPathToClonedProject(pathGroup + File.separator + project.getName());
+    	updateProjectTypeAndStatus(project);
+    }
+    
+    @Override
+    public void updateProjectTypeAndStatus(Project project) {
+    	if (project == null) {
+			return;
+		}
         project.setProjectType(_projectTypeService.getProjectType(project));
         _gitService.modifyProjectStatusByGit(project);
         project.setClonedStatus(true);

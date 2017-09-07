@@ -11,6 +11,7 @@ import com.lgc.gitlabtool.git.jgit.JGit;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.services.ProgressListener;
+import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.javafx.ProgressDialog;
@@ -39,6 +40,9 @@ public class OperationProgressListener implements ProgressListener {
 
     private final StateService _stateService = (StateService) ServiceProvider.getInstance()
             .getService(StateService.class.getName());
+    
+    private final ProjectService _projectService = (ProjectService) ServiceProvider.getInstance()
+            .getService(ProjectService.class.getName());
 
     public OperationProgressListener(ProgressDialog progressDialog, ApplicationState applicationState) {
         if (progressDialog == null || applicationState == null) {
@@ -67,7 +71,11 @@ public class OperationProgressListener implements ProgressListener {
             double progress = (long) t[0] * 0.01;
             _progressDialog.updateProgressBar(progress);
         }
-        if (t.length >= 3 && t[1] instanceof Project && t[2] instanceof JGitStatus) {
+        if (t.length >= 3 && t[1] instanceof Project && t[2] instanceof JGitStatus) { 	
+        	Project project = (Project) t[1];
+        	if (_applicationState == ApplicationState.CLONE) {
+        		_projectService.updateProjectTypeAndStatus(project);
+			}
             String message = ((Project) t[1]).getName() + " : " + t[2];
             _progressDialog.addMessageToConcole(message, MessageType.SUCCESS);
             _logger.info(_applicationState + ": " + message);
