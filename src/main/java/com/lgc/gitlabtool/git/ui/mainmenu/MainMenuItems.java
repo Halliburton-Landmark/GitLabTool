@@ -16,6 +16,7 @@ public enum MainMenuItems {
 
     GROUP_WINDOW_EXIT(ViewKey.GROUP_WINDOW.getKey(), "File", "group_window_file_exit", "icons/mainmenu/exit_16x16.png", "Exit"),
     GROUP_WINDOW_CLONE_GROUP(ViewKey.GROUP_WINDOW.getKey(), "Git", "group_window_group_clone", "icons/mainmenu/clone_16x16.png", "Clone"),
+    GROUP_WINDOW_USER_GUIDE(ViewKey.GROUP_WINDOW.getKey(), "Help", "group_window_help_user_guide", "icons/mainmenu/user_guide_16x16.png", "User guide"),
     GROUP_WINDOW_ABOUT(ViewKey.GROUP_WINDOW.getKey(), "Help", "group_window_help_about", "icons/mainmenu/about_16x16.png", "About"),
 
     MAIN_EXIT(ViewKey.MAIN_WINDOW.getKey(), "File", "main_file_exit", "icons/mainmenu/exit_16x16.png", "Exit"),
@@ -25,6 +26,7 @@ public enum MainMenuItems {
     MAIN_COMMIT(ViewKey.MAIN_WINDOW.getKey(), "Git", "main_git_commit", "icons/mainmenu/commit_16x16.png", "Commit"),
     MAIN_PUSH(ViewKey.MAIN_WINDOW.getKey(), "Git", "main_git_push", "icons/mainmenu/push_16x16.png", "Push"),
     MAIN_PULL(ViewKey.MAIN_WINDOW.getKey(), "Git", "main_git_pull", "icons/mainmenu/pull_16x16.png", "Pull"),
+    MAIN_USER_GUIDE(ViewKey.MAIN_WINDOW.getKey(), "Help", "main_help_user_guide", "icons/mainmenu/user_guide_16x16.png", "User guide"),
     MAIN_ABOUT(ViewKey.MAIN_WINDOW.getKey(), "Help", "main_help_about", "icons/mainmenu/about_16x16.png", "About");
 
     private final String viewKey;
