@@ -20,6 +20,9 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.Window;
 
+/**
+ * Dialog that indicate doing some background processes
+ */
 public class WorkIndicatorDialog {
 
     private final ProgressIndicator progressIndicator = new ProgressIndicator(INDETERMINATE_PROGRESS);
