@@ -144,6 +144,9 @@ public class ModularController {
         initActionsMainMenu(ViewKey.MAIN_WINDOW.getKey());
         initActionsToolBar(ViewKey.MAIN_WINDOW.getKey());
 
+        ToolbarManager.getInstance().lockButtons();
+        MainMenuManager.getInstance().lockButtons();
+
         Stage stage = (Stage) toolbar.getScene().getWindow();
         FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource(ViewKey.MAIN_WINDOW.getPath()));
         Node node = loader.load();
@@ -157,6 +160,9 @@ public class ModularController {
 
             // UI updating
             Platform.runLater(() -> {
+                ToolbarManager.getInstance().unlockButtons();
+                MainMenuManager.getInstance().unlockButtons();
+
                 _mainWindowController.beforeShowing();
 
                 AnchorPane.setTopAnchor(node, 0.0);
