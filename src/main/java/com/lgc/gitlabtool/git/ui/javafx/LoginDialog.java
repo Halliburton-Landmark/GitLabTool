@@ -17,6 +17,7 @@ import com.lgc.gitlabtool.git.ui.ViewKey;
 import com.lgc.gitlabtool.git.ui.javafx.controllers.ServerInputWindowController;
 import com.lgc.gitlabtool.git.ui.javafx.dto.DialogDTO;
 import com.lgc.gitlabtool.git.util.URLManager;
+import com.lgc.gitlabtool.git.util.UserGuideUtil;
 import com.lgc.gitlabtool.git.xml.Server;
 
 import javafx.application.Platform;
@@ -33,6 +34,11 @@ import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -57,6 +63,8 @@ class LoginDialog extends Dialog<DialogDTO> {
     private final String WRONG_CREDENTIALS = "Wrong login or password! Please try again";
     private final String WAITING_MESSAGE = "Login... Please wait";
     private final String EMPTY_FIELD = "Login or password is empty!";
+    private static final String INFO_IMAGE_URL = "icons/info_20x20.png";
+    private static final String CSS_PATH = "css/style.css";
 
     private final Text sceneTitle;
     private final Label userName;
@@ -67,6 +75,7 @@ class LoginDialog extends Dialog<DialogDTO> {
     private final ComboBox<String> comboBox;
     private final Label message;
     private final Button signInButton;
+    private final Button infoButton;
 
     LoginDialog() {
         setTitle("GitLab Welcome");
@@ -79,19 +88,19 @@ class LoginDialog extends Dialog<DialogDTO> {
         sceneTitle = new Text("Welcome To GitLab");
         sceneTitle.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
         GridPane.setHalignment(sceneTitle, HPos.CENTER);
-        grid.add(sceneTitle, 0, 0, 2, 1);
+        grid.add(sceneTitle, 0, 1, 2, 1);
 
         userName = new Label("User Name:");
-        grid.add(userName, 0, 1);
+        grid.add(userName, 0, 2);
 
         userTextField = new TextField();
-        grid.add(userTextField, 1, 1);
+        grid.add(userTextField, 1, 2);
 
         password = new Label("Password:");
-        grid.add(password, 0, 2);
+        grid.add(password, 0, 3);
 
         passwordField = new PasswordField();
-        grid.add(passwordField, 1, 2);
+        grid.add(passwordField, 1, 3);
 
         signInButton = new Button("Sign in");
         signInButton.setDefaultButton(true);
@@ -99,13 +108,17 @@ class LoginDialog extends Dialog<DialogDTO> {
         setOnSignInButtonListener(signInButton);
         grid.add(signInButton, 1, 9, 1, 1);
 
+        infoButton = new Button();
+        setUpInfoButton(infoButton);
+        grid.add(infoButton, 0, 9);
+
         message = new Label();
         message.setText("blablabla");
         message.setVisible(false);
         grid.add(message, 0, 5, 3, 3);
 
         repositoryText = new Text("Service: ");
-        grid.add(repositoryText, 0, 3);
+        grid.add(repositoryText, 0, 4);
 
         ObservableList<String> options = getBoxOptions();
         comboBox = new ComboBox<>(options);
@@ -124,12 +137,35 @@ class LoginDialog extends Dialog<DialogDTO> {
             setLastUserName(comboBox, userTextField);
         });
         comboBox.setValue(getDefaultComboBoxOption(options));
-        grid.add(comboBox, 1, 3, 1, 1);
-
-
+        grid.add(comboBox, 1, 4, 1, 1);
 
         getDialogPane().setContent(grid);
+        addUserGuideKeyEvent();
         initializeOnCloseEvent();
+    }
+
+    private void setUpInfoButton(Button infoButton) {
+        Image infoImage = new Image(getClass()
+                .getClassLoader()
+                .getResource(INFO_IMAGE_URL).toExternalForm());
+
+        infoButton.setGraphic(new ImageView(infoImage));
+
+        /* ROUND (30 px is optimal size but can be changed) */
+        infoButton.setStyle(
+                "-fx-background-radius: 5em; " +
+                        "-fx-min-width: 30px; " +
+                        "-fx-min-height: 30px; " +
+                        "-fx-max-width: 30px; " +
+                        "-fx-max-height: 30px;"
+        );
+
+        /* HOVER ANIMATION */
+        infoButton.getStylesheets().add(getClass().getClassLoader().getResource(CSS_PATH).toExternalForm());
+
+        GridPane.setHalignment(infoButton, HPos.LEFT);
+        infoButton.setTooltip(new Tooltip("Get info"));
+        infoButton.setOnAction((event) -> UserGuideUtil.openUserGuide()); 
     }
 
     private ObservableList<String> getBoxOptions() {
@@ -236,4 +272,13 @@ class LoginDialog extends Dialog<DialogDTO> {
         Server lastUsedServer = storageService.getLastUsedServer();
         return lastUsedServer != null ? lastUsedServer.getName() : options.get(0);
     }
+
+    private void addUserGuideKeyEvent() {
+        getDialogPane().getScene().addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+            if (event.getCode() == KeyCode.F1) {
+                UserGuideUtil.openUserGuide();
+            }
+        });
+    }
+
 }

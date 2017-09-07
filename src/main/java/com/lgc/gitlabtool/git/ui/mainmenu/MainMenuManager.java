@@ -1,12 +1,20 @@
 package com.lgc.gitlabtool.git.ui.mainmenu;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
 import com.lgc.gitlabtool.git.ui.javafx.controllers.ModularController;
+
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-
-import java.util.*;
 
 /**
  * Class for managing an main menu with menu items
@@ -18,6 +26,7 @@ public class MainMenuManager {
     private static MainMenuManager instance = null;
 
     private List<Menu> items;
+    private Map<String, Boolean> enableMap = new HashMap<>();
 
     private MainMenuManager() {
     }
@@ -103,6 +112,39 @@ public class MainMenuManager {
         }
 
         return items;
+    }
+
+    /**
+     * Temporary lock all buttons in mainmenu and makes backup of disable states
+     */
+    public void lockButtons() {
+        if (items == null || enableMap == null) {
+            return;
+        }
+
+        items.stream()
+                .filter(Objects::nonNull)
+                .forEach(menu -> {
+                    enableMap.put(menu.getId(), menu.isDisable());
+                    menu.setDisable(true);
+                });
+    }
+
+    /**
+     * Unlock all buttons in mainmenu after locking and restore backup disable states
+     */
+    public void unlockButtons() {
+        if (items == null || enableMap == null) {
+            return;
+        }
+
+        items.stream()
+                .filter(Objects::nonNull)
+                .forEach(menu -> {
+                    if (enableMap.containsKey(menu.getId())) {
+                        menu.setDisable(enableMap.get(menu.getId()));
+                    }
+                });
     }
 
     private MenuItem createButton(String buttonId, String imgPath, String btnText) {
