@@ -53,9 +53,11 @@ public class GitServiceImpl implements GitService {
 
     @Override
     public Map<Project, JGitStatus> switchTo(List<Project> projects, String branchName, boolean isRemote) {
+        _stateService.stateON(ApplicationState.SWITCH_BRANCH);
         final Map<Project, JGitStatus> switchStatuses = new ConcurrentHashMap<>();
         projects.parallelStream()
                 .forEach((project) -> switchStatuses.put(project, _git.switchTo(project, branchName, isRemote)));
+        _stateService.stateOFF(ApplicationState.SWITCH_BRANCH);
         return switchStatuses;
     }
 
@@ -181,7 +183,7 @@ public class GitServiceImpl implements GitService {
 
     @Override
     public int[] getAheadBehindIndexCounts(Project project, String branchName) {
-        if (project == null || branchName == null || branchName.isEmpty() || !project.isCloned()) {
+        if (project == null || branchName == null || branchName.isEmpty() || project.getPath() == null) {
             return new int[] {0, 0};
         }
         return _git.getAheadBehindIndexCounts(project, branchName);

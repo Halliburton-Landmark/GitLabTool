@@ -42,10 +42,25 @@ public enum ApplicationState {
         }
     },
 
+    SWITCH_BRANCH {
+        @Override
+        public String toString() {
+            return "Branch switching";
+        }
+    },
+
+    EDIT_POM {
+        @Override
+        public String toString() {
+            return "Editing pom.xml file";
+        }
+    },
+
     REFRESH_PROJECTS {
         @Override
         public String toString() {
             return "Refresh projects";
+
         }
     };
 

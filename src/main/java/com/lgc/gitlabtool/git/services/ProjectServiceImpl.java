@@ -94,7 +94,7 @@ public class ProjectServiceImpl implements ProjectService {
         _consoleService.addMessage("Getting statuses and types of projects...", MessageType.SIMPLE);
         projects.parallelStream()
                 .filter(project -> projectsName.contains(project.getName()))
-                .forEach((project) -> updateProjectTypeAndStatus(project, group.getPathToClonedGroup()));
+                .forEach((project) -> updateDataProject(project, group.getPathToClonedGroup()));
         _consoleService.addMessage(successMessage, MessageType.SUCCESS);
         return projects;
     }
@@ -192,11 +192,19 @@ public class ProjectServiceImpl implements ProjectService {
         }
     }
 
-    private void updateProjectTypeAndStatus(Project project, String pathGroup) {
-        project.setClonedStatus(true);
-        project.setPathToClonedProject(pathGroup + File.separator + project.getName());
+    private void updateDataProject(Project project, String pathGroup) {
+    	project.setPathToClonedProject(pathGroup + File.separator + project.getName());
+    	updateProjectTypeAndStatus(project);
+    }
+    
+    @Override
+    public void updateProjectTypeAndStatus(Project project) {
+    	if (project == null) {
+			return;
+		}
         project.setProjectType(_projectTypeService.getProjectType(project));
         _gitService.modifyProjectStatusByGit(project);
+        project.setClonedStatus(true);
     }
 
     private Project createRemoteProject(Group group, String name, ProgressListener progressListener) {
@@ -219,7 +227,7 @@ public class ProjectServiceImpl implements ProjectService {
         List<Project> projects = Arrays.asList(project);
         progressListener.onStart("Cloning of created project");
 
-        clone(projects, path, new ProgressListener() {
+        cloneWithoutState(projects, path, new ProgressListener() {
             @Override
             public void onSuccess(Object... t) {
                 Set<String> structures = projectType.getStructures();
@@ -231,13 +239,10 @@ public class ProjectServiceImpl implements ProjectService {
                 progressListener.onFinish((Object)null, "Failed creating the " + project.getName() + " project!");
             }
             @Override
-            public void onStart(Object... t) {
-            }
+            public void onStart(Object... t) {}
 
             @Override
-            public void onFinish(Object... t) {
-                _stateService.stateOFF(ApplicationState.CLONE);
-            }
+            public void onFinish(Object... t) {}
         });
     }
 
@@ -291,7 +296,10 @@ public class ProjectServiceImpl implements ProjectService {
         }
         // we must call stateOFF for this state in the progressListener.onFinish method
         _stateService.stateON(ApplicationState.CLONE);
+        cloneWithoutState(projects, destinationPath, progressListener);
+    }
 
+    private void cloneWithoutState(List<Project> projects, String destinationPath, ProgressListener progressListener) {
         Path path = Paths.get(destinationPath);
         if (!PathUtilities.isExistsAndDirectory(path)) {
             String errorMessage = path.toAbsolutePath() + " path is not exist or it is not a directory.";

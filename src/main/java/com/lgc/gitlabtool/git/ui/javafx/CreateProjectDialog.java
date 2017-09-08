@@ -140,16 +140,19 @@ public class CreateProjectDialog extends Dialog<String> {
         addProgressBarOnPanel();
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.submit(() -> {
-            _stateService.stateON(ApplicationState.CREATE_PROJECT);
+            CreateProjectProgressListener listener = new CreateProjectProgressListener();
             String idType = _typeComboBox.getSelectionModel().getSelectedItem();
             ProjectType projectType = _typeServies.getTypeById(idType);
-            _projectService.createProject(_selectGroup, _projectNameField.getText(), projectType,
-                    new CreateProjectProgressListener());
+            _projectService.createProject(_selectGroup, _projectNameField.getText(), projectType, listener);
         });
         executor.shutdown();
     }
 
     class CreateProjectProgressListener implements ProgressListener {
+
+        public CreateProjectProgressListener() {
+            _stateService.stateON(ApplicationState.CREATE_PROJECT);
+        }
 
         @Override
         public void onSuccess(Object... t) {

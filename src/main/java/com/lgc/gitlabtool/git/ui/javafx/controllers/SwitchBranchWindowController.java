@@ -55,7 +55,7 @@ public class SwitchBranchWindowController implements StateListener {
     private static final String SWITCHTO_STATUS_ALERT_TITLE = "Switch branch info";
     private static final String SWITCHTO_STATUS_ALERT_HEADER = "Switch branch statuses:";
 
-    private final GitService _gitService =
+    private static final GitService _gitService =
             (GitService) ServiceProvider.getInstance().getService(GitService.class.getName());
 
     private List<Branch> _allBranches = new ArrayList<>();

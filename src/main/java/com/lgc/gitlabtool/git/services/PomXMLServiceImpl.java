@@ -30,6 +30,7 @@ import org.apache.maven.model.Scm;
 
 import com.lgc.gitlabtool.git.entities.MessageType;
 import com.lgc.gitlabtool.git.entities.Project;
+import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.util.PathUtilities;
 
 import javafx.fxml.FXML;
@@ -51,10 +52,12 @@ public class PomXMLServiceImpl implements PomXMLService {
     private static final String CHANGE_ERROR_MESSAGE = "ERROR in changing the pom.xml file.";
 
     private static ConsoleService _consoleService;
+    private static StateService _stateService;
     public static final String UNDEFINED_TEXT = "[Undefined]";
 
-    public PomXMLServiceImpl(ConsoleService consoleService){
+    public PomXMLServiceImpl(ConsoleService consoleService, StateService stateService){
         _consoleService = consoleService;
+        _stateService = stateService;
     }
 
     private void errorNotValidDataInLog() {
@@ -129,6 +132,7 @@ public class PomXMLServiceImpl implements PomXMLService {
         }
     }
 
+    @Override
     @FXML
     public Set<String> getReposIds(List<Project> projects, Boolean isCommon) {
         Set<String> uniqueIds = new HashSet<>();
@@ -157,6 +161,8 @@ public class PomXMLServiceImpl implements PomXMLService {
             errorNotValidDataInLog();
             return statuses;
         }
+
+        _stateService.stateON(ApplicationState.EDIT_POM);
         for (Project project : projects) {
             if (project == null || !project.isCloned()) {
                 statuses.put(project, false);
@@ -174,7 +180,7 @@ public class PomXMLServiceImpl implements PomXMLService {
                         MessageType.ERROR);
             }
         }
-
+        _stateService.stateOFF(ApplicationState.EDIT_POM);
         return statuses;
     }
 
@@ -185,6 +191,7 @@ public class PomXMLServiceImpl implements PomXMLService {
             errorNotValidDataInLog();
             return statuses;
         }
+        _stateService.stateON(ApplicationState.EDIT_POM);
         for (Project project : projects) {
             if (project == null || !project.isCloned()) {
                 statuses.put(project, false);
@@ -202,7 +209,7 @@ public class PomXMLServiceImpl implements PomXMLService {
                         MessageType.ERROR);
             }
         }
-
+        _stateService.stateOFF(ApplicationState.EDIT_POM);
         return statuses;
     }
 
@@ -214,7 +221,7 @@ public class PomXMLServiceImpl implements PomXMLService {
             return statuses;
         }
 
-
+        _stateService.stateON(ApplicationState.EDIT_POM);
         for (Project project : projects) {
             if (project == null || !project.isCloned()) {
                 statuses.put(project, false);
@@ -240,7 +247,7 @@ public class PomXMLServiceImpl implements PomXMLService {
                         MessageType.ERROR);
             }
         }
-
+        _stateService.stateOFF(ApplicationState.EDIT_POM);
         return statuses;
     }
 
