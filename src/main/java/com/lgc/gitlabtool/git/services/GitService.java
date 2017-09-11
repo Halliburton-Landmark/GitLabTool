@@ -143,5 +143,13 @@ public interface GitService {
      */
     public int[] getAheadBehindIndexCounts(Project project, String branchName);
 
+    /**
+     * Checks whether the project has conflicts and uncommitted changes.
+     *
+     * @param  project the project
+     * @return array of values. Array consists of two parameters:
+     *         - has conflicts: <true> is has, otherwise  <false>.
+     *         - has changes: <true> is has, otherwise  <false>.
+     */
     public boolean[] hasConflictsAndChanges(Project project);
 }
