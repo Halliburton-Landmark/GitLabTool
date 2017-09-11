@@ -13,7 +13,7 @@ public class ProjectStatusServiceImpl implements ProjectStatusService {
 
     @Override
     public void updateProjectStatus(Project project) {
-        if (project == null || !project.isCloned()) {
+        if (project == null || project.getPath() == null) {
             return;
         }
         String nameBranch = _gitService.getCurrentBranchName(project);
