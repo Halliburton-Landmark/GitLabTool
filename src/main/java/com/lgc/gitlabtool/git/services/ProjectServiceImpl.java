@@ -192,12 +192,6 @@ public class ProjectServiceImpl implements ProjectService {
         }
     }
 
-    private void setProjectStatusService(ProjectStatusService projectStatusService) {
-        if (projectStatusService != null) {
-            _projectStatusService = projectStatusService;
-        }
-    }
-
     private void updateDataProject(Project project, String pathGroup) {
         project.setPathToClonedProject(pathGroup + File.separator + project.getName());
         updateProjectTypeAndStatus(project);
@@ -329,5 +323,11 @@ public class ProjectServiceImpl implements ProjectService {
         return projects.stream()
                 .filter(Project::isCloned)
                 .count() > 0;
+    }
+
+    private void setProjectStatusService(ProjectStatusService projectStatusService) {
+        if (projectStatusService != null) {
+            _projectStatusService = projectStatusService;
+        }
     }
 }

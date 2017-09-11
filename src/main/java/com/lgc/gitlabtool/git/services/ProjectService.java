@@ -77,6 +77,7 @@ public interface ProjectService {
      * @return true if list contains cloned project
      */
     boolean hasCloned(List<Project> projects);
+    
     /**
      * Gets and sets ProjectType, ProjectStatus and isCloned field to a project 
      * @param project the project

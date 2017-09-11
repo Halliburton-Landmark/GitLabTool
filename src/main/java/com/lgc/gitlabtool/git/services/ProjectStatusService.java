@@ -14,5 +14,5 @@ public interface ProjectStatusService {
      *
      * @param project - the project
      */
-    public void updateProjectStatus(Project project);
+    void updateProjectStatus(Project project);
 }
