@@ -30,6 +30,7 @@ import com.lgc.gitlabtool.git.services.LoginService;
 import com.lgc.gitlabtool.git.services.PomXMLService;
 import com.lgc.gitlabtool.git.services.ProgressListener;
 import com.lgc.gitlabtool.git.services.ProjectService;
+import com.lgc.gitlabtool.git.services.ProjectStatusService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.ViewKey;
@@ -116,6 +117,9 @@ public class MainWindowController implements StateListener {
 
     private static final StateService _stateService = (StateService) ServiceProvider.getInstance()
             .getService(StateService.class.getName());
+
+    private static final ProjectStatusService _projectStatusService =(ProjectStatusService)ServiceProvider.getInstance()
+            .getService(ProjectStatusService.class.getName());
 
     @FXML
     private ListView<Project> projectsList;
@@ -447,6 +451,10 @@ public class MainWindowController implements StateListener {
 
     private void refreshLoadProjects() {
         _projectsList.refreshLoadProjects();
+        sortAndCheckProjects();
+    }
+
+    private void sortAndCheckProjects() {
         sortProjectsList();
         checkProjectsList();
     }
@@ -688,8 +696,21 @@ public class MainWindowController implements StateListener {
     @Override
     public void handleEvent(ApplicationState state, boolean isActivate) {
         if (!isActivate) {
-            refreshLoadProjects(null);
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            executor.submit(() -> updateProjectsByState(state));
+            executor.shutdown();
         }
     }
 
+    private void updateProjectsByState(ApplicationState state) {
+        List<Project> projects = _projectsList.getProjects();
+        if (state == ApplicationState.CREATE_PROJECT) {
+            refreshLoadProjects();
+            return;
+        }
+        projects.parallelStream()
+                .filter(project -> project.isCloned())
+                .forEach(project -> _projectStatusService.updateProjectStatus(project));
+        sortAndCheckProjects();
+    }
 }

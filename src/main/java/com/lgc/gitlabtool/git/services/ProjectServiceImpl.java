@@ -50,18 +50,18 @@ public class ProjectServiceImpl implements ProjectService {
     private static StateService _stateService;
     private static RESTConnector _connector;
     private ConsoleService _consoleService;
-    private static GitService _gitService;
+    private ProjectStatusService _projectStatusService;
 
     public ProjectServiceImpl(RESTConnector connector,
-    													ProjectTypeService projectTypeService,
-            									StateService stateService,
-            									ConsoleService consoleService,
-            									GitService gitService) {
+                              ProjectTypeService projectTypeService,
+                              StateService stateService,
+                              ConsoleService consoleService,
+                              ProjectStatusService projectStatusService) {
         setConnector(connector);
         setProjectTypeService(projectTypeService);
         setStateService(stateService);
         setConsoleService(consoleService);
-        setGitService(gitService);
+        setProjectStatusService(projectStatusService);
     }
 
     @Override
@@ -192,18 +192,24 @@ public class ProjectServiceImpl implements ProjectService {
         }
     }
 
-    private void updateDataProject(Project project, String pathGroup) {
-    	project.setPathToClonedProject(pathGroup + File.separator + project.getName());
-    	updateProjectTypeAndStatus(project);
+    private void setProjectStatusService(ProjectStatusService projectStatusService) {
+        if (projectStatusService != null) {
+            _projectStatusService = projectStatusService;
+        }
     }
-    
+
+    private void updateDataProject(Project project, String pathGroup) {
+        project.setPathToClonedProject(pathGroup + File.separator + project.getName());
+        updateProjectTypeAndStatus(project);
+    }
+
     @Override
     public void updateProjectTypeAndStatus(Project project) {
-    	if (project == null) {
-			return;
-		}
+        if (project == null) {
+            return;
+        }
         project.setProjectType(_projectTypeService.getProjectType(project));
-        _gitService.modifyProjectStatusByGit(project);
+        _projectStatusService.updateProjectStatus(project);
         project.setClonedStatus(true);
     }
 
@@ -323,11 +329,5 @@ public class ProjectServiceImpl implements ProjectService {
         return projects.stream()
                 .filter(Project::isCloned)
                 .count() > 0;
-    }
-
-    private void setGitService(GitService gitService) {
-        if (gitService != null) {
-            _gitService = gitService;
-        }
     }
 }

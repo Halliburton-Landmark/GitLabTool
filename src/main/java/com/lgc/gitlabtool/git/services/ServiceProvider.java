@@ -30,9 +30,10 @@ public class ServiceProvider {
         ProjectTypeService projectTypeService = new ProjectTypeServiceImpl();
         StateService stateService = new StateServiceImpl();
         GitService gitService = new GitServiceImpl(stateService);
+        ProjectStatusService projectStatusService = new ProjectStatusServiceImpl(gitService);
         ConsoleService consoleService = new ConsoleServiceImpl();
-        ProjectService projectService =
-                new ProjectServiceImpl(restConnector, projectTypeService, stateService, consoleService, gitService);
+        ProjectService projectService = new ProjectServiceImpl(restConnector, projectTypeService,
+                stateService, consoleService, projectStatusService);
         ClonedGroupsService programProgertiesService = new ClonedGroupsServiceImpl(storageService, loginService);
 
         _services = new HashMap<>();
@@ -49,5 +50,6 @@ public class ServiceProvider {
         _services.put(GitService.class.getName(), gitService);
         _services.put(StateService.class.getName(), stateService);
         _services.put(ConsoleService.class.getName(), consoleService);
+        _services.put(ProjectStatusService.class.getName(), new ProjectStatusServiceImpl(gitService));
     }
 }
