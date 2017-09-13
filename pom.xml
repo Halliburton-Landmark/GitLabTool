@@ -4,7 +4,7 @@
     <groupId>com.lgc</groupId>
     <artifactId>gitlabtool</artifactId>
     <version>0.0.2</version>
-    <name>Gitlab Tool</name>
+    <name>GitLab Tool</name>
 
     <scm>
         <connection>scm:git:http://none</connection>

@@ -63,8 +63,7 @@ public class JavaFXUI extends Application implements UserInterface {
         modularController.loadGroupWindow();
 
         Scene scene = new Scene(root);
-
-        primaryStage.setTitle("Gitlab Tool v." + ProjectPropertiesUtil.getProjectVersion());
+        primaryStage.setTitle(ProjectPropertiesUtil.getProjectNameWithVersion());
         primaryStage.setScene(scene);
         primaryStage.getIcons().add(appIcon);
         primaryStage.setOnCloseRequest(confirmCloseEventHandler);
