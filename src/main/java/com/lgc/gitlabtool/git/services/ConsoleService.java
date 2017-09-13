@@ -1,9 +1,12 @@
 package com.lgc.gitlabtool.git.services;
 
 import java.util.List;
+import java.util.Map;
 
 import com.lgc.gitlabtool.git.entities.ConsoleMessage;
 import com.lgc.gitlabtool.git.entities.MessageType;
+import com.lgc.gitlabtool.git.entities.Project;
+import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.listeners.updateConsole.UpdateConsoleGenerator;
 
 /**
@@ -24,6 +27,14 @@ public interface ConsoleService extends UpdateConsoleGenerator{
      * @param type the type of message (ERROR, SUCCESS or SIMPLE)
      */
     void addMessage(String message, MessageType type);
+
+    /**
+     * Adds messages to UI console for statuses.
+     *
+     * @param statuses statuses git operations
+     * @param nameOperation the name operation (For example: "Pulling", "Reverting changes" etc.)
+     */
+    void addMessagesForStatuses(Map<Project, JGitStatus> statuses, String nameOperation);
 
     /**
      * Gets all messages

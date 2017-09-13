@@ -156,7 +156,7 @@ public class JGit {
         return branches;
     }
 
-    public JGitStatus discardChanges(Project project) {
+    public JGitStatus revertChanges(Project project) {
         if (project == null) {
             logger.error(WRONG_PARAMETERS);
             throw new IllegalArgumentException(WRONG_PARAMETERS);

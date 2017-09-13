@@ -32,6 +32,7 @@ public class StateServiceImpl implements StateService {
         _listeners.put(ApplicationState.SWITCH_BRANCH, createSynchronizedSet());
         _listeners.put(ApplicationState.EDIT_POM, createSynchronizedSet());
         _listeners.put(ApplicationState.REFRESH_PROJECTS, createSynchronizedSet());
+        _listeners.put(ApplicationState.REVERT, createSynchronizedSet());
 
         _states = new ConcurrentHashMap<>();
         _states.put(ApplicationState.CLONE, START_STATE);
@@ -42,6 +43,7 @@ public class StateServiceImpl implements StateService {
         _states.put(ApplicationState.SWITCH_BRANCH, START_STATE);
         _states.put(ApplicationState.EDIT_POM, START_STATE);
         _states.put(ApplicationState.REFRESH_PROJECTS, START_STATE);
+        _states.put(ApplicationState.REVERT, START_STATE);
     }
 
     @Override

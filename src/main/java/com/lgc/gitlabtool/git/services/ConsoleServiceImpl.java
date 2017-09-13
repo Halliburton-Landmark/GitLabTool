@@ -7,6 +7,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
@@ -14,6 +16,8 @@ import org.apache.logging.log4j.Logger;
 
 import com.lgc.gitlabtool.git.entities.ConsoleMessage;
 import com.lgc.gitlabtool.git.entities.MessageType;
+import com.lgc.gitlabtool.git.entities.Project;
+import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.listeners.updateConsole.UpdateConsoleListener;
 
 public class ConsoleServiceImpl implements ConsoleService {
@@ -60,6 +64,22 @@ public class ConsoleServiceImpl implements ConsoleService {
     public void removeStateListener(UpdateConsoleListener listener) {
         if (listener != null) {
             _listeners.remove(listener);
+        }
+    }
+
+    @Override
+    public void addMessagesForStatuses(Map<Project, JGitStatus> statuses, String nameOperation) {
+        if (statuses == null) {
+            return;
+        }
+        for (Entry<Project, JGitStatus> status : statuses.entrySet()) {
+            Project project = status.getKey();
+            JGitStatus gitStatus = status.getValue();
+
+            String prefix = nameOperation == null ? "" : nameOperation + " of ";
+            String message = prefix + project.getName() + " project is " + gitStatus;
+
+            addMessage(message, MessageType.getTypeForStatus(status.getValue()));
         }
     }
 

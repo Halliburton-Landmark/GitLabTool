@@ -30,7 +30,8 @@ public enum ToolbarButtons {
     COMMIT_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "commit", "icons/toolbar/commit_20x20.png", "Commit", "Show commit dialog"),
     PUSH_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "push", "icons/toolbar/push_20x20.png", "Push", "Show push dialog"),
     EDIT_PROJECT_PROPERTIES_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "edit_project_propecties", "icons/toolbar/edit_properties_20x20.png", "Edit project properties", "Edit project properties"),
-    PULL_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "pull", "icons/toolbar/pull_20x20.png", "Pull", "Pull projects");
+    PULL_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "pull", "icons/toolbar/pull_20x20.png", "Pull", "Pull projects"),
+    REVERT_CHANGES(ViewKey.MAIN_WINDOW.getKey(), "revert", "icons/toolbar/revert_changes.png", "Revert", "Revert changes");
 
     private final String viewKey;
     private final String id;

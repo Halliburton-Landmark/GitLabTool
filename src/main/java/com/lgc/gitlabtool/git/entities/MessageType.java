@@ -2,6 +2,8 @@ package com.lgc.gitlabtool.git.entities;
 
 import org.apache.commons.lang.StringUtils;
 
+import com.lgc.gitlabtool.git.jgit.JGitStatus;
+
 import javafx.scene.paint.Color;
 
 /**
@@ -67,5 +69,15 @@ public enum MessageType {
      */
     public static MessageType determineMessageType(boolean isSuccess) {
         return isSuccess ? MessageType.SUCCESS : MessageType.ERROR;
+    }
+
+    public static MessageType getTypeForStatus(JGitStatus status) {
+        if (JGitStatus.SUCCESSFUL == status) {
+            return MessageType.SUCCESS;
+        } else if (JGitStatus.FAILED == status) {
+            return MessageType.ERROR;
+        } else {
+            return MessageType.SIMPLE;
+        }
     }
 }

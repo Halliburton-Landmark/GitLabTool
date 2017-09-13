@@ -63,7 +63,7 @@ public interface GitService {
      * @param projects projects that need to be resets
      * @return list of projects that and their discard statuses
      */
-    Map<Project, JGitStatus> discardChanges(List<Project> projects);
+    Map<Project, JGitStatus> revertChanges(List<Project> projects);
 
     /**
      * Commit changes to selectedProjects

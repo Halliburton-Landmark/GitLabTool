@@ -9,6 +9,7 @@ import java.math.RoundingMode;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.prefs.Preferences;
@@ -22,6 +23,7 @@ import com.lgc.gitlabtool.git.entities.MessageType;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.ProjectList;
 import com.lgc.gitlabtool.git.entities.ProjectStatus;
+import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.listeners.stateListeners.StateListener;
 import com.lgc.gitlabtool.git.services.ConsoleService;
@@ -92,6 +94,8 @@ public class MainWindowController implements StateListener {
     private static final String STATUS_DIALOG_HEADER_COMMIT = "Commit statuses";
     private static final String EDIT_PROJECT_PROPERTIES = "Edit project properties";
     private static final String EDIT_POM_SELECTION_WARNING = "This operation unavailable for some projects: ";
+    private static final String REVERT_START_MESSAGE = "Revert operation is starting...";
+    private static final String REVERT_FINISH_MESSAGE = "Revert operation is starting...";
 
     private ProjectList _projectsList;
 
@@ -145,6 +149,7 @@ public class MainWindowController implements StateListener {
         _stateService.addStateListener(ApplicationState.CREATE_PROJECT, this);
         _stateService.addStateListener(ApplicationState.SWITCH_BRANCH, this);
         _stateService.addStateListener(ApplicationState.EDIT_POM, this);
+        _stateService.addStateListener(ApplicationState.REVERT, this);
     }
 
     public void beforeShowing() {
@@ -204,6 +209,8 @@ public class MainWindowController implements StateListener {
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.EDIT_PROJECT_PROPERTIES_BUTTON.getId())
                 .disableProperty().bind(booleanBinding);
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.PULL_BUTTON.getId()).disableProperty()
+                .bind(booleanBinding);
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.REVERT_CHANGES.getId()).disableProperty()
                 .bind(booleanBinding);
 
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_COMMIT).disableProperty().bind(booleanBinding);
@@ -393,6 +400,9 @@ public class MainWindowController implements StateListener {
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.PULL_BUTTON.getId())
                 .setOnAction(this::onPullAction);
 
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.REVERT_CHANGES.getId())
+                .setOnAction(this::onRevertChanges);
+
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_CLONE_PROJECT)
                 .setOnAction(this::cloneShadowProject);
 
@@ -426,11 +436,15 @@ public class MainWindowController implements StateListener {
 
     private void showCreateNewBranchDialog() {
         List<Project> allSelectedProjects = getCurrentProjects();
-        List<Project> clonedProjectsWithoutConflicts = allSelectedProjects.stream()
-                .filter(this::projectIsReadyForGitOperations)
-                .collect(Collectors.toList());
+        List<Project> clonedProjectsWithoutConflicts = getProjectsClonedAndWithoutConflicts(allSelectedProjects);
         CreateNewBranchDialog dialog = new CreateNewBranchDialog(clonedProjectsWithoutConflicts);
         dialog.showAndWait();
+    }
+
+    private List<Project> getProjectsClonedAndWithoutConflicts(List<Project> projects){
+        return projects.stream()
+                       .filter(this::projectIsReadyForGitOperations)
+                       .collect(Collectors.toList());
     }
 
     private boolean projectIsReadyForGitOperations(Project project) {
@@ -472,9 +486,7 @@ public class MainWindowController implements StateListener {
 
     @FXML
     public void onCommitAction(ActionEvent actionEvent) {
-        List<Project> allSelectedProjects = getCurrentProjects();
-        List<Project> projectWithChanges = _gitService.getProjectsWithChanges(allSelectedProjects);
-
+        List<Project> projectWithChanges = _gitService.getProjectsWithChanges(getCurrentProjects());
         if (projectWithChanges.isEmpty()) {
             showProjectsWithoutChangesMessage();
             return;
@@ -486,9 +498,7 @@ public class MainWindowController implements StateListener {
 
     @FXML
     public void onPushAction(ActionEvent actionEvent) {
-        List<Project> filteredProjects = getCurrentProjects().stream()
-                                                             .filter(this::projectIsReadyForGitOperations)
-                                                             .collect(Collectors.toList());
+        List<Project> filteredProjects = getProjectsClonedAndWithoutConflicts(getCurrentProjects());
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.submit(() -> _gitService.push(filteredProjects, new PushProgressListener()));
         executor.shutdown();
@@ -627,10 +637,33 @@ public class MainWindowController implements StateListener {
 
     @FXML
     public void onPullAction(ActionEvent actionEvent) {
-        List<Project> projectsToPull = getCurrentProjects().stream()
-                                                           .filter(this::projectIsReadyForGitOperations)
-                                                           .collect(Collectors.toList());
+        List<Project> projectsToPull = getProjectsClonedAndWithoutConflicts(getCurrentProjects());
         checkChangesAndPull(projectsToPull, new Object());
+    }
+
+    @FXML
+    public void onRevertChanges(ActionEvent actionEvent) {
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.submit(() -> revert());
+        executor.shutdown();
+    }
+
+    private void revert() {
+        _stateService.stateON(ApplicationState.REVERT);
+        _consoleService.addMessage(REVERT_START_MESSAGE, MessageType.SIMPLE);
+
+        List<Project> correctProjects = getProjectsClonedAndWithoutConflicts(getCurrentProjects());
+        List<Project> projectsWithChanges = _gitService.getProjectsWithChanges(correctProjects);
+        _consoleService.addMessage(projectsWithChanges.size() + " selected projects have changes.", MessageType.SIMPLE);
+        if (projectsWithChanges.isEmpty()) {
+            _consoleService.addMessage(REVERT_FINISH_MESSAGE, MessageType.SIMPLE);
+            return;
+        }
+
+        Map<Project, JGitStatus> statuses = _gitService.revertChanges(projectsWithChanges);
+        _consoleService.addMessagesForStatuses(statuses, "Reverting changes");
+        _stateService.stateOFF(ApplicationState.REVERT);
+        _consoleService.addMessage(REVERT_FINISH_MESSAGE, MessageType.SIMPLE);
     }
 
     private void checkChangesAndPull(List<Project> projects, Object item) {
