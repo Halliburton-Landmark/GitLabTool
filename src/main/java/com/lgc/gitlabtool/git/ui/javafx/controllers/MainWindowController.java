@@ -95,7 +95,7 @@ public class MainWindowController implements StateListener {
     private static final String EDIT_PROJECT_PROPERTIES = "Edit project properties";
     private static final String EDIT_POM_SELECTION_WARNING = "This operation unavailable for some projects: ";
     private static final String REVERT_START_MESSAGE = "Revert operation is starting...";
-    private static final String REVERT_FINISH_MESSAGE = "Revert operation is starting...";
+    private static final String REVERT_FINISH_MESSAGE = "Revert operation finished.";
 
     private ProjectList _projectsList;
 
@@ -213,6 +213,8 @@ public class MainWindowController implements StateListener {
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.REVERT_CHANGES.getId()).disableProperty()
                 .bind(booleanBinding);
 
+        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_CLONE_PROJECT).disableProperty()
+                .bind(booleanBinding);
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_COMMIT).disableProperty().bind(booleanBinding);
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_SWITCH_BRANCH).disableProperty()
                 .bind(booleanBinding);
@@ -221,7 +223,7 @@ public class MainWindowController implements StateListener {
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_COMMIT).disableProperty().bind(booleanBinding);
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_PUSH).disableProperty().bind(booleanBinding);
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_PULL).disableProperty().bind(booleanBinding);
-
+        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_REVERT).disableProperty().bind(booleanBinding);
     }
 
     public void setSelectedGroup(Group group) {
@@ -420,6 +422,9 @@ public class MainWindowController implements StateListener {
 
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_PULL)
                 .setOnAction(this::onPullAction);
+
+        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_REVERT)
+                .setOnAction(this::onRevertChanges);
     }
 
     @FXML
@@ -656,14 +661,17 @@ public class MainWindowController implements StateListener {
         List<Project> projectsWithChanges = _gitService.getProjectsWithChanges(correctProjects);
         _consoleService.addMessage(projectsWithChanges.size() + " selected projects have changes.", MessageType.SIMPLE);
         if (projectsWithChanges.isEmpty()) {
-            _consoleService.addMessage(REVERT_FINISH_MESSAGE, MessageType.SIMPLE);
+            finishAction(REVERT_FINISH_MESSAGE, MessageType.SIMPLE, ApplicationState.REVERT);
             return;
         }
-
         Map<Project, JGitStatus> statuses = _gitService.revertChanges(projectsWithChanges);
         _consoleService.addMessagesForStatuses(statuses, "Reverting changes");
-        _stateService.stateOFF(ApplicationState.REVERT);
-        _consoleService.addMessage(REVERT_FINISH_MESSAGE, MessageType.SIMPLE);
+        finishAction(REVERT_FINISH_MESSAGE, MessageType.SIMPLE, ApplicationState.REVERT);
+    }
+
+    private void finishAction(String message, MessageType type, ApplicationState state) {
+        _stateService.stateOFF(state);
+        _consoleService.addMessage(message, type);
     }
 
     private void checkChangesAndPull(List<Project> projects, Object item) {
@@ -713,8 +721,7 @@ public class MainWindowController implements StateListener {
 
         @Override
         public void onFinish(Object... t) {
-            _stateService.stateOFF(ApplicationState.PUSH);
-            _consoleService.addMessage("Push projects is finished!", MessageType.SIMPLE);
+            finishAction("Push projects is finished!", MessageType.SIMPLE, ApplicationState.PUSH);
         }
     }
 
