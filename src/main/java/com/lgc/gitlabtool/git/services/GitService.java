@@ -2,13 +2,11 @@ package com.lgc.gitlabtool.git.services;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
-
-import org.eclipse.jgit.api.Status;
 
 import com.lgc.gitlabtool.git.entities.Branch;
 import com.lgc.gitlabtool.git.entities.Project;
+import com.lgc.gitlabtool.git.entities.ProjectStatus;
 import com.lgc.gitlabtool.git.jgit.BranchType;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
@@ -58,7 +56,7 @@ public interface GitService {
     List<Project> getProjectsWithChanges(List<Project> projects);
 
     /**
-     * Discard uncommited changes
+     * Reverts uncommited changes
      *
      * @param projects projects that need to be resets
      * @return list of projects that and their discard statuses
@@ -119,7 +117,7 @@ public interface GitService {
 
     /**
      * Pulls changes in selected projects from upstream
-     * 
+     *
      * @param projects - selected projects
      * @param progressListener - instance of {@link OperationProgressListener}
      * @return <code>true</code> if pull operation works well and <code>false</code> otherwise
@@ -136,11 +134,11 @@ public interface GitService {
 
     /**
      * Returns count of commits ahead and behind index
-     * 
+     *
      * @param project - project to show status
      * @param branchName - the name of branch
      * @return array of ahead and behind commits counts<br>
-     *         Array consists of two parameters: 
+     *         Array consists of two parameters:
      *         first is the count of commits ahead Index, <br>
      *         second is the count of commits behind Index
      */
@@ -148,7 +146,7 @@ public interface GitService {
 
     /**
      * Modifies project's field {@link ProjectStatus} according to the Git statuses
-     * 
+     *
      * @param project - the project to be modified
      */
     public void modifyProjectStatusByGit(Project project);

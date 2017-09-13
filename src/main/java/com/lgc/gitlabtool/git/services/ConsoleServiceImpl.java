@@ -79,7 +79,7 @@ public class ConsoleServiceImpl implements ConsoleService {
             String prefix = nameOperation == null ? "" : nameOperation + " of ";
             String message = prefix + project.getName() + " project is " + gitStatus;
 
-            addMessage(message, MessageType.getTypeForStatus(status.getValue()));
+            addMessage(message, MessageType.getTypeForStatus(gitStatus));
         }
     }
 

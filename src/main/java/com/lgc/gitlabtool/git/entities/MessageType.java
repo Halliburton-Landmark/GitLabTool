@@ -71,6 +71,12 @@ public enum MessageType {
         return isSuccess ? MessageType.SUCCESS : MessageType.ERROR;
     }
 
+    /**
+     * Gets MessageType which corresponds this JGitStatus.
+     *
+     * @param  status the jgit status
+     * @return a MessageType
+     */
     public static MessageType getTypeForStatus(JGitStatus status) {
         if (JGitStatus.SUCCESSFUL == status) {
             return MessageType.SUCCESS;

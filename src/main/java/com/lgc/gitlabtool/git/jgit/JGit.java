@@ -156,6 +156,12 @@ public class JGit {
         return branches;
     }
 
+    /**
+     * Reverts changes of project
+     *
+     * @param  project the project
+     * @return a JGitStatus
+     */
     public JGitStatus revertChanges(Project project) {
         if (project == null) {
             logger.error(WRONG_PARAMETERS);
