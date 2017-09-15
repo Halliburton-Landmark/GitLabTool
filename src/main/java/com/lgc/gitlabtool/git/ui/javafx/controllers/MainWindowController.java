@@ -30,7 +30,6 @@ import com.lgc.gitlabtool.git.services.LoginService;
 import com.lgc.gitlabtool.git.services.PomXMLService;
 import com.lgc.gitlabtool.git.services.ProgressListener;
 import com.lgc.gitlabtool.git.services.ProjectService;
-import com.lgc.gitlabtool.git.services.ProjectStatusService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.ViewKey;
@@ -117,9 +116,6 @@ public class MainWindowController implements StateListener {
 
     private static final StateService _stateService = (StateService) ServiceProvider.getInstance()
             .getService(StateService.class.getName());
-
-    private static final ProjectStatusService _projectStatusService =(ProjectStatusService)ServiceProvider.getInstance()
-            .getService(ProjectStatusService.class.getName());
 
     @FXML
     private ListView<Project> projectsList;
@@ -710,7 +706,7 @@ public class MainWindowController implements StateListener {
         }
         projects.parallelStream()
                 .filter(project -> project.isCloned())
-                .forEach(project -> _projectStatusService.updateProjectStatus(project));
+                .forEach(project -> _projectService.updateProjectStatus(project));
         sortAndCheckProjects();
     }
 }

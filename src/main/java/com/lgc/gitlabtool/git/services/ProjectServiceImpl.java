@@ -22,6 +22,7 @@ import com.lgc.gitlabtool.git.connections.token.CurrentUser;
 import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.MessageType;
 import com.lgc.gitlabtool.git.entities.Project;
+import com.lgc.gitlabtool.git.entities.ProjectStatus;
 import com.lgc.gitlabtool.git.jgit.JGit;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.project.nature.projecttype.ProjectType;
@@ -50,18 +51,18 @@ public class ProjectServiceImpl implements ProjectService {
     private static StateService _stateService;
     private static RESTConnector _connector;
     private ConsoleService _consoleService;
-    private ProjectStatusService _projectStatusService;
+    private GitService _gitService;
 
     public ProjectServiceImpl(RESTConnector connector,
                               ProjectTypeService projectTypeService,
                               StateService stateService,
                               ConsoleService consoleService,
-                              ProjectStatusService projectStatusService) {
+                              GitService gitService) {
         setConnector(connector);
         setProjectTypeService(projectTypeService);
         setStateService(stateService);
         setConsoleService(consoleService);
-        setProjectStatusService(projectStatusService);
+        setGitService(gitService);
     }
 
     @Override
@@ -130,6 +131,39 @@ public class ProjectServiceImpl implements ProjectService {
                                                   .filter(project -> project.getName().equals(nameProject))
                                                   .findAny();
         return resultProject.isPresent();
+    }
+
+    @Override
+    public void updateProjectStatus(Project project) {
+        if (project == null || project.getPath() == null) {
+            return;
+        }
+        String nameBranch = _gitService.getCurrentBranchName(project);
+
+        boolean[] result = _gitService.hasConflictsAndChanges(project);
+        boolean hasConflicts = result[0];
+        boolean hasChanges = result[1];
+
+        int aheadIndex = 0;
+        int behindIndex = 0;
+        if (nameBranch != null) {
+            int[] indexCount = _gitService.getAheadBehindIndexCounts(project, nameBranch);
+            aheadIndex = indexCount[0];
+            behindIndex = indexCount[1];
+        }
+
+        ProjectStatus projectStatus;
+        if (project.getProjectStatus() == null) {
+            projectStatus = new ProjectStatus(hasConflicts, hasChanges, aheadIndex, behindIndex, nameBranch);
+            project.setProjectStatus(projectStatus);
+        } else {
+            projectStatus = project.getProjectStatus();
+            projectStatus.setCurrentBranch(nameBranch);
+            projectStatus.setHasConflicts(hasConflicts);
+            projectStatus.setHasChanges(hasChanges);
+            projectStatus.setAheadIndex(aheadIndex);
+            projectStatus.setBehindIndex(behindIndex);
+        }
     }
 
     private Map<String, String> getCurrentPrivateToken() {
@@ -203,7 +237,7 @@ public class ProjectServiceImpl implements ProjectService {
             return;
         }
         project.setProjectType(_projectTypeService.getProjectType(project));
-        _projectStatusService.updateProjectStatus(project);
+        updateProjectStatus(project);
         project.setClonedStatus(true);
     }
 
@@ -325,9 +359,9 @@ public class ProjectServiceImpl implements ProjectService {
                 .count() > 0;
     }
 
-    private void setProjectStatusService(ProjectStatusService projectStatusService) {
-        if (projectStatusService != null) {
-            _projectStatusService = projectStatusService;
+    private void setGitService(GitService gitService) {
+        if (gitService != null) {
+            _gitService = gitService;
         }
     }
 }
