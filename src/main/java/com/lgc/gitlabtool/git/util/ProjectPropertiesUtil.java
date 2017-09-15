@@ -24,6 +24,7 @@ public class ProjectPropertiesUtil {
     /** commit hash key in pom.properties file */
     private static final String COMMIT_HASH_KEY            = "gitlabtool.commithash";
     private static final String UNDEFINED_VALUE            = "undefined";
+    private static final String VERSION_PREFIX = " v.";
 
     /**
      * Returns the value from the property file by its key
@@ -53,6 +54,14 @@ public class ProjectPropertiesUtil {
 
     public static String getCommitHash() {
         return getProperty(PROJECT_PROPERTY_FILE_NAME, COMMIT_HASH_KEY);
+    }
+
+    /**
+     * Gets project name and version.
+     * @return string in format "<project name> v.<project version>"
+     */
+    public static String getProjectNameWithVersion() {
+        return getProjectName() + VERSION_PREFIX + getProjectVersion();
     }
 
 }
