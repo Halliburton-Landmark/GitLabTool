@@ -2,10 +2,7 @@ package com.lgc.gitlabtool.git.services;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
-
-import org.eclipse.jgit.api.Status;
 
 import com.lgc.gitlabtool.git.entities.Branch;
 import com.lgc.gitlabtool.git.entities.Project;
@@ -147,9 +144,12 @@ public interface GitService {
     public int[] getAheadBehindIndexCounts(Project project, String branchName);
 
     /**
-     * Modifies project's field {@link ProjectStatus} according to the Git statuses
-     * 
-     * @param project - the project to be modified
+     * Checks whether the project has conflicts and uncommitted changes.
+     *
+     * @param  project the project
+     * @return array of values. Array consists of two parameters:
+     *         - has conflicts: <true> is has, otherwise  <false>.
+     *         - has changes: <true> is has, otherwise  <false>.
      */
-    public void modifyProjectStatusByGit(Project project);
+    public boolean[] hasConflictsAndChanges(Project project);
 }
