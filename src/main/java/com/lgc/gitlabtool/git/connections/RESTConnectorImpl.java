@@ -58,6 +58,7 @@ class RESTConnectorImpl implements RESTConnector {
      */
     private HttpResponseHolder sendRequest(String suffixForUrl, Map<String, String> params, Map<String, String> header, RequestType request) {
         HttpsURLConnection connection = null;
+        HttpResponseHolder responseHolder = new HttpResponseHolder();
         try {
             URL url = new URL(_urlMainPart + suffixForUrl);
             connection = getConnection(url);
@@ -77,6 +78,7 @@ class RESTConnectorImpl implements RESTConnector {
             }
 
             int responseCode = connection.getResponseCode();
+            responseHolder.setResponseCode(responseCode);
             _logger.info("Sending '" + request +"' request to URL : " + url.toString());
             _logger.info("Response Code : " + responseCode);
 
@@ -89,10 +91,9 @@ class RESTConnectorImpl implements RESTConnector {
             }
             in.close();
 
-            HttpResponseHolder responseHolder = new HttpResponseHolder(connection.getHeaderFields(), response.toString(), responseCode);
+            responseHolder.setHeaderLines(connection.getHeaderFields());
+            responseHolder.setBody(response.toString());
             _logger.info(response.toString());
-
-            return responseHolder;
 
         } catch (Exception e) {
             _logger.error("Error sending request: " + e.getMessage());
@@ -101,7 +102,7 @@ class RESTConnectorImpl implements RESTConnector {
                 connection.disconnect();
             }
         }
-        return new HttpResponseHolder();
+        return responseHolder;
     }
 
     private void setHTTPRequestHeader(Map<String, String> header, HttpsURLConnection con) {

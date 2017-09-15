@@ -63,8 +63,12 @@ class LoginDialog extends Dialog<DialogDTO> {
     private final String WRONG_CREDENTIALS = "Wrong login or password! Please try again";
     private final String WAITING_MESSAGE = "Login... Please wait";
     private final String EMPTY_FIELD = "Login or password is empty!";
+    private final String CONNECTION_ERROR = "Cannot reach the Gitlab instance. \nConnection error";
     private static final String INFO_IMAGE_URL = "icons/info_20x20.png";
     private static final String CSS_PATH = "css/style.css";
+
+    /** need to store two line message */
+    private final double MIN_MESSAGE_HEIGHT = 40;
 
     private final Text sceneTitle;
     private final Label userName;
@@ -114,6 +118,7 @@ class LoginDialog extends Dialog<DialogDTO> {
 
         message = new Label();
         message.setText("blablabla");
+        message.setMinHeight(MIN_MESSAGE_HEIGHT);
         message.setVisible(false);
         grid.add(message, 0, 5, 3, 3);
 
@@ -210,25 +215,33 @@ class LoginDialog extends Dialog<DialogDTO> {
                 disableSignInButton(true);
                 String serverURL = URLManager.completeServerURL(comboBox.getValue());
                 DialogDTO dto = new DialogDTO(userTextField.getText(), passwordField.getText(), serverURL);
-                _loginService.login(dto, responseCode -> {
-                    if (responseCode == HttpStatus.SC_OK) {
-                        updateLastUserName();
-                        Platform.runLater(() -> {
-                            _consoleService.addMessage("Login successfull", MessageType.SUCCESS);
-                            getStage().close();
-                        });
-                    } else if (responseCode == HttpStatus.SC_UNAUTHORIZED) {
-                        Platform.runLater(() -> {
-                            logger.warn(WRONG_CREDENTIALS);
-                            showMessage(WRONG_CREDENTIALS, Color.RED);
-                            disableSignInButton(false);
-                        });
-                    }
-                });
+                _loginService.login(dto, this::doAfterLogin);
             } else {
                 logger.warn(EMPTY_FIELD);
                 showMessage(EMPTY_FIELD, Color.RED);
             }
+        });
+    }
+
+    private void doAfterLogin(int responseCode) {
+        if (responseCode == HttpStatus.SC_OK) {
+            updateLastUserName();
+            Platform.runLater(() -> {
+                _consoleService.addMessage("Login successfull", MessageType.SUCCESS);
+                getStage().close();
+            });
+        } else if (responseCode == HttpStatus.SC_UNAUTHORIZED) {
+            showWarningAndDisableSignInButton(WRONG_CREDENTIALS);
+        } else if (responseCode == HttpStatus.SC_REQUEST_TIMEOUT) {
+            showWarningAndDisableSignInButton(CONNECTION_ERROR);
+        }
+    }
+
+    private void showWarningAndDisableSignInButton(String warningMessage) {
+        Platform.runLater(() -> {
+            logger.warn(warningMessage);
+            showMessage(warningMessage, Color.RED);
+            disableSignInButton(false);
         });
     }
 
