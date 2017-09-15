@@ -89,7 +89,10 @@ public class GitServiceImpl implements GitService {
     @Override
     public Map<Project, JGitStatus> commitChanges(List<Project> projects, String commitMessage,
             boolean isPushImmediately, ProgressListener progressListener) {
-
+        if (projects == null || projects.isEmpty()) {
+            _logger.error("Wrong parameters for committing changes. Projects list is null or empty.");
+            return Collections.emptyMap();
+        }
         return isPushImmediately ? commitAndPush(projects, commitMessage, progressListener)
                                  : commit(projects, commitMessage, progressListener);
     }

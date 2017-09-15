@@ -40,11 +40,9 @@ public class CommitDialog extends Dialog<String> {
 
     private static final String STATUS_COMMIT_DIALOG_TITLE = "Committing changes status";
     private static final String STATUS_COMMIT_DIALOG_HEADER = "Committing changes info";
-    private static final String STATUS_COMMIT_COLLAPSED_MESSAGE = "%s projects were commited successfully";
 
     private static final String STATUS_PUSH_DIALOG_TITLE = "Pushing changes status";
     private static final String STATUS_PUSH_DIALOG_HEADER = "Pushing changes info";
-    private static final String STATUS_PUSH_COLLAPSED_MESSAGE = "%s projects were pushed successfully";
 
     private final Button _commitButton;
     private final Button _commitAndPushButton;
@@ -139,19 +137,24 @@ public class CommitDialog extends Dialog<String> {
     }
 
     private void showStatusDialog(boolean isPushToUpstream) {
+        Map<Project, JGitStatus> statuses = getCommitStatuses();
+        if (statuses == null || statuses.isEmpty()) {
+            return;
+        }
         String dialogTitle = isPushToUpstream ? STATUS_PUSH_DIALOG_TITLE : STATUS_COMMIT_DIALOG_TITLE;
         String dialogHeader = isPushToUpstream ? STATUS_PUSH_DIALOG_HEADER : STATUS_COMMIT_DIALOG_HEADER;
 
         String info = "Successfully: %s project(s)\n"
                     + "Failed: %s project(s)";
 
-        long countOfSuccessfulOperations = getCommitStatuses().entrySet().stream()
-                .map(Map.Entry::getValue)
-                .filter(status -> status.equals(JGitStatus.SUCCESSFUL))
-                .count();
+        long countOfSuccessfulOperations = statuses.entrySet()
+                                                   .stream()
+                                                   .map(Map.Entry::getValue)
+                                                   .filter(status -> status.equals(JGitStatus.SUCCESSFUL))
+                                                   .count();
 
         StatusDialog statusDialog = new StatusDialog(dialogTitle, dialogHeader);
-        statusDialog.showMessage(getCommitStatuses(), getProjectsWithChanges().size(), info,
+        statusDialog.showMessage(statuses, getProjectsWithChanges().size(), info,
                 String.valueOf(countOfSuccessfulOperations),
                 String.valueOf(getProjectsWithChanges().size() - countOfSuccessfulOperations));
         statusDialog.showAndWait();
