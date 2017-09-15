@@ -705,8 +705,8 @@ public class MainWindowController implements StateListener {
             return;
         }
         projects.parallelStream()
-                .filter(project -> project.isCloned())
-                .forEach(project -> _projectService.updateProjectStatus(project));
+                .filter(Project::isCloned)
+                .forEach(_projectService::updateProjectStatus);
         sortAndCheckProjects();
     }
 }
