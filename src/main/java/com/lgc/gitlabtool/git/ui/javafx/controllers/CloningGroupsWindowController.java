@@ -4,6 +4,9 @@ import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.prefs.Preferences;
+
+import org.apache.commons.lang.StringUtils;
 
 import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
@@ -55,6 +58,9 @@ public class CloningGroupsWindowController {
     @FXML
     private Button browseButton;
 
+    private final Preferences _prefs = Preferences.userRoot().node(CloningGroupsWindowController.class.getName());
+    private static final String PREF_NAME = "path_to_group";
+
     @FXML
     public void initialize() {
         List<Group> userGroups = (List<Group>) _groupsService.getGroups(_loginService.getCurrentUser());
@@ -71,6 +77,11 @@ public class CloningGroupsWindowController {
             };
         });
         setStyleAndDisableForIncorrectData();
+
+        String propertyValue = _prefs.get(PREF_NAME, StringUtils.EMPTY);
+        if (propertyValue != null) {
+            folderPath.setText(propertyValue);
+        }
     }
 
     @FXML
@@ -81,7 +92,9 @@ public class CloningGroupsWindowController {
         chooser.setTitle(FOLDER_CHOOSER_DIALOG);
         File selectedDirectory = chooser.showDialog(stage);
         if (selectedDirectory != null) {
-            folderPath.setText(selectedDirectory.getCanonicalPath());
+            String path = selectedDirectory.getCanonicalPath();
+            _prefs.put(PREF_NAME, path);
+            folderPath.setText(path);
         }
     }
 
@@ -99,7 +112,7 @@ public class CloningGroupsWindowController {
     }
 
     private boolean startClone(String destinationPath, List<Group> selectedGroups, CloneProgressDialog progressDialog) {
-        _groupsService.cloneGroups(selectedGroups, destinationPath, 
+        _groupsService.cloneGroups(selectedGroups, destinationPath,
                 new OperationProgressListener(progressDialog, ApplicationState.CLONE));
         return true;
     }
