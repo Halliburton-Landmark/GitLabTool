@@ -1,11 +1,15 @@
 package com.lgc.gitlabtool.git.ui.javafx;
 
+import java.util.Optional;
+
 import org.apache.commons.lang.StringUtils;
 
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 import com.lgc.gitlabtool.git.util.ScreenUtil;
 
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
@@ -87,4 +91,32 @@ public class GLTAlert extends Alert {
         ScreenUtil.adaptForMultiScreens(stage, 300, 100);
     }
 
+    /**
+     * Sets new text for button by ButtonType
+     * @param type the button type
+     * @param newText the text
+     */
+    public void setTextButton(ButtonType type, String newText) {
+        Button button = (Button) getDialogPane().lookupButton(type);
+        button.setText(newText);
+    }
+
+    /**
+     * Checks buttons types are equal
+     *
+     * @param pressedButton the button type
+     * @return <true> is buttons are equal, otherwise <false>.
+     */
+    public boolean isOKButtonPressed(Optional<ButtonType> pressedButton) {
+        return ButtonType.OK.equals(pressedButton.orElse(ButtonType.CANCEL));
+    }
+
+    /**
+     * Adds buttons to dialog
+     *
+     * @param buttonTypes the need button types.
+     */
+    public void addButtons(ButtonType... buttonTypes) {
+        getDialogPane().getButtonTypes().addAll(buttonTypes);
+    }
 }

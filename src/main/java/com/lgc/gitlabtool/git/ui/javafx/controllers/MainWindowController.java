@@ -41,6 +41,7 @@ import com.lgc.gitlabtool.git.ui.javafx.CloneProgressDialog;
 import com.lgc.gitlabtool.git.ui.javafx.CommitDialog;
 import com.lgc.gitlabtool.git.ui.javafx.CreateNewBranchDialog;
 import com.lgc.gitlabtool.git.ui.javafx.CreateProjectDialog;
+import com.lgc.gitlabtool.git.ui.javafx.GLTAlert;
 import com.lgc.gitlabtool.git.ui.javafx.IncorrectProjectDialog;
 import com.lgc.gitlabtool.git.ui.javafx.ProgressDialog;
 import com.lgc.gitlabtool.git.ui.javafx.PullProgressDialog;
@@ -67,7 +68,9 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
@@ -652,6 +655,14 @@ public class MainWindowController implements StateListener {
 
     @FXML
     public void onRevertChanges(ActionEvent actionEvent) {
+        GLTAlert alert = new GLTAlert(AlertType.CONFIRMATION, ApplicationState.REVERT.toString(),
+                "Revert changes for selected projects", "Are you sure you want to do it?");
+        alert.addButtons(ButtonType.CANCEL);
+        alert.setTextButton(ButtonType.OK, "Revert");
+        // check that user press OK button
+        if(!alert.isOKButtonPressed(alert.showAndWait())) {
+            return;
+        }
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.submit(() -> revert());
         executor.shutdown();
