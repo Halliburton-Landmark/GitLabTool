@@ -62,6 +62,14 @@ public enum ApplicationState {
             return "Refresh projects";
 
         }
+    },
+
+    REVERT {
+        @Override
+        public String toString() {
+            return "Revert changes";
+
+        }
     };
 
     public String getState() {

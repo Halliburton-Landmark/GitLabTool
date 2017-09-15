@@ -55,12 +55,12 @@ public interface GitService {
     List<Project> getProjectsWithChanges(List<Project> projects);
 
     /**
-     * Discard uncommited changes
+     * Reverts uncommited changes
      *
      * @param projects projects that need to be resets
      * @return list of projects that and their discard statuses
      */
-    Map<Project, JGitStatus> discardChanges(List<Project> projects);
+    Map<Project, JGitStatus> revertChanges(List<Project> projects);
 
     /**
      * Commit changes to selectedProjects
@@ -116,7 +116,7 @@ public interface GitService {
 
     /**
      * Pulls changes in selected projects from upstream
-     * 
+     *
      * @param projects - selected projects
      * @param progressListener - instance of {@link OperationProgressListener}
      * @return <code>true</code> if pull operation works well and <code>false</code> otherwise
@@ -133,11 +133,11 @@ public interface GitService {
 
     /**
      * Returns count of commits ahead and behind index
-     * 
+     *
      * @param project - project to show status
      * @param branchName - the name of branch
      * @return array of ahead and behind commits counts<br>
-     *         Array consists of two parameters: 
+     *         Array consists of two parameters:
      *         first is the count of commits ahead Index, <br>
      *         second is the count of commits behind Index
      */

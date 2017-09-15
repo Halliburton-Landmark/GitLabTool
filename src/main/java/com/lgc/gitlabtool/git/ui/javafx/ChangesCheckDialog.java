@@ -33,7 +33,7 @@ public class ChangesCheckDialog extends GLTAlert {
 
 
     private final ButtonType commitButton;
-    private final ButtonType discardButton;
+    private final ButtonType revertButton;
     private final ButtonType cancelButton;
 
     public ChangesCheckDialog() {
@@ -41,10 +41,10 @@ public class ChangesCheckDialog extends GLTAlert {
               "Would you like to commit changes or discard?");
 
         commitButton = new ButtonType("Commit changes");
-        discardButton = new ButtonType("Discard changes");
+        revertButton = new ButtonType("Revert changes");
         cancelButton = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);;
 
-        getDialogPane().getButtonTypes().setAll(commitButton, discardButton, cancelButton);
+        getDialogPane().getButtonTypes().setAll(commitButton, revertButton, cancelButton);
     }
 
     private Map<Project, JGitStatus> commitChanges(List<Project> projectsWithChanges) {
@@ -53,16 +53,16 @@ public class ChangesCheckDialog extends GLTAlert {
         return dialog.getStatuses();
     }
 
-    private Map<Project, JGitStatus> discardChanges(List<Project> changedProjects) {
-        Map<Project, JGitStatus> discardStatuses = _gitService.discardChanges(changedProjects);
+    private Map<Project, JGitStatus> revertChanges(List<Project> changedProjects) {
+        Map<Project, JGitStatus> revertStatuses = _gitService.revertChanges(changedProjects);
 
-        showStatusDialog(changedProjects, discardStatuses,
+        showStatusDialog(changedProjects, revertStatuses,
                 SUCCESSFUL_DISCARD_HEADER_MESSAGE,
                 FAILED_DISCARDING_MESSAGE,
                 STATUS_DISCARD_DIALOG_TITLE,
                 STATUS_DISCARD_DIALOG_HEADER);
 
-        return discardStatuses;
+        return revertStatuses;
     }
 
     public void showStatusDialog(List<Project> projects, Map<Project, JGitStatus> discardStatuses,
@@ -97,8 +97,8 @@ public class ChangesCheckDialog extends GLTAlert {
         return commitButton;
     }
 
-    public ButtonType getDiscardButton() {
-        return discardButton;
+    public ButtonType getRevertButton() {
+        return revertButton;
     }
 
     public ButtonType getCancelButton() {
@@ -132,9 +132,9 @@ public class ChangesCheckDialog extends GLTAlert {
             Map<Project, JGitStatus> commitStatuses = commitChanges(changedProjects);
             executeBiConsumer(biConsumer, commitStatuses, selectedProjects, selectedItem);
 
-        } else if (alert.getDiscardButton().equals(result.orElse(ButtonType.CANCEL))) {
-            Map<Project, JGitStatus> discardStatuses = discardChanges(changedProjects);
-            executeBiConsumer(biConsumer, discardStatuses, selectedProjects, selectedItem);
+        } else if (alert.getRevertButton().equals(result.orElse(ButtonType.CANCEL))) {
+            Map<Project, JGitStatus> revertStatuses = revertChanges(changedProjects);
+            executeBiConsumer(biConsumer, revertStatuses, selectedProjects, selectedItem);
         } else {
             alert.close();
         }

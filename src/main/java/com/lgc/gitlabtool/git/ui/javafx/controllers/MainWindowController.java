@@ -9,6 +9,7 @@ import java.math.RoundingMode;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.prefs.Preferences;
@@ -22,6 +23,7 @@ import com.lgc.gitlabtool.git.entities.MessageType;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.ProjectList;
 import com.lgc.gitlabtool.git.entities.ProjectStatus;
+import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.listeners.stateListeners.StateListener;
 import com.lgc.gitlabtool.git.services.ConsoleService;
@@ -39,6 +41,7 @@ import com.lgc.gitlabtool.git.ui.javafx.CloneProgressDialog;
 import com.lgc.gitlabtool.git.ui.javafx.CommitDialog;
 import com.lgc.gitlabtool.git.ui.javafx.CreateNewBranchDialog;
 import com.lgc.gitlabtool.git.ui.javafx.CreateProjectDialog;
+import com.lgc.gitlabtool.git.ui.javafx.GLTAlert;
 import com.lgc.gitlabtool.git.ui.javafx.IncorrectProjectDialog;
 import com.lgc.gitlabtool.git.ui.javafx.ProgressDialog;
 import com.lgc.gitlabtool.git.ui.javafx.PullProgressDialog;
@@ -65,7 +68,9 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
@@ -92,6 +97,8 @@ public class MainWindowController implements StateListener {
     private static final String STATUS_DIALOG_HEADER_COMMIT = "Commit statuses";
     private static final String EDIT_PROJECT_PROPERTIES = "Edit project properties";
     private static final String EDIT_POM_SELECTION_WARNING = "This operation unavailable for some projects: ";
+    private static final String REVERT_START_MESSAGE = "Revert operation is starting...";
+    private static final String REVERT_FINISH_MESSAGE = "Revert operation finished.";
 
     private ProjectList _projectsList;
 
@@ -145,6 +152,7 @@ public class MainWindowController implements StateListener {
         _stateService.addStateListener(ApplicationState.CREATE_PROJECT, this);
         _stateService.addStateListener(ApplicationState.SWITCH_BRANCH, this);
         _stateService.addStateListener(ApplicationState.EDIT_POM, this);
+        _stateService.addStateListener(ApplicationState.REVERT, this);
     }
 
     public void beforeShowing() {
@@ -205,7 +213,11 @@ public class MainWindowController implements StateListener {
                 .disableProperty().bind(booleanBinding);
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.PULL_BUTTON.getId()).disableProperty()
                 .bind(booleanBinding);
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.REVERT_CHANGES.getId()).disableProperty()
+                .bind(booleanBinding);
 
+        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_CLONE_PROJECT).disableProperty()
+                .bind(booleanBinding);
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_COMMIT).disableProperty().bind(booleanBinding);
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_SWITCH_BRANCH).disableProperty()
                 .bind(booleanBinding);
@@ -214,7 +226,7 @@ public class MainWindowController implements StateListener {
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_COMMIT).disableProperty().bind(booleanBinding);
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_PUSH).disableProperty().bind(booleanBinding);
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_PULL).disableProperty().bind(booleanBinding);
-
+        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_REVERT).disableProperty().bind(booleanBinding);
     }
 
     public void setSelectedGroup(Group group) {
@@ -393,6 +405,9 @@ public class MainWindowController implements StateListener {
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.PULL_BUTTON.getId())
                 .setOnAction(this::onPullAction);
 
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.REVERT_CHANGES.getId())
+                .setOnAction(this::onRevertChanges);
+
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_CLONE_PROJECT)
                 .setOnAction(this::cloneShadowProject);
 
@@ -410,6 +425,9 @@ public class MainWindowController implements StateListener {
 
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_PULL)
                 .setOnAction(this::onPullAction);
+
+        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_REVERT)
+                .setOnAction(this::onRevertChanges);
     }
 
     @FXML
@@ -426,11 +444,15 @@ public class MainWindowController implements StateListener {
 
     private void showCreateNewBranchDialog() {
         List<Project> allSelectedProjects = getCurrentProjects();
-        List<Project> clonedProjectsWithoutConflicts = allSelectedProjects.stream()
-                .filter(this::projectIsReadyForGitOperations)
-                .collect(Collectors.toList());
+        List<Project> clonedProjectsWithoutConflicts = getProjectsClonedAndWithoutConflicts(allSelectedProjects);
         CreateNewBranchDialog dialog = new CreateNewBranchDialog(clonedProjectsWithoutConflicts);
         dialog.showAndWait();
+    }
+
+    private List<Project> getProjectsClonedAndWithoutConflicts(List<Project> projects){
+        return projects.stream()
+                       .filter(this::projectIsReadyForGitOperations)
+                       .collect(Collectors.toList());
     }
 
     private boolean projectIsReadyForGitOperations(Project project) {
@@ -476,9 +498,7 @@ public class MainWindowController implements StateListener {
 
     @FXML
     public void onCommitAction(ActionEvent actionEvent) {
-        List<Project> allSelectedProjects = getCurrentProjects();
-        List<Project> projectWithChanges = _gitService.getProjectsWithChanges(allSelectedProjects);
-
+        List<Project> projectWithChanges = _gitService.getProjectsWithChanges(getCurrentProjects());
         if (projectWithChanges.isEmpty()) {
             showProjectsWithoutChangesMessage();
             return;
@@ -490,9 +510,7 @@ public class MainWindowController implements StateListener {
 
     @FXML
     public void onPushAction(ActionEvent actionEvent) {
-        List<Project> filteredProjects = getCurrentProjects().stream()
-                                                             .filter(this::projectIsReadyForGitOperations)
-                                                             .collect(Collectors.toList());
+        List<Project> filteredProjects = getProjectsClonedAndWithoutConflicts(getCurrentProjects());
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.submit(() -> _gitService.push(filteredProjects, new PushProgressListener()));
         executor.shutdown();
@@ -631,10 +649,44 @@ public class MainWindowController implements StateListener {
 
     @FXML
     public void onPullAction(ActionEvent actionEvent) {
-        List<Project> projectsToPull = getCurrentProjects().stream()
-                                                           .filter(this::projectIsReadyForGitOperations)
-                                                           .collect(Collectors.toList());
+        List<Project> projectsToPull = getProjectsClonedAndWithoutConflicts(getCurrentProjects());
         checkChangesAndPull(projectsToPull, new Object());
+    }
+
+    @FXML
+    public void onRevertChanges(ActionEvent actionEvent) {
+        GLTAlert alert = new GLTAlert(AlertType.CONFIRMATION, ApplicationState.REVERT.toString(),
+                "Revert changes for selected projects", "Are you sure you want to do it?");
+        alert.addButtons(ButtonType.CANCEL);
+        alert.setTextButton(ButtonType.OK, "Revert");
+        // check that user press OK button
+        if(!alert.isOKButtonPressed(alert.showAndWait())) {
+            return;
+        }
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.submit(() -> revert());
+        executor.shutdown();
+    }
+
+    private void revert() {
+        _stateService.stateON(ApplicationState.REVERT);
+        _consoleService.addMessage(REVERT_START_MESSAGE, MessageType.SIMPLE);
+
+        List<Project> correctProjects = getProjectsClonedAndWithoutConflicts(getCurrentProjects());
+        List<Project> projectsWithChanges = _gitService.getProjectsWithChanges(correctProjects);
+        _consoleService.addMessage(projectsWithChanges.size() + " selected projects have changes.", MessageType.SIMPLE);
+        if (projectsWithChanges.isEmpty()) {
+            finishAction(REVERT_FINISH_MESSAGE, MessageType.SIMPLE, ApplicationState.REVERT);
+            return;
+        }
+        Map<Project, JGitStatus> statuses = _gitService.revertChanges(projectsWithChanges);
+        _consoleService.addMessagesForStatuses(statuses, "Reverting changes");
+        finishAction(REVERT_FINISH_MESSAGE, MessageType.SIMPLE, ApplicationState.REVERT);
+    }
+
+    private void finishAction(String message, MessageType type, ApplicationState state) {
+        _stateService.stateOFF(state);
+        _consoleService.addMessage(message, type);
     }
 
     private void checkChangesAndPull(List<Project> projects, Object item) {
@@ -684,8 +736,7 @@ public class MainWindowController implements StateListener {
 
         @Override
         public void onFinish(Object... t) {
-            _stateService.stateOFF(ApplicationState.PUSH);
-            _consoleService.addMessage("Push projects is finished!", MessageType.SIMPLE);
+            finishAction("Push projects is finished!", MessageType.SIMPLE, ApplicationState.PUSH);
         }
     }
 

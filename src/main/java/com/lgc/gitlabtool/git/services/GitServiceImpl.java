@@ -76,13 +76,13 @@ public class GitServiceImpl implements GitService {
     }
 
     @Override
-    public Map<Project, JGitStatus> discardChanges(List<Project> projects) {
+    public Map<Project, JGitStatus> revertChanges(List<Project> projects) {
         if (projects == null) {
             throw new IllegalArgumentException("Wrong parameters for discarding projects.");
         }
         final Map<Project, JGitStatus> results = new ConcurrentHashMap<>();
         projects.parallelStream()
-                .forEach(project -> discardChanges(project, results));
+                .forEach(project -> revertChanges(project, results));
         return results;
     }
 
@@ -106,12 +106,12 @@ public class GitServiceImpl implements GitService {
         return statuses;
     }
 
-    private void discardChanges(Project project, Map<Project, JGitStatus> results) {
+    private void revertChanges(Project project, Map<Project, JGitStatus> results) {
         if (project == null) {
             results.put(project, JGitStatus.FAILED);
             return;
         }
-        results.put(project, _git.discardChanges(project));
+        results.put(project, _git.revertChanges(project));
     }
 
     private Map<Project, JGitStatus> commit(List<Project> projects,
