@@ -6,7 +6,6 @@ import java.util.Set;
 
 import com.lgc.gitlabtool.git.entities.Branch;
 import com.lgc.gitlabtool.git.entities.Project;
-import com.lgc.gitlabtool.git.entities.ProjectStatus;
 import com.lgc.gitlabtool.git.jgit.BranchType;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
@@ -145,9 +144,12 @@ public interface GitService {
     public int[] getAheadBehindIndexCounts(Project project, String branchName);
 
     /**
-     * Modifies project's field {@link ProjectStatus} according to the Git statuses
+     * Checks whether the project has conflicts and uncommitted changes.
      *
-     * @param project - the project to be modified
+     * @param  project the project
+     * @return array of values. Array consists of two parameters:
+     *         - has conflicts: <true> is has, otherwise  <false>.
+     *         - has changes: <true> is has, otherwise  <false>.
      */
-    public void modifyProjectStatusByGit(Project project);
+    public boolean[] hasConflictsAndChanges(Project project);
 }

@@ -466,6 +466,10 @@ public class MainWindowController implements StateListener {
 
     private void refreshLoadProjects() {
         _projectsList.refreshLoadProjects();
+        sortAndCheckProjects();
+    }
+
+    private void sortAndCheckProjects() {
         sortProjectsList();
         checkProjectsList();
     }
@@ -728,8 +732,21 @@ public class MainWindowController implements StateListener {
     @Override
     public void handleEvent(ApplicationState state, boolean isActivate) {
         if (!isActivate) {
-            refreshLoadProjects(null);
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            executor.submit(() -> updateProjectsByState(state));
+            executor.shutdown();
         }
     }
 
+    private void updateProjectsByState(ApplicationState state) {
+        List<Project> projects = _projectsList.getProjects();
+        if (state == ApplicationState.CREATE_PROJECT) {
+            refreshLoadProjects();
+            return;
+        }
+        projects.parallelStream()
+                .filter(Project::isCloned)
+                .forEach(_projectService::updateProjectStatus);
+        sortAndCheckProjects();
+    }
 }

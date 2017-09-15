@@ -31,8 +31,8 @@ public class ServiceProvider {
         StateService stateService = new StateServiceImpl();
         GitService gitService = new GitServiceImpl(stateService);
         ConsoleService consoleService = new ConsoleServiceImpl();
-        ProjectService projectService =
-                new ProjectServiceImpl(restConnector, projectTypeService, stateService, consoleService, gitService);
+        ProjectService projectService = new ProjectServiceImpl(restConnector, projectTypeService,
+                stateService, consoleService, gitService);
         ClonedGroupsService programProgertiesService = new ClonedGroupsServiceImpl(storageService, loginService);
 
         _services = new HashMap<>();
