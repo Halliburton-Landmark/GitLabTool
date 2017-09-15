@@ -32,7 +32,10 @@ public class LoginServiceImpl implements LoginService {
             getConnector().setUrlMainPart(dto.getServerURL());
             HttpResponseHolder responseHolder = getConnector().sendPost("/session", params, null);
             Object userJson = responseHolder != null ? responseHolder.getBody() : null;
-            if (userJson == null) {
+            if (responseHolder.getResponseCode() == HttpStatus.SC_REQUEST_TIMEOUT
+                    || responseHolder.getResponseCode() == 0) {
+                onSuccess.accept(HttpStatus.SC_REQUEST_TIMEOUT);
+            } else if (userJson == null) {
                 onSuccess.accept(HttpStatus.SC_UNAUTHORIZED);
             } else {
                 _currentUser = CurrentUser.getInstance();
