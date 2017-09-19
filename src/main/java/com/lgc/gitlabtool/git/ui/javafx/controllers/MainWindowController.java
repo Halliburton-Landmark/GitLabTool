@@ -99,6 +99,8 @@ public class MainWindowController implements StateListener {
     private static final String EDIT_POM_SELECTION_WARNING = "This operation unavailable for some projects: ";
     private static final String REVERT_START_MESSAGE = "Revert operation is starting...";
     private static final String REVERT_FINISH_MESSAGE = "Revert operation finished.";
+    private static final String COULD_NOT_SUBMIT_OPERATION_MESSAGE = "Operation could not be submitted for %s project. "
+            + "It is not cloned or has conflicts";
 
     private ProjectList _projectsList;
 
@@ -450,9 +452,16 @@ public class MainWindowController implements StateListener {
     }
 
     private List<Project> getProjectsClonedAndWithoutConflicts(List<Project> projects){
-        return projects.stream()
-                       .filter(this::projectIsReadyForGitOperations)
-                       .collect(Collectors.toList());
+        List<Project> properProjects = new ArrayList<>();
+        for (Project project : projects) {
+            if (projectIsReadyForGitOperations(project)) {
+                properProjects.add(project);
+            } else {
+                _consoleService.addMessage(String.format(COULD_NOT_SUBMIT_OPERATION_MESSAGE, project.getName()), 
+                        MessageType.ERROR);
+            }
+        }
+        return properProjects;
     }
 
     private boolean projectIsReadyForGitOperations(Project project) {
@@ -479,8 +488,10 @@ public class MainWindowController implements StateListener {
 
     // shadow projects in the end list
     private void sortProjectsList() {
-        List<Project> sortedList = _projectsList.getProjects().stream().sorted(this::compareProjects)
-                .collect(Collectors.toList());
+        List<Project> sortedList = _projectsList.getProjects()
+                                                .stream()
+                                                .sorted(this::compareProjects)
+                                                .collect(Collectors.toList());
 
         Platform.runLater(new Runnable() {
             @Override
@@ -616,8 +627,7 @@ public class MainWindowController implements StateListener {
     }
 
     private List<Integer> getIdSelectedProjects() {
-        List<Project> projects = projectsList.getSelectionModel().getSelectedItems();
-        return ProjectList.getIdsProjects(projects);
+        return ProjectList.getIdsProjects(getCurrentProjects());
     }
 
     private void checkProjectsList() {
