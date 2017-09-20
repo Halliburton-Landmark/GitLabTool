@@ -453,15 +453,17 @@ public class MainWindowController implements StateListener {
 
     private List<Project> getProjectsClonedAndWithoutConflicts(List<Project> projects) {
         List<Project> properProjects = new ArrayList<>();
-        projects.forEach(project -> {
-            if (projectIsReadyForGitOperations(project)) {
-                properProjects.add(project);
-            } else {
-                _consoleService.addMessage(String.format(COULD_NOT_SUBMIT_OPERATION_MESSAGE, project.getName()),
-                        MessageType.ERROR);
-            }
-        });
+        projects.forEach(project -> addProperProjectToList(project, properProjects));
         return properProjects;
+    }
+
+    private void addProperProjectToList(Project project, List<Project> properProjects) {
+        if (projectIsReadyForGitOperations(project)) {
+            properProjects.add(project);
+        } else {
+            _consoleService.addMessage(String.format(COULD_NOT_SUBMIT_OPERATION_MESSAGE, project.getName()),
+                    MessageType.ERROR);
+        }
     }
 
     private boolean projectIsReadyForGitOperations(Project project) {
