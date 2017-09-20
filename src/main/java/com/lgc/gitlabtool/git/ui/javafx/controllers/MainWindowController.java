@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -452,6 +453,9 @@ public class MainWindowController implements StateListener {
     }
 
     private List<Project> getProjectsClonedAndWithoutConflicts(List<Project> projects) {
+        if (projects == null || projects.isEmpty()) {
+            return Collections.emptyList();
+        }
         List<Project> properProjects = new ArrayList<>();
         projects.forEach(project -> addProperProjectToList(project, properProjects));
         return properProjects;
