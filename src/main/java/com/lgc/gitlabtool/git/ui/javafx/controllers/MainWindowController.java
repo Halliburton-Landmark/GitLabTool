@@ -451,16 +451,16 @@ public class MainWindowController implements StateListener {
         dialog.showAndWait();
     }
 
-    private List<Project> getProjectsClonedAndWithoutConflicts(List<Project> projects){
+    private List<Project> getProjectsClonedAndWithoutConflicts(List<Project> projects) {
         List<Project> properProjects = new ArrayList<>();
-        for (Project project : projects) {
+        projects.forEach(project -> {
             if (projectIsReadyForGitOperations(project)) {
                 properProjects.add(project);
             } else {
-                _consoleService.addMessage(String.format(COULD_NOT_SUBMIT_OPERATION_MESSAGE, project.getName()), 
+                _consoleService.addMessage(String.format(COULD_NOT_SUBMIT_OPERATION_MESSAGE, project.getName()),
                         MessageType.ERROR);
             }
-        }
+        });
         return properProjects;
     }
 
