@@ -467,8 +467,10 @@ public class MainWindowController implements StateListener {
 
     // shadow projects in the end list
     private void sortProjectsList() {
-        List<Project> sortedList = _projectsList.getProjects().stream().sorted(this::compareProjects)
-                .collect(Collectors.toList());
+        List<Project> sortedList = _projectsList.getProjects()
+                                                .stream()
+                                                .sorted(this::compareProjects)
+                                                .collect(Collectors.toList());
 
         Platform.runLater(new Runnable() {
             @Override
@@ -604,8 +606,7 @@ public class MainWindowController implements StateListener {
     }
 
     private List<Integer> getIdSelectedProjects() {
-        List<Project> projects = projectsList.getSelectionModel().getSelectedItems();
-        return ProjectList.getIdsProjects(projects);
+        return ProjectList.getIdsProjects(getCurrentProjects());
     }
 
     private void checkProjectsList() {

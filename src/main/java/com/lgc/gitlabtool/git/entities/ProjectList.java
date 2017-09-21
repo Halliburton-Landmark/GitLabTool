@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
+import com.lgc.gitlabtool.git.services.ConsoleService;
 import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StateService;
@@ -24,6 +25,12 @@ public class ProjectList {
 
     private final StateService _stateService = (StateService) ServiceProvider.getInstance()
             .getService(StateService.class.getName());
+
+    private static final ConsoleService _consoleService = (ConsoleService) ServiceProvider.getInstance()
+            .getService(ConsoleService.class.getName());
+
+    private static final String COULD_NOT_SUBMIT_OPERATION_MESSAGE = "Operation could not be submitted for %s project. "
+            + "It is not cloned or has conflicts";
 
     /**
      * We lock create new instance if _isLockCreating is <true>, we return exist instance.
@@ -122,7 +129,7 @@ public class ProjectList {
      * @return filtered list
      */
     public static List<Project> getCorrectProjects(List<Project> projects) {
-        if (projects == null) {
+        if (projects == null || projects.isEmpty()) {
             return Collections.emptyList();
         }
         return projects.stream()
@@ -141,7 +148,12 @@ public class ProjectList {
             return false;
         }
         ProjectStatus projectStatus = project.getProjectStatus();
-        return project.isCloned() && !projectStatus.hasConflicts();
+        boolean result = project.isCloned() && !projectStatus.hasConflicts();
+        if (!result) {
+            _consoleService.addMessage(String.format(COULD_NOT_SUBMIT_OPERATION_MESSAGE, project.getName()),
+                    MessageType.ERROR);
+        }
+        return result;
     }
 
     /**
