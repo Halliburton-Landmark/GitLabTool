@@ -22,7 +22,6 @@ import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.MessageType;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.ProjectList;
-import com.lgc.gitlabtool.git.entities.ProjectStatus;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.listeners.stateListeners.StateListener;
@@ -444,20 +443,9 @@ public class MainWindowController implements StateListener {
 
     private void showCreateNewBranchDialog() {
         List<Project> allSelectedProjects = getCurrentProjects();
-        List<Project> clonedProjectsWithoutConflicts = getProjectsClonedAndWithoutConflicts(allSelectedProjects);
+        List<Project> clonedProjectsWithoutConflicts = ProjectList.getProjectsClonedAndWithoutConflicts(allSelectedProjects);
         CreateNewBranchDialog dialog = new CreateNewBranchDialog(clonedProjectsWithoutConflicts);
         dialog.showAndWait();
-    }
-
-    private List<Project> getProjectsClonedAndWithoutConflicts(List<Project> projects){
-        return projects.stream()
-                       .filter(this::projectIsReadyForGitOperations)
-                       .collect(Collectors.toList());
-    }
-
-    private boolean projectIsReadyForGitOperations(Project project) {
-        ProjectStatus projectType = project.getProjectStatus();
-        return project.isCloned() && !projectType.hasConflicts();
     }
 
     @FXML
@@ -510,7 +498,7 @@ public class MainWindowController implements StateListener {
 
     @FXML
     public void onPushAction(ActionEvent actionEvent) {
-        List<Project> filteredProjects = getProjectsClonedAndWithoutConflicts(getCurrentProjects());
+        List<Project> filteredProjects = ProjectList.getProjectsClonedAndWithoutConflicts(getCurrentProjects());
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.submit(() -> _gitService.push(filteredProjects, new PushProgressListener()));
         executor.shutdown();
@@ -579,8 +567,8 @@ public class MainWindowController implements StateListener {
 
     private List<Project> getUnavalibleProjectsForEditingPom(List<Project> projects) {
         return projects.parallelStream()
-                .filter(project -> !projectIsReadyForGitOperations(project)
-                        || !_pomXmlService.hasPomFile(project))
+                .filter(project -> !ProjectList.projectIsReadyForGitOperations(project)
+                                                 || !_pomXmlService.hasPomFile(project))
                 .collect(Collectors.toList());
     }
 
@@ -649,7 +637,7 @@ public class MainWindowController implements StateListener {
 
     @FXML
     public void onPullAction(ActionEvent actionEvent) {
-        List<Project> projectsToPull = getProjectsClonedAndWithoutConflicts(getCurrentProjects());
+        List<Project> projectsToPull = ProjectList.getProjectsClonedAndWithoutConflicts(getCurrentProjects());
         checkChangesAndPull(projectsToPull, new Object());
     }
 
@@ -672,7 +660,7 @@ public class MainWindowController implements StateListener {
         _stateService.stateON(ApplicationState.REVERT);
         _consoleService.addMessage(REVERT_START_MESSAGE, MessageType.SIMPLE);
 
-        List<Project> correctProjects = getProjectsClonedAndWithoutConflicts(getCurrentProjects());
+        List<Project> correctProjects = ProjectList.getProjectsClonedAndWithoutConflicts(getCurrentProjects());
         List<Project> projectsWithChanges = _gitService.getProjectsWithChanges(correctProjects);
         _consoleService.addMessage(projectsWithChanges.size() + " selected projects have changes.", MessageType.SIMPLE);
         if (projectsWithChanges.isEmpty()) {

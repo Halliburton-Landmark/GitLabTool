@@ -6,6 +6,7 @@ import static com.lgc.gitlabtool.git.util.ProjectPropertiesUtil.getProjectNameWi
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -17,6 +18,8 @@ import org.apache.logging.log4j.Logger;
 
 import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.MessageType;
+import com.lgc.gitlabtool.git.entities.Project;
+import com.lgc.gitlabtool.git.entities.ProjectList;
 import com.lgc.gitlabtool.git.services.ConsoleService;
 import com.lgc.gitlabtool.git.services.GroupsUserService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
@@ -27,6 +30,7 @@ import com.lgc.gitlabtool.git.ui.javafx.AlertWithCheckBox;
 import com.lgc.gitlabtool.git.ui.javafx.WorkIndicatorDialog;
 import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuItems;
 import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuManager;
+import com.lgc.gitlabtool.git.ui.selection.SelectionsProvider;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarButtons;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarManager;
 import com.lgc.gitlabtool.git.util.ScreenUtil;
@@ -71,6 +75,7 @@ public class ModularController {
             getProjectNameWithVersion() + " (" + getCommitHash() + "), powered by Luxoft";
     private static final String ABOUT_POPUP_CONTENT = "Contacts: Yurii Pitomets (yurii.pitomets2@halliburton.com)";
     private static final String SWITCH_BRANCH_TITLE = "Switch branch";
+    private static final String SWITCH_BRANCH_DOESNT_HAVE_PROJECTS_MESSAGE = "Selected projects are not available the switch branch operation";
 
     private static final String IMPORT_CHOOSER_TITLE = "Import Group";
     private static final String IMPORT_DIALOG_TITLE = "Import Status Dialog";
@@ -278,9 +283,19 @@ public class ModularController {
 
     private void showSwitchBranchWindow() {
         try {
+            List<Project> projects = SelectionsProvider.getInstance().getSelectionItems("mainWindow_projectsList");
+            projects = ProjectList.getProjectsClonedAndWithoutConflicts(projects);
+            if (projects.isEmpty()) {
+                _consoleService.addMessage(SWITCH_BRANCH_DOESNT_HAVE_PROJECTS_MESSAGE, MessageType.ERROR);
+                return;
+            }
+
             URL switchBranchWindowUrl = getClass().getClassLoader().getResource(ViewKey.SWITCH_BRANCH_WINDOW.getPath());
             FXMLLoader loader = new FXMLLoader(switchBranchWindowUrl);
             Parent root = loader.load();
+
+            SwitchBranchWindowController switchWindowController  = loader.getController();
+            switchWindowController.beforeShowing(projects);
 
             Scene scene = new Scene(root);
             Stage stage = new Stage();

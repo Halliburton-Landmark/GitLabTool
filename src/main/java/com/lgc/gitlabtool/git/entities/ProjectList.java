@@ -115,6 +115,16 @@ public class ProjectList {
                        .collect(Collectors.toList());
     }
 
+    public static List<Project> getProjectsClonedAndWithoutConflicts(List<Project> projects) {
+        return projects.stream().filter(project -> projectIsReadyForGitOperations(project))
+                .collect(Collectors.toList());
+    }
+
+    public static boolean projectIsReadyForGitOperations(Project project) {
+        ProjectStatus projectType = project.getProjectStatus();
+        return project.isCloned() && !projectType.hasConflicts();
+    }
+
     /**
      * Resets ProjectList data. After this method _isLockCreating is <false>.
      * This allows create new instance of ProjectList for another group.
