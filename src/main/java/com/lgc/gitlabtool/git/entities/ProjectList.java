@@ -122,6 +122,9 @@ public class ProjectList {
      * @return filtered list
      */
     public static List<Project> getCorrectProjects(List<Project> projects) {
+        if (projects == null) {
+            return Collections.emptyList();
+        }
         return projects.stream()
                        .filter(project -> projectIsClonedAndWithoutConflicts(project))
                        .collect(Collectors.toList());
@@ -134,6 +137,9 @@ public class ProjectList {
      * @return<true> is project ready for operation, otherwise <false>.
      */
     public static boolean projectIsClonedAndWithoutConflicts(Project project) {
+        if (project == null) {
+            return false;
+        }
         ProjectStatus projectStatus = project.getProjectStatus();
         return project.isCloned() && !projectStatus.hasConflicts();
     }
