@@ -21,7 +21,7 @@ import com.lgc.gitlabtool.git.listeners.updateConsole.UpdateConsoleGenerator;
 public interface ConsoleService extends UpdateConsoleGenerator{
 
     /**
-     * Adds new message to UI console.
+     * Adds new message to UI console and to log file.
      *
      * @param message the text for console
      * @param type the type of message (ERROR, SUCCESS or SIMPLE)
