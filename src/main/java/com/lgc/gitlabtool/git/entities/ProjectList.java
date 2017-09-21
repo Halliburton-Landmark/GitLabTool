@@ -115,14 +115,26 @@ public class ProjectList {
                        .collect(Collectors.toList());
     }
 
+    /**
+     * Gets filtered a list of projects which doesn't have shadow projects and projects with conflicts.
+     *
+     * @param  projects the list which need to filter
+     * @return filtered list
+     */
     public static List<Project> getProjectsClonedAndWithoutConflicts(List<Project> projects) {
-        return projects.stream().filter(project -> projectIsReadyForGitOperations(project))
+        return projects.stream().filter(project -> projectIsClonedAndWithoutConflicts(project))
                 .collect(Collectors.toList());
     }
 
-    public static boolean projectIsReadyForGitOperations(Project project) {
-        ProjectStatus projectType = project.getProjectStatus();
-        return project.isCloned() && !projectType.hasConflicts();
+    /**
+     * Checks that project is cloned and doesn't have conflicts.
+     *
+     * @param project the project for checking
+     * @return<true> is project ready for operation, otherwise <false>.
+     */
+    public static boolean projectIsClonedAndWithoutConflicts(Project project) {
+        ProjectStatus projectStatus = project.getProjectStatus();
+        return project.isCloned() && !projectStatus.hasConflicts();
     }
 
     /**

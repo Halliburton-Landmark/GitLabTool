@@ -567,7 +567,7 @@ public class MainWindowController implements StateListener {
 
     private List<Project> getUnavalibleProjectsForEditingPom(List<Project> projects) {
         return projects.parallelStream()
-                .filter(project -> !ProjectList.projectIsReadyForGitOperations(project)
+                .filter(project -> !ProjectList.projectIsClonedAndWithoutConflicts(project)
                                                  || !_pomXmlService.hasPomFile(project))
                 .collect(Collectors.toList());
     }
