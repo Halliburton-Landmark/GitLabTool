@@ -101,6 +101,10 @@ public class MainWindowController implements StateListener {
     private static final String REVERT_FINISH_MESSAGE = "Revert operation finished.";
     private static final String NO_ANY_PROJECT_FOR_OPERATION = "There isn't any proper project selected for %s operation";
 
+    private static final String NEW_BRANCH_CREATION = "new branch creation";
+    private static final String PULL = "pull";
+    private static final String PUSH = "push";
+
     private ProjectList _projectsList;
 
     private Group _currentGroup;
@@ -449,7 +453,7 @@ public class MainWindowController implements StateListener {
             CreateNewBranchDialog dialog = new CreateNewBranchDialog(clonedProjectsWithoutConflicts);
             dialog.showAndWait();
         } else {
-            _consoleService.addMessage(String.format(NO_ANY_PROJECT_FOR_OPERATION, "new branch creation"), MessageType.ERROR);
+            _consoleService.addMessage(String.format(NO_ANY_PROJECT_FOR_OPERATION, NEW_BRANCH_CREATION), MessageType.ERROR);
         }
     }
 
@@ -520,7 +524,7 @@ public class MainWindowController implements StateListener {
             executor.submit(() -> _gitService.push(filteredProjects, new PushProgressListener()));
             executor.shutdown();
         } else {
-            _consoleService.addMessage(String.format(NO_ANY_PROJECT_FOR_OPERATION, "push"), MessageType.ERROR);
+            _consoleService.addMessage(String.format(NO_ANY_PROJECT_FOR_OPERATION, PUSH), MessageType.ERROR);
         }
     }
 
@@ -661,7 +665,7 @@ public class MainWindowController implements StateListener {
         if (!projectsToPull.isEmpty()) {
             checkChangesAndPull(projectsToPull, new Object());
         } else {
-            _consoleService.addMessage(String.format(NO_ANY_PROJECT_FOR_OPERATION, "pull"), MessageType.ERROR);
+            _consoleService.addMessage(String.format(NO_ANY_PROJECT_FOR_OPERATION, PULL), MessageType.ERROR);
         }
     }
 
