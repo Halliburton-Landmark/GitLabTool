@@ -443,7 +443,7 @@ public class MainWindowController implements StateListener {
 
     private void showCreateNewBranchDialog() {
         List<Project> allSelectedProjects = getCurrentProjects();
-        List<Project> clonedProjectsWithoutConflicts = ProjectList.getProjectsClonedAndWithoutConflicts(allSelectedProjects);
+        List<Project> clonedProjectsWithoutConflicts = ProjectList.getCorrectProjects(allSelectedProjects);
         CreateNewBranchDialog dialog = new CreateNewBranchDialog(clonedProjectsWithoutConflicts);
         dialog.showAndWait();
     }
@@ -498,7 +498,7 @@ public class MainWindowController implements StateListener {
 
     @FXML
     public void onPushAction(ActionEvent actionEvent) {
-        List<Project> filteredProjects = ProjectList.getProjectsClonedAndWithoutConflicts(getCurrentProjects());
+        List<Project> filteredProjects = ProjectList.getCorrectProjects(getCurrentProjects());
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.submit(() -> _gitService.push(filteredProjects, new PushProgressListener()));
         executor.shutdown();
@@ -637,7 +637,7 @@ public class MainWindowController implements StateListener {
 
     @FXML
     public void onPullAction(ActionEvent actionEvent) {
-        List<Project> projectsToPull = ProjectList.getProjectsClonedAndWithoutConflicts(getCurrentProjects());
+        List<Project> projectsToPull = ProjectList.getCorrectProjects(getCurrentProjects());
         checkChangesAndPull(projectsToPull, new Object());
     }
 
@@ -660,7 +660,7 @@ public class MainWindowController implements StateListener {
         _stateService.stateON(ApplicationState.REVERT);
         _consoleService.addMessage(REVERT_START_MESSAGE, MessageType.SIMPLE);
 
-        List<Project> correctProjects = ProjectList.getProjectsClonedAndWithoutConflicts(getCurrentProjects());
+        List<Project> correctProjects = ProjectList.getCorrectProjects(getCurrentProjects());
         List<Project> projectsWithChanges = _gitService.getProjectsWithChanges(correctProjects);
         _consoleService.addMessage(projectsWithChanges.size() + " selected projects have changes.", MessageType.SIMPLE);
         if (projectsWithChanges.isEmpty()) {

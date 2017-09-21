@@ -121,9 +121,10 @@ public class ProjectList {
      * @param  projects the list which need to filter
      * @return filtered list
      */
-    public static List<Project> getProjectsClonedAndWithoutConflicts(List<Project> projects) {
-        return projects.stream().filter(project -> projectIsClonedAndWithoutConflicts(project))
-                .collect(Collectors.toList());
+    public static List<Project> getCorrectProjects(List<Project> projects) {
+        return projects.stream()
+                       .filter(project -> projectIsClonedAndWithoutConflicts(project))
+                       .collect(Collectors.toList());
     }
 
     /**
