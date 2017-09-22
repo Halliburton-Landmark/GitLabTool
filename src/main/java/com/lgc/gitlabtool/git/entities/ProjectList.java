@@ -123,7 +123,7 @@ public class ProjectList {
     }
 
     /**
-     * Gets filtered a list of projects which doesn't have shadow projects and projects with conflicts.
+     * Gets a filtered projects list which doesn't have shadow projects and projects with conflicts.
      *
      * @param  projects the list which need to filter
      * @return filtered list
@@ -141,7 +141,7 @@ public class ProjectList {
      * Checks that project is cloned and doesn't have conflicts.
      *
      * @param project the project for checking
-     * @return<true> is project ready for operation, otherwise <false>.
+     * @return <code>true</code> is project ready for operation, otherwise <code>true</code>.
      */
     public static boolean projectIsClonedAndWithoutConflicts(Project project) {
         if (project == null) {
