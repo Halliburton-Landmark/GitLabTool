@@ -143,7 +143,7 @@ public class ProjectList {
      * Checks that project is cloned and doesn't have conflicts.
      *
      * @param project the project for checking
-     * @return <code>true</code> is project ready for operation, otherwise <code>true</code>.
+     * @return <code>true</code> is project ready for operation, otherwise <code>false</code>.
      */
     public static boolean projectIsClonedAndWithoutConflicts(Project project) {
         if (project == null) {
