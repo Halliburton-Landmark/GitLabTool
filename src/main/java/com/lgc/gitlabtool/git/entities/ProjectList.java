@@ -32,6 +32,8 @@ public class ProjectList {
     private static final String COULD_NOT_SUBMIT_OPERATION_MESSAGE = "Operation could not be submitted for %s project. "
             + "It is not cloned or has conflicts";
 
+    private static final String INCORRECT_PROJECT = "null";
+
     /**
      * We lock create new instance if _isLockCreating is <true>, we return exist instance.
      * We can use one ProjectList for current group.
@@ -145,6 +147,8 @@ public class ProjectList {
      */
     public static boolean projectIsClonedAndWithoutConflicts(Project project) {
         if (project == null) {
+            _consoleService.addMessage(String.format(COULD_NOT_SUBMIT_OPERATION_MESSAGE, INCORRECT_PROJECT),
+                    MessageType.ERROR);
             return false;
         }
         ProjectStatus projectStatus = project.getProjectStatus();
