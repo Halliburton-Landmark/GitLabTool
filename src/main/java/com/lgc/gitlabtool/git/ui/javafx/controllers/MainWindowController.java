@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -99,6 +100,8 @@ public class MainWindowController implements StateListener {
     private static final String EDIT_POM_SELECTION_WARNING = "This operation unavailable for some projects: ";
     private static final String REVERT_START_MESSAGE = "Revert operation is starting...";
     private static final String REVERT_FINISH_MESSAGE = "Revert operation finished.";
+    private static final String COULD_NOT_SUBMIT_OPERATION_MESSAGE = "Operation could not be submitted for %s project. "
+            + "It is not cloned or has conflicts";
     private static final String NO_ANY_PROJECT_FOR_OPERATION = "There isn't any proper project selected for %s operation";
 
     private static final String NEW_BRANCH_CREATION = "new branch creation";
@@ -457,10 +460,22 @@ public class MainWindowController implements StateListener {
         }
     }
 
-    private List<Project> getProjectsClonedAndWithoutConflicts(List<Project> projects){
-        return projects.stream()
-                       .filter(this::projectIsReadyForGitOperations)
-                       .collect(Collectors.toList());
+    private List<Project> getProjectsClonedAndWithoutConflicts(List<Project> projects) {
+        if (projects == null || projects.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<Project> properProjects = new ArrayList<>();
+        projects.forEach(project -> addProperProjectToList(project, properProjects));
+        return properProjects;
+    }
+
+    private void addProperProjectToList(Project project, List<Project> properProjects) {
+        if (projectIsReadyForGitOperations(project)) {
+            properProjects.add(project);
+        } else {
+            _consoleService.addMessage(String.format(COULD_NOT_SUBMIT_OPERATION_MESSAGE, project.getName()),
+                    MessageType.ERROR);
+        }
     }
 
     private boolean projectIsReadyForGitOperations(Project project) {
@@ -487,8 +502,10 @@ public class MainWindowController implements StateListener {
 
     // shadow projects in the end list
     private void sortProjectsList() {
-        List<Project> sortedList = _projectsList.getProjects().stream().sorted(this::compareProjects)
-                .collect(Collectors.toList());
+        List<Project> sortedList = _projectsList.getProjects()
+                                                .stream()
+                                                .sorted(this::compareProjects)
+                                                .collect(Collectors.toList());
 
         Platform.runLater(new Runnable() {
             @Override
@@ -628,8 +645,7 @@ public class MainWindowController implements StateListener {
     }
 
     private List<Integer> getIdSelectedProjects() {
-        List<Project> projects = projectsList.getSelectionModel().getSelectedItems();
-        return ProjectList.getIdsProjects(projects);
+        return ProjectList.getIdsProjects(getCurrentProjects());
     }
 
     private void checkProjectsList() {
