@@ -98,11 +98,12 @@ public class MainWindowController implements StateListener {
     private static final String EDIT_POM_SELECTION_WARNING = "This operation unavailable for some projects: ";
     private static final String REVERT_START_MESSAGE = "Revert operation is starting...";
     private static final String REVERT_FINISH_MESSAGE = "Revert operation finished.";
-    private static final String NO_ANY_PROJECT_FOR_OPERATION = "There isn't any proper project selected for %s operation";
+    public static final String NO_ANY_PROJECT_FOR_OPERATION = "There isn't any proper project selected for %s operation";
 
     private static final String NEW_BRANCH_CREATION = "new branch creation";
-    private static final String PULL = "pull";
-    private static final String PUSH = "push";
+    private static final String PULL_OPERATION_NAME = "pull";
+    private static final String PUSH_OPERATION_NAME = "push";
+    public static final String SWITCH_BEANCH_OPERATION_NAME = "switch branch";
 
     private ProjectList _projectsList;
 
@@ -514,7 +515,7 @@ public class MainWindowController implements StateListener {
             executor.submit(() -> _gitService.push(filteredProjects, new PushProgressListener()));
             executor.shutdown();
         } else {
-            _consoleService.addMessage(String.format(NO_ANY_PROJECT_FOR_OPERATION, PUSH), MessageType.ERROR);
+            _consoleService.addMessage(String.format(NO_ANY_PROJECT_FOR_OPERATION, PUSH_OPERATION_NAME), MessageType.ERROR);
         }
     }
 
@@ -654,7 +655,7 @@ public class MainWindowController implements StateListener {
         if (!projectsToPull.isEmpty()) {
             checkChangesAndPull(projectsToPull, new Object());
         } else {
-            _consoleService.addMessage(String.format(NO_ANY_PROJECT_FOR_OPERATION, PULL), MessageType.ERROR);
+            _consoleService.addMessage(String.format(NO_ANY_PROJECT_FOR_OPERATION, PULL_OPERATION_NAME), MessageType.ERROR);
         }
     }
 

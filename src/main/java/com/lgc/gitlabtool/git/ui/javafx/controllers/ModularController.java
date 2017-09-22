@@ -75,7 +75,6 @@ public class ModularController {
             getProjectNameWithVersion() + " (" + getCommitHash() + "), powered by Luxoft";
     private static final String ABOUT_POPUP_CONTENT = "Contacts: Yurii Pitomets (yurii.pitomets2@halliburton.com)";
     private static final String SWITCH_BRANCH_TITLE = "Switch branch";
-    private static final String NO_PROJECTS_FOR_SWITCH_BRANCH = "Selected projects are not available the switch branch operation";
 
     private static final String IMPORT_CHOOSER_TITLE = "Import Group";
     private static final String IMPORT_DIALOG_TITLE = "Import Status Dialog";
@@ -286,7 +285,9 @@ public class ModularController {
             List<Project> projects = SelectionsProvider.getInstance().getSelectionItems("mainWindow_projectsList");
             projects = ProjectList.getCorrectProjects(projects);
             if (projects.isEmpty()) {
-                _consoleService.addMessage(NO_PROJECTS_FOR_SWITCH_BRANCH, MessageType.ERROR);
+                String message = String.format(MainWindowController.NO_ANY_PROJECT_FOR_OPERATION,
+                                               MainWindowController.SWITCH_BEANCH_OPERATION_NAME);
+                _consoleService.addMessage(message, MessageType.ERROR);
                 return;
             }
 
