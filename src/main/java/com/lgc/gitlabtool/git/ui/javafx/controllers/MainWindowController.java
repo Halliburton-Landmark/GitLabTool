@@ -98,6 +98,11 @@ public class MainWindowController implements StateListener {
     private static final String EDIT_POM_SELECTION_WARNING = "This operation unavailable for some projects: ";
     private static final String REVERT_START_MESSAGE = "Revert operation is starting...";
     private static final String REVERT_FINISH_MESSAGE = "Revert operation finished.";
+    private static final String NO_ANY_PROJECT_FOR_OPERATION = "There isn't any proper project selected for %s operation";
+
+    private static final String NEW_BRANCH_CREATION = "new branch creation";
+    private static final String PULL = "pull";
+    private static final String PUSH = "push";
 
     private ProjectList _projectsList;
 
@@ -442,10 +447,13 @@ public class MainWindowController implements StateListener {
     }
 
     private void showCreateNewBranchDialog() {
-        List<Project> allSelectedProjects = getCurrentProjects();
-        List<Project> clonedProjectsWithoutConflicts = ProjectList.getCorrectProjects(allSelectedProjects);
-        CreateNewBranchDialog dialog = new CreateNewBranchDialog(clonedProjectsWithoutConflicts);
-        dialog.showAndWait();
+        List<Project> clonedProjectsWithoutConflicts = ProjectList.getCorrectProjects(getCurrentProjects());
+        if (!clonedProjectsWithoutConflicts.isEmpty()) {
+            CreateNewBranchDialog dialog = new CreateNewBranchDialog(clonedProjectsWithoutConflicts);
+            dialog.showAndWait();
+        } else {
+            _consoleService.addMessage(String.format(NO_ANY_PROJECT_FOR_OPERATION, NEW_BRANCH_CREATION), MessageType.ERROR);
+        }
     }
 
     @FXML
@@ -501,9 +509,13 @@ public class MainWindowController implements StateListener {
     @FXML
     public void onPushAction(ActionEvent actionEvent) {
         List<Project> filteredProjects = ProjectList.getCorrectProjects(getCurrentProjects());
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.submit(() -> _gitService.push(filteredProjects, new PushProgressListener()));
-        executor.shutdown();
+        if (!filteredProjects.isEmpty()) {
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            executor.submit(() -> _gitService.push(filteredProjects, new PushProgressListener()));
+            executor.shutdown();
+        } else {
+            _consoleService.addMessage(String.format(NO_ANY_PROJECT_FOR_OPERATION, PUSH), MessageType.ERROR);
+        }
     }
 
     @FXML
@@ -639,7 +651,11 @@ public class MainWindowController implements StateListener {
     @FXML
     public void onPullAction(ActionEvent actionEvent) {
         List<Project> projectsToPull = ProjectList.getCorrectProjects(getCurrentProjects());
-        checkChangesAndPull(projectsToPull, new Object());
+        if (!projectsToPull.isEmpty()) {
+            checkChangesAndPull(projectsToPull, new Object());
+        } else {
+            _consoleService.addMessage(String.format(NO_ANY_PROJECT_FOR_OPERATION, PULL), MessageType.ERROR);
+        }
     }
 
     @FXML
