@@ -42,6 +42,7 @@ public class ProjectServiceImpl implements ProjectService {
     private static final String CREATE_STRUCTURES_TYPE_SUCCESS_MESSAGE = "Structure of type was successfully created!";
     private static final String CREATE_STRUCTURES_TYPE_FAILED_MESSAGE = "Failed creating structure of type!";
     private static final String PROJECT_ALREADY_EXISTS_MESSAGE = "Project with this name already exists!";
+    private static final String LOADING_PROJECT_MESSAGE_TEMPLATE = "Loading of %s project is %s"; 
 
     private static final Logger _logger = LogManager.getLogger(ProjectServiceImpl.class);
     private static final CurrentUser _currentUser = CurrentUser.getInstance();
@@ -227,8 +228,10 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     private void updateDataProject(Project project, String pathGroup) {
+        _logger.debug(String.format(LOADING_PROJECT_MESSAGE_TEMPLATE, project.getName(), "started"));
         project.setPathToClonedProject(pathGroup + File.separator + project.getName());
         updateProjectTypeAndStatus(project);
+        _logger.debug(String.format(LOADING_PROJECT_MESSAGE_TEMPLATE, project.getName(), "finished"));
     }
 
     @Override
