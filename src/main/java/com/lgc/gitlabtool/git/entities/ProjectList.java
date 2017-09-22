@@ -35,7 +35,7 @@ public class ProjectList {
     private static final String INCORRECT_PROJECT = "null";
 
     /**
-     * We lock create new instance if _isLockCreating is <true>, we return exist instance.
+     * We lock create new instance if _isLockCreating is <code>true</code>, we return exist instance.
      * We can use one ProjectList for current group.
      */
     private static boolean _isLockCreating = false;
@@ -47,7 +47,7 @@ public class ProjectList {
      * Gets instance of PrjectList.
      *
      * @param group the current group.
-     *        The group can be null if ProjectList have already created and _isLockCreating is <true>.
+     *        The group can be null if ProjectList have already created and _isLockCreating is <code>true</code>.
      * @return instance
      */
     public static ProjectList get(Group group) {
@@ -161,7 +161,7 @@ public class ProjectList {
     }
 
     /**
-     * Resets ProjectList data. After this method _isLockCreating is <false>.
+     * Resets ProjectList data. After this method _isLockCreating is <code>false</code>.
      * This allows create new instance of ProjectList for another group.
      */
     public static void reset() {
