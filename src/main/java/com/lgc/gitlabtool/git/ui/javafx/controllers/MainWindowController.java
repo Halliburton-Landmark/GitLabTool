@@ -8,7 +8,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -23,7 +22,6 @@ import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.MessageType;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.ProjectList;
-import com.lgc.gitlabtool.git.entities.ProjectStatus;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.listeners.stateListeners.StateListener;
@@ -100,13 +98,12 @@ public class MainWindowController implements StateListener {
     private static final String EDIT_POM_SELECTION_WARNING = "This operation unavailable for some projects: ";
     private static final String REVERT_START_MESSAGE = "Revert operation is starting...";
     private static final String REVERT_FINISH_MESSAGE = "Revert operation finished.";
-    private static final String COULD_NOT_SUBMIT_OPERATION_MESSAGE = "Operation could not be submitted for %s project. "
-            + "It is not cloned or has conflicts";
-    private static final String NO_ANY_PROJECT_FOR_OPERATION = "There isn't any proper project selected for %s operation";
+    public static final String NO_ANY_PROJECT_FOR_OPERATION = "There isn't any proper project selected for %s operation";
 
     private static final String NEW_BRANCH_CREATION = "new branch creation";
-    private static final String PULL = "pull";
-    private static final String PUSH = "push";
+    private static final String PULL_OPERATION_NAME = "pull";
+    private static final String PUSH_OPERATION_NAME = "push";
+    public static final String SWITCH_BEANCH_OPERATION_NAME = "switch branch";
 
     private ProjectList _projectsList;
 
@@ -451,36 +448,13 @@ public class MainWindowController implements StateListener {
     }
 
     private void showCreateNewBranchDialog() {
-        List<Project> clonedProjectsWithoutConflicts = getProjectsClonedAndWithoutConflicts(getCurrentProjects());
+        List<Project> clonedProjectsWithoutConflicts = ProjectList.getCorrectProjects(getCurrentProjects());
         if (!clonedProjectsWithoutConflicts.isEmpty()) {
             CreateNewBranchDialog dialog = new CreateNewBranchDialog(clonedProjectsWithoutConflicts);
             dialog.showAndWait();
         } else {
             _consoleService.addMessage(String.format(NO_ANY_PROJECT_FOR_OPERATION, NEW_BRANCH_CREATION), MessageType.ERROR);
         }
-    }
-
-    private List<Project> getProjectsClonedAndWithoutConflicts(List<Project> projects) {
-        if (projects == null || projects.isEmpty()) {
-            return Collections.emptyList();
-        }
-        List<Project> properProjects = new ArrayList<>();
-        projects.forEach(project -> addProperProjectToList(project, properProjects));
-        return properProjects;
-    }
-
-    private void addProperProjectToList(Project project, List<Project> properProjects) {
-        if (projectIsReadyForGitOperations(project)) {
-            properProjects.add(project);
-        } else {
-            _consoleService.addMessage(String.format(COULD_NOT_SUBMIT_OPERATION_MESSAGE, project.getName()),
-                    MessageType.ERROR);
-        }
-    }
-
-    private boolean projectIsReadyForGitOperations(Project project) {
-        ProjectStatus projectType = project.getProjectStatus();
-        return project.isCloned() && !projectType.hasConflicts();
     }
 
     @FXML
@@ -535,13 +509,13 @@ public class MainWindowController implements StateListener {
 
     @FXML
     public void onPushAction(ActionEvent actionEvent) {
-        List<Project> filteredProjects = getProjectsClonedAndWithoutConflicts(getCurrentProjects());
+        List<Project> filteredProjects = ProjectList.getCorrectProjects(getCurrentProjects());
         if (!filteredProjects.isEmpty()) {
             ExecutorService executor = Executors.newSingleThreadExecutor();
             executor.submit(() -> _gitService.push(filteredProjects, new PushProgressListener()));
             executor.shutdown();
         } else {
-            _consoleService.addMessage(String.format(NO_ANY_PROJECT_FOR_OPERATION, PUSH), MessageType.ERROR);
+            _consoleService.addMessage(String.format(NO_ANY_PROJECT_FOR_OPERATION, PUSH_OPERATION_NAME), MessageType.ERROR);
         }
     }
 
@@ -608,8 +582,8 @@ public class MainWindowController implements StateListener {
 
     private List<Project> getUnavalibleProjectsForEditingPom(List<Project> projects) {
         return projects.parallelStream()
-                .filter(project -> !projectIsReadyForGitOperations(project)
-                        || !_pomXmlService.hasPomFile(project))
+                .filter(project -> !ProjectList.projectIsClonedAndWithoutConflicts(project)
+                                                 || !_pomXmlService.hasPomFile(project))
                 .collect(Collectors.toList());
     }
 
@@ -677,11 +651,11 @@ public class MainWindowController implements StateListener {
 
     @FXML
     public void onPullAction(ActionEvent actionEvent) {
-        List<Project> projectsToPull = getProjectsClonedAndWithoutConflicts(getCurrentProjects());
+        List<Project> projectsToPull = ProjectList.getCorrectProjects(getCurrentProjects());
         if (!projectsToPull.isEmpty()) {
             checkChangesAndPull(projectsToPull, new Object());
         } else {
-            _consoleService.addMessage(String.format(NO_ANY_PROJECT_FOR_OPERATION, PULL), MessageType.ERROR);
+            _consoleService.addMessage(String.format(NO_ANY_PROJECT_FOR_OPERATION, PULL_OPERATION_NAME), MessageType.ERROR);
         }
     }
 
@@ -704,7 +678,7 @@ public class MainWindowController implements StateListener {
         _stateService.stateON(ApplicationState.REVERT);
         _consoleService.addMessage(REVERT_START_MESSAGE, MessageType.SIMPLE);
 
-        List<Project> correctProjects = getProjectsClonedAndWithoutConflicts(getCurrentProjects());
+        List<Project> correctProjects = ProjectList.getCorrectProjects(getCurrentProjects());
         List<Project> projectsWithChanges = _gitService.getProjectsWithChanges(correctProjects);
         _consoleService.addMessage(projectsWithChanges.size() + " selected projects have changes.", MessageType.SIMPLE);
         if (projectsWithChanges.isEmpty()) {

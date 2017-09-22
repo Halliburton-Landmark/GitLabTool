@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -27,7 +26,6 @@ import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.icon.LocalRemoteIconHolder;
 import com.lgc.gitlabtool.git.ui.javafx.ChangesCheckDialog;
 import com.lgc.gitlabtool.git.ui.javafx.StatusDialog;
-import com.lgc.gitlabtool.git.ui.selection.SelectionsProvider;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -96,21 +94,19 @@ public class SwitchBranchWindowController implements StateListener {
 
     @FXML
     public void initialize() {
-        List<Project> projects = SelectionsProvider.getInstance().getSelectionItems("mainWindow_projectsList");
-        _projectList = ProjectList.get(null);
-        _selectedProjectsIds = ProjectList.getIdsProjects(projects);
-
-        projects = projects.stream().filter((item)-> item.isCloned())
-                                    .collect(Collectors.toList());
-        setProjectListItems(projects, currentProjectsListView);
-
-        configureProjectsListView(currentProjectsListView);
-        configureBranchesListView(branchesListView);
-
         searchField.textProperty().addListener((observable, oldValue, newValue) -> filterPlantList(oldValue, newValue));
 
         BooleanBinding branchListBooleanBinding = branchesListView.getSelectionModel().selectedItemProperty().isNull();
         switchButton.disableProperty().bind(branchListBooleanBinding);
+    }
+
+    public void beforeShowing(List<Project> projects) {
+        _projectList = ProjectList.get(null);
+        _selectedProjectsIds = ProjectList.getIdsProjects(projects);
+        setProjectListItems(getProjectsByIds(), currentProjectsListView);
+
+        configureProjectsListView(currentProjectsListView);
+        configureBranchesListView(branchesListView);
 
         onUpdateList();
     }

@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
+import com.lgc.gitlabtool.git.services.ConsoleService;
 import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StateService;
@@ -25,8 +26,14 @@ public class ProjectList {
     private final StateService _stateService = (StateService) ServiceProvider.getInstance()
             .getService(StateService.class.getName());
 
+    private static final ConsoleService _consoleService = (ConsoleService) ServiceProvider.getInstance()
+            .getService(ConsoleService.class.getName());
+
+    private static final String COULD_NOT_SUBMIT_OPERATION_MESSAGE = "Operation could not be submitted for %s project. "
+            + "It is not cloned or has conflicts";
+
     /**
-     * We lock create new instance if _isLockCreating is <true>, we return exist instance.
+     * We lock create new instance if _isLockCreating is <code>true</code>, we return exist instance.
      * We can use one ProjectList for current group.
      */
     private static boolean _isLockCreating = false;
@@ -38,7 +45,7 @@ public class ProjectList {
      * Gets instance of PrjectList.
      *
      * @param group the current group.
-     *        The group can be null if ProjectList have already created and _isLockCreating is <true>.
+     *        The group can be null if ProjectList have already created and _isLockCreating is <code>true</code>.
      * @return instance
      */
     public static ProjectList get(Group group) {
@@ -116,7 +123,42 @@ public class ProjectList {
     }
 
     /**
-     * Resets ProjectList data. After this method _isLockCreating is <false>.
+     * Gets a filtered projects list which doesn't have shadow projects and projects with conflicts.
+     *
+     * @param  projects the list which need to filter
+     * @return filtered list
+     */
+    public static List<Project> getCorrectProjects(List<Project> projects) {
+        if (projects == null || projects.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return projects.stream()
+                       .filter(project -> projectIsClonedAndWithoutConflicts(project))
+                       .collect(Collectors.toList());
+    }
+
+    /**
+     * Checks that project is cloned and doesn't have conflicts.
+     *
+     * @param project the project for checking
+     * @return <code>true</code> if project ready for operation,
+     *         <code>false</code> otherwise. Also, in this case we add message to IU console and log.
+     */
+    public static boolean projectIsClonedAndWithoutConflicts(Project project) {
+        if (project == null) {
+            return false;
+        }
+        ProjectStatus projectStatus = project.getProjectStatus();
+        boolean result = project.isCloned() && !projectStatus.hasConflicts();
+        if (!result) {
+            _consoleService.addMessage(String.format(COULD_NOT_SUBMIT_OPERATION_MESSAGE, project.getName()),
+                    MessageType.ERROR);
+        }
+        return result;
+    }
+
+    /**
+     * Resets ProjectList data. After this method _isLockCreating is <code>false</code>.
      * This allows create new instance of ProjectList for another group.
      */
     public static void reset() {
