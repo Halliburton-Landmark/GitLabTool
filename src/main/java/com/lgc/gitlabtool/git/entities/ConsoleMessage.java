@@ -37,4 +37,20 @@ public class ConsoleMessage {
     public MessageType getType() {
         return _type;
     }
+
+    @Override
+    public boolean equals(Object o) {
+
+        if (o == this) {
+            return true;
+        }
+
+        if (!(o instanceof ConsoleMessage)) {
+            return false;
+        }
+
+        ConsoleMessage c = (ConsoleMessage) o;
+
+        return _message.equals(c.getMessage()) && _type == c.getType();
+    }
 }

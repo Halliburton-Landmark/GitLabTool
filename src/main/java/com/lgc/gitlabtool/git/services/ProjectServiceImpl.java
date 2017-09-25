@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -28,6 +29,8 @@ import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.project.nature.projecttype.ProjectType;
 import com.lgc.gitlabtool.git.util.JSONParser;
 import com.lgc.gitlabtool.git.util.PathUtilities;
+
+import javafx.application.Platform;
 
 public class ProjectServiceImpl implements ProjectService {
     private static final String GROUP_DOESNT_HAVE_PROJECTS_MESSAGE = "The group has no projects.";
@@ -92,10 +95,22 @@ public class ProjectServiceImpl implements ProjectService {
             return projects;
         }
 
+        final Double[] progress = {0.0};
         _consoleService.addMessage("Getting statuses and types of projects...", MessageType.SIMPLE);
+        AtomicInteger counter = new AtomicInteger(0);
+        Integer allCount = projects.size();
         projects.parallelStream()
                 .filter(project -> projectsName.contains(project.getName()))
-                .forEach((project) -> updateDataProject(project, group.getPathToClonedGroup()));
+                .forEach((project) -> {
+
+            updateDataProject(project, group.getPathToClonedGroup());
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            _consoleService.addProgressMessage("loadGroup","Current progress: "+(counter.incrementAndGet()*100/allCount)+"%");
+                        }
+                    });
+        });
         _consoleService.addMessage(successMessage, MessageType.SUCCESS);
         return projects;
     }

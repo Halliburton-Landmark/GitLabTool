@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,7 @@ public class ConsoleServiceImpl implements ConsoleService {
     private final List<ConsoleMessage> _messages;
     private final Set<UpdateConsoleListener> _listeners;
     private static final String LINE_SEPARATOR = System.getProperty("line.separator") ;
+    private Map<String, ConsoleMessage> _progressMessages = new HashMap<>();
 
     public ConsoleServiceImpl() {
         _messages = new ArrayList<>();
@@ -65,6 +67,19 @@ public class ConsoleServiceImpl implements ConsoleService {
         if (listener != null) {
             _listeners.remove(listener);
         }
+    }
+
+    @Override
+    public void addProgressMessage(String idOperation, String text) {
+        if (_progressMessages.containsKey(idOperation)) {
+            ConsoleMessage oldMessage = _progressMessages.get(idOperation);
+            _messages.remove(oldMessage);
+            updateConsole();
+        }
+
+        ConsoleMessage newMessage = new ConsoleMessage(formMessage(text), MessageType.SIMPLE);
+        _progressMessages.put(idOperation, newMessage);
+        addNewLineToConsole(newMessage);
     }
 
     @Override

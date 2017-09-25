@@ -28,6 +28,7 @@ public interface ConsoleService extends UpdateConsoleGenerator{
      */
     void addMessage(String message, MessageType type);
 
+    void addProgressMessage(String idOperation, String message);
     /**
      * Adds messages to UI console for statuses.
      *
