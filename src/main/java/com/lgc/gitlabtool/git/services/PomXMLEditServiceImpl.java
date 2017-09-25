@@ -15,30 +15,44 @@ import com.ximpleware.XMLModifier;
 import com.ximpleware.XPathEvalException;
 import com.ximpleware.XPathParseException;
 
-/**
- * Created by H185176 on 19.09.2017.
- */
 public class PomXMLEditServiceImpl {
     private static final Logger logger = LogManager.getLogger(PomXMLModel.class);
 
-    private static final String RELEASE_NAME_KEY = "releaseName";
-    private static final String ECLIPSE_RELEASE_KEY = "eclipse.release";
-    private static final String POM_NAME = "pom.xml";
-
-    private static final String SUCCESSFUL_CHANGE_MESSAGE = "The pom.xml file was changed successfully.";
-    private static final String CHANGE_ERROR_MESSAGE = "ERROR in changing the pom.xml file.";
-
     private static ConsoleService _consoleService;
-    private static StateService _stateSerice;
-    public static final String UNDEFINED_TEXT = "[Undefined]";
+    private static StateService _stateService;
 
     public PomXMLEditServiceImpl(ConsoleService consoleService, StateService stateService) {
         _consoleService = consoleService;
         _stateService = stateService;
     }
 
-
     public boolean addRepository(String path, String id, String url, String layout) {
+        try {
+
+            VTDGen vg = new VTDGen();
+            if (!vg.parseFile(path, true)) {
+                return false;
+            }
+            VTDNav vn = vg.getNav();
+            XMLModifier xm = new XMLModifier(vn);
+
+            AutoPilot apRepository = new AutoPilot();
+            apRepository.bind(vn);
+            apRepository.selectXPath("/project/repositories");
+
+            while ((apRepository.evalXPath()) != -1) {
+                if (vn.toElement(VTDNav.LAST_CHILD)) {
+                    xm.insertAfterElement(getRepoXmlString(id, url, layout));
+                }
+            }
+
+            xm.output(path);
+            return true;
+        } catch (NavException | XPathEvalException | IOException | ModifyException | XPathParseException | TranscodeException e) {
+            e.printStackTrace();
+        }
+
+
         return false;
     }
 
@@ -85,44 +99,50 @@ public class PomXMLEditServiceImpl {
             apRepository.bind(vn);
             apRepository.selectXPath("/project/repositories/repository[id = '" + oldId + "']");
 
-            int index = -1;
-            while ((index = apRepository.evalXPath()) != -1) {
+            int index;
+            while (apRepository.evalXPath() != -1) {
                 if (vn.toElement(VTDNav.FIRST_CHILD, "id")) {
-                    int j = vn.getText();
-                    if (j != -1) {
-                        System.out.println(" text node ==>" + vn.toString(j));
-                        xm.updateToken(j, newId);
+                    index = vn.getText();
+                    if (index != -1) {
+                        xm.updateToken(index, newId);
                         xm.output(path);
                     }
                     vn.toElement(VTDNav.PARENT);
                 }
 
                 if (vn.toElement(VTDNav.FIRST_CHILD, "url")) {
-                    int j = vn.getText();
-                    if (j != -1) {
-                        System.out.println(" text node ==>" + vn.toString(j));
-                        xm.updateToken(j, newUrl);
+                    index = vn.getText();
+                    if (index != -1) {
+                        xm.updateToken(index, newUrl);
                         xm.output(path);
                     }
                     vn.toElement(VTDNav.PARENT);
                 }
 
                 if (vn.toElement(VTDNav.FIRST_CHILD, "layout")) {
-                    int j = vn.getText();
-                    if (j != -1) {
-                        System.out.println(" text node ==>" + vn.toString(j));
-                        xm.updateToken(j, newLayout);
+                    index = vn.getText();
+                    if (index != -1) {
+                        xm.updateToken(index, newLayout);
                         xm.output(path);
                     }
                     vn.toElement(VTDNav.PARENT);
                 }
             }
 
-
+            return true;
         } catch (NavException | XPathEvalException | IOException | ModifyException | TranscodeException | XPathParseException e) {
             e.printStackTrace();
         }
+
+        return false;
     }
 
+    private static String getRepoXmlString(String id, String url, String layout) {
+        return "\n        <repository>\n" +
+                "            <id>" + id + "</id>\n" +
+                "            <url>" + url + "</url>\n" +
+                "            <layout>" + layout + "</layout>\n" +
+                "        </repository>";
+    }
 
 }

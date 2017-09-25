@@ -56,7 +56,7 @@ public class PomXMLModel {
 
     /**
      * Writes the model in the pom.xml
-
+     */
     public void writeToFile() {
         if (_originalModel == null) {
             logger.error("The file can not be written to. The model is not defined.");
@@ -69,7 +69,6 @@ public class PomXMLModel {
             logger.error("", e);
         }
     }
-*/
 
     private void updateModelFile(Path path) {
         try (FileReader reader = new FileReader(path.toFile());) {

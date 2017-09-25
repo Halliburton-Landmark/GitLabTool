@@ -164,21 +164,33 @@ public class PomXMLServiceImpl implements PomXMLService {
 
         _stateService.stateON(ApplicationState.EDIT_POM);
         for (Project project : projects) {
-            if (project == null || !project.isCloned()) {
+            if (project == null || !project.isCloned() || !hasPomFile(project)) {
                 statuses.put(project, false);
                 continue;
             }
+            /* NOTE:
+            Previously we use ... for editing POM.xml
+
             PomXMLModel pomModel = getModel(project);
-            if (addRepository(pomModel, id, url, layout)) {
-                pomModel.writeToFile();
+            if (addRepository(pomModel, id, url, layout)){
+                ...
+            }
+
+           */
+
+            if (true /* TODO: PLACE FOR NEW METHOD */) {
+
                 statuses.put(project, true);
                 _consoleService.addMessage(SUCCESSFUL_CHANGE_MESSAGE + " [Project: " + project.getName() + "]",
                         MessageType.SUCCESS);
             } else {
+
                 statuses.put(project, false);
                 _consoleService.addMessage(CHANGE_ERROR_MESSAGE + " [Project: " + project.getName() + "]",
                         MessageType.ERROR);
             }
+
+
         }
         _stateService.stateOFF(ApplicationState.EDIT_POM);
         return statuses;
@@ -505,6 +517,7 @@ public class PomXMLServiceImpl implements PomXMLService {
         return isChanged;
     }
 
+    @Deprecated
     private boolean addRepository(PomXMLModel pomMng, String id, String url, String layout) {
         Model model = pomMng.getModelFile();
         if (model == null) {
