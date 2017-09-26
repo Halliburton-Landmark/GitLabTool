@@ -170,7 +170,6 @@ public class PomXMLServiceImpl implements PomXMLService {
                 statuses.put(project, false);
                 continue;
             }
-
             /*                  ***NOTE***
             Previously we use the addRepository() method for editing POM.xml (adding repo)
             As result, diffs contains extra changes across all file.
@@ -181,20 +180,16 @@ public class PomXMLServiceImpl implements PomXMLService {
                 ...
                 pomModel.writeToFile();
             }
-
-           */
+            */
             if (_pomXmlEditService.addRepository(getPomFilePath(project), id, url, layout)) {
-
                 statuses.put(project, true);
                 _consoleService.addMessage(SUCCESSFUL_CHANGE_MESSAGE + " [Project: " + project.getName() + "]",
                         MessageType.SUCCESS);
             } else {
-
                 statuses.put(project, false);
                 _consoleService.addMessage(CHANGE_ERROR_MESSAGE + " [Project: " + project.getName() + "]",
                         MessageType.ERROR);
             }
-
         }
         _stateService.stateOFF(ApplicationState.EDIT_POM);
         return statuses;
@@ -213,8 +208,7 @@ public class PomXMLServiceImpl implements PomXMLService {
                 statuses.put(project, false);
                 continue;
             }
-
-              /*                  ***NOTE***
+            /*                  ***NOTE***
             Previously we use the removeRepository() method for editing POM.xml (removing repo)
             As result, diffs contains extra changes across all file.
             Since 0.0.2 release we use VTD-XML lib for fix this problem.
@@ -224,11 +218,8 @@ public class PomXMLServiceImpl implements PomXMLService {
                 ...
                 pomModel.writeToFile();
             }
-
-           */
-
+            */
             if (_pomXmlEditService.removeRepository(getPomFilePath(project), id)) {
-
                 statuses.put(project, true);
                 _consoleService.addMessage(SUCCESSFUL_CHANGE_MESSAGE + " [Project: " + project.getName() + "]",
                         MessageType.SUCCESS);
@@ -256,8 +247,7 @@ public class PomXMLServiceImpl implements PomXMLService {
                 statuses.put(project, false);
                 continue;
             }
-
-                          /*                  ***NOTE***
+            /*                  ***NOTE***
             Previously we use the modifyRepository() method for editing POM.xml (removing repo)
             As result, diffs contains extra changes across all file.
             Since 0.0.2 release we use VTD-XML lib for fix this problem.
@@ -268,12 +258,8 @@ public class PomXMLServiceImpl implements PomXMLService {
                 ...
                 pomModel.writeToFile();
             }
-
-           */
-
-
+            */
             if (_pomXmlEditService.modifyRepository(getPomFilePath(project), oldId, newId, newUrl, newLayout)) {
-
                 statuses.put(project, true);
                 _consoleService.addMessage(SUCCESSFUL_CHANGE_MESSAGE + " [Project: " + project.getName() + "]",
                         MessageType.SUCCESS);
