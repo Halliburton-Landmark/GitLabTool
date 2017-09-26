@@ -106,33 +106,9 @@ public class PomXMLEditServiceImpl implements PomXmlEditService {
                 return false;
             }
 
-            int index;
-            if (vn.toElement(VTDNav.FIRST_CHILD, "id")) {
-                index = vn.getText();
-                if (index != -1) {
-                    xm.updateToken(index, newId);
-                    xm.output(path);
-                }
-                vn.toElement(VTDNav.PARENT);
-            }
-
-            if (vn.toElement(VTDNav.FIRST_CHILD, "url")) {
-                index = vn.getText();
-                if (index != -1) {
-                    xm.updateToken(index, newUrl);
-                    xm.output(path);
-                }
-                vn.toElement(VTDNav.PARENT);
-            }
-
-            if (vn.toElement(VTDNav.FIRST_CHILD, "layout")) {
-                index = vn.getText();
-                if (index != -1) {
-                    xm.updateToken(index, newLayout);
-                    xm.output(path);
-                }
-                vn.toElement(VTDNav.PARENT);
-            }
+            editXmlNode(path, vn, xm, "id", newId);
+            editXmlNode(path, vn, xm, "url", newUrl);
+            editXmlNode(path, vn, xm, "layout", newLayout);
 
             return true;
 
@@ -141,6 +117,19 @@ public class PomXMLEditServiceImpl implements PomXmlEditService {
         }
 
         return false;
+    }
+
+    private void editXmlNode(String path, VTDNav vn, XMLModifier xm, String nodeKey, String nodeValue)
+            throws NavException, ModifyException, IOException, TranscodeException {
+        int index;
+        if (vn.toElement(VTDNav.FIRST_CHILD, nodeKey)) {
+            index = vn.getText();
+            if (index != -1) {
+                xm.updateToken(index, nodeValue);
+                xm.output(path);
+            }
+            vn.toElement(VTDNav.PARENT);
+        }
     }
 
     private static String getRepoXmlString(String id, String url, String layout) {
