@@ -34,6 +34,7 @@ public class ServiceProvider {
         ProjectService projectService = new ProjectServiceImpl(restConnector, projectTypeService,
                 stateService, consoleService, gitService);
         ClonedGroupsService programProgertiesService = new ClonedGroupsServiceImpl(storageService, loginService);
+        PomXmlEditService pomXmlEditService = new PomXMLEditServiceImpl();
 
         _services = new HashMap<>();
         _services.put(LoginService.class.getName(), loginService);
@@ -43,7 +44,7 @@ public class ServiceProvider {
         _services.put(ProjectService.class.getName(), projectService);
         _services.put(StorageService.class.getName(), storageService);
         _services.put(ReplacementService.class.getName(), new ReplacementServiceImpl());
-        _services.put(PomXMLService.class.getName(), new PomXMLEditServiceImpl(consoleService, stateService));
+        _services.put(PomXMLService.class.getName(), new PomXMLServiceImpl(consoleService, stateService, pomXmlEditService));
         _services.put(ProjectTypeService.class.getName(), projectTypeService);
         _services.put(NetworkService.class.getName(), new NetworkServiceImpl());
         _services.put(GitService.class.getName(), gitService);

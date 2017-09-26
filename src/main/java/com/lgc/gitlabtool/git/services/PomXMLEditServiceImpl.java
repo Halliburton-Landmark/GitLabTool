@@ -1,5 +1,7 @@
 package com.lgc.gitlabtool.git.services;
 
+import static com.ximpleware.VTDNav.WS_LEADING;
+
 import java.io.IOException;
 
 import org.apache.logging.log4j.LogManager;
@@ -15,17 +17,11 @@ import com.ximpleware.XMLModifier;
 import com.ximpleware.XPathEvalException;
 import com.ximpleware.XPathParseException;
 
-public class PomXMLEditServiceImpl {
-    private static final Logger logger = LogManager.getLogger(PomXMLModel.class);
+public class PomXMLEditServiceImpl implements PomXmlEditService {
 
-    private static ConsoleService _consoleService;
-    private static StateService _stateService;
+    private static final Logger logger = LogManager.getLogger(PomXmlEditService.class);
 
-    public PomXMLEditServiceImpl(ConsoleService consoleService, StateService stateService) {
-        _consoleService = consoleService;
-        _stateService = stateService;
-    }
-
+    @Override
     public boolean addRepository(String path, String id, String url, String layout) {
         try {
 
@@ -33,29 +29,33 @@ public class PomXMLEditServiceImpl {
             if (!vg.parseFile(path, true)) {
                 return false;
             }
+
             VTDNav vn = vg.getNav();
             XMLModifier xm = new XMLModifier(vn);
 
             AutoPilot apRepository = new AutoPilot();
             apRepository.bind(vn);
             apRepository.selectXPath("/project/repositories");
-
-            while ((apRepository.evalXPath()) != -1) {
-                if (vn.toElement(VTDNav.LAST_CHILD)) {
-                    xm.insertAfterElement(getRepoXmlString(id, url, layout));
-                }
+            if ((apRepository.evalXPath()) == -1) {
+                return false;
             }
 
-            xm.output(path);
-            return true;
-        } catch (NavException | XPathEvalException | IOException | ModifyException | XPathParseException | TranscodeException e) {
-            e.printStackTrace();
-        }
+            if (vn.toElement(VTDNav.LAST_CHILD)) {
+                System.out.println(vn.toString());
+                xm.insertAfterElement(getRepoXmlString(id, url, layout));
 
+                xm.output(path);
+                return true;
+            }
+
+        } catch (NavException | XPathEvalException | IOException | ModifyException | XPathParseException | TranscodeException e) {
+            logger.error("Error during adding repository to pom.xml " + e.getMessage());
+        }
 
         return false;
     }
 
+    @Override
     public boolean removeRepository(String path, String id) {
         try {
 
@@ -63,28 +63,31 @@ public class PomXMLEditServiceImpl {
             if (!vg.parseFile(path, true)) {
                 return false;
             }
+
             VTDNav vn = vg.getNav();
             XMLModifier xm = new XMLModifier(vn);
 
             AutoPilot apRepository = new AutoPilot();
             apRepository.bind(vn);
-
             apRepository.selectXPath("/project/repositories/repository[id = '" + id + "']");
-            if (apRepository.evalXPath() != -1) {
-                long elementFragment = vn.getElementFragment();
-                xm.remove(vn.expandWhiteSpaces(elementFragment));
-
-                xm.output(path);
-                return true;
+            if (apRepository.evalXPath() == -1) {
+                return false;
             }
 
+            long elementFragment = vn.getElementFragment();
+            xm.remove(vn.expandWhiteSpaces(elementFragment, WS_LEADING));
+
+            xm.output(path);
+            return true;
+
         } catch (NavException | XPathParseException | XPathEvalException | IOException | ModifyException | TranscodeException e) {
-            e.printStackTrace();
+            logger.error("Error during removing repository to pom.xml " + e.getMessage());
         }
 
         return false;
     }
 
+    @Override
     public boolean modifyRepository(String path, String oldId, String newId, String newUrl, String newLayout) {
         try {
 
@@ -92,46 +95,49 @@ public class PomXMLEditServiceImpl {
             if (!vg.parseFile(path, true)) {
                 return false;
             }
+
             VTDNav vn = vg.getNav();
             XMLModifier xm = new XMLModifier(vn);
 
             AutoPilot apRepository = new AutoPilot();
             apRepository.bind(vn);
             apRepository.selectXPath("/project/repositories/repository[id = '" + oldId + "']");
+            if (apRepository.evalXPath() == -1) {
+                return false;
+            }
 
             int index;
-            while (apRepository.evalXPath() != -1) {
-                if (vn.toElement(VTDNav.FIRST_CHILD, "id")) {
-                    index = vn.getText();
-                    if (index != -1) {
-                        xm.updateToken(index, newId);
-                        xm.output(path);
-                    }
-                    vn.toElement(VTDNav.PARENT);
+            if (vn.toElement(VTDNav.FIRST_CHILD, "id")) {
+                index = vn.getText();
+                if (index != -1) {
+                    xm.updateToken(index, newId);
+                    xm.output(path);
                 }
+                vn.toElement(VTDNav.PARENT);
+            }
 
-                if (vn.toElement(VTDNav.FIRST_CHILD, "url")) {
-                    index = vn.getText();
-                    if (index != -1) {
-                        xm.updateToken(index, newUrl);
-                        xm.output(path);
-                    }
-                    vn.toElement(VTDNav.PARENT);
+            if (vn.toElement(VTDNav.FIRST_CHILD, "url")) {
+                index = vn.getText();
+                if (index != -1) {
+                    xm.updateToken(index, newUrl);
+                    xm.output(path);
                 }
+                vn.toElement(VTDNav.PARENT);
+            }
 
-                if (vn.toElement(VTDNav.FIRST_CHILD, "layout")) {
-                    index = vn.getText();
-                    if (index != -1) {
-                        xm.updateToken(index, newLayout);
-                        xm.output(path);
-                    }
-                    vn.toElement(VTDNav.PARENT);
+            if (vn.toElement(VTDNav.FIRST_CHILD, "layout")) {
+                index = vn.getText();
+                if (index != -1) {
+                    xm.updateToken(index, newLayout);
+                    xm.output(path);
                 }
+                vn.toElement(VTDNav.PARENT);
             }
 
             return true;
+
         } catch (NavException | XPathEvalException | IOException | ModifyException | TranscodeException | XPathParseException e) {
-            e.printStackTrace();
+            logger.error("Error during editing repository to pom.xml " + e.getMessage());
         }
 
         return false;

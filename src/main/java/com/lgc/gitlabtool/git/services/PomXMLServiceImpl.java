@@ -53,11 +53,13 @@ public class PomXMLServiceImpl implements PomXMLService {
 
     private static ConsoleService _consoleService;
     private static StateService _stateService;
+    private static PomXmlEditService _pomXmlEditService;
     public static final String UNDEFINED_TEXT = "[Undefined]";
 
-    public PomXMLServiceImpl(ConsoleService consoleService, StateService stateService){
+    public PomXMLServiceImpl(ConsoleService consoleService, StateService stateService, PomXmlEditService pomXmlEditService){
         _consoleService = consoleService;
         _stateService = stateService;
+        _pomXmlEditService = pomXmlEditService;
     }
 
     private void errorNotValidDataInLog() {
@@ -168,17 +170,20 @@ public class PomXMLServiceImpl implements PomXMLService {
                 statuses.put(project, false);
                 continue;
             }
-            /* NOTE:
-            Previously we use ... for editing POM.xml
+
+            /*                  ***NOTE***
+            Previously we use the addRepository() method for editing POM.xml (adding repo)
+            As result, diffs contains extra changes across all file.
+            Since 0.0.2 release we use VTD-XML lib for fix this problem.
 
             PomXMLModel pomModel = getModel(project);
             if (addRepository(pomModel, id, url, layout)){
                 ...
+                pomModel.writeToFile();
             }
 
            */
-
-            if (true /* TODO: PLACE FOR NEW METHOD */) {
+            if (_pomXmlEditService.addRepository(getPomFilePath(project), id, url, layout)) {
 
                 statuses.put(project, true);
                 _consoleService.addMessage(SUCCESSFUL_CHANGE_MESSAGE + " [Project: " + project.getName() + "]",
@@ -189,7 +194,6 @@ public class PomXMLServiceImpl implements PomXMLService {
                 _consoleService.addMessage(CHANGE_ERROR_MESSAGE + " [Project: " + project.getName() + "]",
                         MessageType.ERROR);
             }
-
 
         }
         _stateService.stateOFF(ApplicationState.EDIT_POM);
@@ -205,13 +209,26 @@ public class PomXMLServiceImpl implements PomXMLService {
         }
         _stateService.stateON(ApplicationState.EDIT_POM);
         for (Project project : projects) {
-            if (project == null || !project.isCloned()) {
+            if (project == null || !project.isCloned() || !hasPomFile(project)) {
                 statuses.put(project, false);
                 continue;
             }
+
+              /*                  ***NOTE***
+            Previously we use the removeRepository() method for editing POM.xml (removing repo)
+            As result, diffs contains extra changes across all file.
+            Since 0.0.2 release we use VTD-XML lib for fix this problem.
+
             PomXMLModel pomModel = getModel(project);
-            if (removeRepository(pomModel, id)) {
+            if (removeRepository(pomModel, id)){
+                ...
                 pomModel.writeToFile();
+            }
+
+           */
+
+            if (_pomXmlEditService.removeRepository(getPomFilePath(project), id)) {
+
                 statuses.put(project, true);
                 _consoleService.addMessage(SUCCESSFUL_CHANGE_MESSAGE + " [Project: " + project.getName() + "]",
                         MessageType.SUCCESS);
@@ -235,21 +252,28 @@ public class PomXMLServiceImpl implements PomXMLService {
 
         _stateService.stateON(ApplicationState.EDIT_POM);
         for (Project project : projects) {
-            if (project == null || !project.isCloned()) {
+            if (project == null || !project.isCloned() || !hasPomFile(project)) {
                 statuses.put(project, false);
                 continue;
             }
+
+                          /*                  ***NOTE***
+            Previously we use the modifyRepository() method for editing POM.xml (removing repo)
+            As result, diffs contains extra changes across all file.
+            Since 0.0.2 release we use VTD-XML lib for fix this problem.
 
             PomXMLModel pomModel = getModel(project);
             Model model = pomModel.getModelFile();
-
-            if (model == null) {
-                statuses.put(project, false);
-                continue;
-            }
-            List<Repository> rep = model.getRepositories();
-            if (modifyRepository(rep, oldId, newId, newUrl, newLayout)) {
+            if (modifyRepository(rep, oldId, newId, newUrl, newLayout)){
+                ...
                 pomModel.writeToFile();
+            }
+
+           */
+
+
+            if (_pomXmlEditService.modifyRepository(getPomFilePath(project), oldId, newId, newUrl, newLayout)) {
+
                 statuses.put(project, true);
                 _consoleService.addMessage(SUCCESSFUL_CHANGE_MESSAGE + " [Project: " + project.getName() + "]",
                         MessageType.SUCCESS);
@@ -373,6 +397,10 @@ public class PomXMLServiceImpl implements PomXMLService {
         }
 
         return hasCorrectPathToPom(project);
+    }
+
+    private String getPomFilePath(Project project) {
+        return project.getPath() + File.separator + POM_NAME;
     }
 
     private List<Model> getModelFiles(Collection<Project> projects) {
@@ -537,6 +565,7 @@ public class PomXMLServiceImpl implements PomXMLService {
         return false;
     }
 
+    @Deprecated
     private boolean modifyRepository(List<Repository> reps, String oldId, String newId, String url, String layout) {
         if (reps == null) {
             return false;
@@ -553,6 +582,7 @@ public class PomXMLServiceImpl implements PomXMLService {
         return isChanged;
     }
 
+    @Deprecated
     private boolean removeRepository(PomXMLModel pomMng, String id) {
         Model model = pomMng.getModelFile();
         if (model == null) {
