@@ -98,9 +98,6 @@ public class ModularController implements UpdateProgressListener {
     private static final StateService _stateService = (StateService) ServiceProvider.getInstance()
             .getService(StateService.class.getName());
 
-    private static final ProjectService _projectService = (ProjectService) ServiceProvider.getInstance()
-            .getService(ProjectService.class.getName());
-
     private MainWindowController _mainWindowController;
     private GroupWindowController _groupWindowController;
 
@@ -126,6 +123,8 @@ public class ModularController implements UpdateProgressListener {
 
     private WorkIndicatorDialog _workIndicatorDialog;
 
+    private static final ProjectService _projectService = (ProjectService) ServiceProvider.getInstance()
+            .getService(ProjectService.class.getName());
     {
         _projectService.addUpdateProgressListener(this);
     }
