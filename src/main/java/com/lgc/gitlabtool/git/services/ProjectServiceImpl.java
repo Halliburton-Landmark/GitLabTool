@@ -44,7 +44,7 @@ public class ProjectServiceImpl implements ProjectService {
     private static final String CREATE_STRUCTURES_TYPE_SUCCESS_MESSAGE = "Structure of type was successfully created!";
     private static final String CREATE_STRUCTURES_TYPE_FAILED_MESSAGE = "Failed creating structure of type!";
     private static final String PROJECT_ALREADY_EXISTS_MESSAGE = "Project with this name already exists!";
-    private static final String LOADING_PROJECT_MESSAGE_TEMPLATE = "%s loading of %s project"; 
+    private static final String LOADING_PROJECT_MESSAGE_TEMPLATE = "%s loading of %s project";
 
     private static final Logger _logger = LogManager.getLogger(ProjectServiceImpl.class);
     private static final CurrentUser _currentUser = CurrentUser.getInstance();
@@ -101,7 +101,8 @@ public class ProjectServiceImpl implements ProjectService {
         PROGRESS_LOADING = 0;
         _consoleService.addMessage("Getting statuses and types of projects...", MessageType.SIMPLE);
         projects.parallelStream()
-                .filter(project -> checkListContainsProjectAndUpdateIndicator(projectsName, project, ++PROGRESS_LOADING, projects.size()))
+                .peek(pr -> updateProgressIndicator(++PROGRESS_LOADING, projects.size()))
+                .filter(project -> projectsName.contains(project.getName()))
                 .forEach((project) -> updateDataProject(project, group.getPathToClonedGroup()));
         _consoleService.addMessage(successMessage, MessageType.SUCCESS);
         return projects;
