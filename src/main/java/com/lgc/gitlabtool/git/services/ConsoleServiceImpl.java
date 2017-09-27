@@ -83,19 +83,6 @@ public class ConsoleServiceImpl implements ConsoleService {
         }
     }
 
-
-    @Override
-    public synchronized void updateLastMessage(String newMessage) {
-        if (newMessage == null || _messages == null || _messages.isEmpty()) {
-            return;
-        }
-        int count = _messages.size()-1;
-        ConsoleMessage oldMessage = _messages.get(count);
-        oldMessage.setMessage(formMessage(newMessage));
-        oldMessage.setType(MessageType.determineMessageType(newMessage));
-        updateConsole();
-    }
-
     private void addNewLineToConsole(ConsoleMessage message) {
         if (_listeners != null) {
             _listeners.forEach(listener -> listener.addNewMessage(message));

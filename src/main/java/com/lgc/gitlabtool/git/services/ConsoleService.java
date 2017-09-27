@@ -48,11 +48,4 @@ public interface ConsoleService extends UpdateConsoleGenerator{
      */
     void removeAll();
 
-    /**
-     *
-     *
-     * @param newMessage
-     */
-    void updateLastMessage(String newMessage);
-
 }

@@ -11,8 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -102,7 +100,8 @@ public class ProjectServiceImpl implements ProjectService {
         _consoleService.addMessage("Getting statuses and types of projects...", MessageType.SIMPLE);
         projects.parallelStream()
                 .filter(project -> projectsName.contains(project.getName()))
-                .forEach((project) -> updateDataProjectAndConsole(project, group.getPathToClonedGroup(), projects.size(), PROGRESS_LOADING));
+                .forEach((project) -> updateDataProjectAndIndicator(project, group.getPathToClonedGroup(), projects.size(), PROGRESS_LOADING));
+        _consoleService.addMessage(successMessage, MessageType.SUCCESS);
         return projects;
     }
 
@@ -232,23 +231,13 @@ public class ProjectServiceImpl implements ProjectService {
         }
     }
 
-    private void updateDataProjectAndConsole(Project project, String pathGroup, int numberProjects, int currentProjects) {
+    private void updateDataProjectAndIndicator(Project project, String pathGroup, int numberProjects, int currentProjects) {
         updateDataProject(project, pathGroup);
         PROGRESS_LOADING++;
 
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.submit(() -> updateProgressInConsole(PROGRESS_LOADING, numberProjects));
-        executor.shutdown();
-    }
-
-    private void updateProgressInConsole(int currentProjects, int numberProjects) {
-        String message;
-        if (currentProjects == numberProjects) {
-            message = LOADING_PROJECTS_FINAL_MESSAGE;
-        } else {
-            message = String.format(LOADING_PROJECTS_PROGRESS_MESSAGE, currentProjects, numberProjects);
-        }
-        _consoleService.updateLastMessage(message);
+//        ExecutorService executor = Executors.newSingleThreadExecutor();
+//        executor.submit(() -> updateProgressInConsole(PROGRESS_LOADING, numberProjects));
+//        executor.shutdown();
     }
 
     private void updateDataProject(Project project, String pathGroup) {
