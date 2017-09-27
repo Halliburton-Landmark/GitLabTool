@@ -7,8 +7,8 @@ package com.lgc.gitlabtool.git.entities;
  */
 public class ConsoleMessage {
 
-    private final String _message;
-    private final MessageType _type;
+    private String _message;
+    private MessageType _type;
 
     /**
      * Creates console message
@@ -37,4 +37,24 @@ public class ConsoleMessage {
     public MessageType getType() {
         return _type;
     }
+
+    /**
+     *
+     * @param message
+     */
+    public void setMessage(String message) {
+        if (message != null) {
+            _message = message;
+        }
+    }
+
+    /**
+    *
+    * @param type
+    */
+   public void setType(MessageType type) {
+       if (type != null) {
+           _type = type;
+       }
+   }
 }

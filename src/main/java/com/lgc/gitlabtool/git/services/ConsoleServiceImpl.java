@@ -29,7 +29,7 @@ public class ConsoleServiceImpl implements ConsoleService {
     private static final String LINE_SEPARATOR = System.getProperty("line.separator") ;
 
     public ConsoleServiceImpl() {
-        _messages = new ArrayList<>();
+        _messages = Collections.synchronizedList(new ArrayList<>());
         _listeners = new HashSet<UpdateConsoleListener>();
     }
 
@@ -81,6 +81,19 @@ public class ConsoleServiceImpl implements ConsoleService {
 
             addMessage(message, MessageType.getTypeForStatus(gitStatus));
         }
+    }
+
+
+    @Override
+    public synchronized void updateLastMessage(String newMessage) {
+        if (newMessage == null || _messages == null || _messages.isEmpty()) {
+            return;
+        }
+        int count = _messages.size()-1;
+        ConsoleMessage oldMessage = _messages.get(count);
+        oldMessage.setMessage(formMessage(newMessage));
+        oldMessage.setType(MessageType.determineMessageType(newMessage));
+        updateConsole();
     }
 
     private void addNewLineToConsole(ConsoleMessage message) {

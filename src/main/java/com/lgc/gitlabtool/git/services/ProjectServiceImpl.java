@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -42,7 +44,10 @@ public class ProjectServiceImpl implements ProjectService {
     private static final String CREATE_STRUCTURES_TYPE_SUCCESS_MESSAGE = "Structure of type was successfully created!";
     private static final String CREATE_STRUCTURES_TYPE_FAILED_MESSAGE = "Failed creating structure of type!";
     private static final String PROJECT_ALREADY_EXISTS_MESSAGE = "Project with this name already exists!";
-    private static final String LOADING_PROJECT_MESSAGE_TEMPLATE = "%s loading of %s project"; 
+    private static final String LOADING_PROJECT_MESSAGE_TEMPLATE = "%s loading of %s project";
+    private static final String LOADING_PROJECTS_PROGRESS_MESSAGE = "%d loading of %d project";
+    private static final String LOADING_PROJECTS_FINAL_MESSAGE = "All projects was loaded successfully.";
+    private static int PROGRESS_LOADING = 0;
 
     private static final Logger _logger = LogManager.getLogger(ProjectServiceImpl.class);
     private static final CurrentUser _currentUser = CurrentUser.getInstance();
@@ -93,11 +98,11 @@ public class ProjectServiceImpl implements ProjectService {
             return projects;
         }
 
+        PROGRESS_LOADING = projects.size() - projectsName.size();
         _consoleService.addMessage("Getting statuses and types of projects...", MessageType.SIMPLE);
         projects.parallelStream()
                 .filter(project -> projectsName.contains(project.getName()))
-                .forEach((project) -> updateDataProject(project, group.getPathToClonedGroup()));
-        _consoleService.addMessage(successMessage, MessageType.SUCCESS);
+                .forEach((project) -> updateDataProjectAndConsole(project, group.getPathToClonedGroup(), projects.size(), PROGRESS_LOADING));
         return projects;
     }
 
@@ -225,6 +230,25 @@ public class ProjectServiceImpl implements ProjectService {
         if (consoleService != null) {
             _consoleService = consoleService;
         }
+    }
+
+    private void updateDataProjectAndConsole(Project project, String pathGroup, int numberProjects, int currentProjects) {
+        updateDataProject(project, pathGroup);
+        PROGRESS_LOADING++;
+
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.submit(() -> updateProgressInConsole(PROGRESS_LOADING, numberProjects));
+        executor.shutdown();
+    }
+
+    private void updateProgressInConsole(int currentProjects, int numberProjects) {
+        String message;
+        if (currentProjects == numberProjects) {
+            message = LOADING_PROJECTS_FINAL_MESSAGE;
+        } else {
+            message = String.format(LOADING_PROJECTS_PROGRESS_MESSAGE, currentProjects, numberProjects);
+        }
+        _consoleService.updateLastMessage(message);
     }
 
     private void updateDataProject(Project project, String pathGroup) {
