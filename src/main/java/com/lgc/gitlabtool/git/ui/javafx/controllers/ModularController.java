@@ -421,7 +421,7 @@ public class ModularController implements UpdateProgressListener {
 
     @Override
     public void handleEvent(String progressMessage) {
-        if (_workIndicatorDialog != null && progressMessage != null) { // TODO dispouse?
+        if (_workIndicatorDialog != null && progressMessage != null) {
             _workIndicatorDialog.updateProjectLabel(progressMessage);
         }
     }

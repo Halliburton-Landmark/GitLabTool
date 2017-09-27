@@ -47,5 +47,4 @@ public interface ConsoleService extends UpdateConsoleGenerator{
      * Removes all messages and clears UI console.
      */
     void removeAll();
-
 }

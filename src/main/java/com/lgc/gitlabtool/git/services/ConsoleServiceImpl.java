@@ -29,7 +29,7 @@ public class ConsoleServiceImpl implements ConsoleService {
     private static final String LINE_SEPARATOR = System.getProperty("line.separator") ;
 
     public ConsoleServiceImpl() {
-        _messages = Collections.synchronizedList(new ArrayList<>());
+        _messages = new ArrayList<>();
         _listeners = new HashSet<UpdateConsoleListener>();
     }
 
