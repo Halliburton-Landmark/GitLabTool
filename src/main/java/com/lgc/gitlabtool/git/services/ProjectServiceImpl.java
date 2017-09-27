@@ -234,15 +234,6 @@ public class ProjectServiceImpl implements ProjectService {
         }
     }
 
-    // update progress indicator here
-    private boolean checkListContainsProjectAndUpdateIndicator(Collection<String> projectsName, Project project,
-                                                               int currentProject, int numberProjects) {
-        Runnable task = () -> updateProgressIndicator(currentProject, numberProjects);
-        Thread t = new Thread(task, "Update Progress Thread");
-        t.start();
-        return projectsName.contains(project.getName());
-    }
-
     private void updateProgressIndicator(int currentProject, int numberProjects) {
         String message = "(" + currentProject + "/" + numberProjects + ")";
         notifyListenersAboutChangesProgress(message);
