@@ -244,7 +244,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     private void updateProgressIndicator(int currentProject, int numberProjects) {
         String message = "(" + currentProject + "/" + numberProjects + ")";
-        fireEvent(message);
+        notifyListenersAboutChangesProgress(message);
     }
 
     private void updateDataProject(Project project, String pathGroup) {
@@ -402,7 +402,7 @@ public class ProjectServiceImpl implements ProjectService {
         }
     }
 
-    private void fireEvent(String progressMessage) {
+    private void notifyListenersAboutChangesProgress(String progressMessage) {
         if (progressMessage != null) {
             _listeners.forEach(listener -> listener.updateProgress(progressMessage));
         }

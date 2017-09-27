@@ -122,6 +122,7 @@ public class ModularController implements UpdateProgressListener {
     public MenuBar menuBar;
 
     private WorkIndicatorDialog _workIndicatorDialog;
+    private static final String WORK_INDICATOR_START_MESSAGE = "Loading projects...";
 
     private static final ProjectService _projectService = (ProjectService) ServiceProvider.getInstance()
             .getService(ProjectService.class.getName());
@@ -170,7 +171,7 @@ public class ModularController implements UpdateProgressListener {
 
         _mainWindowController = loader.getController();
 
-        _workIndicatorDialog = new WorkIndicatorDialog(stage, "Loading projects...");
+        _workIndicatorDialog = new WorkIndicatorDialog(stage, WORK_INDICATOR_START_MESSAGE);
 
         Runnable selectGroup = () ->{
             _mainWindowController.setSelectedGroup(selectedGroup);
