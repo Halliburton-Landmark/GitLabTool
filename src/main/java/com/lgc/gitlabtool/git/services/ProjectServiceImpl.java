@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -25,6 +26,7 @@ import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.ProjectStatus;
 import com.lgc.gitlabtool.git.jgit.JGit;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
+import com.lgc.gitlabtool.git.listeners.updateProgressListener.UpdateProgressListener;
 import com.lgc.gitlabtool.git.project.nature.projecttype.ProjectType;
 import com.lgc.gitlabtool.git.util.JSONParser;
 import com.lgc.gitlabtool.git.util.PathUtilities;
@@ -43,8 +45,6 @@ public class ProjectServiceImpl implements ProjectService {
     private static final String CREATE_STRUCTURES_TYPE_FAILED_MESSAGE = "Failed creating structure of type!";
     private static final String PROJECT_ALREADY_EXISTS_MESSAGE = "Project with this name already exists!";
     private static final String LOADING_PROJECT_MESSAGE_TEMPLATE = "%s loading of %s project";
-    private static final String LOADING_PROJECTS_PROGRESS_MESSAGE = "%d loading of %d project";
-    private static final String LOADING_PROJECTS_FINAL_MESSAGE = "All projects was loaded successfully.";
     private static int PROGRESS_LOADING = 0;
 
     private static final Logger _logger = LogManager.getLogger(ProjectServiceImpl.class);
@@ -56,6 +56,8 @@ public class ProjectServiceImpl implements ProjectService {
     private static RESTConnector _connector;
     private ConsoleService _consoleService;
     private GitService _gitService;
+
+    private final Set<UpdateProgressListener> _listeners = new HashSet<>();
 
     public ProjectServiceImpl(RESTConnector connector,
                               ProjectTypeService projectTypeService,
@@ -96,11 +98,11 @@ public class ProjectServiceImpl implements ProjectService {
             return projects;
         }
 
-        PROGRESS_LOADING = projects.size() - projectsName.size();
+        PROGRESS_LOADING = 0;
         _consoleService.addMessage("Getting statuses and types of projects...", MessageType.SIMPLE);
         projects.parallelStream()
-                .filter(project -> projectsName.contains(project.getName()))
-                .forEach((project) -> updateDataProjectAndIndicator(project, group.getPathToClonedGroup(), projects.size(), PROGRESS_LOADING));
+                .filter(project -> checkListContainsProjectAndUpdateIndicator(projectsName, project, ++PROGRESS_LOADING, projects.size()))
+                .forEach((project) -> updateDataProject(project, group.getPathToClonedGroup()));
         _consoleService.addMessage(successMessage, MessageType.SUCCESS);
         return projects;
     }
@@ -231,13 +233,18 @@ public class ProjectServiceImpl implements ProjectService {
         }
     }
 
-    private void updateDataProjectAndIndicator(Project project, String pathGroup, int numberProjects, int currentProjects) {
-        updateDataProject(project, pathGroup);
-        PROGRESS_LOADING++;
+    // update progress indicator here
+    private boolean checkListContainsProjectAndUpdateIndicator(Collection<String> projectsName, Project project,
+                                                               int currentProject, int numberProjects) {
+        Runnable task = () -> updateProgressIndicator(currentProject, numberProjects);
+        Thread t = new Thread(task, "Update Progress Thread");
+        t.start();
+        return projectsName.contains(project.getName());
+    }
 
-//        ExecutorService executor = Executors.newSingleThreadExecutor();
-//        executor.submit(() -> updateProgressInConsole(PROGRESS_LOADING, numberProjects));
-//        executor.shutdown();
+    private void updateProgressIndicator(int currentProject, int numberProjects) {
+        String message = "(" + currentProject + "/" + numberProjects + ")";
+        fireEvent(message);
     }
 
     private void updateDataProject(Project project, String pathGroup) {
@@ -380,4 +387,25 @@ public class ProjectServiceImpl implements ProjectService {
             _gitService = gitService;
         }
     }
+
+    @Override
+    public void addUpdateProgressListener(UpdateProgressListener listener) {
+        if (listener != null) {
+            _listeners.add(listener);
+        }
+    }
+
+    @Override
+    public void removeUpdateProgressListener(UpdateProgressListener listener) {
+        if (listener != null) {
+            _listeners.remove(listener);
+        }
+    }
+
+    public void fireEvent(String progressMessage) {
+        if (progressMessage != null) {
+            _listeners.forEach(listener -> listener.handleEvent(progressMessage));
+        }
+    }
+
 }
