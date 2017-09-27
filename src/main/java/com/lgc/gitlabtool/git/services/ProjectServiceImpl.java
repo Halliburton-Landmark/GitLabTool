@@ -404,7 +404,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     private void fireEvent(String progressMessage) {
         if (progressMessage != null) {
-            _listeners.forEach(listener -> listener.handleEvent(progressMessage));
+            _listeners.forEach(listener -> listener.updateProgress(progressMessage));
         }
     }
 

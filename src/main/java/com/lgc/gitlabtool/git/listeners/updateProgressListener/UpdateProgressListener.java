@@ -12,5 +12,5 @@ public interface UpdateProgressListener {
      *
      * @param progressMessage the progress message for a component
      */
-    void handleEvent(String progressMessage);
+    void updateProgress(String progressMessage);
 }
