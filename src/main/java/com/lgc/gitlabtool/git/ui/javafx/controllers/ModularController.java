@@ -69,6 +69,8 @@ import javafx.stage.Stage;
 
 public class ModularController implements UpdateProgressListener {
 
+    private final String CLASS_ID = ModularController.class.getName();
+
     private static final Logger logger = LogManager.getLogger(ModularController.class);
 
     private static final String ABOUT_POPUP_TITLE = "About";
@@ -126,9 +128,6 @@ public class ModularController implements UpdateProgressListener {
 
     private static final ProjectService _projectService = (ProjectService) ServiceProvider.getInstance()
             .getService(ProjectService.class.getName());
-    {
-        _projectService.addUpdateProgressListener(this);
-    }
 
     @FXML
     public void initialize() {
@@ -157,6 +156,7 @@ public class ModularController implements UpdateProgressListener {
     }
 
     public void loadMainWindow(Group selectedGroup) throws IOException {
+        _projectService.addUpdateProgressListener(this);
         toolbar.getItems().addAll(ToolbarManager.getInstance().createToolbarItems(ViewKey.MAIN_WINDOW.getKey()));
         menuBar.getMenus().addAll(MainMenuManager.getInstance().createToolbarItems(ViewKey.MAIN_WINDOW.getKey()));
         initActionsMainMenu(ViewKey.MAIN_WINDOW.getKey());
@@ -190,6 +190,8 @@ public class ModularController implements UpdateProgressListener {
 
                 viewPane.getChildren().clear();
                 viewPane.getChildren().add(node);
+
+                _projectService.removeUpdateProgressListener(this);
             });
         };
 
@@ -424,6 +426,36 @@ public class ModularController implements UpdateProgressListener {
         if (_workIndicatorDialog != null && progressMessage != null) {
             _workIndicatorDialog.updateProjectLabel(progressMessage);
         }
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((CLASS_ID == null) ? 0 : CLASS_ID.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        ModularController other = (ModularController) obj;
+        if (CLASS_ID == null) {
+            if (other.CLASS_ID != null) {
+                return false;
+            }
+        } else if (!CLASS_ID.equals(other.CLASS_ID)) {
+            return false;
+        }
+        return true;
     }
 
 }
