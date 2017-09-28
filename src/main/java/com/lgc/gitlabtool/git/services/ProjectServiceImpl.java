@@ -45,6 +45,7 @@ public class ProjectServiceImpl implements ProjectService {
     private static final String CREATE_STRUCTURES_TYPE_FAILED_MESSAGE = "Failed creating structure of type!";
     private static final String PROJECT_ALREADY_EXISTS_MESSAGE = "Project with this name already exists!";
     private static final String LOADING_PROJECT_MESSAGE_TEMPLATE = "%s loading of %s project";
+    private static int PROGRESS_LOADING = 0;
 
     private static final Logger _logger = LogManager.getLogger(ProjectServiceImpl.class);
     private static final CurrentUser _currentUser = CurrentUser.getInstance();
@@ -57,7 +58,6 @@ public class ProjectServiceImpl implements ProjectService {
     private GitService _gitService;
 
     private final Set<UpdateProgressListener> _listeners = new HashSet<>();
-    private static int PROGRESS_LOADING = 0;
 
     public ProjectServiceImpl(RESTConnector connector,
                               ProjectTypeService projectTypeService,
@@ -394,10 +394,9 @@ public class ProjectServiceImpl implements ProjectService {
         }
     }
 
-    private void notifyListenersAboutChangesProgress(String progressMessage) {
-        if (progressMessage != null) {
-            _listeners.forEach(listener -> listener.updateProgress(progressMessage));
+    private void notifyListenersAboutChangesProgress(String message) {
+        if (message != null) {
+            _listeners.forEach(listener -> listener.updateProgress(message));
         }
     }
-
 }
