@@ -24,6 +24,7 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.image.Image;
@@ -34,6 +35,12 @@ import javafx.stage.WindowEvent;
 
 public class JavaFXUI extends Application implements UserInterface {
     private static final Logger logger = LogManager.getLogger(LoginDialog.class);
+
+    private static final String TITLE_STATE_WARNING = "Error Exit";
+    private static final String HEADER_CONFIRMATION_MESSAGE = "Confirm exit";
+    private static final String CONTENT_CONFIRMATION_MESSAGE = "Are you sure you want to exit?";
+    private static final String HEADER_STATE_MESSAGE = "The application can't be closed. We don't finish some operations.";
+    private static final String CONTENT_STATE_PREFIX_MESSAGE ="Unfinished operations: ";
 
     private static final StateService _stateService = (StateService) ServiceProvider.getInstance()
             .getService(StateService.class.getName());
@@ -84,23 +91,12 @@ public class JavaFXUI extends Application implements UserInterface {
 
     private final EventHandler<WindowEvent> confirmCloseEventHandler = event -> {
         List<ApplicationState> activeStates = _stateService.getActiveStates();
-        System.err.println(activeStates);
         if(!activeStates.isEmpty()) {
             event.consume();
+            showWarningAlertForActiveStates(activeStates);
             return;
         }
-        Alert closeConfirmation = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to exit?");
-        Button exitButton = (Button) closeConfirmation.getDialogPane().lookupButton(ButtonType.OK);
-
-        exitButton.setText("Exit");
-        closeConfirmation.setHeaderText("Confirm exit");
-        closeConfirmation.initModality(Modality.APPLICATION_MODAL);
-        closeConfirmation.initOwner(mainStage);
-
-        Optional<ButtonType> closeResponse = closeConfirmation.showAndWait();
-        if (!ButtonType.OK.equals(closeResponse.orElse(ButtonType.CANCEL))) {
-            event.consume();
-        }
+        showAlertConfirmation(event);
     };
 
     private void showLoginDialog() {
@@ -112,5 +108,35 @@ public class JavaFXUI extends Application implements UserInterface {
         ScreenUtil.adaptForMultiScreens(stage, 300, 300);
 
         loginDialog.showAndWait();
+    }
+
+    private void showAlertConfirmation(WindowEvent event) {
+        Alert closeConfirmation = new Alert(Alert.AlertType.CONFIRMATION, CONTENT_CONFIRMATION_MESSAGE);
+        Button exitButton = (Button) closeConfirmation.getDialogPane().lookupButton(ButtonType.OK);
+
+        exitButton.setText("Exit");
+        closeConfirmation.setHeaderText(HEADER_CONFIRMATION_MESSAGE);
+        closeConfirmation.initModality(Modality.APPLICATION_MODAL);
+        closeConfirmation.initOwner(mainStage);
+
+        Optional<ButtonType> closeResponse = closeConfirmation.showAndWait();
+        if (!ButtonType.OK.equals(closeResponse.orElse(ButtonType.CANCEL))) {
+            event.consume();
+        }
+    }
+
+    /**
+     * Shows alert for user to report about operations which didn't finish.
+     * If activeStates is null or empty a alert won't show.
+     *
+     * @param activeStates the active states
+     */
+    public static void showWarningAlertForActiveStates(List<ApplicationState> activeStates) {
+        if (activeStates == null || activeStates.isEmpty()) {
+            return;
+        }
+        GLTAlert statesAlert = new GLTAlert(AlertType.WARNING, TITLE_STATE_WARNING, HEADER_STATE_MESSAGE,
+                CONTENT_STATE_PREFIX_MESSAGE + activeStates.toString());
+        statesAlert.showAndWait();
     }
 }

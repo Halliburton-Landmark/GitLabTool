@@ -55,8 +55,9 @@ public interface StateService extends StateEventGenerator {
     boolean isBusy();
 
     /**
+     * Gets a list of current active states.
      *
-     * @return
+     * @return the ApplicationState list
      */
     List<ApplicationState> getActiveStates();
 }

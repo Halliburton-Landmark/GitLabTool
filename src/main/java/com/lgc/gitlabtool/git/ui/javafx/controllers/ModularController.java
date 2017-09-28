@@ -28,6 +28,7 @@ import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.ViewKey;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 import com.lgc.gitlabtool.git.ui.javafx.AlertWithCheckBox;
+import com.lgc.gitlabtool.git.ui.javafx.JavaFXUI;
 import com.lgc.gitlabtool.git.ui.javafx.WorkIndicatorDialog;
 import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuItems;
 import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuManager;
@@ -408,7 +409,7 @@ public class ModularController {
         if (activeStates.isEmpty()) {
             Platform.exit();
         }
-        System.err.println(activeStates);
+        JavaFXUI.showWarningAlertForActiveStates(activeStates);
     }
 
 }
