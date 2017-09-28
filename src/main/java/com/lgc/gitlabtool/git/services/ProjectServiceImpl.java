@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -25,6 +26,7 @@ import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.ProjectStatus;
 import com.lgc.gitlabtool.git.jgit.JGit;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
+import com.lgc.gitlabtool.git.listeners.updateProgressListener.UpdateProgressListener;
 import com.lgc.gitlabtool.git.project.nature.projecttype.ProjectType;
 import com.lgc.gitlabtool.git.util.JSONParser;
 import com.lgc.gitlabtool.git.util.PathUtilities;
@@ -42,7 +44,7 @@ public class ProjectServiceImpl implements ProjectService {
     private static final String CREATE_STRUCTURES_TYPE_SUCCESS_MESSAGE = "Structure of type was successfully created!";
     private static final String CREATE_STRUCTURES_TYPE_FAILED_MESSAGE = "Failed creating structure of type!";
     private static final String PROJECT_ALREADY_EXISTS_MESSAGE = "Project with this name already exists!";
-    private static final String LOADING_PROJECT_MESSAGE_TEMPLATE = "%s loading of %s project"; 
+    private static final String LOADING_PROJECT_MESSAGE_TEMPLATE = "%s loading of %s project";
 
     private static final Logger _logger = LogManager.getLogger(ProjectServiceImpl.class);
     private static final CurrentUser _currentUser = CurrentUser.getInstance();
@@ -53,6 +55,9 @@ public class ProjectServiceImpl implements ProjectService {
     private static RESTConnector _connector;
     private ConsoleService _consoleService;
     private GitService _gitService;
+
+    private final Set<UpdateProgressListener> _listeners = new HashSet<>();
+    private static int PROGRESS_LOADING = 0;
 
     public ProjectServiceImpl(RESTConnector connector,
                               ProjectTypeService projectTypeService,
@@ -93,8 +98,10 @@ public class ProjectServiceImpl implements ProjectService {
             return projects;
         }
 
+        PROGRESS_LOADING = 0;
         _consoleService.addMessage("Getting statuses and types of projects...", MessageType.SIMPLE);
         projects.parallelStream()
+                .peek(pr -> updateProgressIndicator(++PROGRESS_LOADING, projects.size()))
                 .filter(project -> projectsName.contains(project.getName()))
                 .forEach((project) -> updateDataProject(project, group.getPathToClonedGroup()));
         _consoleService.addMessage(successMessage, MessageType.SUCCESS);
@@ -225,6 +232,11 @@ public class ProjectServiceImpl implements ProjectService {
         if (consoleService != null) {
             _consoleService = consoleService;
         }
+    }
+
+    private void updateProgressIndicator(int currentProject, int numberProjects) {
+        String message = "(" + currentProject + "/" + numberProjects + ")";
+        notifyListenersAboutChangesProgress(message);
     }
 
     private void updateDataProject(Project project, String pathGroup) {
@@ -365,6 +377,26 @@ public class ProjectServiceImpl implements ProjectService {
     private void setGitService(GitService gitService) {
         if (gitService != null) {
             _gitService = gitService;
+        }
+    }
+
+    @Override
+    public void addUpdateProgressListener(UpdateProgressListener listener) {
+        if (listener != null) {
+            _listeners.add(listener);
+        }
+    }
+
+    @Override
+    public void removeUpdateProgressListener(UpdateProgressListener listener) {
+        if (listener != null) {
+            _listeners.remove(listener);
+        }
+    }
+
+    private void notifyListenersAboutChangesProgress(String message) {
+        if (message != null) {
+            _listeners.forEach(listener -> listener.updateProgress(message));
         }
     }
 }
