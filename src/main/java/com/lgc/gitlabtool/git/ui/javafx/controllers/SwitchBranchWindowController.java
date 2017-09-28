@@ -49,8 +49,6 @@ import javafx.stage.Stage;
 @SuppressWarnings("unchecked")
 public class SwitchBranchWindowController implements StateListener {
 
-    private final String ID = SwitchBranchWindowController.class.getName();
-
     private static final String TOTAL_CAPTION = "Total count: ";
     private static final String SWITCHTO_STATUS_ALERT_TITLE = "Switch branch info";
     private static final String SWITCHTO_STATUS_ALERT_HEADER = "Switch branch statuses:";
@@ -344,37 +342,6 @@ public class SwitchBranchWindowController implements StateListener {
             });
             executor.shutdown();
         }
-    }
-
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((ID == null) ? 0 : ID.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        SwitchBranchWindowController other = (SwitchBranchWindowController) obj;
-        if (ID == null) {
-            if (other.ID != null) {
-                return false;
-            }
-        } else if (!ID.equals(other.ID)) {
-            return false;
-        }
-        return true;
     }
 
 }
