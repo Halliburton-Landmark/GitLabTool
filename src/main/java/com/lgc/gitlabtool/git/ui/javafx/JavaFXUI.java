@@ -39,7 +39,7 @@ public class JavaFXUI extends Application implements UserInterface {
     private static final String TITLE_STATE_WARNING = "Error Exit";
     private static final String HEADER_CONFIRMATION_MESSAGE = "Confirm exit";
     private static final String CONTENT_CONFIRMATION_MESSAGE = "Are you sure you want to exit?";
-    private static final String HEADER_STATE_MESSAGE = "The application can't be closed. We don't finish some operations.";
+    private static final String HEADER_STATE_MESSAGE = "The application can't be closed. We have not finish some operations. Please wait.";
     private static final String CONTENT_STATE_PREFIX_MESSAGE ="Unfinished operations: ";
     private static final String EXIT_BUTTON_NAME = "Exit";
 
@@ -128,7 +128,7 @@ public class JavaFXUI extends Application implements UserInterface {
 
     /**
      * Shows alert for user to report about operations which didn't finish.
-     * If activeStates is null or empty a alert won't show.
+     * If <code>activeStates</code> is equals to null or empty, an alert won't be shown.
      *
      * @param activeStates the active states
      */
