@@ -149,7 +149,6 @@ public class MainWindowController implements StateListener {
 
     @FXML
     private ToggleButton filterShadowProjects;
-
     {
         _stateService.addStateListener(ApplicationState.CLONE, this);
         _stateService.addStateListener(ApplicationState.COMMIT, this);
