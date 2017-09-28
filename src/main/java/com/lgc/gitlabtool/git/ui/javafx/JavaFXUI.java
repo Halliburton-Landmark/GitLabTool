@@ -41,6 +41,7 @@ public class JavaFXUI extends Application implements UserInterface {
     private static final String CONTENT_CONFIRMATION_MESSAGE = "Are you sure you want to exit?";
     private static final String HEADER_STATE_MESSAGE = "The application can't be closed. We don't finish some operations.";
     private static final String CONTENT_STATE_PREFIX_MESSAGE ="Unfinished operations: ";
+    private static final String EXIT_BUTTON_NAME = "Exit";
 
     private static final StateService _stateService = (StateService) ServiceProvider.getInstance()
             .getService(StateService.class.getName());
@@ -114,7 +115,7 @@ public class JavaFXUI extends Application implements UserInterface {
         Alert closeConfirmation = new Alert(Alert.AlertType.CONFIRMATION, CONTENT_CONFIRMATION_MESSAGE);
         Button exitButton = (Button) closeConfirmation.getDialogPane().lookupButton(ButtonType.OK);
 
-        exitButton.setText("Exit");
+        exitButton.setText(EXIT_BUTTON_NAME);
         closeConfirmation.setHeaderText(HEADER_CONFIRMATION_MESSAGE);
         closeConfirmation.initModality(Modality.APPLICATION_MODAL);
         closeConfirmation.initOwner(mainStage);
@@ -137,6 +138,7 @@ public class JavaFXUI extends Application implements UserInterface {
         }
         GLTAlert statesAlert = new GLTAlert(AlertType.WARNING, TITLE_STATE_WARNING, HEADER_STATE_MESSAGE,
                 CONTENT_STATE_PREFIX_MESSAGE + activeStates.toString());
+        statesAlert.setTextButton(ButtonType.OK, EXIT_BUTTON_NAME);
         statesAlert.showAndWait();
     }
 }
