@@ -137,7 +137,7 @@ public class StateServiceImpl implements StateService {
     @Override
     public List<ApplicationState> getActiveStates() {
         return _states.entrySet().stream()
-                                 .filter(map -> isActive(map.getValue()))
+                                 .filter(entry -> isActive(entry.getValue()))
                                  .map(pair -> pair.getKey())
                                  .collect(Collectors.toList());
     }
