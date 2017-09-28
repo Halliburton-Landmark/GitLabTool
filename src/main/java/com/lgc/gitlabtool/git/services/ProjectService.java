@@ -5,10 +5,9 @@ import java.util.List;
 
 import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.Project;
-import com.lgc.gitlabtool.git.listeners.updateProgressListener.UpdateProgressGenerator;
 import com.lgc.gitlabtool.git.project.nature.projecttype.ProjectType;
 
-public interface ProjectService extends UpdateProgressGenerator {
+public interface ProjectService {
 
     /**
      * Gets projects' group from gitlab

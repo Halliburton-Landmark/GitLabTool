@@ -4,9 +4,6 @@ import static javafx.scene.control.ProgressIndicator.INDETERMINATE_PROGRESS;
 
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 
-import javafx.application.Platform;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.EventHandler;
@@ -31,7 +28,7 @@ public class WorkIndicatorDialog {
     private final ProgressIndicator progressIndicator = new ProgressIndicator(INDETERMINATE_PROGRESS);
     private static final Image _appIcon = AppIconHolder.getInstance().getAppIcoImage();
     private final Stage stage = new Stage();
-    private final Label _progressLabel = new Label();
+    private final Label label = new Label();
     private final Group root = new Group();
     private final Scene scene = new Scene(root);
     private final BorderPane mainPane = new BorderPane();
@@ -47,23 +44,7 @@ public class WorkIndicatorDialog {
         stage.initModality(Modality.WINDOW_MODAL);
         stage.initOwner(owner);
         stage.setResizable(false);
-        _progressLabel.setText(label);
-    }
-
-    /**
-     * Updates the progress label
-     *
-     * @param progressLabel the new label
-     */
-    public void updateProjectLabel(String progressLabel) {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                StringProperty projectProperty = new SimpleStringProperty("");
-                projectProperty.set(progressLabel);
-                _progressLabel.textProperty().bind(projectProperty);
-            }
-        });
+        this.label.setText(label);
     }
 
     /**
@@ -108,7 +89,7 @@ public class WorkIndicatorDialog {
         vbox.setSpacing(5);
         vbox.setAlignment(Pos.CENTER);
         vbox.setMinSize(300, 100);
-        vbox.getChildren().addAll(_progressLabel, progressIndicator);
+        vbox.getChildren().addAll(label, progressIndicator);
         mainPane.setTop(vbox);
         stage.setScene(scene);
     }
