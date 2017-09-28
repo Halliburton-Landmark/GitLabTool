@@ -87,6 +87,9 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 public class MainWindowController implements StateListener {
+
+    private final String ID = MainWindowController.class.getName();
+
     private static final String HEDER_GROUP_TITLE = "Current group: ";
     private static final String SELECT_ALL_IMAGE_URL = "icons/select_all_20x20.png";
     private static final String REFRESH_PROJECTS_IMAGE_URL = "icons/toolbar/refresh_projects_20x20.png";
@@ -765,5 +768,35 @@ public class MainWindowController implements StateListener {
                 .filter(Project::isCloned)
                 .forEach(_projectService::updateProjectStatus);
         sortAndCheckProjects();
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((ID == null) ? 0 : ID.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        MainWindowController other = (MainWindowController) obj;
+        if (ID == null) {
+            if (other.ID != null) {
+                return false;
+            }
+        } else if (!ID.equals(other.ID)) {
+            return false;
+        }
+        return true;
     }
 }
