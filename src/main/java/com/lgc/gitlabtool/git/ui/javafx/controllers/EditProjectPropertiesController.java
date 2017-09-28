@@ -42,6 +42,8 @@ import javafx.stage.Stage;
 
 public class EditProjectPropertiesController implements StateListener {
 
+    private final String ID = EditProjectPropertiesController.class.getName();
+
     private static final String EDIT_POM_TITLE = "Editing project properties";
 
     private static final String ADDING_REPO_COLLAPSED_MESSAGE = "Repository has been added in %s selected projects";
@@ -387,4 +389,36 @@ public class EditProjectPropertiesController implements StateListener {
             executor.shutdown();
         }
     }
+
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((ID == null) ? 0 : ID.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        EditProjectPropertiesController other = (EditProjectPropertiesController) obj;
+        if (ID == null) {
+            if (other.ID != null) {
+                return false;
+            }
+        } else if (!ID.equals(other.ID)) {
+            return false;
+        }
+        return true;
+    }
+
 }

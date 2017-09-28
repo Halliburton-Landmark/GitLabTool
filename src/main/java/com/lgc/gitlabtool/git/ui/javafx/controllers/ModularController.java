@@ -21,8 +21,10 @@ import com.lgc.gitlabtool.git.entities.MessageType;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.ProjectList;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
+import com.lgc.gitlabtool.git.listeners.updateProgressListener.UpdateProgressListener;
 import com.lgc.gitlabtool.git.services.ConsoleService;
 import com.lgc.gitlabtool.git.services.GroupsUserService;
+import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.ViewKey;
@@ -67,7 +69,9 @@ import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
-public class ModularController {
+public class ModularController implements UpdateProgressListener {
+    // for equals and hasCode methods
+    private final String ID = ModularController.class.getName();
 
     private static final Logger logger = LogManager.getLogger(ModularController.class);
 
@@ -121,6 +125,15 @@ public class ModularController {
     @FXML
     public MenuBar menuBar;
 
+    private WorkIndicatorDialog _workIndicatorDialog;
+    private static final String WORK_INDICATOR_START_MESSAGE = "Loading projects...";
+
+    private static final ProjectService _projectService = (ProjectService) ServiceProvider.getInstance()
+            .getService(ProjectService.class.getName());
+    {
+        _projectService.addUpdateProgressListener(this);
+    }
+
     @FXML
     public void initialize() {
         toolbar.getStylesheets().add(getClass().getClassLoader().getResource(CSS_PATH).toExternalForm());
@@ -162,7 +175,7 @@ public class ModularController {
 
         _mainWindowController = loader.getController();
 
-        WorkIndicatorDialog workIndicatorDialog = new WorkIndicatorDialog(stage, "Loading projects...");
+        _workIndicatorDialog = new WorkIndicatorDialog(stage, WORK_INDICATOR_START_MESSAGE);
 
         Runnable selectGroup = () ->{
             _mainWindowController.setSelectedGroup(selectedGroup);
@@ -184,9 +197,9 @@ public class ModularController {
             });
         };
 
-        workIndicatorDialog.execute(selectGroup);
+        _workIndicatorDialog.execute(selectGroup);
 
-        Parent loadingStage = workIndicatorDialog.getStage().getScene().getRoot();
+        Parent loadingStage = _workIndicatorDialog.getStage().getScene().getRoot();
 
         StackPane pane = new StackPane();
         pane.getChildren().add(loadingStage);
@@ -411,5 +424,44 @@ public class ModularController {
         }
         JavaFXUI.showWarningAlertForActiveStates(activeStates);
     }
+
+    @Override
+    public void updateProgress(String progressMessage) {
+        if (_workIndicatorDialog != null && progressMessage != null) {
+            _workIndicatorDialog.updateProjectLabel(progressMessage);
+        }
+    }
+
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((ID == null) ? 0 : ID.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        ModularController other = (ModularController) obj;
+        if (ID == null) {
+            if (other.ID != null) {
+                return false;
+            }
+        } else if (!ID.equals(other.ID)) {
+            return false;
+        }
+        return true;
+    }
+
 
 }

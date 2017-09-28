@@ -54,6 +54,9 @@ import javafx.util.Callback;
  * @author Yevhen Strazhko
  */
 public class GroupWindowController implements StateListener {
+
+    private final String ID = GroupWindowController.class.getName();
+
     private static final Logger _logger = LogManager.getLogger(GroupWindowController.class);
 
     private static final String CLONE_WINDOW_TITLE = "Cloning window";
@@ -76,9 +79,12 @@ public class GroupWindowController implements StateListener {
     private static final StateService _stateService = (StateService) ServiceProvider.getInstance()
             .getService(StateService.class.getName());
 
+    {
+        _stateService.addStateListener(ApplicationState.CLONE, this);
+    }
+
     @FXML
     public void initialize() {
-        _stateService.addStateListener(ApplicationState.CLONE, this);
         configureListView(groupList);
         new Thread(this::updateClonedGroups).start();
 
@@ -278,4 +284,35 @@ public class GroupWindowController implements StateListener {
             updateClonedGroups();
         }
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((ID == null) ? 0 : ID.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        GroupWindowController other = (GroupWindowController) obj;
+        if (ID == null) {
+            if (other.ID != null) {
+                return false;
+            }
+        } else if (!ID.equals(other.ID)) {
+            return false;
+        }
+        return true;
+    }
+
 }
