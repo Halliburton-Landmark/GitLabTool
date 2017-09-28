@@ -68,8 +68,6 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 public class ModularController implements UpdateProgressListener {
-    // for equals and hasCode methods
-    private final String ID = "ModularController.class";
 
     private static final Logger logger = LogManager.getLogger(ModularController.class);
 
@@ -427,37 +425,5 @@ public class ModularController implements UpdateProgressListener {
             _workIndicatorDialog.updateProjectLabel(progressMessage);
         }
     }
-
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((ID == null) ? 0 : ID.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        ModularController other = (ModularController) obj;
-        if (ID == null) {
-            if (other.ID != null) {
-                return false;
-            }
-        } else if (!ID.equals(other.ID)) {
-            return false;
-        }
-        return true;
-    }
-
 
 }
