@@ -19,8 +19,7 @@ import javafx.scene.text.TextFlow;
 import javafx.util.Duration;
 
 public class ConsoleController implements UpdateConsoleListener {
-
-    private final String ID = ConsoleController.class.getName();
+    private final String ID = "ConsoleController.class";
 
     private TextFlow _console;
     private ScrollPane _scrollPane;
