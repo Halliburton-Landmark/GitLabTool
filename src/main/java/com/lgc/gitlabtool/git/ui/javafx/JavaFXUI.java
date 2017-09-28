@@ -138,7 +138,6 @@ public class JavaFXUI extends Application implements UserInterface {
         }
         GLTAlert statesAlert = new GLTAlert(AlertType.WARNING, TITLE_STATE_WARNING, HEADER_STATE_MESSAGE,
                 CONTENT_STATE_PREFIX_MESSAGE + activeStates.toString());
-        statesAlert.setTextButton(ButtonType.OK, EXIT_BUTTON_NAME);
         statesAlert.showAndWait();
     }
 }
