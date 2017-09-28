@@ -170,17 +170,7 @@ public class PomXMLServiceImpl implements PomXMLService {
                 statuses.put(project, false);
                 continue;
             }
-            /*                  ***NOTE***
-            Previously we use the addRepository() method for editing POM.xml (adding repo)
-            As result, diffs contains extra changes across all file.
-            Since 0.0.2 release we use VTD-XML lib for fix this problem.
 
-            PomXMLModel pomModel = getModel(project);
-            if (addRepository(pomModel, id, url, layout)){
-                ...
-                pomModel.writeToFile();
-            }
-            */
             if (_pomXmlEditService.addRepository(getPomFilePath(project), id, url, layout)) {
                 statuses.put(project, true);
                 _consoleService.addMessage(SUCCESSFUL_CHANGE_MESSAGE + " [Project: " + project.getName() + "]",
@@ -208,17 +198,7 @@ public class PomXMLServiceImpl implements PomXMLService {
                 statuses.put(project, false);
                 continue;
             }
-            /*                  ***NOTE***
-            Previously we use the removeRepository() method for editing POM.xml (removing repo)
-            As result, diffs contains extra changes across all file.
-            Since 0.0.2 release we use VTD-XML lib for fix this problem.
 
-            PomXMLModel pomModel = getModel(project);
-            if (removeRepository(pomModel, id)){
-                ...
-                pomModel.writeToFile();
-            }
-            */
             if (_pomXmlEditService.removeRepository(getPomFilePath(project), id)) {
                 statuses.put(project, true);
                 _consoleService.addMessage(SUCCESSFUL_CHANGE_MESSAGE + " [Project: " + project.getName() + "]",
@@ -247,18 +227,7 @@ public class PomXMLServiceImpl implements PomXMLService {
                 statuses.put(project, false);
                 continue;
             }
-            /*                  ***NOTE***
-            Previously we use the modifyRepository() method for editing POM.xml (removing repo)
-            As result, diffs contains extra changes across all file.
-            Since 0.0.2 release we use VTD-XML lib for fix this problem.
 
-            PomXMLModel pomModel = getModel(project);
-            Model model = pomModel.getModelFile();
-            if (modifyRepository(rep, oldId, newId, newUrl, newLayout)){
-                ...
-                pomModel.writeToFile();
-            }
-            */
             if (_pomXmlEditService.modifyRepository(getPomFilePath(project), oldId, newId, newUrl, newLayout)) {
                 statuses.put(project, true);
                 _consoleService.addMessage(SUCCESSFUL_CHANGE_MESSAGE + " [Project: " + project.getName() + "]",
@@ -529,63 +498,6 @@ public class PomXMLServiceImpl implements PomXMLService {
             isChanged = true;
         }
         return isChanged;
-    }
-
-    @Deprecated
-    private boolean addRepository(PomXMLModel pomMng, String id, String url, String layout) {
-        Model model = pomMng.getModelFile();
-        if (model == null) {
-            return false;
-        }
-
-        List<Repository> reps = model.getRepositories();
-        Repository repository = new Repository();
-        repository.setId(id);
-        repository.setUrl(url);
-        repository.setLayout(layout);
-
-        if (!isListHasRepository(reps, repository)) {
-            reps.add(repository);
-            return true;
-        }
-        return false;
-    }
-
-    @Deprecated
-    private boolean modifyRepository(List<Repository> reps, String oldId, String newId, String url, String layout) {
-        if (reps == null) {
-            return false;
-        }
-        boolean isChanged = false;
-        for (Repository repository : reps) {
-            if (repository != null && repository.getId().equals(oldId)) {
-                repository.setId(newId);
-                repository.setUrl(url);
-                repository.setLayout(layout);
-                isChanged = true;
-            }
-        }
-        return isChanged;
-    }
-
-    @Deprecated
-    private boolean removeRepository(PomXMLModel pomMng, String id) {
-        Model model = pomMng.getModelFile();
-        if (model == null) {
-            return false;
-        }
-        List<Repository> reps = model.getRepositories();
-        Repository remRep = null;
-        for (Repository repository : reps) {
-            if (id.equals(repository.getId())) {
-                remRep = repository;
-            }
-        }
-        if (remRep != null) {
-            reps.remove(remRep);
-            return true;
-        }
-        return false;
     }
 
     private boolean isCompliteValue(Pattern replace, String param) {

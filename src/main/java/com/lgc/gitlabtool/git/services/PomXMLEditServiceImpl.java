@@ -41,7 +41,6 @@ public class PomXMLEditServiceImpl implements PomXmlEditService {
             }
 
             if (vn.toElement(VTDNav.LAST_CHILD)) {
-                System.out.println(vn.toString());
                 xm.insertAfterElement(getRepoXmlString(id, url, layout));
 
                 xm.output(path);
