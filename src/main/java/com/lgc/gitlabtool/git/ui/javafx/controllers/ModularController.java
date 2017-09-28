@@ -69,7 +69,7 @@ import javafx.stage.Stage;
 
 public class ModularController implements UpdateProgressListener {
     // for equals and hasCode methods
-    private final String ID = ModularController.class.getName();
+    private final String ID = "ModularController.class";
 
     private static final Logger logger = LogManager.getLogger(ModularController.class);
 
