@@ -20,6 +20,7 @@ import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.MessageType;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.ProjectList;
+import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.services.ConsoleService;
 import com.lgc.gitlabtool.git.services.GroupsUserService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
@@ -403,9 +404,11 @@ public class ModularController {
     }
 
     private void exit() {
-        if (!_stateService.isBusy()) {
+        List<ApplicationState> activeStates = _stateService.getActiveStates();
+        if (activeStates.isEmpty()) {
             Platform.exit();
         }
+        System.err.println(activeStates);
     }
 
 }

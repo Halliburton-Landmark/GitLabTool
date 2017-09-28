@@ -1,11 +1,13 @@
 package com.lgc.gitlabtool.git.ui.javafx;
 
 import java.net.URL;
+import java.util.List;
 import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.UserInterface;
@@ -81,11 +83,12 @@ public class JavaFXUI extends Application implements UserInterface {
     }
 
     private final EventHandler<WindowEvent> confirmCloseEventHandler = event -> {
-        if (_stateService.isBusy()) {
+        List<ApplicationState> activeStates = _stateService.getActiveStates();
+        System.err.println(activeStates);
+        if(!activeStates.isEmpty()) {
             event.consume();
             return;
         }
-
         Alert closeConfirmation = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure you want to exit?");
         Button exitButton = (Button) closeConfirmation.getDialogPane().lookupButton(ButtonType.OK);
 
