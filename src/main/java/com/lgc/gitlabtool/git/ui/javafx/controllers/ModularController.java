@@ -20,6 +20,7 @@ import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.MessageType;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.ProjectList;
+import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.listeners.updateProgressListener.UpdateProgressListener;
 import com.lgc.gitlabtool.git.services.ConsoleService;
 import com.lgc.gitlabtool.git.services.GroupsUserService;
@@ -29,6 +30,7 @@ import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.ViewKey;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 import com.lgc.gitlabtool.git.ui.javafx.AlertWithCheckBox;
+import com.lgc.gitlabtool.git.ui.javafx.JavaFXUI;
 import com.lgc.gitlabtool.git.ui.javafx.WorkIndicatorDialog;
 import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuItems;
 import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuManager;
@@ -416,9 +418,11 @@ public class ModularController implements UpdateProgressListener {
     }
 
     private void exit() {
-        if (!_stateService.isBusy()) {
+        List<ApplicationState> activeStates = _stateService.getActiveStates();
+        if (activeStates.isEmpty()) {
             Platform.exit();
         }
+        JavaFXUI.showWarningAlertForActiveStates(activeStates);
     }
 
     @Override

@@ -1,5 +1,7 @@
 package com.lgc.gitlabtool.git.services;
 
+import java.util.List;
+
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.listeners.stateListeners.StateEventGenerator;
 
@@ -40,15 +42,22 @@ public interface StateService extends StateEventGenerator {
      * Checks that the state is activated.
      *
      * @param state is the state which is stored in the ApplicationState enum.
-     * @return <true> if state is activated or <false> if not.
+     * @return <code>true</code> if state is activated or <code>false</code> if not.
      */
     boolean isActiveState(ApplicationState state);
 
     /**
      * Checks that all processes finished (for example: clone, pull, push etc.)
      *
-     * @return <true> if any process doesn't finish,
-     *         <false> if all processes finished.
+     * @return <code>true</code> if any process doesn't finish,
+     *         <code>false</code> if all processes finished.
      */
     boolean isBusy();
+
+    /**
+     * Gets a list of current active states.
+     *
+     * @return the ApplicationState list
+     */
+    List<ApplicationState> getActiveStates();
 }

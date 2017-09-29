@@ -2,9 +2,11 @@ package com.lgc.gitlabtool.git.services;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -130,5 +132,13 @@ public class StateServiceImpl implements StateService {
         if (listeners != null) {
             listeners.forEach(listener -> listener.handleEvent(changedState, isActiveState(changedState)));
         }
+    }
+
+    @Override
+    public List<ApplicationState> getActiveStates() {
+        return _states.entrySet().stream()
+                                 .filter(entry -> isActive(entry.getValue()))
+                                 .map(pair -> pair.getKey())
+                                 .collect(Collectors.toList());
     }
 }
