@@ -53,11 +53,13 @@ public class PomXMLServiceImpl implements PomXMLService {
 
     private static ConsoleService _consoleService;
     private static StateService _stateService;
+    private static PomXmlEditService _pomXmlEditService;
     public static final String UNDEFINED_TEXT = "[Undefined]";
 
-    public PomXMLServiceImpl(ConsoleService consoleService, StateService stateService){
+    public PomXMLServiceImpl(ConsoleService consoleService, StateService stateService, PomXmlEditService pomXmlEditService){
         _consoleService = consoleService;
         _stateService = stateService;
+        _pomXmlEditService = pomXmlEditService;
     }
 
     private void errorNotValidDataInLog() {
@@ -164,13 +166,12 @@ public class PomXMLServiceImpl implements PomXMLService {
 
         _stateService.stateON(ApplicationState.EDIT_POM);
         for (Project project : projects) {
-            if (project == null || !project.isCloned()) {
+            if (project == null || !project.isCloned() || !hasPomFile(project)) {
                 statuses.put(project, false);
                 continue;
             }
-            PomXMLModel pomModel = getModel(project);
-            if (addRepository(pomModel, id, url, layout)) {
-                pomModel.writeToFile();
+
+            if (_pomXmlEditService.addRepository(getPomFilePath(project), id, url, layout)) {
                 statuses.put(project, true);
                 _consoleService.addMessage(SUCCESSFUL_CHANGE_MESSAGE + " [Project: " + project.getName() + "]",
                         MessageType.SUCCESS);
@@ -193,13 +194,12 @@ public class PomXMLServiceImpl implements PomXMLService {
         }
         _stateService.stateON(ApplicationState.EDIT_POM);
         for (Project project : projects) {
-            if (project == null || !project.isCloned()) {
+            if (project == null || !project.isCloned() || !hasPomFile(project)) {
                 statuses.put(project, false);
                 continue;
             }
-            PomXMLModel pomModel = getModel(project);
-            if (removeRepository(pomModel, id)) {
-                pomModel.writeToFile();
+
+            if (_pomXmlEditService.removeRepository(getPomFilePath(project), id)) {
                 statuses.put(project, true);
                 _consoleService.addMessage(SUCCESSFUL_CHANGE_MESSAGE + " [Project: " + project.getName() + "]",
                         MessageType.SUCCESS);
@@ -223,21 +223,12 @@ public class PomXMLServiceImpl implements PomXMLService {
 
         _stateService.stateON(ApplicationState.EDIT_POM);
         for (Project project : projects) {
-            if (project == null || !project.isCloned()) {
+            if (project == null || !project.isCloned() || !hasPomFile(project)) {
                 statuses.put(project, false);
                 continue;
             }
 
-            PomXMLModel pomModel = getModel(project);
-            Model model = pomModel.getModelFile();
-
-            if (model == null) {
-                statuses.put(project, false);
-                continue;
-            }
-            List<Repository> rep = model.getRepositories();
-            if (modifyRepository(rep, oldId, newId, newUrl, newLayout)) {
-                pomModel.writeToFile();
+            if (_pomXmlEditService.modifyRepository(getPomFilePath(project), oldId, newId, newUrl, newLayout)) {
                 statuses.put(project, true);
                 _consoleService.addMessage(SUCCESSFUL_CHANGE_MESSAGE + " [Project: " + project.getName() + "]",
                         MessageType.SUCCESS);
@@ -361,6 +352,10 @@ public class PomXMLServiceImpl implements PomXMLService {
         }
 
         return hasCorrectPathToPom(project);
+    }
+
+    private String getPomFilePath(Project project) {
+        return project.getPath() + File.separator + POM_NAME;
     }
 
     private List<Model> getModelFiles(Collection<Project> projects) {
@@ -503,60 +498,6 @@ public class PomXMLServiceImpl implements PomXMLService {
             isChanged = true;
         }
         return isChanged;
-    }
-
-    private boolean addRepository(PomXMLModel pomMng, String id, String url, String layout) {
-        Model model = pomMng.getModelFile();
-        if (model == null) {
-            return false;
-        }
-
-        List<Repository> reps = model.getRepositories();
-        Repository repository = new Repository();
-        repository.setId(id);
-        repository.setUrl(url);
-        repository.setLayout(layout);
-
-        if (!isListHasRepository(reps, repository)) {
-            reps.add(repository);
-            return true;
-        }
-        return false;
-    }
-
-    private boolean modifyRepository(List<Repository> reps, String oldId, String newId, String url, String layout) {
-        if (reps == null) {
-            return false;
-        }
-        boolean isChanged = false;
-        for (Repository repository : reps) {
-            if (repository != null && repository.getId().equals(oldId)) {
-                repository.setId(newId);
-                repository.setUrl(url);
-                repository.setLayout(layout);
-                isChanged = true;
-            }
-        }
-        return isChanged;
-    }
-
-    private boolean removeRepository(PomXMLModel pomMng, String id) {
-        Model model = pomMng.getModelFile();
-        if (model == null) {
-            return false;
-        }
-        List<Repository> reps = model.getRepositories();
-        Repository remRep = null;
-        for (Repository repository : reps) {
-            if (id.equals(repository.getId())) {
-                remRep = repository;
-            }
-        }
-        if (remRep != null) {
-            reps.remove(remRep);
-            return true;
-        }
-        return false;
     }
 
     private boolean isCompliteValue(Pattern replace, String param) {
