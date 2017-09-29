@@ -36,10 +36,11 @@ import javafx.stage.WindowEvent;
 public class JavaFXUI extends Application implements UserInterface {
     private static final Logger logger = LogManager.getLogger(LoginDialog.class);
 
-    private static final String TITLE_STATE_WARNING = "Error Exit";
+    private static final String TITLE_STATE_WARNING = "Error Exiting";
     private static final String HEADER_CONFIRMATION_MESSAGE = "Confirm exit";
     private static final String CONTENT_CONFIRMATION_MESSAGE = "Are you sure you want to exit?";
-    private static final String HEADER_STATE_MESSAGE = "The application can't be closed. \nWe have not finish some operations. Please wait.";
+    private static final String HEADER_STATE_MESSAGE = "The application can't be closed. "
+            + "\nWe have not finished some operations. Please wait.";
     private static final String CONTENT_STATE_PREFIX_MESSAGE ="Unfinished operations: ";
     private static final String EXIT_BUTTON_NAME = "Exit";
 
