@@ -153,9 +153,6 @@ public class MainWindowController implements StateListener {
 
     @FXML
     private ToggleButton filterShadowProjects;
-
-    private BooleanBinding _booleanBindingDefault;
-
     {
         _stateService.addStateListener(ApplicationState.CLONE, this);
         _stateService.addStateListener(ApplicationState.COMMIT, this);
@@ -203,7 +200,6 @@ public class MainWindowController implements StateListener {
                         preferences.putDouble(key, value);
                     }
                 });
-        _booleanBindingDefault = projectsList.getSelectionModel().selectedItemProperty().isNull();
         setDisablePropertyForButtons();
         configureToolbarCommands();
         initToolbarMainMenuActions();
@@ -226,39 +222,37 @@ public class MainWindowController implements StateListener {
     }
 
     private void setDisablePropertyForButtons() {
-        ToolbarManager.getInstance().getButtonById(ToolbarButtons.CLONE_PROJECT_BUTTON.getId()).disableProperty()
-                .bind(booleanBindingForClonedProjects().or(_booleanBindingDefault));
-        ToolbarManager.getInstance().getButtonById(ToolbarButtons.NEW_BRANCH_BUTTON.getId()).disableProperty()
-                .bind(booleanBindingForShadowProjects().or(_booleanBindingDefault));
-        ToolbarManager.getInstance().getButtonById(ToolbarButtons.SWITCH_BRANCH_BUTTON.getId()).disableProperty()
-                .bind(booleanBindingForShadowProjects().or(_booleanBindingDefault));
-        ToolbarManager.getInstance().getButtonById(ToolbarButtons.COMMIT_BUTTON.getId()).disableProperty()
-                .bind(booleanBindingForShadowProjects().or(_booleanBindingDefault));
-        ToolbarManager.getInstance().getButtonById(ToolbarButtons.PUSH_BUTTON.getId()).disableProperty()
-                .bind(booleanBindingForShadowProjects().or(_booleanBindingDefault));
-        ToolbarManager.getInstance().getButtonById(ToolbarButtons.EDIT_PROJECT_PROPERTIES_BUTTON.getId())
-                .disableProperty().bind(booleanBindingForShadowProjects().or(_booleanBindingDefault));
-        ToolbarManager.getInstance().getButtonById(ToolbarButtons.PULL_BUTTON.getId()).disableProperty()
-                .bind(booleanBindingForShadowProjects().or(_booleanBindingDefault));
-        ToolbarManager.getInstance().getButtonById(ToolbarButtons.REVERT_CHANGES.getId()).disableProperty()
-                .bind(booleanBindingForShadowProjects().or(_booleanBindingDefault));
+        BooleanBinding booleanBindingDefault = projectsList.getSelectionModel().selectedItemProperty().isNull();
+        // We lock git operation (all except "clone") if shadow projects was selected.
+        BooleanBinding booleanBindingForShadow = booleanBindingForShadowProjects().or(booleanBindingDefault);
+        // We lock clone operation if cloned projects was selected.
+        BooleanBinding booleanBindingForCloned = booleanBindingForClonedProjects().or(booleanBindingDefault);
 
-        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_CLONE_PROJECT).disableProperty()
-                .bind(booleanBindingForClonedProjects().or(_booleanBindingDefault));
-        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_COMMIT).disableProperty()
-                .bind(booleanBindingForShadowProjects().or(_booleanBindingDefault));
-        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_SWITCH_BRANCH).disableProperty()
-                .bind(booleanBindingForShadowProjects().or(_booleanBindingDefault));
-        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_CREATE_BRANCH).disableProperty()
-                .bind(booleanBindingForShadowProjects().or(_booleanBindingDefault));
-        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_COMMIT).disableProperty()
-                .bind(booleanBindingForShadowProjects().or(_booleanBindingDefault));
-        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_PUSH).disableProperty()
-                .bind(booleanBindingForShadowProjects().or(_booleanBindingDefault));
-        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_PULL).disableProperty()
-                .bind(booleanBindingForShadowProjects().or(_booleanBindingDefault));
-        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_REVERT).disableProperty()
-                .bind(booleanBindingForShadowProjects().or(_booleanBindingDefault));
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.CLONE_PROJECT_BUTTON.getId()).disableProperty()
+                .bind(booleanBindingForCloned);
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.NEW_BRANCH_BUTTON.getId()).disableProperty()
+                .bind(booleanBindingForShadow);
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.SWITCH_BRANCH_BUTTON.getId()).disableProperty()
+                .bind(booleanBindingForShadow);
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.COMMIT_BUTTON.getId()).disableProperty()
+                .bind(booleanBindingForShadow);
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.PUSH_BUTTON.getId()).disableProperty()
+                .bind(booleanBindingForShadow);
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.EDIT_PROJECT_PROPERTIES_BUTTON.getId())
+                .disableProperty().bind(booleanBindingForShadow);
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.PULL_BUTTON.getId()).disableProperty()
+                .bind(booleanBindingForShadow);
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.REVERT_CHANGES.getId()).disableProperty()
+                .bind(booleanBindingForShadow);
+
+        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_CLONE_PROJECT).disableProperty().bind(booleanBindingForCloned);
+        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_COMMIT).disableProperty().bind(booleanBindingForShadow);
+        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_SWITCH_BRANCH).disableProperty().bind(booleanBindingForShadow);
+        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_CREATE_BRANCH).disableProperty().bind(booleanBindingForShadow);
+        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_COMMIT).disableProperty().bind(booleanBindingForShadow);
+        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_PUSH).disableProperty().bind(booleanBindingForShadow);
+        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_PULL).disableProperty().bind(booleanBindingForShadow);
+        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_REVERT).disableProperty().bind(booleanBindingForShadow);
     }
 
     public void setSelectedGroup(Group group) {
@@ -398,7 +392,6 @@ public class MainWindowController implements StateListener {
             @Override
             public void onChanged(ListChangeListener.Change<? extends Project> change) {
                 setDisablePropertyForButtons();
-
                 SelectionsProvider.getInstance().setSelectionItems(ListViewKey.MAIN_WINDOW_PROJECTS.getKey(),
                         listView.getSelectionModel().getSelectedItems());
             }
