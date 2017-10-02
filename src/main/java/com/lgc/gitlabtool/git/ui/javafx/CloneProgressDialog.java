@@ -14,8 +14,12 @@ import javafx.event.EventHandler;
  */
 public class CloneProgressDialog extends ProgressDialog {
 
+    private static final String CANCEL_DIALOG_TITLE = "Clonning dialog";
+    private static final String CANCEL_MESSAGE = "Cancel process is started. This may take some time. Please wait...";
+    private static final String CANCEL_LABEL = "canceling";
+
     public CloneProgressDialog() {
-        super("Clonning dialog", ApplicationState.CLONE, CancelButtonStatus.ACTIVATED);
+        super(CANCEL_DIALOG_TITLE, ApplicationState.CLONE, CancelButtonStatus.ACTIVATED);
     }
 
     @Override
@@ -23,9 +27,11 @@ public class CloneProgressDialog extends ProgressDialog {
         return new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent e) {
-                getCancelButton().setDisable(true);
-                addMessageToConcole("Starting cancel process of cloning...", MessageType.SIMPLE);
                 JGit.getInstance().cancelClone();
+
+                getCancelButton().setDisable(true);
+                updateProjectLabel(CANCEL_LABEL);
+                addMessageToConcole(CANCEL_MESSAGE, MessageType.SIMPLE);
                 updateProgressBar(0.0);
             }
         };
