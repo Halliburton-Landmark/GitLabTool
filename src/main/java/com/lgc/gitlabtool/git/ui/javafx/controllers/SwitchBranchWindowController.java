@@ -133,14 +133,13 @@ public class SwitchBranchWindowController implements StateListener {
             _concoleService.addMessage(
                     String.format(ALREADY_SWICHED_MESSAGE, numberSelected - correctProjects.size(), numberSelected),
                     MessageType.ERROR);
-            return;
         }
 
         List<Project> changedProjects = _gitService.getProjectsWithChanges(correctProjects);
         if (changedProjects.isEmpty()) {
-            switchBranch(selectedProjects, selectedBranch);
+            switchBranch(correctProjects, selectedBranch);
         } else {
-            launchSwitchBranchConfirmation(changedProjects, selectedProjects, selectedBranch);
+            launchSwitchBranchConfirmation(changedProjects, correctProjects, selectedBranch);
         }
     }
 
