@@ -36,7 +36,7 @@ public class LoginServiceImpl implements LoginService {
                     || responseHolder.getResponseCode() == 0) {
                 onSuccess.accept(HttpStatus.SC_REQUEST_TIMEOUT);
             } else if (userJson == null) {
-                onSuccess.accept(HttpStatus.SC_UNAUTHORIZED);
+                onSuccess.accept(responseHolder.getResponseCode());
             } else {
                 _currentUser = CurrentUser.getInstance();
                 _currentUser.setCurrentUser(JSONParser.parseToObject(userJson, User.class));
