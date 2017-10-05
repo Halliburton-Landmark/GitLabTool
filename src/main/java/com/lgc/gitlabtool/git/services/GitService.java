@@ -152,4 +152,9 @@ public interface GitService {
      *         - has changes: <true> is has, otherwise  <false>.
      */
     public boolean[] hasConflictsAndChanges(Project project);
+
+    /**
+     * Starts canceling process for cloning
+     */
+    void cancelClone();
 }

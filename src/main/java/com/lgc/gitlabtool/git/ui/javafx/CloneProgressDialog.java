@@ -1,8 +1,9 @@
 package com.lgc.gitlabtool.git.ui.javafx;
 
 import com.lgc.gitlabtool.git.entities.MessageType;
-import com.lgc.gitlabtool.git.jgit.JGit;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
+import com.lgc.gitlabtool.git.services.GitService;
+import com.lgc.gitlabtool.git.services.ServiceProvider;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -14,12 +15,16 @@ import javafx.event.EventHandler;
  */
 public class CloneProgressDialog extends ProgressDialog {
 
-    private static final String CANCEL_DIALOG_TITLE = "Clonning dialog";
+    private static final String CLONE_DIALOG_TITLE = "Clonning dialog";
     private static final String CANCEL_MESSAGE = "Cancel process is started. This may take some time. Please wait...";
     private static final String CANCEL_LABEL = "canceling";
 
+    private static final GitService _gitService = (GitService) ServiceProvider.getInstance()
+            .getService(GitService.class.getName());
+
+
     public CloneProgressDialog() {
-        super(CANCEL_DIALOG_TITLE, ApplicationState.CLONE, CancelButtonStatus.ACTIVATED);
+        super(CLONE_DIALOG_TITLE, ApplicationState.CLONE, CancelButtonStatus.ACTIVATED);
     }
 
     @Override
@@ -27,7 +32,7 @@ public class CloneProgressDialog extends ProgressDialog {
         return new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent e) {
-                JGit.getInstance().cancelClone();
+                _gitService.cancelClone();
 
                 getCancelButton().setDisable(true);
                 updateProjectLabel(CANCEL_LABEL);

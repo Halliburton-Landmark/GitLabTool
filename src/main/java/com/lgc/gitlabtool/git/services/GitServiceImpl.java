@@ -202,4 +202,9 @@ public class GitServiceImpl implements GitService {
         }
         return new boolean[] {hasConflicts, hasChanges};
     }
+
+    @Override
+    public void cancelClone() {
+        JGit.getInstance().cancelClone();
+    }
 }
