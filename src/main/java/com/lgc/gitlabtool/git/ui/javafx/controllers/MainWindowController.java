@@ -469,10 +469,6 @@ public class MainWindowController implements StateListener {
 
     private void refreshLoadProjects() {
         _projectsList.refreshLoadProjects();
-        sortAndCheckProjects();
-    }
-
-    private void sortAndCheckProjects() {
         hideShadowsAction();
         checkProjectsList();
     }
@@ -771,6 +767,6 @@ public class MainWindowController implements StateListener {
         projects.parallelStream()
                 .filter(Project::isCloned)
                 .forEach(_projectService::updateProjectStatus);
-        sortAndCheckProjects();
+        hideShadowsAction();
     }
 }
