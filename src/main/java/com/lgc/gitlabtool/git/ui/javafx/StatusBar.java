@@ -3,6 +3,8 @@ package com.lgc.gitlabtool.git.ui.javafx;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.listeners.stateListeners.StateListener;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
@@ -29,12 +31,10 @@ public class StatusBar extends HBox implements StateListener {
     private static final double STATUS_BAR_HEIGHT = 15.0;
     private static final int ELEMENTS_SPACING = 5;
     /** Default application state */
-    private static final String READY_TO_USE_STATE = "Ready to use";
+    private static final String READY_TO_USE_STATE = StringUtils.EMPTY;
 
     @FXML
     private final ProgressIndicator _statusIndicator = new ProgressIndicator();
-    @FXML
-    private final Label _statusLabel = new Label();
     @FXML
     private final Label _currentStatus = new Label();
 
@@ -49,11 +49,10 @@ public class StatusBar extends HBox implements StateListener {
     private void initUI() {
         this.setMaxHeight(STATUS_BAR_HEIGHT);
         this.setHeight(STATUS_BAR_HEIGHT);
-        _statusLabel.setText("Application status: ");
         _currentStatus.setText(READY_TO_USE_STATE);
-        _statusIndicator.setDisable(true);
+        _statusIndicator.setVisible(false);
 
-        getChildren().addAll(_statusLabel, _currentStatus, _statusIndicator);
+        getChildren().addAll(_statusIndicator, _currentStatus);
         setSpacing(ELEMENTS_SPACING);
     }
 
@@ -66,23 +65,28 @@ public class StatusBar extends HBox implements StateListener {
         _stateService.addStateListener(ApplicationState.SWITCH_BRANCH, this);
         _stateService.addStateListener(ApplicationState.EDIT_POM, this);
         _stateService.addStateListener(ApplicationState.REVERT, this);
+        _stateService.addStateListener(ApplicationState.REFRESH_PROJECTS, this);
     }
 
     @Override
     public void handleEvent(ApplicationState changedState, boolean isActivate) {
-        if (isActivate) {
-            List<ApplicationState> activeStates = _stateService.getActiveStates();
-            if (!activeStates.isEmpty()) {
-                String status = activeStates.stream()
-                                            .map(elem -> elem.toString())
-                                            .distinct()
-                                            .collect(Collectors.joining(", "));
-                Platform.runLater(() -> _currentStatus.setText(status));
-                _statusIndicator.setDisable(false);
-            }
-        } else {
-            Platform.runLater(() -> _currentStatus.setText(READY_TO_USE_STATE));
-            _statusIndicator.setDisable(true);
-        }
+        showStatus();
+    }
+
+    /**
+     * Shows status if some operations is running
+     */
+    private void showStatus() {
+        Platform.runLater(() -> _currentStatus.setText(getStatusChain()));
+        _statusIndicator.setVisible(_stateService.isBusy());
+    }
+
+    private String getStatusChain() {
+        List<ApplicationState> activeStates = _stateService.getActiveStates();
+        String status = activeStates.stream()
+                .map(elem -> elem.toString())
+                .distinct()
+                .collect(Collectors.joining(", "));
+        return status;
     }
 }
