@@ -84,9 +84,9 @@ public class StatusBar extends HBox implements StateListener {
     private String getStatusChain() {
         List<ApplicationState> activeStates = _stateService.getActiveStates();
         String status = activeStates.stream()
-                .map(elem -> elem.toString())
-                .distinct()
-                .collect(Collectors.joining(", "));
+                                    .map(elem -> elem.toString())
+                                    .distinct()
+                                    .collect(Collectors.joining(", "));
         return status;
     }
 }
