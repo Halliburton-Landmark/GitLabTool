@@ -154,7 +154,7 @@ public interface GitService {
     public boolean[] hasConflictsAndChanges(Project project);
 
     /**
-     * Starts canceling process for cloning
+     * Starts canceling process for cloning. This may take some time.
      */
     void cancelClone();
 }
