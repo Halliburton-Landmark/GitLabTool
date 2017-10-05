@@ -74,7 +74,7 @@ public class StatusBar extends HBox implements StateListener {
     }
 
     /**
-     * Shows status if some operations is running
+     * Shows status if some operations are running
      */
     private void showStatus() {
         Platform.runLater(() -> _currentStatus.setText(getStatusChain()));
