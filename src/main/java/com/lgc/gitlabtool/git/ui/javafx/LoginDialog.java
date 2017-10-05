@@ -64,7 +64,6 @@ class LoginDialog extends Dialog<DialogDTO> {
     private final String WAITING_MESSAGE = "Login... Please wait";
     private final String EMPTY_FIELD = "Login or password is empty!";
     private final String CONNECTION_ERROR = "Cannot reach the Gitlab instance. \nConnection error";
-    private final String INTERNAL_SERVER_ERROR = "At the moment the server is not available \ndue to internal error. Please try again later.";
     private static final String INFO_IMAGE_URL = "icons/info_20x20.png";
     private static final String CSS_PATH = "css/style.css";
 
@@ -235,8 +234,6 @@ class LoginDialog extends Dialog<DialogDTO> {
             showWarningAndDisableSignInButton(WRONG_CREDENTIALS);
         } else if (responseCode == HttpStatus.SC_REQUEST_TIMEOUT) {
             showWarningAndDisableSignInButton(CONNECTION_ERROR);
-        } else if (responseCode == HttpStatus.SC_INTERNAL_SERVER_ERROR) {
-        	showWarningAndDisableSignInButton(INTERNAL_SERVER_ERROR);
         }
     }
 
