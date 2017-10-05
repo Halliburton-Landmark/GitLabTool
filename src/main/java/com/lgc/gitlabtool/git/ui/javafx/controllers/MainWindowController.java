@@ -149,6 +149,9 @@ public class MainWindowController implements StateListener {
 
     @FXML
     private ToggleButton filterShadowProjects;
+
+    private static final String PREF_NAME_HIDE_SHADOWS = "is_hide_shadows";
+
     {
         _stateService.addStateListener(ApplicationState.CLONE, this);
         _stateService.addStateListener(ApplicationState.COMMIT, this);
@@ -199,6 +202,7 @@ public class MainWindowController implements StateListener {
         setDisablePropertyForButtons();
         configureToolbarCommands();
         initToolbarMainMenuActions();
+        hideShadowsAction();
     }
 
     private void setDisablePropertyForButtons() {
@@ -238,7 +242,6 @@ public class MainWindowController implements StateListener {
         _currentGroup = group;
         ProjectList.reset();
         _projectsList = ProjectList.get(_currentGroup);
-        sortProjectsList();
     }
 
     public void onSelectAll() {
@@ -470,25 +473,18 @@ public class MainWindowController implements StateListener {
     }
 
     private void sortAndCheckProjects() {
-        sortProjectsList();
+        hideShadowsAction();
         checkProjectsList();
     }
 
     // shadow projects in the end list
     private void sortProjectsList() {
-        List<Project> sortedList = _projectsList.getProjects()
-                                                .stream()
-                                                .sorted(this::compareProjects)
-                                                .collect(Collectors.toList());
-
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                ObservableList<Project> projectsObservableList = FXCollections.observableList(sortedList);
-                projectsList.setItems(projectsObservableList);
-                projectsList.refresh();
-            }
-        });
+        List<Project> sortedList = _projectsList.getProjects().stream()
+                                                              .sorted(this::compareProjects)
+                                                              .collect(Collectors.toList());
+        ObservableList<Project> projectsObservableList = FXCollections.observableList(sortedList);
+        projectsList.setItems(projectsObservableList);
+        projectsList.refresh();
     }
 
     private int compareProjects(Project firstProject, Project secondProject) {
@@ -589,14 +585,25 @@ public class MainWindowController implements StateListener {
 
     @FXML
     public void onShowHideShadowProjects(ActionEvent actionEvent) {
-        ObservableList<Project> obsList = FXCollections.observableArrayList(_projectsList.getProjects());
-        if (filterShadowProjects.isSelected()) {
-            FilteredList<Project> list = new FilteredList<>(obsList, Project::isCloned);
-            projectsList.setItems(list);
-        } else {
-            projectsList.setItems(obsList);
-            sortProjectsList();
-        }
+        preferences.putBoolean(PREF_NAME_HIDE_SHADOWS, filterShadowProjects.isSelected());
+        hideShadowsAction();
+    }
+
+    private void hideShadowsAction() {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                Boolean isHide = preferences.getBoolean(PREF_NAME_HIDE_SHADOWS, false);
+                filterShadowProjects.setSelected(isHide);
+                if (isHide) {
+                    ObservableList<Project> obsList = FXCollections.observableArrayList(_projectsList.getProjects());
+                    FilteredList<Project> list = new FilteredList<>(obsList, Project::isCloned);
+                    projectsList.setItems(list);
+                } else {
+                    sortProjectsList();
+                }
+            }
+        });
     }
 
     private boolean startClone(List<Project> shadowProjects, String path,  CloneProgressDialog progressDialog) {
