@@ -167,6 +167,10 @@ public class ModularController implements UpdateProgressListener {
 
     private void initializeProjectsWindow(){
         projectList1 = new ListView();
+        AnchorPane.setBottomAnchor(projectList1, 0.0);
+        AnchorPane.setTopAnchor(projectList1, 0.0);
+        AnchorPane.setLeftAnchor(projectList1, 0.0);
+        AnchorPane.setRightAnchor(projectList1, 0.0);
         configureProjectsListView(projectList1);
         projectsWindowItems = ToolbarManager.getInstance().createToolbarItems(ViewKey.MAIN_WINDOW.getKey());
         initActionsToolBar(ViewKey.MAIN_WINDOW.getKey());
@@ -174,6 +178,10 @@ public class ModularController implements UpdateProgressListener {
 
     private void initializeGroupsWindow(){
         groupList1 = new ListView();
+        AnchorPane.setBottomAnchor(groupList1, 0.0);
+        AnchorPane.setTopAnchor(groupList1, 0.0);
+        AnchorPane.setLeftAnchor(groupList1, 0.0);
+        AnchorPane.setRightAnchor(groupList1, 0.0);
         configureGroupListView(groupList1);
         groupsWindowItems = ToolbarManager.getInstance().createToolbarItems(ViewKey.GROUP_WINDOW.getKey());
         initActionsToolBar(ViewKey.GROUP_WINDOW.getKey());

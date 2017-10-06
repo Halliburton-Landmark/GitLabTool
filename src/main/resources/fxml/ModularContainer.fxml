@@ -87,7 +87,6 @@
                 </center>
 
             </BorderPane>
-            <AnchorPane fx:id="viewPane"/>
 
             <ScrollPane fx:id="scrollPane" fitToWidth="true" fitToHeight="true">
                 <TextFlow fx:id="_console" style="-fx-background-color: #D7DBE3;">
