@@ -210,7 +210,9 @@ public class MainWindowController implements StateListener {
                  getCurrentProjects().stream()
                                      .filter(Objects::nonNull)
                                      .allMatch(project -> !project.isCloned()),
-                 Stream.of(projectsList.getSelectionModel()).map(pr -> pr.selectedItemProperty()).toArray(Observable[]::new));
+                 Stream.of(projectsList.getSelectionModel())
+                                       .map(pr -> pr.selectedItemProperty())
+                                       .toArray(Observable[]::new));
     }
 
     private BooleanBinding booleanBindingForClonedProjects() {
@@ -218,7 +220,9 @@ public class MainWindowController implements StateListener {
                  getCurrentProjects().stream()
                                      .filter(Objects::nonNull)
                                      .allMatch(Project::isCloned),
-                 Stream.of(projectsList.getSelectionModel()).map(pr -> pr.selectedItemProperty()).toArray(Observable[]::new));
+                 Stream.of(projectsList.getSelectionModel())
+                                       .map(pr -> pr.selectedItemProperty())
+                                       .toArray(Observable[]::new));
     }
 
     private void setDisablePropertyForButtons() {
