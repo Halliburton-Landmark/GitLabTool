@@ -58,7 +58,7 @@
                         </tooltip>
                     </ToggleButton>
 
-            </HBox>
+                </HBox>
                 </AnchorPane>
                 <GridPane prefHeight="210.0" prefWidth="519.0">
                     <columnConstraints>
