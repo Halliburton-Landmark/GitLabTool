@@ -100,6 +100,8 @@ public class MainWindowController implements StateListener {
     private static final String REVERT_FINISH_MESSAGE = "Revert operation finished.";
     public static final String NO_ANY_PROJECT_FOR_OPERATION = "There isn't any proper project selected for %s operation";
 
+    private static final String PREF_NAME_HIDE_SHADOWS = "is_hide_shadows";
+
     private static final String NEW_BRANCH_CREATION = "new branch creation";
     private static final String PULL_OPERATION_NAME = "pull";
     private static final String PUSH_OPERATION_NAME = "push";
@@ -149,8 +151,6 @@ public class MainWindowController implements StateListener {
 
     @FXML
     private ToggleButton filterShadowProjects;
-
-    private static final String PREF_NAME_HIDE_SHADOWS = "is_hide_shadows";
 
     {
         _stateService.addStateListener(ApplicationState.CLONE, this);
