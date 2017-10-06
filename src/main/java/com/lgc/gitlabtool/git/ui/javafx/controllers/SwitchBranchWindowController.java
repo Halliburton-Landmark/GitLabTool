@@ -104,7 +104,7 @@ public class SwitchBranchWindowController implements StateListener {
     @FXML
     public void initialize() {
         searchField.textProperty().addListener((observable, oldValue, newValue) -> filterPlantList(oldValue, newValue));
-        disableSwinchButton(null);
+        disableSwitchButton(null);
     }
 
     public void beforeShowing(List<Project> projects) {
@@ -154,7 +154,7 @@ public class SwitchBranchWindowController implements StateListener {
 
         switchToStatusDialog(switchStatuses, selectedProjects.size(), dialogMessage);
         currentProjectsListView.refresh();
-        disableSwinchButton(selectedBranch);
+        disableSwitchButton(selectedBranch);
     }
 
     private void launchSwitchBranchConfirmation(List<Project> changedProjects,
@@ -304,12 +304,12 @@ public class SwitchBranchWindowController implements StateListener {
                 Branch branch = (Branch) newValue;
                 filteringProjectsListView(Arrays.asList(branch));
 
-                disableSwinchButton(branch);
+                disableSwitchButton(branch);
             }
         });
     }
 
-    private void disableSwinchButton(Object currentBranch) {
+    private void disableSwitchButton(Object currentBranch) {
         if (currentBranch == null) {
             BooleanBinding defaultProperty = branchesListView.getSelectionModel().selectedItemProperty().isNull();
             switchButton.disableProperty().bind(defaultProperty);
