@@ -16,13 +16,14 @@
 <?import javafx.scene.text.TextFlow?>
 <?import javafx.stage.Screen?>
 <?import javafx.scene.layout.Pane?>
-<BorderPane id="background" prefHeight="${screen.visualBounds.maxY / 1.5}"
+<AnchorPane prefHeight="${screen.visualBounds.maxY / 1.5}"
             prefWidth="${screen.visualBounds.maxX / 1.5}" xmlns="http://javafx.com/javafx/8"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.lgc.gitlabtool.git.ui.javafx.controllers.ModularController">
     <fx:define>
         <Screen fx:factory="getPrimary" fx:id="screen"/>
     </fx:define>
+    <BorderPane fx:id="background" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
     <top>
         <VBox BorderPane.alignment="CENTER">
             <MenuBar fx:id="menuBar">
@@ -94,4 +95,5 @@
             </ScrollPane>
         </SplitPane>
     </center>
-</BorderPane>
+    </BorderPane>
+</AnchorPane>

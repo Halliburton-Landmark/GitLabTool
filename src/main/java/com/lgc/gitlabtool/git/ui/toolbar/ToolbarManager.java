@@ -42,9 +42,6 @@ public class ToolbarManager {
 
     private List<Node> items;
 
-    private List<Node> projectsWindowItems = new LinkedList<>();
-    private List<Node> groupsWindowItems = new LinkedList<>();
-
     private ToolbarManager() {
     }
 
@@ -58,24 +55,6 @@ public class ToolbarManager {
             instance = new ToolbarManager();
         }
         return instance;
-    }
-
-    public List<Node> getToolbarItems(String windowId) {
-        if (windowId == ViewKey.MAIN_WINDOW.getKey()) {
-            if (projectsWindowItems.isEmpty()) {
-                projectsWindowItems.addAll(createToolbarItems(ViewKey.MAIN_WINDOW.getKey()));
-            }
-
-            return projectsWindowItems;
-        } else if (windowId == ViewKey.GROUP_WINDOW.getKey()) {
-            if (groupsWindowItems.isEmpty()) {
-                groupsWindowItems.addAll(createToolbarItems(ViewKey.GROUP_WINDOW.getKey()));
-            }
-
-            return groupsWindowItems;
-        } else {
-            return new ArrayList<>();
-        }
     }
 
     /**

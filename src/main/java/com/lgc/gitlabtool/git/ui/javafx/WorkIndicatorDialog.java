@@ -15,9 +15,12 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
+import javafx.scene.effect.BlendMode;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -36,7 +39,8 @@ public class WorkIndicatorDialog {
     private final Scene scene = new Scene(root);
     private final BorderPane mainPane = new BorderPane();
     private final VBox vbox = new VBox();
-
+    private final int initWidth = 300;
+    private final int initHeight = 100;
     /**
      * Constructor
      *
@@ -71,15 +75,37 @@ public class WorkIndicatorDialog {
      *
      * @param title    text for the dialog
      * @param runnable work that should be done
+     * @param stageStyle style of stage
      */
-    public void executeAndShowDialog(String title, Runnable runnable) {
+    public void executeAndShowDialog(String title, Runnable runnable, StageStyle stageStyle) {
         stage.setTitle(title);
         stage.getIcons().add(_appIcon);
-        stage.initStyle(StageStyle.DECORATED);
+        stage.initStyle(stageStyle);
 
         execute(runnable);
 
         stage.show();
+    }
+
+    /**
+     * Execute work and show work-indicator dialog
+     *
+     * @param title       text for the dialog
+     * @param runnable    work that should be done
+     * @param stageStyle  style of stage
+     * @param parentStage stage of parent window (for calculating start coordinates)
+     */
+    public void executeAndShowDialog(String title, Runnable runnable, StageStyle stageStyle, Stage parentStage) {
+        double centerXPosition = parentStage.getX() + parentStage.getWidth() / 2;
+        double centerYPosition = parentStage.getY() + parentStage.getHeight() / 2;
+
+        stage.setX(centerXPosition - initWidth / 2);
+        stage.setY(centerYPosition - initHeight / 2);
+
+        if (stageStyle == StageStyle.TRANSPARENT) {
+            scene.setFill(Color.TRANSPARENT);
+        }
+        executeAndShowDialog(title, runnable, stageStyle);
     }
 
     /**
@@ -107,7 +133,7 @@ public class WorkIndicatorDialog {
         root.getChildren().add(mainPane);
         vbox.setSpacing(5);
         vbox.setAlignment(Pos.CENTER);
-        vbox.setMinSize(300, 100);
+        vbox.setMinSize(initWidth, initHeight);
         vbox.getChildren().addAll(_progressLabel, progressIndicator);
         mainPane.setTop(vbox);
         stage.setScene(scene);

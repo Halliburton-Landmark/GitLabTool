@@ -50,7 +50,7 @@ public class MainMenuManager {
      * @param windowId Id of view where should be created main menu
      * @return List of menus with menu items
      */
-    public List<Menu> createToolbarItems(String windowId) {
+    public List<Menu> createMainMenuItems(String windowId) {
 
         items = new ArrayList<>();
         List<Menu> menus = new ArrayList<>();
