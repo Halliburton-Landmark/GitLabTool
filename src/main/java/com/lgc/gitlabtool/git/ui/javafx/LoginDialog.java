@@ -237,10 +237,10 @@ class LoginDialog extends Dialog<DialogDTO> {
             showWarningAndDisableSignInButton(MESSAGE_WRONG_CREDENTIALS);
         } else {
             StringBuilder errorMessage = new StringBuilder(MESSAGE_HTTP_ERROR);
-            errorMessage.append(MESSAGE_SPACE);
-            errorMessage.append(responseHolder.getResponseCode());
-            errorMessage.append(MESSAGE_DASH);
-            errorMessage.append(responseHolder.getResponseMessage());
+            errorMessage.append(MESSAGE_SPACE)
+                        .append(responseHolder.getResponseCode())
+                        .append(MESSAGE_DASH)
+                        .append(responseHolder.getResponseMessage());
             showWarningAndDisableSignInButton(errorMessage.toString());
         }
     }
