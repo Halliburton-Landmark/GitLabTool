@@ -32,8 +32,7 @@ public class LoginServiceImpl implements LoginService {
             getConnector().setUrlMainPart(dto.getServerURL());
             HttpResponseHolder responseHolder = getConnector().sendPost("/session", params, null);
             Object userJson = responseHolder != null ? responseHolder.getBody() : null;
-            if (responseHolder.getResponseCode() != HttpStatus.SC_REQUEST_TIMEOUT
-                    && responseHolder.getResponseCode() != 0 && userJson != null) {
+            if (isResponseCodeValid(responseHolder, userJson)) {
                 _currentUser = CurrentUser.getInstance();
                 _currentUser.setCurrentUser(JSONParser.parseToObject(userJson, User.class));
                 CredentialsProvider.setDefault(new UsernamePasswordCredentialsProvider(dto.getLogin(), dto.getPassword()));
@@ -48,6 +47,14 @@ public class LoginServiceImpl implements LoginService {
     @Override
     public User getCurrentUser() {
         return _currentUser.getCurrentUser();
+    }
+    
+    private boolean isResponseCodeValid(HttpResponseHolder responseHolder, Object userJson) {
+        if (responseHolder.getResponseCode() == HttpStatus.SC_REQUEST_TIMEOUT
+                || responseHolder.getResponseCode() == 0 || userJson == null) {
+            return false;
+        }
+        return true;
     }
 
     private RESTConnector getConnector() {
