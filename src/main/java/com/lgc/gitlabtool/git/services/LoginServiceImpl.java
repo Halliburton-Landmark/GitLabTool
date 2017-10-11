@@ -24,7 +24,7 @@ public class LoginServiceImpl implements LoginService {
     }
 
     @Override
-    public void login(DialogDTO dto, Consumer<Integer> onSuccess) {
+    public void login(DialogDTO dto, Consumer<HttpResponseHolder> onSuccess) {
         Runnable runnable = () -> {
             HashMap<String, String> params = new HashMap<>();
             params.put("login", dto.getLogin());
@@ -32,18 +32,12 @@ public class LoginServiceImpl implements LoginService {
             getConnector().setUrlMainPart(dto.getServerURL());
             HttpResponseHolder responseHolder = getConnector().sendPost("/session", params, null);
             Object userJson = responseHolder != null ? responseHolder.getBody() : null;
-            if (responseHolder.getResponseCode() == HttpStatus.SC_REQUEST_TIMEOUT
-                    || responseHolder.getResponseCode() == 0) {
-                onSuccess.accept(HttpStatus.SC_REQUEST_TIMEOUT);
-            } else if (userJson == null) {
-                onSuccess.accept(responseHolder.getResponseCode());
-            } else {
+            if (isResponseCodeValid(responseHolder, userJson)) {
                 _currentUser = CurrentUser.getInstance();
                 _currentUser.setCurrentUser(JSONParser.parseToObject(userJson, User.class));
                 CredentialsProvider.setDefault(new UsernamePasswordCredentialsProvider(dto.getLogin(), dto.getPassword()));
-
-                onSuccess.accept(HttpStatus.SC_OK);
             }
+            onSuccess.accept(responseHolder);
         };
         Thread loginThread = new Thread(runnable);
         loginThread.setName("LoginThread");
@@ -53,6 +47,14 @@ public class LoginServiceImpl implements LoginService {
     @Override
     public User getCurrentUser() {
         return _currentUser.getCurrentUser();
+    }
+    
+    private boolean isResponseCodeValid(HttpResponseHolder responseHolder, Object userJson) {
+        if (responseHolder.getResponseCode() == HttpStatus.SC_REQUEST_TIMEOUT
+                || responseHolder.getResponseCode() == 0 || userJson == null) {
+            return false;
+        }
+        return true;
     }
 
     private RESTConnector getConnector() {
