@@ -13,6 +13,7 @@ public class HttpResponseHolder {
     private Map<String, List<String>> _headerLines;
     private Object _body;
     private int _responseCode;
+    private String _responseMessage;
 
     public HttpResponseHolder() {
         
@@ -78,6 +79,24 @@ public class HttpResponseHolder {
      */
     public void setResponseCode(int responseCode) {
         this._responseCode = responseCode;
+    }
+
+    /**
+     * Return the response message of the server
+     * 
+     * @return response message
+     */
+    public String getResponseMessage() {
+        return _responseMessage;
+    }
+
+    /**
+     * Set the response message of the server
+     * 
+     * @param _responseMessage
+     */
+    public void setResponseMessage(String responseMessage) {
+        this._responseMessage = responseMessage;
     }
 
 }

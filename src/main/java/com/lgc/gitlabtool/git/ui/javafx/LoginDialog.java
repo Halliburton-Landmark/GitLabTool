@@ -8,6 +8,7 @@ import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.lgc.gitlabtool.git.connections.HttpResponseHolder;
 import com.lgc.gitlabtool.git.entities.MessageType;
 import com.lgc.gitlabtool.git.services.ConsoleService;
 import com.lgc.gitlabtool.git.services.LoginService;
@@ -60,13 +61,14 @@ class LoginDialog extends Dialog<DialogDTO> {
     private static final ConsoleService _consoleService = (ConsoleService) ServiceProvider.getInstance()
             .getService(ConsoleService.class.getName());
 
-    private final String WRONG_CREDENTIALS = "Wrong login or password! Please try again";
-    private final String WAITING_MESSAGE = "Login... Please wait";
-    private final String EMPTY_FIELD = "Login or password is empty!";
-    private final String CONNECTION_ERROR = "Cannot reach the Gitlab instance. \nConnection error";
-    private final String INTERNAL_SERVER_ERROR = "At the moment the server is not available \ndue to internal error. Please try again later.";
-    private static final String INFO_IMAGE_URL = "icons/info_20x20.png";
-    private static final String CSS_PATH = "css/style.css";
+    private static final String MESSAGE_WRONG_CREDENTIALS  = "Wrong login or password! Please try again";
+    private static final String MESSAGE_WAITING            = "Login... Please wait";
+    private static final String MESSAGE_EMPTY_FIELD        = "Login or password is empty!";
+    private static final String MESSAGE_HTTP_ERROR         = "Error logging in:";
+    private static final String MESSAGE_SPACE              = " ";
+    private static final String MESSAGE_DASH               = "-";
+    private static final String INFO_IMAGE_URL             = "icons/info_20x20.png";
+    private static final String CSS_PATH                   = "css/style.css";
 
     /** need to store two line message */
     private final double MIN_MESSAGE_HEIGHT = 40;
@@ -211,32 +213,35 @@ class LoginDialog extends Dialog<DialogDTO> {
     private void setOnSignInButtonListener(Button button) {
         button.setOnAction(event -> {
             if (!isEmptyInputFields(userTextField, passwordField)) {
-                logger.info(WAITING_MESSAGE);
-                showMessage(WAITING_MESSAGE, Color.GREEN);
+                logger.info(MESSAGE_WAITING);
+                showMessage(MESSAGE_WAITING, Color.GREEN);
                 disableSignInButton(true);
                 String serverURL = URLManager.completeServerURL(comboBox.getValue());
                 DialogDTO dto = new DialogDTO(userTextField.getText(), passwordField.getText(), serverURL);
                 _loginService.login(dto, this::doAfterLogin);
             } else {
-                logger.warn(EMPTY_FIELD);
-                showMessage(EMPTY_FIELD, Color.RED);
+                logger.warn(MESSAGE_EMPTY_FIELD);
+                showMessage(MESSAGE_EMPTY_FIELD, Color.RED);
             }
         });
     }
 
-    private void doAfterLogin(int responseCode) {
-        if (responseCode == HttpStatus.SC_OK) {
+    private void doAfterLogin(HttpResponseHolder responseHolder) {
+        if (responseHolder.getResponseCode() >= HttpStatus.SC_OK && responseHolder.getResponseCode() <= HttpStatus.SC_MULTI_STATUS) {
             updateLastUserName();
             Platform.runLater(() -> {
                 _consoleService.addMessage("Login successfull", MessageType.SUCCESS);
                 getStage().close();
             });
-        } else if (responseCode == HttpStatus.SC_UNAUTHORIZED) {
-            showWarningAndDisableSignInButton(WRONG_CREDENTIALS);
-        } else if (responseCode == HttpStatus.SC_REQUEST_TIMEOUT) {
-            showWarningAndDisableSignInButton(CONNECTION_ERROR);
-        } else if (responseCode == HttpStatus.SC_INTERNAL_SERVER_ERROR) {
-            showWarningAndDisableSignInButton(INTERNAL_SERVER_ERROR);
+        } else if (responseHolder.getResponseCode() == HttpStatus.SC_UNAUTHORIZED) {
+            showWarningAndDisableSignInButton(MESSAGE_WRONG_CREDENTIALS);
+        } else {
+            StringBuilder errorMessage = new StringBuilder(MESSAGE_HTTP_ERROR);
+            errorMessage.append(MESSAGE_SPACE);
+            errorMessage.append(responseHolder.getResponseCode());
+            errorMessage.append(MESSAGE_DASH);
+            errorMessage.append(responseHolder.getResponseMessage());
+            showWarningAndDisableSignInButton(errorMessage.toString());
         }
     }
 

@@ -77,10 +77,11 @@ class RESTConnectorImpl implements RESTConnector {
                 wr.close();
             }
 
-            int responseCode = connection.getResponseCode();
-            responseHolder.setResponseCode(responseCode);
+            responseHolder.setResponseCode(connection.getResponseCode());
+            responseHolder.setResponseMessage(connection.getResponseMessage());
             _logger.info("Sending '" + request +"' request to URL : " + url.toString());
-            _logger.info("Response Code : " + responseCode);
+            _logger.info("Response Code : " + connection.getResponseCode());
+            _logger.info("Response Message : " + connection.getResponseMessage());
 
             BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             StringBuilder response = new StringBuilder();
