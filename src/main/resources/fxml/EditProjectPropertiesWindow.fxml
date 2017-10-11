@@ -63,7 +63,7 @@
                     <TextField fx:id="addIdField" promptText="ID"/>
                     <TextField fx:id="addUrlField" promptText="URL"/>
                     <TextField fx:id="addLayoutField" promptText="LAYOUT"/>
-                    <CheckBox fx:id="addIsCommit" text="Commit immediate"/>
+                    <CheckBox fx:id="addIsCommit" text="Commit immediately"/>
                     <AnchorPane>
                         <Button fx:id="addButton" mnemonicParsing="false" onAction="#onAddRepo" text="Add"
                                 AnchorPane.rightAnchor="0.0"/>
@@ -80,7 +80,7 @@
                     <TextField fx:id="editIdField" promptText="ID"/>
                     <TextField fx:id="editUrlField" promptText="URL"/>
                     <TextField fx:id="editLayoutField" promptText="LAYOUT"/>
-                    <CheckBox fx:id="editIsCommit" text="Commit immediate"/>
+                    <CheckBox fx:id="editIsCommit" text="Commit immediately"/>
                     <AnchorPane>
                         <Button fx:id="editButton" mnemonicParsing="false" onAction="#onEditRepo" text="Edit"
                                 AnchorPane.rightAnchor="0.0"/>
@@ -95,7 +95,7 @@
                 <VBox prefHeight="200.0" prefWidth="100.0" spacing="10.0">
                     <CheckBox fx:id="removeOnlyCommon" text="Only common repositories"/>
                     <ListView fx:id="removeListView" prefHeight="200.0" prefWidth="200.0"/>
-                    <CheckBox fx:id="removeIsCommit" text="Commit immediate"/>
+                    <CheckBox fx:id="removeIsCommit" text="Commit immediately"/>
                     <AnchorPane>
                         <Button fx:id="removeButton" mnemonicParsing="false" onAction="#onRemoveRepo" text="Remove"
                                 AnchorPane.rightAnchor="0.0"/>

@@ -54,7 +54,7 @@
                     </Button>
                     <ToggleButton fx:id="filterShadowProjects" maxHeight="25.0" onAction="#onShowHideShadowProjects">
                         <tooltip>
-                            <Tooltip text="Enable\disable shadow projects"/>
+                            <Tooltip text="Show/Hide shadow projects"/>
                         </tooltip>
                     </ToggleButton>
 
