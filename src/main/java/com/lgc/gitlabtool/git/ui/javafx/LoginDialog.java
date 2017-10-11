@@ -61,14 +61,15 @@ class LoginDialog extends Dialog<DialogDTO> {
     private static final ConsoleService _consoleService = (ConsoleService) ServiceProvider.getInstance()
             .getService(ConsoleService.class.getName());
 
-    private static final String MESSAGE_WRONG_CREDENTIALS  = "Wrong login or password! Please try again";
-    private static final String MESSAGE_WAITING            = "Login... Please wait";
-    private static final String MESSAGE_EMPTY_FIELD        = "Login or password is empty!";
-    private static final String MESSAGE_HTTP_ERROR         = "Error logging in:";
-    private static final String MESSAGE_SPACE              = " ";
-    private static final String MESSAGE_DASH               = "-";
-    private static final String INFO_IMAGE_URL             = "icons/info_20x20.png";
-    private static final String CSS_PATH                   = "css/style.css";
+    private static final String MESSAGE_WRONG_CREDENTIALS              = "Wrong login or password! Please try again";
+    private static final String MESSAGE_WAITING                        = "Login... Please wait";
+    private static final String MESSAGE_EMPTY_FIELD                    = "Login or password is empty!";
+    private static final String MESSAGE_NETWORK_IS_NO_LONGER_AVAILABLE = "Network is no longer available!";
+    private static final String MESSAGE_HTTP_ERROR                     = "Error logging in:";
+    private static final String MESSAGE_SPACE                          = " ";
+    private static final String MESSAGE_DASH                           = "-";
+    private static final String INFO_IMAGE_URL                         = "icons/info_20x20.png";
+    private static final String CSS_PATH                               = "css/style.css";
 
     /** need to store two line message */
     private final double MIN_MESSAGE_HEIGHT = 40;
@@ -235,6 +236,8 @@ class LoginDialog extends Dialog<DialogDTO> {
             });
         } else if (responseHolder.getResponseCode() == HttpStatus.SC_UNAUTHORIZED) {
             showWarningAndDisableSignInButton(MESSAGE_WRONG_CREDENTIALS);
+        } else if (responseHolder.getResponseCode() == 0) {
+            showWarningAndDisableSignInButton(MESSAGE_NETWORK_IS_NO_LONGER_AVAILABLE);
         } else {
             StringBuilder errorMessage = new StringBuilder(MESSAGE_HTTP_ERROR);
             errorMessage.append(MESSAGE_SPACE)
