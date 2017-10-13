@@ -12,6 +12,7 @@
 <?import javafx.stage.Screen?>
 <?import javafx.scene.text.TextFlow?>
 <?import javafx.scene.control.ScrollPane?>
+<?import com.lgc.gitlabtool.git.ui.javafx.StatusBar?>
 
 <BorderPane id="background" prefHeight="${screen.visualBounds.maxY / 1.5}"
     prefWidth="${screen.visualBounds.maxX / 1.5}" xmlns="http://javafx.com/javafx/8"
@@ -38,6 +39,7 @@
                     <TextFlow fx:id="_console" style="-fx-background-color: #D7DBE3;">
                     </TextFlow>
                 </ScrollPane>
+                <StatusBar />
         </SplitPane>
     </center>
 </BorderPane>
