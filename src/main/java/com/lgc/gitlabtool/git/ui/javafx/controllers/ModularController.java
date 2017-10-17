@@ -120,6 +120,12 @@ public class ModularController implements UpdateProgressListener {
             .getService(ProjectService.class.getName());
 
     @FXML
+    private VBox topBackground;
+
+    @FXML
+    private BorderPane mainPanelBackground;
+
+    @FXML
     private ListView projectListView;
 
     @FXML
@@ -563,7 +569,8 @@ public class ModularController implements UpdateProgressListener {
 
         ToolbarManager.getInstance().lockButtons();
         MainMenuManager.getInstance().lockButtons();
-        background.setEffect(new GaussianBlur());
+        mainPanelBackground.setEffect(new GaussianBlur());
+        topBackground.setEffect(new GaussianBlur());
 
         Stage stage = (Stage) toolbar.getScene().getWindow();
 
@@ -593,7 +600,8 @@ public class ModularController implements UpdateProgressListener {
                 projectListView.setItems(FXCollections.observableArrayList(_projectsList.getProjects()));
                 ToolbarManager.getInstance().unlockButtons();
                 MainMenuManager.getInstance().unlockButtons();
-                background.setEffect(null);
+                mainPanelBackground.setEffect(null);
+                topBackground.setEffect(null);
                 _projectService.removeUpdateProgressListener(this);
 
             });
