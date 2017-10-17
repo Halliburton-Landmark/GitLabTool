@@ -63,6 +63,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.ToolBar;
 import javafx.scene.control.Tooltip;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.effect.GaussianBlur;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -159,6 +160,8 @@ public class ModularController implements UpdateProgressListener {
     private List<Menu> projectsWindowMainMenuItems = new LinkedList<>();
     private List<Menu> groupsWindowMainMenuItems = new LinkedList<>();
 
+    private HBox projectsToolbar;
+
     private WorkIndicatorDialog _workIndicatorDialog;
 
     @FXML
@@ -174,7 +177,7 @@ public class ModularController implements UpdateProgressListener {
     private void initializeProjectsWindow(){
         projectListView = new ListView();
         AnchorPane.setBottomAnchor(projectListView, 0.0);
-        AnchorPane.setTopAnchor(projectListView, 0.0);
+        AnchorPane.setTopAnchor(projectListView, 25.0);
         AnchorPane.setLeftAnchor(projectListView, 0.0);
         AnchorPane.setRightAnchor(projectListView, 0.0);
         configureProjectsListView(projectListView);
@@ -197,6 +200,29 @@ public class ModularController implements UpdateProgressListener {
 
         groupsWindowMainMenuItems = MainMenuManager.getInstance().createMainMenuItems(ViewKey.GROUP_WINDOW.getKey());
         initActionsMainMenu(ViewKey.GROUP_WINDOW.getKey());
+
+        initProjectsToolbar();
+    }
+
+    private void initProjectsToolbar(){
+        if(projectsToolbar != null){
+            return;
+        }
+
+        projectsToolbar = new HBox();
+        toolbar.setMaxHeight(25.0);
+
+        ToggleButton selectAllButton = new ToggleButton();
+        selectAllButton.setTooltip(new Tooltip("Select all projects"));
+
+        Button refreshProjectsButton = new Button();
+        refreshProjectsButton.setTooltip(new Tooltip("Refresh projects"));
+
+        ToggleButton filterShadowProjects = new ToggleButton();
+        filterShadowProjects.setTooltip(new Tooltip("Enable\\disable shadow projects"));
+
+        projectsToolbar.getChildren().addAll(selectAllButton, refreshProjectsButton, filterShadowProjects);
+
     }
 
     public void loadGroupWindow() {
@@ -614,7 +640,7 @@ public class ModularController implements UpdateProgressListener {
 
         listPane.getChildren().clear();
         listPane.getChildren().add(projectListView);
-
+        listPane.getChildren().add(projectsToolbar);
 //        ToolbarManager.getInstance().unlockButtons();
 //        MainMenuManager.getInstance().unlockButtons();
     }
