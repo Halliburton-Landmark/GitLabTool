@@ -165,6 +165,7 @@ public class MainWindowController implements StateListener {
         _stateService.addStateListener(ApplicationState.SWITCH_BRANCH, this);
         _stateService.addStateListener(ApplicationState.EDIT_POM, this);
         _stateService.addStateListener(ApplicationState.REVERT, this);
+        _stateService.addStateListener(ApplicationState.REFRESH_PROJECTS, this);
     }
 
     public void beforeShowing() {
@@ -781,6 +782,13 @@ public class MainWindowController implements StateListener {
             ExecutorService executor = Executors.newSingleThreadExecutor();
             executor.submit(() -> updateProjectsByState(state));
             executor.shutdown();
+        }
+        handleRefreshButtonState(state, isActivate);
+    }
+
+    private void handleRefreshButtonState(ApplicationState state, boolean isActivate) {
+        if(state == ApplicationState.REFRESH_PROJECTS) {
+            refreshProjectsButton.setDisable(isActivate);
         }
     }
 
