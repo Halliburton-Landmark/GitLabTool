@@ -1,9 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.ToolBar?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.TextFlow?>
 <?import javafx.stage.Screen?>
+<?import com.lgc.gitlabtool.git.ui.javafx.StatusBar?>
+
 <AnchorPane prefHeight="${screen.visualBounds.maxY / 1.5}"
             prefWidth="${screen.visualBounds.maxX / 1.5}" xmlns="http://javafx.com/javafx/8"
             xmlns:fx="http://javafx.com/fxml/1"
@@ -42,7 +54,7 @@
                             </rowConstraints>
 
                             <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0">
-                                <Label fx:id="leftLabel" textFill="WHITE"/>
+                                <Label fx:id="groupPath" textFill="WHITE"/>
                             </HBox>
 
                             <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0"
@@ -83,6 +95,7 @@
                     <TextFlow fx:id="_console" style="-fx-background-color: #D7DBE3;">
                     </TextFlow>
                 </ScrollPane>
+                <StatusBar />
             </SplitPane>
         </center>
     </BorderPane>

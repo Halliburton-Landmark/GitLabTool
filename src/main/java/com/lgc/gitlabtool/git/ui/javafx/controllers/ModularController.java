@@ -25,6 +25,7 @@ import com.lgc.gitlabtool.git.listeners.updateProgressListener.UpdateProgressLis
 import com.lgc.gitlabtool.git.services.ClonedGroupsService;
 import com.lgc.gitlabtool.git.services.ConsoleService;
 import com.lgc.gitlabtool.git.services.GroupsUserService;
+import com.lgc.gitlabtool.git.services.LoginService;
 import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StateService;
@@ -54,6 +55,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Menu;
@@ -88,6 +90,7 @@ public class ModularController implements UpdateProgressListener {
     private static final Logger logger = LogManager.getLogger(ModularController.class);
 
     private final String CLASS_ID = ModularController.class.getName();
+    private static final String HEDER_GROUP_TITLE = "Current group: ";
     private static final String ABOUT_POPUP_TITLE = "About";
     private static final String ABOUT_POPUP_HEADER =
             getProjectNameWithVersion() + " (" + getCommitHash() + "), powered by Luxoft";
@@ -123,6 +126,15 @@ public class ModularController implements UpdateProgressListener {
 
     private static final ProjectService _projectService = (ProjectService) ServiceProvider.getInstance()
             .getService(ProjectService.class.getName());
+
+    private static final LoginService _loginService = (LoginService) ServiceProvider.getInstance()
+            .getService(LoginService.class.getName());
+
+    @FXML
+    private Label userId;
+
+    @FXML
+    private Label groupPath;
 
     @FXML
     private VBox topBackground;
@@ -171,6 +183,8 @@ public class ModularController implements UpdateProgressListener {
     @FXML
     public void initialize() {
         toolbar.getStylesheets().add(getClass().getClassLoader().getResource(CSS_PATH).toExternalForm());
+
+        userId.setText(_loginService.getCurrentUser().getName());
 
         initializeProjectsWindow();
         initializeGroupsWindow();
@@ -603,8 +617,8 @@ public class ModularController implements UpdateProgressListener {
         toolbar.getItems().addAll(projectsWindowToolbarItems);
         menuBar.getMenus().addAll(projectsWindowMainMenuItems);
 
-        //TODO: REWRITE ACTIONS INITIALIZATION
-        // initActionsMainMenu(ViewKey.MAIN_WINDOW.getKey());
+        String groupTitle = group.getName() + " [" + group.getPathToClonedGroup() + "]";
+        groupPath.setText(HEDER_GROUP_TITLE + groupTitle);
 
         ToolbarManager.getInstance().lockButtons();
         MainMenuManager.getInstance().lockButtons();

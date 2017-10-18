@@ -59,7 +59,7 @@ public enum ApplicationState {
     REFRESH_PROJECTS {
         @Override
         public String toString() {
-            return "Refresh projects";
+            return "Refreshing projects";
 
         }
     },
@@ -67,8 +67,7 @@ public enum ApplicationState {
     REVERT {
         @Override
         public String toString() {
-            return "Revert changes";
-
+            return "Reverting changes";
         }
     };
 
