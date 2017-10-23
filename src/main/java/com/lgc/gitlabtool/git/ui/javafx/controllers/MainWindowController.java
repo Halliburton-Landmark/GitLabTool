@@ -799,7 +799,7 @@ public class MainWindowController implements StateListener {
             refreshLoadProjects();
             return;
         }
-        if (state != ApplicationState.UPDATE_PROJECT_STATUSES) {
+        if (state != ApplicationState.UPDATE_PROJECT_STATUSES && state != ApplicationState.LOAD_PROJECTS) {
             _projectService.updateProjectStatuses(projects);
         }
         hideShadowsAction();
