@@ -6,11 +6,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.services.ConsoleService;
 import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
-import com.lgc.gitlabtool.git.services.StateService;
 
 /**
  * Keeps data about projects of current group in the main window.
@@ -22,9 +20,6 @@ public class ProjectList {
 
     private final ProjectService _projectService = (ProjectService) ServiceProvider.getInstance()
             .getService(ProjectService.class.getName());
-
-    private final StateService _stateService = (StateService) ServiceProvider.getInstance()
-            .getService(StateService.class.getName());
 
     private static final ConsoleService _consoleService = (ConsoleService) ServiceProvider.getInstance()
             .getService(ConsoleService.class.getName());
@@ -77,9 +72,7 @@ public class ProjectList {
      */
     public void refreshLoadProjects() {
         if (_currentGroup != null) {
-            _stateService.stateON(ApplicationState.REFRESH_PROJECTS);
             _projects = loadProjects();
-            _stateService.stateOFF(ApplicationState.REFRESH_PROJECTS);
         }
     }
 

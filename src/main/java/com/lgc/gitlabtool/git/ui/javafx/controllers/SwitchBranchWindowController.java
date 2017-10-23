@@ -98,7 +98,7 @@ public class SwitchBranchWindowController implements StateListener {
     private static final String ALREADY_SWICHED_MESSAGE = "%d of %d projects have already switched to the selected branch.";
 
     {
-        _stateService.addStateListener(ApplicationState.REFRESH_PROJECTS, this);
+        _stateService.addStateListener(ApplicationState.LOAD_PROJECTS, this);
     }
 
     @FXML

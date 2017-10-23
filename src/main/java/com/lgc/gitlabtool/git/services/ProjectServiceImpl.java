@@ -142,6 +142,16 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
+    public void updateProjectStatuses(List<Project> projects) {
+        if (projects == null || projects.isEmpty()) {
+            return;
+        }
+        _stateService.stateON(ApplicationState.UPDATE_PROJECT_STATUSES);
+        projects.parallelStream().filter(Project::isCloned)
+                                 .forEach(this::updateProjectStatus);
+        _stateService.stateOFF(ApplicationState.UPDATE_PROJECT_STATUSES);
+    }
+
     public void updateProjectStatus(Project project) {
         if (project == null || project.getPath() == null) {
             return;
