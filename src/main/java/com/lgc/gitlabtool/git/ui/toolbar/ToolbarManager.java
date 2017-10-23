@@ -5,6 +5,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -66,11 +67,6 @@ public class ToolbarManager {
     public List<Node> createToolbarItems(String windowId) {
 
         items = new ArrayList<>();
-
-        if (!windowId.equals(ViewKey.GROUP_WINDOW.getKey())) {
-            items.add(createHomeButton());
-        }
-
         for (ToolbarButtons button : ToolbarButtons.values()) {
             if (button.getViewKey().equals(windowId)) {
                 items.add(createButton(button.getId(), button.getIconUrl(), button.getText(), button.getTooltip()));
