@@ -39,7 +39,10 @@
                     <TextFlow fx:id="_console" style="-fx-background-color: #D7DBE3;">
                     </TextFlow>
                 </ScrollPane>
-                <StatusBar />
         </SplitPane>
     </center>
+
+    <bottom>
+        <StatusBar/>
+    </bottom>
 </BorderPane>

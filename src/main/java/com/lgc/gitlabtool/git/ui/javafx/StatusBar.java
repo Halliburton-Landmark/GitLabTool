@@ -12,6 +12,7 @@ import com.lgc.gitlabtool.git.services.StateService;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.layout.HBox;
@@ -47,12 +48,13 @@ public class StatusBar extends HBox implements StateListener {
     }
 
     private void initUI() {
+        this.setAlignment(Pos.CENTER_RIGHT);
         this.setMaxHeight(STATUS_BAR_HEIGHT);
         this.setHeight(STATUS_BAR_HEIGHT);
         _currentStatus.setText(READY_TO_USE_STATE);
         _statusIndicator.setVisible(false);
 
-        getChildren().addAll(_statusIndicator, _currentStatus);
+        getChildren().addAll(_currentStatus, _statusIndicator);
         setSpacing(ELEMENTS_SPACING);
     }
 
