@@ -85,9 +85,11 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public Collection<Project> loadProjects(Group group) {
+        _stateService.stateON(ApplicationState.REFRESH_PROJECTS);
         Collection<Project> projects = getProjects(group);
         if (projects.isEmpty()) {
             _consoleService.addMessage(GROUP_DOESNT_HAVE_PROJECTS_MESSAGE, MessageType.ERROR);
+            _stateService.stateOFF(ApplicationState.REFRESH_PROJECTS);
             return Collections.emptyList();
         }
         String successMessage = "The projects of " + group.getName() + PREFIX_SUCCESSFUL_LOAD;
@@ -95,6 +97,7 @@ public class ProjectServiceImpl implements ProjectService {
         Collection<String> projectsName = PathUtilities.getFolders(path);
         if (projectsName.isEmpty()) {
             _consoleService.addMessage(successMessage, MessageType.SUCCESS);
+            _stateService.stateOFF(ApplicationState.REFRESH_PROJECTS);
             return projects;
         }
 
@@ -105,6 +108,7 @@ public class ProjectServiceImpl implements ProjectService {
                 .filter(project -> projectsName.contains(project.getName()))
                 .forEach((project) -> updateDataProject(project, group.getPathToClonedGroup()));
         _consoleService.addMessage(successMessage, MessageType.SUCCESS);
+        _stateService.stateOFF(ApplicationState.REFRESH_PROJECTS);
         return projects;
     }
 

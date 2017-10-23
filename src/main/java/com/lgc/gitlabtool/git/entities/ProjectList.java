@@ -23,6 +23,8 @@ public class ProjectList {
     private final ProjectService _projectService = (ProjectService) ServiceProvider.getInstance()
             .getService(ProjectService.class.getName());
 
+    // Hint. StateService usage in this class removed in the issue #200
+    // I didn't remove the instance because it could be used later 
     private final StateService _stateService = (StateService) ServiceProvider.getInstance()
             .getService(StateService.class.getName());
 
@@ -77,9 +79,7 @@ public class ProjectList {
      */
     public void refreshLoadProjects() {
         if (_currentGroup != null) {
-            _stateService.stateON(ApplicationState.REFRESH_PROJECTS);
             _projects = loadProjects();
-            _stateService.stateOFF(ApplicationState.REFRESH_PROJECTS);
         }
     }
 
