@@ -20,13 +20,13 @@ import javafx.scene.layout.HBox;
 /**
  * Modified HBox component that shows current application status
  * Status bar contains progress indicator, that will be shown if some operation runs and won't show otherwise
- *
+ * 
  * @author Igor Khlaponin
  *
  */
 public class StatusBar extends HBox implements StateListener {
 
-    private static final StateService _stateService =
+    private static final StateService _stateService = 
             (StateService) ServiceProvider.getInstance().getService(StateService.class.getName());
 
     private static final double STATUS_BAR_HEIGHT = 15.0;

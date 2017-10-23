@@ -778,9 +778,6 @@ public class MainWindowController implements StateListener {
 
     @Override
     public void handleEvent(ApplicationState state, boolean isActivate) {
-        if (state == ApplicationState.UPDATE_PROJECT_STATUSES) {
-            return;
-        }
         if (!isActivate) {
             ExecutorService executor = Executors.newSingleThreadExecutor();
             executor.submit(() -> updateProjectsByState(state));
