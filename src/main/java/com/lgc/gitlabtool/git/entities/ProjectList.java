@@ -152,7 +152,6 @@ public class ProjectList {
 
     /**
      * Gets cloned projects
-     *
      * @return projects
      */
     public List<Project> getClonedProjects() {

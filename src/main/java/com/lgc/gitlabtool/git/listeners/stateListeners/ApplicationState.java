@@ -60,7 +60,6 @@ public enum ApplicationState {
         @Override
         public String toString() {
             return "Loading projects";
-
         }
     },
 
@@ -68,7 +67,6 @@ public enum ApplicationState {
         @Override
         public String toString() {
             return "Updating project statuses";
-
         }
     },
 
