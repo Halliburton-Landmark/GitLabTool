@@ -151,6 +151,16 @@ public class ProjectList {
     }
 
     /**
+     * Gets cloned projects
+     * @return projects
+     */
+    public List<Project> getClonedProjects() {
+        return _projects.stream()
+                        .filter(Project::isCloned)
+                        .collect(Collectors.toList());
+    }
+
+    /**
      * Resets ProjectList data. After this method _isLockCreating is <code>false</code>.
      * This allows create new instance of ProjectList for another group.
      */
