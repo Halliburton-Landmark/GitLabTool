@@ -1,6 +1,5 @@
 package com.lgc.gitlabtool.git.ui.javafx.controllers;
 
-
 import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
@@ -165,6 +164,7 @@ public class MainWindowController implements StateListener {
         _stateService.addStateListener(ApplicationState.EDIT_POM, this);
         _stateService.addStateListener(ApplicationState.REVERT, this);
         _stateService.addStateListener(ApplicationState.LOAD_PROJECTS, this);
+        _stateService.addStateListener(ApplicationState.UPDATE_PROJECT_STATUSES, this);
     }
 
     public void beforeShowing() {
@@ -801,7 +801,9 @@ public class MainWindowController implements StateListener {
             refreshLoadProjects();
             return;
         }
-        _projectService.updateProjectStatuses(projects);
+        if (!(state == ApplicationState.LOAD_PROJECTS && state == ApplicationState.UPDATE_PROJECT_STATUSES)) {
+            _projectService.updateProjectStatuses(projects);
+        }
         hideShadowsAction();
     }
 }
