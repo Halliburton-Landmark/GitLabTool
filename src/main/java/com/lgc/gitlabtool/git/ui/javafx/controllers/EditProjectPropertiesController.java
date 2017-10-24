@@ -60,7 +60,6 @@ public class EditProjectPropertiesController implements StateListener {
 
     {
         _stateService.addStateListener(ApplicationState.LOAD_PROJECTS, this);
-        _stateService.addStateListener(ApplicationState.UPDATE_PROJECT_STATUSES, this);
     }
 
     @FXML

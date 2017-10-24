@@ -166,7 +166,6 @@ public class MainWindowController implements StateListener {
         _stateService.addStateListener(ApplicationState.EDIT_POM, this);
         _stateService.addStateListener(ApplicationState.REVERT, this);
         _stateService.addStateListener(ApplicationState.LOAD_PROJECTS, this);
-        _stateService.addStateListener(ApplicationState.UPDATE_PROJECT_STATUSES, this);
     }
 
     public void beforeShowing() {
@@ -799,9 +798,7 @@ public class MainWindowController implements StateListener {
             refreshLoadProjects();
             return;
         }
-        if (state != ApplicationState.UPDATE_PROJECT_STATUSES) {
-            _projectService.updateProjectStatuses(projects);
-        }
+        _projectService.updateProjectStatuses(projects);
         hideShadowsAction();
     }
 }
