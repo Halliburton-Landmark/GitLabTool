@@ -63,7 +63,6 @@ import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -618,12 +617,13 @@ public class MainWindowController implements StateListener {
             public void run() {
                 Boolean isHide = preferences.getBoolean(PREF_NAME_HIDE_SHADOWS, false);
                 filterShadowProjects.setSelected(isHide);
-                if (isHide) {
-                    ObservableList<Project> obsList = FXCollections.observableArrayList(_projectsList.getProjects());
-                    FilteredList<Project> list = new FilteredList<>(obsList, Project::isCloned);
-                    projectsList.setItems(list);
-                } else {
+                ObservableList<Project> obsList = FXCollections.observableArrayList(
+                        isHide ? _projectsList.getClonedProjects() : _projectsList.getProjects());
+                projectsList.setItems(obsList);
+                if (!isHide) {
                     sortProjectsList();
+                } else {
+                    projectsList.refresh();
                 }
             }
         });
