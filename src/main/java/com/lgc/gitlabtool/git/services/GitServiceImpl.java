@@ -81,6 +81,7 @@ public class GitServiceImpl implements GitService {
                           AtomicInteger percentages,
                           int step) {
         try {
+            progress.onStart(project);
             percentages.addAndGet(step);
             JGitStatus status = _git.switchTo(project, branchName, isRemote);
             if (status == JGitStatus.SUCCESSFUL) {

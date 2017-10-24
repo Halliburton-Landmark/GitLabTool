@@ -155,7 +155,6 @@ public class SwitchBranchWindowController implements StateListener {
         //String dialogMessage = "%s projects were switched successfully";
         //switchToStatusDialog(switchStatuses, selectedProjects.size(), dialogMessage);
         //currentProjectsListView.refresh();
-        //disableSwitchButton(selectedBranch);
     }
 
     private void switchAction(Object selectedBranch, List<Project> projects, ProgressDialog progressDialog) {
@@ -383,6 +382,7 @@ public class SwitchBranchWindowController implements StateListener {
                         } else {
                             currentProjectsListView.setItems(FXCollections.observableArrayList(getProjectsByIds()));
                         }
+                        disableSwitchButton(branch);
                     }
                 });
             });
