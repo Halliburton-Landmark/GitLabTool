@@ -44,7 +44,6 @@ public class CreateNewBranchDialog extends Dialog<String> {
     private static final String STATUS_DIALOG_TITLE = "Branch Creating status";
     private static final String STATUS_DIALOG_HEADER = "Branch creating info";
     private static final String CHOOSE_BRANCH_NAME_MESSAGE = "Please choose a new branch name";
-    private static final String WRONG_INPUT_MESSAGE = " is a wrong branch name. Please try again!";
 
     private static final Logger _logger = LogManager.getLogger(CreateNewBranchDialog.class);
     private static final GitService _gitService = (GitService) ServiceProvider.getInstance()
@@ -142,7 +141,7 @@ public class CreateNewBranchDialog extends Dialog<String> {
         Set<String> branchesNames = branches.stream()
                 .map(branch -> branch.getBranchName())
                 .collect(Collectors.toSet());
-        
+
         ObservableList<String> options = FXCollections.observableArrayList(branchesNames);
         return options;
     }
@@ -164,7 +163,7 @@ public class CreateNewBranchDialog extends Dialog<String> {
 
     private void onCreateButton(ActionEvent event) {
         String newBranchName = _branchNameField.getText().trim();
-        String startPoint = (String) _comboBox.getSelectionModel().getSelectedItem();
+        String startPoint = _comboBox.getSelectionModel().getSelectedItem();
         Map<Project, JGitStatus> results = _gitService.createBranch(getProjects(), newBranchName, startPoint, false);
 
         boolean switchToBranch = _checkoutBox.isSelected();
@@ -194,8 +193,8 @@ public class CreateNewBranchDialog extends Dialog<String> {
 
     private ChangeListener<? super String> getInputFilter() {
         return (observable, oldValue, newValue) -> {
-            if (!_branchNameField.getText().isEmpty() 
-                    && isInputValid(_branchNameField.getText()) 
+            if (!_branchNameField.getText().isEmpty()
+                    && isInputValid(_branchNameField.getText())
                     && !_comboBox.getSelectionModel().getSelectedItem().isEmpty()) {
                 _createButton.setDisable(false);
                 _branchNameField.setStyle("-fx-border-color: green;");
@@ -243,7 +242,7 @@ public class CreateNewBranchDialog extends Dialog<String> {
             // we do not show switching on statuses here
             // because we show the statuses of branches creation
             // In the same time we could see that branch is changed on the projects list panel
-            _gitService.switchTo(projects, (String) branchName, false);
+            _gitService.switchTo(projects, (String) branchName, false, null);
         } else {
             ChangesCheckDialog alert = new ChangesCheckDialog();
             alert.launchConfirmationDialog(changedProjects, projects, branchName, this::switchBranch);

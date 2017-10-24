@@ -32,9 +32,11 @@ public interface GitService {
      *
      * @param projects projects that need to be switched
      * @param branch selected branch
+     * @param progress
+     *
      * @return map with projects and theirs statuses of switching
      */
-    Map<Project, JGitStatus> switchTo(List<Project> projects, Branch branch);
+    Map<Project, JGitStatus> switchTo(List<Project> projects, Branch branch, ProgressListener progress);
 
     /**
      * Switches projects to selected branch
@@ -44,7 +46,7 @@ public interface GitService {
      * @param isRemote <code>true</code> if the branch has {@link BranchType#REMOTE}
      * @return map with projects and theirs statuses of switching
      */
-    Map<Project, JGitStatus> switchTo(List<Project> projects, String branchName, boolean isRemote);
+    Map<Project, JGitStatus> switchTo(List<Project> projects, String branchName, boolean isRemote, ProgressListener progress);
 
     /**
      * Gets projects that have uncommited changes
