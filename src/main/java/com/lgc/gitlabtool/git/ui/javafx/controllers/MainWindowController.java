@@ -165,7 +165,8 @@ public class MainWindowController implements StateListener {
         _stateService.addStateListener(ApplicationState.SWITCH_BRANCH, this);
         _stateService.addStateListener(ApplicationState.EDIT_POM, this);
         _stateService.addStateListener(ApplicationState.REVERT, this);
-        _stateService.addStateListener(ApplicationState.REFRESH_PROJECTS, this);
+        _stateService.addStateListener(ApplicationState.LOAD_PROJECTS, this);
+        _stateService.addStateListener(ApplicationState.UPDATE_PROJECT_STATUSES, this);
     }
 
     public void beforeShowing() {
@@ -787,7 +788,7 @@ public class MainWindowController implements StateListener {
     }
 
     private void handleRefreshButtonState(ApplicationState state, boolean isActivate) {
-        if(state == ApplicationState.REFRESH_PROJECTS) {
+        if(state == ApplicationState.LOAD_PROJECTS) {
             refreshProjectsButton.setDisable(isActivate);
         }
     }
@@ -798,9 +799,9 @@ public class MainWindowController implements StateListener {
             refreshLoadProjects();
             return;
         }
-        projects.parallelStream()
-                .filter(Project::isCloned)
-                .forEach(_projectService::updateProjectStatus);
+        if (state != ApplicationState.UPDATE_PROJECT_STATUSES && state != ApplicationState.LOAD_PROJECTS) {
+            _projectService.updateProjectStatuses(projects);
+        }
         hideShadowsAction();
     }
 }
