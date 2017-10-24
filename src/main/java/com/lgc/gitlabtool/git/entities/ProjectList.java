@@ -155,7 +155,9 @@ public class ProjectList {
      * @return projects
      */
     public List<Project> getClonedProjects() {
-        return _projects.stream().filter(Project::isCloned).collect(Collectors.toList());
+        return _projects.stream()
+                        .filter(Project::isCloned)
+                        .collect(Collectors.toList());
     }
 
     /**
