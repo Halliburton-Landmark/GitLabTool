@@ -801,7 +801,8 @@ public class MainWindowController implements StateListener {
         }
         if (state != ApplicationState.UPDATE_PROJECT_STATUSES && state != ApplicationState.LOAD_PROJECTS) {
             _projectService.updateProjectStatuses(projects);
+        } else {
+            hideShadowsAction();
         }
-        hideShadowsAction();
     }
 }
