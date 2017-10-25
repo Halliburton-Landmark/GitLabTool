@@ -2,6 +2,7 @@ package com.lgc.gitlabtool.git.ui.javafx.controllers;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.ProjectList;
@@ -34,7 +35,6 @@ public class AddRemoveFilesWindowController {
 
     public void beforeShowing(List<Integer> projectIds) {
         _selectedProjectIds = projectIds;
-
         _filterField.setText("" + _selectedProjectIds.size());
 
         ObservableList<SortingType> items = FXCollections.observableArrayList(SortingType.PROJECTS,
@@ -47,6 +47,11 @@ public class AddRemoveFilesWindowController {
     }
 
     private void configureListViews() {
+        List<String> items = getSelectedProjects().stream()
+                                                  .map(project -> project.getName())
+                                                  .collect(Collectors.toList());
+        ObservableList<String> observableItems = FXCollections.observableArrayList(items);
+        _unstagedFilesListView.setItems(observableItems);
 
         _unstagedFilesListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         _stagedFilesListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
