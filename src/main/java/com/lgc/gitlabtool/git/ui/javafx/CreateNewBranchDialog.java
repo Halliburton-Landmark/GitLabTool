@@ -139,9 +139,8 @@ public class CreateNewBranchDialog extends Dialog<String> {
     private ObservableList<String> getBoxOptions() {
         Set<Branch> branches = _gitService.getBranches(getProjects(), BranchType.ALL, true);
         Set<String> branchesNames = branches.stream()
-                .map(branch -> branch.getBranchName())
-                .collect(Collectors.toSet());
-
+                                            .map(branch -> branch.getBranchName())
+                                            .collect(Collectors.toSet());
         ObservableList<String> options = FXCollections.observableArrayList(branchesNames);
         return options;
     }
@@ -149,21 +148,21 @@ public class CreateNewBranchDialog extends Dialog<String> {
     private String getDefaultBranchOption(ObservableList<String> options) {
         String currentBranchName = getCurrentCommonBranchName(getProjects());
         return options.stream()
-                .filter(element -> element.equals(currentBranchName))
-                .findFirst().orElse(StringUtils.EMPTY);
+                      .filter(element -> element.equals(currentBranchName))
+                      .findFirst().orElse(StringUtils.EMPTY);
     }
 
     private String getCurrentCommonBranchName(List<Project> projects) {
         List<String> currentBranches = projects.stream()
-                .map(project -> _gitService.getCurrentBranchName(project))
-                .distinct()
-                .collect(Collectors.toList());
+                                               .map(project -> _gitService.getCurrentBranchName(project))
+                                               .distinct()
+                                               .collect(Collectors.toList());
         return currentBranches.size() > 1 ? StringUtils.EMPTY : currentBranches.get(0);
     }
 
     private void onCreateButton(ActionEvent event) {
         String newBranchName = _branchNameField.getText().trim();
-        String startPoint = _comboBox.getSelectionModel().getSelectedItem();
+        String startPoint = (String) _comboBox.getSelectionModel().getSelectedItem();
         Map<Project, JGitStatus> results = _gitService.createBranch(getProjects(), newBranchName, startPoint, false);
 
         boolean switchToBranch = _checkoutBox.isSelected();
@@ -193,8 +192,8 @@ public class CreateNewBranchDialog extends Dialog<String> {
 
     private ChangeListener<? super String> getInputFilter() {
         return (observable, oldValue, newValue) -> {
-            if (!_branchNameField.getText().isEmpty()
-                    && isInputValid(_branchNameField.getText())
+            if (!_branchNameField.getText().isEmpty() 
+                    && isInputValid(_branchNameField.getText()) 
                     && !_comboBox.getSelectionModel().getSelectedItem().isEmpty()) {
                 _createButton.setDisable(false);
                 _branchNameField.setStyle("-fx-border-color: green;");

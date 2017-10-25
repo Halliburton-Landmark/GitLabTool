@@ -67,7 +67,7 @@ public class GitServiceImpl implements GitService {
         final Map<Project, JGitStatus> switchStatuses = new ConcurrentHashMap<>();
         final long step = 100 / projects.size();
         final AtomicLong percentages = new AtomicLong(0);
-        projects.stream()
+        projects.parallelStream()
                 .forEach(project -> switchTo(switchStatuses, project, branchName, isRemote, progress, percentages, step));
         progress.onFinish("Switch branch operation is finished.");
         return switchStatuses;
