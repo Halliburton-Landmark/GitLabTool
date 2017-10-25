@@ -50,7 +50,6 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -77,8 +76,8 @@ public class ModularController implements UpdateProgressListener {
 
     private static final String ABOUT_POPUP_TITLE = "About";
 
-    private static final String ABOUT_POPUP_HEADER =
-            getProjectNameWithVersion() + " (" + getCommitHash() + "), powered by Luxoft";
+    private static final String ABOUT_POPUP_HEADER = getProjectNameWithVersion() + " (" + getCommitHash()
+            + "), powered by Luxoft";
     private static final String ABOUT_POPUP_CONTENT = "Contacts: Yurii Pitomets (yurii.pitomets2@halliburton.com)";
     private static final String SWITCH_BRANCH_TITLE = "Switch branch";
 
@@ -131,6 +130,8 @@ public class ModularController implements UpdateProgressListener {
     private static final ProjectService _projectService = (ProjectService) ServiceProvider.getInstance()
             .getService(ProjectService.class.getName());
 
+    private static ToolbarManager _toolbarMgr = ToolbarManager.getInstance();
+
     @FXML
     public void initialize() {
         toolbar.getStylesheets().add(getClass().getClassLoader().getResource(CSS_PATH).toExternalForm());
@@ -157,6 +158,38 @@ public class ModularController implements UpdateProgressListener {
         updateCurrentConsole();
     }
 
+    private void loadAddRemoveFilesWindow(ActionEvent event) {
+        try {
+            URL switchBranchWindowUrl = getClass().getClassLoader().getResource(ViewKey.ADD_REMOVE_FILES_WINDOW.getPath());
+            FXMLLoader loader = new FXMLLoader(switchBranchWindowUrl);
+            Parent root = loader.load();
+
+            AddRemoveFilesWindowController addRemoveFilesWindowController = loader.getController();
+            //switchWindowController.beforeShowing(new ArrayList<>());
+
+            Scene scene = new Scene(root);
+            Stage stage = new Stage();
+            stage.setScene(scene);
+            stage.getIcons().add(_appIcon);
+            stage.setResizable(false);
+            stage.setTitle("Add/Remove Files window");
+            stage.initModality(Modality.APPLICATION_MODAL);
+
+            /* Set sizing and position */
+            double dialogWidth = 500;
+            double dialogHeight = 400;
+
+            ScreenUtil.adaptForMultiScreens(stage, dialogWidth, dialogHeight);
+
+            stage.setHeight(dialogHeight);
+            stage.setWidth(dialogWidth);
+
+            stage.show();
+        } catch (IOException e) {
+            logger.error("Could not load fxml resource", e);
+        }
+    }
+
     public void loadMainWindow(Group selectedGroup) throws IOException {
         _projectService.addUpdateProgressListener(this);
         toolbar.getItems().addAll(ToolbarManager.getInstance().createToolbarItems(ViewKey.MAIN_WINDOW.getKey()));
@@ -175,7 +208,7 @@ public class ModularController implements UpdateProgressListener {
 
         _workIndicatorDialog = new WorkIndicatorDialog(stage, WORK_INDICATOR_START_MESSAGE);
 
-        Runnable selectGroup = () ->{
+        Runnable selectGroup = () -> {
             _mainWindowController.setSelectedGroup(selectedGroup);
 
             // UI updating
@@ -216,26 +249,25 @@ public class ModularController implements UpdateProgressListener {
 
     private void initActionsToolBar(String windowId) {
         if (windowId.equals(ViewKey.GROUP_WINDOW.getKey())) {
-            ToolbarManager.getInstance().getButtonById(ToolbarButtons.IMPORT_GROUP_BUTTON.getId())
-                    .setOnAction(event -> importGroupDialog());
+            _toolbarMgr.getButtonById(ToolbarButtons.IMPORT_GROUP_BUTTON.getId())
+                       .setOnAction(this::importGroupDialog);
 
-            ToolbarManager.getInstance().getButtonById(ToolbarButtons.REMOVE_GROUP_BUTTON.getId())
-                    .setOnAction(this::onRemoveGroup);
+            _toolbarMgr.getButtonById(ToolbarButtons.REMOVE_GROUP_BUTTON.getId())
+                       .setOnAction(this::onRemoveGroup);
 
         } else if (windowId.equals(ViewKey.MAIN_WINDOW.getKey())) {
-            Button switchBranch = ToolbarManager.getInstance()
-                    .getButtonById(ToolbarButtons.SWITCH_BRANCH_BUTTON.getId());
-            switchBranch.setOnAction(event -> switchBranchAction());
+            _toolbarMgr.getButtonById(ToolbarButtons.SWITCH_BRANCH_BUTTON.getId())
+                       .setOnAction(this::showSwitchBranchWindow);
+
+            _toolbarMgr.getButtonById(ToolbarButtons.ADD_REMOVE_FILES.getId())
+                       .setOnAction(this::loadAddRemoveFilesWindow);
         }
     }
 
     private void removeGroupDialog(Group selectedGroup) {
-        AlertWithCheckBox alert = new AlertWithCheckBox(AlertType.CONFIRMATION,
-                REMOVE_GROUP_DIALOG_TITLE,
-                "You want to remove the " + selectedGroup.getName() + " group.",
-                "Are you sure you want to delete it?",
-                "remove group from a local disk",
-                ButtonType.YES, ButtonType.NO);
+        AlertWithCheckBox alert = new AlertWithCheckBox(AlertType.CONFIRMATION, REMOVE_GROUP_DIALOG_TITLE,
+                "You want to remove the " + selectedGroup.getName() + " group.", "Are you sure you want to delete it?",
+                "remove group from a local disk", ButtonType.YES, ButtonType.NO);
 
         Optional<ButtonType> result = alert.showAndWait();
         if (result.get() == ButtonType.NO) {
@@ -286,22 +318,18 @@ public class ModularController implements UpdateProgressListener {
             userGuide.setAccelerator(new KeyCodeCombination(KeyCode.F1));
 
             MenuItem switchTo = MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_SWITCH_BRANCH);
-            switchTo.setOnAction(event -> showSwitchBranchWindow());
+            switchTo.setOnAction(this::showSwitchBranchWindow);
 
         }
     }
 
-    private void switchBranchAction(){
-        showSwitchBranchWindow();
-    }
-
-    private void showSwitchBranchWindow() {
+    private void showSwitchBranchWindow(ActionEvent event) {
         try {
             List<Project> projects = SelectionsProvider.getInstance().getSelectionItems("mainWindow_projectsList");
             projects = ProjectList.getCorrectProjects(projects);
             if (projects.isEmpty()) {
                 String message = String.format(MainWindowController.NO_ANY_PROJECT_FOR_OPERATION,
-                                               MainWindowController.SWITCH_BEANCH_OPERATION_NAME);
+                        MainWindowController.SWITCH_BEANCH_OPERATION_NAME);
                 _consoleService.addMessage(message, MessageType.ERROR);
                 return;
             }
@@ -310,7 +338,7 @@ public class ModularController implements UpdateProgressListener {
             FXMLLoader loader = new FXMLLoader(switchBranchWindowUrl);
             Parent root = loader.load();
 
-            SwitchBranchWindowController switchWindowController  = loader.getController();
+            SwitchBranchWindowController switchWindowController = loader.getController();
             switchWindowController.beforeShowing(projects);
 
             Scene scene = new Scene(root);
@@ -360,7 +388,7 @@ public class ModularController implements UpdateProgressListener {
         alert.show();
     }
 
-    private void importGroupDialog() {
+    private void importGroupDialog(ActionEvent event) {
         if (viewPane != null) {
             Stage stage = (Stage) viewPane.getScene().getWindow();
             stage.getIcons().add(_appIcon);
