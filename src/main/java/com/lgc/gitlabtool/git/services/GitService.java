@@ -7,6 +7,7 @@ import java.util.Set;
 import com.lgc.gitlabtool.git.entities.Branch;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.jgit.BranchType;
+import com.lgc.gitlabtool.git.jgit.ChangedFiles;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 
@@ -157,4 +158,6 @@ public interface GitService {
      * Starts canceling process for cloning. This may take some time.
      */
     void cancelClone();
+
+    ChangedFiles getChangedFiles(Project project);
 }

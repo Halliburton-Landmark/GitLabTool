@@ -340,6 +340,10 @@ public class ModularController implements UpdateProgressListener {
     private void showSwitchBranchWindow(ActionEvent event) {
         try {
             List<Project> projects = SelectionsProvider.getInstance().getSelectionItems("mainWindow_projectsList");
+
+            //GitService service = (GitService) ServiceProvider.getInstance().getService(GitService.class.getName());
+            //service.getChangedFiles(projects.get(0));
+
             projects = ProjectList.getCorrectProjects(projects);
             if (projects.isEmpty()) {
                 String message = String.format(MainWindowController.NO_ANY_PROJECT_FOR_OPERATION,
