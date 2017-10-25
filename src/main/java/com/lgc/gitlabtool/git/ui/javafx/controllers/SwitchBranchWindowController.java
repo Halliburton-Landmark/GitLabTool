@@ -147,14 +147,9 @@ public class SwitchBranchWindowController implements StateListener {
     }
 
     private void switchBranch(List<Project> selectedProjects, Object selectedBranch) {
-
         ProgressDialog progressDialog = new SwitchBranchProgressDialog();
         progressDialog.setStartAction(() -> switchAction(selectedBranch, selectedProjects, progressDialog));
         progressDialog.showDialog();
-        //Map<Project, JGitStatus> switchStatuses = _gitService.switchTo(selectedProjects, (Branch) selectedBranch);
-        //String dialogMessage = "%s projects were switched successfully";
-        //switchToStatusDialog(switchStatuses, selectedProjects.size(), dialogMessage);
-        //currentProjectsListView.refresh();
     }
 
     private void switchAction(Object selectedBranch, List<Project> projects, ProgressDialog progressDialog) {
