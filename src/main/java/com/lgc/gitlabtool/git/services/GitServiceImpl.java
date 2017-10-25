@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
@@ -65,9 +65,9 @@ public class GitServiceImpl implements GitService {
                                                      ProgressListener progress) {
         _stateService.stateON(ApplicationState.SWITCH_BRANCH);
         final Map<Project, JGitStatus> switchStatuses = new ConcurrentHashMap<>();
-        final int step = 100 / projects.size();
-        final AtomicInteger percentages = new AtomicInteger(0);
-        projects.parallelStream()
+        final long step = 100 / projects.size();
+        final AtomicLong percentages = new AtomicLong(0);
+        projects.stream()
                 .forEach(project -> switchTo(switchStatuses, project, branchName, isRemote, progress, percentages, step));
         progress.onFinish("Switch branch operation is finished.");
         return switchStatuses;
@@ -78,8 +78,8 @@ public class GitServiceImpl implements GitService {
                           String branchName,
                           boolean isRemote,
                           ProgressListener progress,
-                          AtomicInteger percentages,
-                          int step) {
+                          AtomicLong percentages,
+                          long step) {
         try {
             progress.onStart(project);
             percentages.addAndGet(step);
