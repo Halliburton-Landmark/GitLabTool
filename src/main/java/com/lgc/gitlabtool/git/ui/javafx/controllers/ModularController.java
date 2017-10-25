@@ -12,6 +12,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -160,29 +161,42 @@ public class ModularController implements UpdateProgressListener {
 
     private void loadAddRemoveFilesWindow(ActionEvent event) {
         try {
-            URL switchBranchWindowUrl = getClass().getClassLoader().getResource(ViewKey.ADD_REMOVE_FILES_WINDOW.getPath());
-            FXMLLoader loader = new FXMLLoader(switchBranchWindowUrl);
+            List<Project> projects = SelectionsProvider.getInstance().getSelectionItems("mainWindow_projectsList");
+            projects = projects.stream()
+                               .filter(Project::isCloned)
+                               .collect(Collectors.toList());
+            if (projects.isEmpty()) {
+                String message = String.format(MainWindowController.NO_ANY_PROJECT_FOR_OPERATION,
+                        MainWindowController.ADD_REMOVE_FILES_OPERATION_NAME);
+                _consoleService.addMessage(message, MessageType.ERROR);
+                return;
+            }
+
+            URL addRemoveFilesWindowUrl = getClass().getClassLoader().getResource(ViewKey.ADD_REMOVE_FILES_WINDOW.getPath());
+            FXMLLoader loader = new FXMLLoader(addRemoveFilesWindowUrl);
             Parent root = loader.load();
 
             AddRemoveFilesWindowController addRemoveFilesWindowController = loader.getController();
-            //switchWindowController.beforeShowing(new ArrayList<>());
+            addRemoveFilesWindowController.beforeShowing(ProjectList.getIdsProjects(projects));
 
             Scene scene = new Scene(root);
             Stage stage = new Stage();
             stage.setScene(scene);
             stage.getIcons().add(_appIcon);
-            stage.setResizable(false);
-            stage.setTitle("Add/Remove Files window");
+            stage.setTitle("Add/Remove Files");
             stage.initModality(Modality.APPLICATION_MODAL);
 
             /* Set sizing and position */
             double dialogWidth = 500;
             double dialogHeight = 400;
-
-            ScreenUtil.adaptForMultiScreens(stage, dialogWidth, dialogHeight);
-
             stage.setHeight(dialogHeight);
             stage.setWidth(dialogWidth);
+            ScreenUtil.adaptForMultiScreens(stage, dialogWidth, dialogHeight);
+
+            // if we set the minimum size only in fxml then window does not respond to them.
+            double minSize = 370;
+            stage.setMinHeight(minSize);
+            stage.setMinWidth(minSize);
 
             stage.show();
         } catch (IOException e) {
