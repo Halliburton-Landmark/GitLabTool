@@ -24,6 +24,7 @@ import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 public class GitServiceImpl implements GitService {
 
     private static final Logger _logger = LogManager.getLogger(GitServiceImpl.class);
+    private static final String SWITCH_TO_FINISHED_MESSAGE = "Switch branch operation is finished.";
 
     private static final JGit _git = JGit.getInstance();
     private static StateService _stateService;
@@ -69,7 +70,7 @@ public class GitServiceImpl implements GitService {
         final AtomicLong percentages = new AtomicLong(0);
         projects.parallelStream()
                 .forEach(project -> switchTo(switchStatuses, project, branchName, isRemote, progress, percentages, step));
-        progress.onFinish("Switch branch operation is finished.");
+        progress.onFinish(SWITCH_TO_FINISHED_MESSAGE);
         return switchStatuses;
     }
 
