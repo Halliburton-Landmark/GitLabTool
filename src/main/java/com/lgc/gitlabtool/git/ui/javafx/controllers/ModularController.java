@@ -3,6 +3,7 @@ package com.lgc.gitlabtool.git.ui.javafx.controllers;
 import static com.lgc.gitlabtool.git.util.ProjectPropertiesUtil.getCommitHash;
 import static com.lgc.gitlabtool.git.util.ProjectPropertiesUtil.getProjectNameWithVersion;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.LinkedList;
@@ -21,6 +22,7 @@ import com.lgc.gitlabtool.git.entities.MessageType;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.ProjectList;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
+import com.lgc.gitlabtool.git.listeners.stateListeners.StateListener;
 import com.lgc.gitlabtool.git.listeners.updateProgressListener.UpdateProgressListener;
 import com.lgc.gitlabtool.git.services.ClonedGroupsService;
 import com.lgc.gitlabtool.git.services.ConsoleService;
@@ -81,13 +83,14 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
 public class ModularController implements UpdateProgressListener {
-    private static final Logger logger = LogManager.getLogger(ModularController.class);
+    private static final Logger _logger = LogManager.getLogger(ModularController.class);
 
     private final String CLASS_ID = ModularController.class.getName();
     private static final String HEDER_GROUP_TITLE = "Current group: ";
@@ -108,7 +111,10 @@ public class ModularController implements UpdateProgressListener {
     private static final String SELECT_ALL_IMAGE_URL = "icons/select_all_20x20.png";
     private static final String REFRESH_PROJECTS_IMAGE_URL = "icons/toolbar/refresh_projects_20x20.png";
     private static final String FILTER_SHADOW_PROJECTS_IMAGE_URL = "icons/toolbar/filter_shadow_projects_20x20.png";
-
+    private static final String CLONE_WINDOW_TITLE = "Cloning window";
+    private static final String FAILED_HEADER_MESSAGE_LOAD_GROUP = "Failed loading cloned groups. ";
+    private static final String FAILED_CONTENT_MESSAGE_LOAD_GROUP
+            = "These groups may have been moved to another folder or deleted from disc: ";
     /*
     SERVICES
     */
@@ -180,8 +186,16 @@ public class ModularController implements UpdateProgressListener {
 
     private WorkIndicatorDialog _workIndicatorDialog;
 
+    /***********************************************************************************************
+     *
+     * START OF INITIALIZATION BLOCK
+     *
+     */
+
     @FXML
     public void initialize() {
+        _stateService.addStateListener(ApplicationState.CLONE, new CloneStateListener());
+
         toolbar.getStylesheets().add(getClass().getClassLoader().getResource(CSS_PATH).toExternalForm());
 
         userId.setText(_loginService.getCurrentUser().getName());
@@ -252,112 +266,16 @@ public class ModularController implements UpdateProgressListener {
 
     }
 
-    public void loadGroupWindow() {
-        toolbar.getItems().clear();
-        menuBar.getMenus().clear();
-        toolbar.getItems().addAll(groupsWindowToolbarItems);
-        menuBar.getMenus().addAll(groupsWindowMainMenuItems);
-        //  initActionsMainMenu(ViewKey.GROUP_WINDOW.getKey());
-
-//        FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource(ViewKey.GROUP_WINDOW.getPath()));
-//        Node node = loader.load();
-//
-//        _groupWindowController = loader.getController();
-//        updateClonedGroups();
-//
-//        AnchorPane.setTopAnchor(node, 0.0);
-//        AnchorPane.setRightAnchor(node, 0.0);
-//        AnchorPane.setLeftAnchor(node, 0.0);
-//        AnchorPane.setBottomAnchor(node, 0.0);
-//
-//        viewPane.getChildren().clear();
-//        viewPane.getChildren().add(node);
-        updateClonedGroups();
-
-        listPane.getChildren().clear();
-        listPane.getChildren().add(groupListView);
-
-    }
-
-    private void updateClonedGroups() {
-
-        List<Group> userGroups = _clonedGroupsService.loadClonedGroups();
-        if (userGroups != null) {
-            groupListView.setItems(FXCollections.observableList(userGroups));
-        }
-
-    }
-
-    public void loadMainWindow(Group selectedGroup) throws IOException {
-//        toolbar.getItems().clear();
-//        menuBar.getMenus().clear();
-//        _projectService.addUpdateProgressListener(this);
-        //  toolbar.getItems().addAll(ToolbarManager.getInstance().getToolbarItems(ViewKey.MAIN_WINDOW.getKey()));
-//        menuBar.getMenus().addAll(MainMenuManager.getInstance().createMainMenuItems(ViewKey.MAIN_WINDOW.getKey()));
-//        initActionsMainMenu(ViewKey.MAIN_WINDOW.getKey());
-//        initActionsToolBar(ViewKey.MAIN_WINDOW.getKey());
-//
-//        ToolbarManager.getInstance().lockButtons();
-//        MainMenuManager.getInstance().lockButtons();
-//
-//        Stage stage = (Stage) toolbar.getScene().getWindow();
-//        FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource(ViewKey.MAIN_WINDOW.getPath()));
-//        Node node = loader.load();
-//
-//        _mainWindowController = loader.getController();
-//
-//        _workIndicatorDialog = new WorkIndicatorDialog(stage, WORK_INDICATOR_START_MESSAGE);
-//
-//        Runnable selectGroup = () -> {
-//            _mainWindowController.setSelectedGroup(selectedGroup);
-//
-//            // UI updating
-//            Platform.runLater(() -> {
-//                ToolbarManager.getInstance().unlockButtons();
-//                MainMenuManager.getInstance().unlockButtons();
-//
-//                _mainWindowController.beforeShowing();
-//
-//                AnchorPane.setTopAnchor(node, 0.0);
-//                AnchorPane.setRightAnchor(node, 0.0);
-//                AnchorPane.setLeftAnchor(node, 0.0);
-//                AnchorPane.setBottomAnchor(node, 0.0);
-//
-//                viewPane.getChildren().clear();
-//                viewPane.getChildren().add(node);
-//
-//                _projectService.removeUpdateProgressListener(this);
-//            });
-//        };
-//
-//        _workIndicatorDialog.execute(selectGroup);
-//
-//        Parent loadingStage = _workIndicatorDialog.getStage().getScene().getRoot();
-//
-//        StackPane pane = new StackPane();
-//        pane.getChildren().add(loadingStage);
-//
-//        AnchorPane.setTopAnchor(pane, 0.0);
-//        AnchorPane.setRightAnchor(pane, 0.0);
-//        AnchorPane.setLeftAnchor(pane, 0.0);
-//        AnchorPane.setBottomAnchor(pane, 0.0);
-//
-//        viewPane.getChildren().add(pane);
-
-        listPane.getChildren().clear();
-        listPane.getChildren().add(projectListView);
-
-        updateCurrentConsole();
-    }
-
     private void initActionsToolBar(String windowId) {
-        System.out.println("  _________    INIT ACTIONS FOR TOOLBAR _______ " + windowId);
         if (windowId.equals(ViewKey.GROUP_WINDOW.getKey())) {
             ToolbarManager.getInstance().getButtonById(ToolbarButtons.IMPORT_GROUP_BUTTON.getId())
-                    .setOnAction(event -> importGroupDialog());
+                    .setOnAction(this::importGroupDialog);
 
             ToolbarManager.getInstance().getButtonById(ToolbarButtons.REMOVE_GROUP_BUTTON.getId())
                     .setOnAction(this::onRemoveGroup);
+
+            ToolbarManager.getInstance().getButtonById(ToolbarButtons.CLONE_GROUP_BUTTON.getId())
+                    .setOnAction(this::onCloneGroups);
 
         } else if (windowId.equals(ViewKey.MAIN_WINDOW.getKey())) {
             Button changeGroup = ToolbarManager.getInstance()
@@ -370,41 +288,7 @@ public class ModularController implements UpdateProgressListener {
         }
     }
 
-    private void removeGroupDialog(Group selectedGroup) {
-        AlertWithCheckBox alert = new AlertWithCheckBox(AlertType.CONFIRMATION,
-                REMOVE_GROUP_DIALOG_TITLE,
-                "You want to remove the " + selectedGroup.getName() + " group.",
-                "Are you sure you want to delete it?",
-                "remove group from a local disk",
-                ButtonType.YES, ButtonType.NO);
-
-        Optional<ButtonType> result = alert.showAndWait();
-        if (result.get() == ButtonType.NO) {
-            return;
-        }
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.submit(() -> {
-            Map<Boolean, String> status = _groupService.removeGroup(selectedGroup, alert.isCheckBoxSelected());
-            for (Entry<Boolean, String> mapStatus : status.entrySet()) {
-                String headerMessage;
-                if (!mapStatus.getKey()) {
-                    headerMessage = FAILED_REMOVE_GROUP_MESSAGE;
-                    showStatusDialog(REMOVE_GROUP_STATUS_DIALOG_TITLE, headerMessage, mapStatus.getValue());
-                }
-                //  _groupWindowController.refreshGroupsList();
-            }
-        });
-        executor.shutdown();
-    }
-
-    @FXML
-    public void onRemoveGroup(ActionEvent actionEvent) {
-        //    Group group = _groupWindowController.getSelectedGroup();
-        //  removeGroupDialog(group);
-    }
-
     private void initActionsMainMenu(String windowId) {
-        System.out.println("  _________    INIT ACTIONS FOR MAINMENU  _______ " + windowId);
         if (windowId.equals(ViewKey.GROUP_WINDOW.getKey())) {
             MenuItem exit = MainMenuManager.getInstance().getButtonById(MainMenuItems.GROUP_WINDOW_EXIT);
             exit.setOnAction(event -> exit());
@@ -432,6 +316,89 @@ public class ModularController implements UpdateProgressListener {
 
         }
     }
+
+    /*
+     *
+     * END OF INITIALIZATION BLOCK
+     *
+     ***********************************************************************************************/
+
+    /***********************************************************************************************
+     *
+     * START OF VIEW SWITCHING BLOCK
+     *
+     */
+
+    private void loadGroup(Group group) {
+        toolbar.getItems().clear();
+        menuBar.getMenus().clear();
+        _projectService.addUpdateProgressListener(this);
+        toolbar.getItems().addAll(projectsWindowToolbarItems);
+        menuBar.getMenus().addAll(projectsWindowMainMenuItems);
+
+        String groupTitle = group.getName() + " [" + group.getPathToClonedGroup() + "]";
+        groupPath.setText(HEDER_GROUP_TITLE + groupTitle);
+
+        ToolbarManager.getInstance().lockButtons();
+        MainMenuManager.getInstance().lockButtons();
+        mainPanelBackground.setEffect(new GaussianBlur());
+        topBackground.setEffect(new GaussianBlur());
+
+        Stage stage = (Stage) toolbar.getScene().getWindow();
+
+        _workIndicatorDialog = new WorkIndicatorDialog(stage, WORK_INDICATOR_START_MESSAGE);
+        Runnable selectGroup = () -> {
+            ProjectList.reset();
+            ProjectList _projectsList = ProjectList.get(group);
+
+            // UI updating
+            Platform.runLater(() -> {
+                projectListView.setItems(FXCollections.observableArrayList(_projectsList.getProjects()));
+                ToolbarManager.getInstance().unlockButtons();
+                MainMenuManager.getInstance().unlockButtons();
+                mainPanelBackground.setEffect(null);
+                topBackground.setEffect(null);
+                _projectService.removeUpdateProgressListener(this);
+
+            });
+        };
+        _workIndicatorDialog.executeAndShowDialog("Loading group", selectGroup, StageStyle.TRANSPARENT, stage);
+
+        listPane.getChildren().clear();
+        listPane.getChildren().add(projectListView);
+        listPane.getChildren().add(projectsToolbar);
+    }
+
+    public void loadGroupWindow() {
+        toolbar.getItems().clear();
+        menuBar.getMenus().clear();
+        toolbar.getItems().addAll(groupsWindowToolbarItems);
+        menuBar.getMenus().addAll(groupsWindowMainMenuItems);
+
+        updateClonedGroups();
+
+        listPane.getChildren().clear();
+        listPane.getChildren().add(groupListView);
+
+    }
+
+    /*
+     *
+     * END OF VIEW SWITCHING BLOCK
+     *
+     ***********************************************************************************************/
+
+    private void updateClonedGroups() {
+
+        List<Group> userGroups = _clonedGroupsService.loadClonedGroups();
+        if (userGroups != null) {
+            groupListView.setItems(FXCollections.observableList(userGroups));
+        }
+
+    }
+
+
+
 
     private void switchBranchAction() {
         showSwitchBranchWindow();
@@ -476,7 +443,7 @@ public class ModularController implements UpdateProgressListener {
 
             stage.show();
         } catch (IOException e) {
-            logger.error("Could not load fxml resource", e);
+            _logger.error("Could not load fxml resource", e);
         }
     }
 
@@ -502,34 +469,33 @@ public class ModularController implements UpdateProgressListener {
         alert.show();
     }
 
-    private void importGroupDialog() {
-//        if (viewPane != null) {
-//            Stage stage = (Stage) viewPane.getScene().getWindow();
-//            stage.getIcons().add(_appIcon);
-//
-//            DirectoryChooser chooser = new DirectoryChooser();
-//            chooser.setTitle(IMPORT_CHOOSER_TITLE);
-//            File selectedDirectory = chooser.showDialog(stage);
-//            if (selectedDirectory == null) {
-//                return;
-//            }
-//            ExecutorService executor = Executors.newSingleThreadExecutor();
-//            executor.submit(() -> {
-//
-//                Group loadGroup = _groupService.importGroup(selectedDirectory.getAbsolutePath());
-//                if (loadGroup == null) {
-//                    _consoleService.addMessage(FAILED_IMPORT_MESSAGE, MessageType.ERROR);
-//                    showStatusDialog(IMPORT_DIALOG_TITLE, FAILED_IMPORT_MESSAGE,
-//                            "Failed to load group from " + selectedDirectory.getAbsolutePath());
-//                } else {
-//                    Platform.runLater(() -> {
-//                        _consoleService.addMessage("Group successfully loaded.", MessageType.SUCCESS);
-//                        //_groupWindowController.refreshGroupsList();
-//                    });
-//                }
-//            });
-//            executor.shutdown();
-//        }
+    private void importGroupDialog(ActionEvent actionEvent) {
+
+
+
+            DirectoryChooser chooser = new DirectoryChooser();
+            chooser.setTitle(IMPORT_CHOOSER_TITLE);
+            File selectedDirectory = chooser.showDialog();
+            if (selectedDirectory == null) {
+                return;
+            }
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            executor.submit(() -> {
+
+                Group loadGroup = _groupService.importGroup(selectedDirectory.getAbsolutePath());
+                if (loadGroup == null) {
+                    _consoleService.addMessage(FAILED_IMPORT_MESSAGE, MessageType.ERROR);
+                    showStatusDialog(IMPORT_DIALOG_TITLE, FAILED_IMPORT_MESSAGE,
+                            "Failed to load group from " + selectedDirectory.getAbsolutePath());
+                } else {
+                    Platform.runLater(() -> {
+                        _consoleService.addMessage("Group successfully loaded.", MessageType.SUCCESS);
+                        //_groupWindowController.refreshGroupsList();
+                    });
+                }
+            });
+            executor.shutdown();
+
     }
 
     private void showStatusDialog(String title, String header, String content) {
@@ -599,78 +565,43 @@ public class ModularController implements UpdateProgressListener {
     }
 
 
-    /*
+    private void removeGroupDialog(Group selectedGroup) {
+        AlertWithCheckBox alert = new AlertWithCheckBox(AlertType.CONFIRMATION,
+                REMOVE_GROUP_DIALOG_TITLE,
+                "You want to remove the " + selectedGroup.getName() + " group.",
+                "Are you sure you want to delete it?",
+                "remove group from a local disk",
+                ButtonType.YES, ButtonType.NO);
 
-
-                   __________________________________
-                  |                                 |
-                  |*** START OF MAGIC CONTROLLER ***|
-                  |_________________________________|
-
-
-
-     */
-    private void loadGroup(Group group) {
-        toolbar.getItems().clear();
-        menuBar.getMenus().clear();
-        _projectService.addUpdateProgressListener(this);
-        toolbar.getItems().addAll(projectsWindowToolbarItems);
-        menuBar.getMenus().addAll(projectsWindowMainMenuItems);
-
-        String groupTitle = group.getName() + " [" + group.getPathToClonedGroup() + "]";
-        groupPath.setText(HEDER_GROUP_TITLE + groupTitle);
-
-        ToolbarManager.getInstance().lockButtons();
-        MainMenuManager.getInstance().lockButtons();
-        mainPanelBackground.setEffect(new GaussianBlur());
-        topBackground.setEffect(new GaussianBlur());
-
-        Stage stage = (Stage) toolbar.getScene().getWindow();
-
-        //  background.getChildren().add();
-
-        // nodes = background.getChildren();
-        //  background.getChildren().clear();
-
-        _workIndicatorDialog = new WorkIndicatorDialog(stage, WORK_INDICATOR_START_MESSAGE);
-        Runnable selectGroup = () -> {
-            ProjectList.reset();
-            ProjectList _projectsList = ProjectList.get(group);
-
-            // UI updating
-            Platform.runLater(() -> {
-
-
-//                _mainWindowController.beforeShowing();
-//
-//                AnchorPane.setTopAnchor(node, 0.0);
-//                AnchorPane.setRightAnchor(node, 0.0);
-//                AnchorPane.setLeftAnchor(node, 0.0);
-//                AnchorPane.setBottomAnchor(node, 0.0);
-//
-//                viewPane.getChildren().clear();
-//                viewPane.getChildren().add(node);
-                projectListView.setItems(FXCollections.observableArrayList(_projectsList.getProjects()));
-                ToolbarManager.getInstance().unlockButtons();
-                MainMenuManager.getInstance().unlockButtons();
-                mainPanelBackground.setEffect(null);
-                topBackground.setEffect(null);
-                _projectService.removeUpdateProgressListener(this);
-
-            });
-        };
-        _workIndicatorDialog.executeAndShowDialog("Loading group", selectGroup, StageStyle.TRANSPARENT, stage);
-
-//        ProjectList.reset();
-//        ProjectList _projectsList = ProjectList.get(group);
-
-
-        listPane.getChildren().clear();
-        listPane.getChildren().add(projectListView);
-        listPane.getChildren().add(projectsToolbar);
-//        ToolbarManager.getInstance().unlockButtons();
-//        MainMenuManager.getInstance().unlockButtons();
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.get() == ButtonType.NO) {
+            return;
+        }
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.submit(() -> {
+            Map<Boolean, String> status = _groupService.removeGroup(selectedGroup, alert.isCheckBoxSelected());
+            for (Entry<Boolean, String> mapStatus : status.entrySet()) {
+                String headerMessage;
+                if (!mapStatus.getKey()) {
+                    headerMessage = FAILED_REMOVE_GROUP_MESSAGE;
+                    showStatusDialog(REMOVE_GROUP_STATUS_DIALOG_TITLE, headerMessage, mapStatus.getValue());
+                }
+                //  _groupWindowController.refreshGroupsList();
+            }
+        });
+        executor.shutdown();
     }
+
+
+
+
+
+
+
+
+
+
+
 
     private void configureGroupListView(ListView listView) {
         // config displayable string
@@ -728,6 +659,69 @@ public class ModularController implements UpdateProgressListener {
 
         private void showGroupWindow(Button showWelcomButton) throws IOException {
             loadGroupWindow();
+        }
+    }
+
+    /***********************************************************************************************
+     *
+     * START OF GROUP-VIEW ACTIONS BLOCK
+     *
+     */
+
+    @FXML
+    public void onCloneGroups(ActionEvent actionEvent) {
+        URL cloningGroupsWindowUrl = getClass().getClassLoader().getResource(ViewKey.CLONING_GROUPS_WINDOW.getPath());
+        Image appIcon = AppIconHolder.getInstance().getAppIcoImage();
+
+        if (cloningGroupsWindowUrl == null) {
+            return;
+        }
+
+        try {
+            Parent root = FXMLLoader.load(cloningGroupsWindowUrl);
+            Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.initStyle(StageStyle.DECORATED);
+            stage.setTitle(CLONE_WINDOW_TITLE);
+            stage.setResizable(false);
+            stage.setScene(new Scene(root));
+            stage.getIcons().add(appIcon);
+
+             /* Set sizing and position */
+            double dialogWidth = 500;
+            double dialogHeight = 400;
+
+            ScreenUtil.adaptForMultiScreens(stage, dialogWidth, dialogHeight);
+
+            stage.setHeight(dialogHeight);
+            stage.setWidth(dialogWidth);
+
+            stage.show();
+        } catch (IOException e) {
+            _logger.error("Could not load fxml resource: " + e.getMessage());
+        }
+    }
+
+    @FXML
+    public void onRemoveGroup(ActionEvent actionEvent) {
+        Group group = (Group) groupListView.getSelectionModel().getSelectedItem();
+        removeGroupDialog(group);
+    }
+
+
+    /*
+     *
+     * END OF GROUP-VIEW ACTIONS BLOCK
+     *
+     ***********************************************************************************************/
+
+    private class CloneStateListener implements StateListener{
+
+        @Override
+        public void handleEvent(ApplicationState changedState, boolean isActivate) {
+            if (!isActivate) {
+                updateClonedGroups();
+            }
         }
     }
 

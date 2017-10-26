@@ -215,7 +215,7 @@ public class GroupWindowController implements StateListener {
             previousStage.getScene().setRoot(root);
 
             ModularController myControllerHandle = fxmlLoader.getController();
-            myControllerHandle.loadMainWindow(group);
+           // myControllerHandle.loadMainWindow(group);
 
         } catch (IOException e) {
             _logger.error("Could not load fxml resource: " + e.getMessage());
