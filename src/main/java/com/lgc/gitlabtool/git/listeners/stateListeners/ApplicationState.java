@@ -56,11 +56,17 @@ public enum ApplicationState {
         }
     },
 
-    REFRESH_PROJECTS {
+    LOAD_PROJECTS {
         @Override
         public String toString() {
-            return "Refreshing projects";
+            return "Loading projects";
+        }
+    },
 
+    UPDATE_PROJECT_STATUSES {
+        @Override
+        public String toString() {
+            return "Updating project statuses";
         }
     },
 

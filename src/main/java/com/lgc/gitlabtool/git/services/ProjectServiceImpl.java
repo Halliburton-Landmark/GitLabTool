@@ -85,11 +85,11 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public Collection<Project> loadProjects(Group group) {
-        _stateService.stateON(ApplicationState.REFRESH_PROJECTS);
+        _stateService.stateON(ApplicationState.LOAD_PROJECTS);
         Collection<Project> projects = getProjects(group);
         if (projects.isEmpty()) {
             _consoleService.addMessage(GROUP_DOESNT_HAVE_PROJECTS_MESSAGE, MessageType.ERROR);
-            _stateService.stateOFF(ApplicationState.REFRESH_PROJECTS);
+            _stateService.stateOFF(ApplicationState.LOAD_PROJECTS);
             return Collections.emptyList();
         }
         String successMessage = "The projects of " + group.getName() + PREFIX_SUCCESSFUL_LOAD;
@@ -97,7 +97,7 @@ public class ProjectServiceImpl implements ProjectService {
         Collection<String> projectsName = PathUtilities.getFolders(path);
         if (projectsName.isEmpty()) {
             _consoleService.addMessage(successMessage, MessageType.SUCCESS);
-            _stateService.stateOFF(ApplicationState.REFRESH_PROJECTS);
+            _stateService.stateOFF(ApplicationState.LOAD_PROJECTS);
             return projects;
         }
 
@@ -108,7 +108,7 @@ public class ProjectServiceImpl implements ProjectService {
                 .filter(project -> projectsName.contains(project.getName()))
                 .forEach((project) -> updateDataProject(project, group.getPathToClonedGroup()));
         _consoleService.addMessage(successMessage, MessageType.SUCCESS);
-        _stateService.stateOFF(ApplicationState.REFRESH_PROJECTS);
+        _stateService.stateOFF(ApplicationState.LOAD_PROJECTS);
         return projects;
     }
 
@@ -146,6 +146,16 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
+    public void updateProjectStatuses(List<Project> projects) {
+        if (projects == null || projects.isEmpty()) {
+            return;
+        }
+        _stateService.stateON(ApplicationState.UPDATE_PROJECT_STATUSES);
+        projects.parallelStream().filter(Project::isCloned)
+                                 .forEach(this::updateProjectStatus);
+        _stateService.stateOFF(ApplicationState.UPDATE_PROJECT_STATUSES);
+    }
+
     public void updateProjectStatus(Project project) {
         if (project == null || project.getPath() == null) {
             return;

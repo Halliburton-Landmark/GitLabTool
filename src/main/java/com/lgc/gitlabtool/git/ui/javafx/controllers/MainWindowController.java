@@ -1,6 +1,5 @@
 package com.lgc.gitlabtool.git.ui.javafx.controllers;
 
-
 import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
@@ -63,7 +62,6 @@ import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -165,7 +163,8 @@ public class MainWindowController implements StateListener {
         _stateService.addStateListener(ApplicationState.SWITCH_BRANCH, this);
         _stateService.addStateListener(ApplicationState.EDIT_POM, this);
         _stateService.addStateListener(ApplicationState.REVERT, this);
-        _stateService.addStateListener(ApplicationState.REFRESH_PROJECTS, this);
+        _stateService.addStateListener(ApplicationState.LOAD_PROJECTS, this);
+        _stateService.addStateListener(ApplicationState.UPDATE_PROJECT_STATUSES, this);
     }
 
     public void beforeShowing() {
@@ -618,12 +617,13 @@ public class MainWindowController implements StateListener {
             public void run() {
                 Boolean isHide = preferences.getBoolean(PREF_NAME_HIDE_SHADOWS, false);
                 filterShadowProjects.setSelected(isHide);
-                if (isHide) {
-                    ObservableList<Project> obsList = FXCollections.observableArrayList(_projectsList.getProjects());
-                    FilteredList<Project> list = new FilteredList<>(obsList, Project::isCloned);
-                    projectsList.setItems(list);
-                } else {
+                ObservableList<Project> obsList = FXCollections.observableArrayList(
+                        isHide ? _projectsList.getClonedProjects() : _projectsList.getProjects());
+                projectsList.setItems(obsList);
+                if (!isHide) {
                     sortProjectsList();
+                } else {
+                    projectsList.refresh();
                 }
             }
         });
@@ -787,7 +787,7 @@ public class MainWindowController implements StateListener {
     }
 
     private void handleRefreshButtonState(ApplicationState state, boolean isActivate) {
-        if(state == ApplicationState.REFRESH_PROJECTS) {
+        if(state == ApplicationState.LOAD_PROJECTS) {
             refreshProjectsButton.setDisable(isActivate);
         }
     }
@@ -798,9 +798,9 @@ public class MainWindowController implements StateListener {
             refreshLoadProjects();
             return;
         }
-        projects.parallelStream()
-                .filter(Project::isCloned)
-                .forEach(_projectService::updateProjectStatus);
+        if (state != ApplicationState.LOAD_PROJECTS && state != ApplicationState.UPDATE_PROJECT_STATUSES) {
+            _projectService.updateProjectStatuses(projects);
+        }
         hideShadowsAction();
     }
 }
