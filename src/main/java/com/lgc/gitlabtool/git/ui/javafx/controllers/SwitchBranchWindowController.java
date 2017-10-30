@@ -11,6 +11,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
+import com.lgc.gitlabtool.git.listeners.stateListeners.AbstractStateListener;
+import javafx.stage.WindowEvent;
 import org.apache.commons.lang.StringUtils;
 
 import com.lgc.gitlabtool.git.entities.Branch;
@@ -51,7 +53,7 @@ import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 
 @SuppressWarnings("unchecked")
-public class SwitchBranchWindowController implements StateListener {
+public class SwitchBranchWindowController extends AbstractStateListener {
 
     private static final String TOTAL_CAPTION = "Total count: ";
     private static final String SWITCHTO_STATUS_ALERT_TITLE = "Switch branch info";
@@ -64,6 +66,8 @@ public class SwitchBranchWindowController implements StateListener {
 
     private List<Integer> _selectedProjectsIds = new ArrayList<>();
     private ProjectList _projectList;
+
+    private Stage _stage;
 
     @FXML
     private ListView<Project> currentProjectsListView;
@@ -108,7 +112,10 @@ public class SwitchBranchWindowController implements StateListener {
         disableSwitchButton(null);
     }
 
-    public void beforeShowing(List<Project> projects) {
+    void beforeShowing(List<Project> projects, Stage stage) {
+        _stage = stage;
+        _stage.addEventFilter(WindowEvent.WINDOW_HIDDEN, event -> dispose());
+
         _projectList = ProjectList.get(null);
         _selectedProjectsIds = ProjectList.getIdsProjects(projects);
         setProjectListItems(getProjectsByIds(), currentProjectsListView);
@@ -165,10 +172,8 @@ public class SwitchBranchWindowController implements StateListener {
         alert.launchConfirmationDialog(changedProjects, selectedProjects, selectedBranch, this::switchBranch);
     }
 
-    public void onClose(ActionEvent actionEvent) {
-        Node source = (Node) actionEvent.getSource();
-        Stage stage = (Stage) source.getScene().getWindow();
-        stage.close();
+    public void onClose() {
+        _stage.close();
     }
 
     public void onUpdateList() {

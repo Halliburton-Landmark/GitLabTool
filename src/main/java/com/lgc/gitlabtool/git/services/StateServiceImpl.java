@@ -1,10 +1,6 @@
 package com.lgc.gitlabtool.git.services;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -131,8 +127,14 @@ public class StateServiceImpl implements StateService {
     private void notifyListenersByType(ApplicationState changedState) {
         _logger.info("Notifying listeners about changing of " + changedState.getState());
         final Set<StateListener> listeners = _listeners.get(changedState);
-        if (listeners != null) {
-            listeners.forEach(listener -> listener.handleEvent(changedState, isActiveState(changedState)));
+        Iterator<StateListener> iterator = listeners.iterator();
+        while (iterator.hasNext()) {
+            StateListener stateListener = iterator.next();
+            if (stateListener.isDisposed()) {
+                iterator.remove();
+                continue;
+            }
+            stateListener.handleEvent(changedState, isActiveState(changedState));
         }
     }
 
