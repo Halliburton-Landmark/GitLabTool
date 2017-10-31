@@ -65,7 +65,7 @@
                     </top>
 
                     <center>
-                        <SplitPane dividerPositions="0.30">
+                        <SplitPane fx:id="dividerMainPane" dividerPositions="0.30">
                             <AnchorPane fx:id="listPane" BorderPane.alignment="CENTER">
                             </AnchorPane>
                             <GridPane prefHeight="210.0" BorderPane.alignment="CENTER">

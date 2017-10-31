@@ -139,6 +139,7 @@ public class ModularController implements UpdateProgressListener {
     private static final String FAILED_HEADER_MESSAGE_LOAD_GROUP = "Failed loading cloned groups. ";
     private static final String FAILED_CONTENT_MESSAGE_LOAD_GROUP
             = "These groups may have been moved to another folder or deleted from disc: ";
+    private static final Double DEFAULT_GROUPS_DIVIDER = 0.3;
     /*
      *
      * END OF GROUP-VIEW CONSTANTS BLOCK
@@ -255,6 +256,9 @@ public class ModularController implements UpdateProgressListener {
     @FXML
     public MenuBar menuBar;
 
+    @FXML
+    private SplitPane dividerMainPane;
+
     /*
      *
      * END OF GROUP-VIEW CONSTANTS BLOCK
@@ -282,6 +286,7 @@ public class ModularController implements UpdateProgressListener {
 
     private Preferences preferences;
     private Group _currentGroup;
+    private String _currentVuew;
 
     /***********************************************************************************************
      *
@@ -481,6 +486,7 @@ public class ModularController implements UpdateProgressListener {
      */
 
     private void loadGroup(Group group) {
+        _currentVuew = ViewKey.MAIN_WINDOW.getKey();
         _currentGroup = group;
 
         toolbar.getItems().clear();
@@ -524,6 +530,8 @@ public class ModularController implements UpdateProgressListener {
     }
 
     public void loadGroupWindow() {
+        _currentVuew = ViewKey.GROUP_WINDOW.getKey();
+
         toolbar.getItems().clear();
         menuBar.getMenus().clear();
         toolbar.getItems().addAll(groupsWindowToolbarItems);
@@ -534,6 +542,7 @@ public class ModularController implements UpdateProgressListener {
         listPane.getChildren().clear();
         listPane.getChildren().add(groupListView);
 
+        dividerMainPane.setDividerPositions(DEFAULT_GROUPS_DIVIDER);
     }
 
     private void setupProjectsDividerPosition(String groupTitle){
@@ -542,12 +551,12 @@ public class ModularController implements UpdateProgressListener {
         if (preferences != null) {
             String key = String.valueOf(groupTitle.hashCode());
             double splitPaneDivider = preferences.getDouble(key, 0.3);
-            parentPane.setDividerPositions(splitPaneDivider);
+            dividerMainPane.setDividerPositions(splitPaneDivider);
         }
 
-        parentPane.getDividers().get(1).positionProperty().addListener(
+        dividerMainPane.getDividers().get(0).positionProperty().addListener(
                 (observable, oldValue, newValue) -> {
-                    if (preferences != null) {
+                    if (preferences != null && _currentVuew == ViewKey.MAIN_WINDOW.getKey()) {
                         String key = String.valueOf(groupTitle.hashCode());
                         Double value = round(newValue.doubleValue(), 3);
 
