@@ -66,6 +66,7 @@ import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.event.EventType;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Rectangle2D;
@@ -93,6 +94,7 @@ import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.stage.WindowEvent;
 
 public class ModularController implements UpdateProgressListener {
     private static final Logger _logger = LogManager.getLogger(ModularController.class);
@@ -275,9 +277,10 @@ public class ModularController implements UpdateProgressListener {
 
     private Preferences preferences;
     private Group _currentGroup;
-    private String _currentVuew;
+    private String _currentView;
     private ProjectList _projectsList;
-
+    private StateListener _modularStateListener;
+    
     /***********************************************************************************************
      *
      * START OF INITIALIZATION BLOCK
@@ -312,6 +315,8 @@ public class ModularController implements UpdateProgressListener {
         initActionsMainMenu(ViewKey.MAIN_WINDOW.getKey());
 
         initProjectsToolbar();
+        
+        initProjectsWindowListeners();
     }
 
     private void initializeGroupsWindow() {
@@ -465,6 +470,10 @@ public class ModularController implements UpdateProgressListener {
                 .forEach(x -> x.disableProperty().bind(groupListBooleanBinding));
     }
 
+    private void initProjectsWindowListeners() {
+        _modularStateListener = new ModularStateListener();
+    }
+    
     /*
      *
      * END OF INITIALIZATION BLOCK
@@ -478,7 +487,7 @@ public class ModularController implements UpdateProgressListener {
      */
 
     private void loadGroup(Group group) {
-        _currentVuew = ViewKey.MAIN_WINDOW.getKey();
+        _currentView = ViewKey.MAIN_WINDOW.getKey();
         _currentGroup = group;
 
         ProjectList.reset();
@@ -521,17 +530,18 @@ public class ModularController implements UpdateProgressListener {
         listPane.getChildren().add(projectsToolbar);
 
         setupProjectsDividerPosition(groupTitle);
-
+        addProjectsWindowListener();
     }
 
     public void loadGroupWindow() {
-        _currentVuew = ViewKey.GROUP_WINDOW.getKey();
-
+        _currentView = ViewKey.GROUP_WINDOW.getKey();
+        
         toolbar.getItems().clear();
         menuBar.getMenus().clear();
         toolbar.getItems().addAll(groupsWindowToolbarItems);
         menuBar.getMenus().addAll(groupsWindowMainMenuItems);
 
+        removeProjectsWindowListener();
         updateClonedGroups();
 
         listPane.getChildren().clear();
@@ -551,13 +561,35 @@ public class ModularController implements UpdateProgressListener {
 
         dividerMainPane.getDividers().get(0).positionProperty().addListener(
                 (observable, oldValue, newValue) -> {
-                    if (preferences != null && _currentVuew == ViewKey.MAIN_WINDOW.getKey()) {
+                    if (preferences != null && _currentView == ViewKey.MAIN_WINDOW.getKey()) {
                         String key = String.valueOf(groupTitle.hashCode());
                         Double value = round(newValue.doubleValue(), 3);
 
                         preferences.putDouble(key, value);
                     }
                 });
+    }
+    
+    private void addProjectsWindowListener() {
+        _stateService.addStateListener(ApplicationState.CLONE, _modularStateListener);
+        _stateService.addStateListener(ApplicationState.COMMIT, _modularStateListener);
+        _stateService.addStateListener(ApplicationState.PUSH, _modularStateListener);
+        _stateService.addStateListener(ApplicationState.PULL, _modularStateListener);
+        _stateService.addStateListener(ApplicationState.CREATE_PROJECT, _modularStateListener);
+        _stateService.addStateListener(ApplicationState.SWITCH_BRANCH, _modularStateListener);
+        _stateService.addStateListener(ApplicationState.EDIT_POM, _modularStateListener);
+        _stateService.addStateListener(ApplicationState.REVERT, _modularStateListener);
+    }
+    
+    private void removeProjectsWindowListener() {
+        _stateService.removeStateListener(ApplicationState.CLONE, _modularStateListener);
+        _stateService.removeStateListener(ApplicationState.COMMIT, _modularStateListener);
+        _stateService.removeStateListener(ApplicationState.PUSH, _modularStateListener);
+        _stateService.removeStateListener(ApplicationState.PULL, _modularStateListener);
+        _stateService.removeStateListener(ApplicationState.CREATE_PROJECT, _modularStateListener);
+        _stateService.removeStateListener(ApplicationState.SWITCH_BRANCH, _modularStateListener);
+        _stateService.removeStateListener(ApplicationState.EDIT_POM, _modularStateListener);
+        _stateService.removeStateListener(ApplicationState.REVERT, _modularStateListener);
     }
 
     /*
@@ -935,8 +967,7 @@ public class ModularController implements UpdateProgressListener {
             List<Project> projects = projectListView.getSelectionModel().getSelectedItems();
             projects = ProjectList.getCorrectProjects(projects);
             if (projects.isEmpty()) {
-                String message = String.format(MainWindowController.NO_ANY_PROJECT_FOR_OPERATION,
-                        MainWindowController.SWITCH_BEANCH_OPERATION_NAME);
+                String message = String.format(NO_ANY_PROJECT_FOR_OPERATION, SWITCH_BEANCH_OPERATION_NAME);
                 _consoleService.addMessage(message, MessageType.ERROR);
                 return;
             }
@@ -1001,14 +1032,14 @@ public class ModularController implements UpdateProgressListener {
     }
 
     @FXML
-    public void createProjectButton(ActionEvent actionEvent) {
+    private void createProjectButton(ActionEvent actionEvent) {
         // dialog
         CreateProjectDialog dialog = new CreateProjectDialog(_currentGroup, null);
         dialog.showAndWait();
     }
 
     @FXML
-    public void onCommitAction(ActionEvent actionEvent) {
+    private void onCommitAction(ActionEvent actionEvent) {
         List<Project> projectWithChanges = _gitService.getProjectsWithChanges(getCurrentProjects());
         if (projectWithChanges.isEmpty()) {
             showProjectsWithoutChangesMessage();
@@ -1020,7 +1051,7 @@ public class ModularController implements UpdateProgressListener {
     }
 
     @FXML
-    public void onPushAction(ActionEvent actionEvent) {
+    private void onPushAction(ActionEvent actionEvent) {
         List<Project> filteredProjects = ProjectList.getCorrectProjects(getCurrentProjects());
         if (!filteredProjects.isEmpty()) {
             ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -1032,7 +1063,7 @@ public class ModularController implements UpdateProgressListener {
     }
 
     @FXML
-    public void onPullAction(ActionEvent actionEvent) {
+    private void onPullAction(ActionEvent actionEvent) {
         List<Project> projectsToPull = ProjectList.getCorrectProjects(getCurrentProjects());
         if (!projectsToPull.isEmpty()) {
             checkChangesAndPull(projectsToPull, new Object());
@@ -1042,7 +1073,7 @@ public class ModularController implements UpdateProgressListener {
     }
 
     @FXML
-    public void onRevertChanges(ActionEvent actionEvent) {
+    private void onRevertChanges(ActionEvent actionEvent) {
         GLTAlert alert = new GLTAlert(AlertType.CONFIRMATION, ApplicationState.REVERT.toString(),
                 "Revert changes for selected projects", "Are you sure you want to do it?");
         alert.addButtons(ButtonType.CANCEL);
@@ -1056,6 +1087,7 @@ public class ModularController implements UpdateProgressListener {
         executor.shutdown();
     }
 
+    @FXML
     private void showEditProjectPropertiesWindow(ActionEvent event) {
         try {
 
@@ -1119,64 +1151,6 @@ public class ModularController implements UpdateProgressListener {
         getCurrentProjects().parallelStream()
                 .filter(Project::isCloned)
                 .forEach(this::openProjectFolder);
-    }
-
-    private void refreshLoadProjects() {
-        _projectsList.refreshLoadProjects();
-        sortAndCheckProjects();
-    }
-
-    private void sortAndCheckProjects() {
-        sortProjectsList();
-        checkProjectsList();
-    }
-
-    // shadow projects in the end list
-    private void sortProjectsList() {
-        List<Project> sortedList = _projectsList.getProjects()
-                .stream()
-                .sorted(this::compareProjects)
-                .collect(Collectors.toList());
-
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                ObservableList<Project> projectsObservableList = FXCollections.observableList(sortedList);
-                projectListView.setItems(projectsObservableList);
-                projectListView.refresh();
-            }
-        });
-    }
-
-    private int compareProjects(Project firstProject, Project secondProject) {
-        return Boolean.compare(secondProject.isCloned(), firstProject.isCloned());
-    }
-
-    private void checkProjectsList() {
-        List<Project> incorrectProjects = findIncorrectProjects();
-        if (incorrectProjects.isEmpty()) {
-            return;
-        }
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                IncorrectProjectDialog dialog = new IncorrectProjectDialog();
-                dialog.showDialog(incorrectProjects, (obj) -> refreshLoadProjects());
-            }
-        });
-    }
-
-    private List<Project> findIncorrectProjects() {
-        return _projectsList.getProjects().parallelStream()
-                .filter(this::isIncorrectProject)
-                .collect(Collectors.toList());
-    }
-
-    private boolean isIncorrectProject(Project project) {
-        if (!project.isCloned()) {
-            return false; // we check only cloned projects
-        }
-        return !_gitService.hasAtLeastOneReference(project);
     }
 
     @FXML
@@ -1331,6 +1305,65 @@ public class ModularController implements UpdateProgressListener {
     private boolean areAllItemsSelected(ListView<?> listView) {
         return listView.getSelectionModel().getSelectedItems().size() == listView.getItems().size();
     }
+    
+    private void sortAndCheckProjects() {
+        sortProjectsList();
+        checkProjectsList();
+    }
+
+    // shadow projects in the end list
+    private void sortProjectsList() {
+        List<Project> sortedList = _projectsList.getProjects()
+                .stream()
+                .sorted(this::compareProjects)
+                .collect(Collectors.toList());
+
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                ObservableList<Project> projectsObservableList = FXCollections.observableList(sortedList);
+                projectListView.setItems(projectsObservableList);
+                projectListView.refresh();
+            }
+        });
+    }
+
+    private int compareProjects(Project firstProject, Project secondProject) {
+        return Boolean.compare(secondProject.isCloned(), firstProject.isCloned());
+    }
+
+    private void checkProjectsList() {
+        List<Project> incorrectProjects = findIncorrectProjects();
+        if (incorrectProjects.isEmpty()) {
+            return;
+        }
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                IncorrectProjectDialog dialog = new IncorrectProjectDialog();
+                dialog.showDialog(incorrectProjects, (obj) -> refreshLoadProjects());
+            }
+        });
+    }
+
+    private List<Project> findIncorrectProjects() {
+        return _projectsList.getProjects().parallelStream()
+                .filter(this::isIncorrectProject)
+                .collect(Collectors.toList());
+    }
+
+    private boolean isIncorrectProject(Project project) {
+        if (!project.isCloned()) {
+            return false; // we check only cloned projects
+        }
+        return !_gitService.hasAtLeastOneReference(project);
+    }
+    
+    private void refreshLoadProjects() {
+        _projectsList.refreshLoadProjects();
+        sortAndCheckProjects();
+    }
+    
     /*
      *
      * END OF PROJECTS-VIEW OTHER METHODS BLOCK
@@ -1381,6 +1414,30 @@ public class ModularController implements UpdateProgressListener {
         @Override
         public void onFinish(Object... t) {
             finishAction("Push projects is finished!", MessageType.SIMPLE, ApplicationState.PUSH);
+        }
+    }
+    
+    public class ModularStateListener implements StateListener {
+        
+        @Override
+        public void handleEvent(ApplicationState state, boolean isActivate) {
+            if (!isActivate) {
+                ExecutorService executor = Executors.newSingleThreadExecutor();
+                executor.submit(() -> updateProjectsByState(state));
+                executor.shutdown();
+            }
+        }
+        
+        private void updateProjectsByState(ApplicationState state) {
+            List<Project> projects = _projectsList.getProjects();
+            if (state == ApplicationState.CREATE_PROJECT) {
+                refreshLoadProjects();
+                return;
+            }
+            projects.parallelStream()
+                    .filter(Project::isCloned)
+                    .forEach(_projectService::updateProjectStatus);
+            sortAndCheckProjects();
         }
     }
 
