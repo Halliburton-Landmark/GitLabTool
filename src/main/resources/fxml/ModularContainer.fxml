@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import com.lgc.gitlabtool.git.ui.javafx.StatusBar?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.ScrollPane?>
@@ -14,8 +15,6 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.TextFlow?>
 <?import javafx.stage.Screen?>
-<?import com.lgc.gitlabtool.git.ui.javafx.StatusBar?>
-
 <AnchorPane prefHeight="${screen.visualBounds.maxY / 1.5}"
             prefWidth="${screen.visualBounds.maxX / 1.5}" xmlns="http://javafx.com/javafx/8"
             xmlns:fx="http://javafx.com/fxml/1"
@@ -23,21 +22,18 @@
     <fx:define>
         <Screen fx:factory="getPrimary" fx:id="screen"/>
     </fx:define>
-    <BorderPane fx:id="background" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0"
+    <BorderPane AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0"
                 AnchorPane.rightAnchor="0">
 
         <top>
             <VBox fx:id="topBackground" BorderPane.alignment="CENTER">
-                <MenuBar fx:id="menuBar">
-                </MenuBar>
-
-                <ToolBar fx:id="toolbar" style="-fx-background-color: #D7DBE3;">
-                </ToolBar>
+                <MenuBar fx:id="menuBar"/>
+                <ToolBar fx:id="toolbar" style="-fx-background-color: #D7DBE3;"/>
             </VBox>
         </top>
 
         <center>
-            <SplitPane fx:id="parentPane" dividerPositions="0.65"
+            <SplitPane dividerPositions="0.65"
                        orientation="VERTICAL">
                 <BorderPane fx:id="mainPanelBackground">
                     <top>
@@ -66,8 +62,7 @@
 
                     <center>
                         <SplitPane fx:id="dividerMainPane" dividerPositions="0.30">
-                            <AnchorPane fx:id="listPane" BorderPane.alignment="CENTER">
-                            </AnchorPane>
+                            <AnchorPane fx:id="listPane" BorderPane.alignment="CENTER"/>
                             <GridPane prefHeight="210.0" BorderPane.alignment="CENTER">
                                 <columnConstraints>
                                     <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0"/>
@@ -88,14 +83,12 @@
                             </GridPane>
                         </SplitPane>
                     </center>
-
                 </BorderPane>
 
                 <ScrollPane fx:id="scrollPane" fitToWidth="true" fitToHeight="true">
-                    <TextFlow fx:id="_console" style="-fx-background-color: #D7DBE3;">
-                    </TextFlow>
+                    <TextFlow fx:id="_console" style="-fx-background-color: #D7DBE3;"/>
                 </ScrollPane>
-                <StatusBar />
+                <StatusBar/>
             </SplitPane>
         </center>
     </BorderPane>

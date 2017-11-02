@@ -329,11 +329,11 @@ public class ModularController implements UpdateProgressListener {
         AnchorPane.setLeftAnchor(projectListView, 0.0);
         AnchorPane.setRightAnchor(projectListView, 0.0);
         configureProjectsListView(projectListView);
-        projectsWindowToolbarItems = _toolbarManager.createToolbarItems(ViewKey.MAIN_WINDOW.getKey());
-        initActionsToolBar(ViewKey.MAIN_WINDOW.getKey());
+        projectsWindowToolbarItems = _toolbarManager.createToolbarItems(ViewKey.PROJECTS_WINDOW.getKey());
+        initActionsToolBar(ViewKey.PROJECTS_WINDOW.getKey());
 
-        projectsWindowMainMenuItems = _mainMenuManager.createMainMenuItems(ViewKey.MAIN_WINDOW.getKey());
-        initActionsMainMenu(ViewKey.MAIN_WINDOW.getKey());
+        projectsWindowMainMenuItems = _mainMenuManager.createMainMenuItems(ViewKey.PROJECTS_WINDOW.getKey());
+        initActionsMainMenu(ViewKey.PROJECTS_WINDOW.getKey());
 
         initProjectsToolbar();
 
@@ -349,10 +349,10 @@ public class ModularController implements UpdateProgressListener {
 
         configureGroupListView(groupListView);
 
-        groupsWindowToolbarItems = _toolbarManager.createToolbarItems(ViewKey.GROUP_WINDOW.getKey());
-        groupsWindowMainMenuItems = _mainMenuManager.createMainMenuItems(ViewKey.GROUP_WINDOW.getKey());
+        groupsWindowToolbarItems = _toolbarManager.createToolbarItems(ViewKey.GROUPS_WINDOW.getKey());
+        groupsWindowMainMenuItems = _mainMenuManager.createMainMenuItems(ViewKey.GROUPS_WINDOW.getKey());
 
-        initActionsToolBar(ViewKey.GROUP_WINDOW.getKey());
+        initActionsToolBar(ViewKey.GROUPS_WINDOW.getKey());
 
         initializeGroupsDisableBinding(groupListView);
     }
@@ -390,7 +390,7 @@ public class ModularController implements UpdateProgressListener {
     }
 
     private void initActionsToolBar(String windowId) {
-        if (windowId.equals(ViewKey.GROUP_WINDOW.getKey())) {
+        if (windowId.equals(ViewKey.GROUPS_WINDOW.getKey())) {
             _toolbarManager.getButtonById(ToolbarButtons.IMPORT_GROUP_BUTTON.getId())
                     .setOnAction(this::importGroupDialog);
 
@@ -400,7 +400,7 @@ public class ModularController implements UpdateProgressListener {
             _toolbarManager.getButtonById(ToolbarButtons.CLONE_GROUP_BUTTON.getId())
                     .setOnAction(this::onCloneGroups);
 
-        } else if (windowId.equals(ViewKey.MAIN_WINDOW.getKey())) {
+        } else if (windowId.equals(ViewKey.PROJECTS_WINDOW.getKey())) {
             _toolbarManager.getButtonById(ToolbarButtons.CHANGE_GROUP_BUTTON.getId())
                     .setOnAction(event -> loadGroupWindow());
 
@@ -434,7 +434,7 @@ public class ModularController implements UpdateProgressListener {
     }
 
     private void initActionsMainMenu(String windowId) {
-        if (windowId.equals(ViewKey.GROUP_WINDOW.getKey())) {
+        if (windowId.equals(ViewKey.GROUPS_WINDOW.getKey())) {
             _mainMenuManager.getButtonById(MainMenuItems.GROUP_WINDOW_CLONE_GROUP).setOnAction(this::onCloneGroups);
             _mainMenuManager.getButtonById(MainMenuItems.GROUP_WINDOW_EXIT).setOnAction(event -> exit());
             _mainMenuManager.getButtonById(MainMenuItems.GROUP_WINDOW_ABOUT).setOnAction(event -> showAboutPopup());
@@ -443,7 +443,7 @@ public class ModularController implements UpdateProgressListener {
             userGuide.setOnAction(event -> UserGuideUtil.openUserGuide());
             userGuide.setAccelerator(new KeyCodeCombination(KeyCode.F1));
 
-        } else if (windowId.equals(ViewKey.MAIN_WINDOW.getKey())) {
+        } else if (windowId.equals(ViewKey.PROJECTS_WINDOW.getKey())) {
             _mainMenuManager.getButtonById(MainMenuItems.MAIN_EXIT).setOnAction(event -> exit());
             _mainMenuManager.getButtonById(MainMenuItems.MAIN_ABOUT).setOnAction(event -> showAboutPopup());
             _mainMenuManager.getButtonById(MainMenuItems.MAIN_CLONE_PROJECT).setOnAction(this::cloneShadowProject);
@@ -541,7 +541,7 @@ public class ModularController implements UpdateProgressListener {
      */
 
     private void loadGroup(Group group) {
-        _currentView = ViewKey.MAIN_WINDOW.getKey();
+        _currentView = ViewKey.PROJECTS_WINDOW.getKey();
         _currentGroup = group;
 
         ProjectList.reset();
@@ -588,7 +588,7 @@ public class ModularController implements UpdateProgressListener {
     }
 
     private void loadGroupWindow() {
-        _currentView = ViewKey.GROUP_WINDOW.getKey();
+        _currentView = ViewKey.GROUPS_WINDOW.getKey();
 
         toolbar.getItems().clear();
         menuBar.getMenus().clear();
@@ -615,7 +615,7 @@ public class ModularController implements UpdateProgressListener {
 
         dividerMainPane.getDividers().get(0).positionProperty().addListener(
                 (observable, oldValue, newValue) -> {
-                    if (preferences != null && _currentView == ViewKey.MAIN_WINDOW.getKey()) {
+                    if (preferences != null && _currentView == ViewKey.PROJECTS_WINDOW.getKey()) {
                         String key = String.valueOf(groupTitle.hashCode());
                         Double value = round(newValue.doubleValue(), 3);
 
