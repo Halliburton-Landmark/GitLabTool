@@ -311,7 +311,6 @@ public class ModularController implements UpdateProgressListener {
             Parent root = loader.load();
 
             SwitchBranchWindowController switchWindowController  = loader.getController();
-            switchWindowController.beforeShowing(projects);
 
             Scene scene = new Scene(root);
             Stage stage = new Stage();
@@ -332,6 +331,7 @@ public class ModularController implements UpdateProgressListener {
             stage.setMinWidth(dialogWidth / 2);
             stage.setMinHeight(dialogHeight / 2);
 
+            switchWindowController.beforeShowing(projects, stage);
             stage.show();
         } catch (IOException e) {
             logger.error("Could not load fxml resource", e);

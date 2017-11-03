@@ -572,7 +572,6 @@ public class MainWindowController implements StateListener {
                 return;
             }
 
-            controller.beforeStart(getIdSelectedProjects());
             Scene scene = new Scene(root);
             Stage stage = new Stage();
             stage.setScene(scene);
@@ -592,6 +591,7 @@ public class MainWindowController implements StateListener {
             stage.setMinWidth(dialogWidth / 2);
             stage.setMinHeight(dialogHeight / 2);
 
+            controller.beforeStart(getIdSelectedProjects(), stage);
             stage.show();
         } catch (IOException e) {
             _logger.error("Could not load fxml resource", e);
@@ -800,7 +800,8 @@ public class MainWindowController implements StateListener {
         }
         if (state != ApplicationState.LOAD_PROJECTS && state != ApplicationState.UPDATE_PROJECT_STATUSES) {
             _projectService.updateProjectStatuses(projects);
+        } else {
+            hideShadowsAction();
         }
-        hideShadowsAction();
     }
 }

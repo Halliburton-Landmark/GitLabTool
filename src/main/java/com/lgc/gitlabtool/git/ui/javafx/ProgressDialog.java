@@ -206,7 +206,7 @@ public abstract class ProgressDialog extends Dialog<Void> {
      */
     public void showDialog() {
         if (_startAction != null) {
-            _startAction.run();
+            new Thread(_startAction).start();
         }
         _stage.showAndWait();
     }
