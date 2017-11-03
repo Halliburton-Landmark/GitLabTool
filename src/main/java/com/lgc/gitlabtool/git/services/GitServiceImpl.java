@@ -64,13 +64,20 @@ public class GitServiceImpl implements GitService {
                                                      String branchName,
                                                      boolean isRemote,
                                                      ProgressListener progress) {
-        _stateService.stateON(ApplicationState.SWITCH_BRANCH);
         final Map<Project, JGitStatus> switchStatuses = new ConcurrentHashMap<>();
-        final long step = 100 / projects.size();
-        final AtomicLong percentages = new AtomicLong(0);
-        projects.parallelStream()
-                .forEach(project -> switchTo(switchStatuses, project, branchName, isRemote, progress, percentages, step));
-        progress.onFinish(SWITCH_TO_FINISHED_MESSAGE);
+        try {
+            _stateService.stateON(ApplicationState.SWITCH_BRANCH);
+            final long step = 100 / projects.size();
+            final AtomicLong percentages = new AtomicLong(0);
+            projects.parallelStream()
+                    .forEach(project -> switchTo(switchStatuses, project, branchName, isRemote, progress, percentages, step));
+            progress.onFinish(SWITCH_TO_FINISHED_MESSAGE);
+
+        } finally {
+            if (_stateService.isActiveState(ApplicationState.SWITCH_BRANCH)) {
+                _stateService.stateOFF(ApplicationState.SWITCH_BRANCH);
+            }
+        }
         return switchStatuses;
     }
 
