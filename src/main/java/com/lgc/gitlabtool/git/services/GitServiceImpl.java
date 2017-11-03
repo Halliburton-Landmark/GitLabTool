@@ -99,10 +99,12 @@ public class GitServiceImpl implements GitService {
 
     @Override
     public Map<Project, JGitStatus> createBranch(List<Project> projects, String branchName, String startPoint, boolean force) {
+        _stateService.stateON(ApplicationState.CREATE_BRANCH);
         Map<Project, JGitStatus> statuses = new ConcurrentHashMap<>();
         projects.parallelStream()
                 .filter(prj -> prj.isCloned())
                 .forEach((project) -> statuses.put(project, _git.createBranch(project, branchName, startPoint, force)));
+        _stateService.stateOFF(ApplicationState.CREATE_BRANCH);
         return statuses;
     }
 

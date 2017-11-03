@@ -49,6 +49,13 @@ public enum ApplicationState {
         }
     },
 
+    CREATE_BRANCH {
+        @Override
+        public String toString() {
+            return "Branch creating";
+        }
+    },
+
     EDIT_POM {
         @Override
         public String toString() {
