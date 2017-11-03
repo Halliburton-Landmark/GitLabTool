@@ -44,7 +44,6 @@ public class CreateNewBranchDialog extends Dialog<String> {
     private static final String STATUS_DIALOG_TITLE = "Branch Creating status";
     private static final String STATUS_DIALOG_HEADER = "Branch creating info";
     private static final String CHOOSE_BRANCH_NAME_MESSAGE = "Please choose a new branch name";
-    private static final String WRONG_INPUT_MESSAGE = " is a wrong branch name. Please try again!";
 
     private static final Logger _logger = LogManager.getLogger(CreateNewBranchDialog.class);
     private static final GitService _gitService = (GitService) ServiceProvider.getInstance()
@@ -140,9 +139,8 @@ public class CreateNewBranchDialog extends Dialog<String> {
     private ObservableList<String> getBoxOptions() {
         Set<Branch> branches = _gitService.getBranches(getProjects(), BranchType.ALL, true);
         Set<String> branchesNames = branches.stream()
-                .map(branch -> branch.getBranchName())
-                .collect(Collectors.toSet());
-        
+                                            .map(branch -> branch.getBranchName())
+                                            .collect(Collectors.toSet());
         ObservableList<String> options = FXCollections.observableArrayList(branchesNames);
         return options;
     }
@@ -150,15 +148,15 @@ public class CreateNewBranchDialog extends Dialog<String> {
     private String getDefaultBranchOption(ObservableList<String> options) {
         String currentBranchName = getCurrentCommonBranchName(getProjects());
         return options.stream()
-                .filter(element -> element.equals(currentBranchName))
-                .findFirst().orElse(StringUtils.EMPTY);
+                      .filter(element -> element.equals(currentBranchName))
+                      .findFirst().orElse(StringUtils.EMPTY);
     }
 
     private String getCurrentCommonBranchName(List<Project> projects) {
         List<String> currentBranches = projects.stream()
-                .map(project -> _gitService.getCurrentBranchName(project))
-                .distinct()
-                .collect(Collectors.toList());
+                                               .map(project -> _gitService.getCurrentBranchName(project))
+                                               .distinct()
+                                               .collect(Collectors.toList());
         return currentBranches.size() > 1 ? StringUtils.EMPTY : currentBranches.get(0);
     }
 
@@ -243,7 +241,7 @@ public class CreateNewBranchDialog extends Dialog<String> {
             // we do not show switching on statuses here
             // because we show the statuses of branches creation
             // In the same time we could see that branch is changed on the projects list panel
-            _gitService.switchTo(projects, (String) branchName, false);
+            _gitService.switchTo(projects, (String) branchName, false, null);
         } else {
             ChangesCheckDialog alert = new ChangesCheckDialog();
             alert.launchConfirmationDialog(changedProjects, projects, branchName, this::switchBranch);

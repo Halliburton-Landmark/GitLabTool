@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -21,7 +20,6 @@ import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.ProjectList;
 import com.lgc.gitlabtool.git.jgit.BranchType;
 import com.lgc.gitlabtool.git.jgit.JGit;
-import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.listeners.stateListeners.StateListener;
 import com.lgc.gitlabtool.git.services.ConsoleService;
@@ -30,7 +28,9 @@ import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.icon.LocalRemoteIconHolder;
 import com.lgc.gitlabtool.git.ui.javafx.ChangesCheckDialog;
-import com.lgc.gitlabtool.git.ui.javafx.StatusDialog;
+import com.lgc.gitlabtool.git.ui.javafx.ProgressDialog;
+import com.lgc.gitlabtool.git.ui.javafx.SwitchBranchProgressDialog;
+import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -56,8 +56,6 @@ import javafx.stage.Stage;
 public class SwitchBranchWindowController extends AbstractStateListener {
 
     private static final String TOTAL_CAPTION = "Total count: ";
-    private static final String SWITCHTO_STATUS_ALERT_TITLE = "Switch branch info";
-    private static final String SWITCHTO_STATUS_ALERT_HEADER = "Switch branch statuses:";
 
     private static final GitService _gitService =
             (GitService) ServiceProvider.getInstance().getService(GitService.class.getName());
@@ -156,13 +154,15 @@ public class SwitchBranchWindowController extends AbstractStateListener {
     }
 
     private void switchBranch(List<Project> selectedProjects, Object selectedBranch) {
-        Map<Project, JGitStatus> switchStatuses = _gitService.switchTo(selectedProjects, (Branch) selectedBranch);
+        ProgressDialog progressDialog = new SwitchBranchProgressDialog();
+        progressDialog.setStartAction(() -> switchAction(selectedBranch, selectedProjects, progressDialog));
+        progressDialog.showDialog();
+    }
 
-        String dialogMessage = "%s projects were switched successfully";
-
-        switchToStatusDialog(switchStatuses, selectedProjects.size(), dialogMessage);
-        currentProjectsListView.refresh();
-        disableSwitchButton(selectedBranch);
+    private void switchAction(Object selectedBranch, List<Project> projects, ProgressDialog progressDialog) {
+        OperationProgressListener switchProgressListener =
+                new OperationProgressListener(progressDialog, ApplicationState.SWITCH_BRANCH);
+        _gitService.switchTo(projects, (Branch) selectedBranch, switchProgressListener);
     }
 
     private void launchSwitchBranchConfirmation(List<Project> changedProjects,
@@ -335,12 +335,6 @@ public class SwitchBranchWindowController extends AbstractStateListener {
                                                   .isPresent();
     }
 
-    private void switchToStatusDialog(Map<Project, JGitStatus> statuses, int countOfProjects, String content) {
-        StatusDialog statusDialog = new StatusDialog(SWITCHTO_STATUS_ALERT_TITLE, SWITCHTO_STATUS_ALERT_HEADER);
-        statusDialog.showMessage(statuses, countOfProjects, content);
-        statusDialog.showAndWait();
-    }
-
     private class BranchListCell extends ListCell<Branch> {
 
         @Override
@@ -388,6 +382,7 @@ public class SwitchBranchWindowController extends AbstractStateListener {
                         } else {
                             currentProjectsListView.setItems(FXCollections.observableArrayList(getProjectsByIds()));
                         }
+                        disableSwitchButton(branch);
                     }
                 });
             });

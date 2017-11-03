@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
@@ -23,6 +24,7 @@ import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 public class GitServiceImpl implements GitService {
 
     private static final Logger _logger = LogManager.getLogger(GitServiceImpl.class);
+    private static final String SWITCH_TO_FINISHED_MESSAGE = "Switch branch operation is finished.";
 
     private static final JGit _git = JGit.getInstance();
     private static StateService _stateService;
@@ -42,21 +44,56 @@ public class GitServiceImpl implements GitService {
     }
 
     @Override
-    public Map<Project, JGitStatus> switchTo(List<Project> projects, Branch branch) {
-        String selectedBranchName = branch.getBranchName();
+    public Map<Project, JGitStatus> switchTo(List<Project> projects, Branch branch, ProgressListener progress) {
         boolean isRemote = branch.getBranchType().equals(BranchType.REMOTE);
-
-        return switchTo(projects, selectedBranchName, isRemote);
+        return switchTo(projects, branch.getBranchName(), isRemote, progress);
     }
 
     @Override
-    public Map<Project, JGitStatus> switchTo(List<Project> projects, String branchName, boolean isRemote) {
+    public Map<Project, JGitStatus> switchTo(List<Project> projects,
+                                             String branchName,
+                                             boolean isRemote,
+                                             ProgressListener progress) {
+        if (progress == null) {
+            progress = EmptyProgressListener.get();
+        }
+        return runSwitchAction(projects, branchName, isRemote, progress);
+    }
+
+    private Map<Project, JGitStatus> runSwitchAction(List<Project> projects,
+                                                     String branchName,
+                                                     boolean isRemote,
+                                                     ProgressListener progress) {
         _stateService.stateON(ApplicationState.SWITCH_BRANCH);
         final Map<Project, JGitStatus> switchStatuses = new ConcurrentHashMap<>();
+        final long step = 100 / projects.size();
+        final AtomicLong percentages = new AtomicLong(0);
         projects.parallelStream()
-                .forEach((project) -> switchStatuses.put(project, _git.switchTo(project, branchName, isRemote)));
-        _stateService.stateOFF(ApplicationState.SWITCH_BRANCH);
+                .forEach(project -> switchTo(switchStatuses, project, branchName, isRemote, progress, percentages, step));
+        progress.onFinish(SWITCH_TO_FINISHED_MESSAGE);
         return switchStatuses;
+    }
+
+    private void switchTo(Map<Project, JGitStatus> switchStatuses,
+                          Project project,
+                          String branchName,
+                          boolean isRemote,
+                          ProgressListener progress,
+                          AtomicLong percentages,
+                          long step) {
+        try {
+            progress.onStart(project);
+            percentages.addAndGet(step);
+            JGitStatus status = _git.switchTo(project, branchName, isRemote);
+            if (status == JGitStatus.SUCCESSFUL) {
+                progress.onSuccess(percentages.get(), project, status);
+            } else {
+                progress.onError(percentages.get(), project, status);
+            }
+            switchStatuses.put(project, status);
+        } catch (IllegalArgumentException e) {
+            progress.onError(percentages.get(), e.getMessage());
+        }
     }
 
     @Override
