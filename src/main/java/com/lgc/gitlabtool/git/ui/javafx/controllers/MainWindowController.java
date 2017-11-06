@@ -16,6 +16,7 @@ import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.lgc.gitlabtool.git.ui.javafx.listeners.PushProgressListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -30,7 +31,6 @@ import com.lgc.gitlabtool.git.services.ConsoleService;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.LoginService;
 import com.lgc.gitlabtool.git.services.PomXMLService;
-import com.lgc.gitlabtool.git.services.ProgressListener;
 import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StateService;
@@ -107,7 +107,7 @@ public class MainWindowController implements StateListener {
     private static final String NEW_BRANCH_CREATION = "new branch creation";
     private static final String PULL_OPERATION_NAME = "pull";
     private static final String PUSH_OPERATION_NAME = "push";
-    public static final String SWITCH_BEANCH_OPERATION_NAME = "switch branch";
+    public static final String SWITCH_BRANCH_OPERATION_NAME = "switch branch";
 
     private ProjectList _projectsList;
 
@@ -742,38 +742,6 @@ public class MainWindowController implements StateListener {
         OperationProgressListener pullProgressListener =
                 new OperationProgressListener(progressDialog, ApplicationState.PULL);
         _gitService.pull(projects, pullProgressListener);
-    }
-
-    public class PushProgressListener implements ProgressListener {
-
-        public PushProgressListener() {
-            _consoleService.addMessage("Push projects is started...", MessageType.SIMPLE);
-            _stateService.stateON(ApplicationState.PUSH);
-        }
-
-        @Override
-        public void onSuccess(Object... t) {
-            if(t[0] instanceof Project) {
-                String message = "Pushing the " + ((Project)t[0]).getName() + " project is successful!";
-                _consoleService.addMessage(message, MessageType.SUCCESS);
-            }
-        }
-
-        @Override
-        public void onError(Object... t) {
-            if(t[0] instanceof Project) {
-                String message = "Failed pushing the " + ((Project)t[0]).getName() + " project!";
-                _consoleService.addMessage(message, MessageType.ERROR);
-            }
-        }
-
-        @Override
-        public void onStart(Object... t) {}
-
-        @Override
-        public void onFinish(Object... t) {
-            finishAction("Push projects is finished!", MessageType.SIMPLE, ApplicationState.PUSH);
-        }
     }
 
     @Override
