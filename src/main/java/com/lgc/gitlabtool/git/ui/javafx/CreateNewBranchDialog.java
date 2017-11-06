@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.lgc.gitlabtool.git.ui.javafx.listeners.PushProgressListener;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -14,7 +15,6 @@ import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.jgit.BranchType;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.services.GitService;
-import com.lgc.gitlabtool.git.services.ProgressListener;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 import com.lgc.gitlabtool.git.util.NameValidator;
@@ -263,30 +263,4 @@ public class CreateNewBranchDialog extends Dialog<String> {
         _gitService.push(projects, new PushProgressListener());
     }
 
-    class PushProgressListener implements ProgressListener {
-
-        @Override
-        public void onSuccess(Object... t) {
-            if (t[0] instanceof Project) {
-                String projectName = ((Project) t[0]).getName();
-                String successMessage = projectName + " successfully pushed to upstream";
-                _logger.debug(successMessage);
-            }
-        }
-
-        @Override
-        public void onError(Object... t) {
-            if (t[0] instanceof Project) {
-                String projectName = ((Project) t[0]).getName();
-                String errorMessage = "Failed to push " + projectName + " project";
-                _logger.error(errorMessage);
-            }
-        }
-
-        @Override
-        public void onStart(Object... t) {}
-
-        @Override
-        public void onFinish(Object... t) {}
-    }
 }
