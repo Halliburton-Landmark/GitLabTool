@@ -26,11 +26,12 @@ public class GitServiceImpl implements GitService {
     private static final Logger _logger = LogManager.getLogger(GitServiceImpl.class);
     private static final String SWITCH_TO_FINISHED_MESSAGE = "Switch branch operation is finished.";
 
-    private static final JGit _git = JGit.getInstance();
+    private static JGit _git;
     private static StateService _stateService;
 
-    public GitServiceImpl(StateService stateService) {
+    public GitServiceImpl(StateService stateService, JGit jGit) {
         _stateService = stateService;
+        _git = jGit;
     }
 
     @Override
