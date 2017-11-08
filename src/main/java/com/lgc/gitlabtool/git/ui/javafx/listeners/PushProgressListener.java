@@ -19,9 +19,19 @@ public class PushProgressListener implements ProgressListener {
     private static final StateService _stateService = (StateService) ServiceProvider.getInstance()
             .getService(StateService.class.getName());
 
-    public PushProgressListener() {
-        _consoleService.addMessage("Push projects is started...", MessageType.SIMPLE);
-        _stateService.stateON(ApplicationState.PUSH);
+    private PushProgressListener() {}
+
+    private static PushProgressListener instance;
+
+    /**
+     * Creates the instance of {@link PushProgressListener} if it doesn't exist yet and returns it
+     * @return the instance of {@link PushProgressListener}
+     */
+    public static PushProgressListener get() {
+        if (instance == null) {
+            instance = new PushProgressListener();
+        }
+        return instance;
     }
 
     @Override
@@ -41,7 +51,10 @@ public class PushProgressListener implements ProgressListener {
     }
 
     @Override
-    public void onStart(Object... t) {}
+    public void onStart(Object... t) {
+        _consoleService.addMessage("Push projects is started...", MessageType.SIMPLE);
+        _stateService.stateON(ApplicationState.PUSH);
+    }
 
     @Override
     public void onFinish(Object... t) {

@@ -260,7 +260,7 @@ public class CreateNewBranchDialog extends Dialog<String> {
     }
 
     private void pushBranches(List<Project> projects) {
-        _gitService.push(projects, new PushProgressListener());
+        _gitService.push(projects, PushProgressListener.get());
     }
 
 }

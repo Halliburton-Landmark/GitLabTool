@@ -530,7 +530,7 @@ public class MainWindowController implements StateListener {
         List<Project> filteredProjects = ProjectList.getCorrectProjects(getCurrentProjects());
         if (!filteredProjects.isEmpty()) {
             ExecutorService executor = Executors.newSingleThreadExecutor();
-            executor.submit(() -> _gitService.push(filteredProjects, new PushProgressListener()));
+            executor.submit(() -> _gitService.push(filteredProjects, PushProgressListener.get()));
             executor.shutdown();
         } else {
             _consoleService.addMessage(String.format(NO_ANY_PROJECT_FOR_OPERATION, PUSH_OPERATION_NAME), MessageType.ERROR);
