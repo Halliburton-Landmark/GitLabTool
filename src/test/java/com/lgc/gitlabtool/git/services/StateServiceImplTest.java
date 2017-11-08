@@ -27,4 +27,21 @@ public class StateServiceImplTest {
         stateService.stateON(testedState);
         Assert.assertTrue(stateService.isActiveState(testedState));
     }
+
+    @Test
+    public void testStackState() {
+        StateServiceImpl stateService = new StateServiceImpl();
+        ApplicationState testedState = ApplicationState.CLONE;
+        Assert.assertFalse(stateService.isActiveState(testedState));
+        stateService.stateON(testedState);
+        stateService.stateON(testedState);
+        stateService.stateON(testedState);
+        Assert.assertTrue(stateService.isActiveState(testedState));
+        stateService.stateOFF(testedState);
+        Assert.assertTrue(stateService.isActiveState(testedState));
+        stateService.stateOFF(testedState);
+        Assert.assertTrue(stateService.isActiveState(testedState));
+        stateService.stateOFF(testedState);
+        Assert.assertFalse(stateService.isActiveState(testedState));
+    }
 }
