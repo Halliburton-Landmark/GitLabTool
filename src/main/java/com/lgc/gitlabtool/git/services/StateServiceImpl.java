@@ -65,11 +65,7 @@ public class StateServiceImpl implements StateService {
 
     private void setState(ApplicationState state, int operation) {
         Integer value = _states.get(state);
-
-        /** Checks that value is correct. If value is incorrect we'll set new value. **/
         if (value == null) {
-            // If value is null and operation equals to DEACTIVATE_STATE, we'll set START_STATE to value.
-            // Otherwise we'll set operation to value.
             value = operation != DEACTIVATE_STATE ? operation : START_STATE;
         } else if (value < START_STATE) {
             // If state turn off more times than turn on, we'll set START_STATE to value.
@@ -82,8 +78,12 @@ public class StateServiceImpl implements StateService {
             return;
         }
 
-        _states.put(state, value + operation);
-        notifyListenersByType(state);
+        Integer newValue = value + operation;
+        _states.put(state, newValue);
+
+        if (isActive(value) != isActive(newValue)) {
+            notifyListenersByType(state);
+        }
     }
 
     @Override
