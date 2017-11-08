@@ -72,9 +72,8 @@ public class GitServiceImpl implements GitService {
             final AtomicLong percentages = new AtomicLong(0);
             projects.parallelStream()
                     .forEach(project -> switchTo(switchStatuses, project, branchName, isRemote, progress, percentages, step));
-            progress.onFinish(SWITCH_TO_FINISHED_MESSAGE);
-
         } finally {
+            progress.onFinish(SWITCH_TO_FINISHED_MESSAGE);
             if (_stateService.isActiveState(ApplicationState.SWITCH_BRANCH)) {
                 _stateService.stateOFF(ApplicationState.SWITCH_BRANCH);
             }
