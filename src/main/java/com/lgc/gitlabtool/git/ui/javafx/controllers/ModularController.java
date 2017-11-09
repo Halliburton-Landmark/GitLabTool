@@ -9,13 +9,9 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedList;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.prefs.Preferences;
@@ -124,7 +120,7 @@ public class ModularController implements UpdateProgressListener {
     private final ConsoleController _consoleController = ConsoleController.getInstance();
     private final String CLASS_ID = ModularController.class.getName();
 
-    private static final String HEDER_GROUP_TITLE = "Current group: ";
+    private static final String HEADER_GROUP_TITLE = "Current group: ";
     private static final String ABOUT_POPUP_TITLE = "About";
     private static final String CSS_PATH = "css/style.css";
     private static final Image _appIcon = AppIconHolder.getInstance().getAppIcoImage();
@@ -287,7 +283,6 @@ public class ModularController implements UpdateProgressListener {
     private WorkIndicatorDialog _workIndicatorDialog;
 
     private ToggleButton selectAllButton;
-    private Button refreshProjectsButton;
     private ToggleButton filterShadowProjects;
     /*
      *
@@ -308,6 +303,7 @@ public class ModularController implements UpdateProgressListener {
      */
 
     @FXML
+    @SuppressWarnings("ConstantConditions")
     private void initialize() {
 
         _stateService.addStateListener(ApplicationState.CLONE, new GroupsWindowStateListener());
@@ -357,6 +353,7 @@ public class ModularController implements UpdateProgressListener {
         initializeGroupsDisableBinding(groupListView);
     }
 
+    @SuppressWarnings("ConstantConditions")
     private void initProjectsToolbar() {
         if (projectsToolbar != null) {
             return;
@@ -375,7 +372,7 @@ public class ModularController implements UpdateProgressListener {
         selectAllButton.setTooltip(new Tooltip("Select all projects"));
         selectAllButton.setGraphic(new ImageView(imageSelectAll));
 
-        refreshProjectsButton = new Button();
+        Button refreshProjectsButton = new Button();
         refreshProjectsButton.setTooltip(new Tooltip("Refresh projects"));
         refreshProjectsButton.setGraphic(new ImageView(imageRefreshProjects));
         refreshProjectsButton.setOnAction(this::refreshLoadProjects);
@@ -472,11 +469,13 @@ public class ModularController implements UpdateProgressListener {
         _modularStateListener = new ProjectsWindowStateListener();
     }
 
+    @SuppressWarnings("unchecked")
     private void configureGroupListView(ListView listView) {
         // config displayable string
         listView.setCellFactory(p -> new GroupListCell());
     }
 
+    @SuppressWarnings("unchecked")
     private void configureProjectsListView(ListView listView) {
         // config displayable string
         listView.getItems().clear();
@@ -517,13 +516,9 @@ public class ModularController implements UpdateProgressListener {
             }
         });
 
-        listView.getSelectionModel().getSelectedItems().addListener(new ListChangeListener<Project>() {
-            @Override
-            public void onChanged(ListChangeListener.Change<? extends Project> change) {
+        listView.getSelectionModel().getSelectedItems().addListener((ListChangeListener<Project>) change ->
                 SelectionsProvider.getInstance().setSelectionItems(ListViewKey.MAIN_WINDOW_PROJECTS.getKey(),
-                        listView.getSelectionModel().getSelectedItems());
-            }
-        });
+                                                                   listView.getSelectionModel().getSelectedItems()));
 
         listView.refresh();
 
@@ -556,7 +551,7 @@ public class ModularController implements UpdateProgressListener {
         _projectService.addUpdateProgressListener(this);
 
         String groupTitle = group.getName() + " [" + group.getPathToClonedGroup() + "]";
-        groupPath.setText(HEDER_GROUP_TITLE + groupTitle);
+        groupPath.setText(HEADER_GROUP_TITLE + groupTitle);
 
         mainPanelBackground.setEffect(new GaussianBlur());
         topBackground.setEffect(new GaussianBlur());
@@ -570,6 +565,7 @@ public class ModularController implements UpdateProgressListener {
 
             // UI updating
             Platform.runLater(() -> {
+                //noinspection unchecked
                 projectListView.setItems(FXCollections.observableArrayList(_projectsList.getProjects()));
                 sortProjectsList();
                 mainPanelBackground.setEffect(null);
@@ -615,9 +611,9 @@ public class ModularController implements UpdateProgressListener {
 
         dividerMainPane.getDividers().get(0).positionProperty().addListener(
                 (observable, oldValue, newValue) -> {
-                    if (preferences != null && _currentView == ViewKey.PROJECTS_WINDOW.getKey()) {
+                    if (preferences != null && Objects.equals(_currentView, ViewKey.PROJECTS_WINDOW.getKey())) {
                         String key = String.valueOf(groupTitle.hashCode());
-                        Double value = round(newValue.doubleValue(), 3);
+                        Double value = roundTo3(newValue.doubleValue());
 
                         preferences.putDouble(key, value);
                     }
@@ -659,6 +655,7 @@ public class ModularController implements UpdateProgressListener {
      */
 
     @FXML
+    @SuppressWarnings("unused")
     private void onCloneGroups(ActionEvent actionEvent) {
         URL cloningGroupsWindowUrl = getClass().getClassLoader().getResource(ViewKey.CLONING_GROUPS_WINDOW.getPath());
         Image appIcon = AppIconHolder.getInstance().getAppIcoImage();
@@ -693,6 +690,7 @@ public class ModularController implements UpdateProgressListener {
     }
 
     @FXML
+    @SuppressWarnings("unused")
     private void onRemoveGroup(ActionEvent actionEvent) {
         Group group = (Group) groupListView.getSelectionModel().getSelectedItem();
 
@@ -704,7 +702,7 @@ public class ModularController implements UpdateProgressListener {
                 ButtonType.YES, ButtonType.NO);
 
         Optional<ButtonType> result = alert.showAndWait();
-        if (result.get() == ButtonType.NO) {
+        if (result.orElse(ButtonType.NO) == ButtonType.NO) {
             return;
         }
         ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -723,6 +721,7 @@ public class ModularController implements UpdateProgressListener {
     }
 
     @FXML
+    @SuppressWarnings("unused")
     private void importGroupDialog(ActionEvent actionEvent) {
         if (mainPanelBackground == null) {
             return;
@@ -767,9 +766,10 @@ public class ModularController implements UpdateProgressListener {
      *
      */
     @FXML
+    @SuppressWarnings("unused")
     private void showSwitchBranchWindow(ActionEvent event) {
         try {
-            List<Project> projects = projectListView.getSelectionModel().getSelectedItems();
+            @SuppressWarnings("unchecked") List<Project> projects = projectListView.getSelectionModel().getSelectedItems();
             projects = ProjectList.getCorrectProjects(projects);
             if (projects.isEmpty()) {
                 String message = String.format(NO_ANY_PROJECT_FOR_OPERATION, SWITCH_BEANCH_OPERATION_NAME);
@@ -810,6 +810,7 @@ public class ModularController implements UpdateProgressListener {
     }
 
     @FXML
+    @SuppressWarnings("unused")
     private void cloneShadowProject(ActionEvent actionEvent) {
         List<Project> shadowProjects = getCurrentProjects().stream()
                 .filter(project -> !project.isCloned())
@@ -826,6 +827,7 @@ public class ModularController implements UpdateProgressListener {
     }
 
     @FXML
+    @SuppressWarnings("unused")
     private void onNewBranchButton(ActionEvent actionEvent) {
         List<Project> clonedProjectsWithoutConflicts = ProjectList.getCorrectProjects(getCurrentProjects());
         if (!clonedProjectsWithoutConflicts.isEmpty()) {
@@ -837,6 +839,7 @@ public class ModularController implements UpdateProgressListener {
     }
 
     @FXML
+    @SuppressWarnings("unused")
     private void createProjectButton(ActionEvent actionEvent) {
         // dialog
         CreateProjectDialog dialog = new CreateProjectDialog(_currentGroup, null);
@@ -844,6 +847,7 @@ public class ModularController implements UpdateProgressListener {
     }
 
     @FXML
+    @SuppressWarnings("unused")
     private void onCommitAction(ActionEvent actionEvent) {
         List<Project> projectWithChanges = _gitService.getProjectsWithChanges(getCurrentProjects());
         if (projectWithChanges.isEmpty()) {
@@ -856,6 +860,7 @@ public class ModularController implements UpdateProgressListener {
     }
 
     @FXML
+    @SuppressWarnings("unused")
     private void onPushAction(ActionEvent actionEvent) {
         List<Project> filteredProjects = ProjectList.getCorrectProjects(getCurrentProjects());
         if (!filteredProjects.isEmpty()) {
@@ -868,6 +873,7 @@ public class ModularController implements UpdateProgressListener {
     }
 
     @FXML
+    @SuppressWarnings("unused")
     private void onPullAction(ActionEvent actionEvent) {
         List<Project> projectsToPull = ProjectList.getCorrectProjects(getCurrentProjects());
         if (!projectsToPull.isEmpty()) {
@@ -878,6 +884,7 @@ public class ModularController implements UpdateProgressListener {
     }
 
     @FXML
+    @SuppressWarnings("unused")
     private void onRevertChanges(ActionEvent actionEvent) {
         GLTAlert alert = new GLTAlert(AlertType.CONFIRMATION, ApplicationState.REVERT.toString(),
                 "Revert changes for selected projects", "Are you sure you want to do it?");
@@ -888,11 +895,12 @@ public class ModularController implements UpdateProgressListener {
             return;
         }
         ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.submit(() -> revert());
+        executor.submit(this::revert);
         executor.shutdown();
     }
 
     @FXML
+    @SuppressWarnings("unused")
     private void showEditProjectPropertiesWindow(ActionEvent event) {
         try {
 
@@ -952,6 +960,7 @@ public class ModularController implements UpdateProgressListener {
         }
     }
 
+    @SuppressWarnings("unused")
     private void onOpenFolder(ActionEvent event) {
         getCurrentProjects().parallelStream()
                 .filter(Project::isCloned)
@@ -959,6 +968,7 @@ public class ModularController implements UpdateProgressListener {
     }
 
     @FXML
+    @SuppressWarnings({"unchecked", "unused"})
     private void onShowHideShadowProjects(ActionEvent actionEvent) {
         ObservableList<Project> obsList = FXCollections.observableArrayList(_projectsList.getProjects());
         if (filterShadowProjects.isSelected()) {
@@ -971,6 +981,7 @@ public class ModularController implements UpdateProgressListener {
     }
 
     @FXML
+    @SuppressWarnings("unused")
     private void refreshLoadProjects(ActionEvent actionEvent) {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.submit((Runnable) this::refreshLoadProjects);
@@ -989,14 +1000,9 @@ public class ModularController implements UpdateProgressListener {
      */
 
     //used for rounding divider positions value
-    private static double round(double value, int places) {
-        if (places < 0) {
-            _logger.error("Incorrect input format");
-            return value;
-        }
-
+    private static double roundTo3(double value) {
         BigDecimal bigDecimal = new BigDecimal(value);
-        bigDecimal = bigDecimal.setScale(places, RoundingMode.HALF_UP);
+        bigDecimal = bigDecimal.setScale(3, RoundingMode.HALF_UP);
         return bigDecimal.doubleValue();
     }
 
@@ -1017,6 +1023,7 @@ public class ModularController implements UpdateProgressListener {
     }
 
     // USE ONLY FOR UNREPEATABLE OPERATION (like Revert, Push etc.)
+    @SuppressWarnings("unchecked")
     private List<Project> getCurrentProjects() {
         return projectListView.getSelectionModel().getSelectedItems();
     }
@@ -1103,6 +1110,7 @@ public class ModularController implements UpdateProgressListener {
         }
     }
 
+    @SuppressWarnings("ConstantConditions")
     private ContextMenu getContextMenu(List<Project> items) {
 
         ContextMenu contextMenu = new ContextMenu();
@@ -1153,6 +1161,7 @@ public class ModularController implements UpdateProgressListener {
 
         Platform.runLater(() -> {
             ObservableList<Project> projectsObservableList = FXCollections.observableList(sortedList);
+            //noinspection unchecked
             projectListView.setItems(projectsObservableList);
             projectListView.refresh();
         });
@@ -1205,6 +1214,7 @@ public class ModularController implements UpdateProgressListener {
 
         List<Group> userGroups = _clonedGroupsService.loadClonedGroups();
         if (userGroups != null) {
+            //noinspection unchecked
             groupListView.setItems(FXCollections.observableList(userGroups));
             showNotExistGroups(_clonedGroupsService.getNotExistGroup());
         }
