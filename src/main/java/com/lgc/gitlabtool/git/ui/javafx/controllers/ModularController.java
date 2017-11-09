@@ -319,7 +319,7 @@ public class ModularController implements UpdateProgressListener {
     }
 
     private void initializeProjectsWindow() {
-        projectListView = new ListView();
+        projectListView = new ListView<>();
         AnchorPane.setBottomAnchor(projectListView, 0.0);
         AnchorPane.setTopAnchor(projectListView, 30.0);
         AnchorPane.setLeftAnchor(projectListView, 0.0);
@@ -337,7 +337,7 @@ public class ModularController implements UpdateProgressListener {
     }
 
     private void initializeGroupsWindow() {
-        groupListView = new ListView();
+        groupListView = new ListView<>();
         AnchorPane.setBottomAnchor(groupListView, 0.0);
         AnchorPane.setTopAnchor(groupListView, 0.0);
         AnchorPane.setLeftAnchor(groupListView, 0.0);
@@ -692,7 +692,7 @@ public class ModularController implements UpdateProgressListener {
     @FXML
     @SuppressWarnings("unused")
     private void onRemoveGroup(ActionEvent actionEvent) {
-        Group group = (Group) groupListView.getSelectionModel().getSelectedItem();
+        Group group = groupListView.getSelectionModel().getSelectedItem();
 
         AlertWithCheckBox alert = new AlertWithCheckBox(AlertType.CONFIRMATION,
                 REMOVE_GROUP_DIALOG_TITLE,
