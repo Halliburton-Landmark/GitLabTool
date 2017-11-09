@@ -239,10 +239,10 @@ public class ModularController implements UpdateProgressListener {
     private BorderPane mainPanelBackground;
 
     @FXML
-    private ListView projectListView;
+    private ListView<Project> projectListView;
 
     @FXML
-    private ListView groupListView;
+    private ListView<Group> groupListView;
 
     @FXML
     private Pane listPane;

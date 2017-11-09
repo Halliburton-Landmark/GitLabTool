@@ -14,22 +14,21 @@ import com.lgc.gitlabtool.git.ui.ViewKey;
  */
 public enum MainMenuItems {
 
+    GROUP_WINDOW_EXIT(MainmenuConstants.GROUPS_WINDOW_KEY, "File", "group_window_file_exit", "icons/mainmenu/exit_16x16.png", "Exit"),
+    GROUP_WINDOW_CLONE_GROUP(MainmenuConstants.GROUPS_WINDOW_KEY, "Git", "group_window_group_clone", "icons/mainmenu/clone_16x16.png", "Clone"),
+    GROUP_WINDOW_USER_GUIDE(MainmenuConstants.GROUPS_WINDOW_KEY, "Help", "group_window_help_user_guide", "icons/mainmenu/user_guide_16x16.png", "User guide"),
+    GROUP_WINDOW_ABOUT(MainmenuConstants.GROUPS_WINDOW_KEY, "Help", "group_window_help_about", "icons/mainmenu/about_16x16.png", "About"),
 
-    GROUP_WINDOW_EXIT(ViewKey.GROUPS_WINDOW.getKey(), "File", "group_window_file_exit", "icons/mainmenu/exit_16x16.png", "Exit"),
-    GROUP_WINDOW_CLONE_GROUP(ViewKey.GROUPS_WINDOW.getKey(), "Git", "group_window_group_clone", "icons/mainmenu/clone_16x16.png", "Clone"),
-    GROUP_WINDOW_USER_GUIDE(ViewKey.GROUPS_WINDOW.getKey(), "Help", "group_window_help_user_guide", "icons/mainmenu/user_guide_16x16.png", "User guide"),
-    GROUP_WINDOW_ABOUT(ViewKey.GROUPS_WINDOW.getKey(), "Help", "group_window_help_about", "icons/mainmenu/about_16x16.png", "About"),
-
-    MAIN_EXIT(ViewKey.PROJECTS_WINDOW.getKey(), "File", "main_file_exit", "icons/mainmenu/exit_16x16.png", "Exit"),
-    MAIN_CLONE_PROJECT(ViewKey.PROJECTS_WINDOW.getKey(), "Git", "main_git_clone_project", "icons/mainmenu/clone_16x16.png", "Clone"),
-    MAIN_CREATE_BRANCH(ViewKey.PROJECTS_WINDOW.getKey(), "Git", "main_git_create_branch", "icons/mainmenu/newbranch_16x16.png", "New branch"),
-    MAIN_SWITCH_BRANCH(ViewKey.PROJECTS_WINDOW.getKey(), "Git", "main_git_switch_branch", "icons/mainmenu/switchbranch_16x16.png", "Switch branch"),
-    MAIN_COMMIT(ViewKey.PROJECTS_WINDOW.getKey(), "Git", "main_git_commit", "icons/mainmenu/commit_16x16.png", "Commit"),
-    MAIN_PUSH(ViewKey.PROJECTS_WINDOW.getKey(), "Git", "main_git_push", "icons/mainmenu/push_16x16.png", "Push"),
-    MAIN_PULL(ViewKey.PROJECTS_WINDOW.getKey(), "Git", "main_git_pull", "icons/mainmenu/pull_16x16.png", "Pull"),
-    MAIN_REVERT(ViewKey.PROJECTS_WINDOW.getKey(), "Git", "main_git_revert", "icons/mainmenu/revert_changes_16x16.png", "Revert"),
-    MAIN_USER_GUIDE(ViewKey.PROJECTS_WINDOW.getKey(), "Help", "main_help_user_guide", "icons/mainmenu/user_guide_16x16.png", "User guide"),
-    MAIN_ABOUT(ViewKey.PROJECTS_WINDOW.getKey(), "Help", "main_help_about", "icons/mainmenu/about_16x16.png", "About");
+    MAIN_EXIT(MainmenuConstants.PROJECTS_WINDOW_KEY, "File", "main_file_exit", "icons/mainmenu/exit_16x16.png", "Exit"),
+    MAIN_CLONE_PROJECT(MainmenuConstants.PROJECTS_WINDOW_KEY, "Git", "main_git_clone_project", "icons/mainmenu/clone_16x16.png", "Clone"),
+    MAIN_CREATE_BRANCH(MainmenuConstants.PROJECTS_WINDOW_KEY, "Git", "main_git_create_branch", "icons/mainmenu/newbranch_16x16.png", "New branch"),
+    MAIN_SWITCH_BRANCH(MainmenuConstants.PROJECTS_WINDOW_KEY, "Git", "main_git_switch_branch", "icons/mainmenu/switchbranch_16x16.png", "Switch branch"),
+    MAIN_COMMIT(MainmenuConstants.PROJECTS_WINDOW_KEY, "Git", "main_git_commit", "icons/mainmenu/commit_16x16.png", "Commit"),
+    MAIN_PUSH(MainmenuConstants.PROJECTS_WINDOW_KEY, "Git", "main_git_push", "icons/mainmenu/push_16x16.png", "Push"),
+    MAIN_PULL(MainmenuConstants.PROJECTS_WINDOW_KEY, "Git", "main_git_pull", "icons/mainmenu/pull_16x16.png", "Pull"),
+    MAIN_REVERT(MainmenuConstants.PROJECTS_WINDOW_KEY, "Git", "main_git_revert", "icons/mainmenu/revert_changes_16x16.png", "Revert"),
+    MAIN_USER_GUIDE(MainmenuConstants.PROJECTS_WINDOW_KEY, "Help", "main_help_user_guide", "icons/mainmenu/user_guide_16x16.png", "User guide"),
+    MAIN_ABOUT(MainmenuConstants.PROJECTS_WINDOW_KEY, "Help", "main_help_about", "icons/mainmenu/about_16x16.png", "About");
 
     private final String viewKey;
     private final String menuName;
@@ -37,7 +36,7 @@ public enum MainMenuItems {
     private final String icoUrl;
     private final String text;
 
-    private MainMenuItems(final String windowId, final String menuName, final String itemId, final String icoUrl, final String itemText) {
+    MainMenuItems(final String windowId, final String menuName, final String itemId, final String icoUrl, final String itemText) {
         this.viewKey = windowId;
         this.menuName = menuName;
         this.id = itemId;
@@ -88,5 +87,10 @@ public enum MainMenuItems {
      */
     public String getMenuName() {
         return menuName;
+    }
+
+    private static class MainmenuConstants{
+        private final static String GROUPS_WINDOW_KEY = ViewKey.GROUPS_WINDOW.getKey();
+        private final static String PROJECTS_WINDOW_KEY = ViewKey.PROJECTS_WINDOW.getKey();
     }
 }
