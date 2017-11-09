@@ -399,7 +399,7 @@ public class ModularController implements UpdateProgressListener {
 
         } else if (windowId.equals(ViewKey.PROJECTS_WINDOW.getKey())) {
             _toolbarManager.getButtonById(ToolbarButtons.CHANGE_GROUP_BUTTON.getId())
-                    .setOnAction(event -> loadGroupWindow());
+                    .setOnAction(this::loadGroupWindow);
 
             _toolbarManager.getButtonById(ToolbarButtons.SWITCH_BRANCH_BUTTON.getId())
                     .setOnAction(this::showSwitchBranchWindow);
@@ -433,16 +433,16 @@ public class ModularController implements UpdateProgressListener {
     private void initActionsMainMenu(String windowId) {
         if (windowId.equals(ViewKey.GROUPS_WINDOW.getKey())) {
             _mainMenuManager.getButtonById(MainMenuItems.GROUP_WINDOW_CLONE_GROUP).setOnAction(this::onCloneGroups);
-            _mainMenuManager.getButtonById(MainMenuItems.GROUP_WINDOW_EXIT).setOnAction(event -> exit());
-            _mainMenuManager.getButtonById(MainMenuItems.GROUP_WINDOW_ABOUT).setOnAction(event -> showAboutPopup());
+            _mainMenuManager.getButtonById(MainMenuItems.GROUP_WINDOW_EXIT).setOnAction(this::exit);
+            _mainMenuManager.getButtonById(MainMenuItems.GROUP_WINDOW_ABOUT).setOnAction(this::showAboutPopup);
 
             MenuItem userGuide = _mainMenuManager.getButtonById(MainMenuItems.GROUP_WINDOW_USER_GUIDE);
-            userGuide.setOnAction(event -> UserGuideUtil.openUserGuide());
+            userGuide.setOnAction(this::openUserGuide);
             userGuide.setAccelerator(new KeyCodeCombination(KeyCode.F1));
 
         } else if (windowId.equals(ViewKey.PROJECTS_WINDOW.getKey())) {
-            _mainMenuManager.getButtonById(MainMenuItems.MAIN_EXIT).setOnAction(event -> exit());
-            _mainMenuManager.getButtonById(MainMenuItems.MAIN_ABOUT).setOnAction(event -> showAboutPopup());
+            _mainMenuManager.getButtonById(MainMenuItems.MAIN_EXIT).setOnAction(this::exit);
+            _mainMenuManager.getButtonById(MainMenuItems.MAIN_ABOUT).setOnAction(this::showAboutPopup);
             _mainMenuManager.getButtonById(MainMenuItems.MAIN_CLONE_PROJECT).setOnAction(this::cloneShadowProject);
             _mainMenuManager.getButtonById(MainMenuItems.MAIN_CREATE_BRANCH).setOnAction(this::onNewBranchButton);
             _mainMenuManager.getButtonById(MainMenuItems.MAIN_COMMIT).setOnAction(this::onCommitAction);
@@ -452,7 +452,7 @@ public class ModularController implements UpdateProgressListener {
             _mainMenuManager.getButtonById(MainMenuItems.MAIN_SWITCH_BRANCH).setOnAction(this::showSwitchBranchWindow);
 
             MenuItem userGuide = _mainMenuManager.getButtonById(MainMenuItems.MAIN_USER_GUIDE);
-            userGuide.setOnAction(event -> UserGuideUtil.openUserGuide());
+            userGuide.setOnAction(this::openUserGuide);
             userGuide.setAccelerator(new KeyCodeCombination(KeyCode.F1));
         }
     }
@@ -485,10 +485,10 @@ public class ModularController implements UpdateProgressListener {
         listView.getSelectionModel().getSelectedItems().addListener((ListChangeListener<Project>) changed -> {
             if (areAllItemsSelected(listView)) {
                 selectAllButton.setSelected(true);
-                selectAllButton.setOnAction(action -> onDeselectAll());
+                selectAllButton.setOnAction(this::onDeselectAll);
             } else {
                 selectAllButton.setSelected(false);
-                selectAllButton.setOnAction(action -> onSelectAll());
+                selectAllButton.setOnAction(this::onSelectAll);
             }
         });
 
@@ -754,6 +754,12 @@ public class ModularController implements UpdateProgressListener {
         executor.shutdown();
     }
 
+    @FXML
+    @SuppressWarnings("unused")
+    private void loadGroupWindow(ActionEvent actionEvent) {
+        loadGroupWindow();
+    }
+
     /*
      *
      * END OF GROUPS-VIEW ACTIONS BLOCK
@@ -987,9 +993,50 @@ public class ModularController implements UpdateProgressListener {
         executor.submit((Runnable) this::refreshLoadProjects);
         executor.shutdown();
     }
+
+    @FXML
+    @SuppressWarnings("unused")
+    private void onSelectAll(ActionEvent actionEvent) {
+        onSelectAll();
+    }
+
+    @FXML
+    @SuppressWarnings("unused")
+    private void onDeselectAll(ActionEvent actionEvent) {
+        onDeselectAll();
+    }
     /*
      *
      * END OF PROJECTS-VIEW ACTIONS BLOCK
+     *
+     ***********************************************************************************************/
+
+    /***********************************************************************************************
+     *
+     * START OF GENERAL ACTIONS BLOCK
+     *
+     */
+
+    @FXML
+    @SuppressWarnings("unused")
+    private void exit(ActionEvent actionEvent) {
+        exit();
+    }
+
+    @FXML
+    @SuppressWarnings("unused")
+    private void showAboutPopup(ActionEvent actionEvent) {
+        showAboutPopup();
+    }
+
+    @FXML
+    @SuppressWarnings("unused")
+    private void openUserGuide(ActionEvent actionEvent){
+        UserGuideUtil.openUserGuide();
+    }
+    /*
+     *
+     * END OF GENERAL ACTIONS BLOCK
      *
      ***********************************************************************************************/
 
