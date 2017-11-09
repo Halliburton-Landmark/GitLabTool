@@ -27,6 +27,7 @@ public class StateServiceImpl implements StateService {
         _listeners.put(ApplicationState.COMMIT, createSynchronizedSet());
         _listeners.put(ApplicationState.PUSH, createSynchronizedSet());
         _listeners.put(ApplicationState.CREATE_PROJECT, createSynchronizedSet());
+        _listeners.put(ApplicationState.CREATE_BRANCH, createSynchronizedSet());
         _listeners.put(ApplicationState.SWITCH_BRANCH, createSynchronizedSet());
         _listeners.put(ApplicationState.EDIT_POM, createSynchronizedSet());
         _listeners.put(ApplicationState.LOAD_PROJECTS, createSynchronizedSet());
@@ -39,6 +40,7 @@ public class StateServiceImpl implements StateService {
         _states.put(ApplicationState.COMMIT, START_STATE);
         _states.put(ApplicationState.PUSH, START_STATE);
         _states.put(ApplicationState.CREATE_PROJECT, START_STATE);
+        _states.put(ApplicationState.CREATE_BRANCH, START_STATE);
         _states.put(ApplicationState.SWITCH_BRANCH, START_STATE);
         _states.put(ApplicationState.EDIT_POM, START_STATE);
         _states.put(ApplicationState.LOAD_PROJECTS, START_STATE);
