@@ -86,9 +86,10 @@ public interface ProjectService extends UpdateProgressGenerator {
     void updateProjectTypeAndStatus(Project project);
 
     /**
-     * Updates project status.
+     * Updates project statuses.
      *
-     * @param project - the project
+     * @param projects - the projects list
      */
-    void updateProjectStatus(Project project);
+    void updateProjectStatuses(List<Project> projects);
+
 }

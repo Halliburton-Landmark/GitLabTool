@@ -347,7 +347,7 @@ public class ModularController implements UpdateProgressListener {
             projects = ProjectList.getCorrectProjects(projects);
             if (projects.isEmpty()) {
                 String message = String.format(MainWindowController.NO_ANY_PROJECT_FOR_OPERATION,
-                        MainWindowController.SWITCH_BEANCH_OPERATION_NAME);
+                        MainWindowController.SWITCH_BRANCH_OPERATION_NAME);
                 _consoleService.addMessage(message, MessageType.ERROR);
                 return;
             }
@@ -355,9 +355,6 @@ public class ModularController implements UpdateProgressListener {
             URL switchBranchWindowUrl = getClass().getClassLoader().getResource(ViewKey.SWITCH_BRANCH_WINDOW.getPath());
             FXMLLoader loader = new FXMLLoader(switchBranchWindowUrl);
             Parent root = loader.load();
-
-            SwitchBranchWindowController switchWindowController = loader.getController();
-            switchWindowController.beforeShowing(projects);
 
             Scene scene = new Scene(root);
             Stage stage = new Stage();
@@ -378,6 +375,8 @@ public class ModularController implements UpdateProgressListener {
             stage.setMinWidth(dialogWidth / 2);
             stage.setMinHeight(dialogHeight / 2);
 
+            SwitchBranchWindowController switchWindowController  = loader.getController();
+            switchWindowController.beforeShowing(projects, stage);
             stage.show();
         } catch (IOException e) {
             logger.error("Could not load fxml resource", e);

@@ -2,6 +2,7 @@ package com.lgc.gitlabtool.git.services;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -31,10 +32,12 @@ public class StateServiceImpl implements StateService {
         _listeners.put(ApplicationState.COMMIT, createSynchronizedSet());
         _listeners.put(ApplicationState.PUSH, createSynchronizedSet());
         _listeners.put(ApplicationState.CREATE_PROJECT, createSynchronizedSet());
+        _listeners.put(ApplicationState.CREATE_BRANCH, createSynchronizedSet());
         _listeners.put(ApplicationState.SWITCH_BRANCH, createSynchronizedSet());
         _listeners.put(ApplicationState.EDIT_POM, createSynchronizedSet());
-        _listeners.put(ApplicationState.REFRESH_PROJECTS, createSynchronizedSet());
+        _listeners.put(ApplicationState.LOAD_PROJECTS, createSynchronizedSet());
         _listeners.put(ApplicationState.REVERT, createSynchronizedSet());
+        _listeners.put(ApplicationState.UPDATE_PROJECT_STATUSES, createSynchronizedSet());
 
         _states = new ConcurrentHashMap<>();
         _states.put(ApplicationState.CLONE, START_STATE);
@@ -42,10 +45,12 @@ public class StateServiceImpl implements StateService {
         _states.put(ApplicationState.COMMIT, START_STATE);
         _states.put(ApplicationState.PUSH, START_STATE);
         _states.put(ApplicationState.CREATE_PROJECT, START_STATE);
+        _states.put(ApplicationState.CREATE_BRANCH, START_STATE);
         _states.put(ApplicationState.SWITCH_BRANCH, START_STATE);
         _states.put(ApplicationState.EDIT_POM, START_STATE);
-        _states.put(ApplicationState.REFRESH_PROJECTS, START_STATE);
+        _states.put(ApplicationState.LOAD_PROJECTS, START_STATE);
         _states.put(ApplicationState.REVERT, START_STATE);
+        _states.put(ApplicationState.UPDATE_PROJECT_STATUSES, START_STATE);
     }
 
     @Override
@@ -62,18 +67,22 @@ public class StateServiceImpl implements StateService {
 
     private void setState(ApplicationState state, int operation) {
         Integer value = _states.get(state);
-
-        Integer newValue;
         if (value == null) {
-            newValue = operation != DEACTIVATE_STATE ? operation : START_STATE;
+            value = operation != DEACTIVATE_STATE ? operation : START_STATE;
         } else if (value < START_STATE) {
-            // we have incorrect value in the map
-            newValue = START_STATE;
-        } else {
-            newValue = value + operation;
+            // If state turn off more times than turn on, we'll set START_STATE to value.
+            value = START_STATE;
         }
+
+        if (value == START_STATE && operation == DEACTIVATE_STATE) {
+            // We can't turn off state if it isn't turn on.
+            _states.put(state, value);
+            return;
+        }
+
+        Integer newValue = value + operation;
         _states.put(state, newValue);
-        // if state was changed from ON to OFF and vice versa
+
         if (isActive(value) != isActive(newValue)) {
             notifyListenersByType(state);
         }
@@ -129,8 +138,14 @@ public class StateServiceImpl implements StateService {
     private void notifyListenersByType(ApplicationState changedState) {
         _logger.info("Notifying listeners about changing of " + changedState.getState());
         final Set<StateListener> listeners = _listeners.get(changedState);
-        if (listeners != null) {
-            listeners.forEach(listener -> listener.handleEvent(changedState, isActiveState(changedState)));
+        Iterator<StateListener> iterator = listeners.iterator();
+        while (iterator.hasNext()) {
+            StateListener stateListener = iterator.next();
+            if (stateListener.isDisposed()) {
+                iterator.remove();
+                continue;
+            }
+            stateListener.handleEvent(changedState, isActiveState(changedState));
         }
     }
 

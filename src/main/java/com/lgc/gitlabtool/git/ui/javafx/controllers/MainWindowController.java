@@ -1,6 +1,5 @@
 package com.lgc.gitlabtool.git.ui.javafx.controllers;
 
-
 import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
@@ -31,7 +30,6 @@ import com.lgc.gitlabtool.git.services.ConsoleService;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.LoginService;
 import com.lgc.gitlabtool.git.services.PomXMLService;
-import com.lgc.gitlabtool.git.services.ProgressListener;
 import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StateService;
@@ -48,6 +46,7 @@ import com.lgc.gitlabtool.git.ui.javafx.ProgressDialog;
 import com.lgc.gitlabtool.git.ui.javafx.PullProgressDialog;
 import com.lgc.gitlabtool.git.ui.javafx.StatusDialog;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
+import com.lgc.gitlabtool.git.ui.javafx.listeners.PushProgressListener;
 import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuItems;
 import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuManager;
 import com.lgc.gitlabtool.git.ui.selection.ListViewKey;
@@ -63,7 +62,6 @@ import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -109,8 +107,10 @@ public class MainWindowController implements StateListener {
     private static final String NEW_BRANCH_CREATION = "new branch creation";
     private static final String PULL_OPERATION_NAME = "pull";
     private static final String PUSH_OPERATION_NAME = "push";
-    public static final String SWITCH_BEANCH_OPERATION_NAME = "switch branch";
+
+    public static final String SWITCH_BRANCH_OPERATION_NAME = "switch branch";
     public static final String ADD_REMOVE_FILES_OPERATION_NAME = "add/remove files";
+
 
     private ProjectList _projectsList;
 
@@ -166,7 +166,8 @@ public class MainWindowController implements StateListener {
         _stateService.addStateListener(ApplicationState.SWITCH_BRANCH, this);
         _stateService.addStateListener(ApplicationState.EDIT_POM, this);
         _stateService.addStateListener(ApplicationState.REVERT, this);
-        _stateService.addStateListener(ApplicationState.REFRESH_PROJECTS, this);
+        _stateService.addStateListener(ApplicationState.LOAD_PROJECTS, this);
+        _stateService.addStateListener(ApplicationState.UPDATE_PROJECT_STATUSES, this);
     }
 
     public void beforeShowing() {
@@ -532,7 +533,7 @@ public class MainWindowController implements StateListener {
         List<Project> filteredProjects = ProjectList.getCorrectProjects(getCurrentProjects());
         if (!filteredProjects.isEmpty()) {
             ExecutorService executor = Executors.newSingleThreadExecutor();
-            executor.submit(() -> _gitService.push(filteredProjects, new PushProgressListener()));
+            executor.submit(() -> _gitService.push(filteredProjects, PushProgressListener.get()));
             executor.shutdown();
         } else {
             _consoleService.addMessage(String.format(NO_ANY_PROJECT_FOR_OPERATION, PUSH_OPERATION_NAME), MessageType.ERROR);
@@ -574,7 +575,6 @@ public class MainWindowController implements StateListener {
                 return;
             }
 
-            controller.beforeStart(getIdSelectedProjects());
             Scene scene = new Scene(root);
             Stage stage = new Stage();
             stage.setScene(scene);
@@ -594,6 +594,7 @@ public class MainWindowController implements StateListener {
             stage.setMinWidth(dialogWidth / 2);
             stage.setMinHeight(dialogHeight / 2);
 
+            controller.beforeStart(getIdSelectedProjects(), stage);
             stage.show();
         } catch (IOException e) {
             _logger.error("Could not load fxml resource", e);
@@ -619,12 +620,13 @@ public class MainWindowController implements StateListener {
             public void run() {
                 Boolean isHide = preferences.getBoolean(PREF_NAME_HIDE_SHADOWS, false);
                 filterShadowProjects.setSelected(isHide);
-                if (isHide) {
-                    ObservableList<Project> obsList = FXCollections.observableArrayList(_projectsList.getProjects());
-                    FilteredList<Project> list = new FilteredList<>(obsList, Project::isCloned);
-                    projectsList.setItems(list);
-                } else {
+                ObservableList<Project> obsList = FXCollections.observableArrayList(
+                        isHide ? _projectsList.getClonedProjects() : _projectsList.getProjects());
+                projectsList.setItems(obsList);
+                if (!isHide) {
                     sortProjectsList();
+                } else {
+                    projectsList.refresh();
                 }
             }
         });
@@ -745,38 +747,6 @@ public class MainWindowController implements StateListener {
         _gitService.pull(projects, pullProgressListener);
     }
 
-    public class PushProgressListener implements ProgressListener {
-
-        public PushProgressListener() {
-            _consoleService.addMessage("Push projects is started...", MessageType.SIMPLE);
-            _stateService.stateON(ApplicationState.PUSH);
-        }
-
-        @Override
-        public void onSuccess(Object... t) {
-            if(t[0] instanceof Project) {
-                String message = "Pushing the " + ((Project)t[0]).getName() + " project is successful!";
-                _consoleService.addMessage(message, MessageType.SUCCESS);
-            }
-        }
-
-        @Override
-        public void onError(Object... t) {
-            if(t[0] instanceof Project) {
-                String message = "Failed pushing the " + ((Project)t[0]).getName() + " project!";
-                _consoleService.addMessage(message, MessageType.ERROR);
-            }
-        }
-
-        @Override
-        public void onStart(Object... t) {}
-
-        @Override
-        public void onFinish(Object... t) {
-            finishAction("Push projects is finished!", MessageType.SIMPLE, ApplicationState.PUSH);
-        }
-    }
-
     @Override
     public void handleEvent(ApplicationState state, boolean isActivate) {
         if (!isActivate) {
@@ -788,7 +758,7 @@ public class MainWindowController implements StateListener {
     }
 
     private void handleRefreshButtonState(ApplicationState state, boolean isActivate) {
-        if(state == ApplicationState.REFRESH_PROJECTS) {
+        if(state == ApplicationState.LOAD_PROJECTS) {
             refreshProjectsButton.setDisable(isActivate);
         }
     }
@@ -799,9 +769,10 @@ public class MainWindowController implements StateListener {
             refreshLoadProjects();
             return;
         }
-        projects.parallelStream()
-                .filter(Project::isCloned)
-                .forEach(_projectService::updateProjectStatus);
-        hideShadowsAction();
+        if (state != ApplicationState.LOAD_PROJECTS && state != ApplicationState.UPDATE_PROJECT_STATUSES) {
+            _projectService.updateProjectStatuses(projects);
+        } else {
+            hideShadowsAction();
+        }
     }
 }

@@ -525,23 +525,27 @@ public class JGit {
         if (projects == null || projects.isEmpty() || progressListener == null) {
             throw new IllegalArgumentException("Incorrect data: projects is " + projects);
         }
-        Map<Project, JGitStatus> statuses = new HashMap<>();
-        for (Project project : projects) {
-            if (project == null || !project.isCloned()) {
-                progressListener.onError(project);
-                statuses.put(null, JGitStatus.FAILED);
-                continue;
+        progressListener.onStart();
+        try {
+            Map<Project, JGitStatus> statuses = new HashMap<>();
+            for (Project project : projects) {
+                if (project == null || !project.isCloned()) {
+                    progressListener.onError(project);
+                    statuses.put(null, JGitStatus.FAILED);
+                    continue;
+                }
+                JGitStatus pushStatus = push(project);
+                if (pushStatus.equals(JGitStatus.FAILED)) {
+                    progressListener.onError(project);
+                } else {
+                    progressListener.onSuccess(project);
+                }
+                statuses.put(project, pushStatus);
             }
-            JGitStatus pushStatus = push(project);
-            if (pushStatus.equals(JGitStatus.FAILED)) {
-                progressListener.onError(project);
-            } else {
-                progressListener.onSuccess(project);
-            }
-            statuses.put(project, pushStatus);
+            return statuses;
+        } finally {
+            progressListener.onFinish();
         }
-        progressListener.onFinish();
-        return statuses;
     }
 
     /**
