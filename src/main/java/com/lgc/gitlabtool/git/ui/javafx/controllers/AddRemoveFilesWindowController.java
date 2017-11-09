@@ -14,6 +14,7 @@ import com.lgc.gitlabtool.git.services.ServiceProvider;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
@@ -42,10 +43,7 @@ public class AddRemoveFilesWindowController {
     private ToggleButton _selectButton;
 
     @FXML
-    private Button _addUpButton;
-
-    @FXML
-    private Button _addDownButton;
+    private Button _moveUpDownButton;
 
     @FXML
     private Button _addButton;
@@ -54,17 +52,17 @@ public class AddRemoveFilesWindowController {
     private Button _removeButton;
 
     private static final String SELECT_ALL_IMAGE_URL = "icons/select_all_20x20.png";
-    private static final String ADD_UP_IMAGE_URL = "icons/arrow-up20x20.png";
-    private static final String ADD_DOWN_IMAGE_URL = "icons/arrow-down20x20.png";
+    private static final String MOVE_UP_IMAGE_URL = "icons/arrow-up20x20.png";
+    private static final String MOVE_DOWN_IMAGE_URL = "icons/arrow-down20x20.png";
 
     private final Image _imageSelectButton;
-    private final Image _imageAddUpButton;
-    private final Image _imageAddDownButton;
+    private final Image _imageMoveUpButton;
+    private final Image _imageMoveDownButton;
 
     {
         _imageSelectButton = new Image(getClass().getClassLoader().getResource(SELECT_ALL_IMAGE_URL).toExternalForm());
-        _imageAddUpButton = new Image(getClass().getClassLoader().getResource(ADD_UP_IMAGE_URL).toExternalForm());
-        _imageAddDownButton = new Image(getClass().getClassLoader().getResource(ADD_DOWN_IMAGE_URL).toExternalForm());
+        _imageMoveUpButton = new Image(getClass().getClassLoader().getResource(MOVE_UP_IMAGE_URL).toExternalForm());
+        _imageMoveDownButton = new Image(getClass().getClassLoader().getResource(MOVE_DOWN_IMAGE_URL).toExternalForm());
 
     }
 
@@ -86,13 +84,20 @@ public class AddRemoveFilesWindowController {
         _sortingByChoice.setValue(SortingType.DEFAULT);
 
         _selectButton.setGraphic(new ImageView(_imageSelectButton));
-        _addUpButton.setGraphic(new ImageView(_imageAddUpButton));
-        _addDownButton.setGraphic(new ImageView(_imageAddDownButton));
 
-        _addUpButton.setOnAction(event -> moveBetweenLists(_stagedFilesListView, _unstagedFilesListView));
-        _addDownButton.setOnAction(event -> moveBetweenLists(_unstagedFilesListView, _stagedFilesListView));
+        _moveUpDownButton.setDisable(true);
+        _moveUpDownButton.setOnAction(this::moveBetweenLists);
 
         configureListViews();
+    }
+
+    private void moveBetweenLists(ActionEvent event) {
+        boolean isUnstagedFiles = !_unstagedFilesListView.getSelectionModel().getSelectedItems().isEmpty();
+        if (isUnstagedFiles) {
+            moveBetweenLists(_unstagedFilesListView, _stagedFilesListView);
+        } else {
+            moveBetweenLists(_stagedFilesListView, _unstagedFilesListView);
+        }
     }
 
     private void moveBetweenLists(ListView<ChangedFile> fromList, ListView<ChangedFile> toList) {
@@ -107,8 +112,9 @@ public class AddRemoveFilesWindowController {
 
             ObservableList<ChangedFile> fromListItems = FXCollections.observableArrayList(allFiles);
             fromList.setItems(fromListItems);
+            fromList.getSelectionModel().clearSelection();
 
-            changeSelectionFiles();
+            onChangedSelectionAction();
         }
 
     }
@@ -129,12 +135,15 @@ public class AddRemoveFilesWindowController {
 
     }
 
+    /**
+     *
+     */
     public void onSelectAll() {
         _unstagedFilesListView.getSelectionModel().selectAll();
         _unstagedFilesListView.requestFocus();
     }
 
-    public void onDeselectAll() {
+    private void onDeselectAll() {
         _unstagedFilesListView.getSelectionModel().clearSelection();
         _unstagedFilesListView.requestFocus();
     }
@@ -155,6 +164,48 @@ public class AddRemoveFilesWindowController {
     private List<Project> getSelectedProjects() {
         return _projectList.getProjectsByIds(_selectedProjectIds);
     }
+
+    class FilesListChangeListener implements ListChangeListener<ChangedFile> {
+
+        @Override
+        public void onChanged(ListChangeListener.Change<? extends ChangedFile> event) {
+            onChangedSelectionAction();
+        }
+
+    }
+
+    private void onChangedSelectionAction() {
+        selectAllAction();
+        updateMoveUpDownButton();
+    }
+
+    private void selectAllAction() {
+        boolean isSelectedAll = areFilesSelected(_unstagedFilesListView);
+        _selectButton.setSelected(isSelectedAll);
+        if (isSelectedAll) {
+            _selectButton.setOnAction(action -> onDeselectAll());
+        } else {
+            _selectButton.setOnAction(action -> onSelectAll());
+        }
+    }
+
+    private void updateMoveUpDownButton() {
+        boolean isUnstagedFilesSelected = !_unstagedFilesListView.getSelectionModel().getSelectedItems().isEmpty();
+        boolean isStagedFlesSelected = !_stagedFilesListView.getSelectionModel().getSelectedItems().isEmpty();
+        if (isUnstagedFilesSelected) {
+            setGraphicAndDisableMoveButton(_imageMoveDownButton, false);
+        } else if (isStagedFlesSelected) {
+            setGraphicAndDisableMoveButton(_imageMoveUpButton, false);
+        } else {
+            setGraphicAndDisableMoveButton(null, true);
+        }
+    }
+
+    private void setGraphicAndDisableMoveButton(Image image, boolean isDisable) {
+        _moveUpDownButton.setGraphic(new ImageView(image));
+        _moveUpDownButton.setDisable(isDisable);
+    }
+
 
     /**
      * Type for sorting files in ListViews.
@@ -185,24 +236,5 @@ public class AddRemoveFilesWindowController {
         };
     }
 
-    // here
-    class FilesListChangeListener implements ListChangeListener<ChangedFile> {
-
-        @Override
-        public void onChanged(ListChangeListener.Change<? extends ChangedFile> event) {
-            changeSelectionFiles();
-        }
-
-    }
-
-    private void changeSelectionFiles() {
-        boolean isSelectedAll = areFilesSelected(_unstagedFilesListView);
-        _selectButton.setSelected(isSelectedAll);
-        if (isSelectedAll) {
-            _selectButton.setOnAction(action -> onDeselectAll());
-        } else {
-            _selectButton.setOnAction(action -> onSelectAll());
-        }
-    }
 
 }
