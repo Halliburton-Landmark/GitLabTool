@@ -1,30 +1,52 @@
 package com.lgc.gitlabtool.git.jgit;
 
+import org.apache.commons.io.FilenameUtils;
+
 import com.lgc.gitlabtool.git.entities.Project;
 
 public class ChangedFile {
     private Project _project;
     private String _fileName;
+    private boolean _hasConflicting;
+    private String _fileExtension;
 
-    public ChangedFile(Project project, String fileName) {
-        _project = project;
-        _fileName = fileName;
+    public ChangedFile(Project project, String fileName, boolean hasConflicting) {
+        setProject(project);
+        setFileName(fileName);
+        setHasConflicting(hasConflicting);
     }
 
     public Project getProject() {
         return _project;
     }
 
-    public void setProject(Project project) {
-        _project = project;
-    }
-
     public String getFileName() {
         return _fileName;
     }
 
-    public void setFileName(String fileName) {
+    public String getFileExtension() {
+        return _fileExtension;
+    }
+
+    public boolean isHasConflicting() {
+        return _hasConflicting;
+    }
+
+    private void setProject(Project project) {
+        _project = project;
+    }
+
+    private void setFileName(String fileName) {
         _fileName = fileName;
+        setFileExtension(FilenameUtils.getExtension(fileName));
+    }
+
+    private void setFileExtension(String fileName) {
+        _fileExtension = FilenameUtils.getExtension(fileName);
+    }
+
+    public void setHasConflicting(boolean hasConflicting) {
+        _hasConflicting = hasConflicting;
     }
 
     @Override
@@ -64,6 +86,5 @@ public class ChangedFile {
         }
         return true;
     }
-
 
 }

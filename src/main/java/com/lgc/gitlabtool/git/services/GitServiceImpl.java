@@ -273,20 +273,8 @@ public class GitServiceImpl implements GitService {
             return changedFiles;
         }
         Status status = optStatus.get();
-//        System.out.println("Added: " + status.getAdded());
-//        System.out.println("Changed: " + status.getChanged());
-//        System.out.println("Conflicting: " + status.getConflicting());
-//        System.out.println("ConflictingStageState: " + status.getConflictingStageState());
-//        System.out.println("IgnoredNotInIndex: " + status.getIgnoredNotInIndex());
-//        System.out.println("Missing: " + status.getMissing());
-//        System.out.println("Modified: " + status.getModified());
-//        System.out.println("Removed: " + status.getRemoved());
-//        System.out.println("Untracked: " + status.getUntracked());
-//        System.out.println("UntrackedFolders: " + status.getUntrackedFolders());
-        Set<String> files = status.getUntracked();
-        for (String file : files) {
-            changedFiles.add(new ChangedFile(project, file));
-        }
+        status.getUntracked().forEach(file -> changedFiles.add(new ChangedFile(project, file, false)));
+        status.getConflicting().forEach(file -> changedFiles.add(new ChangedFile(project, file, true)));
         return changedFiles;
     }
 
@@ -304,7 +292,7 @@ public class GitServiceImpl implements GitService {
 
             List<String> result = _git.addUntrackedFileForCommit(fileNames, project);
             List<ChangedFile> added = result.stream()
-                                            .map(file -> new ChangedFile(project, file))
+                                            .map(file -> new ChangedFile(project, file, false))
                                             .collect(Collectors.toList());
             addedFiles.addAll(added);
         }

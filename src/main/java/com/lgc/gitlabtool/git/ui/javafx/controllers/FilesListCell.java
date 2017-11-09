@@ -20,6 +20,10 @@ public class FilesListCell extends ListCell<ChangedFile> {
 
         if (item != null && !empty) {
             Text fileNameText = new Text(item.getFileName());
+            if (item.isHasConflicting()) {
+                fileNameText.setText(item.getFileName() + " [conflicting]");
+                fileNameText.setFill(Color.BLUE);
+            }
             Text projectNameText = new Text(getProjectNamme(item.getProject()));
             projectNameText.setFill(Color.DARKCYAN);
             projectNameText.setFont(new Font(10));

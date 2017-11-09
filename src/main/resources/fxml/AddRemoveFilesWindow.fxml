@@ -27,7 +27,7 @@
         </items>
       </SplitPane>
       <Label layoutX="27.0" layoutY="22.0" text="Sorting by:" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="10.0" />
-      <ChoiceBox fx:id="_sortingByChoice" disable="true" layoutX="76.0" layoutY="6.0" prefHeight="25.0" prefWidth="159.0" AnchorPane.leftAnchor="65.0" AnchorPane.topAnchor="5.0" />
+      <ChoiceBox fx:id="_sortingListBox" disable="true" layoutX="76.0" layoutY="6.0" prefHeight="25.0" prefWidth="159.0" AnchorPane.leftAnchor="65.0" AnchorPane.topAnchor="5.0" />
       <TextField fx:id="_filterField" alignment="CENTER_RIGHT" disable="true" layoutX="226.0" layoutY="5.0" AnchorPane.leftAnchor="230.0" AnchorPane.rightAnchor="5.0" />
       <ButtonBar layoutX="135.0" layoutY="411.0" prefHeight="25.0" prefWidth="465.0" AnchorPane.bottomAnchor="5.0" AnchorPane.rightAnchor="5.0">
          <buttons>

@@ -3,6 +3,7 @@ package com.lgc.gitlabtool.git.ui.javafx.controllers;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -13,11 +14,15 @@ import com.lgc.gitlabtool.git.entities.ProjectList;
 import com.lgc.gitlabtool.git.jgit.ChangedFile;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
+import com.lgc.gitlabtool.git.ui.javafx.comparators.ComparatorDefaultType;
+import com.lgc.gitlabtool.git.ui.javafx.comparators.ComparatorExtensionsType;
+import com.lgc.gitlabtool.git.ui.javafx.comparators.ComparatorProjectsType;
 import com.lgc.gitlabtool.git.util.PathUtilities;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -37,7 +42,7 @@ public class AddRemoveFilesWindowController {
     private TextField _filterField;
 
     @FXML
-    private ChoiceBox<SortingType> _sortingByChoice;
+    private ChoiceBox<SortingType> _sortingListBox;
 
     @FXML
     private ListView<ChangedFile> _unstagedFilesListView;
@@ -89,10 +94,10 @@ public class AddRemoveFilesWindowController {
         _filterField.setText("" + _selectedProjectIds.size());
 
         ObservableList<SortingType> items = FXCollections.observableArrayList(SortingType.PROJECTS,
-                                                                              SortingType.TYPE_FILES,
+                                                                              SortingType.EXTENSIONS,
                                                                               SortingType.DEFAULT);
-        _sortingByChoice.setItems(items);
-        _sortingByChoice.setValue(SortingType.DEFAULT);
+        _sortingListBox.setItems(items);
+        _sortingListBox.setValue(SortingType.DEFAULT);
 
         _selectButton.setGraphic(new ImageView(_imageSelectButton));
 
@@ -107,10 +112,10 @@ public class AddRemoveFilesWindowController {
     private void configureListViews() {
         List<Project> items = getSelectedProjects();
         Project project = items.get(0);
-        ObservableList<ChangedFile> observableItems = FXCollections.observableArrayList(getUnstagedFiles(project));
+        Collection<ChangedFile> files = getUnstagedFiles(project);
 
         _unstagedFilesListView.setCellFactory(p -> new FilesListCell());
-        _unstagedFilesListView.setItems(observableItems);
+        _unstagedFilesListView.setItems(FXCollections.observableArrayList(files));
         _unstagedFilesListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         _unstagedFilesListView.getSelectionModel().getSelectedItems().addListener(new FilesListChangeListener());
         _unstagedFilesListView.addEventFilter(MouseEvent.MOUSE_PRESSED,
@@ -121,7 +126,7 @@ public class AddRemoveFilesWindowController {
         _stagedFilesListView.getSelectionModel().getSelectedItems().addListener(new FilesListChangeListener());
         _stagedFilesListView.addEventFilter(MouseEvent.MOUSE_PRESSED,
                 event -> changeFocuseAndSelection(_stagedFilesListView, _unstagedFilesListView));
-
+        setContentAndComparatorToLists();
     }
 
     private void changeFocuseAndSelection(ListView<ChangedFile> setFocuseList, ListView<ChangedFile> resetSelectionList) {
@@ -157,14 +162,24 @@ public class AddRemoveFilesWindowController {
         onChangedSelectionAction();
     }
 
+    private void setContentAndComparatorToLists() {
+        SortedList<ChangedFile> unstagedFiles = new SortedList<>(_unstagedFilesListView.getItems());
+        SortedList<ChangedFile> stagedFiles = new SortedList<>(_stagedFilesListView.getItems());
+
+        Comparator<ChangedFile> comparator = SortingType.getComparatorByType(_sortingListBox.getValue());
+        unstagedFiles.setComparator(comparator);
+        stagedFiles.setComparator(comparator);
+
+        _unstagedFilesListView.setItems(unstagedFiles);
+        _stagedFilesListView.setItems(stagedFiles);
+    }
+
     private void removeItemsFromList(ListView<ChangedFile> fromList, List<ChangedFile> removeFiles) {
-        List<ChangedFile> allFiles = fromList.getItems();
-        allFiles.removeAll(removeFiles);
-
-        ObservableList<ChangedFile> fromListItems = FXCollections.observableArrayList(allFiles);
+        ObservableList<ChangedFile> fromListItems = FXCollections.observableArrayList(fromList.getItems());
+        fromListItems.removeAll(removeFiles);
         fromList.setItems(fromListItems);
-        fromList.getSelectionModel().clearSelection();
 
+        setContentAndComparatorToLists();
         onChangedSelectionAction();
     }
 
@@ -198,7 +213,9 @@ public class AddRemoveFilesWindowController {
         List<ChangedFile> selectedFiles = getSelectedItems(fromList);
         if (selectedFiles != null) {
             ObservableList<ChangedFile> toListItems = FXCollections.observableArrayList(selectedFiles);
-            toList.getItems().addAll(toListItems);
+            toListItems.addAll(toList.getItems());
+            toList.setItems(toListItems);
+
             removeItemsFromList(fromList, selectedFiles);
         }
     }
@@ -317,10 +334,10 @@ public class AddRemoveFilesWindowController {
             }
         },
 
-        TYPE_FILES {
+        EXTENSIONS {
             @Override
             public String toString() {
-                return "files type";
+                return "extensions";
             }
         },
 
@@ -330,7 +347,16 @@ public class AddRemoveFilesWindowController {
                 return "default";
             }
         };
-    }
 
+        private static Comparator<ChangedFile> getComparatorByType(SortingType type) {
+            if (type == SortingType.DEFAULT) {
+                return new ComparatorDefaultType();
+            } else if (type == SortingType.PROJECTS) {
+                return new ComparatorProjectsType();
+            } else {
+                return new ComparatorExtensionsType();
+            }
+        }
+    }
 
 }
