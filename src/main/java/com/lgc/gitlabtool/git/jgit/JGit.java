@@ -276,15 +276,18 @@ public class JGit {
      * @param files names of files that need to add
      * @param project the cloned project
      */
-    public boolean addUntrackedFileForCommit(Collection<String> files, Project project) {
+    public List<String> addUntrackedFileForCommit(Collection<String> files, Project project) {
         if (files == null || project == null) {
             throw new IllegalArgumentException("Incorrect data: project is " + project + ", files is " + files);
         }
+
+        List<String> addedFiles = new ArrayList<>();
         try (Git git = getGit(project.getPath())) {
             files.stream().forEach((file) -> {
                 if (file != null) {
                     try {
                         git.add().addFilepattern(file).call();
+                        addedFiles.add(file);
                     } catch (GitAPIException e) {
                         logger.error("Could not add the " + file + " file");
                         logger.error("!ERROR: " + e.getMessage());
@@ -292,11 +295,11 @@ public class JGit {
                 }
             });
             git.close();
-            return true;
+            return addedFiles;
         } catch (IOException e) {
             logger.error("Error opening repository " + project.getPath() + " " + e.getMessage());
         }
-        return false;
+        return addedFiles;
     }
 
     /**

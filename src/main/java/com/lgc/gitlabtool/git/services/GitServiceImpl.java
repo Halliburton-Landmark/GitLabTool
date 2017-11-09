@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -16,7 +17,7 @@ import org.eclipse.jgit.api.Status;
 import com.lgc.gitlabtool.git.entities.Branch;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.jgit.BranchType;
-import com.lgc.gitlabtool.git.jgit.ChangedFiles;
+import com.lgc.gitlabtool.git.jgit.ChangedFile;
 import com.lgc.gitlabtool.git.jgit.JGit;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
@@ -211,13 +212,14 @@ public class GitServiceImpl implements GitService {
     }
 
     @Override
-    public ChangedFiles getChangedFiles(Project project) {
+    public List<ChangedFile> getChangedFiles(Project project) {
         if (project == null || !project.isCloned()) {
             return null;
         }
+        List<ChangedFile> changedFiles = new ArrayList<>();
         Optional<Status> optStatus = _git.getStatusProject(project);
         if (!optStatus.isPresent()) {
-            return new ChangedFiles(project, new ArrayList<>(), new ArrayList<>());
+            return changedFiles;
         }
         Status status = optStatus.get();
 //        System.out.println("Added: " + status.getAdded());
@@ -230,10 +232,33 @@ public class GitServiceImpl implements GitService {
 //        System.out.println("Removed: " + status.getRemoved());
 //        System.out.println("Untracked: " + status.getUntracked());
 //        System.out.println("UntrackedFolders: " + status.getUntrackedFolders());
-        return new ChangedFiles(project,
-                                ChangedFiles.getChangedFiles(new ArrayList<>(), project),
-                                ChangedFiles.getChangedFiles(status.getUntracked(), project));
+        Set<String> files = status.getUntracked();
+        for (String file : files) {
+            changedFiles.add(new ChangedFile(project, file));
+        }
+        return changedFiles;
+    }
 
+    @Override
+    public List<ChangedFile> addUntrackedFileForCommit(Map<Project, List<ChangedFile>> files) {
+        // add state on here and checks
+
+        List<ChangedFile> addedFiles = new ArrayList<>();
+        for (Entry<Project, List<ChangedFile>> entry : files.entrySet()) {
+            Project project = entry.getKey();
+            List<ChangedFile> changedFiles = entry.getValue();
+            List<String> fileNames = new ArrayList<>();
+
+            changedFiles.forEach(file -> fileNames.add(file.getFileName()));
+
+            List<String> result = _git.addUntrackedFileForCommit(fileNames, project);
+            List<ChangedFile> added = result.stream()
+                                            .map(file -> new ChangedFile(project, file))
+                                            .collect(Collectors.toList());
+            addedFiles.addAll(added);
+        }
+        // add state off here
+        return addedFiles;
     }
 
 }

@@ -4,11 +4,13 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.collections.map.HashedMap;
 
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.ProjectList;
 import com.lgc.gitlabtool.git.jgit.ChangedFile;
-import com.lgc.gitlabtool.git.jgit.ChangedFiles;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.util.PathUtilities;
@@ -95,6 +97,7 @@ public class AddRemoveFilesWindowController {
         _selectButton.setGraphic(new ImageView(_imageSelectButton));
 
         _moveUpDownButton.setOnAction(this::moveBetweenLists);
+        _addButton.setOnAction(this::onAddFilesAction);
         _removeButton.setOnAction(this::onRemoveAction);
         _exitButton.setOnAction(this::onExitAction);
 
@@ -124,6 +127,22 @@ public class AddRemoveFilesWindowController {
     private void changeFocuseAndSelection(ListView<ChangedFile> setFocuseList, ListView<ChangedFile> resetSelectionList) {
         setFocuseList.requestFocus();
         resetSelectionList.getSelectionModel().clearSelection();
+    }
+
+    @SuppressWarnings("unchecked")
+    private void onAddFilesAction(ActionEvent event) {
+        List<ChangedFile> unstagedList = _stagedFilesListView.getItems();
+        Map<Project, List<ChangedFile>> map = new HashedMap();
+        for (ChangedFile changedList : unstagedList) {
+            List<ChangedFile> files = map.get(changedList.getProject());
+            if (files == null) {
+                files = new ArrayList<>();
+            }
+            files.add(changedList);
+            map.put(changedList.getProject(), files);
+        }
+        List<ChangedFile> addedFiles = _gitService.addUntrackedFileForCommit(map);
+        removeItemsFromList(_stagedFilesListView, addedFiles);
     }
 
     private void onRemoveAction(ActionEvent event) {
@@ -209,8 +228,7 @@ public class AddRemoveFilesWindowController {
     }
 
     private Collection<ChangedFile> getUnstagedFiles(Project project) {
-        ChangedFiles files = _gitService.getChangedFiles(project);
-        return files.getUnstagedFiles();
+        return _gitService.getChangedFiles(project);
     }
 
     private List<Project> getSelectedProjects() {
@@ -230,6 +248,11 @@ public class AddRemoveFilesWindowController {
         selectAllAction();
         updateMoveUpDownButton();
         setDisableRemoveButton();
+        setDisableAddButton();
+    }
+
+    private void setDisableAddButton() {
+        _addButton.setDisable(_stagedFilesListView.getItems().isEmpty());
     }
 
     private void selectAllAction() {

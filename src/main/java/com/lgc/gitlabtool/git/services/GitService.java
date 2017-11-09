@@ -7,7 +7,7 @@ import java.util.Set;
 import com.lgc.gitlabtool.git.entities.Branch;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.jgit.BranchType;
-import com.lgc.gitlabtool.git.jgit.ChangedFiles;
+import com.lgc.gitlabtool.git.jgit.ChangedFile;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 
@@ -159,5 +159,7 @@ public interface GitService {
      */
     void cancelClone();
 
-    ChangedFiles getChangedFiles(Project project);
+    List<ChangedFile> getChangedFiles(Project project);
+
+    List<ChangedFile> addUntrackedFileForCommit(Map<Project, List<ChangedFile>> files);
 }
