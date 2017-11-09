@@ -14,7 +14,6 @@ import com.lgc.gitlabtool.git.services.ServiceProvider;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
@@ -47,6 +46,12 @@ public class AddRemoveFilesWindowController {
 
     @FXML
     private Button _addDownButton;
+
+    @FXML
+    private Button _addButton;
+
+    @FXML
+    private Button _removeButton;
 
     private static final String SELECT_ALL_IMAGE_URL = "icons/select_all_20x20.png";
     private static final String ADD_UP_IMAGE_URL = "icons/arrow-up20x20.png";
@@ -84,44 +89,29 @@ public class AddRemoveFilesWindowController {
         _addUpButton.setGraphic(new ImageView(_imageAddUpButton));
         _addDownButton.setGraphic(new ImageView(_imageAddDownButton));
 
-        _addUpButton.setOnAction(this::moveFilesToUpList);
-        _addDownButton.setOnAction(this::moveFilesToDownList);
+        _addUpButton.setOnAction(event -> moveBetweenLists(_stagedFilesListView, _unstagedFilesListView));
+        _addDownButton.setOnAction(event -> moveBetweenLists(_unstagedFilesListView, _stagedFilesListView));
 
         configureListViews();
     }
-    // bug logic
-    private void moveFilesToDownList(ActionEvent event) {
-        List<ChangedFile> allFiles = _unstagedFilesListView.getItems();
-        List<ChangedFile> selectedFiles = _unstagedFilesListView.getSelectionModel().getSelectedItems();
+
+    private void moveBetweenLists(ListView<ChangedFile> fromList, ListView<ChangedFile> toList) {
+        List<ChangedFile> allFiles = fromList.getItems();
+        List<ChangedFile> selectedFiles = fromList.getSelectionModel().getSelectedItems();
 
         if (selectedFiles != null) {
-            ObservableList<ChangedFile> stagedItems = FXCollections.observableArrayList(selectedFiles);
-            _stagedFilesListView.setItems(stagedItems);
+            ObservableList<ChangedFile> toListItems = FXCollections.observableArrayList(selectedFiles);
+            toList.getItems().addAll(toListItems);
 
             allFiles.removeAll(selectedFiles);
 
-            ObservableList<ChangedFile> unstagedItems = FXCollections.observableArrayList(allFiles);
-            _unstagedFilesListView.setItems(unstagedItems);
+            ObservableList<ChangedFile> fromListItems = FXCollections.observableArrayList(allFiles);
+            fromList.setItems(fromListItems);
+
             changeSelectionFiles();
         }
+
     }
-    // bug logic
-    private void moveFilesToUpList(ActionEvent event) {
-        List<ChangedFile> allFiles = _stagedFilesListView.getItems();
-        List<ChangedFile> selectedFiles = _stagedFilesListView.getSelectionModel().getSelectedItems();
-
-        if (selectedFiles != null) {
-            ObservableList<ChangedFile> unstagedItems = FXCollections.observableArrayList(selectedFiles);
-            _unstagedFilesListView.setItems(unstagedItems);
-            changeSelectionFiles();
-
-            allFiles.removeAll(selectedFiles);
-
-            ObservableList<ChangedFile> stagedItems = FXCollections.observableArrayList(allFiles);
-            _stagedFilesListView.setItems(stagedItems);
-        }
-    }
-
 
     private void configureListViews() {
         List<Project> items = getSelectedProjects();
@@ -150,6 +140,9 @@ public class AddRemoveFilesWindowController {
     }
 
     private boolean areFilesSelected(ListView<?> listView) {
+        if (_unstagedFilesListView == null || _unstagedFilesListView.getItems().isEmpty()) {
+            return false;
+        }
         return _unstagedFilesListView.getItems().size() ==
                _unstagedFilesListView.getSelectionModel().getSelectedItems().size();
     }
