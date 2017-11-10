@@ -77,8 +77,8 @@ public class ModularController implements UpdateProgressListener {
 
     private static final String ABOUT_POPUP_TITLE = "About";
 
-    private static final String ABOUT_POPUP_HEADER = getProjectNameWithVersion() + " (" + getCommitHash()
-            + "), powered by Luxoft";
+    private static final String ABOUT_POPUP_HEADER =
+            getProjectNameWithVersion() + " (" + getCommitHash() + "), powered by Luxoft";
     private static final String ABOUT_POPUP_CONTENT = "Contacts: Yurii Pitomets (yurii.pitomets2@halliburton.com)";
     private static final String SWITCH_BRANCH_TITLE = "Switch branch";
 
@@ -336,14 +336,10 @@ public class ModularController implements UpdateProgressListener {
     private void showSwitchBranchWindow(ActionEvent event) {
         try {
             List<Project> projects = SelectionsProvider.getInstance().getSelectionItems("mainWindow_projectsList");
-
-            //GitService service = (GitService) ServiceProvider.getInstance().getService(GitService.class.getName());
-            //service.getChangedFiles(projects.get(0));
-
             projects = ProjectList.getCorrectProjects(projects);
             if (projects.isEmpty()) {
                 String message = String.format(MainWindowController.NO_ANY_PROJECT_FOR_OPERATION,
-                        MainWindowController.SWITCH_BRANCH_OPERATION_NAME);
+                                               MainWindowController.SWITCH_BRANCH_OPERATION_NAME);
                 _consoleService.addMessage(message, MessageType.ERROR);
                 return;
             }

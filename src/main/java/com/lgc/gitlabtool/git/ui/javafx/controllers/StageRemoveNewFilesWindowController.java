@@ -42,6 +42,27 @@ import javafx.stage.Stage;
 
 public class StageRemoveNewFilesWindowController {
 
+    private static final String MOVE_UP_IMAGE_URL = "icons/arrow-up20x20.png";
+    private static final String MOVE_DOWN_IMAGE_URL = "icons/arrow-down20x20.png";
+
+    private final Image _imageMoveUpButton;
+    private final Image _imageMoveDownButton;
+
+    private final GitService _gitService = (GitService) ServiceProvider.getInstance()
+            .getService(GitService.class.getName());
+
+    private final ProjectService _projectService = (ProjectService) ServiceProvider.getInstance()
+            .getService(ProjectService.class.getName());
+
+    private final List<Integer> _selectedProjectIds = new ArrayList<>();
+    private final ProjectList _projectList = ProjectList.get(null);
+
+    {
+        ClassLoader loader = getClass().getClassLoader();
+        _imageMoveUpButton = new Image(loader.getResource(MOVE_UP_IMAGE_URL).toExternalForm());
+        _imageMoveDownButton = new Image(loader.getResource(MOVE_DOWN_IMAGE_URL).toExternalForm());
+    }
+
     @FXML
     private TextField _filterField;
 
@@ -72,36 +93,43 @@ public class StageRemoveNewFilesWindowController {
     @FXML
     private Button _exitButton;
 
-    private static final String MOVE_UP_IMAGE_URL = "icons/arrow-up20x20.png";
-    private static final String MOVE_DOWN_IMAGE_URL = "icons/arrow-down20x20.png";
-
-    private final Image _imageMoveUpButton;
-    private final Image _imageMoveDownButton;
-
-    {
-        ClassLoader loader = getClass().getClassLoader();
-        _imageMoveUpButton = new Image(loader.getResource(MOVE_UP_IMAGE_URL).toExternalForm());
-        _imageMoveDownButton = new Image(loader.getResource(MOVE_DOWN_IMAGE_URL).toExternalForm());
-    }
-
-    private List<Integer> _selectedProjectIds = new ArrayList<>();
-    private final ProjectList _projectList = ProjectList.get(null);
-
-    private final GitService _gitService = (GitService) ServiceProvider.getInstance()
-                    .getService(GitService.class.getName());
-
-    private final ProjectService _projectService = (ProjectService) ServiceProvider.getInstance()
-            .getService(ProjectService.class.getName());
-
     public void beforeShowing(List<Integer> projectIds) {
-        _selectedProjectIds = projectIds;
-        _filterField.textProperty().addListener((observable, oldValue, newValue) -> filterUnstagedList(oldValue, newValue));
         ObservableList<SortingType> items = FXCollections.observableArrayList
                 (SortingType.PROJECTS,SortingType.EXTENSIONS, SortingType.DEFAULT);
         _sortingListBox.setItems(items);
         _sortingListBox.setValue(SortingType.DEFAULT);
 
+        _selectedProjectIds.addAll(projectIds);
+        _filterField.textProperty().addListener((observable, oldValue, newValue) -> filterUnstagedList(oldValue, newValue));
+
         configureListViews();
+    }
+
+    private void configureListViews() {
+        ObservableList<ChangedFile> items = FXCollections.observableArrayList(getUnstagedFilesSelectedProjects());
+
+        _unstagedFilesListView.setItems(items);
+        setupListView(_unstagedFilesListView);
+        _unstagedFilesListView.addEventFilter(MouseEvent.MOUSE_PRESSED,
+                event -> changeFocuseAndSelection(_unstagedFilesListView, _stagedFilesListView));
+
+        setupListView(_stagedFilesListView);
+        _stagedFilesListView.addEventFilter(MouseEvent.MOUSE_PRESSED,
+                event -> changeFocuseAndSelection(_stagedFilesListView, _unstagedFilesListView));
+
+        setContentAndComparatorToLists();
+    }
+
+    private void setupListView(ListView<ChangedFile> list) {
+        list.setCellFactory(p -> new FilesListCell());
+        list.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        list.getSelectionModel().getSelectedItems().addListener(new FilesListChangeListener());
+    }
+
+    // Fix bug with double selection. We can have selected items only in one list.
+    private void changeFocuseAndSelection(ListView<ChangedFile> setFocuseList, ListView<ChangedFile> resetSelectionList) {
+        setFocuseList.requestFocus();
+        resetSelectionList.getSelectionModel().clearSelection();
     }
 
     private void filterUnstagedList(String oldValue, String newValue) {
@@ -120,61 +148,14 @@ public class StageRemoveNewFilesWindowController {
             }
         }
         _unstagedFilesListView.setItems(items);
-        setContentAndComparatorToLists();
-    }
-
-    private Collection<ChangedFile> getFilesInUnstagedList() {
-        Collection<ChangedFile> unstagedFiles = getUnstagedFiles();
-        List<ChangedFile> stagedItems = _stagedFilesListView.getItems();
-        if (!stagedItems.isEmpty()) {
-            unstagedFiles.removeAll(stagedItems);
-        }
-        return unstagedFiles;
-    }
-
-    private void configureListViews() {
-        ObservableList<ChangedFile> items = FXCollections.observableArrayList(getUnstagedFiles());
-
-        _unstagedFilesListView.setItems(items);
-        _unstagedFilesListView.setCellFactory(p -> new FilesListCell());
-        _unstagedFilesListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        _unstagedFilesListView.getSelectionModel().getSelectedItems().addListener(new FilesListChangeListener());
-        _unstagedFilesListView.addEventFilter(MouseEvent.MOUSE_PRESSED,
-                event -> changeFocuseAndSelection(_unstagedFilesListView, _stagedFilesListView));
-
-        _stagedFilesListView.setCellFactory(p -> new FilesListCell());
-        _stagedFilesListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        _stagedFilesListView.getSelectionModel().getSelectedItems().addListener(new FilesListChangeListener());
-        _stagedFilesListView.addEventFilter(MouseEvent.MOUSE_PRESSED,
-                event -> changeFocuseAndSelection(_stagedFilesListView, _unstagedFilesListView));
-
-        setContentAndComparatorToLists();
-    }
-
-    private void changeFocuseAndSelection(ListView<ChangedFile> setFocuseList, ListView<ChangedFile> resetSelectionList) {
-        setFocuseList.requestFocus();
-        resetSelectionList.getSelectionModel().clearSelection();
-    }
-
-    @FXML
-    public void onApplyCommitAction(ActionEvent event) {
-        List<ChangedFile> addedFiles =  onApplyAction(event);
-        List<Project> changedProjects = addedFiles.stream() // filter ?
-                                                  .map(files -> files.getProject())
-                                                  .collect(Collectors.toList());
-
-        // If we add to index files which have conflicts we should update project statuses
-        _projectService.updateProjectStatuses(changedProjects);
-
-        CommitDialog dialog = new CommitDialog();
-        dialog.commitChanges(changedProjects);
+        setContentAndComparator(_unstagedFilesListView);
     }
 
     @FXML
     public List<ChangedFile> onApplyAction(ActionEvent event) {
-        List<ChangedFile> unstagedList = _stagedFilesListView.getItems();
+        List<ChangedFile> stagedList = _stagedFilesListView.getItems();
         Map<Project, List<ChangedFile>> map = new HashMap<>();
-        for (ChangedFile changedList : unstagedList) {
+        for (ChangedFile changedList : stagedList) {
             List<ChangedFile> files = map.get(changedList.getProject());
             if (files == null) {
                 files = new ArrayList<>();
@@ -188,13 +169,26 @@ public class StageRemoveNewFilesWindowController {
     }
 
     @FXML
+    public void onApplyCommitAction(ActionEvent event) {
+        List<ChangedFile> addedFiles =  onApplyAction(event);
+        List<Project> changedProjects = addedFiles.stream()
+                                                  .map(files -> files.getProject())
+                                                  .collect(Collectors.toList());
+        // If we add files which have conflicts to index we should update project statuses
+        _projectService.updateProjectStatuses(changedProjects);
+
+        CommitDialog dialog = new CommitDialog();
+        dialog.commitChanges(changedProjects);
+    }
+
+    @FXML
     public void onDeleteAction(ActionEvent event) {
         List<ChangedFile> unstagedList = getSelectedItems(_unstagedFilesListView);
         if (!unstagedList.isEmpty()) {
-            List<ChangedFile> removedFiles = removeSelectedFiles(unstagedList);
+            List<ChangedFile> removedFiles = deleteSelectedFiles(unstagedList);
             removeItemsFromList(_unstagedFilesListView, removedFiles);
         } else {
-            List<ChangedFile> removedFiles = removeSelectedFiles(getSelectedItems(_stagedFilesListView));
+            List<ChangedFile> removedFiles = deleteSelectedFiles(getSelectedItems(_stagedFilesListView));
             removeItemsFromList(_stagedFilesListView, removedFiles);
         }
         onChangedSelectionAction();
@@ -205,16 +199,25 @@ public class StageRemoveNewFilesWindowController {
         setContentAndComparatorToLists();
     }
 
+    private Collection<ChangedFile> getFilesInUnstagedList() {
+        Collection<ChangedFile> unstagedFiles = getUnstagedFilesSelectedProjects();
+        List<ChangedFile> stagedItems = _stagedFilesListView.getItems();
+        if (!stagedItems.isEmpty()) {
+            unstagedFiles.removeAll(stagedItems);
+        }
+        return unstagedFiles;
+    }
+
     private void setContentAndComparatorToLists() {
-        SortedList<ChangedFile> unstagedFiles = new SortedList<>(_unstagedFilesListView.getItems());
-        SortedList<ChangedFile> stagedFiles = new SortedList<>(_stagedFilesListView.getItems());
+        setContentAndComparator(_unstagedFilesListView);
+        setContentAndComparator(_stagedFilesListView);
+    }
 
+    private void setContentAndComparator(ListView<ChangedFile> list) {
+        SortedList<ChangedFile> sortedList = new SortedList<>(list.getItems());
         Comparator<ChangedFile> comparator = SortingType.getComparatorByType(_sortingListBox.getValue());
-        unstagedFiles.setComparator(comparator);
-        stagedFiles.setComparator(comparator);
-
-        _unstagedFilesListView.setItems(unstagedFiles);
-        _stagedFilesListView.setItems(stagedFiles);
+        sortedList.setComparator(comparator);
+        list.setItems(sortedList);
     }
 
     private void removeItemsFromList(ListView<ChangedFile> fromList, List<ChangedFile> removeFiles) {
@@ -226,17 +229,15 @@ public class StageRemoveNewFilesWindowController {
         onChangedSelectionAction();
     }
 
-    private List<ChangedFile> removeSelectedFiles(List<ChangedFile> files) {
-        List<ChangedFile> removedFiles = new ArrayList<>();
-        for (ChangedFile file : files) {
-            String projectPath = file.getProject().getPath();
-            String fileName = file.getFileName();
-            boolean result = PathUtilities.deletePath(projectPath + File.separatorChar + fileName);
-            if (result) {
-                removedFiles.add(file);
-            }
-        }
-        return removedFiles;
+    private List<ChangedFile> deleteSelectedFiles(List<ChangedFile> files) {
+        return files.stream().filter(this::deleteFile)
+                             .collect(Collectors.toList());
+    }
+
+    private boolean deleteFile(ChangedFile file) {
+        String projectPath = file.getProject().getPath();
+        String fileName = file.getFileName();
+        return PathUtilities.deletePath(projectPath + File.separatorChar + fileName);
     }
 
     private List<ChangedFile> getSelectedItems(ListView<ChangedFile> list) {
@@ -245,8 +246,8 @@ public class StageRemoveNewFilesWindowController {
 
     @FXML
     public void moveBetweenLists(ActionEvent event) {
-        boolean isUnstagedFiles = hasListSelectionItems(_unstagedFilesListView);
-        if (isUnstagedFiles) {
+        boolean hasSelectedFiles = hasSelectedItems(_unstagedFilesListView);
+        if (hasSelectedFiles) {
             moveBetweenLists(_unstagedFilesListView, _stagedFilesListView);
         } else {
             moveBetweenLists(_stagedFilesListView, _unstagedFilesListView);
@@ -272,44 +273,50 @@ public class StageRemoveNewFilesWindowController {
 
     @FXML
     public void onSelectAll() {
-        if (_unstagedFilesListView == null || _unstagedFilesListView.getItems().isEmpty()) {
-            return;
+        if (_unstagedFilesListView != null && !_unstagedFilesListView.getItems().isEmpty()) {
+            _unstagedFilesListView.getSelectionModel().selectAll();
+            _unstagedFilesListView.requestFocus();
         }
-        _unstagedFilesListView.getSelectionModel().selectAll();
-        _unstagedFilesListView.requestFocus();
     }
 
     private void onDeselectAll() {
-        if (_unstagedFilesListView == null || _unstagedFilesListView.getItems().isEmpty()) {
-            return;
+        if (_unstagedFilesListView != null && !_unstagedFilesListView.getItems().isEmpty()) {
+            _unstagedFilesListView.getSelectionModel().clearSelection();
+            _unstagedFilesListView.requestFocus();
         }
-        _unstagedFilesListView.getSelectionModel().clearSelection();
-        _unstagedFilesListView.requestFocus();
-    }
-
-    private Collection<ChangedFile> getUnstagedFiles() {
-        Collection<Project> selectedProjects = getSelectedProjects();
-        Collection<ChangedFile> files = new ArrayList<>();
-        selectedProjects.forEach(project -> files.addAll(getUnstagedFiles(project)));
-        return files;
-    }
-
-    private Collection<ChangedFile> getUnstagedFiles(Project project) {
-        return _gitService.getChangedFiles(project);
     }
 
     private List<Project> getSelectedProjects() {
         return _projectList.getProjectsByIds(_selectedProjectIds);
     }
 
-    class FilesListChangeListener implements ListChangeListener<ChangedFile> {
-
-        @Override
-        public void onChanged(ListChangeListener.Change<? extends ChangedFile> event) {
-            onChangedSelectionAction();
-        }
-
+    private Collection<ChangedFile> getUnstagedFiles(Project project) {
+        return _gitService.getChangedFiles(project);
     }
+
+    private Collection<ChangedFile> getUnstagedFilesSelectedProjects() {
+        Collection<Project> selectedProjects = getSelectedProjects();
+        Collection<ChangedFile> files = new ArrayList<>();
+        selectedProjects.forEach(project -> files.addAll(getUnstagedFiles(project)));
+        return files;
+    }
+
+
+    /******************** Methods for changing selection event in lists ********************/
+
+    /**
+    *
+    *
+    * @author Lyudmila Lyska
+    */
+   class FilesListChangeListener implements ListChangeListener<ChangedFile> {
+
+       @Override
+       public void onChanged(ListChangeListener.Change<? extends ChangedFile> event) {
+           onChangedSelectionAction();
+       }
+
+   }
 
     private void onChangedSelectionAction() {
         selectAllAction();
@@ -342,11 +349,9 @@ public class StageRemoveNewFilesWindowController {
     }
 
     private void updateMoveUpDownButton() {
-        boolean isUnstagedFilesSelected = hasListSelectionItems(_unstagedFilesListView);
-        boolean isStagedFlesSelected = hasListSelectionItems(_stagedFilesListView);
-        if (isUnstagedFilesSelected) {
+        if (hasSelectedItems(_unstagedFilesListView)) {
             setGraphicAndDisableMoveButton(_imageMoveDownButton, false);
-        } else if (isStagedFlesSelected) {
+        } else if (hasSelectedItems(_stagedFilesListView)) {
             setGraphicAndDisableMoveButton(_imageMoveUpButton, false);
         } else {
             setGraphicAndDisableMoveButton(null, true);
@@ -359,16 +364,11 @@ public class StageRemoveNewFilesWindowController {
     }
 
     private void setDisableRemoveButton() {
-        boolean isUnstagedFilesSelected = hasListSelectionItems(_unstagedFilesListView);
-        boolean isStagedFlesSelected = hasListSelectionItems(_stagedFilesListView);
-        if (isUnstagedFilesSelected || isStagedFlesSelected) {
-            _deleteButton.setDisable(false);
-        } else {
-            _deleteButton.setDisable(true);
-        }
+        boolean hasSelection = hasSelectedItems(_unstagedFilesListView) || hasSelectedItems(_stagedFilesListView);
+        _deleteButton.setDisable(!hasSelection);
     }
 
-    private boolean hasListSelectionItems(ListView<ChangedFile> list) {
+    private boolean hasSelectedItems(ListView<ChangedFile> list) {
         return !getSelectedItems(list).isEmpty();
     }
 

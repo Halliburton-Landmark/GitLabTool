@@ -111,7 +111,6 @@ public class MainWindowController implements StateListener {
     public static final String SWITCH_BRANCH_OPERATION_NAME = "switch branch";
     public static final String STAGE_REMOVE_NEW_FILES_OPERATION_NAME = "stage/remove new files";
 
-
     private ProjectList _projectsList;
 
     private Group _currentGroup;
@@ -770,9 +769,6 @@ public class MainWindowController implements StateListener {
             refreshLoadProjects();
             return;
         }
-
-
-
         if (state != ApplicationState.LOAD_PROJECTS && state != ApplicationState.UPDATE_PROJECT_STATUSES) {
             _projectService.updateProjectStatuses(projects);
         } else {
