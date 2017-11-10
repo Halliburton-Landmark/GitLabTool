@@ -82,6 +82,13 @@ public enum ApplicationState {
         public String toString() {
             return "Reverting changes";
         }
+    },
+
+    ADD_FILES_TO_INDEX {
+        @Override
+        public String toString() {
+            return "Adding files to index";
+        }
     };
 
     public String getState() {

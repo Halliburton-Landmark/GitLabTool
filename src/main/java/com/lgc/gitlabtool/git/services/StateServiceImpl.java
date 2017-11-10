@@ -38,6 +38,7 @@ public class StateServiceImpl implements StateService {
         _listeners.put(ApplicationState.LOAD_PROJECTS, createSynchronizedSet());
         _listeners.put(ApplicationState.REVERT, createSynchronizedSet());
         _listeners.put(ApplicationState.UPDATE_PROJECT_STATUSES, createSynchronizedSet());
+        _listeners.put(ApplicationState.ADD_FILES_TO_INDEX, createSynchronizedSet());
 
         _states = new ConcurrentHashMap<>();
         _states.put(ApplicationState.CLONE, START_STATE);
@@ -51,6 +52,7 @@ public class StateServiceImpl implements StateService {
         _states.put(ApplicationState.LOAD_PROJECTS, START_STATE);
         _states.put(ApplicationState.REVERT, START_STATE);
         _states.put(ApplicationState.UPDATE_PROJECT_STATUSES, START_STATE);
+        _states.put(ApplicationState.ADD_FILES_TO_INDEX, START_STATE);
     }
 
     @Override

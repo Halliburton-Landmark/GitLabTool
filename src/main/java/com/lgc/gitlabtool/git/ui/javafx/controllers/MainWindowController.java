@@ -168,6 +168,7 @@ public class MainWindowController implements StateListener {
         _stateService.addStateListener(ApplicationState.REVERT, this);
         _stateService.addStateListener(ApplicationState.LOAD_PROJECTS, this);
         _stateService.addStateListener(ApplicationState.UPDATE_PROJECT_STATUSES, this);
+        _stateService.addStateListener(ApplicationState.ADD_FILES_TO_INDEX, this);
     }
 
     public void beforeShowing() {
@@ -769,6 +770,9 @@ public class MainWindowController implements StateListener {
             refreshLoadProjects();
             return;
         }
+
+
+
         if (state != ApplicationState.LOAD_PROJECTS && state != ApplicationState.UPDATE_PROJECT_STATUSES) {
             _projectService.updateProjectStatuses(projects);
         } else {

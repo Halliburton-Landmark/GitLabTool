@@ -15,6 +15,7 @@ import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.ProjectList;
 import com.lgc.gitlabtool.git.jgit.ChangedFile;
 import com.lgc.gitlabtool.git.services.GitService;
+import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.javafx.CommitDialog;
 import com.lgc.gitlabtool.git.ui.javafx.comparators.ComparatorDefaultType;
@@ -83,12 +84,14 @@ public class StageRemoveNewFilesWindowController {
         _imageMoveDownButton = new Image(loader.getResource(MOVE_DOWN_IMAGE_URL).toExternalForm());
     }
 
-    //data for view
     private List<Integer> _selectedProjectIds = new ArrayList<>();
     private final ProjectList _projectList = ProjectList.get(null);
 
     private final GitService _gitService = (GitService) ServiceProvider.getInstance()
                     .getService(GitService.class.getName());
+
+    private final ProjectService _projectService = (ProjectService) ServiceProvider.getInstance()
+            .getService(ProjectService.class.getName());
 
     public void beforeShowing(List<Integer> projectIds) {
         _selectedProjectIds = projectIds;
@@ -159,6 +162,10 @@ public class StageRemoveNewFilesWindowController {
         List<Project> changedProjects = addedFiles.stream() // filter ?
                                                   .map(files -> files.getProject())
                                                   .collect(Collectors.toList());
+
+        // If we add to index files which have conflicts we should update project statuses
+        _projectService.updateProjectStatuses(changedProjects);
+
         CommitDialog dialog = new CommitDialog();
         dialog.commitChanges(changedProjects);
     }
