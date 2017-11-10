@@ -199,7 +199,11 @@ public class JGitTest {
         List<String> files = new ArrayList<>();
         files.add("0");
         files.add(null);
-        //Assert.assertTrue(getJGitMock(gitMock).addUntrackedFileForCommit(files, getProject(true)));
+
+        List<String> addedFiles = getJGitMock(gitMock).addUntrackedFileForCommit(files, getProject(true));
+        Assert.assertTrue(!addedFiles.isEmpty());
+        Assert.assertEquals(files.get(0), addedFiles.get(0));
+        Assert.assertNotEquals(files.size(), addedFiles.size());
     }
 
     @Test
@@ -213,13 +217,8 @@ public class JGitTest {
             }
         };
         Mockito.when(gitMock.add()).thenReturn(addCommandMock);
-        //Assert.assertFalse(getJGitMock(null).addUntrackedFileForCommit(new ArrayList<>(), getProject(false)));
-        //Assert.assertTrue(getJGitMock(gitMock).addUntrackedFileForCommit(new ArrayList<>(), getProject(true)));
-
-        List<String> files = new ArrayList<>();
-        files.add("0");
-        files.add(null);
-        //Assert.assertTrue(getJGitMock(gitMock).addUntrackedFileForCommit(files, getProject(true)));
+        Assert.assertTrue(getJGitMock(gitMock).addUntrackedFileForCommit(new ArrayList<>(), getProject(true)).isEmpty());
+        Assert.assertTrue(getJGitMock(gitMock).addUntrackedFileForCommit(new ArrayList<>(), getProject(false)).isEmpty());
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -408,7 +407,7 @@ public class JGitTest {
         };
         Mockito.when(gitMock.push()).thenReturn(pushCommandMock);
         Map<Project, JGitStatus> statuses = getJGitMock(gitMock).push(getProjects(),  new EmptyListener());
-        Assert.assertEquals(getCountCorrectStatuses(statuses),getCountCorrectProject(getProjects()));
+        Assert.assertEquals(getCountCorrectStatuses(statuses), getCountCorrectProject(getProjects()));
     }
 
     @Test(expected = IllegalArgumentException.class)
