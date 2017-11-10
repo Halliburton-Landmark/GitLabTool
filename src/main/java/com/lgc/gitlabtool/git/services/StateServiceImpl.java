@@ -20,30 +20,13 @@ public class StateServiceImpl implements StateService {
 
     private static final Logger _logger = LogManager.getLogger(StateServiceImpl.class);
 
-    public StateServiceImpl() {
+    StateServiceImpl() {
         _listeners = new ConcurrentHashMap<>();
-        _listeners.put(ApplicationState.CLONE, createSynchronizedSet());
-        _listeners.put(ApplicationState.PULL, createSynchronizedSet());
-        _listeners.put(ApplicationState.COMMIT, createSynchronizedSet());
-        _listeners.put(ApplicationState.PUSH, createSynchronizedSet());
-        _listeners.put(ApplicationState.CREATE_PROJECT, createSynchronizedSet());
-        _listeners.put(ApplicationState.SWITCH_BRANCH, createSynchronizedSet());
-        _listeners.put(ApplicationState.EDIT_POM, createSynchronizedSet());
-        _listeners.put(ApplicationState.LOAD_PROJECTS, createSynchronizedSet());
-        _listeners.put(ApplicationState.REVERT, createSynchronizedSet());
-        _listeners.put(ApplicationState.UPDATE_PROJECT_STATUSES, createSynchronizedSet());
-
         _states = new ConcurrentHashMap<>();
-        _states.put(ApplicationState.CLONE, START_STATE);
-        _states.put(ApplicationState.PULL, START_STATE);
-        _states.put(ApplicationState.COMMIT, START_STATE);
-        _states.put(ApplicationState.PUSH, START_STATE);
-        _states.put(ApplicationState.CREATE_PROJECT, START_STATE);
-        _states.put(ApplicationState.SWITCH_BRANCH, START_STATE);
-        _states.put(ApplicationState.EDIT_POM, START_STATE);
-        _states.put(ApplicationState.LOAD_PROJECTS, START_STATE);
-        _states.put(ApplicationState.REVERT, START_STATE);
-        _states.put(ApplicationState.UPDATE_PROJECT_STATUSES, START_STATE);
+        for (ApplicationState state: ApplicationState.values()) {
+            _listeners.put(state, createSynchronizedSet());
+            _states.put(state, START_STATE);
+        }
     }
 
     @Override
@@ -88,7 +71,7 @@ public class StateServiceImpl implements StateService {
     }
 
     private boolean isActive(Integer value) {
-        return value != null && value > START_STATE ? true : false;
+        return value != null && value > START_STATE;
     }
 
     @Override
@@ -115,9 +98,7 @@ public class StateServiceImpl implements StateService {
     @Override
     public boolean isBusy() {
         return _states.entrySet().stream()
-                                 .filter(map -> isActive(map.getValue()))
-                                 .findAny()
-                                 .isPresent();
+                                 .anyMatch(map -> isActive(map.getValue()));
     }
 
     private Set<StateListener> createSynchronizedSet() {
@@ -142,7 +123,7 @@ public class StateServiceImpl implements StateService {
     public List<ApplicationState> getActiveStates() {
         return _states.entrySet().stream()
                                  .filter(entry -> isActive(entry.getValue()))
-                                 .map(pair -> pair.getKey())
+                                 .map(Map.Entry::getKey)
                                  .collect(Collectors.toList());
     }
 }
