@@ -187,17 +187,13 @@ public class ModularController implements UpdateProgressListener {
             stage.initModality(Modality.APPLICATION_MODAL);
 
             /* Set sizing and position */
-            double dialogWidth = 600;
-            double dialogHeight = 500;
-            stage.setHeight(dialogHeight);
+            double dialogWidth = 550;
+            double dialogHeight = 600;
+            // if we set the minimum size only in fxml then window does not respond to them.
+            stage.setMinHeight(dialogHeight);
+            stage.setMinWidth(dialogWidth);
             stage.setWidth(dialogWidth);
             ScreenUtil.adaptForMultiScreens(stage, dialogWidth, dialogHeight);
-
-            // if we set the minimum size only in fxml then window does not respond to them.
-            double minSize = 500;
-            stage.setMinHeight(minSize);
-            stage.setMinWidth(minSize);
-
             stage.show();
         } catch (IOException e) {
             logger.error("Could not load fxml resource", e);

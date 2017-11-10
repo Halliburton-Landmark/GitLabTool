@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.ProjectList;
 import com.lgc.gitlabtool.git.jgit.ChangedFile;
@@ -69,31 +71,16 @@ public class StageRemoveNewFilesWindowController {
     @FXML
     private Button _exitButton;
 
-    private static final String SELECT_ALL_IMAGE_URL = "icons/select_all_20x20.png";
     private static final String MOVE_UP_IMAGE_URL = "icons/arrow-up20x20.png";
     private static final String MOVE_DOWN_IMAGE_URL = "icons/arrow-down20x20.png";
-    private static final String DELETE_IMAGE_URL = "icons/toolbar/remove_20x20.png";
-    private static final String APPLY_IMAGE_URL = "icons/apply_20x20.png";
-    private static final String APPLY_COMMIT_IMAGE_URL = "icons/toolbar/commit_20x20.png";
-    private static final String EXIT_IMAGE_URL = "icons/mainmenu/exit_16x16.png";
 
-    private final Image _imageSelectButton;
     private final Image _imageMoveUpButton;
     private final Image _imageMoveDownButton;
-    private final Image _imageDeleteButton;
-    private final Image _imageApplyButton;
-    private final Image _imageApplyCommitButton;
-    private final Image _imageExitButton;
 
     {
         ClassLoader loader = getClass().getClassLoader();
-        _imageSelectButton = new Image(loader.getResource(SELECT_ALL_IMAGE_URL).toExternalForm());
         _imageMoveUpButton = new Image(loader.getResource(MOVE_UP_IMAGE_URL).toExternalForm());
         _imageMoveDownButton = new Image(loader.getResource(MOVE_DOWN_IMAGE_URL).toExternalForm());
-        _imageDeleteButton = new Image(loader.getResource(DELETE_IMAGE_URL).toExternalForm());
-        _imageApplyButton = new Image(loader.getResource(APPLY_IMAGE_URL).toExternalForm());
-        _imageApplyCommitButton = new Image(loader.getResource(APPLY_COMMIT_IMAGE_URL).toExternalForm());
-        _imageExitButton = new Image(loader.getResource(EXIT_IMAGE_URL).toExternalForm());
     }
 
     //data for view
@@ -105,24 +92,45 @@ public class StageRemoveNewFilesWindowController {
 
     public void beforeShowing(List<Integer> projectIds) {
         _selectedProjectIds = projectIds;
-        _filterField.setText("" + _selectedProjectIds.size());
-
+        _filterField.textProperty().addListener((observable, oldValue, newValue) -> filterUnstagedList(oldValue, newValue));
         ObservableList<SortingType> items = FXCollections.observableArrayList
                 (SortingType.PROJECTS,SortingType.EXTENSIONS, SortingType.DEFAULT);
         _sortingListBox.setItems(items);
         _sortingListBox.setValue(SortingType.DEFAULT);
 
-        _applyButton.setGraphic(new ImageView(_imageApplyButton));
-        _applyCommitButton.setGraphic(new ImageView(_imageApplyCommitButton));
-        _deleteButton.setGraphic(new ImageView(_imageDeleteButton));
-        _exitButton.setGraphic(new ImageView(_imageExitButton));
-        _selectButton.setGraphic(new ImageView(_imageSelectButton));
-
         configureListViews();
     }
 
+    private void filterUnstagedList(String oldValue, String newValue) {
+        ObservableList<ChangedFile> items = FXCollections.observableArrayList(new ArrayList<>());
+        Collection<ChangedFile> unstagedItems = getFilesInUnstagedList();
+
+        if (_filterField == null || _filterField.getText().equals(StringUtils.EMPTY)) {
+            items.addAll(unstagedItems);
+        } else {
+            String searchText = _filterField.getText();
+            List<ChangedFile> foundFiles = unstagedItems.stream()
+                                                        .filter(file -> file.getFileName().contains(searchText))
+                                                        .collect(Collectors.toList());
+            if (!foundFiles.isEmpty()) {
+                items.addAll(foundFiles);
+            }
+        }
+        _unstagedFilesListView.setItems(items);
+        setContentAndComparatorToLists();
+    }
+
+    private Collection<ChangedFile> getFilesInUnstagedList() {
+        Collection<ChangedFile> unstagedFiles = getUnstagedFiles();
+        List<ChangedFile> stagedItems = _stagedFilesListView.getItems();
+        if (!stagedItems.isEmpty()) {
+            unstagedFiles.removeAll(stagedItems);
+        }
+        return unstagedFiles;
+    }
+
     private void configureListViews() {
-        ObservableList<ChangedFile> items = FXCollections.observableArrayList(getUnstagedFiles(getSelectedProjects()));
+        ObservableList<ChangedFile> items = FXCollections.observableArrayList(getUnstagedFiles());
 
         _unstagedFilesListView.setItems(items);
         _unstagedFilesListView.setCellFactory(p -> new FilesListCell());
@@ -272,9 +280,10 @@ public class StageRemoveNewFilesWindowController {
         _unstagedFilesListView.requestFocus();
     }
 
-    private Collection<ChangedFile> getUnstagedFiles(List<Project> projects) {
+    private Collection<ChangedFile> getUnstagedFiles() {
+        Collection<Project> selectedProjects = getSelectedProjects();
         Collection<ChangedFile> files = new ArrayList<>();
-        projects.forEach(project -> files.addAll(getUnstagedFiles(project)));
+        selectedProjects.forEach(project -> files.addAll(getUnstagedFiles(project)));
         return files;
     }
 
