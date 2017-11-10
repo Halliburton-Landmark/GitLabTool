@@ -4,6 +4,11 @@ import java.util.Comparator;
 
 import com.lgc.gitlabtool.git.jgit.ChangedFile;
 
+/**
+ * Comparator for ListView<ChangedFile> which sorting item by file extensions in alphabetical order with ignore case.
+ *
+ * @author Lyudmila Lyska
+ */
 public class ComparatorExtensionsType implements Comparator<ChangedFile> {
 
     @Override

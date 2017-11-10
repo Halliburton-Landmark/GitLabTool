@@ -4,6 +4,11 @@ import java.util.Comparator;
 
 import com.lgc.gitlabtool.git.jgit.ChangedFile;
 
+/**
+ * Comparator for ListView<ChangedFile> which sorting item by file names in alphabetical order with ignore case.
+ *
+ * @author Lyudmila Lyska
+ */
 public class ComparatorDefaultType implements Comparator<ChangedFile> {
 
     @Override

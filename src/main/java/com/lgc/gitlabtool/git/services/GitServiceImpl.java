@@ -280,23 +280,28 @@ public class GitServiceImpl implements GitService {
 
     @Override
     public List<ChangedFile> addUntrackedFileForCommit(Map<Project, List<ChangedFile>> files) {
-        // add state on here and checks
-
         List<ChangedFile> addedFiles = new ArrayList<>();
-        for (Entry<Project, List<ChangedFile>> entry : files.entrySet()) {
-            Project project = entry.getKey();
-            List<ChangedFile> changedFiles = entry.getValue();
-            List<String> fileNames = new ArrayList<>();
-
-            changedFiles.forEach(file -> fileNames.add(file.getFileName()));
-
-            List<String> result = _git.addUntrackedFileForCommit(fileNames, project);
-            List<ChangedFile> added = result.stream()
-                                            .map(file -> new ChangedFile(project, file, false))
-                                            .collect(Collectors.toList());
-            addedFiles.addAll(added);
+        if (files == null || files.isEmpty()) {
+            return addedFiles;
         }
-        // add state off here
+        _stateService.stateON(ApplicationState.ADD_FILES_TO_INDEX);
+        try {
+            for (Entry<Project, List<ChangedFile>> entry : files.entrySet()) {
+                Project project = entry.getKey();
+                List<ChangedFile> changedFiles = entry.getValue();
+                List<String> fileNames = new ArrayList<>();
+
+                changedFiles.forEach(file -> fileNames.add(file.getFileName()));
+
+                List<String> result     = _git.addUntrackedFileForCommit(fileNames, project);
+                List<ChangedFile> added = result.stream()
+                                                .map(file -> new ChangedFile(project, file, false))
+                                                .collect(Collectors.toList());
+                addedFiles.addAll(added);
+            }
+        } finally {
+            _stateService.stateOFF(ApplicationState.ADD_FILES_TO_INDEX);
+        }
         return addedFiles;
     }
 

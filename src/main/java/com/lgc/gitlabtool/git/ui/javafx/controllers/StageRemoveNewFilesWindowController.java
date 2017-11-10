@@ -21,6 +21,7 @@ import com.lgc.gitlabtool.git.ui.javafx.CommitDialog;
 import com.lgc.gitlabtool.git.ui.javafx.comparators.ComparatorDefaultType;
 import com.lgc.gitlabtool.git.ui.javafx.comparators.ComparatorExtensionsType;
 import com.lgc.gitlabtool.git.ui.javafx.comparators.ComparatorProjectsType;
+import com.lgc.gitlabtool.git.ui.javafx.controllers.listcells.FilesListCell;
 import com.lgc.gitlabtool.git.util.PathUtilities;
 
 import javafx.collections.FXCollections;

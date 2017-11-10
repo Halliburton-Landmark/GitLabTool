@@ -4,30 +4,68 @@ import org.apache.commons.io.FilenameUtils;
 
 import com.lgc.gitlabtool.git.entities.Project;
 
+/**
+ * ChangedFile keeps data about changed file in project.
+ *
+ * We can get
+ *        - a name of changed file;
+ *        - a file extension;
+ *        - a project in which the modified file is stored;
+ *        - a status of file. It have conflicts or not.
+ *
+ * @author Lyudmila Lyska
+ */
 public class ChangedFile {
     private Project _project;
     private String _fileName;
     private boolean _hasConflicting;
     private String _fileExtension;
 
+    /**
+     * Constructor of object.
+     *
+     * @param project  the project in which the modified file is stored
+     * @param fileName the name of changed file
+     * @param hasConflicting <code>true</code> if project has conflicts, otherwise <code>false</code>
+     */
     public ChangedFile(Project project, String fileName, boolean hasConflicting) {
         setProject(project);
         setFileName(fileName);
         setHasConflicting(hasConflicting);
     }
 
+    /**
+     * Gets project in which the modified file is stored
+     *
+     * @return the project
+     */
     public Project getProject() {
         return _project;
     }
 
+    /**
+     * Gets name of changed file
+     *
+     * @return a file name
+     */
     public String getFileName() {
         return _fileName;
     }
 
+    /**
+     * Gets extension of changed file
+     *
+     * @return a file extension
+     */
     public String getFileExtension() {
         return _fileExtension;
     }
 
+    /**
+     * Gets status of file
+     *
+     * @return <code>true</code> if project has conflicts, otherwise <code>false</code>
+     */
     public boolean isHasConflicting() {
         return _hasConflicting;
     }
@@ -45,7 +83,7 @@ public class ChangedFile {
         _fileExtension = FilenameUtils.getExtension(fileName);
     }
 
-    public void setHasConflicting(boolean hasConflicting) {
+    private void setHasConflicting(boolean hasConflicting) {
         _hasConflicting = hasConflicting;
     }
 

@@ -162,7 +162,19 @@ public interface GitService {
      */
     void cancelClone();
 
+    /**
+     * Gets ChangedFiles for project.
+     *
+     * @param  project the project
+     * @return a ChangedFiles list
+     */
     List<ChangedFile> getChangedFiles(Project project);
 
+    /**
+     * Adds untracked files to index.
+     *
+     * @param  files the map of projects and changed files
+     * @return the list of added files
+     */
     List<ChangedFile> addUntrackedFileForCommit(Map<Project, List<ChangedFile>> files);
 }
