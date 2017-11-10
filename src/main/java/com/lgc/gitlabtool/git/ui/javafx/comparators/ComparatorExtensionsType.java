@@ -8,6 +8,6 @@ public class ComparatorExtensionsType implements Comparator<ChangedFile> {
 
     @Override
     public int compare(ChangedFile o1, ChangedFile o2) {
-        return o1.getFileExtension().compareTo(o2.getFileExtension());
+        return o1.getFileExtension().compareToIgnoreCase(o2.getFileExtension());
     }
 }

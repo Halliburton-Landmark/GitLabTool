@@ -36,7 +36,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 
-public class AddRemoveFilesWindowController {
+public class StageRemoveNewFilesWindowController {
 
     @FXML
     private TextField _filterField;
@@ -57,13 +57,13 @@ public class AddRemoveFilesWindowController {
     private Button _moveUpDownButton;
 
     @FXML
-    private Button _addButton;
+    private Button _applyButton;
 
     @FXML
     private Button _removeButton;
 
     @FXML
-    private Button _addCommitButton;
+    private Button _applyCommitButton;
 
     @FXML
     private Button _exitButton;
@@ -98,11 +98,12 @@ public class AddRemoveFilesWindowController {
                                                                               SortingType.DEFAULT);
         _sortingListBox.setItems(items);
         _sortingListBox.setValue(SortingType.DEFAULT);
+        _sortingListBox.setOnAction(event -> setContentAndComparatorToLists());
 
         _selectButton.setGraphic(new ImageView(_imageSelectButton));
 
         _moveUpDownButton.setOnAction(this::moveBetweenLists);
-        _addButton.setOnAction(this::onAddFilesAction);
+        _applyButton.setOnAction(this::onApplyAction);
         _removeButton.setOnAction(this::onRemoveAction);
         _exitButton.setOnAction(this::onExitAction);
 
@@ -110,12 +111,10 @@ public class AddRemoveFilesWindowController {
     }
 
     private void configureListViews() {
-        List<Project> items = getSelectedProjects();
-        Project project = items.get(0);
-        Collection<ChangedFile> files = getUnstagedFiles(project);
+        ObservableList<ChangedFile> items = FXCollections.observableArrayList(getUnstagedFiles(getSelectedProjects()));
 
+        _unstagedFilesListView.setItems(items);
         _unstagedFilesListView.setCellFactory(p -> new FilesListCell());
-        _unstagedFilesListView.setItems(FXCollections.observableArrayList(files));
         _unstagedFilesListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         _unstagedFilesListView.getSelectionModel().getSelectedItems().addListener(new FilesListChangeListener());
         _unstagedFilesListView.addEventFilter(MouseEvent.MOUSE_PRESSED,
@@ -126,6 +125,7 @@ public class AddRemoveFilesWindowController {
         _stagedFilesListView.getSelectionModel().getSelectedItems().addListener(new FilesListChangeListener());
         _stagedFilesListView.addEventFilter(MouseEvent.MOUSE_PRESSED,
                 event -> changeFocuseAndSelection(_stagedFilesListView, _unstagedFilesListView));
+
         setContentAndComparatorToLists();
     }
 
@@ -135,7 +135,7 @@ public class AddRemoveFilesWindowController {
     }
 
     @SuppressWarnings("unchecked")
-    private void onAddFilesAction(ActionEvent event) {
+    private void onApplyAction(ActionEvent event) {
         List<ChangedFile> unstagedList = _stagedFilesListView.getItems();
         Map<Project, List<ChangedFile>> map = new HashedMap();
         for (ChangedFile changedList : unstagedList) {
@@ -244,6 +244,12 @@ public class AddRemoveFilesWindowController {
         _unstagedFilesListView.requestFocus();
     }
 
+    private Collection<ChangedFile> getUnstagedFiles(List<Project> projects) {
+        Collection<ChangedFile> files = new ArrayList<>();
+        projects.forEach(project -> files.addAll(getUnstagedFiles(project)));
+        return files;
+    }
+
     private Collection<ChangedFile> getUnstagedFiles(Project project) {
         return _gitService.getChangedFiles(project);
     }
@@ -265,11 +271,11 @@ public class AddRemoveFilesWindowController {
         selectAllAction();
         updateMoveUpDownButton();
         setDisableRemoveButton();
-        setDisableAddButton();
+        setDisableApplyButton();
     }
 
-    private void setDisableAddButton() {
-        _addButton.setDisable(_stagedFilesListView.getItems().isEmpty());
+    private void setDisableApplyButton() {
+        _applyButton.setDisable(_stagedFilesListView.getItems().isEmpty());
     }
 
     private void selectAllAction() {

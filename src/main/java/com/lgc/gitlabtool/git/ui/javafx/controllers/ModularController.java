@@ -176,7 +176,7 @@ public class ModularController implements UpdateProgressListener {
             FXMLLoader loader = new FXMLLoader(addRemoveFilesWindowUrl);
             Parent root = loader.load();
 
-            AddRemoveFilesWindowController addRemoveFilesWindowController = loader.getController();
+            StageRemoveNewFilesWindowController addRemoveFilesWindowController = loader.getController();
             addRemoveFilesWindowController.beforeShowing(ProjectList.getIdsProjects(projects));
 
             Scene scene = new Scene(root);

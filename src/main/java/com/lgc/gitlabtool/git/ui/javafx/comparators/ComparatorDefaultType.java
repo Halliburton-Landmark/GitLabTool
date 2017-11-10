@@ -8,6 +8,6 @@ public class ComparatorDefaultType implements Comparator<ChangedFile> {
 
     @Override
     public int compare(ChangedFile o1, ChangedFile o2) {
-        return o1.getFileName().compareTo(o2.getFileName());
+        return o1.getFileName().compareToIgnoreCase(o2.getFileName());
     }
 }

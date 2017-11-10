@@ -8,6 +8,7 @@ public class ComparatorProjectsType implements Comparator<ChangedFile> {
 
     @Override
     public int compare(ChangedFile o1, ChangedFile o2) {
-        return o1.getProject().getName().compareTo(o2.getProject().getName());
+        String projectName = o1.getProject().getName();
+        return projectName.compareToIgnoreCase(o2.getProject().getName());
     }
 }

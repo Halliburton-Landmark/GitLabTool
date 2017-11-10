@@ -10,7 +10,7 @@
 <?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane minHeight="150.0" minWidth="200.0" prefHeight="450.0" prefWidth="500.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.lgc.gitlabtool.git.ui.javafx.controllers.AddRemoveFilesWindowController">
+<AnchorPane minHeight="150.0" minWidth="200.0" prefHeight="450.0" prefWidth="500.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.lgc.gitlabtool.git.ui.javafx.controllers.StageRemoveNewFilesWindowController">
    <children>
       <SplitPane dividerPositions="0.5634920634920635" orientation="VERTICAL" AnchorPane.bottomAnchor="35.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="45.0" AnchorPane.topAnchor="35.0">
         <items>
@@ -27,13 +27,13 @@
         </items>
       </SplitPane>
       <Label layoutX="27.0" layoutY="22.0" text="Sorting by:" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="10.0" />
-      <ChoiceBox fx:id="_sortingListBox" disable="true" layoutX="76.0" layoutY="6.0" prefHeight="25.0" prefWidth="159.0" AnchorPane.leftAnchor="65.0" AnchorPane.topAnchor="5.0" />
+      <ChoiceBox fx:id="_sortingListBox" layoutX="76.0" layoutY="6.0" prefHeight="25.0" prefWidth="159.0" AnchorPane.leftAnchor="65.0" AnchorPane.topAnchor="5.0" />
       <TextField fx:id="_filterField" alignment="CENTER_RIGHT" disable="true" layoutX="226.0" layoutY="5.0" AnchorPane.leftAnchor="230.0" AnchorPane.rightAnchor="5.0" />
-      <ButtonBar layoutX="135.0" layoutY="411.0" prefHeight="25.0" prefWidth="465.0" AnchorPane.bottomAnchor="5.0" AnchorPane.rightAnchor="5.0">
+      <ButtonBar layoutX="135.0" layoutY="411.0" prefHeight="25.0" prefWidth="473.0" AnchorPane.bottomAnchor="5.0" AnchorPane.rightAnchor="5.0">
          <buttons>
-            <Button fx:id="_addButton" disable="true" mnemonicParsing="false" text="Add" textAlignment="CENTER" />
+            <Button fx:id="_applyButton" disable="true" mnemonicParsing="false" text="Apply" textAlignment="CENTER" />
+            <Button fx:id="_applyCommitButton" alignment="CENTER" disable="true" mnemonicParsing="false" prefHeight="25.0" prefWidth="299.0" text="Apply &amp; Commit" textAlignment="CENTER" />
             <Button fx:id="_removeButton" disable="true" mnemonicParsing="false" text="Remove" textAlignment="CENTER" />
-            <Button fx:id="_addCommitButton" alignment="CENTER" disable="true" mnemonicParsing="false" prefHeight="25.0" prefWidth="114.0" text="Add &amp; Commit" textAlignment="CENTER" />
             <Button fx:id="_exitButton" mnemonicParsing="false" text="Exit" textAlignment="CENTER" />
          </buttons>
       </ButtonBar>

@@ -38,7 +38,7 @@ public class ChangedFile {
 
     private void setFileName(String fileName) {
         _fileName = fileName;
-        setFileExtension(FilenameUtils.getExtension(fileName));
+        setFileExtension(fileName);
     }
 
     private void setFileExtension(String fileName) {
