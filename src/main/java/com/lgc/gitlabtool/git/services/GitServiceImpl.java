@@ -264,10 +264,10 @@ public class GitServiceImpl implements GitService {
 
     @Override
     public List<ChangedFile> getChangedFiles(Project project) {
-        if (project == null || !project.isCloned()) {
-            return null;
-        }
         List<ChangedFile> changedFiles = new ArrayList<>();
+        if (project == null || !project.isCloned()) {
+            return changedFiles;
+        }
         Optional<Status> optStatus = _git.getStatusProject(project);
         if (!optStatus.isPresent()) {
             return changedFiles;

@@ -24,6 +24,8 @@ public class FilesListCell extends ListCell<ChangedFile> {
 
     private static final String OPEN_BRACKETS = " [";
     private static final String CLOSE_BRACKETS = "]";
+    private static final String CONFLICTING_PREFIX = " [conflicting]";
+    private static final int PROJECT_FONT = 10;
 
     @Override
     protected void updateItem(ChangedFile item, boolean empty) {
@@ -44,7 +46,7 @@ public class FilesListCell extends ListCell<ChangedFile> {
         Text fileNameText = new Text();
         String fileName = item.getFileName();
         if (item.isHasConflicting()) {
-            fileNameText.setText(fileName + " [conflicting]");
+            fileNameText.setText(fileName + CONFLICTING_PREFIX);
             fileNameText.setFill(Color.DARKRED);
         } else {
             fileNameText.setText(fileName);
@@ -55,7 +57,7 @@ public class FilesListCell extends ListCell<ChangedFile> {
     private Text getProjectNameText(ChangedFile item) {
         Text projectNameText = new Text(getProjectNamme(item));
         projectNameText.setFill(Color.DARKCYAN);
-        projectNameText.setFont(new Font(10));
+        projectNameText.setFont(new Font(PROJECT_FONT));
         return projectNameText;
     }
 

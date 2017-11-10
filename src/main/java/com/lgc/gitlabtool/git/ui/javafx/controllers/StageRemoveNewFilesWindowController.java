@@ -247,8 +247,7 @@ public class StageRemoveNewFilesWindowController {
 
     @FXML
     public void moveBetweenLists(ActionEvent event) {
-        boolean hasSelectedFiles = hasSelectedItems(_unstagedFilesListView);
-        if (hasSelectedFiles) {
+        if (hasSelectedItems(_unstagedFilesListView)) {
             moveBetweenLists(_unstagedFilesListView, _stagedFilesListView);
         } else {
             moveBetweenLists(_stagedFilesListView, _unstagedFilesListView);
@@ -306,7 +305,9 @@ public class StageRemoveNewFilesWindowController {
     /******************** Methods for changing selection event in lists ********************/
 
     /**
-    *
+    * Listener for handling changing selection events in ListViews.
+    * If change selection item in any list we will update states and actions
+    * for select all, move up/down, delete and apply buttons.
     *
     * @author Lyudmila Lyska
     */
@@ -320,9 +321,9 @@ public class StageRemoveNewFilesWindowController {
    }
 
     private void onChangedSelectionAction() {
-        selectAllAction();
+        setSelectedAndActionSelecAllButton();
         updateMoveUpDownButton();
-        setDisableRemoveButton();
+        setDisableDeleteButton();
         setDisableApplyButton();
     }
 
@@ -332,7 +333,7 @@ public class StageRemoveNewFilesWindowController {
         _applyCommitButton.setDisable(isDisable);
     }
 
-    private void selectAllAction() {
+    private void setSelectedAndActionSelecAllButton() {
         boolean isSelectedAll = areFilesSelected(_unstagedFilesListView);
         _selectButton.setSelected(isSelectedAll);
         if (isSelectedAll) {
@@ -364,7 +365,7 @@ public class StageRemoveNewFilesWindowController {
         _moveUpDownButton.setDisable(isDisable);
     }
 
-    private void setDisableRemoveButton() {
+    private void setDisableDeleteButton() {
         boolean hasSelection = hasSelectedItems(_unstagedFilesListView) || hasSelectedItems(_stagedFilesListView);
         _deleteButton.setDisable(!hasSelection);
     }

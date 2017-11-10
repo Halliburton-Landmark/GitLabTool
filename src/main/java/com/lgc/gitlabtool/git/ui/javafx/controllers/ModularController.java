@@ -89,6 +89,8 @@ public class ModularController implements UpdateProgressListener {
     private static final String REMOVE_GROUP_DIALOG_TITLE = "Remove Group";
     private static final String REMOVE_GROUP_STATUS_DIALOG_TITLE = "Import Status Dialog";
     private static final String FAILED_REMOVE_GROUP_MESSAGE = "Removing of group is Failed";
+    private static final String FXML_RESOURCE_EXCEPTION_MESSAGE = "Could not load fxml resource";
+    private static final String STAGE_REMOVE_WINDOW_TITLE = "Stage | Remove Files";
 
     private static final String CSS_PATH = "css/style.css";
     private static final Image _appIcon = AppIconHolder.getInstance().getAppIcoImage();
@@ -130,8 +132,6 @@ public class ModularController implements UpdateProgressListener {
 
     private static final ProjectService _projectService = (ProjectService) ServiceProvider.getInstance()
             .getService(ProjectService.class.getName());
-
-    private static ToolbarManager _toolbarMgr = ToolbarManager.getInstance();
 
     @FXML
     public void initialize() {
@@ -183,20 +183,20 @@ public class ModularController implements UpdateProgressListener {
             Stage stage = new Stage();
             stage.setScene(scene);
             stage.getIcons().add(_appIcon);
-            stage.setTitle("Stage | Remove Files");
+            stage.setTitle(STAGE_REMOVE_WINDOW_TITLE);
             stage.initModality(Modality.APPLICATION_MODAL);
 
             /* Set sizing and position */
             double dialogWidth = 550;
             double dialogHeight = 600;
+            stage.setWidth(dialogWidth);
+            ScreenUtil.adaptForMultiScreens(stage, dialogWidth, dialogHeight);
             // if we set the minimum size only in fxml then window does not respond to them.
             stage.setMinHeight(dialogHeight);
             stage.setMinWidth(dialogWidth);
-            stage.setWidth(dialogWidth);
-            ScreenUtil.adaptForMultiScreens(stage, dialogWidth, dialogHeight);
             stage.show();
         } catch (IOException e) {
-            logger.error("Could not load fxml resource", e);
+            logger.error(FXML_RESOURCE_EXCEPTION_MESSAGE, e);
         }
     }
 
@@ -218,7 +218,7 @@ public class ModularController implements UpdateProgressListener {
 
         _workIndicatorDialog = new WorkIndicatorDialog(stage, WORK_INDICATOR_START_MESSAGE);
 
-        Runnable selectGroup = () -> {
+        Runnable selectGroup = () ->{
             _mainWindowController.setSelectedGroup(selectedGroup);
 
             // UI updating
@@ -259,25 +259,28 @@ public class ModularController implements UpdateProgressListener {
 
     private void initActionsToolBar(String windowId) {
         if (windowId.equals(ViewKey.GROUP_WINDOW.getKey())) {
-            _toolbarMgr.getButtonById(ToolbarButtons.IMPORT_GROUP_BUTTON.getId())
-                       .setOnAction(this::importGroupDialog);
+            ToolbarManager.getInstance().getButtonById(ToolbarButtons.IMPORT_GROUP_BUTTON.getId())
+                    .setOnAction(this::importGroupDialog);
 
-            _toolbarMgr.getButtonById(ToolbarButtons.REMOVE_GROUP_BUTTON.getId())
-                       .setOnAction(this::onRemoveGroup);
+            ToolbarManager.getInstance().getButtonById(ToolbarButtons.REMOVE_GROUP_BUTTON.getId())
+                    .setOnAction(this::onRemoveGroup);
 
         } else if (windowId.equals(ViewKey.MAIN_WINDOW.getKey())) {
-            _toolbarMgr.getButtonById(ToolbarButtons.SWITCH_BRANCH_BUTTON.getId())
-                       .setOnAction(this::showSwitchBranchWindow);
+            ToolbarManager.getInstance().getButtonById(ToolbarButtons.SWITCH_BRANCH_BUTTON.getId())
+                    .setOnAction(this::showSwitchBranchWindow);
 
-            _toolbarMgr.getButtonById(ToolbarButtons.STAGE_REMOVE_FILES.getId())
-                       .setOnAction(this::loadStageRemoveNewFilesWindow);
+            ToolbarManager.getInstance().getButtonById(ToolbarButtons.STAGE_REMOVE_FILES.getId())
+                    .setOnAction(this::loadStageRemoveNewFilesWindow);
         }
     }
 
     private void removeGroupDialog(Group selectedGroup) {
-        AlertWithCheckBox alert = new AlertWithCheckBox(AlertType.CONFIRMATION, REMOVE_GROUP_DIALOG_TITLE,
-                "You want to remove the " + selectedGroup.getName() + " group.", "Are you sure you want to delete it?",
-                "remove group from a local disk", ButtonType.YES, ButtonType.NO);
+        AlertWithCheckBox alert = new AlertWithCheckBox(AlertType.CONFIRMATION,
+                REMOVE_GROUP_DIALOG_TITLE,
+                "You want to remove the " + selectedGroup.getName() + " group.",
+                "Are you sure you want to delete it?",
+                "remove group from a local disk",
+                ButtonType.YES, ButtonType.NO);
 
         Optional<ButtonType> result = alert.showAndWait();
         if (result.get() == ButtonType.NO) {
@@ -371,7 +374,7 @@ public class ModularController implements UpdateProgressListener {
             switchWindowController.beforeShowing(projects, stage);
             stage.show();
         } catch (IOException e) {
-            logger.error("Could not load fxml resource", e);
+            logger.error(FXML_RESOURCE_EXCEPTION_MESSAGE, e);
         }
     }
 

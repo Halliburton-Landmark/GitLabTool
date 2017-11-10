@@ -28,7 +28,6 @@ public class StateServiceImpl implements StateService {
     StateServiceImpl() {
         _listeners = new ConcurrentHashMap<>();
         _states = new ConcurrentHashMap<>();
-
         for (ApplicationState state: ApplicationState.values()) {
             _listeners.put(state, createSynchronizedSet());
             _states.put(state, START_STATE);
