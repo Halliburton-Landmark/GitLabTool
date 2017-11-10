@@ -75,8 +75,6 @@ import com.lgc.gitlabtool.git.services.ProgressListener;
 import com.lgc.gitlabtool.git.ui.javafx.ProgressDialog;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 
-import jdk.nashorn.internal.ir.annotations.Ignore;
-
 /**
  * Tests for the JGit class.
  *
@@ -185,7 +183,6 @@ public class JGitTest {
     }
 
     @Test
-    @Ignore
     public void addUntrackedFileForCommitCorrectDataTest() {
         Git gitMock = getGitMock();
         AddCommand addCommandMock = new AddCommand(getRepository()) {
@@ -207,7 +204,6 @@ public class JGitTest {
     }
 
     @Test
-    @Ignore
     public void addUntrackedFileForCommitIncorrectDataTest() {
         Git gitMock = getGitMock();
         AddCommand addCommandMock = new AddCommand(getRepository()) {
@@ -218,7 +214,7 @@ public class JGitTest {
         };
         Mockito.when(gitMock.add()).thenReturn(addCommandMock);
         Assert.assertTrue(getJGitMock(gitMock).addUntrackedFileForCommit(new ArrayList<>(), getProject(true)).isEmpty());
-        Assert.assertTrue(getJGitMock(gitMock).addUntrackedFileForCommit(new ArrayList<>(), getProject(false)).isEmpty());
+        Assert.assertTrue(getJGitMock(null).addUntrackedFileForCommit(new ArrayList<>(), getProject(false)).isEmpty());
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -926,7 +922,7 @@ public class JGitTest {
         listProjects.add(getProject(true));
         listProjects.add(null);
         listProjects.add(getProject(false));
-        listProjects.add(getProject(true));
+        listProjects.add(new Project());
         return listProjects;
     }
 
