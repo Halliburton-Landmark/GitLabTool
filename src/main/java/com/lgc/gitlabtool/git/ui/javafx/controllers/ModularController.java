@@ -159,7 +159,7 @@ public class ModularController implements UpdateProgressListener {
         updateCurrentConsole();
     }
 
-    private void loadAddRemoveFilesWindow(ActionEvent event) {
+    private void loadStageRemoveNewFilesWindow(ActionEvent event) {
         try {
             List<Project> projects = SelectionsProvider.getInstance().getSelectionItems("mainWindow_projectsList");
             projects = projects.stream()
@@ -167,34 +167,34 @@ public class ModularController implements UpdateProgressListener {
                                .collect(Collectors.toList());
             if (projects.isEmpty()) {
                 String message = String.format(MainWindowController.NO_ANY_PROJECT_FOR_OPERATION,
-                        MainWindowController.ADD_REMOVE_FILES_OPERATION_NAME);
+                        MainWindowController.STAGE_REMOVE_NEW_FILES_OPERATION_NAME);
                 _consoleService.addMessage(message, MessageType.ERROR);
                 return;
             }
 
-            URL addRemoveFilesWindowUrl = getClass().getClassLoader().getResource(ViewKey.ADD_REMOVE_FILES_WINDOW.getPath());
-            FXMLLoader loader = new FXMLLoader(addRemoveFilesWindowUrl);
+            URL stageRemoveNewFilesWindowUrl = getClass().getClassLoader().getResource(ViewKey.STAGE_REMOVE_NEW_FILES_WINDOW.getPath());
+            FXMLLoader loader = new FXMLLoader(stageRemoveNewFilesWindowUrl);
             Parent root = loader.load();
 
-            StageRemoveNewFilesWindowController addRemoveFilesWindowController = loader.getController();
-            addRemoveFilesWindowController.beforeShowing(ProjectList.getIdsProjects(projects));
+            StageRemoveNewFilesWindowController stageRemoveFilesWindowController = loader.getController();
+            stageRemoveFilesWindowController.beforeShowing(ProjectList.getIdsProjects(projects));
 
             Scene scene = new Scene(root);
             Stage stage = new Stage();
             stage.setScene(scene);
             stage.getIcons().add(_appIcon);
-            stage.setTitle("Add/Remove Files");
+            stage.setTitle("Stage | Remove Files");
             stage.initModality(Modality.APPLICATION_MODAL);
 
             /* Set sizing and position */
-            double dialogWidth = 500;
-            double dialogHeight = 400;
+            double dialogWidth = 600;
+            double dialogHeight = 500;
             stage.setHeight(dialogHeight);
             stage.setWidth(dialogWidth);
             ScreenUtil.adaptForMultiScreens(stage, dialogWidth, dialogHeight);
 
             // if we set the minimum size only in fxml then window does not respond to them.
-            double minSize = 370;
+            double minSize = 500;
             stage.setMinHeight(minSize);
             stage.setMinWidth(minSize);
 
@@ -273,8 +273,8 @@ public class ModularController implements UpdateProgressListener {
             _toolbarMgr.getButtonById(ToolbarButtons.SWITCH_BRANCH_BUTTON.getId())
                        .setOnAction(this::showSwitchBranchWindow);
 
-            _toolbarMgr.getButtonById(ToolbarButtons.ADD_REMOVE_FILES.getId())
-                       .setOnAction(this::loadAddRemoveFilesWindow);
+            _toolbarMgr.getButtonById(ToolbarButtons.STAGE_REMOVE_FILES.getId())
+                       .setOnAction(this::loadStageRemoveNewFilesWindow);
         }
     }
 

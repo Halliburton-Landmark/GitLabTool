@@ -109,7 +109,7 @@ public class MainWindowController implements StateListener {
     private static final String PUSH_OPERATION_NAME = "push";
 
     public static final String SWITCH_BRANCH_OPERATION_NAME = "switch branch";
-    public static final String ADD_REMOVE_FILES_OPERATION_NAME = "add/remove files";
+    public static final String STAGE_REMOVE_NEW_FILES_OPERATION_NAME = "stage/remove new files";
 
 
     private ProjectList _projectsList;

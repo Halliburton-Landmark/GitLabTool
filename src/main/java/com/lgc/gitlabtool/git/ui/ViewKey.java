@@ -14,7 +14,7 @@ public enum ViewKey {
     SWITCH_BRANCH_WINDOW("switchBranchWindow", "fxml/SwitchBranchWindow.fxml"),
     SERVER_INPUT_WINDOW("serverInputWindow", "fxml/ServerInputWindow.fxml"),
     EDIT_PROJECT_PROPERTIES("editProjectProperties", "fxml/EditProjectPropertiesWindow.fxml"),
-    ADD_REMOVE_FILES_WINDOW("addRemoveFilesWindow", "fxml/AddRemoveFilesWindow.fxml");
+    STAGE_REMOVE_NEW_FILES_WINDOW("stageRemoveFilesWindow", "fxml/StageRemoveNewFilesWindow.fxml");
 
     private final String key;
     private final String path;

@@ -32,7 +32,7 @@ public enum ToolbarButtons {
     EDIT_PROJECT_PROPERTIES_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "edit_project_propecties", "icons/toolbar/edit_properties_20x20.png", "Edit project properties", "Edit project properties"),
     PULL_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "pull", "icons/toolbar/pull_20x20.png", "Pull", "Pull projects"),
     REVERT_CHANGES(ViewKey.MAIN_WINDOW.getKey(), "revert", "icons/toolbar/revert_changes_20x20.png", "Revert", "Revert changes"),
-    ADD_REMOVE_FILES(ViewKey.MAIN_WINDOW.getKey(), "add/remove", "icons/toolbar/switch_20x20.png", "Add/Remove files", "Add/Remove changed files");
+    STAGE_REMOVE_FILES(ViewKey.MAIN_WINDOW.getKey(), "stage/remove", "icons/toolbar/switch_20x20.png", "Stage|Remove files", "Stage|Remove new files");
 
     private final String viewKey;
     private final String id;

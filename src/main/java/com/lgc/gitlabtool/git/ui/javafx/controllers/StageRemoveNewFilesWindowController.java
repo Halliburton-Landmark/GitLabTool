@@ -4,16 +4,17 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.commons.collections.map.HashedMap;
+import java.util.stream.Collectors;
 
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.ProjectList;
 import com.lgc.gitlabtool.git.jgit.ChangedFile;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
+import com.lgc.gitlabtool.git.ui.javafx.CommitDialog;
 import com.lgc.gitlabtool.git.ui.javafx.comparators.ComparatorDefaultType;
 import com.lgc.gitlabtool.git.ui.javafx.comparators.ComparatorExtensionsType;
 import com.lgc.gitlabtool.git.ui.javafx.comparators.ComparatorProjectsType;
@@ -60,7 +61,7 @@ public class StageRemoveNewFilesWindowController {
     private Button _applyButton;
 
     @FXML
-    private Button _removeButton;
+    private Button _deleteButton;
 
     @FXML
     private Button _applyCommitButton;
@@ -71,15 +72,28 @@ public class StageRemoveNewFilesWindowController {
     private static final String SELECT_ALL_IMAGE_URL = "icons/select_all_20x20.png";
     private static final String MOVE_UP_IMAGE_URL = "icons/arrow-up20x20.png";
     private static final String MOVE_DOWN_IMAGE_URL = "icons/arrow-down20x20.png";
+    private static final String DELETE_IMAGE_URL = "icons/toolbar/remove_20x20.png";
+    private static final String APPLY_IMAGE_URL = "icons/apply_20x20.png";
+    private static final String APPLY_COMMIT_IMAGE_URL = "icons/toolbar/commit_20x20.png";
+    private static final String EXIT_IMAGE_URL = "icons/mainmenu/exit_16x16.png";
 
     private final Image _imageSelectButton;
     private final Image _imageMoveUpButton;
     private final Image _imageMoveDownButton;
+    private final Image _imageDeleteButton;
+    private final Image _imageApplyButton;
+    private final Image _imageApplyCommitButton;
+    private final Image _imageExitButton;
 
     {
-        _imageSelectButton = new Image(getClass().getClassLoader().getResource(SELECT_ALL_IMAGE_URL).toExternalForm());
-        _imageMoveUpButton = new Image(getClass().getClassLoader().getResource(MOVE_UP_IMAGE_URL).toExternalForm());
-        _imageMoveDownButton = new Image(getClass().getClassLoader().getResource(MOVE_DOWN_IMAGE_URL).toExternalForm());
+        ClassLoader loader = getClass().getClassLoader();
+        _imageSelectButton = new Image(loader.getResource(SELECT_ALL_IMAGE_URL).toExternalForm());
+        _imageMoveUpButton = new Image(loader.getResource(MOVE_UP_IMAGE_URL).toExternalForm());
+        _imageMoveDownButton = new Image(loader.getResource(MOVE_DOWN_IMAGE_URL).toExternalForm());
+        _imageDeleteButton = new Image(loader.getResource(DELETE_IMAGE_URL).toExternalForm());
+        _imageApplyButton = new Image(loader.getResource(APPLY_IMAGE_URL).toExternalForm());
+        _imageApplyCommitButton = new Image(loader.getResource(APPLY_COMMIT_IMAGE_URL).toExternalForm());
+        _imageExitButton = new Image(loader.getResource(EXIT_IMAGE_URL).toExternalForm());
     }
 
     //data for view
@@ -93,19 +107,16 @@ public class StageRemoveNewFilesWindowController {
         _selectedProjectIds = projectIds;
         _filterField.setText("" + _selectedProjectIds.size());
 
-        ObservableList<SortingType> items = FXCollections.observableArrayList(SortingType.PROJECTS,
-                                                                              SortingType.EXTENSIONS,
-                                                                              SortingType.DEFAULT);
+        ObservableList<SortingType> items = FXCollections.observableArrayList
+                (SortingType.PROJECTS,SortingType.EXTENSIONS, SortingType.DEFAULT);
         _sortingListBox.setItems(items);
         _sortingListBox.setValue(SortingType.DEFAULT);
-        _sortingListBox.setOnAction(event -> setContentAndComparatorToLists());
 
+        _applyButton.setGraphic(new ImageView(_imageApplyButton));
+        _applyCommitButton.setGraphic(new ImageView(_imageApplyCommitButton));
+        _deleteButton.setGraphic(new ImageView(_imageDeleteButton));
+        _exitButton.setGraphic(new ImageView(_imageExitButton));
         _selectButton.setGraphic(new ImageView(_imageSelectButton));
-
-        _moveUpDownButton.setOnAction(this::moveBetweenLists);
-        _applyButton.setOnAction(this::onApplyAction);
-        _removeButton.setOnAction(this::onRemoveAction);
-        _exitButton.setOnAction(this::onExitAction);
 
         configureListViews();
     }
@@ -134,10 +145,20 @@ public class StageRemoveNewFilesWindowController {
         resetSelectionList.getSelectionModel().clearSelection();
     }
 
-    @SuppressWarnings("unchecked")
-    private void onApplyAction(ActionEvent event) {
+    @FXML
+    public void onApplyCommitAction(ActionEvent event) {
+        List<ChangedFile> addedFiles =  onApplyAction(event);
+        List<Project> changedProjects = addedFiles.stream() // filter ?
+                                                  .map(files -> files.getProject())
+                                                  .collect(Collectors.toList());
+        CommitDialog dialog = new CommitDialog();
+        dialog.commitChanges(changedProjects);
+    }
+
+    @FXML
+    public List<ChangedFile> onApplyAction(ActionEvent event) {
         List<ChangedFile> unstagedList = _stagedFilesListView.getItems();
-        Map<Project, List<ChangedFile>> map = new HashedMap();
+        Map<Project, List<ChangedFile>> map = new HashMap<>();
         for (ChangedFile changedList : unstagedList) {
             List<ChangedFile> files = map.get(changedList.getProject());
             if (files == null) {
@@ -148,9 +169,11 @@ public class StageRemoveNewFilesWindowController {
         }
         List<ChangedFile> addedFiles = _gitService.addUntrackedFileForCommit(map);
         removeItemsFromList(_stagedFilesListView, addedFiles);
+        return addedFiles;
     }
 
-    private void onRemoveAction(ActionEvent event) {
+    @FXML
+    public void onDeleteAction(ActionEvent event) {
         List<ChangedFile> unstagedList = getSelectedItems(_unstagedFilesListView);
         if (!unstagedList.isEmpty()) {
             List<ChangedFile> removedFiles = removeSelectedFiles(unstagedList);
@@ -160,6 +183,11 @@ public class StageRemoveNewFilesWindowController {
             removeItemsFromList(_stagedFilesListView, removedFiles);
         }
         onChangedSelectionAction();
+    }
+
+    @FXML
+    public void onChangeSortingType(ActionEvent event) {
+        setContentAndComparatorToLists();
     }
 
     private void setContentAndComparatorToLists() {
@@ -200,7 +228,8 @@ public class StageRemoveNewFilesWindowController {
         return list.getSelectionModel().getSelectedItems();
     }
 
-    private void moveBetweenLists(ActionEvent event) {
+    @FXML
+    public void moveBetweenLists(ActionEvent event) {
         boolean isUnstagedFiles = hasListSelectionItems(_unstagedFilesListView);
         if (isUnstagedFiles) {
             moveBetweenLists(_unstagedFilesListView, _stagedFilesListView);
@@ -220,14 +249,13 @@ public class StageRemoveNewFilesWindowController {
         }
     }
 
-    private void onExitAction(ActionEvent event) {
+    @FXML
+    public void onExitAction(ActionEvent event) {
         Stage stage = (Stage) _exitButton.getScene().getWindow();
         stage.close();
     }
 
-    /**
-     *
-     */
+    @FXML
     public void onSelectAll() {
         if (_unstagedFilesListView == null || _unstagedFilesListView.getItems().isEmpty()) {
             return;
@@ -275,7 +303,9 @@ public class StageRemoveNewFilesWindowController {
     }
 
     private void setDisableApplyButton() {
-        _applyButton.setDisable(_stagedFilesListView.getItems().isEmpty());
+        boolean isDisable = _stagedFilesListView.getItems().isEmpty();
+        _applyButton.setDisable(isDisable);
+        _applyCommitButton.setDisable(isDisable);
     }
 
     private void selectAllAction() {
@@ -316,9 +346,9 @@ public class StageRemoveNewFilesWindowController {
         boolean isUnstagedFilesSelected = hasListSelectionItems(_unstagedFilesListView);
         boolean isStagedFlesSelected = hasListSelectionItems(_stagedFilesListView);
         if (isUnstagedFilesSelected || isStagedFlesSelected) {
-            _removeButton.setDisable(false);
+            _deleteButton.setDisable(false);
         } else {
-            _removeButton.setDisable(true);
+            _deleteButton.setDisable(true);
         }
     }
 
@@ -350,7 +380,7 @@ public class StageRemoveNewFilesWindowController {
         DEFAULT {
             @Override
             public String toString() {
-                return "default";
+                return "A-Z";
             }
         };
 
