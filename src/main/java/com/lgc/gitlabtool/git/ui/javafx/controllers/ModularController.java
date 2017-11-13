@@ -347,6 +347,7 @@ public class ModularController implements UpdateProgressListener {
 
         groupsWindowToolbarItems = _toolbarManager.createToolbarItems(ViewKey.GROUPS_WINDOW.getKey());
         groupsWindowMainMenuItems = _mainMenuManager.createMainMenuItems(ViewKey.GROUPS_WINDOW.getKey());
+        initActionsMainMenu(ViewKey.GROUPS_WINDOW.getKey());
 
         initActionsToolBar(ViewKey.GROUPS_WINDOW.getKey());
 
