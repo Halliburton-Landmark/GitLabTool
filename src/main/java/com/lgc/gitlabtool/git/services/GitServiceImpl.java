@@ -288,21 +288,25 @@ public class GitServiceImpl implements GitService {
         try {
             for (Entry<Project, List<ChangedFile>> entry : files.entrySet()) {
                 Project project = entry.getKey();
-                List<ChangedFile> changedFiles = entry.getValue();
-                List<String> fileNames = new ArrayList<>();
-
-                changedFiles.forEach(file -> fileNames.add(file.getFileName()));
-
-                List<String> result     = _git.addUntrackedFileForCommit(fileNames, project);
-                List<ChangedFile> added = result.stream()
-                                                .map(file -> new ChangedFile(project, file, false))
-                                                .collect(Collectors.toList());
-                addedFiles.addAll(added);
+                if (project != null && project.isCloned()) {
+                    List<String> fileNames = convertChangedFileToString(entry.getValue());
+                    List<String> result = _git.addUntrackedFileForCommit(fileNames, project);
+                    List<ChangedFile> added = result.stream()
+                                                    .map(file -> new ChangedFile(project, file, false))
+                                                    .collect(Collectors.toList());
+                    addedFiles.addAll(added);
+                }
             }
         } finally {
             _stateService.stateOFF(ApplicationState.ADD_FILES_TO_INDEX);
         }
         return addedFiles;
+    }
+
+    private List<String> convertChangedFileToString(List<ChangedFile> changedFiles) {
+        return changedFiles.stream()
+                           .map(file -> file.getFileName())
+                           .collect(Collectors.toList());
     }
 
 }
