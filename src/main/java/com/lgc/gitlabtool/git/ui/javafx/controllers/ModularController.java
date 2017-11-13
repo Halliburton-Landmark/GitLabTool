@@ -398,6 +398,9 @@ public class ModularController implements UpdateProgressListener {
             _toolbarManager.getButtonById(ToolbarButtons.CLONE_GROUP_BUTTON.getId())
                     .setOnAction(this::onCloneGroups);
 
+            _toolbarManager.getButtonById(ToolbarButtons.SELECT_GROUP_BUTTON.getId())
+                    .setOnAction(this::loadGroup);
+
         } else if (windowId.equals(ViewKey.PROJECTS_WINDOW.getKey())) {
             _toolbarManager.getButtonById(ToolbarButtons.CHANGE_GROUP_BUTTON.getId())
                     .setOnAction(this::loadGroupWindow);
@@ -759,6 +762,13 @@ public class ModularController implements UpdateProgressListener {
     @SuppressWarnings("unused")
     private void loadGroupWindow(ActionEvent actionEvent) {
         loadGroupWindow();
+    }
+
+    @FXML
+    @SuppressWarnings("unused")
+    private void loadGroup(ActionEvent actionEvent) {
+        Group selectedGroup = groupListView.getSelectionModel().getSelectedItem();
+        loadGroup(selectedGroup);
     }
 
     /*
