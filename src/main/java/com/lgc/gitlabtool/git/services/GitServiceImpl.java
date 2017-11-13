@@ -289,12 +289,9 @@ public class GitServiceImpl implements GitService {
             for (Entry<Project, List<ChangedFile>> entry : files.entrySet()) {
                 Project project = entry.getKey();
                 if (project != null && project.isCloned()) {
-                    List<String> fileNames = convertChangedFileToString(entry.getValue());
+                    List<String> fileNames = convertToFileNames(entry.getValue());
                     List<String> result = _git.addUntrackedFileForCommit(fileNames, project);
-                    List<ChangedFile> added = result.stream()
-                                                    .map(file -> new ChangedFile(project, file, false))
-                                                    .collect(Collectors.toList());
-                    addedFiles.addAll(added);
+                    addedFiles.addAll(convertToChangedFile(result, project));
                 }
             }
         } finally {
@@ -303,10 +300,16 @@ public class GitServiceImpl implements GitService {
         return addedFiles;
     }
 
-    private List<String> convertChangedFileToString(List<ChangedFile> changedFiles) {
+    private List<String> convertToFileNames(List<ChangedFile> changedFiles) {
         return changedFiles.stream()
-                           .map(file -> file.getFileName())
+                           .map(ChangedFile::getFileName)
                            .collect(Collectors.toList());
+    }
+
+    private List<ChangedFile> convertToChangedFile(List<String> fileNames, Project project) {
+        return fileNames.stream()
+                        .map(file -> new ChangedFile(project, file, false))
+                        .collect(Collectors.toList());
     }
 
 }
