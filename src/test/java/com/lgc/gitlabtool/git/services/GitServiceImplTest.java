@@ -221,12 +221,13 @@ public class GitServiceImplTest {
     @Test
     public void addUntrackedFileForCommitCorrectData() {
         Project project = getClonedProject();
+        Set<String> files = getFiles();
 
         Map<Project, List<ChangedFile>> data = getFilesForProject(project);
-        when(_jGit.addUntrackedFileForCommit(anyCollection(), eq(project))).thenReturn(new ArrayList<>(getFiles()));
+        when(_jGit.addUntrackedFileForCommit(anyCollection(), eq(project))).thenReturn(new ArrayList<>(files));
 
         List<ChangedFile> addedFiles = _gitService.addUntrackedFileForCommit(data);
-        assertEquals(addedFiles.size(), getFiles().size());
+        assertEquals(addedFiles.size(), files.size());
     }
 
     private Optional<Status> getIncorrectStatus() {
