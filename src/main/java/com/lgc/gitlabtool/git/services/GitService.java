@@ -4,6 +4,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.Status;
+
 import com.lgc.gitlabtool.git.entities.Branch;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.ProjectStatus;
@@ -179,5 +182,15 @@ public interface GitService {
      */
     List<ChangedFile> addUntrackedFileForCommit(Map<Project, List<ChangedFile>> files);
 
+    /**
+     * Gets ProjectStatus for project.
+     * We use {@link Status} for getting info about conflicting, untracked files.
+     * Also, use it for checking the presence of uncommitted changes.
+     *
+     * Gets current branch name, ahead and behind indexes using {@link Git}.
+     *
+     * @param  project the project
+     * @return ProjectStatus for the project.
+     */
     ProjectStatus getProjectStatus(Project project);
 }
