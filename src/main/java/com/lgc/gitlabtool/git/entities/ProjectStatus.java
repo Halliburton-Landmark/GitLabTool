@@ -88,7 +88,7 @@ public class ProjectStatus {
      * @param aheadIndex     the number of commits ahead index
      * @param behindIndex    the number of commits behind index
      * @param currentBranch  the branch name
-     * @param conflicting    the set of files with has conflicting
+     * @param conflicting    the set of files which has conflicting
      * @param untrackedFiles the set of files which are not added to index
      */
     public ProjectStatus(boolean hasChanges, int aheadIndex, int behindIndex, String currentBranch,
@@ -102,7 +102,7 @@ public class ProjectStatus {
     }
 
     /**
-     * Gets set of files witch have conflicts.
+     * Gets set of files which have conflicts.
      *
      * @return files set
      */
@@ -111,7 +111,7 @@ public class ProjectStatus {
     }
 
     /**
-     * Sets set of files witch have conflicts.
+     * Sets set of files which have conflicts.
      *
      * @param conflictingChanges the files
      */
@@ -120,7 +120,7 @@ public class ProjectStatus {
     }
 
     /**
-     * Gets set of files witch don't add to index (new files).
+     * Gets set of files which don't add to index (new files).
      *
      * @return files set
      */
@@ -129,7 +129,7 @@ public class ProjectStatus {
     }
 
     /**
-     * Sets set of files witch don't add to index (new files).
+     * Sets set of files which don't add to index (new files).
      *
      * @param uncommittedChanges the files
      */

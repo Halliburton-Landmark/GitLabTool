@@ -272,20 +272,7 @@ public class GitServiceImpl implements GitService {
             behindIndex = indexCount[1];
         }
 
-        ProjectStatus projectStatus;
-        if (project.getProjectStatus() == null) {
-            projectStatus = new ProjectStatus(hasChanges, aheadIndex, behindIndex, nameBranch,
-                                              conflictedFiles, untrackedFiles);
-        } else {
-            projectStatus = project.getProjectStatus();
-            projectStatus.setCurrentBranch(nameBranch);
-            projectStatus.setHasChanges(hasChanges);
-            projectStatus.setAheadIndex(aheadIndex);
-            projectStatus.setBehindIndex(behindIndex);
-            projectStatus.setConflictedFiles(conflictedFiles);
-            projectStatus.setUntrackedFiles(untrackedFiles);
-        }
-        return projectStatus;
+        return new ProjectStatus(hasChanges, aheadIndex, behindIndex, nameBranch, conflictedFiles, untrackedFiles);
     }
 
     @Override
