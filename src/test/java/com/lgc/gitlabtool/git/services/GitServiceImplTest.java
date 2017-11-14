@@ -1,6 +1,7 @@
 package com.lgc.gitlabtool.git.services;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.eq;
@@ -230,6 +231,43 @@ public class GitServiceImplTest {
         assertEquals(addedFiles.size(), files.size());
     }
 
+    @Test
+    public void getProjectStatusIncorrectData() {
+        ProjectStatus status = _gitService.getProjectStatus(null);
+        assertFalse(status.hasChanges());
+        assertFalse(status.hasConflicts());
+        assertTrue(status.getConflictedFiles().isEmpty());
+        assertTrue(status.getUntrackedFiles().isEmpty());
+        assertEquals(status.getAheadIndex(), 0);
+        assertEquals(status.getBehindIndex(), 0);
+    }
+
+    @Test
+    public void getProjectStatusCorrectData() {
+        Project project = getClonedProject();
+        String currentBranch = "test_branch";
+        int[] aheadBehindIndex = new int[] {0, 1};
+        boolean hasChanges = true;
+
+        Status gitStatus = Mockito.mock(Status.class);
+        Set<String> files = getFiles();
+        when(gitStatus.getConflicting()).thenReturn(files);
+        when(gitStatus.getUntracked()).thenReturn(files);
+        when(gitStatus.hasUncommittedChanges()).thenReturn(hasChanges);
+
+        when(_jGit.getStatusProject(project)).thenReturn(Optional.of(gitStatus));
+        when(_jGit.getCurrentBranch(project)).thenReturn(Optional.of(currentBranch));
+        when(_jGit.getAheadBehindIndexCounts(project, currentBranch)).thenReturn(aheadBehindIndex);
+
+        ProjectStatus status = _gitService.getProjectStatus(project);
+        assertEquals(aheadBehindIndex[1], status.getBehindIndex());
+        assertEquals(aheadBehindIndex[0], status.getAheadIndex());
+        assertEquals(currentBranch, status.getCurrentBranch());
+        assertEquals(files, status.getConflictedFiles());
+        assertEquals(files, status.getUntrackedFiles());
+        assertEquals(hasChanges, status.hasChanges());
+    }
+
     private Optional<Status> getIncorrectStatus() {
         return Optional.empty();
     }
@@ -238,6 +276,7 @@ public class GitServiceImplTest {
         Project project = new Project();
         project.setClonedStatus(true);
         project.setProjectStatus(new ProjectStatus());
+        project.setPathToClonedProject(".");
         return project;
     }
 
