@@ -1,5 +1,6 @@
 package com.lgc.gitlabtool.git.entities;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
@@ -15,7 +16,6 @@ import org.apache.commons.lang.StringUtils;
  * @author Lyudmila Lyska
  */
 public class ProjectStatus {
-    private boolean _hasConflicts;
     private boolean _hasChanges;
     private int _aheadIndex;
     private int _behindIndex;
@@ -27,7 +27,7 @@ public class ProjectStatus {
      * Constructs a ProjectStatus with default parameters.
      */
     public ProjectStatus() {
-        this(false, false, 0, 0, null);
+        this(false, 0, 0, null, new HashSet<>(), new HashSet<>());
     }
 
     /**
@@ -36,28 +36,26 @@ public class ProjectStatus {
      * @param currentBranch the branch name
      */
     public ProjectStatus(String currentBranch) {
-        this(false, false, 0, 0, currentBranch);
+        this(false, 0, 0, currentBranch, new HashSet<>(), new HashSet<>());
     }
 
     /**
      * Constructs a ProjectStatus with a hasConflicts and a hasChanges parameters.
      *
-     * @param hasConflicts <true> if the project has conflicts <false> otherwise.
-     * @param hasChanges   <true> if the project has changes <false> otherwise.
+     * @param hasChanges   <code>true</code> if the project has changes <code>false</code> otherwise.
      */
-    public ProjectStatus(boolean hasConflicts, boolean hasChanges) {
-        this(hasConflicts, hasChanges, 0, 0, null);
+    public ProjectStatus(boolean hasChanges) {
+        this(hasChanges, 0, 0, null, new HashSet<>(), new HashSet<>());
     }
 
     /**
      * Constructs a ProjectStatus with a hasConflicts, a hasChanges and a branch name parameters.
      *
-     * @param hasConflicts  <true> if the project has conflicts <false> otherwise.
-     * @param hasChanges    <true> if the project has changes <false> otherwise.
+     * @param hasChanges    <code>true</code> if the project has changes <code>false</code> otherwise.
      * @param currentBranch the branch name
      */
-    public ProjectStatus(boolean hasConflicts, boolean hasChanges, String currentBranch) {
-        this(hasConflicts, hasChanges, 0, 0, currentBranch);
+    public ProjectStatus(boolean hasChanges, String currentBranch) {
+        this(hasChanges, 0, 0, currentBranch, new HashSet<>(), new HashSet<>());
     }
 
     /**
@@ -68,40 +66,33 @@ public class ProjectStatus {
      * @param currentBranch the branch name
      */
     public ProjectStatus(int aheadIndex, int behindIndex, String currentBranch) {
-        this(false, false, aheadIndex, behindIndex, currentBranch);
+        this(false, aheadIndex, behindIndex, currentBranch, new HashSet<>(), new HashSet<>());
     }
 
     /**
      * Constructs a ProjectStatus with all parameters.
      *
-     * @param hasConflicts  <true> if the project has conflicts <false> otherwise.
-     * @param hasChanges    <true> if the project has changes <false> otherwise.
+     * @param hasChanges    <code>true</code> if the project has changes <code>false</code> otherwise.
      * @param aheadIndex    the number of commits ahead index
      * @param behindIndex   the number of commits behind index
      * @param currentBranch the branch name
      */
-    public ProjectStatus(boolean hasConflicts, boolean hasChanges, int aheadIndex, int behindIndex, String currentBranch) {
-        setHasConflicts(hasConflicts);
-        setHasChanges(hasChanges);
-        setAheadIndex(aheadIndex);
-        setBehindIndex(behindIndex);
-        setCurrentBranch(currentBranch);
+    public ProjectStatus(boolean hasChanges, int aheadIndex, int behindIndex, String currentBranch) {
+        this(hasChanges, aheadIndex, behindIndex, currentBranch, new HashSet<>(), new HashSet<>());
     }
 
     /**
      * Constructs a ProjectStatus with all parameters.
      *
-     * @param hasConflicts   <true> if the project has conflicts <false> otherwise.
-     * @param hasChanges     <true> if the project has changes <false> otherwise.
+     * @param hasChanges     <code>true</code> if the project has changes <code>false</code> otherwise.
      * @param aheadIndex     the number of commits ahead index
      * @param behindIndex    the number of commits behind index
      * @param currentBranch  the branch name
      * @param conflicting    the set of files with has conflicting
      * @param untrackedFiles the set of files which are not added to index
      */
-    public ProjectStatus(boolean hasConflicts, boolean hasChanges, int aheadIndex, int behindIndex,
-                         String currentBranch, Set<String> conflicting, Set<String> untrackedFiles) {
-        setHasConflicts(hasConflicts);
+    public ProjectStatus(boolean hasChanges, int aheadIndex, int behindIndex, String currentBranch,
+                         Set<String> conflicting, Set<String> untrackedFiles) {
         setHasChanges(hasChanges);
         setAheadIndex(aheadIndex);
         setBehindIndex(behindIndex);
@@ -110,18 +101,38 @@ public class ProjectStatus {
         setUntrackedFiles(untrackedFiles);
     }
 
-    public Set<String> getConflictingFiles() {
+    /**
+     * Gets set of files witch have conflicts.
+     *
+     * @return files set
+     */
+    public Set<String> getConflictedFiles() {
         return _conflictedFiles;
     }
 
+    /**
+     * Sets set of files witch have conflicts.
+     *
+     * @param conflictingChanges the files
+     */
     public void setConflictedFiles(Set<String> conflictingChanges) {
         _conflictedFiles = conflictingChanges;
     }
 
+    /**
+     * Gets set of files witch don't add to index (new files).
+     *
+     * @return files set
+     */
     public Set<String> getUntrackedFiles() {
         return _untrackedFiles;
     }
 
+    /**
+     * Sets set of files witch don't add to index (new files).
+     *
+     * @param uncommittedChanges the files
+     */
     public void setUntrackedFiles(Set<String> uncommittedChanges) {
         _untrackedFiles = uncommittedChanges;
     }
@@ -129,25 +140,16 @@ public class ProjectStatus {
     /**
      * Gets hasConflicts parameter.
      *
-     * @return <true> if the project has conflicts <false> otherwise.
+     * @return <code>true</code> if the project has conflicts <code>false</code> otherwise.
      */
     public boolean hasConflicts() {
-        return _hasConflicts;
-    }
-
-    /**
-     * Sets hasConflicts parameter.
-     *
-     * @return <true> if the project has conflicts <false> otherwise.
-     */
-    public void setHasConflicts(boolean hasConflicts) {
-        _hasConflicts = hasConflicts;
+        return !_conflictedFiles.isEmpty();
     }
 
     /**
      * Gets hasChanges parameter.
      *
-     * @return <true> if the project has conflicts <false> otherwise.
+     * @return <code>true</code> if the project has conflicts <code>false</code> otherwise.
      */
     public boolean hasChanges() {
         return _hasChanges;
@@ -156,7 +158,7 @@ public class ProjectStatus {
     /**
      * Sets hasChanges parameter.
      *
-     * @return <true> if the project has conflicts <false> otherwise.
+     * @return <code>true</code> if the project has conflicts <code>false</code> otherwise.
      */
     public void setHasChanges(boolean hasChanges) {
         _hasChanges = hasChanges;

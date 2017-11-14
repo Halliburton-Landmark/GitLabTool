@@ -26,6 +26,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.lgc.gitlabtool.git.entities.Project;
+import com.lgc.gitlabtool.git.entities.ProjectStatus;
 import com.lgc.gitlabtool.git.jgit.ChangedFile;
 import com.lgc.gitlabtool.git.jgit.JGit;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
@@ -202,11 +203,10 @@ public class GitServiceImplTest {
         Project project = getClonedProject();
         Set<String> files = getFiles();
 
-        Status status = Mockito.mock(Status.class);
-        when(status.getConflicting()).thenReturn(files);
-        when(status.getUntracked()).thenReturn(files);
-
-        when(_jGit.getStatusProject(project)).thenReturn(Optional.of(status));
+        ProjectStatus status = new ProjectStatus();
+        status.setConflictedFiles(files);
+        status.setUntrackedFiles(files);
+        project.setProjectStatus(status);
 
         Collection<ChangedFile> changedFiles = _gitService.getChangedFiles(project);
         assertEquals(changedFiles.size(), files.size()*2);
@@ -237,6 +237,7 @@ public class GitServiceImplTest {
     private Project getClonedProject() {
         Project project = new Project();
         project.setClonedStatus(true);
+        project.setProjectStatus(new ProjectStatus());
         return project;
     }
 

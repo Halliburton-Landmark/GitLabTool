@@ -175,7 +175,7 @@ public class StageRemoveNewFilesWindowController {
         List<Project> changedProjects = addedFiles.stream()
                                                   .map(files -> files.getProject())
                                                   .collect(Collectors.toList());
-        // If we add files which have conflicts to index we should update project statuses
+        // We should update project statuses to show actual information
         _projectService.updateProjectStatuses(changedProjects);
 
         CommitDialog dialog = new CommitDialog();

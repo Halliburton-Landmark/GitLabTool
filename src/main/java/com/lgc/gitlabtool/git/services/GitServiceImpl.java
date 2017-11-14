@@ -271,13 +271,11 @@ public class GitServiceImpl implements GitService {
 
         ProjectStatus projectStatus;
         if (project.getProjectStatus() == null) {
-            projectStatus = new ProjectStatus(!conflictedFiles.isEmpty(), hasChanges,
-                                              aheadIndex, behindIndex, nameBranch,
+            projectStatus = new ProjectStatus(hasChanges, aheadIndex, behindIndex, nameBranch,
                                               conflictedFiles, untrackedFiles);
         } else {
             projectStatus = project.getProjectStatus();
             projectStatus.setCurrentBranch(nameBranch);
-            projectStatus.setHasConflicts(!conflictedFiles.isEmpty());
             projectStatus.setHasChanges(hasChanges);
             projectStatus.setAheadIndex(aheadIndex);
             projectStatus.setBehindIndex(behindIndex);
@@ -311,13 +309,9 @@ public class GitServiceImpl implements GitService {
         if (project == null || !project.isCloned()) {
             return changedFiles;
         }
-        Optional<Status> optStatus = _git.getStatusProject(project);
-        if (!optStatus.isPresent()) {
-            return changedFiles;
-        }
-        Status status = optStatus.get();
-        status.getUntracked().forEach(file -> changedFiles.add(new ChangedFile(project, file, false)));
-        status.getConflicting().forEach(file -> changedFiles.add(new ChangedFile(project, file, true)));
+        ProjectStatus status = project.getProjectStatus();
+        status.getUntrackedFiles().forEach(file -> changedFiles.add(new ChangedFile(project, file, false)));
+        status.getConflictedFiles().forEach(file -> changedFiles.add(new ChangedFile(project, file, true)));
         return changedFiles;
     }
 
