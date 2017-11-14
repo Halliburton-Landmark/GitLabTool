@@ -94,7 +94,7 @@ public class StageRemoveNewFilesWindowController {
     @FXML
     private Button _exitButton;
 
-    public void beforeShowing(List<Integer> projectIds) {
+    public void beforeShowing(List<Integer> projectIds, Collection<ChangedFile> changedFiles) {
         ObservableList<SortingType> items = FXCollections.observableArrayList
                 (SortingType.PROJECTS,SortingType.EXTENSIONS, SortingType.DEFAULT);
         _sortingListBox.setItems(items);
@@ -103,11 +103,11 @@ public class StageRemoveNewFilesWindowController {
         _selectedProjectIds.addAll(projectIds);
         _filterField.textProperty().addListener((observable, oldValue, newValue) -> filterUnstagedList(oldValue, newValue));
 
-        configureListViews();
+        configureListViews(changedFiles);
     }
 
-    private void configureListViews() {
-        ObservableList<ChangedFile> items = FXCollections.observableArrayList(getUnstagedFilesSelectedProjects());
+    private void configureListViews(Collection<ChangedFile> changedFiles) {
+        ObservableList<ChangedFile> items = FXCollections.observableArrayList(changedFiles);
 
         _unstagedFilesListView.setItems(items);
         setupListView(_unstagedFilesListView);

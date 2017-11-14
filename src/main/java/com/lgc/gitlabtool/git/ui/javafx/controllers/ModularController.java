@@ -6,6 +6,8 @@ import static com.lgc.gitlabtool.git.util.ProjectPropertiesUtil.getProjectNameWi
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -21,9 +23,11 @@ import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.MessageType;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.ProjectList;
+import com.lgc.gitlabtool.git.jgit.ChangedFile;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.listeners.updateProgressListener.UpdateProgressListener;
 import com.lgc.gitlabtool.git.services.ConsoleService;
+import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.GroupsUserService;
 import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
@@ -91,6 +95,7 @@ public class ModularController implements UpdateProgressListener {
     private static final String FAILED_REMOVE_GROUP_MESSAGE = "Removing of group is Failed";
     private static final String FXML_RESOURCE_EXCEPTION_MESSAGE = "Could not load fxml resource";
     private static final String STAGE_REMOVE_WINDOW_TITLE = "Stage | Remove Files";
+    private static final String PROJECTS_DOESNT_HAVE_CHANGED_FILE = "Selected projects doesn't have new or conflicting files";
 
     private static final String CSS_PATH = "css/style.css";
     private static final Image _appIcon = AppIconHolder.getInstance().getAppIcoImage();
@@ -103,6 +108,9 @@ public class ModularController implements UpdateProgressListener {
 
     private static final StateService _stateService = (StateService) ServiceProvider.getInstance()
             .getService(StateService.class.getName());
+
+    private final GitService _gitService = (GitService) ServiceProvider.getInstance()
+            .getService(GitService.class.getName());
 
     private MainWindowController _mainWindowController;
     private GroupWindowController _groupWindowController;
@@ -172,12 +180,19 @@ public class ModularController implements UpdateProgressListener {
                 return;
             }
 
+            Collection<ChangedFile> files = new ArrayList<>();
+            projects.forEach(project -> files.addAll(_gitService.getChangedFiles(project)));
+            if (files.isEmpty()) {
+                _consoleService.addMessage(PROJECTS_DOESNT_HAVE_CHANGED_FILE, MessageType.ERROR);
+                return;
+            }
+
             URL stageRemoveNewFilesWindowUrl = getClass().getClassLoader().getResource(ViewKey.STAGE_REMOVE_NEW_FILES_WINDOW.getPath());
             FXMLLoader loader = new FXMLLoader(stageRemoveNewFilesWindowUrl);
             Parent root = loader.load();
 
             StageRemoveNewFilesWindowController stageRemoveFilesWindowController = loader.getController();
-            stageRemoveFilesWindowController.beforeShowing(ProjectList.getIdsProjects(projects));
+            stageRemoveFilesWindowController.beforeShowing(ProjectList.getIdsProjects(projects), files);
 
             Scene scene = new Scene(root);
             Stage stage = new Stage();
