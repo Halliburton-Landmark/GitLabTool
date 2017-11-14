@@ -254,6 +254,8 @@ public class MainWindowController implements StateListener {
                 .bind(booleanBindingForShadow);
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.REVERT_CHANGES.getId()).disableProperty()
                 .bind(booleanBindingForShadow);
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.STAGE_REMOVE_FILES.getId()).disableProperty()
+                .bind(booleanBindingForShadow);
 
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_CLONE_PROJECT).disableProperty().bind(booleanBindingForCloned);
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_COMMIT).disableProperty().bind(booleanBindingForShadow);

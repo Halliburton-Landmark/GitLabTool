@@ -12,17 +12,13 @@
 
 <AnchorPane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.lgc.gitlabtool.git.ui.javafx.controllers.StageRemoveNewFilesWindowController">
    <children>
-      <SplitPane dividerPositions="0.5634920634920635" orientation="VERTICAL" AnchorPane.bottomAnchor="35.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="45.0" AnchorPane.topAnchor="35.0">
+      <SplitPane orientation="VERTICAL" AnchorPane.bottomAnchor="35.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="45.0" AnchorPane.topAnchor="35.0">
         <items>
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
-               <children>
                   <ListView fx:id="_unstagedFilesListView" layoutX="102.0" layoutY="-36.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-               </children>
             </AnchorPane>
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
-               <children>
                   <ListView fx:id="_stagedFilesListView" layoutX="41.0" layoutY="-36.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-               </children>
             </AnchorPane>
         </items>
       </SplitPane>
@@ -36,7 +32,7 @@
             <Button fx:id="_applyButton" disable="true" mnemonicParsing="false" onAction="#onApplyAction" style="-fx-graphic: url('icons/apply_20x20.png')" text="Apply" textAlignment="CENTER" />
             <Button fx:id="_applyCommitButton" alignment="CENTER" disable="true" mnemonicParsing="false" onAction="#onApplyCommitAction" style="-fx-graphic: url('icons/toolbar/commit_20x20.png')" text="Apply&amp;Commit" textAlignment="CENTER" />
             <Button fx:id="_deleteButton" disable="true" graphicTextGap="2.0" mnemonicParsing="false" onAction="#onDeleteAction" style="-fx-graphic: url('icons/toolbar/remove_20x20.png')" text="Delete" textAlignment="CENTER" />
-            <Button fx:id="_exitButton" mnemonicParsing="false" onAction="#onExitAction" style="-fx-graphic: url('icons/mainmenu/exit_16x16.png')" text="Exit" textAlignment="CENTER" />
+            <Button fx:id="_exitButton" mnemonicParsing="false" onAction="#onExitAction" style="-fx-graphic: url('icons/exit_20x20.png')" text="Exit" textAlignment="CENTER" />
          </buttons>
       </ButtonBar>
    </children>

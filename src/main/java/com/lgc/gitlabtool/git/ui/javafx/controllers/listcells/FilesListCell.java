@@ -55,13 +55,13 @@ public class FilesListCell extends ListCell<ChangedFile> {
     }
 
     private Text getProjectNameText(ChangedFile item) {
-        Text projectNameText = new Text(getProjectNamme(item));
+        Text projectNameText = new Text(getProjectName(item));
         projectNameText.setFill(Color.DARKCYAN);
         projectNameText.setFont(new Font(PROJECT_FONT));
         return projectNameText;
     }
 
-    private String getProjectNamme(ChangedFile item) {
+    private String getProjectName(ChangedFile item) {
         Project project = item.getProject();
         if (project == null) {
             return StringUtils.EMPTY;

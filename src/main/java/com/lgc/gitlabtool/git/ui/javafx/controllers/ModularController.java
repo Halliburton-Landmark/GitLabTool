@@ -189,7 +189,8 @@ public class ModularController implements UpdateProgressListener {
             /* Set sizing and position */
             double dialogWidth = 550;
             double dialogHeight = 600;
-            stage.setWidth(dialogWidth);
+            double preferedWidth = 700;
+            stage.setWidth(preferedWidth);
             ScreenUtil.adaptForMultiScreens(stage, dialogWidth, dialogHeight);
             // if we set the minimum size only in fxml then window does not respond to them.
             stage.setMinHeight(dialogHeight);
