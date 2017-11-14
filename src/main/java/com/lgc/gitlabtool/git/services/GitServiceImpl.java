@@ -248,7 +248,7 @@ public class GitServiceImpl implements GitService {
 
     @Override
     public ProjectStatus getProjectStatus(Project project) {
-        if (project == null || !project.isCloned()) {
+        if (project == null) {
             return new ProjectStatus();
         }
         Set<String> conflictedFiles = new HashSet<>();
