@@ -6,6 +6,7 @@ import java.util.Set;
 
 import com.lgc.gitlabtool.git.entities.Branch;
 import com.lgc.gitlabtool.git.entities.Project;
+import com.lgc.gitlabtool.git.entities.ProjectStatus;
 import com.lgc.gitlabtool.git.jgit.BranchType;
 import com.lgc.gitlabtool.git.jgit.ChangedFile;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
@@ -177,4 +178,6 @@ public interface GitService {
      * @return the list of added files
      */
     List<ChangedFile> addUntrackedFileForCommit(Map<Project, List<ChangedFile>> files);
+
+    ProjectStatus getProjectStatus(Project project);
 }

@@ -1,5 +1,7 @@
 package com.lgc.gitlabtool.git.entities;
 
+import java.util.Set;
+
 import org.apache.commons.lang.StringUtils;
 
 /**
@@ -18,6 +20,8 @@ public class ProjectStatus {
     private int _aheadIndex;
     private int _behindIndex;
     private String _currentBranch;
+    private Set<String> _conflictedFiles;
+    private Set<String> _untrackedFiles;
 
     /**
      * Constructs a ProjectStatus with default parameters.
@@ -82,6 +86,44 @@ public class ProjectStatus {
         setAheadIndex(aheadIndex);
         setBehindIndex(behindIndex);
         setCurrentBranch(currentBranch);
+    }
+
+    /**
+     * Constructs a ProjectStatus with all parameters.
+     *
+     * @param hasConflicts   <true> if the project has conflicts <false> otherwise.
+     * @param hasChanges     <true> if the project has changes <false> otherwise.
+     * @param aheadIndex     the number of commits ahead index
+     * @param behindIndex    the number of commits behind index
+     * @param currentBranch  the branch name
+     * @param conflicting    the set of files with has conflicting
+     * @param untrackedFiles the set of files which are not added to index
+     */
+    public ProjectStatus(boolean hasConflicts, boolean hasChanges, int aheadIndex, int behindIndex,
+                         String currentBranch, Set<String> conflicting, Set<String> untrackedFiles) {
+        setHasConflicts(hasConflicts);
+        setHasChanges(hasChanges);
+        setAheadIndex(aheadIndex);
+        setBehindIndex(behindIndex);
+        setCurrentBranch(currentBranch);
+        setConflictedFiles(conflicting);
+        setUntrackedFiles(untrackedFiles);
+    }
+
+    public Set<String> getConflictingFiles() {
+        return _conflictedFiles;
+    }
+
+    public void setConflictedFiles(Set<String> conflictingChanges) {
+        _conflictedFiles = conflictingChanges;
+    }
+
+    public Set<String> getUntrackedFiles() {
+        return _untrackedFiles;
+    }
+
+    public void setUntrackedFiles(Set<String> uncommittedChanges) {
+        _untrackedFiles = uncommittedChanges;
     }
 
     /**

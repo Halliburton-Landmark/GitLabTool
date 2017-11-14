@@ -2,6 +2,7 @@ package com.lgc.gitlabtool.git.services;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -17,6 +18,7 @@ import org.eclipse.jgit.api.Status;
 
 import com.lgc.gitlabtool.git.entities.Branch;
 import com.lgc.gitlabtool.git.entities.Project;
+import com.lgc.gitlabtool.git.entities.ProjectStatus;
 import com.lgc.gitlabtool.git.jgit.BranchType;
 import com.lgc.gitlabtool.git.jgit.ChangedFile;
 import com.lgc.gitlabtool.git.jgit.JGit;
@@ -242,6 +244,47 @@ public class GitServiceImpl implements GitService {
             return new int[] {0, 0};
         }
         return _git.getAheadBehindIndexCounts(project, branchName);
+    }
+
+    @Override
+    public ProjectStatus getProjectStatus(Project project) {
+        Set<String> conflictedFiles = new HashSet<>();
+        Set<String> untrackedFiles = new HashSet<>();
+        boolean hasChanges = false;
+
+        Optional<Status> optStatus = _git.getStatusProject(project);
+        if (optStatus.isPresent()) {
+            Status status = optStatus.get();
+            conflictedFiles =  status.getConflicting();
+            untrackedFiles = status.getUntracked();
+            hasChanges = status.hasUncommittedChanges();
+        }
+
+        int aheadIndex = 0;
+        int behindIndex = 0;
+        String nameBranch = getCurrentBranchName(project);
+        if (nameBranch != null) {
+            int[] indexCount = getAheadBehindIndexCounts(project, nameBranch);
+            aheadIndex = indexCount[0];
+            behindIndex = indexCount[1];
+        }
+
+        ProjectStatus projectStatus;
+        if (project.getProjectStatus() == null) {
+            projectStatus = new ProjectStatus(!conflictedFiles.isEmpty(), hasChanges,
+                                              aheadIndex, behindIndex, nameBranch,
+                                              conflictedFiles, untrackedFiles);
+        } else {
+            projectStatus = project.getProjectStatus();
+            projectStatus.setCurrentBranch(nameBranch);
+            projectStatus.setHasConflicts(!conflictedFiles.isEmpty());
+            projectStatus.setHasChanges(hasChanges);
+            projectStatus.setAheadIndex(aheadIndex);
+            projectStatus.setBehindIndex(behindIndex);
+            projectStatus.setConflictedFiles(conflictedFiles);
+            projectStatus.setUntrackedFiles(untrackedFiles);
+        }
+        return projectStatus;
     }
 
     @Override
