@@ -280,13 +280,11 @@ public class JGit {
         if (files == null || project == null) {
             throw new IllegalArgumentException("Incorrect data: project is " + project + ", files is " + files);
         }
-
         List<String> addedFiles = new ArrayList<>();
         try (Git git = getGit(project.getPath())) {
             files.stream().forEach((file) -> {
                 if (file != null) {
                     try {
-
                         git.add().addFilepattern(file).call();
                         addedFiles.add(file);
                     } catch (GitAPIException e) {
@@ -301,6 +299,24 @@ public class JGit {
             logger.error("Error opening repository " + project.getPath() + " " + e.getMessage());
         }
         return addedFiles;
+    }
+
+    public List<String> resetFiles(Collection<String> files, Project project) {
+        if (files == null || project == null) {
+            throw new IllegalArgumentException("Incorrect data: project is " + project + ", files is " + files);
+        }
+        List<String> removedFiles = new ArrayList<>();
+        try (Git git = getGit(project.getPath())) {
+            for (String file : removedFiles) {
+                git.reset().setRef(Constants.HEAD).addPath(file).call();
+                removedFiles.add(file);
+            }
+        } catch (IOException e) {
+            logger.error("Error opening repository " + e.getMessage());
+        } catch (GitAPIException e) {
+            logger.error("Error reseting file to HEAD " + e.getMessage());
+        }
+        return removedFiles;
     }
 
     /**
