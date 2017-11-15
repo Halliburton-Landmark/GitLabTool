@@ -24,7 +24,6 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
@@ -33,7 +32,6 @@ import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextField;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DataFormat;
-import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
@@ -113,39 +111,42 @@ public class GitStagingWindowController {
         setContentAndComparatorToLists();
     }
 
-    private final DataFormat dataFormat = new DataFormat("subListFiles");
+    private static final DataFormat dataFormat = new DataFormat("subListFiles");
 
     private void setDragAndDropToList(ListView<ChangedFile> fromListView, ListView<ChangedFile> toListView) {
-        fromListView.setOnDragDetected(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                Dragboard dragBoard = fromListView.startDragAndDrop(TransferMode.MOVE);
-                ClipboardContent content = new ClipboardContent();
-                content.put(dataFormat, new ArrayList<ChangedFile>(fromListView.getSelectionModel().getSelectedItems()));
-                dragBoard.setContent(content);
-            }
+
+        fromListView.setOnDragDetected(event -> {
+            Dragboard dragBoard = fromListView.startDragAndDrop(TransferMode.MOVE);
+            ClipboardContent content = new ClipboardContent();
+            content.put(dataFormat, new ArrayList<ChangedFile>(fromListView.getSelectionModel().getSelectedItems()));
+            dragBoard.setContent(content);
         });
 
-        toListView.setOnDragOver(new EventHandler<DragEvent>() {
-            @Override
-            public void handle(DragEvent dragEvent) {
-                dragEvent.acceptTransferModes(TransferMode.MOVE);
-            }
+        toListView.setOnDragOver(event -> {
+            event.acceptTransferModes(TransferMode.MOVE);
         });
 
-        toListView.setOnDragDropped(new EventHandler<DragEvent>() {
-            @Override
-            public void handle(DragEvent dragEvent) {
-                List<ChangedFile> files = (List<ChangedFile>) dragEvent.getDragboard().getContent(dataFormat);
-                if (files != null) {
-                    // here my logic
-
-                    addItemsToList(toListView, files);
-                    removeItemsFromList(fromListView, files);
-                }
-                dragEvent.setDropCompleted(true);
+        toListView.setOnDragDropped(event -> {
+            List<ChangedFile> files = (List<ChangedFile>) event.getDragboard().getContent(dataFormat);
+            if (files != null) {
+                // here my logic
+                addItemsToList(toListView, files);
             }
+            event.setDropCompleted(true);
         });
+
+//        toListView.setOnDragDropped(new EventHandler<DragEvent>() {
+//            @Override
+//            public void handle(DragEvent dragEvent) {
+//                List<ChangedFile> files = (List<ChangedFile>) dragEvent.getDragboard().getContent(dataFormat);
+//                if (files != null) {
+//                    // here my logic
+//                    addItemsToList(toListView, files);
+//                }
+//                dragEvent.setDropCompleted(true);
+//                dragEvent.consume();
+//            }
+//        });
     }
 
     // Fix bug with double selection. We can have selected items only in one list.
