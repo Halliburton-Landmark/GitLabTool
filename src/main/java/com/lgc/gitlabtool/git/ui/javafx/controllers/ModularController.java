@@ -167,7 +167,7 @@ public class ModularController implements UpdateProgressListener {
         updateCurrentConsole();
     }
 
-    private void loadStageRemoveNewFilesWindow(ActionEvent event) {
+    public void loadGitStageWindow(ActionEvent event) {
         try {
             List<Project> projects = SelectionsProvider.getInstance().getSelectionItems("mainWindow_projectsList");
             projects = projects.stream()
@@ -187,12 +187,12 @@ public class ModularController implements UpdateProgressListener {
                 return;
             }
 
-            URL stageRemoveNewFilesWindowUrl = getClass().getClassLoader().getResource(ViewKey.STAGE_REMOVE_NEW_FILES_WINDOW.getPath());
-            FXMLLoader loader = new FXMLLoader(stageRemoveNewFilesWindowUrl);
+            URL gitStagingWindowUrl = getClass().getClassLoader().getResource(ViewKey.GIT_STAGING_WINDOW.getPath());
+            FXMLLoader loader = new FXMLLoader(gitStagingWindowUrl);
             Parent root = loader.load();
 
-            StageRemoveNewFilesWindowController stageRemoveFilesWindowController = loader.getController();
-            stageRemoveFilesWindowController.beforeShowing(ProjectList.getIdsProjects(projects), files);
+            GitStagingWindowController gitStagingWindowController = loader.getController();
+            gitStagingWindowController.beforeShowing(ProjectList.getIdsProjects(projects), files);
 
             Scene scene = new Scene(root);
             Stage stage = new Stage();
@@ -285,8 +285,8 @@ public class ModularController implements UpdateProgressListener {
             ToolbarManager.getInstance().getButtonById(ToolbarButtons.SWITCH_BRANCH_BUTTON.getId())
                     .setOnAction(this::showSwitchBranchWindow);
 
-            ToolbarManager.getInstance().getButtonById(ToolbarButtons.STAGE_REMOVE_FILES.getId())
-                    .setOnAction(this::loadStageRemoveNewFilesWindow);
+            ToolbarManager.getInstance().getButtonById(ToolbarButtons.COMMIT_BUTTON.getId())
+                    .setOnAction(this::loadGitStageWindow);
         }
     }
 

@@ -1,5 +1,6 @@
 package com.lgc.gitlabtool.git.entities;
 
+import java.io.Serializable;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Set;
@@ -16,7 +17,9 @@ import com.lgc.gitlabtool.git.util.PathUtilities;
  *
  * @author Lyska Lyudmila
  */
-public class Project {
+public class Project implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private int id;
     private String http_url_to_repo;
     private String name;

@@ -286,6 +286,7 @@ public class JGit {
             files.stream().forEach((file) -> {
                 if (file != null) {
                     try {
+
                         git.add().addFilepattern(file).call();
                         addedFiles.add(file);
                     } catch (GitAPIException e) {
@@ -446,7 +447,7 @@ public class JGit {
         try (Git git = getGit(project.getPath())){
             PersonIdent author = getPersonIdent(nameAuthor, emailAuthor);
             PersonIdent comitter = getPersonIdent(nameCommitter, emailCommitter);
-            git.commit().setAll(setAll).setMessage(message).setAuthor(author).setCommitter(comitter).call();
+            git.commit().setMessage(message).setAuthor(author).setCommitter(comitter).call();
             logger.debug("Commit for the " + project.getName() + " project is " + JGitStatus.SUCCESSFUL);
             return JGitStatus.SUCCESSFUL;
         } catch (IOException | GitAPIException e) {

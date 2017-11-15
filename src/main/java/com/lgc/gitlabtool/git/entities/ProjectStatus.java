@@ -1,5 +1,6 @@
 package com.lgc.gitlabtool.git.entities;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -15,19 +16,22 @@ import org.apache.commons.lang.StringUtils;
  *
  * @author Lyudmila Lyska
  */
-public class ProjectStatus {
+public class ProjectStatus implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private boolean _hasChanges;
     private int _aheadIndex;
     private int _behindIndex;
     private String _currentBranch;
     private Set<String> _conflictedFiles;
     private Set<String> _untrackedFiles;
+    private Set<String> _changedFiles;
 
     /**
      * Constructs a ProjectStatus with default parameters.
      */
     public ProjectStatus() {
-        this(false, 0, 0, null, new HashSet<>(), new HashSet<>());
+        this(null);
     }
 
     /**
@@ -36,7 +40,7 @@ public class ProjectStatus {
      * @param currentBranch the branch name
      */
     public ProjectStatus(String currentBranch) {
-        this(false, 0, 0, currentBranch, new HashSet<>(), new HashSet<>());
+        this(false, currentBranch);
     }
 
     /**
@@ -45,7 +49,7 @@ public class ProjectStatus {
      * @param hasChanges   <code>true</code> if the project has changes <code>false</code> otherwise.
      */
     public ProjectStatus(boolean hasChanges) {
-        this(hasChanges, 0, 0, null, new HashSet<>(), new HashSet<>());
+        this(hasChanges, null);
     }
 
     /**
@@ -55,7 +59,7 @@ public class ProjectStatus {
      * @param currentBranch the branch name
      */
     public ProjectStatus(boolean hasChanges, String currentBranch) {
-        this(hasChanges, 0, 0, currentBranch, new HashSet<>(), new HashSet<>());
+        this(hasChanges, 0, 0, currentBranch);
     }
 
     /**
@@ -66,7 +70,7 @@ public class ProjectStatus {
      * @param currentBranch the branch name
      */
     public ProjectStatus(int aheadIndex, int behindIndex, String currentBranch) {
-        this(false, aheadIndex, behindIndex, currentBranch, new HashSet<>(), new HashSet<>());
+        this(false, aheadIndex, behindIndex, currentBranch);
     }
 
     /**
@@ -78,7 +82,7 @@ public class ProjectStatus {
      * @param currentBranch the branch name
      */
     public ProjectStatus(boolean hasChanges, int aheadIndex, int behindIndex, String currentBranch) {
-        this(hasChanges, aheadIndex, behindIndex, currentBranch, new HashSet<>(), new HashSet<>());
+        this(hasChanges, aheadIndex, behindIndex, currentBranch, new HashSet<>(), new HashSet<>(), new HashSet<>());
     }
 
     /**
@@ -89,16 +93,18 @@ public class ProjectStatus {
      * @param behindIndex    the number of commits behind index
      * @param currentBranch  the branch name
      * @param conflicting    the set of files which has conflicting
-     * @param untrackedFiles the set of files which are not added to index
+     * @param untrackedFiles the set of files which weren't not added to index
+     * @param changedFiles   the set of files which were added to index
      */
     public ProjectStatus(boolean hasChanges, int aheadIndex, int behindIndex, String currentBranch,
-                         Set<String> conflicting, Set<String> untrackedFiles) {
+                         Set<String> conflicting, Set<String> untrackedFiles, Set<String> changedFiles) {
         setHasChanges(hasChanges);
         setAheadIndex(aheadIndex);
         setBehindIndex(behindIndex);
         setCurrentBranch(currentBranch);
         setConflictedFiles(conflicting);
         setUntrackedFiles(untrackedFiles);
+        setChangedFiles(changedFiles);
     }
 
     /**
@@ -218,6 +224,14 @@ public class ProjectStatus {
      */
     public void setCurrentBranch(String currentBranch) {
         _currentBranch = currentBranch == null ? StringUtils.EMPTY : currentBranch;
+    }
+
+    public Set<String> getChangedFiles() {
+        return _changedFiles;
+    }
+
+    public void setChangedFiles(Set<String> changedFiles) {
+        _changedFiles = changedFiles;
     }
 
 }

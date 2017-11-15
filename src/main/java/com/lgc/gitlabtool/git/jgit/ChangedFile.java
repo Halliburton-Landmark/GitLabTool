@@ -1,5 +1,7 @@
 package com.lgc.gitlabtool.git.jgit;
 
+import java.io.Serializable;
+
 import org.apache.commons.io.FilenameUtils;
 
 import com.lgc.gitlabtool.git.entities.Project;
@@ -15,11 +17,15 @@ import com.lgc.gitlabtool.git.entities.Project;
  *
  * @author Lyudmila Lyska
  */
-public class ChangedFile {
+public class ChangedFile implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
     private Project _project;
     private String _fileName;
     private boolean _hasConflicting;
     private String _fileExtension;
+    private ChangedFileType _typeFile;
 
     /**
      * Constructor of object.
@@ -28,10 +34,11 @@ public class ChangedFile {
      * @param fileName the name of changed file
      * @param hasConflicting <code>true</code> if project has conflicts, otherwise <code>false</code>
      */
-    public ChangedFile(Project project, String fileName, boolean hasConflicting) {
+    public ChangedFile(Project project, String fileName, boolean hasConflicting, ChangedFileType typeFile) {
         setProject(project);
         setFileName(fileName);
         setHasConflicting(hasConflicting);
+        setTypeFile(typeFile);
     }
 
     /**
@@ -123,6 +130,14 @@ public class ChangedFile {
             return false;
         }
         return true;
+    }
+
+    public ChangedFileType getTypeFile() {
+        return _typeFile;
+    }
+
+    public void setTypeFile(ChangedFileType typeFile) {
+        _typeFile = typeFile;
     }
 
 }

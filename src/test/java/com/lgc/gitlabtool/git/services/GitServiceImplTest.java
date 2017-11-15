@@ -29,6 +29,7 @@ import org.mockito.Mockito;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.ProjectStatus;
 import com.lgc.gitlabtool.git.jgit.ChangedFile;
+import com.lgc.gitlabtool.git.jgit.ChangedFileType;
 import com.lgc.gitlabtool.git.jgit.JGit;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
@@ -287,7 +288,7 @@ public class GitServiceImplTest {
     private List<ChangedFile> getChangedFiles() {
         List<ChangedFile> files = new ArrayList<>();
         Project project = getClonedProject();
-        getFiles().forEach(fileName -> files.add(new ChangedFile(project, fileName, false)));
+        getFiles().forEach(fileName -> files.add(new ChangedFile(project, fileName, false, ChangedFileType.UNSTAGED)));
         return files;
     }
 

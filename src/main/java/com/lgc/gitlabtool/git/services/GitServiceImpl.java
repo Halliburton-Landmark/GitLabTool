@@ -21,6 +21,7 @@ import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.ProjectStatus;
 import com.lgc.gitlabtool.git.jgit.BranchType;
 import com.lgc.gitlabtool.git.jgit.ChangedFile;
+import com.lgc.gitlabtool.git.jgit.ChangedFileType;
 import com.lgc.gitlabtool.git.jgit.JGit;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
@@ -253,14 +254,22 @@ public class GitServiceImpl implements GitService {
         }
         Set<String> conflictedFiles = new HashSet<>();
         Set<String> untrackedFiles = new HashSet<>();
+        Set<String> changedFiles = new HashSet<>();
         boolean hasChanges = false;
 
         Optional<Status> optStatus = _git.getStatusProject(project);
         if (optStatus.isPresent()) {
             Status status = optStatus.get();
-            conflictedFiles =  status.getConflicting();
-            untrackedFiles = status.getUntracked();
-            hasChanges = status.hasUncommittedChanges();
+            conflictedFiles.addAll(status.getConflicting());
+
+            changedFiles.addAll(status.getChanged());
+            changedFiles.addAll(status.getAdded());
+
+            untrackedFiles.addAll(status.getUntracked());
+            untrackedFiles.addAll(status.getModified());
+            untrackedFiles.addAll(status.getMissing());
+
+            hasChanges = status.hasUncommittedChanges() || !untrackedFiles.isEmpty();
         }
 
         int aheadIndex = 0;
@@ -272,18 +281,19 @@ public class GitServiceImpl implements GitService {
             behindIndex = indexCount[1];
         }
 
-        return new ProjectStatus(hasChanges, aheadIndex, behindIndex, nameBranch, conflictedFiles, untrackedFiles);
+        return new ProjectStatus(hasChanges, aheadIndex, behindIndex, nameBranch, conflictedFiles, untrackedFiles, changedFiles);
     }
 
     @Override
     public boolean[] hasConflictsAndChanges(Project project) {
-        Optional<Status> status = _git.getStatusProject(project);
+        Optional<Status> optStatus = _git.getStatusProject(project);
 
         boolean hasConflicts = false;
         boolean hasChanges = false;
-        if (status.isPresent()) {
-            hasConflicts = status.get().getConflicting().size() > 0;
-            hasChanges = status.get().hasUncommittedChanges();
+        if (optStatus.isPresent()) {
+            Status status = optStatus.get();
+            hasConflicts = status.getConflicting().size() > 0;
+            hasChanges = status.hasUncommittedChanges()  || !status.getUntracked().isEmpty();
         }
         return new boolean[] {hasConflicts, hasChanges};
     }
@@ -300,8 +310,9 @@ public class GitServiceImpl implements GitService {
             return changedFiles;
         }
         ProjectStatus status = project.getProjectStatus();
-        status.getUntrackedFiles().forEach(file -> changedFiles.add(new ChangedFile(project, file, false)));
-        status.getConflictedFiles().forEach(file -> changedFiles.add(new ChangedFile(project, file, true)));
+        status.getChangedFiles().forEach(file -> changedFiles.add(new ChangedFile(project, file, false, ChangedFileType.STAGED)));
+        status.getUntrackedFiles().forEach(file -> changedFiles.add(new ChangedFile(project, file, false, ChangedFileType.UNSTAGED)));
+        status.getConflictedFiles().forEach(file -> changedFiles.add(new ChangedFile(project, file, true, ChangedFileType.UNSTAGED)));
         return changedFiles;
     }
 
@@ -335,7 +346,7 @@ public class GitServiceImpl implements GitService {
 
     private List<ChangedFile> convertToChangedFile(List<String> fileNames, Project project) {
         return fileNames.stream()
-                        .map(file -> new ChangedFile(project, file, false))
+                        .map(file -> new ChangedFile(project, file, false, ChangedFileType.STAGED))
                         .collect(Collectors.toList());
     }
 

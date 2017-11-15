@@ -244,8 +244,7 @@ public class MainWindowController implements StateListener {
                 .bind(booleanBindingForShadow);
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.SWITCH_BRANCH_BUTTON.getId()).disableProperty()
                 .bind(booleanBindingForShadow);
-        ToolbarManager.getInstance().getButtonById(ToolbarButtons.COMMIT_BUTTON.getId()).disableProperty()
-                .bind(booleanBindingForShadow);
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.COMMIT_BUTTON.getId()).disableProperty().bind(booleanBindingForShadow);
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.PUSH_BUTTON.getId()).disableProperty()
                 .bind(booleanBindingForShadow);
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.EDIT_PROJECT_PROPERTIES_BUTTON.getId())
@@ -253,8 +252,6 @@ public class MainWindowController implements StateListener {
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.PULL_BUTTON.getId()).disableProperty()
                 .bind(booleanBindingForShadow);
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.REVERT_CHANGES.getId()).disableProperty()
-                .bind(booleanBindingForShadow);
-        ToolbarManager.getInstance().getButtonById(ToolbarButtons.STAGE_REMOVE_FILES.getId()).disableProperty()
                 .bind(booleanBindingForShadow);
 
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_CLONE_PROJECT).disableProperty().bind(booleanBindingForCloned);
@@ -434,8 +431,7 @@ public class MainWindowController implements StateListener {
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.CREATE_PROJECT_BUTTON.getId())
                 .setOnAction(this::createProjectButton);
 
-        ToolbarManager.getInstance().getButtonById(ToolbarButtons.COMMIT_BUTTON.getId())
-                .setOnAction(this::onCommitAction);
+        //ToolbarManager.getInstance().getButtonById(ToolbarButtons.COMMIT_BUTTON.getId()).setOnAction(this::onCommitAction);
 
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.PUSH_BUTTON.getId())
                 .setOnAction(this::onPushAction);
@@ -455,8 +451,7 @@ public class MainWindowController implements StateListener {
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_CREATE_BRANCH)
                 .setOnAction(this::onNewBranchButton);
 
-        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_COMMIT)
-                .setOnAction(this::onCommitAction);
+        //MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_COMMIT).setOnAction(this::onCommitAction);
 
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_PUSH)
                 .setOnAction(this::onPushAction);
@@ -619,15 +614,17 @@ public class MainWindowController implements StateListener {
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
-                Boolean isHide = preferences.getBoolean(PREF_NAME_HIDE_SHADOWS, false);
-                filterShadowProjects.setSelected(isHide);
-                ObservableList<Project> obsList = FXCollections.observableArrayList(
-                        isHide ? _projectsList.getClonedProjects() : _projectsList.getProjects());
-                projectsList.setItems(obsList);
-                if (!isHide) {
-                    sortProjectsList();
-                } else {
-                    projectsList.refresh();
+                if (preferences != null) {
+                    Boolean isHide = preferences.getBoolean(PREF_NAME_HIDE_SHADOWS, false);
+                    filterShadowProjects.setSelected(isHide);
+                    ObservableList<Project> obsList = FXCollections.observableArrayList(
+                            isHide ? _projectsList.getClonedProjects() : _projectsList.getProjects());
+                    projectsList.setItems(obsList);
+                    if (!isHide) {
+                        sortProjectsList();
+                    } else {
+                        projectsList.refresh();
+                    }
                 }
             }
         });
