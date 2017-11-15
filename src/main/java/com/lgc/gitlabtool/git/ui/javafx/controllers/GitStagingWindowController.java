@@ -32,6 +32,7 @@ import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextField;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DataFormat;
+import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
@@ -93,60 +94,21 @@ public class GitStagingWindowController {
     private void configureListViews(Collection<ChangedFile> files) {
         Collection<ChangedFile> unstagedFiles = new ArrayList<>();
         Collection<ChangedFile> stagedFiles = new ArrayList<>();
-
         fillLists(files, stagedFiles, unstagedFiles);
 
         setupListView(_unstagedListView);
-        setDragAndDropToList(_unstagedListView, _stagedListView);
+        setDragAndDropToUnstagedListView();
         _unstagedListView.setItems(FXCollections.observableArrayList(unstagedFiles));
         _unstagedListView.addEventFilter(MouseEvent.MOUSE_PRESSED,
                 event -> changeFocuseAndSelection(_unstagedListView, _stagedListView));
 
         setupListView(_stagedListView);
-        setDragAndDropToList(_stagedListView, _unstagedListView);
+        setDragAndDropToStagedListView();
         _stagedListView.setItems(FXCollections.observableArrayList(stagedFiles));
         _stagedListView.addEventFilter(MouseEvent.MOUSE_PRESSED,
                 event -> changeFocuseAndSelection(_stagedListView, _unstagedListView));
 
         setContentAndComparatorToLists();
-    }
-
-    private static final DataFormat dataFormat = new DataFormat("subListFiles");
-
-    private void setDragAndDropToList(ListView<ChangedFile> fromListView, ListView<ChangedFile> toListView) {
-
-        fromListView.setOnDragDetected(event -> {
-            Dragboard dragBoard = fromListView.startDragAndDrop(TransferMode.MOVE);
-            ClipboardContent content = new ClipboardContent();
-            content.put(dataFormat, new ArrayList<ChangedFile>(fromListView.getSelectionModel().getSelectedItems()));
-            dragBoard.setContent(content);
-        });
-
-        toListView.setOnDragOver(event -> {
-            event.acceptTransferModes(TransferMode.MOVE);
-        });
-
-        toListView.setOnDragDropped(event -> {
-            List<ChangedFile> files = (List<ChangedFile>) event.getDragboard().getContent(dataFormat);
-            if (files != null) {
-                // here my logic
-                addItemsToList(toListView, files);
-            }
-            event.setDropCompleted(true);
-        });
-
-//        toListView.setOnDragDropped(new EventHandler<DragEvent>() {
-//            @Override
-//            public void handle(DragEvent dragEvent) {
-//                List<ChangedFile> files = (List<ChangedFile>) dragEvent.getDragboard().getContent(dataFormat);
-//                if (files != null) {
-//                    // here my logic
-//                    addItemsToList(toListView, files);
-//                }
-//                dragEvent.setDropCompleted(true);
-//                dragEvent.consume();
-//            }
-//        });
     }
 
     // Fix bug with double selection. We can have selected items only in one list.
@@ -235,16 +197,6 @@ public class GitStagingWindowController {
         return files;
     }
 
-    private Collection<ChangedFile> getStagedFiles(Collection<ChangedFile> files) {
-
-        return null;
-    }
-
-    private Collection<ChangedFile> getUtagedFiles(Collection<ChangedFile> files) {
-
-        return null;
-    }
-
 
     /******************** Methods for changing selection event in lists ********************/
 
@@ -316,5 +268,58 @@ public class GitStagingWindowController {
                 return new ComparatorExtensionsType();
             }
         }
+    }
+
+    /************************************************ DRAG AND DROP ************************************************/
+
+    private static final DataFormat _dataFormatUnstagedList = new DataFormat("subUnstagedListFiles");
+    private static final DataFormat _dataFormatStagedList = new DataFormat("subStagedListFiles");
+
+    private void setDragAndDropToUnstagedListView() {
+        _unstagedListView.setOnDragDetected(evn -> setDragDetectedActionToList(_unstagedListView, _dataFormatUnstagedList));
+        setMoveOnDragOverAction(_stagedListView);
+        _stagedListView.setOnDragDropped(event -> {
+            List<ChangedFile> files = getMovedFiles(event, _dataFormatUnstagedList);
+            if (files != null) {
+                // here logic for add files to index
+
+                addRemoveFiles(_stagedListView, _unstagedListView, files);
+                event.setDropCompleted(true);
+            }
+        });
+    }
+
+    private void setDragAndDropToStagedListView() {
+        _stagedListView.setOnDragDetected(event -> setDragDetectedActionToList(_stagedListView, _dataFormatStagedList));
+        setMoveOnDragOverAction(_unstagedListView);
+        _unstagedListView.setOnDragDropped(event -> {
+            List<ChangedFile> files = getMovedFiles(event, _dataFormatStagedList);
+            if (files != null) {
+                // here logic for remove files from index
+
+                addRemoveFiles(_unstagedListView, _stagedListView, files);
+                event.setDropCompleted(true);
+            }
+        });
+    }
+
+    private List<ChangedFile> getMovedFiles(DragEvent event, DataFormat dataFormat) {
+        return (List<ChangedFile>) event.getDragboard().getContent(dataFormat);
+    }
+
+    private void setDragDetectedActionToList(ListView<ChangedFile> list, DataFormat dataFormat) {
+        Dragboard dragBoard = list.startDragAndDrop(TransferMode.MOVE);
+        ClipboardContent content = new ClipboardContent();
+        content.put(dataFormat, new ArrayList<ChangedFile>(getSelectedItems(list)));
+        dragBoard.setContent(content);
+    }
+
+    private void setMoveOnDragOverAction(ListView<ChangedFile> list) {
+        list.setOnDragOver(event -> event.acceptTransferModes(TransferMode.MOVE));
+    }
+
+    private void addRemoveFiles(ListView<ChangedFile> toList, ListView<ChangedFile> fromList, List<ChangedFile> files) {
+        addItemsToList(toList, files);
+        removeItemsFromList(fromList, files);
     }
 }
