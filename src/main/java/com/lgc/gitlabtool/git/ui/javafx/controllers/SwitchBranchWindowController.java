@@ -5,31 +5,37 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
+import com.lgc.gitlabtool.git.listeners.stateListeners.AbstractStateListener;
+import javafx.stage.WindowEvent;
 import org.apache.commons.lang.StringUtils;
 
 import com.lgc.gitlabtool.git.entities.Branch;
+import com.lgc.gitlabtool.git.entities.MessageType;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.ProjectList;
 import com.lgc.gitlabtool.git.jgit.BranchType;
 import com.lgc.gitlabtool.git.jgit.JGit;
-import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.listeners.stateListeners.StateListener;
+import com.lgc.gitlabtool.git.services.ConsoleService;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.icon.LocalRemoteIconHolder;
 import com.lgc.gitlabtool.git.ui.javafx.ChangesCheckDialog;
-import com.lgc.gitlabtool.git.ui.javafx.StatusDialog;
+import com.lgc.gitlabtool.git.ui.javafx.ProgressDialog;
+import com.lgc.gitlabtool.git.ui.javafx.SwitchBranchProgressDialog;
+import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -47,11 +53,9 @@ import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 
 @SuppressWarnings("unchecked")
-public class SwitchBranchWindowController implements StateListener {
+public class SwitchBranchWindowController extends AbstractStateListener {
 
     private static final String TOTAL_CAPTION = "Total count: ";
-    private static final String SWITCHTO_STATUS_ALERT_TITLE = "Switch branch info";
-    private static final String SWITCHTO_STATUS_ALERT_HEADER = "Switch branch statuses:";
 
     private static final GitService _gitService =
             (GitService) ServiceProvider.getInstance().getService(GitService.class.getName());
@@ -61,8 +65,10 @@ public class SwitchBranchWindowController implements StateListener {
     private List<Integer> _selectedProjectsIds = new ArrayList<>();
     private ProjectList _projectList;
 
+    private Stage _stage;
+
     @FXML
-    private ListView currentProjectsListView;
+    private ListView<Project> currentProjectsListView;
 
     @FXML
     private Label projectsCountLabel;
@@ -88,19 +94,26 @@ public class SwitchBranchWindowController implements StateListener {
     private static final StateService _stateService = (StateService) ServiceProvider.getInstance()
             .getService(StateService.class.getName());
 
+    private static final ConsoleService _concoleService = (ConsoleService) ServiceProvider.getInstance()
+            .getService(ConsoleService.class.getName());
+
+    private static final String ALREADY_SWICHED_MESSAGE = "%d of %d projects have already switched to the selected branch.";
+
     {
-        _stateService.addStateListener(ApplicationState.REFRESH_PROJECTS, this);
+        _stateService.addStateListener(ApplicationState.LOAD_PROJECTS, this);
+        _stateService.addStateListener(ApplicationState.UPDATE_PROJECT_STATUSES, this);
     }
 
     @FXML
     public void initialize() {
         searchField.textProperty().addListener((observable, oldValue, newValue) -> filterPlantList(oldValue, newValue));
-
-        BooleanBinding branchListBooleanBinding = branchesListView.getSelectionModel().selectedItemProperty().isNull();
-        switchButton.disableProperty().bind(branchListBooleanBinding);
+        disableSwitchButton(null);
     }
 
-    public void beforeShowing(List<Project> projects) {
+    void beforeShowing(List<Project> projects, Stage stage) {
+        _stage = stage;
+        _stage.addEventFilter(WindowEvent.WINDOW_HIDDEN, event -> dispose());
+
         _projectList = ProjectList.get(null);
         _selectedProjectsIds = ProjectList.getIdsProjects(projects);
         setProjectListItems(getProjectsByIds(), currentProjectsListView);
@@ -118,12 +131,21 @@ public class SwitchBranchWindowController implements StateListener {
         List<Project> selectedProjects = currentProjectsListView.getItems();
         Branch selectedBranch = (Branch) branchesListView.getSelectionModel().getSelectedItem();
 
-        List<Project> changedProjects = _gitService.getProjectsWithChanges(selectedProjects);
+        List<Project> correctProjects = selectedProjects.stream()
+                                                      .filter(project -> !Branch.compareBranches(project, selectedBranch))
+                                                      .collect(Collectors.toList());
+        int numberSelected = selectedProjects.size();
+        if (correctProjects.size() != numberSelected) {
+            _concoleService.addMessage(
+                    String.format(ALREADY_SWICHED_MESSAGE, numberSelected - correctProjects.size(), numberSelected),
+                    MessageType.ERROR);
+        }
 
+        List<Project> changedProjects = _gitService.getProjectsWithChanges(correctProjects);
         if (changedProjects.isEmpty()) {
-            switchBranch(selectedProjects, selectedBranch);
+            switchBranch(correctProjects, selectedBranch);
         } else {
-            launchSwitchBranchConfirmation(changedProjects, selectedProjects, selectedBranch);
+            launchSwitchBranchConfirmation(changedProjects, correctProjects, selectedBranch);
         }
     }
 
@@ -132,12 +154,15 @@ public class SwitchBranchWindowController implements StateListener {
     }
 
     private void switchBranch(List<Project> selectedProjects, Object selectedBranch) {
-        Map<Project, JGitStatus> switchStatuses = _gitService.switchTo(selectedProjects, (Branch) selectedBranch);
+        ProgressDialog progressDialog = new SwitchBranchProgressDialog();
+        progressDialog.setStartAction(() -> switchAction(selectedBranch, selectedProjects, progressDialog));
+        progressDialog.showDialog();
+    }
 
-        String dialogMessage = "%s projects were switched successfully";
-
-        switchToStatusDialog(switchStatuses, selectedProjects.size(), dialogMessage);
-        currentProjectsListView.refresh();
+    private void switchAction(Object selectedBranch, List<Project> projects, ProgressDialog progressDialog) {
+        OperationProgressListener switchProgressListener =
+                new OperationProgressListener(progressDialog, ApplicationState.SWITCH_BRANCH);
+        _gitService.switchTo(projects, (Branch) selectedBranch, switchProgressListener);
     }
 
     private void launchSwitchBranchConfirmation(List<Project> changedProjects,
@@ -147,10 +172,8 @@ public class SwitchBranchWindowController implements StateListener {
         alert.launchConfirmationDialog(changedProjects, selectedProjects, selectedBranch, this::switchBranch);
     }
 
-    public void onClose(ActionEvent actionEvent) {
-        Node source = (Node) actionEvent.getSource();
-        Stage stage = (Stage) source.getScene().getWindow();
-        stage.close();
+    public void onClose() {
+        _stage.close();
     }
 
     public void onUpdateList() {
@@ -282,12 +305,34 @@ public class SwitchBranchWindowController implements StateListener {
                 branchesCountLabel.textProperty().bind(Bindings.concat(TOTAL_CAPTION,
                         Bindings.size((listView.getItems())).asString())));
 
+        branchesListView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                Branch branch = (Branch) newValue;
+                filteringProjectsListView(Arrays.asList(branch));
+
+                disableSwitchButton(branch);
+            }
+        });
     }
 
-    private void switchToStatusDialog(Map<Project, JGitStatus> statuses, int countOfProjects, String content) {
-        StatusDialog statusDialog = new StatusDialog(SWITCHTO_STATUS_ALERT_TITLE, SWITCHTO_STATUS_ALERT_HEADER);
-        statusDialog.showMessage(statuses, countOfProjects, content);
-        statusDialog.showAndWait();
+    private void disableSwitchButton(Object currentBranch) {
+        if (currentBranch == null) {
+            BooleanBinding defaultProperty = branchesListView.getSelectionModel().selectedItemProperty().isNull();
+            switchButton.disableProperty().bind(defaultProperty);
+            return;
+        }
+        if(isSelectedBranchCurrentForAllProjects((Branch)currentBranch)) {
+            switchButton.disableProperty().bind(new SimpleBooleanProperty(true));
+        } else {
+            switchButton.disableProperty().bind(new SimpleBooleanProperty(false));
+        }
+    }
+
+    private boolean isSelectedBranchCurrentForAllProjects(Branch currentBranch) {
+        return !currentProjectsListView.getItems().parallelStream()
+                                                  .filter(project -> !Branch.compareBranches(project, currentBranch))
+                                                  .findFirst()
+                                                  .isPresent();
     }
 
     private class BranchListCell extends ListCell<Branch> {
@@ -337,6 +382,7 @@ public class SwitchBranchWindowController implements StateListener {
                         } else {
                             currentProjectsListView.setItems(FXCollections.observableArrayList(getProjectsByIds()));
                         }
+                        disableSwitchButton(branch);
                     }
                 });
             });

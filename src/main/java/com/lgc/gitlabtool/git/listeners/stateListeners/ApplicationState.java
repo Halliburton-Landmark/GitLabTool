@@ -49,6 +49,13 @@ public enum ApplicationState {
         }
     },
 
+    CREATE_BRANCH {
+        @Override
+        public String toString() {
+            return "Branch creating";
+        }
+    },
+
     EDIT_POM {
         @Override
         public String toString() {
@@ -60,7 +67,20 @@ public enum ApplicationState {
         @Override
         public String toString() {
             return "Refreshing projects";
+        }
+    },
 
+    LOAD_PROJECTS {
+        @Override
+        public String toString() {
+            return "Loading projects";
+        }
+    },
+
+    UPDATE_PROJECT_STATUSES {
+        @Override
+        public String toString() {
+            return "Updating project statuses";
         }
     },
 

@@ -1,9 +1,11 @@
 package com.lgc.gitlabtool.git.entities;
 
-import com.lgc.gitlabtool.git.jgit.BranchType;
+import java.util.Objects;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
+
+import com.lgc.gitlabtool.git.jgit.BranchType;
 
 /**
  * Class keeps data about branch.
@@ -75,6 +77,21 @@ public class Branch {
         branchName = bName;
     }
 
+    /**
+     * Compares project current branch with the branch.
+     *
+     * @param project the cloned project
+     * @param branch  the branch
+     *
+     * @return <code>true</code> if branches is equals, otherwise <code>false</code>.
+     */
+    public static boolean compareBranches(Project project, Branch branch) {
+        if (project == null || !project.isCloned() || branch == null) {
+            return false;
+        }
+        return Objects.equals(project.getProjectStatus().getCurrentBranch(), branch.getBranchName());
+    }
+
     /* (non-Javadoc)
      * @see java.lang.hashCode();
      */
@@ -90,10 +107,12 @@ public class Branch {
      */
     @Override
     public boolean equals(Object obj) {
-        if (!(obj instanceof Branch))
+        if (!(obj instanceof Branch)) {
             return false;
-        if (obj == this)
+        }
+        if (obj == this) {
             return true;
+        }
 
         Branch anotherBranch = (Branch) obj;
         return new EqualsBuilder().

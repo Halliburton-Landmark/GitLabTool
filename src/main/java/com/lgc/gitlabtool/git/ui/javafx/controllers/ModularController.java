@@ -9,9 +9,14 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.prefs.Preferences;
@@ -179,6 +184,7 @@ public class ModularController implements UpdateProgressListener {
     private static final String REFRESH_PROJECTS_IMAGE_URL = "icons/toolbar/refresh_projects_20x20.png";
     private static final String FILTER_SHADOW_PROJECTS_IMAGE_URL = "icons/toolbar/filter_shadow_projects_20x20.png";
     private static final String DIVIDER_PROPERTY_NODE = "MainWindowController_Dividers";
+    private static final String PREF_NAME_HIDE_SHADOWS = "is_hide_shadows";
     /*
      *
      * END OF GROUP-VIEW CONSTANTS BLOCK
@@ -585,6 +591,7 @@ public class ModularController implements UpdateProgressListener {
 
         setupProjectsDividerPosition(groupTitle);
         addProjectsWindowListener();
+        hideShadowsAction();
     }
 
     private void loadGroupWindow() {
@@ -798,8 +805,7 @@ public class ModularController implements UpdateProgressListener {
             FXMLLoader loader = new FXMLLoader(switchBranchWindowUrl);
             Parent root = loader.load();
 
-            SwitchBranchWindowController switchWindowController = loader.getController();
-            switchWindowController.beforeShowing(projects);
+            SwitchBranchWindowController switchWindowController  = loader.getController();
 
             Scene scene = new Scene(root);
             Stage stage = new Stage();
@@ -820,6 +826,7 @@ public class ModularController implements UpdateProgressListener {
             stage.setMinWidth(dialogWidth / 2);
             stage.setMinHeight(dialogHeight / 2);
 
+            switchWindowController.beforeShowing(projects, stage);
             stage.show();
         } catch (IOException e) {
             _logger.error("Could not load fxml resource", e);
@@ -937,7 +944,6 @@ public class ModularController implements UpdateProgressListener {
                 return;
             }
 
-            controller.beforeStart(getIdSelectedProjects());
             Scene scene = new Scene(root);
             Stage stage = new Stage();
             stage.setScene(scene);
@@ -957,6 +963,7 @@ public class ModularController implements UpdateProgressListener {
             stage.setMinWidth(dialogWidth / 2);
             stage.setMinHeight(dialogHeight / 2);
 
+            controller.beforeStart(getIdSelectedProjects(), stage);
             stage.show();
         } catch (IOException e) {
             _logger.error("Could not load fxml resource", e);
@@ -987,14 +994,8 @@ public class ModularController implements UpdateProgressListener {
     @FXML
     @SuppressWarnings({"unchecked", "unused"})
     private void onShowHideShadowProjects(ActionEvent actionEvent) {
-        ObservableList<Project> obsList = FXCollections.observableArrayList(_projectsList.getProjects());
-        if (filterShadowProjects.isSelected()) {
-            FilteredList<Project> list = new FilteredList<>(obsList, Project::isCloned);
-            projectListView.setItems(list);
-        } else {
-            projectListView.setItems(obsList);
-            sortProjectsList();
-        }
+        preferences.putBoolean(PREF_NAME_HIDE_SHADOWS, filterShadowProjects.isSelected());
+        hideShadowsAction();
     }
 
     @FXML
@@ -1095,6 +1096,21 @@ public class ModularController implements UpdateProgressListener {
         _projectService.clone(shadowProjects, path,
                 new OperationProgressListener(progressDialog, ApplicationState.CLONE, null));
         return true;
+    }
+
+    private void hideShadowsAction() {
+        Platform.runLater(() -> {
+            Boolean isHide = preferences.getBoolean(PREF_NAME_HIDE_SHADOWS, false);
+            filterShadowProjects.setSelected(isHide);
+            ObservableList<Project> obsList = FXCollections.observableArrayList(
+                    isHide ? _projectsList.getClonedProjects() : _projectsList.getProjects());
+            projectListView.setItems(obsList);
+            if (!isHide) {
+                sortProjectsList();
+            } else {
+                projectListView.refresh();
+            }
+        });
     }
 
     private void showProjectsWithoutChangesMessage() {
@@ -1521,10 +1537,11 @@ public class ModularController implements UpdateProgressListener {
                 refreshLoadProjects();
                 return;
             }
-            projects.parallelStream()
-                    .filter(Project::isCloned)
-                    .forEach(_projectService::updateProjectStatus);
-            sortAndCheckProjects();
+            if (state != ApplicationState.LOAD_PROJECTS && state != ApplicationState.UPDATE_PROJECT_STATUSES) {
+                _projectService.updateProjectStatuses(projects);
+            } else {
+                hideShadowsAction();
+            }
         }
     }
 

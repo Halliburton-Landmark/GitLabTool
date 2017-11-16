@@ -12,6 +12,7 @@ import com.lgc.gitlabtool.git.services.StateService;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.layout.HBox;
@@ -47,12 +48,13 @@ public class StatusBar extends HBox implements StateListener {
     }
 
     private void initUI() {
+        this.setAlignment(Pos.CENTER_RIGHT);
         this.setMaxHeight(STATUS_BAR_HEIGHT);
         this.setHeight(STATUS_BAR_HEIGHT);
         _currentStatus.setText(READY_TO_USE_STATE);
         _statusIndicator.setVisible(false);
 
-        getChildren().addAll(_statusIndicator, _currentStatus);
+        getChildren().addAll(_currentStatus, _statusIndicator);
         setSpacing(ELEMENTS_SPACING);
     }
 
@@ -63,9 +65,11 @@ public class StatusBar extends HBox implements StateListener {
         _stateService.addStateListener(ApplicationState.PULL, this);
         _stateService.addStateListener(ApplicationState.CREATE_PROJECT, this);
         _stateService.addStateListener(ApplicationState.SWITCH_BRANCH, this);
+        _stateService.addStateListener(ApplicationState.CREATE_BRANCH, this);
         _stateService.addStateListener(ApplicationState.EDIT_POM, this);
         _stateService.addStateListener(ApplicationState.REVERT, this);
-        _stateService.addStateListener(ApplicationState.REFRESH_PROJECTS, this);
+        _stateService.addStateListener(ApplicationState.LOAD_PROJECTS, this);
+        _stateService.addStateListener(ApplicationState.UPDATE_PROJECT_STATUSES, this);
     }
 
     @Override
@@ -84,8 +88,8 @@ public class StatusBar extends HBox implements StateListener {
     private String getStatusChain() {
         List<ApplicationState> activeStates = _stateService.getActiveStates();
         String status = activeStates.stream()
-                .map(elem -> elem.toString())
-                .collect(Collectors.joining(", "));
+                                    .map(elem -> elem.toString())
+                                    .collect(Collectors.joining(", "));
         return status;
     }
 }

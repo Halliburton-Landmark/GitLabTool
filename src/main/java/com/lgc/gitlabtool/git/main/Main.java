@@ -11,6 +11,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.lgc.gitlabtool.git.connections.RESTConnector;
 import com.lgc.gitlabtool.git.entities.MessageType;
+import com.lgc.gitlabtool.git.exceptions.Log4jExceptionHandler;
 import com.lgc.gitlabtool.git.services.ConsoleService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.UserInterface;
@@ -26,6 +27,7 @@ public class Main {
             .getService(ConsoleService.class.getName());
 
     public static void main(String[] args) {
+        Thread.setDefaultUncaughtExceptionHandler(new Log4jExceptionHandler());
         final UserInterface ui = new JavaFXUI();
         logger.debug("==================== application started");
         _consoleService.addMessage(ProjectPropertiesUtil.getProjectName().toUpperCase() +

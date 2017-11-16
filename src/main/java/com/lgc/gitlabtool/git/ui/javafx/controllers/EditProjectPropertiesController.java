@@ -9,6 +9,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
+import com.lgc.gitlabtool.git.listeners.stateListeners.AbstractStateListener;
+import javafx.stage.WindowEvent;
 import org.apache.commons.lang.StringUtils;
 
 import com.lgc.gitlabtool.git.entities.Project;
@@ -40,7 +42,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-public class EditProjectPropertiesController implements StateListener {
+public class EditProjectPropertiesController extends AbstractStateListener {
 
     private static final String EDIT_POM_TITLE = "Editing project properties";
 
@@ -58,8 +60,11 @@ public class EditProjectPropertiesController implements StateListener {
     private static final StateService _stateService = (StateService) ServiceProvider.getInstance()
             .getService(StateService.class.getName());
 
+    private Stage _stage;
+
     {
-        _stateService.addStateListener(ApplicationState.REFRESH_PROJECTS, this);
+        _stateService.addStateListener(ApplicationState.LOAD_PROJECTS, this);
+        _stateService.addStateListener(ApplicationState.UPDATE_PROJECT_STATUSES, this);
     }
 
     @FXML
@@ -134,7 +139,10 @@ public class EditProjectPropertiesController implements StateListener {
         return _projectList.getProjectsByIds(_selectProjectsIds);
     }
 
-    public void beforeStart(List<Integer> items) {
+    void beforeStart(List<Integer> items, Stage stage) {
+        _stage = stage;
+        _stage.addEventFilter(WindowEvent.WINDOW_HIDDEN, event -> dispose());
+
         _selectProjectsIds = items;
         List<Project> projects = getProjectsByIds();
 

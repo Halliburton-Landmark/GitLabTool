@@ -28,7 +28,7 @@ import javafx.application.Platform;
  * <b>Important!</b><br>
  * Realizations of methods have definite count of parameters (it is needed to use it with {@link ProgressDialog})<br>
  * Please see javadoc
- * 
+ *
  * @author Igor Khlaponin
  */
 public class OperationProgressListener implements ProgressListener {
@@ -40,7 +40,7 @@ public class OperationProgressListener implements ProgressListener {
 
     private final StateService _stateService = (StateService) ServiceProvider.getInstance()
             .getService(StateService.class.getName());
-    
+
     private final ProjectService _projectService = (ProjectService) ServiceProvider.getInstance()
             .getService(ProjectService.class.getName());
 
@@ -71,11 +71,11 @@ public class OperationProgressListener implements ProgressListener {
             double progress = (long) t[0] * 0.01;
             _progressDialog.updateProgressBar(progress);
         }
-        if (t.length >= 3 && t[1] instanceof Project && t[2] instanceof JGitStatus) { 	
-        	Project project = (Project) t[1];
-        	if (_applicationState == ApplicationState.CLONE) {
-        		_projectService.updateProjectTypeAndStatus(project);
-			}
+        if (t.length >= 3 && t[1] instanceof Project && t[2] instanceof JGitStatus) {
+            Project project = (Project) t[1];
+            if (_applicationState == ApplicationState.CLONE) {
+                _projectService.updateProjectTypeAndStatus(project);
+            }
             String message = project.getName() + " : " + t[2];
             _progressDialog.addMessageToConcole(message, MessageType.SUCCESS);
             _logger.info(_applicationState + ": " + message);
@@ -158,7 +158,7 @@ public class OperationProgressListener implements ProgressListener {
     }
 
     protected void showStatusDialog(String message) {
-        StatusDialog statusDialog = new StatusDialog(_applicationState.toString(), 
+        StatusDialog statusDialog = new StatusDialog(_applicationState.toString(),
                 _applicationState.toString()+ " info", message);
         statusDialog.showAndWait();
     }

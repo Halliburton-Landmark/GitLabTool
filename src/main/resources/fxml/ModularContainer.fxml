@@ -15,6 +15,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.TextFlow?>
 <?import javafx.stage.Screen?>
+<?import com.lgc.gitlabtool.git.ui.javafx.StatusBar?>
 <AnchorPane prefHeight="${screen.visualBounds.maxY / 1.5}"
             prefWidth="${screen.visualBounds.maxX / 1.5}" xmlns="http://javafx.com/javafx/8"
             xmlns:fx="http://javafx.com/fxml/1"
@@ -88,8 +89,11 @@
                 <ScrollPane fx:id="scrollPane" fitToWidth="true" fitToHeight="true">
                     <TextFlow fx:id="_console" style="-fx-background-color: #D7DBE3;"/>
                 </ScrollPane>
-                <StatusBar/>
             </SplitPane>
         </center>
+
+        <bottom>
+            <StatusBar/>
+        </bottom>
     </BorderPane>
 </AnchorPane>

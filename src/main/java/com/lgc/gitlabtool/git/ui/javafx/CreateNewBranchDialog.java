@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.lgc.gitlabtool.git.ui.javafx.listeners.PushProgressListener;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -14,12 +15,12 @@ import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.jgit.BranchType;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.services.GitService;
-import com.lgc.gitlabtool.git.services.ProgressListener;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 import com.lgc.gitlabtool.git.util.NameValidator;
 import com.lgc.gitlabtool.git.util.ScreenUtil;
 
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -44,7 +45,6 @@ public class CreateNewBranchDialog extends Dialog<String> {
     private static final String STATUS_DIALOG_TITLE = "Branch Creating status";
     private static final String STATUS_DIALOG_HEADER = "Branch creating info";
     private static final String CHOOSE_BRANCH_NAME_MESSAGE = "Please choose a new branch name";
-    private static final String WRONG_INPUT_MESSAGE = " is a wrong branch name. Please try again!";
 
     private static final Logger _logger = LogManager.getLogger(CreateNewBranchDialog.class);
     private static final GitService _gitService = (GitService) ServiceProvider.getInstance()
@@ -140,9 +140,8 @@ public class CreateNewBranchDialog extends Dialog<String> {
     private ObservableList<String> getBoxOptions() {
         Set<Branch> branches = _gitService.getBranches(getProjects(), BranchType.ALL, true);
         Set<String> branchesNames = branches.stream()
-                .map(branch -> branch.getBranchName())
-                .collect(Collectors.toSet());
-        
+                                            .map(branch -> branch.getBranchName())
+                                            .collect(Collectors.toSet());
         ObservableList<String> options = FXCollections.observableArrayList(branchesNames);
         return options;
     }
@@ -150,35 +149,36 @@ public class CreateNewBranchDialog extends Dialog<String> {
     private String getDefaultBranchOption(ObservableList<String> options) {
         String currentBranchName = getCurrentCommonBranchName(getProjects());
         return options.stream()
-                .filter(element -> element.equals(currentBranchName))
-                .findFirst().orElse(StringUtils.EMPTY);
+                      .filter(element -> element.equals(currentBranchName))
+                      .findFirst().orElse(StringUtils.EMPTY);
     }
 
     private String getCurrentCommonBranchName(List<Project> projects) {
         List<String> currentBranches = projects.stream()
-                .map(project -> _gitService.getCurrentBranchName(project))
-                .distinct()
-                .collect(Collectors.toList());
+                                               .map(project -> _gitService.getCurrentBranchName(project))
+                                               .distinct()
+                                               .collect(Collectors.toList());
         return currentBranches.size() > 1 ? StringUtils.EMPTY : currentBranches.get(0);
     }
 
     private void onCreateButton(ActionEvent event) {
         String newBranchName = _branchNameField.getText().trim();
-        String startPoint = (String) _comboBox.getSelectionModel().getSelectedItem();
-        Map<Project, JGitStatus> results = _gitService.createBranch(getProjects(), newBranchName, startPoint, false);
+        String startPoint = _comboBox.getSelectionModel().getSelectedItem();
+        Runnable task = () -> {
+            Map<Project, JGitStatus> results = _gitService.createBranch(getProjects(), newBranchName, startPoint, false);
+            boolean switchToBranch = _checkoutBox.isSelected();
+            if (switchToBranch) {
+                switchBranch(getProjects(), newBranchName);
+            }
+            boolean pushToUpstream = _pushToUpstreamBox.isSelected();
+            if (pushToUpstream && switchToBranch) {
+                pushBranches(getProjects());
+            }
+            Platform.runLater(() -> createAndShowStatusDialog(getProjects(), results));
+        };
 
-        boolean switchToBranch = _checkoutBox.isSelected();
-        if (switchToBranch) {
-            switchBranch(getProjects(), newBranchName);
-        }
-        boolean pushToUpstream = _pushToUpstreamBox.isSelected();
-        if (pushToUpstream && switchToBranch) {
-            pushBranches(getProjects());
-        }
-
+        new Thread(task, "create-branch-task").start();
         getStage().close();
-
-        createAndShowStatusDialog(getProjects(), results);
     }
 
     private boolean isInputValid(String input) {
@@ -243,7 +243,8 @@ public class CreateNewBranchDialog extends Dialog<String> {
             // we do not show switching on statuses here
             // because we show the statuses of branches creation
             // In the same time we could see that branch is changed on the projects list panel
-            _gitService.switchTo(projects, (String) branchName, false);
+            Runnable task = () -> _gitService.switchTo(projects, (String) branchName, false, null);
+            new Thread(task, "switch-branch-task").start();
         } else {
             ChangesCheckDialog alert = new ChangesCheckDialog();
             alert.launchConfirmationDialog(changedProjects, projects, branchName, this::switchBranch);
@@ -259,33 +260,7 @@ public class CreateNewBranchDialog extends Dialog<String> {
     }
 
     private void pushBranches(List<Project> projects) {
-        _gitService.push(projects, new PushProgressListener());
+        _gitService.push(projects, PushProgressListener.get());
     }
 
-    class PushProgressListener implements ProgressListener {
-
-        @Override
-        public void onSuccess(Object... t) {
-            if (t[0] instanceof Project) {
-                String projectName = ((Project) t[0]).getName();
-                String successMessage = projectName + " successfully pushed to upstream";
-                _logger.debug(successMessage);
-            }
-        }
-
-        @Override
-        public void onError(Object... t) {
-            if (t[0] instanceof Project) {
-                String projectName = ((Project) t[0]).getName();
-                String errorMessage = "Failed to push " + projectName + " project";
-                _logger.error(errorMessage);
-            }
-        }
-
-        @Override
-        public void onStart(Object... t) {}
-
-        @Override
-        public void onFinish(Object... t) {}
-    }
 }

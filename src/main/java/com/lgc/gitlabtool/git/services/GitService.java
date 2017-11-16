@@ -32,9 +32,11 @@ public interface GitService {
      *
      * @param projects projects that need to be switched
      * @param branch selected branch
+     * @param progress the listener for obtaining data on the process of performing the operation
+     *
      * @return map with projects and theirs statuses of switching
      */
-    Map<Project, JGitStatus> switchTo(List<Project> projects, Branch branch);
+    Map<Project, JGitStatus> switchTo(List<Project> projects, Branch branch, ProgressListener progress);
 
     /**
      * Switches projects to selected branch
@@ -42,9 +44,10 @@ public interface GitService {
      * @param projects projects that need to be switched
      * @param branchName name of the branch
      * @param isRemote <code>true</code> if the branch has {@link BranchType#REMOTE}
+     * @param progress the listener for obtaining data on the process of performing the operation
      * @return map with projects and theirs statuses of switching
      */
-    Map<Project, JGitStatus> switchTo(List<Project> projects, String branchName, boolean isRemote);
+    Map<Project, JGitStatus> switchTo(List<Project> projects, String branchName, boolean isRemote, ProgressListener progress);
 
     /**
      * Gets projects that have uncommited changes
@@ -152,4 +155,9 @@ public interface GitService {
      *         - has changes: <true> is has, otherwise  <false>.
      */
     public boolean[] hasConflictsAndChanges(Project project);
+
+    /**
+     * Starts canceling process for cloning. This may take some time.
+     */
+    void cancelClone();
 }
