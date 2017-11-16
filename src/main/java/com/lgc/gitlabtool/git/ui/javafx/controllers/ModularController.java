@@ -293,6 +293,7 @@ public class ModularController implements UpdateProgressListener {
 
     private ToggleButton selectAllButton;
     private ToggleButton filterShadowProjects;
+    private Button refreshProjectsButton;
     /*
      *
      * END OF GROUP-VIEW CONSTANTS BLOCK
@@ -314,6 +315,7 @@ public class ModularController implements UpdateProgressListener {
     @FXML
     @SuppressWarnings("ConstantConditions")
     private void initialize() {
+        preferences = getPreferences(DIVIDER_PROPERTY_NODE);
 
         _stateService.addStateListener(ApplicationState.CLONE, new GroupsWindowStateListener());
         toolbar.getStylesheets().add(getClass().getClassLoader().getResource(CSS_PATH).toExternalForm());
@@ -383,13 +385,13 @@ public class ModularController implements UpdateProgressListener {
         selectAllButton.setGraphic(new ImageView(imageSelectAll));
         selectAllButton.setOnAction(this::onSelectAll);
 
-        Button refreshProjectsButton = new Button();
+        refreshProjectsButton = new Button();
         refreshProjectsButton.setTooltip(new Tooltip("Refresh projects"));
         refreshProjectsButton.setGraphic(new ImageView(imageRefreshProjects));
         refreshProjectsButton.setOnAction(this::refreshLoadProjects);
 
         filterShadowProjects = new ToggleButton();
-        filterShadowProjects.setTooltip(new Tooltip("Enable\\disable shadow projects"));
+        filterShadowProjects.setTooltip(new Tooltip("Show/Hide shadow projects"));
         filterShadowProjects.setGraphic(new ImageView(imageFilterShadow));
         filterShadowProjects.setOnAction(this::onShowHideShadowProjects);
 
@@ -558,9 +560,6 @@ public class ModularController implements UpdateProgressListener {
         _currentView = ViewKey.PROJECTS_WINDOW.getKey();
         _currentGroup = group;
 
-        ProjectList.reset();
-        _projectsList = ProjectList.get(_currentGroup);
-
         toolbar.getItems().clear();
         menuBar.getMenus().clear();
 
@@ -580,13 +579,12 @@ public class ModularController implements UpdateProgressListener {
         _workIndicatorDialog = new WorkIndicatorDialog(stage, WORK_INDICATOR_START_MESSAGE);
         Runnable selectGroup = () -> {
             ProjectList.reset();
-            ProjectList _projectsList = ProjectList.get(group);
+            _projectsList = ProjectList.get(_currentGroup);
+            hideShadowsAction();
 
             // UI updating
             Platform.runLater(() -> {
                 //noinspection unchecked
-                projectListView.setItems(FXCollections.observableArrayList(_projectsList.getProjects()));
-                sortProjectsList();
                 mainPanelBackground.setEffect(null);
                 topBackground.setEffect(null);
                 _projectService.removeUpdateProgressListener(this);
@@ -600,7 +598,7 @@ public class ModularController implements UpdateProgressListener {
 
         setupProjectsDividerPosition(groupTitle);
         addProjectsWindowListener();
-        hideShadowsAction();
+        
     }
 
     private void loadGroupWindow() {
@@ -621,7 +619,6 @@ public class ModularController implements UpdateProgressListener {
     }
 
     private void setupProjectsDividerPosition(String groupTitle) {
-        preferences = getPreferences(DIVIDER_PROPERTY_NODE);
 
         if (preferences != null) {
             String key = String.valueOf(groupTitle.hashCode());
@@ -649,6 +646,7 @@ public class ModularController implements UpdateProgressListener {
         _stateService.addStateListener(ApplicationState.SWITCH_BRANCH, _modularStateListener);
         _stateService.addStateListener(ApplicationState.EDIT_POM, _modularStateListener);
         _stateService.addStateListener(ApplicationState.REVERT, _modularStateListener);
+        _stateService.addStateListener(ApplicationState.REFRESH_PROJECTS, _modularStateListener);
     }
 
     private void removeProjectsWindowListener() {
@@ -660,6 +658,7 @@ public class ModularController implements UpdateProgressListener {
         _stateService.removeStateListener(ApplicationState.SWITCH_BRANCH, _modularStateListener);
         _stateService.removeStateListener(ApplicationState.EDIT_POM, _modularStateListener);
         _stateService.removeStateListener(ApplicationState.REVERT, _modularStateListener);
+        _stateService.removeStateListener(ApplicationState.REFRESH_PROJECTS, _modularStateListener);
     }
 
     /*
@@ -1575,7 +1574,8 @@ public class ModularController implements UpdateProgressListener {
 
         @Override
         public void onFinish(Object... t) {
-            finishAction("Push projects is finished!", MessageType.SIMPLE, ApplicationState.PUSH);
+            finishAction("Push projects is fini" +
+                    "shed!", MessageType.SIMPLE, ApplicationState.PUSH);
         }
     }
 
@@ -1588,7 +1588,15 @@ public class ModularController implements UpdateProgressListener {
                 executor.submit(() -> updateProjectsByState(state));
                 executor.shutdown();
             }
+            handleRefreshButtonState(state, isActivate);
         }
+
+        private void handleRefreshButtonState(ApplicationState state, boolean isActivate) {
+            if (state == ApplicationState.REFRESH_PROJECTS) {
+                refreshProjectsButton.setDisable(isActivate);
+            }
+        }
+
 
         private void updateProjectsByState(ApplicationState state) {
             List<Project> projects = _projectsList.getProjects();
