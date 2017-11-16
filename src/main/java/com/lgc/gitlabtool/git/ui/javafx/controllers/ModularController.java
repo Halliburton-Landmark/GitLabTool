@@ -378,6 +378,7 @@ public class ModularController implements UpdateProgressListener {
         selectAllButton = new ToggleButton();
         selectAllButton.setTooltip(new Tooltip("Select all projects"));
         selectAllButton.setGraphic(new ImageView(imageSelectAll));
+        selectAllButton.setOnAction(this::onSelectAll);
 
         Button refreshProjectsButton = new Button();
         refreshProjectsButton.setTooltip(new Tooltip("Refresh projects"));
