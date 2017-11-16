@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
@@ -14,15 +15,20 @@ import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.ProjectList;
 import com.lgc.gitlabtool.git.jgit.ChangedFile;
 import com.lgc.gitlabtool.git.jgit.ChangedFileType;
+import com.lgc.gitlabtool.git.jgit.JGitStatus;
+import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
+import com.lgc.gitlabtool.git.ui.javafx.StatusDialog;
 import com.lgc.gitlabtool.git.ui.javafx.comparators.ComparatorDefaultType;
 import com.lgc.gitlabtool.git.ui.javafx.comparators.ComparatorExtensionsType;
 import com.lgc.gitlabtool.git.ui.javafx.comparators.ComparatorProjectsType;
 import com.lgc.gitlabtool.git.ui.javafx.controllers.listcells.FilesListCell;
+import com.lgc.gitlabtool.git.ui.javafx.listeners.CommitPushProgressListener;
 
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
@@ -31,6 +37,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DataFormat;
@@ -38,6 +45,7 @@ import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
+import javafx.stage.Stage;
 
 public class GitStagingWindowController {
 
@@ -60,16 +68,23 @@ public class GitStagingWindowController {
     private Button _commitPushButton;
 
     @FXML
-    private Button _cancelButton;
+    private Button _exitButton;
+
+    @FXML
+    private TextArea _commitText;
+
+    private static final String STATUS_COMMIT_DIALOG_TITLE = "Committing changes status";
+    private static final String STATUS_COMMIT_DIALOG_HEADER = "Committing changes info";
+
+    private static final String STATUS_PUSH_DIALOG_TITLE = "Pushing changes status";
+    private static final String STATUS_PUSH_DIALOG_HEADER = "Pushing changes info";
 
     private final GitService _gitService = (GitService) ServiceProvider.getInstance()
             .getService(GitService.class.getName());
 
-    //private final ProjectService _projectService = (ProjectService) ServiceProvider.getInstance()
-            //.getService(ProjectService.class.getName());
-
     private final List<Integer> _selectedProjectIds = new ArrayList<>();
     private final ProjectList _projectList = ProjectList.get(null);
+    private Map<Project, JGitStatus> _commitStatuses = new HashMap<>();
 
     public void beforeShowing(List<Integer> projectIds, Collection<ChangedFile> files) {
         ObservableList<SortingType> items = FXCollections.observableArrayList
@@ -81,6 +96,12 @@ public class GitStagingWindowController {
         _filterField.textProperty().addListener((observable, oldValue, newValue) -> filterUnstagedList(oldValue, newValue));
 
         configureListViews(files);
+    }
+
+    private void updateDisableButton() {
+        BooleanBinding property = Bindings.size(_stagedListView.getItems()).isEqualTo(0).or(_commitText.textProperty().isEmpty());
+        _commitButton.disableProperty().bind(property);
+        _commitPushButton.disableProperty().bind(property);
     }
 
     private void fillLists(Collection<ChangedFile> all, Collection<ChangedFile> staged, Collection<ChangedFile> unstaged) {
@@ -120,14 +141,64 @@ public class GitStagingWindowController {
     }
 
     @FXML
+    public void onCommitAction(ActionEvent event) {
+        commitChanges(getProjects(_stagedListView.getItems()), false);
+    }
+
+    @FXML
+    public void onCommitPushAction(ActionEvent event) {
+        commitChanges(getProjects(_stagedListView.getItems()), true);
+    }
+
+    private List<Project> getProjects(List<ChangedFile> files) {
+        Set<Project> setProjects = files.stream()
+                                        .map(ChangedFile::getProject)
+                                        .collect(Collectors.toSet());
+        return new ArrayList<>(setProjects);
+    }
+
+    private void commitChanges(List<Project> projects, boolean isPushChanges) {
+        String commitMessage = _commitText.getText();
+        _commitStatuses = _gitService.commitChanges(projects, commitMessage, isPushChanges,
+                new CommitPushProgressListener(isPushChanges ? ApplicationState.PUSH : ApplicationState.COMMIT));
+        showStatusDialog(isPushChanges, projects.size());
+    }
+
+    @FXML
     public void onChangeSortingType(ActionEvent event) {
         setContentAndComparatorToLists();
+    }
+
+    @FXML
+    public void onExitAction(ActionEvent event) {
+        Stage stage = (Stage) _exitButton.getScene().getWindow();
+        stage.close();
+    }
+
+    // move from old CommitDialog class
+    private void showStatusDialog(boolean isPushChanges, int countProjects) {
+        Map<Project, JGitStatus> statuses = _commitStatuses;
+        if (statuses == null || statuses.isEmpty()) {
+            return;
+        }
+        String info = "Successfully: %s project(s)\nFailed: %s project(s)";
+        String dialogTitle = isPushChanges ? STATUS_PUSH_DIALOG_TITLE : STATUS_COMMIT_DIALOG_TITLE;
+        String dialogHeader = isPushChanges ? STATUS_PUSH_DIALOG_HEADER : STATUS_COMMIT_DIALOG_HEADER;
+
+        long countSuccess = statuses.entrySet().stream()
+                                               .map(Map.Entry::getValue)
+                                               .filter(status -> status.equals(JGitStatus.SUCCESSFUL))
+                                               .count();
+
+        StatusDialog statusDialog = new StatusDialog(dialogTitle, dialogHeader);
+        statusDialog.showMessage(statuses, countProjects, info, String.valueOf(countSuccess),
+                String.valueOf(countProjects - countSuccess));
+        statusDialog.showAndWait();
     }
 
     private void setupListView(ListView<ChangedFile> list) {
         list.setCellFactory(p -> new FilesListCell());
         list.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        list.getSelectionModel().getSelectedItems().addListener(new FilesListChangeListener());
     }
 
     private void setContentAndComparatorToLists() {
@@ -140,6 +211,7 @@ public class GitStagingWindowController {
         Comparator<ChangedFile> comparator = SortingType.getComparatorByType(_sortingListBox.getValue());
         sortedList.setComparator(comparator);
         list.setItems(sortedList);
+        updateDisableButton();
     }
 
     private void filterUnstagedList(String oldValue, String newValue) {
@@ -197,35 +269,6 @@ public class GitStagingWindowController {
         Collection<ChangedFile> files = new ArrayList<>();
         selectedProjects.forEach(project -> files.addAll(getChangedFiles(project)));
         return files;
-    }
-
-
-    /******************** Methods for changing selection event in lists ********************/
-
-    /**
-    * Listener for handling changing selection events in ListViews.
-    * If change selection item in any list we will update states and actions
-    * for select all, move up/down, delete and apply buttons.
-    *
-    * @author Lyudmila Lyska
-    */
-   class FilesListChangeListener implements ListChangeListener<ChangedFile> {
-
-       @Override
-       public void onChanged(ListChangeListener.Change<? extends ChangedFile> event) {
-           onChangedSelectionAction();
-       }
-
-   }
-
-    private void onChangedSelectionAction() {
-        setDisableApplyButton();
-    }
-
-    private void setDisableApplyButton() {
-        boolean isDisable = _stagedListView.getItems().isEmpty();
-        _commitButton.setDisable(isDisable);
-        _commitPushButton.setDisable(isDisable);
     }
 
     private List<ChangedFile> getSelectedItems(ListView<ChangedFile> list) {

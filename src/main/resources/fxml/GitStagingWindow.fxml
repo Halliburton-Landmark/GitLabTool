@@ -34,12 +34,12 @@
       </AnchorPane>
       <AnchorPane layoutX="7.0" layoutY="409.0" prefHeight="148.0" prefWidth="700.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
          <children>
-            <TextArea layoutX="105.0" layoutY="-18.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="35.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="0.0" />
+            <TextArea fx:id="_commitText" layoutX="105.0" layoutY="-18.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="35.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="0.0" />
             <ButtonBar layoutX="498.0" layoutY="108.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="5.0">
                <buttons>
-                  <Button fx:id="_commitButton" mnemonicParsing="false" text="Commit" />
-                  <Button fx:id="_commitPushButton" mnemonicParsing="false" text="Commit Push" />
-                  <Button fx:id="_cancelButton" mnemonicParsing="false" text="Cancel" />
+                  <Button fx:id="_commitButton" onAction="#onCommitAction" mnemonicParsing="false" text="Commit" />
+                  <Button fx:id="_commitPushButton" onAction="#onCommitPushAction" mnemonicParsing="false" text="Commit Push" />
+                  <Button fx:id="_exitButton" onAction="#onExitAction" mnemonicParsing="false" text="Exit" />
                </buttons>
             </ButtonBar>
          </children>
