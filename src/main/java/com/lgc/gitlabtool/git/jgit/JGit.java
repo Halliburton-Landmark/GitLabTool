@@ -271,12 +271,12 @@ public class JGit {
     }
 
     /**
-     * Adds untracked files for commit
+     * Adds untracked files to index
      *
      * @param files names of files that need to add
      * @param project the cloned project
      */
-    public List<String> addUntrackedFileForCommit(Collection<String> files, Project project) {
+    public List<String> addUntrackedFileToIndex(Collection<String> files, Project project) {
         if (files == null || project == null) {
             throw new IllegalArgumentException("Incorrect data: project is " + project + ", files is " + files);
         }
@@ -301,13 +301,13 @@ public class JGit {
         return addedFiles;
     }
 
-    public List<String> resetFiles(Collection<String> files, Project project) {
+    public List<String> resetChangedFiles(Collection<String> files, Project project) {
         if (files == null || project == null) {
             throw new IllegalArgumentException("Incorrect data: project is " + project + ", files is " + files);
         }
         List<String> removedFiles = new ArrayList<>();
         try (Git git = getGit(project.getPath())) {
-            for (String file : removedFiles) {
+            for (String file : files) {
                 git.reset().setRef(Constants.HEAD).addPath(file).call();
                 removedFiles.add(file);
             }

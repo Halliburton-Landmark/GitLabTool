@@ -306,7 +306,7 @@ public class ProjectServiceImpl implements ProjectService {
 
         Project createdProject = projects.get(0); // list of projects always has one element
         if (structures.size() > 0 && isCreatedStructure) {
-            _git.addUntrackedFileForCommit(structures, createdProject);
+            _git.addUntrackedFileToIndex(structures, createdProject);
         }
         // make first commit to GitLab repository
         _git.commitAndPush(projects, "Created new project", true, null, null, null, null,

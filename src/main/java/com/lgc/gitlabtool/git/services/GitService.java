@@ -180,7 +180,9 @@ public interface GitService {
      * @param  files the map of projects and changed files
      * @return the list of added files
      */
-    List<ChangedFile> addUntrackedFileForCommit(Map<Project, List<ChangedFile>> files);
+    List<ChangedFile> addUntrackedFilesToIndex(Map<Project, List<ChangedFile>> files);
+
+    List<ChangedFile> resetChangedFiles(Map<Project, List<ChangedFile>> files);
 
     /**
      * Gets ProjectStatus for project.

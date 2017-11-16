@@ -317,7 +317,7 @@ public class GitServiceImpl implements GitService {
     }
 
     @Override
-    public List<ChangedFile> addUntrackedFileForCommit(Map<Project, List<ChangedFile>> files) {
+    public List<ChangedFile> addUntrackedFilesToIndex(Map<Project, List<ChangedFile>> files) {
         List<ChangedFile> addedFiles = new ArrayList<>();
         if (files == null || files.isEmpty()) {
             return addedFiles;
@@ -328,8 +328,8 @@ public class GitServiceImpl implements GitService {
                 Project project = entry.getKey();
                 if (project != null && project.isCloned()) {
                     List<String> fileNames = convertToFileNames(entry.getValue());
-                    List<String> result = _git.addUntrackedFileForCommit(fileNames, project);
-                    addedFiles.addAll(convertToChangedFile(result, project));
+                    List<String> result = _git.addUntrackedFileToIndex(fileNames, project);
+                    addedFiles.addAll(convertToChangedFile(result, project, ChangedFileType.STAGED));
                 }
             }
         } finally {
@@ -338,15 +338,37 @@ public class GitServiceImpl implements GitService {
         return addedFiles;
     }
 
+    @Override
+    public List<ChangedFile> resetChangedFiles(Map<Project, List<ChangedFile>> files) {
+        List<ChangedFile> resetedFiles = new ArrayList<>();
+        if (files == null || files.isEmpty()) {
+            return resetedFiles;
+        }
+        _stateService.stateON(ApplicationState.RESET);
+        try {
+            for (Entry<Project, List<ChangedFile>> entry : files.entrySet()) {
+                Project project = entry.getKey();
+                if (project != null && project.isCloned()) {
+                    List<String> fileNames = convertToFileNames(entry.getValue());
+                    List<String> result = _git.resetChangedFiles(fileNames, project);
+                    resetedFiles.addAll(convertToChangedFile(result, project, ChangedFileType.UNSTAGED));
+                }
+            }
+        } finally {
+            _stateService.stateOFF(ApplicationState.RESET);
+        }
+        return resetedFiles;
+    }
+
     private List<String> convertToFileNames(List<ChangedFile> changedFiles) {
         return changedFiles.stream()
                            .map(ChangedFile::getFileName)
                            .collect(Collectors.toList());
     }
 
-    private List<ChangedFile> convertToChangedFile(List<String> fileNames, Project project) {
+    private List<ChangedFile> convertToChangedFile(List<String> fileNames, Project project, ChangedFileType type) {
         return fileNames.stream()
-                        .map(file -> new ChangedFile(project, file, false, ChangedFileType.STAGED))
+                        .map(file -> new ChangedFile(project, file, false, type))
                         .collect(Collectors.toList());
     }
 

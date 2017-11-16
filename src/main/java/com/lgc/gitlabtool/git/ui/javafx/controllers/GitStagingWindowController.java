@@ -3,7 +3,9 @@ package com.lgc.gitlabtool.git.ui.javafx.controllers;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
@@ -282,11 +284,35 @@ public class GitStagingWindowController {
             List<ChangedFile> files = getMovedFiles(event, _dataFormatUnstagedList);
             if (files != null) {
                 // here logic for add files to index
-
-                addRemoveFiles(_stagedListView, _unstagedListView, files);
+                onAddToIndexAction(files);
                 event.setDropCompleted(true);
             }
         });
+    }
+
+    private void onAddToIndexAction(List<ChangedFile> unstagedFiles) {
+        Map<Project, List<ChangedFile>> map = getMapFiles(unstagedFiles);
+        List<ChangedFile> addedFiles = _gitService.addUntrackedFilesToIndex(map);
+        addRemoveFiles(_stagedListView, _unstagedListView, addedFiles);
+    }
+
+    private void onResetAction(List<ChangedFile> stagedFiles) {
+        Map<Project, List<ChangedFile>> map = getMapFiles(stagedFiles);
+        List<ChangedFile> resetFiles = _gitService.resetChangedFiles(map);
+        addRemoveFiles(_unstagedListView, _stagedListView, resetFiles);
+    }
+
+    private Map<Project, List<ChangedFile>> getMapFiles(List<ChangedFile> list) {
+        Map<Project, List<ChangedFile>> map = new HashMap<>();
+        for (ChangedFile changedList : list) {
+            List<ChangedFile> files = map.get(changedList.getProject());
+            if (files == null) {
+                files = new ArrayList<>();
+            }
+            files.add(changedList);
+            map.put(changedList.getProject(), files);
+        }
+        return map;
     }
 
     private void setDragAndDropToStagedListView() {
@@ -296,8 +322,7 @@ public class GitStagingWindowController {
             List<ChangedFile> files = getMovedFiles(event, _dataFormatStagedList);
             if (files != null) {
                 // here logic for remove files from index
-
-                addRemoveFiles(_unstagedListView, _stagedListView, files);
+                onResetAction(files);
                 event.setDropCompleted(true);
             }
         });

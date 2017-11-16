@@ -167,6 +167,7 @@ public class MainWindowController implements StateListener {
         _stateService.addStateListener(ApplicationState.LOAD_PROJECTS, this);
         _stateService.addStateListener(ApplicationState.UPDATE_PROJECT_STATUSES, this);
         _stateService.addStateListener(ApplicationState.ADD_FILES_TO_INDEX, this);
+        _stateService.addStateListener(ApplicationState.RESET, this);
     }
 
     public void beforeShowing() {

@@ -216,8 +216,8 @@ public class GitServiceImplTest {
 
     @Test
     public void addUntrackedFileForCommitIncorrectData() {
-        assertTrue(_gitService.addUntrackedFileForCommit(null).isEmpty());
-        assertTrue(_gitService.addUntrackedFileForCommit(Collections.emptyMap()).isEmpty());
+        assertTrue(_gitService.addUntrackedFilesToIndex(null).isEmpty());
+        assertTrue(_gitService.addUntrackedFilesToIndex(Collections.emptyMap()).isEmpty());
     }
 
     @Test
@@ -226,9 +226,9 @@ public class GitServiceImplTest {
         Set<String> files = getFiles();
 
         Map<Project, List<ChangedFile>> data = getFilesForProject(project);
-        when(_jGit.addUntrackedFileForCommit(anyCollection(), eq(project))).thenReturn(new ArrayList<>(files));
+        when(_jGit.addUntrackedFileToIndex(anyCollection(), eq(project))).thenReturn(new ArrayList<>(files));
 
-        List<ChangedFile> addedFiles = _gitService.addUntrackedFileForCommit(data);
+        List<ChangedFile> addedFiles = _gitService.addUntrackedFilesToIndex(data);
         assertEquals(addedFiles.size(), files.size());
     }
 
