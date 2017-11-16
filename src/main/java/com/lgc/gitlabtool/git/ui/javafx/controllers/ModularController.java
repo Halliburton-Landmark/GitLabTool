@@ -21,6 +21,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -69,6 +70,8 @@ import com.lgc.gitlabtool.git.util.ScreenUtil;
 import com.lgc.gitlabtool.git.util.UserGuideUtil;
 
 import javafx.application.Platform;
+import javafx.beans.Observable;
+import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -95,6 +98,7 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SelectionMode;
+import javafx.scene.control.SelectionModel;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToolBar;
@@ -338,8 +342,8 @@ public class ModularController implements UpdateProgressListener {
         initActionsMainMenu(ViewKey.PROJECTS_WINDOW.getKey());
 
         initProjectsToolbar();
-
         initProjectsWindowListeners();
+        setDisablePropertyForButtons();
     }
 
     private void initializeGroupsWindow() {
@@ -1271,6 +1275,56 @@ public class ModularController implements UpdateProgressListener {
     private void refreshLoadProjects() {
         _projectsList.refreshLoadProjects();
         sortAndCheckProjects();
+    }
+
+    private BooleanBinding booleanBindingForShadowProjects() {
+        return Bindings.createBooleanBinding(() ->
+                        getCurrentProjects().stream()
+                                .filter(Objects::nonNull)
+                                .allMatch(project -> !project.isCloned()),
+                Stream.of(projectListView.getSelectionModel()).map(SelectionModel::selectedItemProperty).toArray(Observable[]::new));
+    }
+
+    private BooleanBinding booleanBindingForClonedProjects() {
+        return Bindings.createBooleanBinding(() ->
+                        getCurrentProjects().stream()
+                                .filter(Objects::nonNull)
+                                .allMatch(Project::isCloned),
+                Stream.of(projectListView.getSelectionModel()).map(SelectionModel::selectedItemProperty).toArray(Observable[]::new));
+    }
+
+    private void setDisablePropertyForButtons() {
+        BooleanBinding booleanBindingDefault = projectListView.getSelectionModel().selectedItemProperty().isNull();
+        // We lock git operation (all except "clone") if shadow projects was selected.
+        BooleanBinding booleanBindingForShadow = booleanBindingForShadowProjects().or(booleanBindingDefault);
+        // We lock clone operation if cloned projects was selected.
+        BooleanBinding booleanBindingForCloned = booleanBindingForClonedProjects().or(booleanBindingDefault);
+
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.CLONE_PROJECT_BUTTON.getId()).disableProperty()
+                .bind(booleanBindingForCloned);
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.NEW_BRANCH_BUTTON.getId()).disableProperty()
+                .bind(booleanBindingForShadow);
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.SWITCH_BRANCH_BUTTON.getId()).disableProperty()
+                .bind(booleanBindingForShadow);
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.COMMIT_BUTTON.getId()).disableProperty()
+                .bind(booleanBindingForShadow);
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.PUSH_BUTTON.getId()).disableProperty()
+                .bind(booleanBindingForShadow);
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.EDIT_PROJECT_PROPERTIES_BUTTON.getId())
+                .disableProperty().bind(booleanBindingForShadow);
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.PULL_BUTTON.getId()).disableProperty()
+                .bind(booleanBindingForShadow);
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.REVERT_CHANGES.getId()).disableProperty()
+                .bind(booleanBindingForShadow);
+
+        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_CLONE_PROJECT).disableProperty().bind(booleanBindingForCloned);
+        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_COMMIT).disableProperty().bind(booleanBindingForShadow);
+        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_SWITCH_BRANCH).disableProperty().bind(booleanBindingForShadow);
+        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_CREATE_BRANCH).disableProperty().bind(booleanBindingForShadow);
+        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_COMMIT).disableProperty().bind(booleanBindingForShadow);
+        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_PUSH).disableProperty().bind(booleanBindingForShadow);
+        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_PULL).disableProperty().bind(booleanBindingForShadow);
+        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_REVERT).disableProperty().bind(booleanBindingForShadow);
     }
 
     /*
