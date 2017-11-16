@@ -76,7 +76,6 @@ import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -532,8 +531,13 @@ public class ModularController implements UpdateProgressListener {
         });
 
         listView.getSelectionModel().getSelectedItems().addListener((ListChangeListener<Project>) change ->
-                SelectionsProvider.getInstance().setSelectionItems(ListViewKey.MAIN_WINDOW_PROJECTS.getKey(),
-                                                                   listView.getSelectionModel().getSelectedItems()));
+                {
+                    setDisablePropertyForButtons();
+                    SelectionsProvider.getInstance().setSelectionItems(ListViewKey.MAIN_WINDOW_PROJECTS.getKey(),
+                            listView.getSelectionModel().getSelectedItems());
+                }
+        );
+
 
         listView.refresh();
 
