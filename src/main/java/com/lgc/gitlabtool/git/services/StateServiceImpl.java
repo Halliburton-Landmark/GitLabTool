@@ -1,6 +1,11 @@
 package com.lgc.gitlabtool.git.services;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -20,30 +25,13 @@ public class StateServiceImpl implements StateService {
 
     private static final Logger _logger = LogManager.getLogger(StateServiceImpl.class);
 
-    public StateServiceImpl() {
+    StateServiceImpl() {
         _listeners = new ConcurrentHashMap<>();
-        _listeners.put(ApplicationState.CLONE, createSynchronizedSet());
-        _listeners.put(ApplicationState.PULL, createSynchronizedSet());
-        _listeners.put(ApplicationState.COMMIT, createSynchronizedSet());
-        _listeners.put(ApplicationState.PUSH, createSynchronizedSet());
-        _listeners.put(ApplicationState.CREATE_PROJECT, createSynchronizedSet());
-        _listeners.put(ApplicationState.SWITCH_BRANCH, createSynchronizedSet());
-        _listeners.put(ApplicationState.EDIT_POM, createSynchronizedSet());
-        _listeners.put(ApplicationState.LOAD_PROJECTS, createSynchronizedSet());
-        _listeners.put(ApplicationState.REVERT, createSynchronizedSet());
-        _listeners.put(ApplicationState.UPDATE_PROJECT_STATUSES, createSynchronizedSet());
-
         _states = new ConcurrentHashMap<>();
-        _states.put(ApplicationState.CLONE, START_STATE);
-        _states.put(ApplicationState.PULL, START_STATE);
-        _states.put(ApplicationState.COMMIT, START_STATE);
-        _states.put(ApplicationState.PUSH, START_STATE);
-        _states.put(ApplicationState.CREATE_PROJECT, START_STATE);
-        _states.put(ApplicationState.SWITCH_BRANCH, START_STATE);
-        _states.put(ApplicationState.EDIT_POM, START_STATE);
-        _states.put(ApplicationState.LOAD_PROJECTS, START_STATE);
-        _states.put(ApplicationState.REVERT, START_STATE);
-        _states.put(ApplicationState.UPDATE_PROJECT_STATUSES, START_STATE);
+        for (ApplicationState state: ApplicationState.values()) {
+            _listeners.put(state, createSynchronizedSet());
+            _states.put(state, START_STATE);
+        }
     }
 
     @Override
@@ -60,18 +48,22 @@ public class StateServiceImpl implements StateService {
 
     private void setState(ApplicationState state, int operation) {
         Integer value = _states.get(state);
-
-        Integer newValue;
         if (value == null) {
-            newValue = operation != DEACTIVATE_STATE ? operation : START_STATE;
+            value = operation != DEACTIVATE_STATE ? operation : START_STATE;
         } else if (value < START_STATE) {
-            // we have incorrect value in the map
-            newValue = START_STATE;
-        } else {
-            newValue = value + operation;
+            // If state turn off more times than turn on, we'll set START_STATE to value.
+            value = START_STATE;
         }
+
+        if (value == START_STATE && operation == DEACTIVATE_STATE) {
+            // We can't turn off state if it isn't turn on.
+            _states.put(state, value);
+            return;
+        }
+
+        Integer newValue = value + operation;
         _states.put(state, newValue);
-        // if state was changed from ON to OFF and vice versa
+
         if (isActive(value) != isActive(newValue)) {
             notifyListenersByType(state);
         }
@@ -88,7 +80,7 @@ public class StateServiceImpl implements StateService {
     }
 
     private boolean isActive(Integer value) {
-        return value != null && value > START_STATE ? true : false;
+        return value != null && value > START_STATE;
     }
 
     @Override
@@ -115,9 +107,7 @@ public class StateServiceImpl implements StateService {
     @Override
     public boolean isBusy() {
         return _states.entrySet().stream()
-                                 .filter(map -> isActive(map.getValue()))
-                                 .findAny()
-                                 .isPresent();
+                                 .anyMatch(map -> isActive(map.getValue()));
     }
 
     private Set<StateListener> createSynchronizedSet() {
@@ -142,7 +132,7 @@ public class StateServiceImpl implements StateService {
     public List<ApplicationState> getActiveStates() {
         return _states.entrySet().stream()
                                  .filter(entry -> isActive(entry.getValue()))
-                                 .map(pair -> pair.getKey())
+                                 .map(Map.Entry::getKey)
                                  .collect(Collectors.toList());
     }
 }

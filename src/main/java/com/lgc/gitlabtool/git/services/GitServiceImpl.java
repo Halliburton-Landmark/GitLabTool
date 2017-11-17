@@ -26,11 +26,12 @@ public class GitServiceImpl implements GitService {
     private static final Logger _logger = LogManager.getLogger(GitServiceImpl.class);
     private static final String SWITCH_TO_FINISHED_MESSAGE = "Switch branch operation is finished.";
 
-    private static final JGit _git = JGit.getInstance();
+    private static JGit _git;
     private static StateService _stateService;
 
-    public GitServiceImpl(StateService stateService) {
+    public GitServiceImpl(StateService stateService, JGit jGit) {
         _stateService = stateService;
+        _git = jGit;
     }
 
     @Override
@@ -64,13 +65,19 @@ public class GitServiceImpl implements GitService {
                                                      String branchName,
                                                      boolean isRemote,
                                                      ProgressListener progress) {
-        _stateService.stateON(ApplicationState.SWITCH_BRANCH);
         final Map<Project, JGitStatus> switchStatuses = new ConcurrentHashMap<>();
-        final long step = 100 / projects.size();
-        final AtomicLong percentages = new AtomicLong(0);
-        projects.parallelStream()
-                .forEach(project -> switchTo(switchStatuses, project, branchName, isRemote, progress, percentages, step));
-        progress.onFinish(SWITCH_TO_FINISHED_MESSAGE);
+        try {
+            _stateService.stateON(ApplicationState.SWITCH_BRANCH);
+            final long step = 100 / projects.size();
+            final AtomicLong percentages = new AtomicLong(0);
+            projects.parallelStream()
+                    .forEach(project -> switchTo(switchStatuses, project, branchName, isRemote, progress, percentages, step));
+        } finally {
+            progress.onFinish(SWITCH_TO_FINISHED_MESSAGE);
+            if (_stateService.isActiveState(ApplicationState.SWITCH_BRANCH)) {
+                _stateService.stateOFF(ApplicationState.SWITCH_BRANCH);
+            }
+        }
         return switchStatuses;
     }
 
@@ -136,11 +143,18 @@ public class GitServiceImpl implements GitService {
 
     @Override
     public Map<Project, JGitStatus> createBranch(List<Project> projects, String branchName, String startPoint, boolean force) {
-        Map<Project, JGitStatus> statuses = new ConcurrentHashMap<>();
-        projects.parallelStream()
-                .filter(prj -> prj.isCloned())
-                .forEach((project) -> statuses.put(project, _git.createBranch(project, branchName, startPoint, force)));
-        return statuses;
+        try {
+            _stateService.stateON(ApplicationState.CREATE_BRANCH);
+            Map<Project, JGitStatus> statuses = new ConcurrentHashMap<>();
+            projects.parallelStream()
+                    .filter(prj -> prj.isCloned())
+                    .forEach((project) -> statuses.put(project, _git.createBranch(project, branchName, startPoint, force)));
+            return statuses;
+        } finally {
+            if (_stateService.isActiveState(ApplicationState.CREATE_BRANCH)) {
+                _stateService.stateOFF(ApplicationState.CREATE_BRANCH);
+            }
+        }
     }
 
     private void revertChanges(Project project, Map<Project, JGitStatus> results) {
