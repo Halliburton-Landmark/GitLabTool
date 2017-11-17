@@ -35,6 +35,7 @@ public class ServiceProvider {
                 stateService, consoleService, gitService);
         ClonedGroupsService programProgertiesService = new ClonedGroupsServiceImpl(storageService, loginService);
         PomXmlEditService pomXmlEditService = new PomXMLEditServiceImpl();
+        BackgroundService backgroundService = BackgroundServiceImpl.get();
 
         _services = new HashMap<>();
         _services.put(LoginService.class.getName(), loginService);
@@ -50,5 +51,6 @@ public class ServiceProvider {
         _services.put(GitService.class.getName(), gitService);
         _services.put(StateService.class.getName(), stateService);
         _services.put(ConsoleService.class.getName(), consoleService);
+        _services.put(BackgroundService.class.getName(), backgroundService);
     }
 }
