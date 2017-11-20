@@ -8,24 +8,13 @@ import java.util.function.Consumer;
  *
  * @author Igor Khlaponin
  */
-public interface BackgroundService {
+public interface BackgroundService extends Service {
 
     /**
-     * Launches the task in background thread and do not return any result
+     * Launches the task in background thread and does not return any result
      *
      * @param runnable - the task that should be run
      */
     void runInBackgroundThread(Runnable runnable);
 
-    /**
-     * Waits if necessary for the computation in <code>callable</code> to complete, and then
-     * retrieves its result to use in <code>consumer</code>
-     *
-     * This is a blocking operation
-     *
-     * @param callable - the task that returns the result
-     * @param consumer - the part of code that uses the {@code callable}'s result
-     * @param <T> the result type of method {@link Callable#call()}
-     */
-    <T> void runSyncInBackgroundThread(Callable<T> callable, Consumer<T> consumer);
 }

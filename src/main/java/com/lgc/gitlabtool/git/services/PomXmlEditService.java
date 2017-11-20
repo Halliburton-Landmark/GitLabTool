@@ -7,7 +7,7 @@ package com.lgc.gitlabtool.git.services;
  *
  * @author Pavlo Pidhorniy
  */
-public interface PomXmlEditService {
+public interface PomXmlEditService extends Service {
 
     /**
      * Adds repository to a list of repositories in a pom.xml

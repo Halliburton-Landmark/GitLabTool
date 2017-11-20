@@ -40,30 +40,12 @@ public class BackgroundServiceImpl implements BackgroundService {
     }
 
     @Override
-    public <T> void runSyncInBackgroundThread(Callable<T> callable, Consumer<T> consumer) {
-        Thread thread = new Thread(() -> {
-            Future<T> future = _executorService.submit(callable);
-
-            try {
-                T result = future.get();
-                if (consumer != null && future.isDone()) {
-                    consumer.accept(result);
-                }
-            } catch (InterruptedException | ExecutionException e) {
-                throw new RuntimeException(e);
-            }
-        },"sync-thread");
-        thread.start();
-    }
-
-    @Override
     public void runInBackgroundThread(Runnable runnable) {
         _executorService.submit(runnable);
     }
 
     @Override
-    protected void finalize() throws Throwable {
+    public void dispose() {
         _executorService.shutdown();
-        super.finalize();
     }
 }
