@@ -10,12 +10,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.lgc.gitlabtool.git.services.*;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.PushProgressListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -27,13 +26,6 @@ import com.lgc.gitlabtool.git.entities.ProjectList;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.listeners.stateListeners.StateListener;
-import com.lgc.gitlabtool.git.services.ConsoleService;
-import com.lgc.gitlabtool.git.services.GitService;
-import com.lgc.gitlabtool.git.services.LoginService;
-import com.lgc.gitlabtool.git.services.PomXMLService;
-import com.lgc.gitlabtool.git.services.ProjectService;
-import com.lgc.gitlabtool.git.services.ServiceProvider;
-import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.ViewKey;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 import com.lgc.gitlabtool.git.ui.javafx.ChangesCheckDialog;
@@ -132,6 +124,9 @@ public class MainWindowController implements StateListener {
 
     private static final StateService _stateService = (StateService) ServiceProvider.getInstance()
             .getService(StateService.class.getName());
+
+    private static final BackgroundService _backgroundService = (BackgroundService) ServiceProvider.getInstance()
+            .getService(BackgroundService.class.getName());
 
     @FXML
     private ListView<Project> projectsList;
@@ -488,9 +483,7 @@ public class MainWindowController implements StateListener {
 
     @FXML
     public void refreshLoadProjects(ActionEvent actionEvent) {
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.submit(() -> refreshLoadProjects());
-        executor.shutdown();
+        _backgroundService.runInBackgroundThread(() -> refreshLoadProjects());
     }
 
     private void refreshLoadProjects() {
@@ -529,9 +522,7 @@ public class MainWindowController implements StateListener {
     public void onPushAction(ActionEvent actionEvent) {
         List<Project> filteredProjects = ProjectList.getCorrectProjects(getCurrentProjects());
         if (!filteredProjects.isEmpty()) {
-            ExecutorService executor = Executors.newSingleThreadExecutor();
-            executor.submit(() -> _gitService.push(filteredProjects, PushProgressListener.get()));
-            executor.shutdown();
+            _backgroundService.runInBackgroundThread(() -> _gitService.push(filteredProjects, PushProgressListener.get()));
         } else {
             _consoleService.addMessage(String.format(NO_ANY_PROJECT_FOR_OPERATION, PUSH_OPERATION_NAME), MessageType.ERROR);
         }
@@ -699,9 +690,7 @@ public class MainWindowController implements StateListener {
         if(!alert.isOKButtonPressed(alert.showAndWait())) {
             return;
         }
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.submit(() -> revert());
-        executor.shutdown();
+        _backgroundService.runInBackgroundThread(() -> revert());
     }
 
     private void revert() {
@@ -747,9 +736,7 @@ public class MainWindowController implements StateListener {
     @Override
     public void handleEvent(ApplicationState state, boolean isActivate) {
         if (!isActivate) {
-            ExecutorService executor = Executors.newSingleThreadExecutor();
-            executor.submit(() -> updateProjectsByState(state));
-            executor.shutdown();
+            _backgroundService.runInBackgroundThread(() -> updateProjectsByState(state));
         }
         handleRefreshButtonState(state, isActivate);
     }

@@ -180,7 +180,6 @@ public class CreateNewBranchDialog extends Dialog<String> {
             Platform.runLater(() -> createAndShowStatusDialog(getProjects(), results));
         };
 
-//        new Thread(task, "create-branch-task").start();
         _backgroundService.runInBackgroundThread(task);
         getStage().close();
     }
@@ -248,7 +247,6 @@ public class CreateNewBranchDialog extends Dialog<String> {
             // because we show the statuses of branches creation
             // In the same time we could see that branch is changed on the projects list panel
             Runnable task = () -> _gitService.switchTo(projects, (String) branchName, false, null);
-//            new Thread(task, "switch-branch-task").start();
             _backgroundService.runInBackgroundThread(task);
         } else {
             ChangesCheckDialog alert = new ChangesCheckDialog();
