@@ -280,7 +280,7 @@ class LoginDialog extends Dialog<DialogDTO> {
         Window window = this.getDialogPane().getScene().getWindow();
         window.setOnCloseRequest(event -> {
             logger.debug("exit without logging in");
-            FinishUtil.onExit();
+            FinishUtil.shutdown();
             System.exit(0);
         });
     }

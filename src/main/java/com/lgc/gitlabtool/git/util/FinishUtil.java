@@ -16,7 +16,7 @@ public class FinishUtil {
     /**
      * Set of actions that will be invoked before application shut downing
      */
-    public static void onExit() {
+    public static void shutdown() {
         ServiceProvider.getInstance().stop();
         _logger.debug(System.lineSeparator() +
                 "<<<< Exit application >>>>" + System.lineSeparator());

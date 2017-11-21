@@ -169,6 +169,7 @@ public class CreateNewBranchDialog extends Dialog<String> {
         String startPoint = _comboBox.getSelectionModel().getSelectedItem();
         Runnable task = () -> {
             Map<Project, JGitStatus> results = _gitService.createBranch(getProjects(), newBranchName, startPoint, false);
+            System.err.println(results);
             boolean switchToBranch = _checkoutBox.isSelected();
             if (switchToBranch) {
                 switchBranch(getProjects(), newBranchName);

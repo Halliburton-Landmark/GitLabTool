@@ -421,7 +421,7 @@ public class ModularController implements UpdateProgressListener {
     private void exit() {
         List<ApplicationState> activeStates = _stateService.getActiveStates();
         if (activeStates.isEmpty()) {
-            FinishUtil.onExit();
+            FinishUtil.shutdown();
             Platform.exit();
         }
         JavaFXUI.showWarningAlertForActiveStates(activeStates);

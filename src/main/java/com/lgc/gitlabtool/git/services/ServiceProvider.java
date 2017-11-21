@@ -25,8 +25,9 @@ public class ServiceProvider {
     }
 
     private ServiceProvider() {
+        BackgroundService backgroundService = BackgroundServiceImpl.get();
         RESTConnector restConnector = RESTConnectorFactory.getInstance().getRESTConnector();
-        LoginService loginService = new LoginServiceImpl(restConnector);
+        LoginService loginService = new LoginServiceImpl(restConnector, backgroundService);
         StorageService storageService = new StorageServiceImpl();
         ProjectTypeService projectTypeService = new ProjectTypeServiceImpl();
         StateService stateService = new StateServiceImpl();
@@ -36,7 +37,6 @@ public class ServiceProvider {
                 stateService, consoleService, gitService);
         ClonedGroupsService programPropertiesService = new ClonedGroupsServiceImpl(storageService, loginService);
         PomXmlEditService pomXmlEditService = new PomXMLEditServiceImpl();
-        BackgroundService backgroundService = BackgroundServiceImpl.get();
 
         _services = new HashMap<>();
         _services.put(LoginService.class.getName(), loginService);
@@ -48,7 +48,7 @@ public class ServiceProvider {
         _services.put(ReplacementService.class.getName(), new ReplacementServiceImpl());
         _services.put(PomXMLService.class.getName(), new PomXMLServiceImpl(consoleService, stateService, pomXmlEditService));
         _services.put(ProjectTypeService.class.getName(), projectTypeService);
-        _services.put(NetworkService.class.getName(), new NetworkServiceImpl());
+        _services.put(NetworkService.class.getName(), new NetworkServiceImpl(backgroundService));
         _services.put(GitService.class.getName(), gitService);
         _services.put(StateService.class.getName(), stateService);
         _services.put(ConsoleService.class.getName(), consoleService);
@@ -57,9 +57,7 @@ public class ServiceProvider {
 
     public void stop() {
         if (_services != null) {
-            _services.values()
-                    .parallelStream()
-                    .forEach(Service::dispose);
+            _services.values().forEach(Service::dispose);
         }
     }
 }
