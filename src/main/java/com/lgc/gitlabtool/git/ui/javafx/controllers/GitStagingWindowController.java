@@ -1,6 +1,7 @@
 package com.lgc.gitlabtool.git.ui.javafx.controllers;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -16,9 +17,11 @@ import com.lgc.gitlabtool.git.entities.ProjectList;
 import com.lgc.gitlabtool.git.jgit.ChangedFile;
 import com.lgc.gitlabtool.git.jgit.ChangedFileType;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
+import com.lgc.gitlabtool.git.listeners.stateListeners.AbstractStateListener;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
+import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.javafx.StatusDialog;
 import com.lgc.gitlabtool.git.ui.javafx.comparators.ComparatorDefaultType;
 import com.lgc.gitlabtool.git.ui.javafx.comparators.ComparatorExtensionsType;
@@ -26,6 +29,7 @@ import com.lgc.gitlabtool.git.ui.javafx.comparators.ComparatorProjectsType;
 import com.lgc.gitlabtool.git.ui.javafx.controllers.listcells.FilesListCell;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.CommitPushProgressListener;
 
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
@@ -35,7 +39,9 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
@@ -47,7 +53,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.stage.Stage;
 
-public class GitStagingWindowController {
+public class GitStagingWindowController extends AbstractStateListener {
 
     @FXML
     private TextField _filterField;
@@ -73,18 +79,34 @@ public class GitStagingWindowController {
     @FXML
     private TextArea _commitText;
 
+    @FXML
+    private ProgressIndicator _progressIndicator;
+
+    @FXML
+    private Label _progressLabel;
+
     private static final String STATUS_COMMIT_DIALOG_TITLE = "Committing changes status";
     private static final String STATUS_COMMIT_DIALOG_HEADER = "Committing changes info";
 
     private static final String STATUS_PUSH_DIALOG_TITLE = "Pushing changes status";
     private static final String STATUS_PUSH_DIALOG_HEADER = "Pushing changes info";
 
-    private final GitService _gitService = (GitService) ServiceProvider.getInstance()
+    private static final GitService _gitService = (GitService) ServiceProvider.getInstance()
             .getService(GitService.class.getName());
+
+    private static final StateService _stateService = (StateService) ServiceProvider.getInstance()
+            .getService(StateService.class.getName());
 
     private final List<Integer> _selectedProjectIds = new ArrayList<>();
     private final ProjectList _projectList = ProjectList.get(null);
     private Map<Project, JGitStatus> _commitStatuses = new HashMap<>();
+    private final List<ApplicationState> _stagingStates =
+            Arrays.asList(ApplicationState.ADD_FILES_TO_INDEX, ApplicationState.RESET,
+                          ApplicationState.COMMIT, ApplicationState.PUSH);
+
+    {
+        _stagingStates.forEach(state -> _stateService.addStateListener(state, this));
+    }
 
     public void beforeShowing(List<Integer> projectIds, Collection<ChangedFile> files) {
         ObservableList<SortingType> items = FXCollections.observableArrayList
@@ -96,12 +118,17 @@ public class GitStagingWindowController {
         _filterField.textProperty().addListener((observable, oldValue, newValue) -> filterUnstagedList(oldValue, newValue));
 
         configureListViews(files);
+        updateProgressBar(false, null);
     }
 
     private void updateDisableButton() {
-        BooleanBinding property = Bindings.size(_stagedListView.getItems()).isEqualTo(0).or(_commitText.textProperty().isEmpty());
+        BooleanBinding progressProperty = _progressLabel.textProperty().isNotEmpty();
+        BooleanBinding property = Bindings.size(_stagedListView.getItems()).isEqualTo(0)
+                .or(_commitText.textProperty().isEmpty())
+                .or(progressProperty);
         _commitButton.disableProperty().bind(property);
         _commitPushButton.disableProperty().bind(property);
+        _exitButton.disableProperty().bind(progressProperty);
     }
 
     private void fillLists(Collection<ChangedFile> all, Collection<ChangedFile> staged, Collection<ChangedFile> unstaged) {
@@ -140,6 +167,33 @@ public class GitStagingWindowController {
         resetSelectionList.getSelectionModel().clearSelection();
     }
 
+    private void updateProgressBar(boolean isVisible, String text) {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                String message = isVisible ? text : StringUtils.EMPTY;
+                _progressLabel.setText(message);
+                _progressLabel.setVisible(isVisible);
+                _progressIndicator.setVisible(isVisible);
+
+                setDisableAllElements(isVisible);
+            }
+        });
+    }
+
+    private void setDisableAllElements(boolean isDisable) {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                _sortingListBox.setDisable(isDisable);
+                _filterField.setDisable(isDisable);
+
+                _unstagedListView.setDisable(isDisable);
+                _stagedListView.setDisable(isDisable);
+            }
+        });
+    }
+
     @FXML
     public void onCommitAction(ActionEvent event) {
         commitChanges(getProjects(_stagedListView.getItems()), false);
@@ -158,10 +212,15 @@ public class GitStagingWindowController {
     }
 
     private void commitChanges(List<Project> projects, boolean isPushChanges) {
-        String commitMessage = _commitText.getText();
-        _commitStatuses = _gitService.commitChanges(projects, commitMessage, isPushChanges,
-                new CommitPushProgressListener(isPushChanges ? ApplicationState.PUSH : ApplicationState.COMMIT));
-        showStatusDialog(isPushChanges, projects.size());
+        Runnable task = new Runnable() {
+            @Override
+            public void run() {
+                _commitStatuses = _gitService.commitChanges(projects, _commitText.getText(), isPushChanges,
+                        new CommitPushProgressListener(isPushChanges ? ApplicationState.PUSH : ApplicationState.COMMIT));
+                showStatusDialog(isPushChanges, projects.size());
+            };
+        };
+        new Thread(task).start();
     }
 
     @FXML
@@ -171,6 +230,11 @@ public class GitStagingWindowController {
 
     @FXML
     public void onExitAction(ActionEvent event) {
+        List<ApplicationState> activeAtates = _stateService.getActiveStates();
+        if (!activeAtates.isEmpty() || activeAtates.contains(_stagingStates)) {
+            return;
+        }
+        isDisposed();
         Stage stage = (Stage) _exitButton.getScene().getWindow();
         stage.close();
     }
@@ -334,15 +398,27 @@ public class GitStagingWindowController {
     }
 
     private void onAddToIndexAction(List<ChangedFile> unstagedFiles) {
-        Map<Project, List<ChangedFile>> map = getMapFiles(unstagedFiles);
-        List<ChangedFile> addedFiles = _gitService.addUntrackedFilesToIndex(map);
-        addRemoveFiles(_stagedListView, _unstagedListView, addedFiles);
+        Runnable task = new Runnable() {
+            @Override
+            public void run() {
+                Map<Project, List<ChangedFile>> map = getMapFiles(unstagedFiles);
+                List<ChangedFile> addedFiles = _gitService.addUntrackedFilesToIndex(map);
+                addRemoveFiles(_stagedListView, _unstagedListView, addedFiles);
+            }
+        };
+        new Thread(task).start();
     }
 
     private void onResetAction(List<ChangedFile> stagedFiles) {
-        Map<Project, List<ChangedFile>> map = getMapFiles(stagedFiles);
-        List<ChangedFile> resetFiles = _gitService.resetChangedFiles(map);
-        addRemoveFiles(_unstagedListView, _stagedListView, resetFiles);
+        Runnable task = new Runnable() {
+            @Override
+            public void run() {
+                Map<Project, List<ChangedFile>> map = getMapFiles(stagedFiles);
+                List<ChangedFile> resetFiles = _gitService.resetChangedFiles(map);
+                addRemoveFiles(_unstagedListView, _stagedListView, resetFiles);
+            }
+        };
+        new Thread(task).start();
     }
 
     private Map<Project, List<ChangedFile>> getMapFiles(List<ChangedFile> list) {
@@ -371,6 +447,7 @@ public class GitStagingWindowController {
         });
     }
 
+    @SuppressWarnings("unchecked")
     private List<ChangedFile> getMovedFiles(DragEvent event, DataFormat dataFormat) {
         return (List<ChangedFile>) event.getDragboard().getContent(dataFormat);
     }
@@ -387,7 +464,20 @@ public class GitStagingWindowController {
     }
 
     private void addRemoveFiles(ListView<ChangedFile> toList, ListView<ChangedFile> fromList, List<ChangedFile> files) {
-        addItemsToList(toList, files);
-        removeItemsFromList(fromList, files);
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                addItemsToList(toList, files);
+                removeItemsFromList(fromList, files);
+            }
+        });
+    }
+
+    @Override
+    public void handleEvent(ApplicationState changedState, boolean isActivate) {
+        List<ApplicationState> activeAtates = _stateService.getActiveStates();
+        boolean isVisible = !activeAtates.isEmpty();
+        String text = activeAtates.toString();
+        updateProgressBar(isVisible, text);
     }
 }

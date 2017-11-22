@@ -6,13 +6,14 @@
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ProgressIndicator?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.lgc.gitlabtool.git.ui.javafx.controllers.GitStagingWindowController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.lgc.gitlabtool.git.ui.javafx.controllers.GitStagingWindowController">
    <children>
       <AnchorPane layoutX="167.0" layoutY="183.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="150.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="40.0">
          <children>
@@ -37,11 +38,25 @@
             <TextArea fx:id="_commitText" layoutX="105.0" layoutY="-18.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="35.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="0.0" />
             <ButtonBar layoutX="498.0" layoutY="108.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="5.0">
                <buttons>
-                  <Button fx:id="_commitButton" onAction="#onCommitAction" mnemonicParsing="false" text="Commit" />
-                  <Button fx:id="_commitPushButton" onAction="#onCommitPushAction" mnemonicParsing="false" text="Commit Push" />
-                  <Button fx:id="_exitButton" onAction="#onExitAction" mnemonicParsing="false" text="Exit" />
+                  <Button fx:id="_commitButton" mnemonicParsing="false" onAction="#onCommitAction" text="Commit" />
+                  <Button fx:id="_commitPushButton" mnemonicParsing="false" onAction="#onCommitPushAction" text="Commit Push" />
+                  <Button fx:id="_exitButton" mnemonicParsing="false" onAction="#onExitAction" text="Exit" />
                </buttons>
             </ButtonBar>
+            <HBox prefHeight="25.0" prefWidth="173.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0">
+               <children>
+                  <ProgressIndicator fx:id="_progressIndicator" maxHeight="20.0" maxWidth="20.0">
+                     <HBox.margin>
+                        <Insets top="3.0" />
+                     </HBox.margin>
+                  </ProgressIndicator>
+                  <Label fx:id="_progressLabel" prefHeight="17.0" prefWidth="130.0">
+                     <padding>
+                        <Insets left="5.0" top="5.0" />
+                     </padding>
+                  </Label>
+               </children>
+            </HBox>
          </children>
       </AnchorPane>
       <AnchorPane layoutX="119.0" layoutY="3.0" prefHeight="32.0" prefWidth="224.0" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="5.0">

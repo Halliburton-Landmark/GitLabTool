@@ -174,8 +174,11 @@ public class ChangesCheckDialog extends GLTAlert {
      *                 else returns <code>false</code>
      */
     private boolean isNotFailedOperation(Map<Project, JGitStatus> operationStatuses, Project project) {
-        JGitStatus currentStatus = operationStatuses.get(project);
-        return currentStatus == null || currentStatus != JGitStatus.FAILED;
+        if (operationStatuses != null) {
+            JGitStatus currentStatus = operationStatuses.get(project);
+            return currentStatus == null || currentStatus != JGitStatus.FAILED;
+        }
+        return false;
     }
 
 }
