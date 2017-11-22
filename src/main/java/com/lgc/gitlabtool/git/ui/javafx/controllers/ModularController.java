@@ -285,7 +285,7 @@ public class ModularController implements UpdateProgressListener {
             ToolbarManager.getInstance().getButtonById(ToolbarButtons.SWITCH_BRANCH_BUTTON.getId())
                     .setOnAction(this::showSwitchBranchWindow);
 
-            ToolbarManager.getInstance().getButtonById(ToolbarButtons.COMMIT_BUTTON.getId())
+            ToolbarManager.getInstance().getButtonById(ToolbarButtons.STAGING_BUTTON.getId())
                     .setOnAction(this::loadGitStageWindow);
         }
     }

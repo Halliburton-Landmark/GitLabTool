@@ -22,7 +22,7 @@ public enum ToolbarButtons {
     CREATE_PROJECT_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "create_project_button", "icons/toolbar/create_project_20x20.png", "Create project", "Create new project"),
     NEW_BRANCH_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "branch_newBranch", "icons/toolbar/new_branch_20x20.png", "New branch", "Create new branch"),
     SWITCH_BRANCH_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "branch_switchBranch", "icons/toolbar/switch_20x20.png", "Switch branch", "Switch to another branch"),
-    COMMIT_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "git staging", "icons/toolbar/commit_20x20.png", "Git Staging", "Show Git Staging dialog"),
+    STAGING_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "git staging", "icons/toolbar/staging_20x20.png", "Staging", "Show Git Staging dialog"),
     PUSH_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "push", "icons/toolbar/push_20x20.png", "Push", "Show push dialog"),
     EDIT_PROJECT_PROPERTIES_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "edit_project_propecties", "icons/toolbar/edit_properties_20x20.png", "Edit project properties", "Edit project properties"),
     PULL_BUTTON(ViewKey.MAIN_WINDOW.getKey(), "pull", "icons/toolbar/pull_20x20.png", "Pull", "Pull projects"),

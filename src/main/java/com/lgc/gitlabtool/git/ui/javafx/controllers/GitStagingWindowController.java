@@ -20,6 +20,7 @@ import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.listeners.stateListeners.AbstractStateListener;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.services.GitService;
+import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.javafx.StatusDialog;
@@ -97,13 +98,15 @@ public class GitStagingWindowController extends AbstractStateListener {
     private static final StateService _stateService = (StateService) ServiceProvider.getInstance()
             .getService(StateService.class.getName());
 
+    private static final ProjectService _projectService = (ProjectService) ServiceProvider.getInstance()
+            .getService(ProjectService.class.getName());
+
     private final List<Integer> _selectedProjectIds = new ArrayList<>();
     private final ProjectList _projectList = ProjectList.get(null);
     private Map<Project, JGitStatus> _commitStatuses = new HashMap<>();
     private final List<ApplicationState> _stagingStates =
-            Arrays.asList(ApplicationState.ADD_FILES_TO_INDEX, ApplicationState.RESET,
-                          ApplicationState.COMMIT, ApplicationState.PUSH);
-
+            Arrays.asList(ApplicationState.ADD_FILES_TO_INDEX, ApplicationState.RESET, ApplicationState.COMMIT,
+                          ApplicationState.PUSH, ApplicationState.UPDATE_PROJECT_STATUSES);
     {
         _stagingStates.forEach(state -> _stateService.addStateListener(state, this));
     }
@@ -142,23 +145,32 @@ public class GitStagingWindowController extends AbstractStateListener {
     }
 
     private void configureListViews(Collection<ChangedFile> files) {
-        Collection<ChangedFile> unstagedFiles = new ArrayList<>();
-        Collection<ChangedFile> stagedFiles = new ArrayList<>();
-        fillLists(files, stagedFiles, unstagedFiles);
-
         setupListView(_unstagedListView);
         setDragAndDropToUnstagedListView();
-        _unstagedListView.setItems(FXCollections.observableArrayList(unstagedFiles));
         _unstagedListView.addEventFilter(MouseEvent.MOUSE_PRESSED,
                 event -> changeFocuseAndSelection(_unstagedListView, _stagedListView));
 
         setupListView(_stagedListView);
         setDragAndDropToStagedListView();
-        _stagedListView.setItems(FXCollections.observableArrayList(stagedFiles));
         _stagedListView.addEventFilter(MouseEvent.MOUSE_PRESSED,
                 event -> changeFocuseAndSelection(_stagedListView, _unstagedListView));
 
-        setContentAndComparatorToLists();
+        updateContendListViews(files);
+    }
+
+    private void updateContendListViews(Collection<ChangedFile> files) {
+        Collection<ChangedFile> unstagedFiles = new ArrayList<>();
+        Collection<ChangedFile> stagedFiles = new ArrayList<>();
+        fillLists(files, stagedFiles, unstagedFiles);
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                _unstagedListView.setItems(FXCollections.observableArrayList(unstagedFiles));
+                _stagedListView.setItems(FXCollections.observableArrayList(stagedFiles));
+
+                setContentAndComparatorToLists();
+            }
+        });
     }
 
     // Fix bug with double selection. We can have selected items only in one list.
@@ -217,8 +229,13 @@ public class GitStagingWindowController extends AbstractStateListener {
             public void run() {
                 _commitStatuses = _gitService.commitChanges(projects, _commitText.getText(), isPushChanges,
                         new CommitPushProgressListener(isPushChanges ? ApplicationState.PUSH : ApplicationState.COMMIT));
+                _projectService.updateProjectStatuses(projects);
+
+                Collection<ChangedFile> changedFiles = getChangedFilesSelectedProjects();
+                updateContendListViews(changedFiles);
+
                 showStatusDialog(isPushChanges, projects.size());
-            };
+            }
         };
         new Thread(task).start();
     }
@@ -254,10 +271,15 @@ public class GitStagingWindowController extends AbstractStateListener {
                                                .filter(status -> status.equals(JGitStatus.SUCCESSFUL))
                                                .count();
 
-        StatusDialog statusDialog = new StatusDialog(dialogTitle, dialogHeader);
-        statusDialog.showMessage(statuses, countProjects, info, String.valueOf(countSuccess),
-                String.valueOf(countProjects - countSuccess));
-        statusDialog.showAndWait();
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                StatusDialog statusDialog = new StatusDialog(dialogTitle, dialogHeader);
+                statusDialog.showMessage(statuses, countProjects, info, String.valueOf(countSuccess),
+                        String.valueOf(countProjects - countSuccess));
+                statusDialog.showAndWait();
+            }
+        });
     }
 
     private void setupListView(ListView<ChangedFile> list) {

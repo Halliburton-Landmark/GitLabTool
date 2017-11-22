@@ -245,7 +245,7 @@ public class MainWindowController implements StateListener {
                 .bind(booleanBindingForShadow);
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.SWITCH_BRANCH_BUTTON.getId()).disableProperty()
                 .bind(booleanBindingForShadow);
-        ToolbarManager.getInstance().getButtonById(ToolbarButtons.COMMIT_BUTTON.getId()).disableProperty().bind(booleanBindingForShadow);
+        ToolbarManager.getInstance().getButtonById(ToolbarButtons.STAGING_BUTTON.getId()).disableProperty().bind(booleanBindingForShadow);
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.PUSH_BUTTON.getId()).disableProperty()
                 .bind(booleanBindingForShadow);
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.EDIT_PROJECT_PROPERTIES_BUTTON.getId())
