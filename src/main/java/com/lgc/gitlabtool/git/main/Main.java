@@ -38,7 +38,7 @@ public class Main {
     }
 
 	/**
-	* This method ...
+	* This method detect proxy...
 	*/
     private static void detectProxy() {
         System.setProperty("java.net.useSystemProxies", "true");
