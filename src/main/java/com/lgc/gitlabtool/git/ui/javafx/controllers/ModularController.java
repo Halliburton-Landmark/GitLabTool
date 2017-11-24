@@ -143,6 +143,7 @@ public class ModularController implements UpdateProgressListener {
      * START OF GROUP-VIEW CONSTANTS BLOCK
      *
      */
+    //region GROUP-VIEW CONSTANTS
     private static final String IMPORT_CHOOSER_TITLE = "Import Group";
     private static final String IMPORT_DIALOG_TITLE = "Import Status Dialog";
     private static final String FAILED_IMPORT_MESSAGE = "Import of group is Failed";
@@ -156,6 +157,7 @@ public class ModularController implements UpdateProgressListener {
     private static final String FAILED_CONTENT_MESSAGE_LOAD_GROUP
             = "These groups may have been moved to another folder or deleted from disc: ";
     private static final Double DEFAULT_GROUPS_DIVIDER = 0.3;
+    //endregion
     /*
      *
      * END OF GROUP-VIEW CONSTANTS BLOCK
@@ -167,6 +169,7 @@ public class ModularController implements UpdateProgressListener {
      * START OF PROJECTS-VIEW CONSTANTS BLOCK
      *
      */
+    //region PROJECTS-VIEW CONSTANTS
     private static final String WORK_INDICATOR_START_MESSAGE = "Loading projects...";
     private static final String STATUS_DIALOG_TITLE = "Status dialog";
     private static final String STATUS_DIALOG_HEADER_COMMIT = "Commit statuses";
@@ -187,6 +190,7 @@ public class ModularController implements UpdateProgressListener {
     private static final String FILTER_SHADOW_PROJECTS_IMAGE_URL = "icons/toolbar/filter_shadow_projects_20x20.png";
     private static final String DIVIDER_PROPERTY_NODE = "MainWindowController_Dividers";
     private static final String PREF_NAME_HIDE_SHADOWS = "is_hide_shadows";
+    ////endregion
     /*
      *
      * END OF GROUP-VIEW CONSTANTS BLOCK
@@ -199,6 +203,7 @@ public class ModularController implements UpdateProgressListener {
      * START OF SERVICES BLOCK
      *
      */
+    //region SERVICES
     private static final ConsoleService _consoleService = (ConsoleService) ServiceProvider.getInstance()
             .getService(ConsoleService.class.getName());
 
@@ -222,6 +227,7 @@ public class ModularController implements UpdateProgressListener {
 
     private static final PomXMLService _pomXmlService = (PomXMLService) ServiceProvider.getInstance()
             .getService(PomXMLService.class.getName());
+    //endregion
     /*
      *
      * END OF GROUP-VIEW CONSTANTS BLOCK
@@ -233,6 +239,7 @@ public class ModularController implements UpdateProgressListener {
      * START OF FXML UI ELEMENTS BLOCK
      *
      */
+    //region FXML UI ELEMENTS
 
     @FXML
     private Label userId;
@@ -270,6 +277,7 @@ public class ModularController implements UpdateProgressListener {
     @FXML
     private SplitPane dividerMainPane;
 
+    //endregion
     /*
      *
      * END OF GROUP-VIEW CONSTANTS BLOCK
@@ -281,6 +289,7 @@ public class ModularController implements UpdateProgressListener {
      * START OF OTHER UI ELEMENTS BLOCK
      *
      */
+    //region OTHER UI ELEMENTS
     private List<Node> projectsWindowToolbarItems;
     private List<Node> groupsWindowToolbarItems;
 
@@ -295,6 +304,7 @@ public class ModularController implements UpdateProgressListener {
     private Button refreshProjectsButton;
 
     private static String css_path = "css/style.css";
+    //endregion
     /*
      *
      * END OF OTHER UI ELEMENTS BLOCK
@@ -312,6 +322,7 @@ public class ModularController implements UpdateProgressListener {
      * START OF INITIALIZATION BLOCK
      *
      */
+    //region INITIALIZATION
 
     @FXML
     @SuppressWarnings("ConstantConditions")
@@ -554,6 +565,7 @@ public class ModularController implements UpdateProgressListener {
         ModularController.css_path = css_path;
     }
 
+    //endregion
     /*
      *
      * END OF INITIALIZATION BLOCK
@@ -565,6 +577,7 @@ public class ModularController implements UpdateProgressListener {
      * START OF VIEW SWITCHING BLOCK
      *
      */
+    //region VIEW SWITCHING
 
     private void loadGroup(Group group) {
         _currentView = ViewKey.PROJECTS_WINDOW.getKey();
@@ -656,7 +669,8 @@ public class ModularController implements UpdateProgressListener {
         _stateService.addStateListener(ApplicationState.SWITCH_BRANCH, _modularStateListener);
         _stateService.addStateListener(ApplicationState.EDIT_POM, _modularStateListener);
         _stateService.addStateListener(ApplicationState.REVERT, _modularStateListener);
-        _stateService.addStateListener(ApplicationState.REFRESH_PROJECTS, _modularStateListener);
+        _stateService.addStateListener(ApplicationState.LOAD_PROJECTS, _modularStateListener);
+        _stateService.addStateListener(ApplicationState.UPDATE_PROJECT_STATUSES, _modularStateListener);
     }
 
     private void removeProjectsWindowListener() {
@@ -668,9 +682,11 @@ public class ModularController implements UpdateProgressListener {
         _stateService.removeStateListener(ApplicationState.SWITCH_BRANCH, _modularStateListener);
         _stateService.removeStateListener(ApplicationState.EDIT_POM, _modularStateListener);
         _stateService.removeStateListener(ApplicationState.REVERT, _modularStateListener);
-        _stateService.removeStateListener(ApplicationState.REFRESH_PROJECTS, _modularStateListener);
+        _stateService.removeStateListener(ApplicationState.LOAD_PROJECTS, _modularStateListener);
+        _stateService.removeStateListener(ApplicationState.UPDATE_PROJECT_STATUSES, _modularStateListener);
     }
 
+    //endregion
     /*
      *
      * END OF VIEW SWITCHING BLOCK
@@ -682,6 +698,7 @@ public class ModularController implements UpdateProgressListener {
      * START OF GROUPS-VIEW ACTIONS BLOCK
      *
      */
+    //region GROUPS-VIEW ACTIONS
 
     @FXML
     @SuppressWarnings("unused")
@@ -796,6 +813,7 @@ public class ModularController implements UpdateProgressListener {
         loadGroup(selectedGroup);
     }
 
+    //endregion
     /*
      *
      * END OF GROUPS-VIEW ACTIONS BLOCK
@@ -807,6 +825,7 @@ public class ModularController implements UpdateProgressListener {
      * START OF PROJECTS-VIEW ACTIONS BLOCK
      *
      */
+    //region PROJECT-VIEW ACTIONS
     @FXML
     @SuppressWarnings("unused")
     private void showSwitchBranchWindow(ActionEvent event) {
@@ -1034,6 +1053,7 @@ public class ModularController implements UpdateProgressListener {
     private void onDeselectAll(ActionEvent actionEvent) {
         onDeselectAll();
     }
+    //endregion
     /*
      *
      * END OF PROJECTS-VIEW ACTIONS BLOCK
@@ -1045,6 +1065,7 @@ public class ModularController implements UpdateProgressListener {
      * START OF GENERAL ACTIONS BLOCK
      *
      */
+    //region GEMERAL ACTIONS
 
     @FXML
     @SuppressWarnings("unused")
@@ -1063,6 +1084,7 @@ public class ModularController implements UpdateProgressListener {
     private void openUserGuide(ActionEvent actionEvent){
         UserGuideUtil.openUserGuide();
     }
+    //endregion
     /*
      *
      * END OF GENERAL ACTIONS BLOCK
@@ -1074,6 +1096,7 @@ public class ModularController implements UpdateProgressListener {
      * START OF PROJECTS-VIEW OTHER METHODS BLOCK
      *
      */
+    //region PROJECTS-VIEW OTHER METHODS
 
     //used for rounding divider positions value
     private static double roundTo3(double value) {
@@ -1355,7 +1378,7 @@ public class ModularController implements UpdateProgressListener {
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_PULL).disableProperty().bind(bindingForShadow);
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_REVERT).disableProperty().bind(bindingForShadow);
     }
-
+    //endregion
     /*
      *
      * END OF PROJECTS-VIEW OTHER METHODS BLOCK
@@ -1367,6 +1390,7 @@ public class ModularController implements UpdateProgressListener {
      * START OF GROUPS-VIEW OTHER METHODS BLOCK
      *
      */
+    //region GROUPS-VIEW OTHER METHODS
 
     private void updateClonedGroups() {
 
@@ -1394,6 +1418,7 @@ public class ModularController implements UpdateProgressListener {
         });
     }
 
+    //endregion
     /*
      *
      * END OF GROUPS-VIEW OTHER METHODS BLOCK
@@ -1405,6 +1430,7 @@ public class ModularController implements UpdateProgressListener {
      * START OF GENERAL OTHER METHODS BLOCK
      *
      */
+    //region GENERAL OTHER METHODS
 
     private void showAboutPopup() {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -1457,6 +1483,7 @@ public class ModularController implements UpdateProgressListener {
         JavaFXUI.showWarningAlertForActiveStates(activeStates);
     }
 
+    //endregion
     /*
      *
      * END OF GENERAL OTHER METHODS BLOCK
@@ -1468,7 +1495,7 @@ public class ModularController implements UpdateProgressListener {
      * START OF UpdateProgressListener IMPLEMENTING BLOCK
      *
      */
-
+    //region UpdateProgressListener IMPLEMENTING
     @Override
     public void updateProgress(String progressMessage) {
         if (_workIndicatorDialog != null && progressMessage != null) {
@@ -1505,7 +1532,7 @@ public class ModularController implements UpdateProgressListener {
         }
         return true;
     }
-
+    //endregion
     /*
      *
      * END OF UpdateProgressListener IMPLEMENTING BLOCK
@@ -1517,6 +1544,7 @@ public class ModularController implements UpdateProgressListener {
      * START OF INNER CLASSES BLOCK
      *
      */
+    //region INNER CLASSES
 
     private class GroupListCell extends ListCell<Group> {
         final Tooltip tooltip = new Tooltip();
@@ -1584,7 +1612,7 @@ public class ModularController implements UpdateProgressListener {
         }
 
         private void handleRefreshButtonState(ApplicationState state, boolean isActivate) {
-            if (state == ApplicationState.REFRESH_PROJECTS) {
+            if (state == ApplicationState.LOAD_PROJECTS) {
                 refreshProjectsButton.setDisable(isActivate);
             }
         }
@@ -1604,6 +1632,7 @@ public class ModularController implements UpdateProgressListener {
         }
     }
 
+    //endregion
     /*
      *
      * END OF INNER CLASSES BLOCK
