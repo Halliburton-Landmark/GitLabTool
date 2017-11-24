@@ -130,7 +130,6 @@ public class ModularController implements UpdateProgressListener {
 
     private static final String HEADER_GROUP_TITLE = "Current group: ";
     private static final String ABOUT_POPUP_TITLE = "About";
-    private static final String CSS_PATH = "css/style.css";
     private static final Image _appIcon = AppIconHolder.getInstance().getAppIcoImage();
     private static final String ABOUT_POPUP_CONTENT = "Contacts: Yurii Pitomets (yurii.pitomets2@halliburton.com)";
     private static final String ABOUT_POPUP_HEADER =
@@ -294,9 +293,11 @@ public class ModularController implements UpdateProgressListener {
     private ToggleButton selectAllButton;
     private ToggleButton filterShadowProjects;
     private Button refreshProjectsButton;
+
+    private static String css_path = "css/style.css";
     /*
      *
-     * END OF GROUP-VIEW CONSTANTS BLOCK
+     * END OF OTHER UI ELEMENTS BLOCK
      *
      ***********************************************************************************************/
 
@@ -318,7 +319,7 @@ public class ModularController implements UpdateProgressListener {
         preferences = getPreferences(DIVIDER_PROPERTY_NODE);
 
         _stateService.addStateListener(ApplicationState.CLONE, new GroupsWindowStateListener());
-        toolbar.getStylesheets().add(getClass().getClassLoader().getResource(CSS_PATH).toExternalForm());
+        toolbar.getStylesheets().add(getClass().getClassLoader().getResource(css_path).toExternalForm());
 
         userId.setText(_loginService.getCurrentUser().getName());
 
@@ -544,6 +545,15 @@ public class ModularController implements UpdateProgressListener {
         listView.refresh();
 
     }
+
+    public static String getCss_path() {
+        return css_path;
+    }
+
+    public static void setCss_path(String css_path) {
+        ModularController.css_path = css_path;
+    }
+
     /*
      *
      * END OF INITIALIZATION BLOCK
