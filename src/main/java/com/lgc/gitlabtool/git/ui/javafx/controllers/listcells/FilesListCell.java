@@ -23,6 +23,7 @@ public class FilesListCell extends ListCell<ChangedFile> {
     private static final String OPEN_BRACKETS = " [";
     private static final String CLOSE_BRACKETS = "]";
     private static final String CONFLICTING_PREFIX = " [conflicting]";
+    private static final String REMOVED_PREFIX = " [x]";
     private static final int PROJECT_FONT = 10;
 
     @Override
@@ -42,13 +43,15 @@ public class FilesListCell extends ListCell<ChangedFile> {
 
     private Text getFileNameText(ChangedFile item) {
         Text fileNameText = new Text();
-        String fileName = item.getFileName();
+        StringBuilder strBuilder = new StringBuilder(item.getFileName());
         if (item.isHasConflicting()) {
-            fileNameText.setText(fileName + CONFLICTING_PREFIX);
+            strBuilder.append(CONFLICTING_PREFIX);
             fileNameText.setFill(Color.DARKRED);
-        } else {
-            fileNameText.setText(fileName);
+        } else if (item.wasRemoved()) {
+            strBuilder.append(REMOVED_PREFIX);
+            fileNameText.setFill(Color.DARKRED);
         }
+        fileNameText.setText(strBuilder.toString());
         return fileNameText;
     }
 

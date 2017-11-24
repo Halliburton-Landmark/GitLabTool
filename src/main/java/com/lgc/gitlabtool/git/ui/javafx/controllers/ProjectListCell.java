@@ -24,6 +24,7 @@ public class ProjectListCell extends ListCell<Project> {
     private static final String SHADOW_PROJECT_ICON_URL = "icons/project/shadow_project.png";
     private static final String SHADOW_PROJECT_TOOLTIP = "The project is not cloned.";
     private static final String PROJECT_WITH_CONFLICTS_ICON_URL = "icons/project/list_icons/conflicts_16x16.png";
+    private static final String PROJECT_WITH_NEW_FILES_ICON_URL = "icons/project/list_icons/new_files_16x16.png";
     private static final String PROJECT_WITH_UNCOMMITTED_CHANGES_ICON_URL = "icons/project/list_icons/uncommitted_changes_16x16.png";
     private static final String COMMITS_AHEAD_INDEX_ICON_URL = "icons/project/list_icons/ahead_index_12x12.png";
     private static final String COMMITS_BEHIND_INDEX_ICON_URL = "icons/project/list_icons/behind_index_12x12.png";
@@ -108,6 +109,13 @@ public class ProjectListCell extends ListCell<Project> {
             Node conflictsImageView = newStatusPic(getImage(PROJECT_WITH_CONFLICTS_ICON_URL),
                     "Project has conflicts");
             pics.add(conflictsImageView);
+            return;
+        }
+
+        if (projectStatus.hasNewUntrackedFiles()) {
+            Node untrackedImageView = newStatusPic(getImage(PROJECT_WITH_NEW_FILES_ICON_URL),
+                    "Project has new files");
+            pics.add(untrackedImageView);
             return;
         }
 

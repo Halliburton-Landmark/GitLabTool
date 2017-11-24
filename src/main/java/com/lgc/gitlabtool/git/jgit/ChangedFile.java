@@ -24,6 +24,7 @@ public class ChangedFile implements Serializable {
     private Project _project;
     private String _fileName;
     private boolean _hasConflicting;
+    private boolean _wasRemoved;
     private String _fileExtension;
     private ChangedFileType _typeFile;
 
@@ -33,11 +34,14 @@ public class ChangedFile implements Serializable {
      * @param project  the project in which the modified file is stored
      * @param fileName the name of changed file
      * @param hasConflicting <code>true</code> if project has conflicts, otherwise <code>false</code>
+     * @param wasRemoved <code>true</code> if files was deleted, otherwise <code>false</code>
+     * @param typeFile staged or unstaged file.
      */
-    public ChangedFile(Project project, String fileName, boolean hasConflicting, ChangedFileType typeFile) {
+    public ChangedFile(Project project, String fileName, boolean hasConflicting, boolean wasRemoved, ChangedFileType typeFile) {
         setProject(project);
         setFileName(fileName);
         setHasConflicting(hasConflicting);
+        setWasRemoved(wasRemoved);
         setTypeFile(typeFile);
     }
 
@@ -136,8 +140,16 @@ public class ChangedFile implements Serializable {
         return _typeFile;
     }
 
-    public void setTypeFile(ChangedFileType typeFile) {
+    private void setTypeFile(ChangedFileType typeFile) {
         _typeFile = typeFile;
+    }
+
+    public boolean wasRemoved() {
+        return _wasRemoved;
+    }
+
+    private void setWasRemoved(boolean wasRemoved) {
+        _wasRemoved = wasRemoved;
     }
 
 }

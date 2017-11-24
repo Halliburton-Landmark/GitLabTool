@@ -197,7 +197,7 @@ public class JGitTest {
         files.add("0");
         files.add(null);
 
-        List<String> addedFiles = getJGitMock(gitMock).addUntrackedFileToIndex(files, getProject(true));
+        List<String> addedFiles = getJGitMock(gitMock).addUntrackedFilesToIndex(files, getProject(true));
         Assert.assertTrue(!addedFiles.isEmpty());
         Assert.assertEquals(files.get(0), addedFiles.get(0));
         Assert.assertNotEquals(files.size(), addedFiles.size());
@@ -213,8 +213,8 @@ public class JGitTest {
             }
         };
         Mockito.when(gitMock.add()).thenReturn(addCommandMock);
-        Assert.assertTrue(getJGitMock(gitMock).addUntrackedFileToIndex(new ArrayList<>(), getProject(true)).isEmpty());
-        Assert.assertTrue(getJGitMock(null).addUntrackedFileToIndex(new ArrayList<>(), getProject(false)).isEmpty());
+        Assert.assertTrue(getJGitMock(gitMock).addUntrackedFilesToIndex(new ArrayList<>(), getProject(true)).isEmpty());
+        Assert.assertTrue(getJGitMock(null).addUntrackedFilesToIndex(new ArrayList<>(), getProject(false)).isEmpty());
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -224,7 +224,7 @@ public class JGitTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void addUntrackedFileForCommitCollectionIsNullTest() {
-        JGit.getInstance().addUntrackedFileToIndex(new ArrayList<>(), null);
+        JGit.getInstance().addUntrackedFilesToIndex(new ArrayList<>(), null);
     }
 
     @Test(expected = IllegalArgumentException.class)

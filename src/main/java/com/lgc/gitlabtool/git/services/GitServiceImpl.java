@@ -22,6 +22,7 @@ import com.lgc.gitlabtool.git.entities.ProjectStatus;
 import com.lgc.gitlabtool.git.jgit.BranchType;
 import com.lgc.gitlabtool.git.jgit.ChangedFile;
 import com.lgc.gitlabtool.git.jgit.ChangedFileType;
+import com.lgc.gitlabtool.git.jgit.ChangedFilesUtils;
 import com.lgc.gitlabtool.git.jgit.JGit;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
@@ -255,6 +256,9 @@ public class GitServiceImpl implements GitService {
         Set<String> conflictedFiles = new HashSet<>();
         Set<String> untrackedFiles = new HashSet<>();
         Set<String> changedFiles = new HashSet<>();
+        Set<String> removedFiles = new HashSet<>();
+        Set<String> missingFiles = new HashSet<>();
+        Set<String> modifiedFiles = new HashSet<>();
         boolean hasChanges = false;
 
         Optional<Status> optStatus = _git.getStatusProject(project);
@@ -266,10 +270,12 @@ public class GitServiceImpl implements GitService {
             changedFiles.addAll(status.getAdded());
 
             untrackedFiles.addAll(status.getUntracked());
-            untrackedFiles.addAll(status.getModified());
-            untrackedFiles.addAll(status.getMissing());
+            modifiedFiles.addAll(status.getModified());
 
-            hasChanges = status.hasUncommittedChanges() || !untrackedFiles.isEmpty();
+            removedFiles.addAll(status.getRemoved());
+            missingFiles.addAll(status.getMissing());
+
+            hasChanges = status.hasUncommittedChanges();
         }
 
         int aheadIndex = 0;
@@ -281,7 +287,8 @@ public class GitServiceImpl implements GitService {
             behindIndex = indexCount[1];
         }
 
-        return new ProjectStatus(hasChanges, aheadIndex, behindIndex, nameBranch, conflictedFiles, untrackedFiles, changedFiles);
+        return new ProjectStatus(hasChanges, aheadIndex, behindIndex, nameBranch, conflictedFiles,
+                untrackedFiles, changedFiles, removedFiles, missingFiles, modifiedFiles);
     }
 
     @Override
@@ -310,9 +317,12 @@ public class GitServiceImpl implements GitService {
             return changedFiles;
         }
         ProjectStatus status = project.getProjectStatus();
-        status.getChangedFiles().forEach(file -> changedFiles.add(new ChangedFile(project, file, false, ChangedFileType.STAGED)));
-        status.getUntrackedFiles().forEach(file -> changedFiles.add(new ChangedFile(project, file, false, ChangedFileType.UNSTAGED)));
-        status.getConflictedFiles().forEach(file -> changedFiles.add(new ChangedFile(project, file, true, ChangedFileType.UNSTAGED)));
+        status.getChangedFiles().forEach(file -> changedFiles.add(new ChangedFile(project, file, false, false, ChangedFileType.STAGED)));
+        status.getUntrackedFiles().forEach(file -> changedFiles.add(new ChangedFile(project, file, false, false, ChangedFileType.UNSTAGED)));
+        status.getConflictedFiles().forEach(file -> changedFiles.add(new ChangedFile(project, file, true, false, ChangedFileType.UNSTAGED)));
+        status.getRemovedFiles().forEach(file -> changedFiles.add(new ChangedFile(project, file, false, true, ChangedFileType.STAGED)));
+        status.getMissingFiles().forEach(file -> changedFiles.add(new ChangedFile(project, file, false, true, ChangedFileType.UNSTAGED)));
+        status.getModifiedFiles().forEach(file -> changedFiles.add(new ChangedFile(project, file, false, false, ChangedFileType.UNSTAGED)));
         return changedFiles;
     }
 
@@ -326,10 +336,9 @@ public class GitServiceImpl implements GitService {
         try {
             for (Entry<Project, List<ChangedFile>> entry : files.entrySet()) {
                 Project project = entry.getKey();
-                if (project != null && project.isCloned()) {
-                    List<String> fileNames = convertToFileNames(entry.getValue());
-                    List<String> result = _git.addUntrackedFileToIndex(fileNames, project);
-                    addedFiles.addAll(convertToChangedFile(result, project, ChangedFileType.STAGED));
+                List<ChangedFile> changedFiles = entry.getValue();
+                if (project != null && project.isCloned() && changedFiles != null && !changedFiles.isEmpty()) {
+                    addedFiles.addAll(addFilesToIndex(changedFiles, project));
                 }
             }
         } finally {
@@ -349,9 +358,10 @@ public class GitServiceImpl implements GitService {
             for (Entry<Project, List<ChangedFile>> entry : files.entrySet()) {
                 Project project = entry.getKey();
                 if (project != null && project.isCloned()) {
-                    List<String> fileNames = convertToFileNames(entry.getValue());
+                    List<ChangedFile> changedFiles = entry.getValue();
+                    List<String> fileNames = ChangedFilesUtils.getFileNames(changedFiles);
                     List<String> result = _git.resetChangedFiles(fileNames, project);
-                    resetedFiles.addAll(convertToChangedFile(result, project, ChangedFileType.UNSTAGED));
+                    resetedFiles.addAll(ChangedFilesUtils.findChangedFiles(result, project, changedFiles));
                 }
             }
         } finally {
@@ -360,16 +370,21 @@ public class GitServiceImpl implements GitService {
         return resetedFiles;
     }
 
-    private List<String> convertToFileNames(List<ChangedFile> changedFiles) {
-        return changedFiles.stream()
-                           .map(ChangedFile::getFileName)
-                           .collect(Collectors.toList());
+    private List<ChangedFile> addFilesToIndex(List<ChangedFile> changedFiles,  Project project) {
+        List<String> addedFiles = new ArrayList<>();
+        for (ChangedFile changedFile : changedFiles) {
+            if (changedFile.wasRemoved() && ChangedFileType.STAGED != changedFile.getTypeFile()) {
+                String fileName = changedFile.getFileName();
+                if (_git.addDeletedFile(fileName, project, true)) {
+                    addedFiles.add(fileName);
+                }
+            } else {
+                String fileName = changedFile.getFileName();
+                if (_git.addUntrackedFileToIndex(fileName, project)) {
+                    addedFiles.add(fileName);
+                }
+            }
+        }
+        return ChangedFilesUtils.findChangedFiles(addedFiles, project, changedFiles);
     }
-
-    private List<ChangedFile> convertToChangedFile(List<String> fileNames, Project project, ChangedFileType type) {
-        return fileNames.stream()
-                        .map(file -> new ChangedFile(project, file, false, type))
-                        .collect(Collectors.toList());
-    }
-
 }

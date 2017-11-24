@@ -226,7 +226,7 @@ public class GitServiceImplTest {
         Set<String> files = getFiles();
 
         Map<Project, List<ChangedFile>> data = getFilesForProject(project);
-        when(_jGit.addUntrackedFileToIndex(anyCollection(), eq(project))).thenReturn(new ArrayList<>(files));
+        when(_jGit.addUntrackedFilesToIndex(anyCollection(), eq(project))).thenReturn(new ArrayList<>(files));
 
         List<ChangedFile> addedFiles = _gitService.addUntrackedFilesToIndex(data);
         assertEquals(addedFiles.size(), files.size());
@@ -288,7 +288,8 @@ public class GitServiceImplTest {
     private List<ChangedFile> getChangedFiles() {
         List<ChangedFile> files = new ArrayList<>();
         Project project = getClonedProject();
-        getFiles().forEach(fileName -> files.add(new ChangedFile(project, fileName, false, ChangedFileType.UNSTAGED)));
+        getFiles().forEach(fileName -> files.add(
+                new ChangedFile(project, fileName, false, false, ChangedFileType.UNSTAGED)));
         return files;
     }
 

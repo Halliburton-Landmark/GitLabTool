@@ -25,7 +25,10 @@ public class ProjectStatus implements Serializable {
     private String _currentBranch;
     private Set<String> _conflictedFiles;
     private Set<String> _untrackedFiles;
+    private Set<String> _modifiedFiles;
     private Set<String> _changedFiles;
+    private Set<String> _removedFiles;
+    private Set<String> _missingFiles;
 
     /**
      * Constructs a ProjectStatus with default parameters.
@@ -82,7 +85,8 @@ public class ProjectStatus implements Serializable {
      * @param currentBranch the branch name
      */
     public ProjectStatus(boolean hasChanges, int aheadIndex, int behindIndex, String currentBranch) {
-        this(hasChanges, aheadIndex, behindIndex, currentBranch, new HashSet<>(), new HashSet<>(), new HashSet<>());
+        this(hasChanges, aheadIndex, behindIndex, currentBranch, new HashSet<>(), new HashSet<>(),
+                new HashSet<>(), new HashSet<>(), new HashSet<>(),new HashSet<>());
     }
 
     /**
@@ -95,9 +99,11 @@ public class ProjectStatus implements Serializable {
      * @param conflicting    the set of files which has conflicting
      * @param untrackedFiles the set of files which weren't not added to index
      * @param changedFiles   the set of files which were added to index
+     * @param removedFiles   the set of removed files which weren't not added to index
      */
     public ProjectStatus(boolean hasChanges, int aheadIndex, int behindIndex, String currentBranch,
-                         Set<String> conflicting, Set<String> untrackedFiles, Set<String> changedFiles) {
+                         Set<String> conflicting, Set<String> untrackedFiles, Set<String> changedFiles,
+                         Set<String> removedFiles, Set<String> missingFiles, Set<String> modifiedFiles) {
         setHasChanges(hasChanges);
         setAheadIndex(aheadIndex);
         setBehindIndex(behindIndex);
@@ -105,6 +111,9 @@ public class ProjectStatus implements Serializable {
         setConflictedFiles(conflicting);
         setUntrackedFiles(untrackedFiles);
         setChangedFiles(changedFiles);
+        setRemovedFiles(removedFiles);
+        setMissingFiles(missingFiles);
+        setModifiedFiles(modifiedFiles);
     }
 
     /**
@@ -159,6 +168,15 @@ public class ProjectStatus implements Serializable {
      */
     public boolean hasChanges() {
         return _hasChanges;
+    }
+
+    /**
+     *
+     *
+     * @return <code>true</code> if the project has untracked files <code>false</code> otherwise.
+     */
+    public boolean hasNewUntrackedFiles() {
+        return !_untrackedFiles.isEmpty();
     }
 
     /**
@@ -232,6 +250,30 @@ public class ProjectStatus implements Serializable {
 
     public void setChangedFiles(Set<String> changedFiles) {
         _changedFiles = changedFiles;
+    }
+
+    public Set<String> getRemovedFiles() {
+        return _removedFiles;
+    }
+
+    public void setRemovedFiles(Set<String> removedFiles) {
+        _removedFiles = removedFiles;
+    }
+
+    public Set<String> getMissingFiles() {
+        return _missingFiles;
+    }
+
+    public void setMissingFiles(Set<String> missingFiles) {
+        _missingFiles = missingFiles;
+    }
+
+    public Set<String> getModifiedFiles() {
+        return _modifiedFiles;
+    }
+
+    public void setModifiedFiles(Set<String> modifiedFiles) {
+        _modifiedFiles = modifiedFiles;
     }
 
 }

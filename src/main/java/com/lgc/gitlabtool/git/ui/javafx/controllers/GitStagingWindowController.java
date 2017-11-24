@@ -199,9 +199,9 @@ public class GitStagingWindowController extends AbstractStateListener {
             public void run() {
                 _sortingListBox.setDisable(isDisable);
                 _filterField.setDisable(isDisable);
-
                 _unstagedListView.setDisable(isDisable);
                 _stagedListView.setDisable(isDisable);
+                _commitText.setDisable(isDisable);
             }
         });
     }
@@ -233,6 +233,7 @@ public class GitStagingWindowController extends AbstractStateListener {
 
                 Collection<ChangedFile> changedFiles = getChangedFilesSelectedProjects();
                 updateContendListViews(changedFiles);
+                _commitText.setText(StringUtils.EMPTY);
 
                 showStatusDialog(isPushChanges, projects.size());
             }
