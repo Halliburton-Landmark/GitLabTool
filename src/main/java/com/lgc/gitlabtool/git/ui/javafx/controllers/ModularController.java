@@ -883,7 +883,6 @@ public class ModularController implements UpdateProgressListener {
     @FXML
     @SuppressWarnings("unused")
     private void createProjectButton(ActionEvent actionEvent) {
-        // dialog
         CreateProjectDialog dialog = new CreateProjectDialog(_currentGroup, null);
         dialog.showAndWait();
     }
@@ -1099,13 +1098,21 @@ public class ModularController implements UpdateProgressListener {
         }
     }
 
-    // USE ONLY FOR UNREPEATABLE OPERATION (like Revert, Push etc.)
+    /**
+     * USE ONLY FOR UNREPEATABLE OPERATION (like Revert, Push etc.)
+     *
+     * @return list of projects
+     */
     @SuppressWarnings("unchecked")
     private List<Project> getCurrentProjects() {
         return projectListView.getSelectionModel().getSelectedItems();
     }
 
-    // USE FOR REPEATABLE OPERATION (like SwitchBranch, EditPomXML etc.)
+    /**
+     * USE FOR REPEATABLE OPERATION (like SwitchBranch, EditPomXML etc.)
+     *
+     * @return list of projects
+     */
     private List<Integer> getIdSelectedProjects() {
         return ProjectList.getIdsProjects(getCurrentProjects());
     }
