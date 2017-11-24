@@ -9,9 +9,9 @@ import org.apache.logging.log4j.Logger;
  *
  * @author Igor Khlaponin
  */
-public class FinishUtil {
+public class ShutDownUtil {
 
-    private static final Logger _logger = LogManager.getLogger(FinishUtil.class);
+    private static final Logger _logger = LogManager.getLogger(ShutDownUtil.class);
 
     /**
      * Set of actions that will be invoked before application shut downing

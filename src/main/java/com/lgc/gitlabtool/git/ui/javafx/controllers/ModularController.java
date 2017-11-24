@@ -13,7 +13,7 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import com.lgc.gitlabtool.git.util.FinishUtil;
+import com.lgc.gitlabtool.git.util.ShutDownUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -421,7 +421,7 @@ public class ModularController implements UpdateProgressListener {
     private void exit() {
         List<ApplicationState> activeStates = _stateService.getActiveStates();
         if (activeStates.isEmpty()) {
-            FinishUtil.shutdown();
+            ShutDownUtil.shutdown();
             Platform.exit();
         }
         JavaFXUI.showWarningAlertForActiveStates(activeStates);

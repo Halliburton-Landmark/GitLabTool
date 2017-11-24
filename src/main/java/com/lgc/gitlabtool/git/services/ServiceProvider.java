@@ -25,7 +25,7 @@ public class ServiceProvider {
     }
 
     private ServiceProvider() {
-        BackgroundService backgroundService = BackgroundServiceImpl.get();
+        BackgroundService backgroundService = new BackgroundServiceImpl();
         RESTConnector restConnector = RESTConnectorFactory.getInstance().getRESTConnector();
         LoginService loginService = new LoginServiceImpl(restConnector, backgroundService);
         StorageService storageService = new StorageServiceImpl();

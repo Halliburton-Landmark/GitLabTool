@@ -1,11 +1,8 @@
 package com.lgc.gitlabtool.git.services;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.function.Consumer;
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
+
+import java.util.concurrent.*;
 
 /**
  * Implementation of {@link BackgroundService}
@@ -15,28 +12,30 @@ import java.util.function.Consumer;
 public class BackgroundServiceImpl implements BackgroundService {
 
     /**
-     * Instance of this class
-     */
-    private static BackgroundService _backgroundService;
-
-    /**
      * Instance of the {@link ExecutorService}
      */
     private final ExecutorService _executorService;
 
-    private BackgroundServiceImpl() {
-        _executorService = Executors.newCachedThreadPool();
+    /**
+     * Creates the instance of this class
+     */
+    public BackgroundServiceImpl() {
+        ThreadFactory namingThreadFactory = getThreadFactory(false);
+        _executorService = Executors.newCachedThreadPool(namingThreadFactory);
     }
 
     /**
-     * Provides the instance of this class
-     * @return BackgroundServiceImpl instance
+     * Provides {@link ThreadFactory} for executor service
+     * @param isDaemon show if created threads should be daemons
+     *              if {@code true}, all created threads will be daemons
+     * @return instance of {@link ThreadFactory}
      */
-    public static BackgroundService get() {
-        if (_backgroundService == null) {
-            _backgroundService = new BackgroundServiceImpl();
-        }
-        return _backgroundService;
+    private ThreadFactory getThreadFactory(boolean isDaemon) {
+        return new BasicThreadFactory.Builder()
+                .namingPattern("background-service-%d")
+                .daemon(isDaemon)
+                .priority(Thread.MAX_PRIORITY)
+                .build();
     }
 
     @Override
