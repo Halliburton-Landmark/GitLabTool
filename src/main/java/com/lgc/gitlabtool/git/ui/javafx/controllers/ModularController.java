@@ -281,11 +281,11 @@ public class ModularController implements UpdateProgressListener {
      * START OF OTHER UI ELEMENTS BLOCK
      *
      */
-    private List<Node> projectsWindowToolbarItems = new LinkedList<>();
-    private List<Node> groupsWindowToolbarItems = new LinkedList<>();
+    private List<Node> projectsWindowToolbarItems;
+    private List<Node> groupsWindowToolbarItems;
 
-    private List<Menu> projectsWindowMainMenuItems = new LinkedList<>();
-    private List<Menu> groupsWindowMainMenuItems = new LinkedList<>();
+    private List<Menu> projectsWindowMainMenuItems;
+    private List<Menu> groupsWindowMainMenuItems;
 
     private HBox projectsToolbar;
     private WorkIndicatorDialog _workIndicatorDialog;
