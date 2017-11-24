@@ -6,15 +6,12 @@ import static com.lgc.gitlabtool.git.util.ProjectPropertiesUtil.getProjectNameWi
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -23,11 +20,9 @@ import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.MessageType;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.ProjectList;
-import com.lgc.gitlabtool.git.jgit.ChangedFile;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.listeners.updateProgressListener.UpdateProgressListener;
 import com.lgc.gitlabtool.git.services.ConsoleService;
-import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.GroupsUserService;
 import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
@@ -94,8 +89,6 @@ public class ModularController implements UpdateProgressListener {
     private static final String REMOVE_GROUP_STATUS_DIALOG_TITLE = "Import Status Dialog";
     private static final String FAILED_REMOVE_GROUP_MESSAGE = "Removing of group is Failed";
     private static final String FXML_RESOURCE_EXCEPTION_MESSAGE = "Could not load fxml resource";
-    private static final String STAGE_REMOVE_WINDOW_TITLE = "Stage | Remove Files";
-    private static final String PROJECTS_DOESNT_HAVE_CHANGED_FILE = "Selected projects doesn't have new or conflicting files";
 
     private static final String CSS_PATH = "css/style.css";
     private static final Image _appIcon = AppIconHolder.getInstance().getAppIcoImage();
@@ -108,9 +101,6 @@ public class ModularController implements UpdateProgressListener {
 
     private static final StateService _stateService = (StateService) ServiceProvider.getInstance()
             .getService(StateService.class.getName());
-
-    private final GitService _gitService = (GitService) ServiceProvider.getInstance()
-            .getService(GitService.class.getName());
 
     private MainWindowController _mainWindowController;
     private GroupWindowController _groupWindowController;
@@ -165,55 +155,6 @@ public class ModularController implements UpdateProgressListener {
         viewPane.getChildren().add(node);
 
         updateCurrentConsole();
-    }
-
-    public void loadGitStageWindow(ActionEvent event) {
-        try {
-            List<Project> projects = SelectionsProvider.getInstance().getSelectionItems("mainWindow_projectsList");
-            projects = projects.stream()
-                               .filter(Project::isCloned)
-                               .collect(Collectors.toList());
-            if (projects.isEmpty()) {
-                String message = String.format(MainWindowController.NO_ANY_PROJECT_FOR_OPERATION,
-                        MainWindowController.STAGE_REMOVE_NEW_FILES_OPERATION_NAME);
-                _consoleService.addMessage(message, MessageType.ERROR);
-                return;
-            }
-
-            Collection<ChangedFile> files = new ArrayList<>();
-            projects.forEach(project -> files.addAll(_gitService.getChangedFiles(project)));
-            if (files.isEmpty()) {
-                _consoleService.addMessage(PROJECTS_DOESNT_HAVE_CHANGED_FILE, MessageType.ERROR);
-                return;
-            }
-
-            URL gitStagingWindowUrl = getClass().getClassLoader().getResource(ViewKey.GIT_STAGING_WINDOW.getPath());
-            FXMLLoader loader = new FXMLLoader(gitStagingWindowUrl);
-            Parent root = loader.load();
-
-            GitStagingWindowController gitStagingWindowController = loader.getController();
-            gitStagingWindowController.beforeShowing(ProjectList.getIdsProjects(projects), files);
-
-            Scene scene = new Scene(root);
-            Stage stage = new Stage();
-            stage.setScene(scene);
-            stage.getIcons().add(_appIcon);
-            stage.setTitle(STAGE_REMOVE_WINDOW_TITLE);
-            stage.initModality(Modality.APPLICATION_MODAL);
-
-            /* Set sizing and position */
-            double dialogWidth = 550;
-            double dialogHeight = 600;
-            double preferedWidth = 800;
-            stage.setWidth(preferedWidth);
-            ScreenUtil.adaptForMultiScreens(stage, dialogWidth, dialogHeight);
-            // if we set the minimum size only in fxml then window does not respond to them.
-            stage.setMinHeight(dialogHeight);
-            stage.setMinWidth(dialogWidth);
-            stage.show();
-        } catch (IOException e) {
-            logger.error(FXML_RESOURCE_EXCEPTION_MESSAGE, e);
-        }
     }
 
     public void loadMainWindow(Group selectedGroup) throws IOException {
@@ -286,7 +227,7 @@ public class ModularController implements UpdateProgressListener {
                     .setOnAction(this::showSwitchBranchWindow);
 
             ToolbarManager.getInstance().getButtonById(ToolbarButtons.STAGING_BUTTON.getId())
-                    .setOnAction(this::loadGitStageWindow);
+                    .setOnAction(event -> WindowLoader.get().loadGitStageWindow(null));
         }
     }
 

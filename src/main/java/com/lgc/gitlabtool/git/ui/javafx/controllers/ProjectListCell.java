@@ -116,7 +116,6 @@ public class ProjectListCell extends ListCell<Project> {
             Node untrackedImageView = newStatusPic(getImage(PROJECT_WITH_NEW_FILES_ICON_URL),
                     "Project has new files");
             pics.add(untrackedImageView);
-            return;
         }
 
         if (projectStatus.hasChanges()) {

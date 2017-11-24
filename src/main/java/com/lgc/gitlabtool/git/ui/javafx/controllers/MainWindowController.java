@@ -37,7 +37,6 @@ import com.lgc.gitlabtool.git.ui.ViewKey;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 import com.lgc.gitlabtool.git.ui.javafx.ChangesCheckDialog;
 import com.lgc.gitlabtool.git.ui.javafx.CloneProgressDialog;
-import com.lgc.gitlabtool.git.ui.javafx.CommitDialog;
 import com.lgc.gitlabtool.git.ui.javafx.CreateNewBranchDialog;
 import com.lgc.gitlabtool.git.ui.javafx.CreateProjectDialog;
 import com.lgc.gitlabtool.git.ui.javafx.GLTAlert;
@@ -521,8 +520,7 @@ public class MainWindowController implements StateListener {
             return;
         }
 
-        CommitDialog dialog = new CommitDialog();
-        dialog.commitChanges(projectWithChanges);
+        WindowLoader.get().loadGitStageWindow(projectWithChanges);
     }
 
     @FXML
