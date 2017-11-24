@@ -1251,7 +1251,9 @@ public class ModularController implements UpdateProgressListener {
         checkProjectsList();
     }
 
-    // shadow projects in the end list
+    /**
+     * Note: shadow projects should be at the end of list
+     */
     private void sortProjectsList() {
         List<Project> sortedList = _projectsList.getProjects()
                 .stream()
