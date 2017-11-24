@@ -23,6 +23,7 @@ import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StateService;
+import com.lgc.gitlabtool.git.ui.javafx.JavaFXUI;
 import com.lgc.gitlabtool.git.ui.javafx.StatusDialog;
 import com.lgc.gitlabtool.git.ui.javafx.comparators.ComparatorDefaultType;
 import com.lgc.gitlabtool.git.ui.javafx.comparators.ComparatorExtensionsType;
@@ -37,6 +38,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
@@ -53,6 +55,7 @@ import javafx.scene.input.Dragboard;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 public class GitStagingWindowController extends AbstractStateListener {
 
@@ -111,6 +114,11 @@ public class GitStagingWindowController extends AbstractStateListener {
         _stagingStates.forEach(state -> _stateService.addStateListener(state, this));
     }
 
+    /**
+     *
+     * @param projectIds
+     * @param files
+     */
     public void beforeShowing(List<Integer> projectIds, Collection<ChangedFile> files) {
         ObservableList<SortingType> items = FXCollections.observableArrayList
                 (SortingType.PROJECTS,SortingType.EXTENSIONS, SortingType.DEFAULT);
@@ -123,6 +131,24 @@ public class GitStagingWindowController extends AbstractStateListener {
         configureListViews(files);
         updateProgressBar(false, null);
     }
+
+    /**
+     *
+     * @return
+     */
+    public List<ApplicationState> getStagingStates() {
+        return _stagingStates;
+    }
+
+    public final EventHandler<WindowEvent> confirmCloseEventHandler = event -> {
+        List<ApplicationState> activeAtates = _stateService.getActiveStates();
+        if (!activeAtates.isEmpty() || activeAtates.contains(_stagingStates)) {
+            event.consume();
+            JavaFXUI.showWarningAlertForActiveStates(activeAtates);
+            return;
+        }
+        isDisposed();
+    };
 
     private void updateDisableButton() {
         BooleanBinding progressProperty = _progressLabel.textProperty().isNotEmpty();
