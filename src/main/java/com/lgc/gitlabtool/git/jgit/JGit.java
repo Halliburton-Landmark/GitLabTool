@@ -34,6 +34,7 @@ import org.eclipse.jgit.dircache.DirCacheCheckout;
 import org.eclipse.jgit.errors.CorruptObjectException;
 import org.eclipse.jgit.errors.NoWorkTreeException;
 import org.eclipse.jgit.errors.RevisionSyntaxException;
+import org.eclipse.jgit.lib.BranchConfig;
 import org.eclipse.jgit.lib.BranchTrackingStatus;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.EmptyProgressMonitor;
@@ -914,5 +915,19 @@ public class JGit {
 
         int[] aheadBehind = {commitsAheadIndex, commitsBehindIndex};
         return aheadBehind;
+    }
+    
+    public String getTrackingBranch(Project project) {
+    	String trackingBranch = null;
+		try {
+			Git git = getGit(project.getPath());
+	    	Repository repo = git.getRepository();
+	    	BranchConfig config = new BranchConfig(repo.getConfig(), repo.getBranch());
+	    	trackingBranch = config.getTrackingBranch();
+	    	return trackingBranch;
+		} catch (IOException e) {
+			logger.error("Could not get tracking branch " + e.getMessage());
+		}
+		return trackingBranch;
     }
 }

@@ -258,4 +258,10 @@ public class GitServiceImpl implements GitService {
     public void cancelClone() {
         JGit.getInstance().cancelClone();
     }
+
+	@Override
+	public String getTrackingBranch(Project project) {
+		String trackingBranch = _git.getTrackingBranch(project);
+		return trackingBranch;
+	}
 }

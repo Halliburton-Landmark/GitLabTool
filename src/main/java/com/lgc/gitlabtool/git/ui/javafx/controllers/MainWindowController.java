@@ -80,6 +80,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
@@ -267,6 +268,7 @@ public class MainWindowController implements StateListener {
         _currentGroup = group;
         ProjectList.reset();
         _projectsList = ProjectList.get(_currentGroup);
+        System.out.println("$$$$$$$$$ pLIST = " + _projectsList);
     }
 
     public void onSelectAll() {
@@ -394,6 +396,23 @@ public class MainWindowController implements StateListener {
                 }
             }
         });
+        
+		listView.addEventFilter(MouseEvent.MOUSE_ENTERED, evt -> {
+
+			Node node = evt.getPickResult().getIntersectedNode();
+
+			while (node != null && node != listView && !(node instanceof ListCell)) {
+				node = node.getParent();
+			}
+
+			if (node instanceof ListCell) {
+				if (_projectsList != null && _projectsList.getProjects().size() == 1) {
+					String trackingBranch = _gitService.getTrackingBranch(_projectsList.getProjects().get(0));
+					Tooltip tooltip = new Tooltip("Tracking branch name " + trackingBranch);
+					((ListCell) node).setTooltip(tooltip);
+				}
+			}
+		});
 
         listView.getSelectionModel().getSelectedItems().addListener(new ListChangeListener<Project>() {
             @Override
