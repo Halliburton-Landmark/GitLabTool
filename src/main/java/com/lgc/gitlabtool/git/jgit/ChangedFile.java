@@ -77,7 +77,7 @@ public class ChangedFile implements Serializable {
      *
      * @return <code>true</code> if project has conflicts, otherwise <code>false</code>
      */
-    public boolean isHasConflicting() {
+    public boolean hasConflicting() {
         return _hasConflicting;
     }
 
@@ -94,7 +94,11 @@ public class ChangedFile implements Serializable {
         _fileExtension = FilenameUtils.getExtension(fileName);
     }
 
-    private void setHasConflicting(boolean hasConflicting) {
+    /**
+     *
+     * @param hasConflicting
+     */
+    public void setHasConflicting(boolean hasConflicting) {
         _hasConflicting = hasConflicting;
     }
 

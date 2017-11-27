@@ -361,7 +361,7 @@ public class GitServiceImpl implements GitService {
                     List<ChangedFile> changedFiles = entry.getValue();
                     List<String> fileNames = ChangedFilesUtils.getFileNames(changedFiles);
                     List<String> result = _git.resetChangedFiles(fileNames, project);
-                    resetedFiles.addAll(ChangedFilesUtils.findChangedFiles(result, project, changedFiles));
+                    resetedFiles.addAll(ChangedFilesUtils.getChangedFiles(result, project, changedFiles));
                 }
             }
         } finally {
@@ -385,6 +385,6 @@ public class GitServiceImpl implements GitService {
                 }
             }
         }
-        return ChangedFilesUtils.findChangedFiles(addedFiles, project, changedFiles);
+        return ChangedFilesUtils.getChangedFiles(addedFiles, project, changedFiles);
     }
 }
