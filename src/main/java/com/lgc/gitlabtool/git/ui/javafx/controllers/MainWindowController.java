@@ -269,7 +269,6 @@ public class MainWindowController implements StateListener {
         _currentGroup = group;
         ProjectList.reset();
         _projectsList = ProjectList.get(_currentGroup);
-        System.out.println("$$$$$$$$$ pLIST = " + _projectsList);
     }
 
     public void onSelectAll() {
