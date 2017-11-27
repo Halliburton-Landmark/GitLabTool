@@ -108,6 +108,7 @@ public class MainWindowController implements StateListener {
     private static final String NEW_BRANCH_CREATION = "new branch creation";
     private static final String PULL_OPERATION_NAME = "pull";
     private static final String PUSH_OPERATION_NAME = "push";
+    private static final String TRACKING_BRANCH = "Tracking branch: ";
     public static final String SWITCH_BRANCH_OPERATION_NAME = "switch branch";
 
     private ProjectList _projectsList;
@@ -408,7 +409,7 @@ public class MainWindowController implements StateListener {
 			if (node instanceof ListCell) {
 				if (_projectsList != null && _projectsList.getProjects().size() == 1) {
 					String trackingBranch = _gitService.getTrackingBranch(_projectsList.getProjects().get(0));
-					Tooltip tooltip = new Tooltip("Tracking branch name " + trackingBranch);
+					Tooltip tooltip = new Tooltip(TRACKING_BRANCH + trackingBranch);
 					((ListCell) node).setTooltip(tooltip);
 				}
 			}
