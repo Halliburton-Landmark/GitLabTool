@@ -329,8 +329,8 @@ public class JGit {
      *                 otherwise <code>false</code>
      */
     public List<String> addDeletedFiles(Collection<String> files, Project project, boolean isCached) {
-        if (files == null || project == null) {
-            throw new IllegalArgumentException("Incorrect data: project is " + project + ", files is " + files);
+        if (files == null || files.isEmpty() || project == null || !project.isCloned()) {
+            return Collections.emptyList();
         }
         try (Git git = getGit(project.getPath())) {
             return files.stream()
@@ -351,7 +351,7 @@ public class JGit {
      *                 otherwise <code>false</code>
      */
     public boolean addDeletedFile(String fileName, Project project, boolean isCached) {
-        if (fileName == null || project == null) {
+        if (fileName == null || project == null || !project.isCloned()) {
             return false;
         }
         try (Git git = getGit(project.getPath())) {
@@ -375,14 +375,15 @@ public class JGit {
     }
 
     /**
+     * Resets changed files to head
      *
-     * @param files
-     * @param project
-     * @return
+     * @param  files the changed files (which was added to index)
+     * @param  project the cloned project
+     * @return a list of files name
      */
     public List<String> resetChangedFiles(Collection<String> files, Project project) {
-        if (files == null || project == null) {
-            throw new IllegalArgumentException("Incorrect data: project is " + project + ", files is " + files);
+        if (files == null || files.isEmpty() || project == null || !project.isCloned()) {
+            return Collections.emptyList();
         }
         try (Git git = getGit(project.getPath())) {
             return files.stream()

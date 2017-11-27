@@ -182,6 +182,12 @@ public interface GitService {
      */
     List<ChangedFile> addUntrackedFilesToIndex(Map<Project, List<ChangedFile>> files);
 
+    /**
+     * Resets changed files to head
+     *
+     * @param  files the map which has projects and their changed files
+     * @return a list of changed files
+     */
     List<ChangedFile> resetChangedFiles(Map<Project, List<ChangedFile>> files);
 
     /**
