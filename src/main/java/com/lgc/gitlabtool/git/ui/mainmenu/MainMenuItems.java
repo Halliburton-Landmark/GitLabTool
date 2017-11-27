@@ -14,12 +14,11 @@ import com.lgc.gitlabtool.git.ui.ViewKey;
  */
 public enum MainMenuItems {
 
-    GROUP_WINDOW_EXIT(MainmenuConstants.GROUPS_WINDOW_KEY, "File", "group_window_file_exit", "icons/mainmenu/exit_16x16.png", "Exit"),
+    GENERAL_EXIT(MainmenuConstants.ALL_WINDOW_KEY, "File", "main_file_exit", "icons/mainmenu/exit_16x16.png", "Exit"),
+
     GROUP_WINDOW_CLONE_GROUP(MainmenuConstants.GROUPS_WINDOW_KEY, "Git", "group_window_group_clone", "icons/mainmenu/clone_16x16.png", "Clone"),
-    GROUP_WINDOW_USER_GUIDE(MainmenuConstants.GROUPS_WINDOW_KEY, "Help", "group_window_help_user_guide", "icons/mainmenu/user_guide_16x16.png", "User guide"),
     GROUP_WINDOW_ABOUT(MainmenuConstants.GROUPS_WINDOW_KEY, "Help", "group_window_help_about", "icons/mainmenu/about_16x16.png", "About"),
 
-    MAIN_EXIT(MainmenuConstants.PROJECTS_WINDOW_KEY, "File", "main_file_exit", "icons/mainmenu/exit_16x16.png", "Exit"),
     MAIN_CLONE_PROJECT(MainmenuConstants.PROJECTS_WINDOW_KEY, "Git", "main_git_clone_project", "icons/mainmenu/clone_16x16.png", "Clone"),
     MAIN_CREATE_BRANCH(MainmenuConstants.PROJECTS_WINDOW_KEY, "Git", "main_git_create_branch", "icons/mainmenu/newbranch_16x16.png", "New branch"),
     MAIN_SWITCH_BRANCH(MainmenuConstants.PROJECTS_WINDOW_KEY, "Git", "main_git_switch_branch", "icons/mainmenu/switchbranch_16x16.png", "Switch branch"),
@@ -27,7 +26,8 @@ public enum MainMenuItems {
     MAIN_PUSH(MainmenuConstants.PROJECTS_WINDOW_KEY, "Git", "main_git_push", "icons/mainmenu/push_16x16.png", "Push"),
     MAIN_PULL(MainmenuConstants.PROJECTS_WINDOW_KEY, "Git", "main_git_pull", "icons/mainmenu/pull_16x16.png", "Pull"),
     MAIN_REVERT(MainmenuConstants.PROJECTS_WINDOW_KEY, "Git", "main_git_revert", "icons/mainmenu/revert_changes_16x16.png", "Revert"),
-    MAIN_USER_GUIDE(MainmenuConstants.PROJECTS_WINDOW_KEY, "Help", "main_help_user_guide", "icons/mainmenu/user_guide_16x16.png", "User guide"),
+
+    GENERAL_USER_GUIDE(MainmenuConstants.ALL_WINDOW_KEY, "Help", "all_window_help_user_guide", "icons/mainmenu/user_guide_16x16.png", "User guide"),
     MAIN_ABOUT(MainmenuConstants.PROJECTS_WINDOW_KEY, "Help", "main_help_about", "icons/mainmenu/about_16x16.png", "About");
 
     private final String viewKey;
@@ -89,8 +89,9 @@ public enum MainMenuItems {
         return menuName;
     }
 
-    private static class MainmenuConstants{
-        private final static String GROUPS_WINDOW_KEY = ViewKey.GROUPS_WINDOW.getKey();
-        private final static String PROJECTS_WINDOW_KEY = ViewKey.PROJECTS_WINDOW.getKey();
+    static class MainmenuConstants{
+        final static String GROUPS_WINDOW_KEY = ViewKey.GROUPS_WINDOW.getKey();
+        final static String PROJECTS_WINDOW_KEY = ViewKey.PROJECTS_WINDOW.getKey();
+        final static String ALL_WINDOW_KEY = ViewKey.ALL_WINDOWS.getKey();
     }
 }

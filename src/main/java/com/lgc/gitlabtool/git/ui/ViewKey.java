@@ -10,6 +10,7 @@ public enum ViewKey {
     //GROUPS_WINDOW and PROJECTS_WINDOW used only for separating two parts of Modular controller
     GROUPS_WINDOW("groupWindow", null),
     PROJECTS_WINDOW("mainWindow", null),
+    ALL_WINDOWS("allWindows", null),
 
     MODULAR_CONTAINER("modularContainer", "fxml/ModularContainer.fxml"),
     CLONING_GROUPS_WINDOW("cloningGroupsWindow", "fxml/CloningGroupsWindow.fxml"),

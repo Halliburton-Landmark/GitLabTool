@@ -57,7 +57,7 @@ public class MainMenuManager {
         LinkedHashSet<String> menusTitles = new LinkedHashSet<>();
 
         Arrays.stream(MainMenuItems.values())
-                .filter(x -> x.getViewKey().equals(windowId))
+                .filter(x -> x.getViewKey().equals(windowId)  || x.getViewKey().equals(MainMenuItems.MainmenuConstants.ALL_WINDOW_KEY))
                 .map(MainMenuItems::getMenuName)
                 .forEach(menusTitles::add);
 
@@ -65,7 +65,8 @@ public class MainMenuManager {
 
         for (Menu menu : menus) {
             for (MainMenuItems button : MainMenuItems.values()) {
-                if (button.getViewKey().equals(windowId) && button.getMenuName().equals(menu.getText())) {
+                if ((button.getViewKey().equals(windowId) || button.getViewKey().equals(MainMenuItems.MainmenuConstants.ALL_WINDOW_KEY))
+                        && button.getMenuName().equals(menu.getText())) {
                     menu.getItems().add(createButton(button.getId(), button.getIconUrl(), button.getText()));
                 }
             }

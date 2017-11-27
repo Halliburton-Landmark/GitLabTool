@@ -22,6 +22,8 @@ import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.swing.text.View;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -461,15 +463,9 @@ public class ModularController implements UpdateProgressListener {
     private void initActionsMainMenu(String windowId) {
         if (windowId.equals(ViewKey.GROUPS_WINDOW.getKey())) {
             _mainMenuManager.getButtonById(MainMenuItems.GROUP_WINDOW_CLONE_GROUP).setOnAction(this::onCloneGroups);
-            _mainMenuManager.getButtonById(MainMenuItems.GROUP_WINDOW_EXIT).setOnAction(this::exit);
             _mainMenuManager.getButtonById(MainMenuItems.GROUP_WINDOW_ABOUT).setOnAction(this::showAboutPopup);
 
-            MenuItem userGuide = _mainMenuManager.getButtonById(MainMenuItems.GROUP_WINDOW_USER_GUIDE);
-            userGuide.setOnAction(this::openUserGuide);
-            userGuide.setAccelerator(new KeyCodeCombination(KeyCode.F1));
-
         } else if (windowId.equals(ViewKey.PROJECTS_WINDOW.getKey())) {
-            _mainMenuManager.getButtonById(MainMenuItems.MAIN_EXIT).setOnAction(this::exit);
             _mainMenuManager.getButtonById(MainMenuItems.MAIN_ABOUT).setOnAction(this::showAboutPopup);
             _mainMenuManager.getButtonById(MainMenuItems.MAIN_CLONE_PROJECT).setOnAction(this::cloneShadowProject);
             _mainMenuManager.getButtonById(MainMenuItems.MAIN_CREATE_BRANCH).setOnAction(this::onNewBranchButton);
@@ -479,10 +475,12 @@ public class ModularController implements UpdateProgressListener {
             _mainMenuManager.getButtonById(MainMenuItems.MAIN_REVERT).setOnAction(this::onRevertChanges);
             _mainMenuManager.getButtonById(MainMenuItems.MAIN_SWITCH_BRANCH).setOnAction(this::showSwitchBranchWindow);
 
-            MenuItem userGuide = _mainMenuManager.getButtonById(MainMenuItems.MAIN_USER_GUIDE);
+        }
+
+            MenuItem userGuide = _mainMenuManager.getButtonById(MainMenuItems.GENERAL_USER_GUIDE);
             userGuide.setOnAction(this::openUserGuide);
             userGuide.setAccelerator(new KeyCodeCombination(KeyCode.F1));
-        }
+            _mainMenuManager.getButtonById(MainMenuItems.GENERAL_EXIT).setOnAction(this::exit);
     }
 
     private void initializeGroupsDisableBinding(ListView listView) {
