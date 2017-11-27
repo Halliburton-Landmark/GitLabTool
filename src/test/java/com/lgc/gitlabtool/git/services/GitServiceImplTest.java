@@ -3,7 +3,7 @@ package com.lgc.gitlabtool.git.services;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -223,13 +223,13 @@ public class GitServiceImplTest {
     @Test
     public void addUntrackedFileForCommitCorrectData() {
         Project project = getClonedProject();
-        Set<String> files = getFiles();
 
         Map<Project, List<ChangedFile>> data = getFilesForProject(project);
-        when(_jGit.addUntrackedFilesToIndex(anyCollection(), eq(project))).thenReturn(new ArrayList<>(files));
+        when(_jGit.addUntrackedFileToIndex(any(), eq(project))).thenReturn(true);
+        when(_jGit.addDeletedFile(any(), eq(project), eq(true))).thenReturn(true);
 
         List<ChangedFile> addedFiles = _gitService.addUntrackedFilesToIndex(data);
-        assertEquals(addedFiles.size(), files.size());
+        assertEquals(addedFiles.size(), getChangedFiles().size());
     }
 
     @Test
@@ -288,8 +288,8 @@ public class GitServiceImplTest {
     private List<ChangedFile> getChangedFiles() {
         List<ChangedFile> files = new ArrayList<>();
         Project project = getClonedProject();
-        getFiles().forEach(fileName -> files.add(
-                new ChangedFile(project, fileName, false, false, ChangedFileType.UNSTAGED)));
+        getFiles().forEach(fileName -> files.add(new ChangedFile(project, fileName, false, false, ChangedFileType.UNSTAGED)));
+        files.add(new ChangedFile(project, "test 2", false, true, ChangedFileType.UNSTAGED));
         return files;
     }
 
