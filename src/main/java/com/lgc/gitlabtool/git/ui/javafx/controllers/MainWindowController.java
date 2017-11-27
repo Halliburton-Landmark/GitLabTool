@@ -255,10 +255,10 @@ public class MainWindowController implements StateListener {
                 .bind(booleanBindingForShadow);
 
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_CLONE_PROJECT).disableProperty().bind(booleanBindingForCloned);
-        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_COMMIT).disableProperty().bind(booleanBindingForShadow);
+        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_STAGING).disableProperty().bind(booleanBindingForShadow);
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_SWITCH_BRANCH).disableProperty().bind(booleanBindingForShadow);
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_CREATE_BRANCH).disableProperty().bind(booleanBindingForShadow);
-        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_COMMIT).disableProperty().bind(booleanBindingForShadow);
+        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_STAGING).disableProperty().bind(booleanBindingForShadow);
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_PUSH).disableProperty().bind(booleanBindingForShadow);
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_PULL).disableProperty().bind(booleanBindingForShadow);
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_REVERT).disableProperty().bind(booleanBindingForShadow);
@@ -431,8 +431,6 @@ public class MainWindowController implements StateListener {
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.CREATE_PROJECT_BUTTON.getId())
                 .setOnAction(this::createProjectButton);
 
-        //ToolbarManager.getInstance().getButtonById(ToolbarButtons.COMMIT_BUTTON.getId()).setOnAction(this::onCommitAction);
-
         ToolbarManager.getInstance().getButtonById(ToolbarButtons.PUSH_BUTTON.getId())
                 .setOnAction(this::onPushAction);
 
@@ -450,8 +448,6 @@ public class MainWindowController implements StateListener {
 
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_CREATE_BRANCH)
                 .setOnAction(this::onNewBranchButton);
-
-        //MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_COMMIT).setOnAction(this::onCommitAction);
 
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_PUSH)
                 .setOnAction(this::onPushAction);

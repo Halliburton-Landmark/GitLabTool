@@ -273,7 +273,7 @@ public class JGit {
      * Adds untracked files to index
      *
      * @param files names of files that need to add
-     * @param project the cloned project
+     * @param project the cloned project where located files
      */
     public List<String> addUntrackedFilesToIndex(Collection<String> files, Project project) {
         if (files == null || project == null) {
@@ -290,9 +290,10 @@ public class JGit {
     }
 
     /**
+     * Adds untracked file to index
      *
-     * @param fileName
-     * @param project
+     * @param fileName the file name
+     * @param project  the cloned project where located file
      */
     public boolean addUntrackedFileToIndex(String fileName, Project project) {
         if (fileName == null || project == null) {
@@ -551,7 +552,11 @@ public class JGit {
         try (Git git = getGit(project.getPath())){
             PersonIdent author = getPersonIdent(nameAuthor, emailAuthor);
             PersonIdent comitter = getPersonIdent(nameCommitter, emailCommitter);
-            git.commit().setMessage(message).setAuthor(author).setCommitter(comitter).call();
+            git.commit()
+               .setMessage(message)
+               .setAuthor(author)
+               .setCommitter(comitter)
+               .call();
             logger.debug("Commit for the " + project.getName() + " project is " + JGitStatus.SUCCESSFUL);
             return JGitStatus.SUCCESSFUL;
         } catch (IOException | GitAPIException e) {

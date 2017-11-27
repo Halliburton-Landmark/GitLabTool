@@ -23,7 +23,7 @@ public enum MainMenuItems {
     MAIN_CLONE_PROJECT(ViewKey.MAIN_WINDOW.getKey(), "Git", "main_git_clone_project", "icons/mainmenu/clone_16x16.png", "Clone"),
     MAIN_CREATE_BRANCH(ViewKey.MAIN_WINDOW.getKey(), "Git", "main_git_create_branch", "icons/mainmenu/newbranch_16x16.png", "New branch"),
     MAIN_SWITCH_BRANCH(ViewKey.MAIN_WINDOW.getKey(), "Git", "main_git_switch_branch", "icons/mainmenu/switchbranch_16x16.png", "Switch branch"),
-    MAIN_COMMIT(ViewKey.MAIN_WINDOW.getKey(), "Git", "main_git_commit", "icons/mainmenu/commit_16x16.png", "Commit"),
+    MAIN_STAGING(ViewKey.MAIN_WINDOW.getKey(), "Git", "main_git_staging", "icons/toolbar/staging_20x20.png", "Staging"),
     MAIN_PUSH(ViewKey.MAIN_WINDOW.getKey(), "Git", "main_git_push", "icons/mainmenu/push_16x16.png", "Push"),
     MAIN_PULL(ViewKey.MAIN_WINDOW.getKey(), "Git", "main_git_pull", "icons/mainmenu/pull_16x16.png", "Pull"),
     MAIN_REVERT(ViewKey.MAIN_WINDOW.getKey(), "Git", "main_git_revert", "icons/mainmenu/revert_changes_16x16.png", "Revert"),

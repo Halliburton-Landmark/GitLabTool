@@ -88,7 +88,6 @@ public class ModularController implements UpdateProgressListener {
     private static final String REMOVE_GROUP_DIALOG_TITLE = "Remove Group";
     private static final String REMOVE_GROUP_STATUS_DIALOG_TITLE = "Import Status Dialog";
     private static final String FAILED_REMOVE_GROUP_MESSAGE = "Removing of group is Failed";
-    private static final String FXML_RESOURCE_EXCEPTION_MESSAGE = "Could not load fxml resource";
 
     private static final String CSS_PATH = "css/style.css";
     private static final Image _appIcon = AppIconHolder.getInstance().getAppIcoImage();
@@ -217,7 +216,7 @@ public class ModularController implements UpdateProgressListener {
     private void initActionsToolBar(String windowId) {
         if (windowId.equals(ViewKey.GROUP_WINDOW.getKey())) {
             ToolbarManager.getInstance().getButtonById(ToolbarButtons.IMPORT_GROUP_BUTTON.getId())
-                    .setOnAction(this::importGroupDialog);
+                    .setOnAction(event -> importGroupDialog());
 
             ToolbarManager.getInstance().getButtonById(ToolbarButtons.REMOVE_GROUP_BUTTON.getId())
                     .setOnAction(this::onRemoveGroup);
@@ -290,6 +289,8 @@ public class ModularController implements UpdateProgressListener {
             MenuItem switchTo = MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_SWITCH_BRANCH);
             switchTo.setOnAction(this::showSwitchBranchWindow);
 
+            MenuItem staging = MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_STAGING);
+            staging.setOnAction(event -> WindowLoader.get().loadGitStageWindow(null));
         }
     }
 
@@ -307,6 +308,8 @@ public class ModularController implements UpdateProgressListener {
             URL switchBranchWindowUrl = getClass().getClassLoader().getResource(ViewKey.SWITCH_BRANCH_WINDOW.getPath());
             FXMLLoader loader = new FXMLLoader(switchBranchWindowUrl);
             Parent root = loader.load();
+
+            SwitchBranchWindowController switchWindowController  = loader.getController();
 
             Scene scene = new Scene(root);
             Stage stage = new Stage();
@@ -327,11 +330,10 @@ public class ModularController implements UpdateProgressListener {
             stage.setMinWidth(dialogWidth / 2);
             stage.setMinHeight(dialogHeight / 2);
 
-            SwitchBranchWindowController switchWindowController  = loader.getController();
             switchWindowController.beforeShowing(projects, stage);
             stage.show();
         } catch (IOException e) {
-            logger.error(FXML_RESOURCE_EXCEPTION_MESSAGE, e);
+            logger.error("Could not load fxml resource", e);
         }
     }
 
@@ -357,7 +359,7 @@ public class ModularController implements UpdateProgressListener {
         alert.show();
     }
 
-    private void importGroupDialog(ActionEvent event) {
+    private void importGroupDialog() {
         if (viewPane != null) {
             Stage stage = (Stage) viewPane.getScene().getWindow();
             stage.getIcons().add(_appIcon);

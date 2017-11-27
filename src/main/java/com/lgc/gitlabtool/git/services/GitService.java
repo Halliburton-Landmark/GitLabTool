@@ -192,9 +192,8 @@ public interface GitService {
 
     /**
      * Gets ProjectStatus for project.
-     * We use {@link Status} for getting info about conflicting, untracked files.
+     * We use {@link Status} for getting info about conflicting, untracked files etc.
      * Also, use it for checking the presence of uncommitted changes.
-     *
      * Gets current branch name, ahead and behind indexes using {@link Git}.
      *
      * @param  project the project

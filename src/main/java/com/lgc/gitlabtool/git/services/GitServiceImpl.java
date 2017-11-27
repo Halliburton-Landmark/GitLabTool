@@ -1,6 +1,7 @@
 package com.lgc.gitlabtool.git.services;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -295,14 +296,13 @@ public class GitServiceImpl implements GitService {
 
     @Override
     public boolean[] hasConflictsAndChanges(Project project) {
-        Optional<Status> optStatus = _git.getStatusProject(project);
+        Optional<Status> status = _git.getStatusProject(project);
 
         boolean hasConflicts = false;
         boolean hasChanges = false;
-        if (optStatus.isPresent()) {
-            Status status = optStatus.get();
-            hasConflicts = status.getConflicting().size() > 0;
-            hasChanges = status.hasUncommittedChanges()  || !status.getUntracked().isEmpty();
+        if (status.isPresent()) {
+            hasConflicts = status.get().getConflicting().size() > 0;
+            hasChanges = status.get().hasUncommittedChanges();
         }
         return new boolean[] {hasConflicts, hasChanges};
     }
@@ -314,18 +314,25 @@ public class GitServiceImpl implements GitService {
 
     @Override
     public List<ChangedFile> getChangedFiles(Project project) {
-        List<ChangedFile> changedFiles = new ArrayList<>();
+        List<ChangedFile> files = new ArrayList<>();
         if (project == null || !project.isCloned()) {
-            return changedFiles;
+            return files;
         }
         ProjectStatus status = project.getProjectStatus();
-        status.getChangedFiles().forEach(file -> changedFiles.add(new ChangedFile(project, file, false, false, ChangedFileType.STAGED)));
-        status.getUntrackedFiles().forEach(file -> changedFiles.add(new ChangedFile(project, file, false, false, ChangedFileType.UNSTAGED)));
-        status.getConflictedFiles().forEach(file -> changedFiles.add(new ChangedFile(project, file, true, false, ChangedFileType.UNSTAGED)));
-        status.getRemovedFiles().forEach(file -> changedFiles.add(new ChangedFile(project, file, false, true, ChangedFileType.STAGED)));
-        status.getMissingFiles().forEach(file -> changedFiles.add(new ChangedFile(project, file, false, true, ChangedFileType.UNSTAGED)));
-        status.getModifiedFiles().forEach(file -> changedFiles.add(new ChangedFile(project, file, false, false, ChangedFileType.UNSTAGED)));
-        return changedFiles;
+        files.addAll(convertToChanged(status.getChangedFiles(), project, false, false, ChangedFileType.STAGED));
+        files.addAll(convertToChanged(status.getRemovedFiles(), project, false, true, ChangedFileType.STAGED));
+        files.addAll(convertToChanged(status.getUntrackedFiles(), project, false, false, ChangedFileType.UNSTAGED));
+        files.addAll(convertToChanged(status.getConflictedFiles(), project,  true, false, ChangedFileType.UNSTAGED));
+        files.addAll(convertToChanged(status.getMissingFiles(), project, false, true, ChangedFileType.UNSTAGED));
+        files.addAll(convertToChanged(status.getModifiedFiles(), project, false, false, ChangedFileType.UNSTAGED));
+        return files;
+    }
+
+    private List<ChangedFile> convertToChanged(Collection<String> fileNames, Project project,
+            boolean hasConflicting, boolean wasRemoved, ChangedFileType typeFile) {
+        return fileNames.stream()
+                        .map(fileName -> new ChangedFile(project, fileName, hasConflicting, wasRemoved, typeFile))
+                        .collect(Collectors.toList());
     }
 
     @Override

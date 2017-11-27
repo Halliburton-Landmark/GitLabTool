@@ -8,14 +8,14 @@ import java.util.stream.Collectors;
 import com.lgc.gitlabtool.git.entities.Project;
 
 /**
- * Util class for work with {@link ChangedFile}.
+ * Util class for working with {@link ChangedFile}.
  *
  * @author Lyudmila Lyska
  */
 public class ChangedFilesUtils {
 
     /**
-     * Gets list of file names from changedFiles list.
+     * Gets list of file names from the changedFiles list.
      *
      * @param  changedFiles the changed files
      * @return a list of file names

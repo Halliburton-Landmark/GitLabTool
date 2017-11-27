@@ -32,6 +32,11 @@ import javafx.scene.image.Image;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+/**
+ * Class for loading new windows by fxml which which are used outside {@link ModularController}
+ *
+ * @author Lyudmila Lyska
+ */
 public class WindowLoader {
 
     private static WindowLoader _windowLoader;
@@ -58,6 +63,11 @@ public class WindowLoader {
         return _windowLoader;
     }
 
+    /**
+     * Loads Git Staging window.
+     *
+     * @param selectedProjects the selected projects.
+     */
     public void loadGitStageWindow(List<Project> selectedProjects) {
         try {
             if (selectedProjects == null) {

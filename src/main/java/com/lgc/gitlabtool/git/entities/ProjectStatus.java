@@ -98,8 +98,10 @@ public class ProjectStatus implements Serializable {
      * @param currentBranch  the branch name
      * @param conflicting    the set of files which has conflicting
      * @param untrackedFiles the set of files which weren't not added to index
-     * @param changedFiles   the set of files which were added to index
-     * @param removedFiles   the set of removed files which weren't not added to index
+     * @param changedFiles   the set of changed files which are located in staging
+     * @param removedFiles   the set of files which were removed from local disk and were added to staging
+     * @param missingFiles   the set of files which were deleted from local disk but haven't added to staging yet
+     * @param modifiedFiles  the set of files which were changed but haven't added to staging yet
      */
     public ProjectStatus(boolean hasChanges, int aheadIndex, int behindIndex, String currentBranch,
                          Set<String> conflicting, Set<String> untrackedFiles, Set<String> changedFiles,
@@ -189,7 +191,7 @@ public class ProjectStatus implements Serializable {
     }
 
     /**
-     * Gets changed files (files which are located in staging)
+     * Gets changed files which are located in staging
      *
      * @return a set of files
      */
