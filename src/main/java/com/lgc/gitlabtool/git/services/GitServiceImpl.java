@@ -357,8 +357,8 @@ public class GitServiceImpl implements GitService {
         try {
             for (Entry<Project, List<ChangedFile>> entry : files.entrySet()) {
                 Project project = entry.getKey();
-                if (project != null && project.isCloned()) {
-                    List<ChangedFile> changedFiles = entry.getValue();
+                List<ChangedFile> changedFiles = entry.getValue();
+                if (project != null && project.isCloned() && !changedFiles.isEmpty()) {
                     List<String> fileNames = ChangedFilesUtils.getFileNames(changedFiles);
                     List<String> result = _git.resetChangedFiles(fileNames, project);
                     resetedFiles.addAll(ChangedFilesUtils.getChangedFiles(result, project, changedFiles));

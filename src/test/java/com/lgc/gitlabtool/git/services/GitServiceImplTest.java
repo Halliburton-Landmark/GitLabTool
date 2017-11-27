@@ -269,6 +269,33 @@ public class GitServiceImplTest {
         assertEquals(hasChanges, status.hasChanges());
     }
 
+    @Test
+    public void resetChangedFilesIncorrectData() {
+        Map<Project, List<ChangedFile>> changedFile = new HashMap<>();
+        assertTrue(_gitService.resetChangedFiles(null).isEmpty());
+        assertTrue(_gitService.resetChangedFiles(changedFile).isEmpty());
+
+        changedFile.put(null, getChangedFiles());
+        changedFile.put(new Project(), getChangedFiles());
+        changedFile.put(getClonedProject(), new ArrayList<>());
+        assertTrue(_gitService.resetChangedFiles(changedFile).isEmpty());
+    }
+
+    @Test
+    public void resetChangedFilesCorrectData() {
+        Project project = getClonedProject();
+        Set<String> files = getFiles();
+        Map<Project, List<ChangedFile>> data = getFilesForProject(project);
+        when(_jGit.resetChangedFiles(any(), eq(project))).thenReturn(new ArrayList<>(files));
+
+        List<ChangedFile> modifiedFiles = _gitService.resetChangedFiles(data);
+        assertFalse(modifiedFiles.isEmpty());
+        assertEquals(modifiedFiles.size(), files.size());
+    }
+
+
+    /*********************************************************************************************************/
+
     private Optional<Status> getIncorrectStatus() {
         return Optional.empty();
     }
