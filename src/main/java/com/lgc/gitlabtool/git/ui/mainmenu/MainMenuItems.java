@@ -17,7 +17,6 @@ public enum MainMenuItems {
     GENERAL_EXIT(MainmenuConstants.ALL_WINDOW_KEY, "File", "main_file_exit", "icons/mainmenu/exit_16x16.png", "Exit"),
 
     GROUP_WINDOW_CLONE_GROUP(MainmenuConstants.GROUPS_WINDOW_KEY, "Git", "group_window_group_clone", "icons/mainmenu/clone_16x16.png", "Clone"),
-    GROUP_WINDOW_ABOUT(MainmenuConstants.GROUPS_WINDOW_KEY, "Help", "group_window_help_about", "icons/mainmenu/about_16x16.png", "About"),
 
     MAIN_CLONE_PROJECT(MainmenuConstants.PROJECTS_WINDOW_KEY, "Git", "main_git_clone_project", "icons/mainmenu/clone_16x16.png", "Clone"),
     MAIN_CREATE_BRANCH(MainmenuConstants.PROJECTS_WINDOW_KEY, "Git", "main_git_create_branch", "icons/mainmenu/newbranch_16x16.png", "New branch"),
@@ -28,7 +27,7 @@ public enum MainMenuItems {
     MAIN_REVERT(MainmenuConstants.PROJECTS_WINDOW_KEY, "Git", "main_git_revert", "icons/mainmenu/revert_changes_16x16.png", "Revert"),
 
     GENERAL_USER_GUIDE(MainmenuConstants.ALL_WINDOW_KEY, "Help", "all_window_help_user_guide", "icons/mainmenu/user_guide_16x16.png", "User guide"),
-    MAIN_ABOUT(MainmenuConstants.PROJECTS_WINDOW_KEY, "Help", "main_help_about", "icons/mainmenu/about_16x16.png", "About");
+    GENERAL_ABOUT(MainmenuConstants.ALL_WINDOW_KEY, "Help", "all_window_help_about", "icons/mainmenu/about_16x16.png", "About");
 
     private final String viewKey;
     private final String menuName;

@@ -463,10 +463,9 @@ public class ModularController implements UpdateProgressListener {
     private void initActionsMainMenu(String windowId) {
         if (windowId.equals(ViewKey.GROUPS_WINDOW.getKey())) {
             _mainMenuManager.getButtonById(MainMenuItems.GROUP_WINDOW_CLONE_GROUP).setOnAction(this::onCloneGroups);
-            _mainMenuManager.getButtonById(MainMenuItems.GROUP_WINDOW_ABOUT).setOnAction(this::showAboutPopup);
+
 
         } else if (windowId.equals(ViewKey.PROJECTS_WINDOW.getKey())) {
-            _mainMenuManager.getButtonById(MainMenuItems.MAIN_ABOUT).setOnAction(this::showAboutPopup);
             _mainMenuManager.getButtonById(MainMenuItems.MAIN_CLONE_PROJECT).setOnAction(this::cloneShadowProject);
             _mainMenuManager.getButtonById(MainMenuItems.MAIN_CREATE_BRANCH).setOnAction(this::onNewBranchButton);
             _mainMenuManager.getButtonById(MainMenuItems.MAIN_COMMIT).setOnAction(this::onCommitAction);
@@ -481,6 +480,7 @@ public class ModularController implements UpdateProgressListener {
             userGuide.setOnAction(this::openUserGuide);
             userGuide.setAccelerator(new KeyCodeCombination(KeyCode.F1));
             _mainMenuManager.getButtonById(MainMenuItems.GENERAL_EXIT).setOnAction(this::exit);
+            _mainMenuManager.getButtonById(MainMenuItems.GENERAL_ABOUT).setOnAction(this::showAboutPopup);
     }
 
     private void initializeGroupsDisableBinding(ListView listView) {
