@@ -81,6 +81,41 @@ public class ChangedFile implements Serializable {
         return _hasConflicting;
     }
 
+    /**
+     * Sets hasConflicting value.
+     *
+     * @param hasConflicting <code>true</code> if file has conflicts, otherwise <code>false</code>
+     */
+    public void setHasConflicting(boolean hasConflicting) {
+        _hasConflicting = hasConflicting;
+    }
+
+    /**
+     * Gets {@link ChangedFileType} file.
+     *
+     * @return ChangedFileType
+     */
+    public ChangedFileType getTypeFile() {
+        return _typeFile;
+    }
+
+    /**
+     * Gets wasRemoved value.
+     *
+     * @return <code>true</code> if file was removed, otherwise <code>false</code>
+     */
+    public boolean wasRemoved() {
+        return _wasRemoved;
+    }
+
+    private void setTypeFile(ChangedFileType typeFile) {
+        _typeFile = typeFile;
+    }
+
+    private void setWasRemoved(boolean wasRemoved) {
+        _wasRemoved = wasRemoved;
+    }
+
     private void setProject(Project project) {
         _project = project;
     }
@@ -92,14 +127,6 @@ public class ChangedFile implements Serializable {
 
     private void setFileExtension(String fileName) {
         _fileExtension = FilenameUtils.getExtension(fileName);
-    }
-
-    /**
-     *
-     * @param hasConflicting
-     */
-    public void setHasConflicting(boolean hasConflicting) {
-        _hasConflicting = hasConflicting;
     }
 
     @Override
@@ -138,22 +165,6 @@ public class ChangedFile implements Serializable {
             return false;
         }
         return true;
-    }
-
-    public ChangedFileType getTypeFile() {
-        return _typeFile;
-    }
-
-    private void setTypeFile(ChangedFileType typeFile) {
-        _typeFile = typeFile;
-    }
-
-    public boolean wasRemoved() {
-        return _wasRemoved;
-    }
-
-    private void setWasRemoved(boolean wasRemoved) {
-        _wasRemoved = wasRemoved;
     }
 
 }

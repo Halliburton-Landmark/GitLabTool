@@ -35,10 +35,12 @@ public class GitServiceImpl implements GitService {
 
     private static JGit _git;
     private static StateService _stateService;
+    private static ChangedFilesUtils _changedFilesUtils;
 
-    public GitServiceImpl(StateService stateService, JGit jGit) {
+    public GitServiceImpl(StateService stateService, JGit jGit, ChangedFilesUtils changedFilesUtils) {
         _stateService = stateService;
         _git = jGit;
+        _changedFilesUtils = changedFilesUtils;
     }
 
     @Override
@@ -359,9 +361,9 @@ public class GitServiceImpl implements GitService {
                 Project project = entry.getKey();
                 List<ChangedFile> changedFiles = entry.getValue();
                 if (project != null && project.isCloned() && !changedFiles.isEmpty()) {
-                    List<String> fileNames = ChangedFilesUtils.getFileNames(changedFiles);
+                    List<String> fileNames = _changedFilesUtils.getFileNames(changedFiles);
                     List<String> result = _git.resetChangedFiles(fileNames, project);
-                    resetedFiles.addAll(ChangedFilesUtils.getChangedFiles(result, project, changedFiles));
+                    resetedFiles.addAll(getNewChangedFiles(result, project, changedFiles));
                 }
             }
         } finally {
@@ -385,6 +387,18 @@ public class GitServiceImpl implements GitService {
                 }
             }
         }
-        return ChangedFilesUtils.getChangedFiles(addedFiles, project, changedFiles);
+        return getNewChangedFiles(addedFiles, project, changedFiles);
+    }
+
+    private List<ChangedFile> getNewChangedFiles(List<String> fileNames, Project project, List<ChangedFile> sourceList) {
+        return resetConflicts(_changedFilesUtils.getChangedFiles(fileNames, project, sourceList));
+    }
+
+    private List<ChangedFile> resetConflicts(List<ChangedFile> sourceList) {
+        // If the file was added to the index, it can no longer have conflicts even if we do a reset.
+        sourceList.stream()
+                  .filter(changedFile -> changedFile.hasConflicting())
+                  .forEach(changedFile -> changedFile.setHasConflicting(false));
+        return sourceList;
     }
 }

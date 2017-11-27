@@ -30,6 +30,7 @@ import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.ProjectStatus;
 import com.lgc.gitlabtool.git.jgit.ChangedFile;
 import com.lgc.gitlabtool.git.jgit.ChangedFileType;
+import com.lgc.gitlabtool.git.jgit.ChangedFilesUtils;
 import com.lgc.gitlabtool.git.jgit.JGit;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
@@ -41,12 +42,14 @@ public class GitServiceImplTest {
 
     private StateService _stateService;
     private JGit _jGit;
+    private ChangedFilesUtils _changedFilesUtilsMock;
 
     @Before
     public void init() {
         _stateService = Mockito.mock(StateService.class);
         _jGit = Mockito.mock(JGit.class);
-        _gitService = new GitServiceImpl(_stateService, _jGit);
+        _changedFilesUtilsMock = Mockito.mock(ChangedFilesUtils.class);
+        _gitService = new GitServiceImpl(_stateService, _jGit, _changedFilesUtilsMock);
     }
 
     @After
@@ -205,9 +208,8 @@ public class GitServiceImplTest {
         Project project = getClonedProject();
         Set<String> files = getFiles();
 
-        ProjectStatus status = new ProjectStatus();
-        status.setConflictedFiles(files);
-        status.setUntrackedFiles(files);
+        ProjectStatus status = new ProjectStatus(false, 0, 0, "branch", files, files,
+                new HashSet<>(), new HashSet<>(), new HashSet<>(),new HashSet<>());
         project.setProjectStatus(status);
 
         Collection<ChangedFile> changedFiles = _gitService.getChangedFiles(project);
@@ -225,6 +227,7 @@ public class GitServiceImplTest {
         Project project = getClonedProject();
 
         Map<Project, List<ChangedFile>> data = getFilesForProject(project);
+        when(_changedFilesUtilsMock.getChangedFiles(any(), any(), any())).thenReturn(getChangedFiles());
         when(_jGit.addUntrackedFileToIndex(any(), eq(project))).thenReturn(true);
         when(_jGit.addDeletedFile(any(), eq(project), eq(true))).thenReturn(true);
 
@@ -284,9 +287,11 @@ public class GitServiceImplTest {
     @Test
     public void resetChangedFilesCorrectData() {
         Project project = getClonedProject();
-        Set<String> files = getFiles();
+        List<String> files = new ArrayList<>(getFiles());
         Map<Project, List<ChangedFile>> data = getFilesForProject(project);
-        when(_jGit.resetChangedFiles(any(), eq(project))).thenReturn(new ArrayList<>(files));
+        when(_changedFilesUtilsMock.getFileNames(any())).thenReturn(files);
+        when(_jGit.resetChangedFiles(any(), eq(project))).thenReturn(files);
+        when(_changedFilesUtilsMock.getChangedFiles(eq(files), eq(project), any())).thenReturn(getChangedFiles(files));
 
         List<ChangedFile> modifiedFiles = _gitService.resetChangedFiles(data);
         assertFalse(modifiedFiles.isEmpty());
@@ -313,11 +318,16 @@ public class GitServiceImplTest {
     }
 
     private List<ChangedFile> getChangedFiles() {
-        List<ChangedFile> files = new ArrayList<>();
-        Project project = getClonedProject();
-        getFiles().forEach(fileName -> files.add(new ChangedFile(project, fileName, false, false, ChangedFileType.UNSTAGED)));
-        files.add(new ChangedFile(project, "test 2", false, true, ChangedFileType.UNSTAGED));
+        List<ChangedFile> files = getChangedFiles(getFiles());
+        files.add(new ChangedFile(getClonedProject(), "test 2", false, true, ChangedFileType.UNSTAGED));
         return files;
+    }
+
+    private List<ChangedFile> getChangedFiles(Collection<String> files) {
+        List<ChangedFile> changedFiles = new ArrayList<>();
+        Project project = getClonedProject();
+        getFiles().forEach(fileName -> changedFiles.add(new ChangedFile(project, fileName, false, false, ChangedFileType.UNSTAGED)));
+        return changedFiles;
     }
 
     private Map<Project, List<ChangedFile>> getFilesForProject(Project project) {

@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.lgc.gitlabtool.git.connections.RESTConnector;
 import com.lgc.gitlabtool.git.connections.RESTConnectorFactory;
+import com.lgc.gitlabtool.git.jgit.ChangedFilesUtils;
 import com.lgc.gitlabtool.git.jgit.JGit;
 
 public class ServiceProvider {
@@ -30,7 +31,7 @@ public class ServiceProvider {
         StorageService storageService = new StorageServiceImpl();
         ProjectTypeService projectTypeService = new ProjectTypeServiceImpl();
         StateService stateService = new StateServiceImpl();
-        GitService gitService = new GitServiceImpl(stateService, JGit.getInstance());
+        GitService gitService = new GitServiceImpl(stateService, JGit.getInstance(), new ChangedFilesUtils());
         ConsoleService consoleService = new ConsoleServiceImpl();
         ProjectService projectService = new ProjectServiceImpl(restConnector, projectTypeService,
                 stateService, consoleService, gitService);

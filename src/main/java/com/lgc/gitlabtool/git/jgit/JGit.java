@@ -174,7 +174,6 @@ public class JGit {
         }
         try (Git git = getGit(project.getPath())) {
             git.reset().setMode(ResetCommand.ResetType.HARD).call();
-            project.getProjectStatus().setHasChanges(false);
             return JGitStatus.SUCCESSFUL;
         } catch (GitAPIException | IOException e) {
             logger.error("Failed to discard changed for the " + project.getName() +" project: ", e);

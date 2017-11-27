@@ -126,30 +126,12 @@ public class ProjectStatus implements Serializable {
     }
 
     /**
-     * Sets set of files which have conflicts.
-     *
-     * @param conflictingChanges the files
-     */
-    public void setConflictedFiles(Set<String> conflictingChanges) {
-        _conflictedFiles = conflictingChanges;
-    }
-
-    /**
      * Gets set of files which don't add to index (new files).
      *
      * @return files set
      */
     public Set<String> getUntrackedFiles() {
         return _untrackedFiles;
-    }
-
-    /**
-     * Sets set of files which don't add to index (new files).
-     *
-     * @param uncommittedChanges the files
-     */
-    public void setUntrackedFiles(Set<String> uncommittedChanges) {
-        _untrackedFiles = uncommittedChanges;
     }
 
     /**
@@ -171,21 +153,12 @@ public class ProjectStatus implements Serializable {
     }
 
     /**
-     *
+     * Project has new files which weren't added to index.
      *
      * @return <code>true</code> if the project has untracked files <code>false</code> otherwise.
      */
     public boolean hasNewUntrackedFiles() {
         return !_untrackedFiles.isEmpty();
-    }
-
-    /**
-     * Sets hasChanges parameter.
-     *
-     * @return <code>true</code> if the project has conflicts <code>false</code> otherwise.
-     */
-    public void setHasChanges(boolean hasChanges) {
-        _hasChanges = hasChanges;
     }
 
     /**
@@ -198,30 +171,12 @@ public class ProjectStatus implements Serializable {
     }
 
     /**
-     * Sets the number of ahead commit.
-     *
-     * @param aheadIndex the number of ahead commit.
-     */
-    public void setAheadIndex(int aheadIndex) {
-        _aheadIndex = aheadIndex < 0 ? 0 : aheadIndex;
-    }
-
-    /**
      * Gets the number of behind commit.
      *
      * @param number
      */
     public int getBehindIndex() {
         return _behindIndex;
-    }
-
-    /**
-     * Sets the number of behind commit.
-     *
-     * @param behindIndex the number of behind commit.
-     */
-    public void setBehindIndex(int behindIndex) {
-        _behindIndex = behindIndex < 0 ? 0 : behindIndex;
     }
 
     /**
@@ -234,46 +189,79 @@ public class ProjectStatus implements Serializable {
     }
 
     /**
-     * Sets a name of current branch.
+     * Gets changed files (files which are located in staging)
      *
-     * @param currentBranch the branch name
-     *
-     * Sets StringUtils.EMPTY if the currentBranch is null.
+     * @return a set of files
      */
-    public void setCurrentBranch(String currentBranch) {
-        _currentBranch = currentBranch == null ? StringUtils.EMPTY : currentBranch;
-    }
-
     public Set<String> getChangedFiles() {
         return _changedFiles;
     }
 
-    public void setChangedFiles(Set<String> changedFiles) {
-        _changedFiles = changedFiles;
-    }
-
+    /**
+     * Gets removed files (deleted files which were added in staging)
+     *
+     * @return a set of files
+     */
     public Set<String> getRemovedFiles() {
         return _removedFiles;
     }
 
-    public void setRemovedFiles(Set<String> removedFiles) {
-        _removedFiles = removedFiles;
-    }
-
+    /**
+     * Gets files which were deleted from local disk but haven't added to staging yet
+     *
+     * @return a set of files
+     */
     public Set<String> getMissingFiles() {
         return _missingFiles;
     }
 
-    public void setMissingFiles(Set<String> missingFiles) {
-        _missingFiles = missingFiles;
-    }
-
+    /**
+     * Gets modifies files. It is files which were changed but haven't added to staging yet
+     *
+     * @return a set of files
+     */
     public Set<String> getModifiedFiles() {
         return _modifiedFiles;
     }
 
-    public void setModifiedFiles(Set<String> modifiedFiles) {
+    private void setCurrentBranch(String currentBranch) {
+        _currentBranch = currentBranch == null ? StringUtils.EMPTY : currentBranch;
+    }
+
+    private void setHasChanges(boolean hasChanges) {
+        _hasChanges = hasChanges;
+    }
+
+    private void setAheadIndex(int aheadIndex) {
+        _aheadIndex = aheadIndex < 0 ? 0 : aheadIndex;
+    }
+
+    private void setBehindIndex(int behindIndex) {
+        _behindIndex = behindIndex < 0 ? 0 : behindIndex;
+    }
+
+    private void setUntrackedFiles(Set<String> uncommittedChanges) {
+        _untrackedFiles = uncommittedChanges;
+    }
+
+    private void setModifiedFiles(Set<String> modifiedFiles) {
         _modifiedFiles = modifiedFiles;
+    }
+
+    private void setRemovedFiles(Set<String> removedFiles) {
+        _removedFiles = removedFiles;
+    }
+
+    private void setMissingFiles(Set<String> missingFiles) {
+        _missingFiles = missingFiles;
+    }
+
+    private void setChangedFiles(Set<String> changedFiles) {
+        _changedFiles = changedFiles;
+    }
+
+    private void setConflictedFiles(Set<String> conflictingChanges) {
+        _conflictedFiles = conflictingChanges;
     }
 
 }

@@ -7,27 +7,34 @@ import java.util.stream.Collectors;
 
 import com.lgc.gitlabtool.git.entities.Project;
 
+/**
+ * Util class for work with {@link ChangedFile}.
+ *
+ * @author Lyudmila Lyska
+ */
 public class ChangedFilesUtils {
 
     /**
+     * Gets list of file names from changedFiles list.
      *
-     * @param changedFiles
-     * @return
+     * @param  changedFiles the changed files
+     * @return a list of file names
      */
-    public static List<String> getFileNames(List<ChangedFile> changedFiles) {
+    public List<String> getFileNames(List<ChangedFile> changedFiles) {
         return changedFiles.stream()
                            .map(ChangedFile::getFileName)
                            .collect(Collectors.toList());
     }
 
     /**
+     * Gets list of changed files by the list of file names using source list.
      *
-     * @param fileNames
-     * @param project
-     * @param sourceList
-     * @return
+     * @param  fileNames  the list of file names
+     * @param  project    the project from which were received these files
+     * @param  sourceList the source from which got the list of file names.
+     * @return a list of changed files found by names in the source list.
      */
-    public static List<ChangedFile> getChangedFiles(List<String> fileNames, Project project, List<ChangedFile> sourceList) {
+    public List<ChangedFile> getChangedFiles(List<String> fileNames, Project project, List<ChangedFile> sourceList) {
         return fileNames.stream()
                         .map(fileName -> getChangedFile(fileName, sourceList))
                         .filter(optionalFile -> optionalFile.isPresent())
@@ -35,14 +42,9 @@ public class ChangedFilesUtils {
                         .collect(Collectors.toList());
     }
 
-    private static Optional<ChangedFile> getChangedFile(String fileName, List<ChangedFile> sourceList) {
-        Optional<ChangedFile> foundFile = sourceList.stream()
-                                         .filter(file -> Objects.equals(file.getFileName(), fileName))
-                                         .findFirst();
-        //If the file was added to the index, it can no longer have conflicts even if we do a reset.
-        if (foundFile.isPresent()) {
-            foundFile.get().setHasConflicting(false);
-        }
-        return foundFile;
+    private Optional<ChangedFile> getChangedFile(String fileName, List<ChangedFile> sourceList) {
+        return sourceList.stream()
+                         .filter(file -> Objects.equals(file.getFileName(), fileName))
+                         .findFirst();
     }
 }
