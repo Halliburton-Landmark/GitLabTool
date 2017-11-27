@@ -50,6 +50,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -222,8 +223,9 @@ public class ModularController implements UpdateProgressListener {
                     .setOnAction(this::onRemoveGroup);
 
         } else if (windowId.equals(ViewKey.MAIN_WINDOW.getKey())) {
-            ToolbarManager.getInstance().getButtonById(ToolbarButtons.SWITCH_BRANCH_BUTTON.getId())
-                    .setOnAction(this::showSwitchBranchWindow);
+            Button switchBranch = ToolbarManager.getInstance()
+                    .getButtonById(ToolbarButtons.SWITCH_BRANCH_BUTTON.getId());
+            switchBranch.setOnAction(event -> switchBranchAction());
 
             ToolbarManager.getInstance().getButtonById(ToolbarButtons.STAGING_BUTTON.getId())
                     .setOnAction(event -> WindowLoader.get().loadGitStageWindow(null));
@@ -287,14 +289,18 @@ public class ModularController implements UpdateProgressListener {
             userGuide.setAccelerator(new KeyCodeCombination(KeyCode.F1));
 
             MenuItem switchTo = MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_SWITCH_BRANCH);
-            switchTo.setOnAction(this::showSwitchBranchWindow);
+            switchTo.setOnAction(event -> showSwitchBranchWindow());
 
             MenuItem staging = MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_STAGING);
             staging.setOnAction(event -> WindowLoader.get().loadGitStageWindow(null));
         }
     }
 
-    private void showSwitchBranchWindow(ActionEvent event) {
+    private void switchBranchAction(){
+        showSwitchBranchWindow();
+    }
+
+    private void showSwitchBranchWindow() {
         try {
             List<Project> projects = SelectionsProvider.getInstance().getSelectionItems("mainWindow_projectsList");
             projects = ProjectList.getCorrectProjects(projects);

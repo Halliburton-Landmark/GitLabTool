@@ -13,8 +13,10 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
 /**
- * ListCell for ListView<ChangedFile>. Sets HBox which contents - a name of changed file (if file has conflicts we'll
- * set Color.RED to text); - a name of project.
+ * ListCell for ListView<ChangedFile>.
+ * Sets HBox which contents:
+ *        - a name of changed file (if file has conflicts we'll set Color.RED to text);
+ *        - a name of project.
  *
  * @author Lyudmila Lyska
  */

@@ -30,6 +30,10 @@ public class ProjectListCell extends ListCell<Project> {
     private static final String COMMITS_BEHIND_INDEX_ICON_URL = "icons/project/list_icons/behind_index_12x12.png";
     private static final String COMMITS_AHEAD_TOOLTIP = "Count of commits ahead index";
     private static final String COMMITS_BEHIND_TOOLTIP = "Count of commits behind index";
+    private static final String CONFLICTS_TOOLTIP = "Project has conflicts";
+    private static final String UNCOMMITTED_CHANGES_TOOLTIP = "Project has uncommitted changes";
+    private static final String NEW_FILES_TOOLTIP = "Project has new files";
+
     private final Integer LIST_CELL_SPACING = 5;
     private final Double INDEX_FONT_SIZE = 12.0;
     private final String LEFT_BRACKET = "[";
@@ -106,21 +110,19 @@ public class ProjectListCell extends ListCell<Project> {
         }
         ProjectStatus projectStatus = project.getProjectStatus();
         if (projectStatus.hasConflicts()) {
-            Node conflictsImageView = newStatusPic(getImage(PROJECT_WITH_CONFLICTS_ICON_URL),
-                    "Project has conflicts");
+            Node conflictsImageView = newStatusPic(getImage(PROJECT_WITH_CONFLICTS_ICON_URL), CONFLICTS_TOOLTIP);
             pics.add(conflictsImageView);
             return;
         }
 
         if (projectStatus.hasNewUntrackedFiles()) {
-            Node untrackedImageView = newStatusPic(getImage(PROJECT_WITH_NEW_FILES_ICON_URL),
-                    "Project has new files");
+            Node untrackedImageView = newStatusPic(getImage(PROJECT_WITH_NEW_FILES_ICON_URL), NEW_FILES_TOOLTIP);
             pics.add(untrackedImageView);
         }
 
         if (projectStatus.hasChanges()) {
             Node uncommittedChangesImage = newStatusPic(getImage(PROJECT_WITH_UNCOMMITTED_CHANGES_ICON_URL),
-                    "Project has uncommitted changes");
+                    UNCOMMITTED_CHANGES_TOOLTIP);
             pics.add(uncommittedChangesImage);
         }
     }
