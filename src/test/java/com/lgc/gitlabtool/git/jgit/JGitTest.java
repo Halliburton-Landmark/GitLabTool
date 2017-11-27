@@ -198,9 +198,42 @@ public class JGitTest {
         files.add(null);
 
         List<String> addedFiles = getJGitMock(gitMock).addUntrackedFilesToIndex(files, getProject(true));
-        Assert.assertTrue(!addedFiles.isEmpty());
+        Assert.assertFalse(addedFiles.isEmpty());
         Assert.assertEquals(files.get(0), addedFiles.get(0));
-        Assert.assertNotEquals(files.size(), addedFiles.size());
+    }
+
+    @Test
+    public void addUntrackedFileToIndexIncorrectTest() throws NoFilepatternException, GitAPIException {
+        String fileName = "test";
+        Git gitMock = getGitMock();
+        AddCommand addCommandMock = mock(AddCommand.class);
+        Mockito.when(addCommandMock.addFilepattern(fileName)).thenReturn(addCommandMock);
+        Mockito.when(addCommandMock.call()).thenThrow(getGitAPIException());
+        Mockito.when(gitMock.add()).thenReturn(addCommandMock);
+
+        Assert.assertFalse(getJGitMock(null).addUntrackedFileToIndex(fileName, getProject(true)));
+        Assert.assertFalse(getJGitMock(gitMock).addUntrackedFileToIndex(fileName, getProject(true)));
+    }
+
+    @Test
+    public void addUntrackedFileToIndexCorrectTest() throws NoFilepatternException, GitAPIException {
+        String fileName = "test";
+        Git gitMock = getGitMock();
+        AddCommand addCommandMock = mock(AddCommand.class);
+        Mockito.when(addCommandMock.addFilepattern(fileName)).thenReturn(addCommandMock);
+        Mockito.when(addCommandMock.call()).thenReturn(getDirCache());
+        Mockito.when(gitMock.add()).thenReturn(addCommandMock);
+
+        Assert.assertTrue(getJGitMock(gitMock).addUntrackedFileToIndex(fileName, getProject(true)));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void addUntrackedFileToIndexFileIncorrectException() {
+        JGit.getInstance().addUntrackedFileToIndex(null, getProject(true));
+    }
+    @Test(expected = IllegalArgumentException.class)
+    public void addUntrackedFileToIndexProjectIncorrectException() {
+        JGit.getInstance().addUntrackedFileToIndex("", null);
     }
 
     @Test

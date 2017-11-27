@@ -332,9 +332,14 @@ public class JGit {
         if (files == null || project == null) {
             throw new IllegalArgumentException("Incorrect data: project is " + project + ", files is " + files);
         }
-        return files.stream()
-                    .filter(file -> addDeletedFile(file, project, isCached))
-                    .collect(Collectors.toList());
+        try (Git git = getGit(project.getPath())) {
+            return files.stream()
+                        .filter(file -> rmAddCommand(git, file, isCached))
+                        .collect(Collectors.toList());
+        } catch (IOException e) {
+            logger.error("Error getting Git for " + project.getPath() + " " + e.getMessage());
+        }
+        return Collections.emptyList();
     }
 
     /**
@@ -350,12 +355,21 @@ public class JGit {
             return false;
         }
         try (Git git = getGit(project.getPath())) {
+            return rmAddCommand(git, fileName, isCached);
+        } catch (IOException e) {
+            logger.error("Error getting Git for " + project.getPath() + " " + e.getMessage());
+            return false;
+        }
+    }
+
+    private boolean rmAddCommand(Git git, String fileName, boolean isCached) {
+        try {
             git.rm().setCached(isCached)
                     .addFilepattern(fileName)
                     .call();
             return true;
-        } catch (IOException | GitAPIException e) {
-            logger.error("Error rm command for " + project.getPath() + " " + e.getMessage());
+        } catch (GitAPIException e) {
+            logger.error("Error reseting file to HEAD " + e.getMessage());
             return false;
         }
     }
