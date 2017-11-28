@@ -17,16 +17,26 @@
    <children>
       <AnchorPane layoutX="167.0" layoutY="183.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="150.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="40.0">
          <children>
-            <SplitPane dividerPositions="0.5490196078431373" layoutX="216.0" layoutY="78.0" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="0.0">
+            <SplitPane dividerPositions="0.5490196078431373" layoutX="216.0" layoutY="78.0" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
               <items>
-                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="195.0" prefWidth="688.0">
                      <children>
-                        <ListView fx:id="_unstagedListView" layoutX="319.0" layoutY="-13.0" prefHeight="225.0" prefWidth="688.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                        <ListView fx:id="_unstagedListView" layoutX="319.0" layoutY="-13.0" prefHeight="225.0" prefWidth="688.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="20.0" />
+                        <Label layoutX="14.0" layoutY="6.0" text="Unstaged Changes" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
+                           <padding>
+                              <Insets left="2.0" top="2.0" />
+                           </padding>
+                        </Label>
                      </children>
                   </AnchorPane>
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
                      <children>
-                        <ListView fx:id="_stagedListView" layoutX="144.0" layoutY="1.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                        <ListView fx:id="_stagedListView" layoutX="144.0" layoutY="1.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="20.0" />
+                        <Label layoutX="14.0" layoutY="6.0" text="Staged Changes" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
+                           <padding>
+                              <Insets left="2.0" top="2.0" />
+                           </padding>
+                        </Label>
                      </children>
                   </AnchorPane>
               </items>
@@ -35,7 +45,7 @@
       </AnchorPane>
       <AnchorPane layoutX="7.0" layoutY="409.0" prefHeight="148.0" prefWidth="700.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
          <children>
-            <TextArea fx:id="_commitText" layoutX="105.0" layoutY="-18.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="35.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="0.0" />
+            <TextArea fx:id="_commitText" layoutX="105.0" layoutY="-18.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="40.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="20.0" />
             <ButtonBar layoutX="498.0" layoutY="108.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="5.0">
                <buttons>
                   <Button fx:id="_commitButton" mnemonicParsing="false" onAction="#onCommitAction" text="Commit" />
@@ -57,29 +67,34 @@
                   </Label>
                </children>
             </HBox>
+            <Label layoutX="14.0" layoutY="6.0" text="Commit Message" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="0.0">
+               <padding>
+                  <Insets left="2.0" top="2.0" />
+               </padding>
+            </Label>
          </children>
       </AnchorPane>
       <AnchorPane layoutX="119.0" layoutY="3.0" prefHeight="32.0" prefWidth="224.0" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="5.0">
          <children>
-            <HBox layoutX="-32.0" layoutY="-31.0" prefHeight="32.0" prefWidth="219.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="5.0">
+            <HBox layoutX="-32.0" layoutY="-31.0" prefHeight="27.0" prefWidth="232.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="5.0">
                <children>
                   <Label text="Sorting by:">
                      <HBox.margin>
                         <Insets top="5.0" />
                      </HBox.margin>
                   </Label>
-                  <ChoiceBox fx:id="_sortingListBox" onAction="#onChangeSortingType" prefWidth="150.0">
+                  <ChoiceBox fx:id="_sortingListBox" onAction="#onChangeSortingType" prefHeight="25.0" prefWidth="157.0">
                      <HBox.margin>
-                        <Insets left="5.0" />
+                        <Insets left="10.0" />
                      </HBox.margin>
                   </ChoiceBox>
                </children>
             </HBox>
          </children>
       </AnchorPane>
-      <AnchorPane layoutX="238.0" layoutY="-76.0" prefHeight="32.0" prefWidth="467.0" AnchorPane.leftAnchor="230.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
+      <AnchorPane layoutX="247.0" layoutY="-76.0" prefHeight="32.0" prefWidth="448.0" AnchorPane.leftAnchor="247.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
          <children>
-            <TextField fx:id="_filterField" layoutX="2.0" layoutY="6.0" prefHeight="25.0" prefWidth="460.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0" />
+            <TextField fx:id="_filterField" layoutY="6.0" prefHeight="25.0" prefWidth="448.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0" />
          </children>
       </AnchorPane>
    </children>
