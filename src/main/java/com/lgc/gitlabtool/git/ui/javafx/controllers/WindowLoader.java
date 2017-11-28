@@ -116,7 +116,7 @@ public class WindowLoader {
             /* Set sizing and position */
             double dialogWidth = 550;
             double dialogHeight = 600;
-            double preferedWidth = 800;
+            double preferedWidth = 900;
             stage.setWidth(preferedWidth);
             ScreenUtil.adaptForMultiScreens(stage, dialogWidth, dialogHeight);
             // if we set the minimum size only in fxml then window does not respond to them.
