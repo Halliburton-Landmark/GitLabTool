@@ -49,9 +49,6 @@ public class FilesListCell extends ListCell<ChangedFile> {
         if (item.hasConflicting()) {
             strBuilder.append(CONFLICTING_PREFIX);
             fileNameText.setFill(Color.DARKRED);
-        } else if (item.wasRemoved()) {
-            strBuilder.append(REMOVED_PREFIX);
-            fileNameText.setFill(Color.DARKRED);
         }
         fileNameText.setText(strBuilder.toString());
         return fileNameText;
