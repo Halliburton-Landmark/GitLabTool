@@ -114,14 +114,13 @@ public class WindowLoader {
             });
 
             /* Set sizing and position */
-            double dialogWidth = 550;
-            double dialogHeight = 600;
+            double dialogMinSize = 600;
             double preferedWidth = 900;
             stage.setWidth(preferedWidth);
-            ScreenUtil.adaptForMultiScreens(stage, dialogWidth, dialogHeight);
+            ScreenUtil.adaptForMultiScreens(stage, dialogMinSize, dialogMinSize);
             // if we set the minimum size only in fxml then window does not respond to them.
-            stage.setMinHeight(dialogHeight);
-            stage.setMinWidth(dialogWidth);
+            stage.setMinHeight(dialogMinSize);
+            stage.setMinWidth(dialogMinSize);
             stage.show();
         } catch (IOException e) {
             logger.error("Error loading Staging window " + e.getMessage());
