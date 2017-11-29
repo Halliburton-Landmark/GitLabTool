@@ -1,6 +1,7 @@
 package com.lgc.gitlabtool.git.entities;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -119,24 +120,6 @@ public class ProjectStatus implements Serializable {
     }
 
     /**
-     * Gets set of files which have conflicts.
-     *
-     * @return files set
-     */
-    public Set<String> getConflictedFiles() {
-        return _conflictedFiles;
-    }
-
-    /**
-     * Gets set of files which don't add to index (new files).
-     *
-     * @return files set
-     */
-    public Set<String> getUntrackedFiles() {
-        return _untrackedFiles;
-    }
-
-    /**
      * Gets hasConflicts parameter.
      *
      * @return <code>true</code> if the project has conflicts <code>false</code> otherwise.
@@ -191,39 +174,57 @@ public class ProjectStatus implements Serializable {
     }
 
     /**
-     * Gets changed files which are located in staging
+     * Gets set of files which have conflicts.
      *
-     * @return a set of files
+     * @return a unmodifiable set of files
+     */
+    public Set<String> getConflictedFiles() {
+        return Collections.unmodifiableSet(_conflictedFiles);
+    }
+
+    /**
+     * Gets set of files which don't add to index (new files).
+     *
+     * @return a unmodifiable set of files
+     */
+    public Set<String> getUntrackedFiles() {
+        return Collections.unmodifiableSet(_untrackedFiles);
+    }
+
+    /**
+     * Gets changed files which are located in staging.
+
+     * @return a unmodifiable set of files
      */
     public Set<String> getChangedFiles() {
-        return _changedFiles;
+        return Collections.unmodifiableSet(_changedFiles);
     }
 
     /**
      * Gets removed files (deleted files which were added in staging)
      *
-     * @return a set of files
+     * @return a unmodifiable set of files
      */
     public Set<String> getRemovedFiles() {
-        return _removedFiles;
+        return Collections.unmodifiableSet(_removedFiles);
     }
 
     /**
      * Gets files which were deleted from local disk but haven't added to staging yet
      *
-     * @return a set of files
+     * @return a unmodifiable set of files
      */
     public Set<String> getMissingFiles() {
-        return _missingFiles;
+        return Collections.unmodifiableSet(_missingFiles);
     }
 
     /**
      * Gets modifies files. It is files which were changed but haven't added to staging yet
      *
-     * @return a set of files
+     * @return a unmodifiable set of files
      */
     public Set<String> getModifiedFiles() {
-        return _modifiedFiles;
+        return Collections.unmodifiableSet(_modifiedFiles);
     }
 
     private void setCurrentBranch(String currentBranch) {
@@ -243,27 +244,27 @@ public class ProjectStatus implements Serializable {
     }
 
     private void setUntrackedFiles(Set<String> uncommittedChanges) {
-        _untrackedFiles = uncommittedChanges;
+        _untrackedFiles = new HashSet<>(uncommittedChanges);
     }
 
     private void setModifiedFiles(Set<String> modifiedFiles) {
-        _modifiedFiles = modifiedFiles;
+        _modifiedFiles = new HashSet<>(modifiedFiles);
     }
 
     private void setRemovedFiles(Set<String> removedFiles) {
-        _removedFiles = removedFiles;
+        _removedFiles = new HashSet<>(removedFiles);
     }
 
     private void setMissingFiles(Set<String> missingFiles) {
-        _missingFiles = missingFiles;
+        _missingFiles = new HashSet<>(missingFiles);
     }
 
     private void setChangedFiles(Set<String> changedFiles) {
-        _changedFiles = changedFiles;
+        _changedFiles = new HashSet<>(changedFiles);
     }
 
     private void setConflictedFiles(Set<String> conflictingChanges) {
-        _conflictedFiles = conflictingChanges;
+        _conflictedFiles = new HashSet<>(conflictingChanges);
     }
 
 }
