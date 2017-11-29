@@ -99,8 +99,6 @@ public class WorkIndicatorDialog {
         double centerXPosition = parentStage.getX() + parentStage.getWidth() / 2;
         double centerYPosition = parentStage.getY() + parentStage.getHeight() / 2;
 
-        scene.getStylesheets().add(getClass().getClassLoader().getResource("css/modular_dark_style.css").toExternalForm());
-
         stage.setX(centerXPosition - initWidth / 2);
         stage.setY(centerYPosition - initHeight / 2);
 

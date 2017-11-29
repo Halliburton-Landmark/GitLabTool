@@ -69,7 +69,7 @@ class LoginDialog extends Dialog<DialogDTO> {
     private static final String MESSAGE_SPACE                          = " ";
     private static final String MESSAGE_DASH                           = "-";
     private static final String INFO_IMAGE_URL                         = "icons/info_20x20.png";
-    private static final String CSS_PATH                               = "css/modular_dark_style.css";
+    private static final String CSS_PATH                               = "css/style.css";
 
     /** need to store two line message */
     private final double MIN_MESSAGE_HEIGHT = 40;
@@ -86,9 +86,6 @@ class LoginDialog extends Dialog<DialogDTO> {
     private final Button infoButton;
 
     LoginDialog() {
-
-
-        getDialogPane().getScene().getStylesheets().add(getClass().getClassLoader().getResource("css/modular_dark_style.css").toExternalForm());
         setTitle("GitLab Welcome");
         final GridPane grid = new GridPane();
         grid.setAlignment(Pos.CENTER);
@@ -204,7 +201,7 @@ class LoginDialog extends Dialog<DialogDTO> {
         FXMLLoader fxmlLoader = new FXMLLoader(
                 getClass().getClassLoader().getResource(ViewKey.SERVER_INPUT_WINDOW.getPath()));
         Parent root = fxmlLoader.load();
-        ServerInputWindowController controller = fxmlLoader.getController();
+        ServerInputWindowController controller = (ServerInputWindowController) fxmlLoader.getController();
         controller.loadServerInputWindow(root);
     }
 
@@ -221,8 +218,7 @@ class LoginDialog extends Dialog<DialogDTO> {
                 showMessage(MESSAGE_WAITING, Color.GREEN);
                 disableSignInButton(true);
                 String serverURL = URLManager.completeServerURL(comboBox.getValue());
-                String shortServerURL = URLManager.shortServerURL(comboBox.getValue());
-                DialogDTO dto = new DialogDTO(userTextField.getText(), passwordField.getText(), serverURL, shortServerURL);
+                DialogDTO dto = new DialogDTO(userTextField.getText(), passwordField.getText(), serverURL);
                 _loginService.login(dto, this::doAfterLogin);
             } else {
                 logger.warn(MESSAGE_EMPTY_FIELD);

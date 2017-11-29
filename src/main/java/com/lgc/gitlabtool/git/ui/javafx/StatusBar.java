@@ -54,8 +54,6 @@ public class StatusBar extends HBox implements StateListener {
         _currentStatus.setText(READY_TO_USE_STATE);
         _statusIndicator.setVisible(false);
 
-        getStyleClass().clear();
-        getStyleClass().add("status-bar");
         getChildren().addAll(_currentStatus, _statusIndicator);
         setSpacing(ELEMENTS_SPACING);
     }

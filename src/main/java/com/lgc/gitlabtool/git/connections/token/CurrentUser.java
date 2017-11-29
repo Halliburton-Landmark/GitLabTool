@@ -11,7 +11,7 @@ public class CurrentUser {
     private User _currentUser;
     private static CurrentUser _instance;
 
-    private static final String PRIVATE_TOKEN_KEY = "Authorization";
+    private static final String PRIVATE_TOKEN_KEY = "PRIVATE-TOKEN";
 
     private CurrentUser() {}
 
@@ -36,10 +36,6 @@ public class CurrentUser {
      */
     public String getPrivateTokenValue() {
         return _currentUser.getPrivate_token();
-    }
-
-    public void setPrivateTokenValue(String token){
-        _currentUser.setPrivate_token(token);
     }
 
     /**

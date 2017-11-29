@@ -24,9 +24,9 @@ public enum MessageType {
      */
     public static String getCSSForStatus(MessageType type) {
         if (type == null || type == MessageType.SIMPLE) {
-            return "-fx-text-fill:silver";
+            return "-fx-text-fill:black";
         }
-        return type == MessageType.ERROR ? "-fx-text-fill:red" : "-fx-text-fill:lightGreen";
+        return type == MessageType.ERROR ? "-fx-text-fill:red" : "-fx-text-fill:green";
     }
 
     /**
@@ -37,9 +37,9 @@ public enum MessageType {
     */
     public static Color getColor(MessageType type) {
         if (type == null || type == MessageType.SIMPLE) {
-            return Color.SILVER;
+            return Color.BLACK;
         }
-        return type == MessageType.ERROR ? Color.RED : Color.LIGHTGREEN;
+        return type == MessageType.ERROR ? Color.RED : Color.GREEN;
     }
 
     /**

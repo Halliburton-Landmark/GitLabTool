@@ -6,7 +6,6 @@ import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.fxmisc.cssfx.CSSFX;
 
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
@@ -14,6 +13,7 @@ import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.UserInterface;
 import com.lgc.gitlabtool.git.ui.ViewKey;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
+import com.lgc.gitlabtool.git.ui.javafx.controllers.ModularController;
 import com.lgc.gitlabtool.git.util.ProjectPropertiesUtil;
 import com.lgc.gitlabtool.git.util.ScreenUtil;
 
@@ -57,8 +57,6 @@ public class JavaFXUI extends Application implements UserInterface {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        CSSFX.start();
-
         mainStage = primaryStage;
         appIcon = AppIconHolder.getInstance().getAppIcoImage();
 
@@ -72,8 +70,7 @@ public class JavaFXUI extends Application implements UserInterface {
         FXMLLoader fxmlLoader = new FXMLLoader(modularWindow);
         Parent root = fxmlLoader.load();
 
-        Scene scene = new CssStyledScene(root);
-
+        Scene scene = new Scene(root);
         primaryStage.setTitle(ProjectPropertiesUtil.getProjectNameWithVersion());
         primaryStage.setScene(scene);
         primaryStage.getIcons().add(appIcon);
