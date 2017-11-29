@@ -1,8 +1,5 @@
 package com.lgc.gitlabtool.git.services;
 
-import java.util.concurrent.Callable;
-import java.util.function.Consumer;
-
 /**
  * BackgroundService provides possibility to run tasks in the background thread
  *
