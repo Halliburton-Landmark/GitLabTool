@@ -1454,17 +1454,8 @@ public class ModularController implements UpdateProgressListener {
 
     private void showStatusDialog(String title, String header, String content) {
         Platform.runLater(() -> {
-            Alert alert = new Alert(AlertType.INFORMATION);
-            alert.setTitle(title);
-            alert.setHeaderText(header);
-            alert.setContentText(content);
-            Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
-            stage.getIcons().add(_appIcon);
-
-            /* Set sizing and position */
-            ScreenUtil.adaptForMultiScreens(stage, 300, 150);
-
-            alert.showAndWait();
+            StatusDialog statusDialog = new StatusDialog(title, header, content);
+            statusDialog.showAndWait();
         });
     }
 
