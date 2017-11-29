@@ -1,0 +1,36 @@
+#toolbar *.button {
+    -fx-background-color: transparent, transparent, transparent, transparent;
+}
+
+#toolbar *.button:hover{
+    -fx-background-color: transparent, rgba(0,0,0,.1), rgba(0,0,0,.1), transparent;
+}
+
+#toolbar *.button:armed {
+    -fx-background-color: transparent, rgba(0,0,0,.1), rgba(0,0,0,.1), rgba(0,0,0,.2);
+}
+
+#toolbar *.separator *.line {
+    -fx-border-style: solid;
+    -fx-border-width: 1px;
+    -fx-border-color: #afb6c6;
+}
+
+#toolbar {
+    -fx-background-color: #D7DBE3;
+}
+
+#top_slim_panel {
+    -fx-background-color: #838EA9;
+}
+
+#console {
+    -fx-background-color: #D7DBE3;
+}
+
+.root{
+    -fx-font-size: 12;
+    -fx-font-family: "Trebuchet MS", "Geneva", "sans-serif";
+    -fx-base: rgb(0, 255, 0);
+    -fx-background: rgb(255, 0, 0);
+}

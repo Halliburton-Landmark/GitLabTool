@@ -1,0 +1,197 @@
+
+/* GENERAL */
+.root{
+    -fx-font-size: 12;
+    -fx-font-family: "Trebuchet MS", "Geneva", "sans-serif";
+    -fx-text-fill: silver;
+    -fx-base: #424242;
+    -fx-background: #313131 ;
+
+    -fx-focus-color: transparent;
+    -fx-accent: #1d497e;
+    
+}
+
+
+
+/* TOOLBAR */
+#toolbar {
+    -fx-background-color: #222222;
+    -fx-border-color:
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.3), transparent),
+    linear-gradient(to top, rgba(0, 0, 0, 0.3), transparent);
+    -fx-border-style: solid;
+    -fx-border-width:
+        5 0 0 0,
+        0 0 5 0;
+}
+
+#toolbar *.button {
+    -fx-background-color: transparent, transparent, transparent, transparent;
+    -fx-text-fill: silver;
+}
+
+#toolbar *.button:hover{
+    -fx-background-color: #213853;
+}
+
+#toolbar *.button:armed {
+    -fx-background-color: #243242;
+
+}
+
+#toolbar *.separator *.line {
+    -fx-border-style: solid;
+    -fx-border-width: 0px;
+}
+
+
+
+/* PROJECTS TOOLBAR */
+#projectsToolbar {
+    -fx-background-color: #222222;
+    -fx-border-color:
+        linear-gradient(to bottom, rgba(0, 0, 0, 0.3), transparent),
+        linear-gradient(to top, rgba(0, 0, 0, 0.3), transparent);
+    -fx-border-style: solid;
+    -fx-border-width: 5 0 0 0, 0 0 5 0;
+}
+
+#projectsToolbar *.button {
+    -fx-background-color: transparent, transparent, transparent, transparent;
+    
+}
+
+#projectsToolbar *.button:hover{
+    -fx-background-color: #213853;
+}
+
+#projectsToolbar *.button:armed {
+    -fx-background-color: #243242;
+}
+
+#projectsToolbar *.toggle-button {
+    -fx-background-color: transparent;
+}
+
+#projectsToolbar *.toggle-button:hover {
+    -fx-background-color: #213853;
+}
+
+#projectsToolbar *.toggle-button:selected {
+    -fx-background-color: #243242;
+}
+
+
+/* TOP SLIM PANEL */
+#top_slim_panel {
+    -fx-background-color: #303233;
+    -fx-text-fill: silver;
+}
+
+
+
+/* CONSOLE */
+#console {
+    -fx-background-color:  #222222;
+    -fx-padding: 5 5 5 5;
+
+
+}
+
+#viewArea{
+    -fx-background-color:  #222222;
+}
+
+
+/* MAIN MENU */
+.menu-bar {
+        -fx-background-color: #303233;
+}
+
+.context-menu {
+    -fx-border-color: rgb(128, 122, 122);
+    -fx-border-width: 1;
+        
+    -fx-background-color: #303030;
+    -fx-background-insets: 0, 1, 2;
+    -fx-background-radius: 0 6 6 6, 0 5 5 5, 0 4 4 4;
+    -fx-padding: 4 1 4 1; /* 4 1 4 1 */
+  }
+  
+  .menu-item .label {
+    -fx-text-fill: rgb(219, 219, 219);
+  }
+
+  .menu-item {
+    -fx-padding: 6 6 6 6;
+  }
+  
+
+
+.list-cell:filled:selected:focused, .list-cell:filled:selected {
+    -fx-background-color: #4e4e4e;
+}
+
+.list-cell { /* <=== changed to even */
+    -fx-background-color: #222222;
+}
+
+.list-cell:even { /* <=== changed to even */
+    -fx-background-color: #272727;
+}
+
+.list-cell:filled:hover {
+    /*-fx-background-color: #505050; */
+}
+
+/*split pane*/
+.split-pane > .split-pane-divider {
+	-fx-background-color: rgba(122, 122, 122, 0.158);
+    -fx-pref-width: 5;
+    -fx-border-width: 0;
+}
+.split-pane:horizontal > .split-pane-divider {
+	-fx-background-insets: 0, 0 1 0 1;
+	-fx-border-width: 0 1 0 1;
+}
+/* vertical the two nodes are placed on top of each other. */
+.split-pane:vertical > .split-pane-divider {
+	-fx-background-insets: 0, 1 0 1 0;
+	-fx-border-width: 1 0 1 0;
+}
+.split-pane > .split-pane-divider:hover {
+    -fx-pref-width: 5;
+	-fx-background-color: rgb(97, 97, 97);
+}
+
+
+/* LOADING SPINNER */
+.progress-indicator{
+    -fx-progress-color: white;
+}
+
+.status-bar{
+    -fx-background-color: #222222;
+    -fx-padding: 3 0 3 0;
+}
+
+
+
+
+/*           LOGIN DIALOG          */
+
+.text-field {
+    -fx-background-color: rgb(78, 78, 78) ;
+    -fx-background-insets: 0, 0 0 5 0 ;
+    -fx-background-radius: 7 ;
+    -fx-text-fill: white;
+}
+.text-field:focused {
+    -fx-background-color: rgb(107, 107, 107) ;
+    -fx-background-radius: 7 ;
+}
+
+.label{
+    -fx-text-fill: silver;
+}

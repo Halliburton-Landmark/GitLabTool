@@ -95,8 +95,10 @@ class RESTConnectorImpl implements RESTConnector {
 
             responseHolder.setHeaderLines(connection.getHeaderFields());
             responseHolder.setBody(response.toString());
-            _logger.info(response.toString());
-
+            String responseString = response.toString();
+            if (!responseString.contains("token")) {
+                _logger.info(response.toString());
+            }
         } catch (Exception e) {
             _logger.error("Error sending request: " + e.getMessage());
         } finally {

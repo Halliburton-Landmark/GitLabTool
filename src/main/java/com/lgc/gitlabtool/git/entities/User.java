@@ -240,4 +240,8 @@ public class User {
         return private_token;
     }
 
+    public void setPrivate_token(String token){
+        private_token = token;
+    }
+
 }

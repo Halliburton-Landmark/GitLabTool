@@ -13,6 +13,7 @@ import com.lgc.gitlabtool.git.ui.javafx.controllers.ModularController;
 
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.effect.ColorAdjust;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
@@ -150,7 +151,14 @@ public class MainMenuManager {
 
     private MenuItem createButton(String buttonId, String imgPath, String btnText) {
         Image menuItemImage = new Image(getClass().getClassLoader().getResource(imgPath).toExternalForm());
-        MenuItem menuItem = new MenuItem(btnText, new ImageView(menuItemImage));
+        ImageView view = new ImageView(menuItemImage);
+
+        ColorAdjust colorAdjust = new ColorAdjust();
+        colorAdjust.setBrightness(+0.65);
+
+        view.setEffect(colorAdjust);
+
+        MenuItem menuItem = new MenuItem(btnText, view);
         menuItem.setId(buttonId);
 
         return menuItem;

@@ -39,6 +39,16 @@ public class URLManager {
     }
 
     /**
+     * Adds the "https://" prefix to URL main part
+     *
+     * @param urlMainPart - main part of URL
+     * @return modified URL
+     */
+    public static String shortServerURL(String urlMainPart) {
+        return HTTPS + urlMainPart;
+    }
+
+    /**
      * Checks if URL is valid
      * 
      * URL could contain http:// or https:// (or blank) prefix, any host that contains only letters, digits or dots and

@@ -3,6 +3,8 @@ package com.lgc.gitlabtool.git.ui.javafx.controllers;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.*;
+
 import org.apache.commons.lang.StringUtils;
 
 import com.lgc.gitlabtool.git.entities.Project;
@@ -45,7 +47,7 @@ public class ProjectListCell extends ListCell<Project> {
             ImageView imageView = new ImageView(fxImage);
 
             Text projectNameTextView = new Text(item.getName());
-            Color textColor = item.isCloned() ? Color.BLACK : Color.DIMGRAY;
+            Color textColor = item.isCloned() ? Color.WHITE : Color.SILVER;
             projectNameTextView.setFill(textColor);
             Text currentBranchTextView = getCurrentBrantProjectText(item);
 
@@ -55,6 +57,7 @@ public class ProjectListCell extends ListCell<Project> {
 
             HBox hBoxItem = new HBox(imageView, projectNameTextView, currentBranchTextView);
             hBoxItem.setSpacing(LIST_CELL_SPACING);
+            hBoxItem.setAlignment(Pos.CENTER);
 
             HBox picItems = new HBox(LIST_CELL_SPACING, getProjectPics(item));
 
@@ -76,7 +79,7 @@ public class ProjectListCell extends ListCell<Project> {
         String currentBranch = getCurrentBranchName(item);
         String currentBranchFull = item.isCloned() ? LEFT_BRACKET + currentBranch + RIGHT_BRACKET : StringUtils.EMPTY;
         Text currentBranchTextView = new Text(currentBranchFull);
-        currentBranchTextView.setFill(Color.DARKBLUE);
+        currentBranchTextView.setFill(Color.LIGHTBLUE);
 
         return currentBranchTextView;
     }

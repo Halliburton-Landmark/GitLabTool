@@ -20,8 +20,12 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Tooltip;
+import javafx.scene.effect.ColorAdjust;
+import javafx.scene.effect.Light;
+import javafx.scene.effect.Lighting;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 /**
@@ -160,7 +164,14 @@ public class ToolbarManager {
 
     private Button createButton(String buttonId, String imgPath, String btnText, String tooltipText) {
         Image btnImage = new Image(getClass().getClassLoader().getResource(imgPath).toExternalForm());
-        Button button = new Button(btnText, new ImageView(btnImage));
+        ImageView view = new ImageView(btnImage);
+
+        ColorAdjust colorAdjust = new ColorAdjust();
+        colorAdjust.setBrightness(+0.65);
+
+        view.setEffect(colorAdjust);
+
+        Button button = new Button(btnText, view);
         button.setTooltip(new Tooltip(tooltipText));
         button.setId(buttonId);
 
