@@ -46,6 +46,7 @@ public class WindowLoader {
 
     private static final String STAGING_WINDOW_TITLE = "Git Staging";
     private static final String PROJECTS_DOESNT_HAVE_CHANGED_FILE = "Selected projects doesn't have new or conflicting files";
+    private static final String GIT_STAGING_OPERATION_NAME = "Git Staging";
 
     private static final ConsoleService _consoleService = (ConsoleService) ServiceProvider.getInstance()
             .getService(ConsoleService.class.getName());
@@ -77,8 +78,7 @@ public class WindowLoader {
                                                .filter(Project::isCloned)
                                                .collect(Collectors.toList());
             if (selectedProjects.isEmpty()) {
-                String message = String.format(MainWindowController.NO_ANY_PROJECT_FOR_OPERATION,
-                        MainWindowController.STAGE_REMOVE_NEW_FILES_OPERATION_NAME);
+                String message = String.format(ModularController.NO_ANY_PROJECT_FOR_OPERATION, GIT_STAGING_OPERATION_NAME);
                 _consoleService.addMessage(message, MessageType.ERROR);
                 return;
             }
