@@ -917,17 +917,28 @@ public class JGit {
         return aheadBehind;
     }
     
+    /**
+     * This method return tracking branch name for the current project
+     * 
+     * @param project
+     * @return tracking branch
+     */
     public String getTrackingBranch(Project project) {
-    	String trackingBranch = null;
-		try {
-			Git git = getGit(project.getPath());
-	    	Repository repo = git.getRepository();
-	    	BranchConfig config = new BranchConfig(repo.getConfig(), repo.getBranch());
-	    	trackingBranch = config.getTrackingBranch();
-	    	return trackingBranch;
-		} catch (IOException e) {
-			logger.error("Could not get tracking branch " + e.getMessage());
-		}
-		return trackingBranch;
+        if (project == null) {
+            return StringUtils.EMPTY;
+        }
+        String trackingBranch = StringUtils.EMPTY;
+        try (Git git = getGit(project.getPath())) {
+            try (Repository repo = git.getRepository()) {
+                BranchConfig config = new BranchConfig(repo.getConfig(), repo.getBranch());
+                trackingBranch = config.getTrackingBranch();
+                return trackingBranch;
+            } catch (IOException e) {
+                logger.error("Could not get tracking branch " + e.getMessage());
+            }
+        } catch (IOException e) {
+            logger.error("Could not get tracking branch " + e.getMessage());
+        }
+        return trackingBranch;
     }
 }
