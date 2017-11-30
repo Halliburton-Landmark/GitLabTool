@@ -5,6 +5,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -66,11 +67,6 @@ public class ToolbarManager {
     public List<Node> createToolbarItems(String windowId) {
 
         items = new ArrayList<>();
-
-        if (!windowId.equals(ViewKey.GROUP_WINDOW.getKey())) {
-            items.add(createHomeButton());
-        }
-
         for (ToolbarButtons button : ToolbarButtons.values()) {
             if (button.getViewKey().equals(windowId)) {
                 items.add(createButton(button.getId(), button.getIconUrl(), button.getText(), button.getTooltip()));
@@ -162,21 +158,6 @@ public class ToolbarManager {
         return buttons;
     }
 
-    private Button createHomeButton() {
-        Image homeImage = new Image(getClass().getClassLoader().getResource(CHANGE_GROUP_BUTTON_ICON_URL).toExternalForm());
-        Button homeButton = new Button(CHANGE_GROUP_BUTTON_TEXT, new ImageView(homeImage));
-        homeButton.setTooltip(new Tooltip(CHANGE_GROUP_BUTTON_TOOLTIP));
-        homeButton.setId(CHANGE_GROUP_BUTTON_ID);
-        homeButton.setOnAction((e) -> {
-            try {
-                showGroupWindow(homeButton);
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-        });
-        return homeButton;
-    }
-
     private Button createButton(String buttonId, String imgPath, String btnText, String tooltipText) {
         Image btnImage = new Image(getClass().getClassLoader().getResource(imgPath).toExternalForm());
         Button button = new Button(btnText, new ImageView(btnImage));
@@ -184,22 +165,5 @@ public class ToolbarManager {
         button.setId(buttonId);
 
         return button;
-    }
-
-    private void showGroupWindow(Button showWelcomButton) throws IOException {
-        URL modularWindow = getClass().getClassLoader().getResource(ViewKey.MODULAR_CONTAINER.getPath());
-        if (modularWindow == null) {
-            logger.error("Could not load fxml resource");
-            return;
-        }
-
-        FXMLLoader fxmlLoader = new FXMLLoader(modularWindow);
-        Parent root = fxmlLoader.load();
-
-        ModularController myControllerHandle = fxmlLoader.getController();
-        myControllerHandle.loadGroupWindow();
-
-        Stage previousStage = (Stage) showWelcomButton.getScene().getWindow();
-        previousStage.getScene().setRoot(root);
     }
 }
