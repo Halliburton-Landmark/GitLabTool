@@ -22,6 +22,7 @@ import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.ProjectStatus;
 import com.lgc.gitlabtool.git.jgit.BranchType;
 import com.lgc.gitlabtool.git.jgit.ChangedFile;
+import com.lgc.gitlabtool.git.jgit.ChangedFileStatus;
 import com.lgc.gitlabtool.git.jgit.ChangedFileType;
 import com.lgc.gitlabtool.git.jgit.ChangedFilesUtils;
 import com.lgc.gitlabtool.git.jgit.JGit;
@@ -262,19 +263,17 @@ public class GitServiceImpl implements GitService {
         Set<String> removedFiles = new HashSet<>();
         Set<String> missingFiles = new HashSet<>();
         Set<String> modifiedFiles = new HashSet<>();
+        Set<String> addedFiles = new HashSet<>();
         boolean hasChanges = false;
 
         Optional<Status> optStatus = _git.getStatusProject(project);
         if (optStatus.isPresent()) {
             Status status = optStatus.get();
             conflictedFiles.addAll(status.getConflicting());
-
             changedFiles.addAll(status.getChanged());
-            changedFiles.addAll(status.getAdded());
-
+            addedFiles.addAll(status.getAdded());
             untrackedFiles.addAll(status.getUntracked());
             modifiedFiles.addAll(status.getModified());
-
             removedFiles.addAll(status.getRemoved());
             missingFiles.addAll(status.getMissing());
 
@@ -291,7 +290,7 @@ public class GitServiceImpl implements GitService {
         }
 
         return new ProjectStatus(hasChanges, aheadIndex, behindIndex, nameBranch, conflictedFiles,
-                untrackedFiles, changedFiles, removedFiles, missingFiles, modifiedFiles);
+                untrackedFiles, changedFiles, addedFiles, removedFiles, missingFiles, modifiedFiles);
     }
 
     @Override
@@ -319,19 +318,20 @@ public class GitServiceImpl implements GitService {
             return files;
         }
         ProjectStatus status = project.getProjectStatus();
-        files.addAll(convertToChanged(status.getChangedFiles(), project, false, false, ChangedFileType.STAGED));
-        files.addAll(convertToChanged(status.getRemovedFiles(), project, false, true, ChangedFileType.STAGED));
-        files.addAll(convertToChanged(status.getUntrackedFiles(), project, false, false, ChangedFileType.UNSTAGED));
-        files.addAll(convertToChanged(status.getConflictedFiles(), project,  true, false, ChangedFileType.UNSTAGED));
-        files.addAll(convertToChanged(status.getMissingFiles(), project, false, true, ChangedFileType.UNSTAGED));
-        files.addAll(convertToChanged(status.getModifiedFiles(), project, false, false, ChangedFileType.UNSTAGED));
+        files.addAll(getChangedFiles(status.getChangedFiles(), project, ChangedFileType.STAGED, ChangedFileStatus.CHANGED));
+        files.addAll(getChangedFiles(status.getRemovedFiles(), project, ChangedFileType.STAGED, ChangedFileStatus.REMOVED));
+        files.addAll(getChangedFiles(status.getAddedFiles(), project, ChangedFileType.STAGED, ChangedFileStatus.ADDED));
+        files.addAll(getChangedFiles(status.getUntrackedFiles(), project, ChangedFileType.UNSTAGED, ChangedFileStatus.UNTRACKED));
+        files.addAll(getChangedFiles(status.getConflictedFiles(), project,  ChangedFileType.UNSTAGED, ChangedFileStatus.CONFLICTING));
+        files.addAll(getChangedFiles(status.getMissingFiles(), project, ChangedFileType.UNSTAGED, ChangedFileStatus.MISSING));
+        files.addAll(getChangedFiles(status.getModifiedFiles(), project,ChangedFileType.UNSTAGED, ChangedFileStatus.MODIFIED));
         return files;
     }
 
-    private List<ChangedFile> convertToChanged(Collection<String> fileNames, Project project,
-            boolean hasConflicting, boolean wasRemoved, ChangedFileType typeFile) {
+    private List<ChangedFile> getChangedFiles(Collection<String> fileNames, Project project,
+            ChangedFileType typeFile, ChangedFileStatus statusFile) {
         return fileNames.stream()
-                        .map(fileName -> new ChangedFile(project, fileName, hasConflicting, wasRemoved, typeFile))
+                        .map(fileName -> new ChangedFile(project, fileName, typeFile, statusFile))
                         .collect(Collectors.toList());
     }
 
@@ -405,7 +405,7 @@ public class GitServiceImpl implements GitService {
         // If the file was added to the index, it can no longer have conflicts even if we do a reset.
         sourceList.stream()
                   .filter(changedFile -> changedFile.hasConflicting())
-                  .forEach(changedFile -> changedFile.setHasConflicting(false));
+                  .forEach(changedFile -> changedFile.setStatusFile(ChangedFileStatus.MODIFIED));
         return sourceList;
     }
 }

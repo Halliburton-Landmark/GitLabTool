@@ -28,6 +28,7 @@ public class ProjectStatus implements Serializable {
     private Set<String> _untrackedFiles;
     private Set<String> _modifiedFiles;
     private Set<String> _changedFiles;
+    private Set<String> _addedFiles;
     private Set<String> _removedFiles;
     private Set<String> _missingFiles;
 
@@ -87,7 +88,7 @@ public class ProjectStatus implements Serializable {
      */
     public ProjectStatus(boolean hasChanges, int aheadIndex, int behindIndex, String currentBranch) {
         this(hasChanges, aheadIndex, behindIndex, currentBranch, new HashSet<>(), new HashSet<>(),
-                new HashSet<>(), new HashSet<>(), new HashSet<>(),new HashSet<>());
+                new HashSet<>(), new HashSet<>(), new HashSet<>(), new HashSet<>(), new HashSet<>());
     }
 
     /**
@@ -106,7 +107,8 @@ public class ProjectStatus implements Serializable {
      */
     public ProjectStatus(boolean hasChanges, int aheadIndex, int behindIndex, String currentBranch,
                          Set<String> conflicting, Set<String> untrackedFiles, Set<String> changedFiles,
-                         Set<String> removedFiles, Set<String> missingFiles, Set<String> modifiedFiles) {
+                         Set<String> addedFiles, Set<String> removedFiles, Set<String> missingFiles,
+                         Set<String> modifiedFiles) {
         setHasChanges(hasChanges);
         setAheadIndex(aheadIndex);
         setBehindIndex(behindIndex);
@@ -117,6 +119,7 @@ public class ProjectStatus implements Serializable {
         setRemovedFiles(removedFiles);
         setMissingFiles(missingFiles);
         setModifiedFiles(modifiedFiles);
+        setAddedFiles(addedFiles);
     }
 
     /**
@@ -227,6 +230,15 @@ public class ProjectStatus implements Serializable {
         return Collections.unmodifiableSet(_modifiedFiles);
     }
 
+    /**
+     * Gets new files which were added to staging
+     *
+     * @return a unmodifiable set of files
+     */
+    public Set<String> getAddedFiles() {
+        return Collections.unmodifiableSet(_addedFiles);
+    }
+
     private void setCurrentBranch(String currentBranch) {
         _currentBranch = currentBranch == null ? StringUtils.EMPTY : currentBranch;
     }
@@ -265,6 +277,10 @@ public class ProjectStatus implements Serializable {
 
     private void setConflictedFiles(Set<String> conflictingChanges) {
         _conflictedFiles = new HashSet<>(conflictingChanges);
+    }
+
+    private void setAddedFiles(Set<String> addedFiles) {
+        _addedFiles = new HashSet<>(addedFiles);
     }
 
 }

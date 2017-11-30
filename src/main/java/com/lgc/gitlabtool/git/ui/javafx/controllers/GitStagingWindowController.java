@@ -255,16 +255,16 @@ public class GitStagingWindowController extends AbstractStateListener {
             public void run() {
                 _commitStatuses = _gitService.commitChanges(projects, _commitText.getText(), isPushChanges,
                         new CommitPushProgressListener(isPushChanges ? ApplicationState.PUSH : ApplicationState.COMMIT));
-                _projectService.updateProjectStatuses(projects);
-
-                Collection<ChangedFile> changedFiles = getChangedFilesSelectedProjects();
-                updateContendListViews(changedFiles);
                 _commitText.setText(StringUtils.EMPTY);
-
+                updateChangedFiles(projects);
                 showStatusDialog(isPushChanges, projects.size());
             }
         };
         new Thread(task).start();
+    }
+
+    private void updateChangedFiles(List<Project> projects) {
+        _projectService.updateProjectStatuses(projects);
     }
 
     @FXML
@@ -452,7 +452,7 @@ public class GitStagingWindowController extends AbstractStateListener {
             public void run() {
                 Map<Project, List<ChangedFile>> map = getMapFiles(unstagedFiles);
                 List<ChangedFile> addedFiles = _gitService.addUntrackedFilesToIndex(map);
-                addRemoveFiles(_stagedListView, _unstagedListView, addedFiles);
+                updateChangedFiles(getProjects(addedFiles));
             }
         };
         new Thread(task).start();
@@ -464,7 +464,7 @@ public class GitStagingWindowController extends AbstractStateListener {
             public void run() {
                 Map<Project, List<ChangedFile>> map = getMapFiles(stagedFiles);
                 List<ChangedFile> resetFiles = _gitService.resetChangedFiles(map);
-                addRemoveFiles(_unstagedListView, _stagedListView, resetFiles);
+                updateChangedFiles(getProjects(resetFiles));
             }
         };
         new Thread(task).start();
@@ -512,18 +512,18 @@ public class GitStagingWindowController extends AbstractStateListener {
         list.setOnDragOver(event -> event.acceptTransferModes(TransferMode.MOVE));
     }
 
-    private void addRemoveFiles(ListView<ChangedFile> toList, ListView<ChangedFile> fromList, List<ChangedFile> files) {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                addItemsToList(toList, files);
-                removeItemsFromList(fromList, files);
-            }
-        });
-    }
-
     @Override
     public void handleEvent(ApplicationState changedState, boolean isActivate) {
+        if (changedState == ApplicationState.UPDATE_PROJECT_STATUSES && !isActivate) {
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    Collection<ChangedFile> changedFiles = getChangedFilesSelectedProjects();
+                    updateContendListViews(changedFiles);
+                }
+            });
+        }
+
         List<ApplicationState> activeAtates = _stateService.getActiveStates();
         boolean isVisible = !activeAtates.isEmpty();
         String text = activeAtates.toString();

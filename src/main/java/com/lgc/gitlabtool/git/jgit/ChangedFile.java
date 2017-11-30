@@ -23,26 +23,23 @@ public class ChangedFile implements Serializable {
 
     private Project _project;
     private String _fileName;
-    private boolean _hasConflicting;
-    private boolean _wasRemoved;
     private String _fileExtension;
     private ChangedFileType _typeFile;
+    private ChangedFileStatus _statusFile;
 
     /**
      * Constructor of object.
      *
      * @param project  the project in which the modified file is stored
      * @param fileName the name of changed file
-     * @param hasConflicting <code>true</code> if project has conflicts, otherwise <code>false</code>
-     * @param wasRemoved <code>true</code> if files was deleted, otherwise <code>false</code>
      * @param typeFile staged or unstaged file.
+     * @param statusFile the status file (CONFLICTING, REMOVED, ADDED etc.)
      */
-    public ChangedFile(Project project, String fileName, boolean hasConflicting, boolean wasRemoved, ChangedFileType typeFile) {
+    public ChangedFile(Project project, String fileName, ChangedFileType typeFile, ChangedFileStatus statusFile) {
         setProject(project);
         setFileName(fileName);
-        setHasConflicting(hasConflicting);
-        setWasRemoved(wasRemoved);
         setTypeFile(typeFile);
+        setStatusFile(statusFile);
     }
 
     /**
@@ -78,16 +75,7 @@ public class ChangedFile implements Serializable {
      * @return <code>true</code> if project has conflicts, otherwise <code>false</code>
      */
     public boolean hasConflicting() {
-        return _hasConflicting;
-    }
-
-    /**
-     * Sets hasConflicting value.
-     *
-     * @param hasConflicting <code>true</code> if file has conflicts, otherwise <code>false</code>
-     */
-    public void setHasConflicting(boolean hasConflicting) {
-        _hasConflicting = hasConflicting;
+        return _statusFile == ChangedFileStatus.CONFLICTING;
     }
 
     /**
@@ -105,15 +93,27 @@ public class ChangedFile implements Serializable {
      * @return <code>true</code> if file was removed, otherwise <code>false</code>
      */
     public boolean wasRemoved() {
-        return _wasRemoved;
+        return _statusFile == ChangedFileStatus.REMOVED || _statusFile == ChangedFileStatus.MISSING;
+    }
+
+    /**
+     *
+     * @return
+     */
+    public ChangedFileStatus getStatusFile() {
+        return _statusFile;
+    }
+
+    /**
+     *
+     * @param statusFile
+     */
+    public void setStatusFile(ChangedFileStatus statusFile) {
+        _statusFile = statusFile;
     }
 
     private void setTypeFile(ChangedFileType typeFile) {
         _typeFile = typeFile;
-    }
-
-    private void setWasRemoved(boolean wasRemoved) {
-        _wasRemoved = wasRemoved;
     }
 
     private void setProject(Project project) {
