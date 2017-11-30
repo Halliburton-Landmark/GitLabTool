@@ -258,7 +258,6 @@ public class MainWindowController implements StateListener {
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_STAGING).disableProperty().bind(booleanBindingForShadow);
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_SWITCH_BRANCH).disableProperty().bind(booleanBindingForShadow);
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_CREATE_BRANCH).disableProperty().bind(booleanBindingForShadow);
-        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_STAGING).disableProperty().bind(booleanBindingForShadow);
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_PUSH).disableProperty().bind(booleanBindingForShadow);
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_PULL).disableProperty().bind(booleanBindingForShadow);
         MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_REVERT).disableProperty().bind(booleanBindingForShadow);
