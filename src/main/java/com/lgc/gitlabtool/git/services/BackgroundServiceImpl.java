@@ -1,6 +1,6 @@
 package com.lgc.gitlabtool.git.services;
 
-import org.apache.commons.lang3.concurrent.BasicThreadFactory;
+import com.lgc.gitlabtool.git.external.ThreadFactoryBuilder;
 
 import java.util.concurrent.*;
 
@@ -31,10 +31,10 @@ public class BackgroundServiceImpl implements BackgroundService {
      * @return instance of {@link ThreadFactory}
      */
     private ThreadFactory getThreadFactory(boolean isDaemon) {
-        return new BasicThreadFactory.Builder()
-                .namingPattern("background-service-%d")
-                .daemon(isDaemon)
-                .priority(Thread.MAX_PRIORITY)
+        return new ThreadFactoryBuilder()
+                .setNamingPattern("background-service-%d")
+                .setDaemon(isDaemon)
+                .setPriority(Thread.MAX_PRIORITY)
                 .build();
     }
 
