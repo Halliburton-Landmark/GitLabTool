@@ -173,7 +173,7 @@ public class ModularController implements UpdateProgressListener {
     private static final String EDIT_POM_SELECTION_WARNING = "This operation unavailable for some projects: ";
     private static final String REVERT_START_MESSAGE = "Revert operation is starting...";
     private static final String REVERT_FINISH_MESSAGE = "Revert operation finished.";
-    private static final String NO_ANY_PROJECT_FOR_OPERATION = "There isn't any proper project selected for %s operation";
+    public static final String NO_ANY_PROJECT_FOR_OPERATION = "There isn't any proper project selected for %s operation";
 
     private static final String SWITCH_BRANCH_TITLE = "Switch branch";
     private static final String NEW_BRANCH_CREATION = "new branch creation";
