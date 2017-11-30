@@ -50,14 +50,14 @@ public class MainMenuManager {
      * @param windowId Id of view where should be created main menu
      * @return List of menus with menu items
      */
-    public List<Menu> createToolbarItems(String windowId) {
+    public List<Menu> createMainMenuItems(String windowId) {
 
         items = new ArrayList<>();
         List<Menu> menus = new ArrayList<>();
         LinkedHashSet<String> menusTitles = new LinkedHashSet<>();
 
         Arrays.stream(MainMenuItems.values())
-                .filter(x -> x.getViewKey().equals(windowId))
+                .filter(x -> isValidItemForView(windowId, x))
                 .map(MainMenuItems::getMenuName)
                 .forEach(menusTitles::add);
 
@@ -65,7 +65,7 @@ public class MainMenuManager {
 
         for (Menu menu : menus) {
             for (MainMenuItems button : MainMenuItems.values()) {
-                if (button.getViewKey().equals(windowId) && button.getMenuName().equals(menu.getText())) {
+                if (isValidItemForView(windowId, button) && button.getMenuName().equals(menu.getText())) {
                     menu.getItems().add(createButton(button.getId(), button.getIconUrl(), button.getText()));
                 }
             }
@@ -153,5 +153,10 @@ public class MainMenuManager {
         menuItem.setId(buttonId);
 
         return menuItem;
+    }
+
+    private boolean isValidItemForView(String viewKey, MainMenuItems item) {
+        return item.getViewKey().equals(viewKey)
+                || item.getViewKey().equals(MainMenuItems.MainmenuConstants.ALL_WINDOW_KEY);
     }
 }

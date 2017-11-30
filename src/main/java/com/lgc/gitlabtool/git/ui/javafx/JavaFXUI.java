@@ -71,9 +71,6 @@ public class JavaFXUI extends Application implements UserInterface {
         FXMLLoader fxmlLoader = new FXMLLoader(modularWindow);
         Parent root = fxmlLoader.load();
 
-        ModularController modularController = fxmlLoader.getController();
-        modularController.loadGroupWindow();
-
         Scene scene = new Scene(root);
         primaryStage.setTitle(ProjectPropertiesUtil.getProjectNameWithVersion());
         primaryStage.setScene(scene);
