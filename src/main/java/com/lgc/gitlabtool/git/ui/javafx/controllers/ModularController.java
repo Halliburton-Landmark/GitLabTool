@@ -659,8 +659,6 @@ public class ModularController implements UpdateProgressListener {
         _stateService.addStateListener(ApplicationState.REVERT, _modularStateListener);
         _stateService.addStateListener(ApplicationState.LOAD_PROJECTS, _modularStateListener);
         _stateService.addStateListener(ApplicationState.UPDATE_PROJECT_STATUSES, _modularStateListener);
-        _stateService.addStateListener(ApplicationState.ADD_FILES_TO_INDEX, _modularStateListener);
-        _stateService.addStateListener(ApplicationState.RESET, _modularStateListener);
     }
 
     private void removeProjectsWindowListener() {
@@ -674,8 +672,6 @@ public class ModularController implements UpdateProgressListener {
         _stateService.removeStateListener(ApplicationState.REVERT, _modularStateListener);
         _stateService.removeStateListener(ApplicationState.LOAD_PROJECTS, _modularStateListener);
         _stateService.removeStateListener(ApplicationState.UPDATE_PROJECT_STATUSES, _modularStateListener);
-        _stateService.removeStateListener(ApplicationState.ADD_FILES_TO_INDEX, _modularStateListener);
-        _stateService.removeStateListener(ApplicationState.RESET, _modularStateListener);
     }
 
     //endregion
@@ -1256,16 +1252,13 @@ public class ModularController implements UpdateProgressListener {
      * Note: shadow projects should be at the end of list
      */
     private void sortProjectsList() {
-        List<Project> sortedList = _projectsList.getProjects()
-                .stream()
-                .sorted(this::compareProjects)
-                .collect(Collectors.toList());
-
         Platform.runLater(() -> {
+            List<Project> sortedList = _projectsList.getProjects().stream()
+                                                                  .sorted(this::compareProjects)
+                                                                  .collect(Collectors.toList());
             ObservableList<Project> projectsObservableList = FXCollections.observableList(sortedList);
-            //noinspection unchecked
+            // noinspection unchecked
             projectListView.setItems(projectsObservableList);
-            projectListView.refresh();
         });
     }
 
@@ -1579,15 +1572,15 @@ public class ModularController implements UpdateProgressListener {
 
 
         private void updateProjectsByState(ApplicationState state) {
-            List<Project> projects = _projectsList.getProjects();
             if (state == ApplicationState.CREATE_PROJECT) {
                 refreshLoadProjects();
                 return;
             }
             if (state != ApplicationState.LOAD_PROJECTS && state != ApplicationState.UPDATE_PROJECT_STATUSES) {
-                _projectService.updateProjectStatuses(projects);
+                _projectsList.updateProjectStatuses();
             } else {
-                hideShadowsAction();
+                projectListView.refresh();
+                //hideShadowsAction();
             }
         }
     }

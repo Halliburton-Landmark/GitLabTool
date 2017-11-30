@@ -92,4 +92,11 @@ public interface ProjectService extends UpdateProgressGenerator {
      */
     void updateProjectStatuses(List<Project> projects);
 
+    /**
+     * Updates project status.
+     *
+     * @param project - the cloned project
+     */
+    void updateProjectStatus(Project project);
+
 }

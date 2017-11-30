@@ -6,9 +6,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.services.ConsoleService;
 import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
+import com.lgc.gitlabtool.git.services.StateService;
 
 /**
  * Keeps data about projects of current group in the main window.
@@ -18,11 +20,14 @@ import com.lgc.gitlabtool.git.services.ServiceProvider;
  */
 public class ProjectList {
 
-    private final ProjectService _projectService = (ProjectService) ServiceProvider.getInstance()
+    private static final ProjectService _projectService = (ProjectService) ServiceProvider.getInstance()
             .getService(ProjectService.class.getName());
 
     private static final ConsoleService _consoleService = (ConsoleService) ServiceProvider.getInstance()
             .getService(ConsoleService.class.getName());
+
+    private static final StateService _stateService = (StateService) ServiceProvider.getInstance()
+            .getService(StateService.class.getName());
 
     private static final String COULD_NOT_SUBMIT_OPERATION_MESSAGE = "Operation could not be submitted for %s project. "
             + "It is not cloned or has conflicts";
@@ -168,6 +173,26 @@ public class ProjectList {
         _isLockCreating = false;
         _currentGroup = null;
         _projects.clear();
+    }
+
+    /**
+     * Updates projects statuses for some projects
+     *
+     * @param projects
+     */
+    public void updateProjectStatuses(List<Project> projects) {
+        _stateService.stateON(ApplicationState.UPDATE_PROJECT_STATUSES);
+        _projects.parallelStream()
+                 .filter(project -> projects.contains(project))
+                 .forEach(project -> _projectService.updateProjectStatus(project));
+        _stateService.stateOFF(ApplicationState.UPDATE_PROJECT_STATUSES);
+    }
+
+    /**
+     * Updates project statuses for all projects.
+     */
+    public void updateProjectStatuses() {
+        _projectService.updateProjectStatuses(_projects);
     }
 
     private List<Project> loadProjects() {

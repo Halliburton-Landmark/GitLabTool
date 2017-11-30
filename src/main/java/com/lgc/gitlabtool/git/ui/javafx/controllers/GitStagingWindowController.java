@@ -243,6 +243,9 @@ public class GitStagingWindowController extends AbstractStateListener {
     }
 
     private List<Project> getProjects(List<ChangedFile> files) {
+
+
+
         Set<Project> setProjects = files.stream()
                                         .map(ChangedFile::getProject)
                                         .collect(Collectors.toSet());
@@ -264,7 +267,7 @@ public class GitStagingWindowController extends AbstractStateListener {
     }
 
     private void updateChangedFiles(List<Project> projects) {
-        _projectService.updateProjectStatuses(projects);
+        _projectList.updateProjectStatuses(projects);
     }
 
     @FXML
