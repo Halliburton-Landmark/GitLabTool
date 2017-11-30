@@ -125,8 +125,9 @@ public class JavaFXUI extends Application implements UserInterface {
         Optional<ButtonType> closeResponse = closeConfirmation.showAndWait();
         if (!ButtonType.OK.equals(closeResponse.orElse(ButtonType.CANCEL))) {
             event.consume();
+        } else {
+            ShutDownUtil.shutdown();
         }
-        ShutDownUtil.shutdown();
     }
 
     /**
