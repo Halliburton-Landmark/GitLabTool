@@ -29,6 +29,7 @@ public class ProjectListCell extends ListCell<Project> {
     private static final String COMMITS_BEHIND_INDEX_ICON_URL = "icons/project/list_icons/behind_index_12x12.png";
     private static final String COMMITS_AHEAD_TOOLTIP = "Count of commits ahead index";
     private static final String COMMITS_BEHIND_TOOLTIP = "Count of commits behind index";
+    private static final String TRACKING_BRANCH_TOOLTIP = "Tracking branch name: ";
     private final Integer LIST_CELL_SPACING = 5;
     private final Double INDEX_FONT_SIZE = 12.0;
     private final String LEFT_BRACKET = "[";
@@ -85,6 +86,11 @@ public class ProjectListCell extends ListCell<Project> {
         ProjectStatus projectStatus = item.getProjectStatus();
         return projectStatus.getCurrentBranch();
     }
+    
+    private String getTrackingBranchName(Project item) {
+    	ProjectStatus projectStatus = item.getProjectStatus();
+		return projectStatus.getTrackingBranch();
+    }
 
     private Node[] getProjectPics(Project item) {
         List<Node> pics = new ArrayList<>();
@@ -136,7 +142,7 @@ public class ProjectListCell extends ListCell<Project> {
         ProjectStatus projectStatus = item.getProjectStatus();
         int ahead = projectStatus.getAheadIndex();
         if (ahead > 0) {
-            items.add(newStatusPic(getImage(COMMITS_AHEAD_INDEX_ICON_URL), COMMITS_AHEAD_TOOLTIP));
+            items.add(newStatusPic(getImage(COMMITS_AHEAD_INDEX_ICON_URL), TRACKING_BRANCH_TOOLTIP + getTrackingBranchName(item)));
             Text aheadIndex = new Text(Integer.toString(ahead));
             aheadIndex.setFont(new Font(INDEX_FONT_SIZE));
             items.add(aheadIndex);

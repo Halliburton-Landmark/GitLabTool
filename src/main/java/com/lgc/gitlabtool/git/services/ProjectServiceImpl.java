@@ -173,10 +173,12 @@ public class ProjectServiceImpl implements ProjectService {
             aheadIndex = indexCount[0];
             behindIndex = indexCount[1];
         }
+        
+        String trackingBranch = _gitService.getTrackingBranch(project);
 
         ProjectStatus projectStatus;
         if (project.getProjectStatus() == null) {
-            projectStatus = new ProjectStatus(hasConflicts, hasChanges, aheadIndex, behindIndex, nameBranch);
+            projectStatus = new ProjectStatus(hasConflicts, hasChanges, aheadIndex, behindIndex, nameBranch, trackingBranch);
             project.setProjectStatus(projectStatus);
         } else {
             projectStatus = project.getProjectStatus();
@@ -185,6 +187,7 @@ public class ProjectServiceImpl implements ProjectService {
             projectStatus.setHasChanges(hasChanges);
             projectStatus.setAheadIndex(aheadIndex);
             projectStatus.setBehindIndex(behindIndex);
+            projectStatus.setTrackingBranch(trackingBranch);
         }
     }
 
