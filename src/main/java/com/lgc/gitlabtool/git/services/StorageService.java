@@ -11,7 +11,7 @@ import com.lgc.gitlabtool.git.xml.Servers;
  *
  * @author Pavlo Pidhornyi
  */
-public interface StorageService {
+public interface StorageService extends Service {
 
     /**
      * Updates user preference storage

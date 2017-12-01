@@ -2,7 +2,7 @@ package com.lgc.gitlabtool.git.services;
 
 import java.util.function.Consumer;
 
-public interface NetworkService {
+public interface NetworkService extends Service {
     
     /**
      * Runs the URL verification in background thread

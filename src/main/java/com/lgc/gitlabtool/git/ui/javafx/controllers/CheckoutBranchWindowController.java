@@ -6,8 +6,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
@@ -20,6 +18,7 @@ import com.lgc.gitlabtool.git.jgit.BranchType;
 import com.lgc.gitlabtool.git.jgit.JGit;
 import com.lgc.gitlabtool.git.listeners.stateListeners.AbstractStateListener;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
+import com.lgc.gitlabtool.git.services.BackgroundService;
 import com.lgc.gitlabtool.git.services.ConsoleService;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
@@ -93,6 +92,9 @@ public class CheckoutBranchWindowController extends AbstractStateListener {
 
     private static final ConsoleService _concoleService = (ConsoleService) ServiceProvider.getInstance()
             .getService(ConsoleService.class.getName());
+
+    private static final BackgroundService _backgroundService = (BackgroundService) ServiceProvider.getInstance()
+            .getService(BackgroundService.class.getName());
 
     private static final String ALREADY_SWICHED_MESSAGE = "%d of %d projects have already switched to the selected branch.";
 
@@ -365,8 +367,7 @@ public class CheckoutBranchWindowController extends AbstractStateListener {
     @Override
     public void handleEvent(ApplicationState changedState, boolean isActivate) {
         if (!isActivate) {
-            ExecutorService executor = Executors.newSingleThreadExecutor();
-            executor.submit(() -> {
+            _backgroundService.runInBackgroundThread(() -> {
                 Platform.runLater(new Runnable() {
                     @Override
                     public void run() {
@@ -383,7 +384,6 @@ public class CheckoutBranchWindowController extends AbstractStateListener {
                     }
                 });
             });
-            executor.shutdown();
         }
     }
 

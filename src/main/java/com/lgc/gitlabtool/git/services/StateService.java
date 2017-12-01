@@ -16,7 +16,7 @@ import com.lgc.gitlabtool.git.listeners.stateListeners.StateEventGenerator;
  *
  * @author Lyudmila Lyska
  */
-public interface StateService extends StateEventGenerator {
+public interface StateService extends StateEventGenerator, Service {
 
     /**
      * Activates the state.

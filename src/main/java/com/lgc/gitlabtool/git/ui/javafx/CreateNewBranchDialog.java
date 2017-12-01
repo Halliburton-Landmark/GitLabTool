@@ -6,13 +6,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import com.lgc.gitlabtool.git.entities.Branch;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.jgit.BranchType;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
+import com.lgc.gitlabtool.git.services.BackgroundService;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
@@ -46,9 +45,10 @@ public class CreateNewBranchDialog extends Dialog<String> {
     private static final String STATUS_DIALOG_HEADER = "Branch creating info";
     private static final String CHOOSE_BRANCH_NAME_MESSAGE = "Please choose a new branch name";
 
-    private static final Logger _logger = LogManager.getLogger(CreateNewBranchDialog.class);
     private static final GitService _gitService = (GitService) ServiceProvider.getInstance()
             .getService(GitService.class.getName());
+    private static final BackgroundService _backgroundService = (BackgroundService) ServiceProvider.getInstance()
+            .getService(BackgroundService.class.getName());
 
     private final Label _messageLabel;
     private final Label _textLabel;
@@ -177,7 +177,7 @@ public class CreateNewBranchDialog extends Dialog<String> {
             Platform.runLater(() -> createAndShowStatusDialog(getProjects(), results));
         };
 
-        new Thread(task, "create-branch-task").start();
+        _backgroundService.runInBackgroundThread(task);
         getStage().close();
     }
 
@@ -244,7 +244,7 @@ public class CreateNewBranchDialog extends Dialog<String> {
             // because we show the statuses of branches creation
             // In the same time we could see that branch is changed on the projects list panel
             Runnable task = () -> _gitService.checkoutBranch(projects, (String) branchName, false, null);
-            new Thread(task, "switch-branch-task").start();
+            _backgroundService.runInBackgroundThread(task);
         } else {
             ChangesCheckDialog alert = new ChangesCheckDialog();
             alert.launchConfirmationDialog(changedProjects, projects, branchName, this::switchBranch);
