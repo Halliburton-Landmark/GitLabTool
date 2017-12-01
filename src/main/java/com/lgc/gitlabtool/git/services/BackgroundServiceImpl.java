@@ -19,21 +19,19 @@ public class BackgroundServiceImpl implements BackgroundService {
      * Creates the instance of this class
      */
     public BackgroundServiceImpl() {
-        ThreadFactory namingThreadFactory = getThreadFactory(false);
+        ThreadFactory namingThreadFactory = buildFactory("background-service-%d", false, Thread.NORM_PRIORITY);
         _executorService = Executors.newCachedThreadPool(namingThreadFactory);
     }
 
     /**
-     * Provides {@link ThreadFactory} for executor service
-     * @param isDaemon show if created threads should be daemons
-     *              if {@code true}, all created threads will be daemons
-     * @return instance of {@link ThreadFactory}
+     * Builds new instance of the {@link ThreadFactory} based on set parameters
+     * @param namingPattern - thread naming pattern
+     * @param isDaemon - {@code true} if all thread created by this {@code TreadFactory} should be daemons,
+     *                   {@code false} otherwise
+     * @param priority - the priority of created threads
+     * @return new instance of the ThreadFactory based on set parameters
      */
-    private ThreadFactory getThreadFactory(boolean isDaemon) {
-        return buildFactory("background-service-%d", isDaemon, Thread.MAX_PRIORITY);
-    }
-
-    private static ThreadFactory buildFactory(String namingPattern, boolean isDaemon, int priority) {
+    private ThreadFactory buildFactory(String namingPattern, boolean isDaemon, int priority) {
         final AtomicLong counter = new AtomicLong(0);
         final ThreadFactory factory = Executors.defaultThreadFactory();
         return new ThreadFactory() {
@@ -44,10 +42,20 @@ public class BackgroundServiceImpl implements BackgroundService {
                     thread.setName(String.format(namingPattern, counter.getAndIncrement()));
                 }
                 thread.setDaemon(isDaemon);
-                thread.setPriority(priority);
+                if (validPriority(priority)) {
+                    thread.setPriority(priority);
+                }
                 return thread;
             }
         };
+    }
+
+    private boolean validPriority(int priority) {
+        String errorMessage = "Wrong priority! It should be >= " + Thread.MIN_PRIORITY + " and <= " + Thread.MAX_PRIORITY;
+        if (priority < Thread.MIN_PRIORITY || priority > Thread.MAX_PRIORITY) {
+            throw new IllegalArgumentException(errorMessage);
+        }
+        return true;
     }
 
     @Override
