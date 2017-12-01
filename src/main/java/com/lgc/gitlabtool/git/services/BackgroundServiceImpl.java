@@ -1,8 +1,7 @@
 package com.lgc.gitlabtool.git.services;
 
-import com.lgc.gitlabtool.git.external.ThreadFactoryBuilder;
-
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Implementation of {@link BackgroundService}
@@ -31,11 +30,24 @@ public class BackgroundServiceImpl implements BackgroundService {
      * @return instance of {@link ThreadFactory}
      */
     private ThreadFactory getThreadFactory(boolean isDaemon) {
-        return new ThreadFactoryBuilder()
-                .setNamingPattern("background-service-%d")
-                .setDaemon(isDaemon)
-                .setPriority(Thread.MAX_PRIORITY)
-                .build();
+        return buildFactory("background-service-%d", isDaemon, Thread.MAX_PRIORITY);
+    }
+
+    private static ThreadFactory buildFactory(String namingPattern, boolean isDaemon, int priority) {
+        final AtomicLong counter = new AtomicLong(0);
+        final ThreadFactory factory = Executors.defaultThreadFactory();
+        return new ThreadFactory() {
+            @Override
+            public Thread newThread(Runnable runnable) {
+                Thread thread = factory.newThread(runnable);
+                if (namingPattern != null) {
+                    thread.setName(String.format(namingPattern, counter.getAndIncrement()));
+                }
+                thread.setDaemon(isDaemon);
+                thread.setPriority(priority);
+                return thread;
+            }
+        };
     }
 
     @Override
