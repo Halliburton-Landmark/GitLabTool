@@ -5,18 +5,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 import com.lgc.gitlabtool.git.listeners.stateListeners.AbstractStateListener;
+import com.lgc.gitlabtool.git.services.BackgroundService;
 import javafx.stage.WindowEvent;
 import org.apache.commons.lang.StringUtils;
 
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.ProjectList;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
-import com.lgc.gitlabtool.git.listeners.stateListeners.StateListener;
 import com.lgc.gitlabtool.git.services.PomXMLService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StateService;
@@ -59,6 +57,9 @@ public class EditProjectPropertiesController extends AbstractStateListener {
 
     private static final StateService _stateService = (StateService) ServiceProvider.getInstance()
             .getService(StateService.class.getName());
+
+    private static final BackgroundService _backgroundService = (BackgroundService) ServiceProvider.getInstance()
+            .getService(BackgroundService.class.getName());
 
     private Stage _stage;
 
@@ -368,8 +369,7 @@ public class EditProjectPropertiesController extends AbstractStateListener {
     @Override
     public void handleEvent(ApplicationState changedState, boolean isActivate) {
         if (!isActivate) {
-            ExecutorService executor = Executors.newSingleThreadExecutor();
-            executor.submit(() -> {
+            _backgroundService.runInBackgroundThread(() -> {
                 Platform.runLater(new Runnable() {
                     @Override
                     public void run() {
@@ -392,7 +392,6 @@ public class EditProjectPropertiesController extends AbstractStateListener {
                     }
                 });
             });
-            executor.shutdown();
         }
     }
 }

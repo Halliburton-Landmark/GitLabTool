@@ -4,6 +4,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 
+import com.lgc.gitlabtool.git.util.ShutDownUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -121,6 +122,8 @@ public class JavaFXUI extends Application implements UserInterface {
         Optional<ButtonType> closeResponse = closeConfirmation.showAndWait();
         if (!ButtonType.OK.equals(closeResponse.orElse(ButtonType.CANCEL))) {
             event.consume();
+        } else {
+            ShutDownUtil.shutdown();
         }
     }
 

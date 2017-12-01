@@ -18,9 +18,15 @@ public class NetworkServiceImpl implements NetworkService {
 
     private static final Logger logger = LogManager.getLogger(NetworkServiceImpl.class);
 
+    private BackgroundService _bacgroundService;
+
     private final int WRONG_RESPONSE = -1;
     private final int TIMEOUT = 10000; // timeout after 10 seconds
     private final String URL_SUFFIX = "/user";
+
+    public NetworkServiceImpl(BackgroundService backgroundService) {
+        this._bacgroundService = backgroundService;
+    }
 
     @Override
     public void runURLVerification(String inputURL, Consumer<Integer> handler) {
@@ -29,7 +35,7 @@ public class NetworkServiceImpl implements NetworkService {
             int responseCode = getServerResponseCode(url);
             handler.accept(responseCode);
         };
-        new Thread(runnable).start();
+        _bacgroundService.runInBackgroundThread(runnable);
     }
 
     private int getServerResponseCode(String serverURL) {

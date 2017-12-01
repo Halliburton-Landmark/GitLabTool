@@ -7,7 +7,7 @@ import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.User;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 
-public interface GroupsUserService {
+public interface GroupsUserService extends Service {
 
     /**
      * Gets user's groups

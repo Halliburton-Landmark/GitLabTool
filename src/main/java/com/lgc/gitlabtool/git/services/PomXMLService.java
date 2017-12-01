@@ -13,7 +13,7 @@ import com.lgc.gitlabtool.git.jgit.JGitStatus;
  *
  * @author Lyska Lyudmila
  */
-public interface PomXMLService {
+public interface PomXMLService extends Service {
 
     /**
      * Changes parent version
