@@ -7,7 +7,7 @@ import java.util.Collection;
  *
  * @author Lyska Lyudmila
  */
-public interface ReplacementService {
+public interface ReplacementService extends Service {
 
     /**
      * Replaces text in all projects of group that have a file with a name equals the fileName parameter.

@@ -15,7 +15,7 @@ import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
  *
  * @author Pavlo Pidhorniy
  */
-public interface GitService {
+public interface GitService extends Service {
 
     /**
      * Checks that project has selected branches

@@ -17,7 +17,7 @@ import com.lgc.gitlabtool.git.entities.Group;
  *
  * @author Lyudmila Lyska
  */
-public interface ClonedGroupsService {
+public interface ClonedGroupsService extends Service {
 
     /**
      * Gets a list of cloned groups
