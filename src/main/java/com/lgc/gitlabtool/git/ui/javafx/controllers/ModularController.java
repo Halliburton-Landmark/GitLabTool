@@ -1281,7 +1281,7 @@ public class ModularController implements UpdateProgressListener {
 
     private void refreshLoadProjects() {
         _projectsList.refreshLoadProjects();
-        sortAndCheckProjects();
+        hideShadowsAction();
     }
 
     private BooleanBinding booleanBindingForShadowProjects() {
