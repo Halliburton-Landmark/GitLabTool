@@ -64,7 +64,7 @@ public class StatusBar extends HBox implements StateListener {
         _stateService.addStateListener(ApplicationState.PUSH, this);
         _stateService.addStateListener(ApplicationState.PULL, this);
         _stateService.addStateListener(ApplicationState.CREATE_PROJECT, this);
-        _stateService.addStateListener(ApplicationState.SWITCH_BRANCH, this);
+        _stateService.addStateListener(ApplicationState.CHECKOUT_BRANCH, this);
         _stateService.addStateListener(ApplicationState.CREATE_BRANCH, this);
         _stateService.addStateListener(ApplicationState.EDIT_POM, this);
         _stateService.addStateListener(ApplicationState.REVERT, this);

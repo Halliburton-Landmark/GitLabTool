@@ -10,8 +10,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
-import com.lgc.gitlabtool.git.listeners.stateListeners.AbstractStateListener;
-import javafx.stage.WindowEvent;
 import org.apache.commons.lang.StringUtils;
 
 import com.lgc.gitlabtool.git.entities.Branch;
@@ -20,16 +18,16 @@ import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.ProjectList;
 import com.lgc.gitlabtool.git.jgit.BranchType;
 import com.lgc.gitlabtool.git.jgit.JGit;
+import com.lgc.gitlabtool.git.listeners.stateListeners.AbstractStateListener;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
-import com.lgc.gitlabtool.git.listeners.stateListeners.StateListener;
 import com.lgc.gitlabtool.git.services.ConsoleService;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.icon.LocalRemoteIconHolder;
 import com.lgc.gitlabtool.git.ui.javafx.ChangesCheckDialog;
+import com.lgc.gitlabtool.git.ui.javafx.CheckoutBranchProgressDialog;
 import com.lgc.gitlabtool.git.ui.javafx.ProgressDialog;
-import com.lgc.gitlabtool.git.ui.javafx.SwitchBranchProgressDialog;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 
 import javafx.application.Platform;
@@ -37,9 +35,7 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
@@ -51,9 +47,10 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 @SuppressWarnings("unchecked")
-public class SwitchBranchWindowController extends AbstractStateListener {
+public class CheckoutBranchWindowController extends AbstractStateListener {
 
     private static final String TOTAL_CAPTION = "Total count: ";
 
@@ -89,7 +86,7 @@ public class SwitchBranchWindowController extends AbstractStateListener {
     private Label branchesCountLabel;
 
     @FXML
-    private Button switchButton;
+    private Button checkoutButton;
 
     private static final StateService _stateService = (StateService) ServiceProvider.getInstance()
             .getService(StateService.class.getName());
@@ -127,7 +124,7 @@ public class SwitchBranchWindowController extends AbstractStateListener {
     /*
     Buttons
     */
-    public void onSwitchButton() {
+    public void onCheckoutButton() {
         List<Project> selectedProjects = currentProjectsListView.getItems();
         Branch selectedBranch = (Branch) branchesListView.getSelectionModel().getSelectedItem();
 
@@ -143,9 +140,9 @@ public class SwitchBranchWindowController extends AbstractStateListener {
 
         List<Project> changedProjects = _gitService.getProjectsWithChanges(correctProjects);
         if (changedProjects.isEmpty()) {
-            switchBranch(correctProjects, selectedBranch);
+            checkoutBranch(correctProjects, selectedBranch);
         } else {
-            launchSwitchBranchConfirmation(changedProjects, correctProjects, selectedBranch);
+            launchCheckoutBranchConfirmation(changedProjects, correctProjects, selectedBranch);
         }
     }
 
@@ -153,23 +150,23 @@ public class SwitchBranchWindowController extends AbstractStateListener {
         return _projectList.getProjectsByIds(_selectedProjectsIds);
     }
 
-    private void switchBranch(List<Project> selectedProjects, Object selectedBranch) {
-        ProgressDialog progressDialog = new SwitchBranchProgressDialog();
-        progressDialog.setStartAction(() -> switchAction(selectedBranch, selectedProjects, progressDialog));
+    private void checkoutBranch(List<Project> selectedProjects, Object selectedBranch) {
+        ProgressDialog progressDialog = new CheckoutBranchProgressDialog();
+        progressDialog.setStartAction(() -> checkoutBranch(selectedBranch, selectedProjects, progressDialog));
         progressDialog.showDialog();
     }
 
-    private void switchAction(Object selectedBranch, List<Project> projects, ProgressDialog progressDialog) {
+    private void checkoutBranch(Object selectedBranch, List<Project> projects, ProgressDialog progressDialog) {
         OperationProgressListener switchProgressListener =
-                new OperationProgressListener(progressDialog, ApplicationState.SWITCH_BRANCH);
-        _gitService.switchTo(projects, (Branch) selectedBranch, switchProgressListener);
+                new OperationProgressListener(progressDialog, ApplicationState.CHECKOUT_BRANCH);
+        _gitService.checkoutBranch(projects, (Branch) selectedBranch, switchProgressListener);
     }
 
-    private void launchSwitchBranchConfirmation(List<Project> changedProjects,
+    private void launchCheckoutBranchConfirmation(List<Project> changedProjects,
                                                 List<Project> selectedProjects, Branch selectedBranch) {
 
         ChangesCheckDialog alert = new ChangesCheckDialog();
-        alert.launchConfirmationDialog(changedProjects, selectedProjects, selectedBranch, this::switchBranch);
+        alert.launchConfirmationDialog(changedProjects, selectedProjects, selectedBranch, this::checkoutBranch);
     }
 
     public void onClose() {
@@ -318,13 +315,13 @@ public class SwitchBranchWindowController extends AbstractStateListener {
     private void disableSwitchButton(Object currentBranch) {
         if (currentBranch == null) {
             BooleanBinding defaultProperty = branchesListView.getSelectionModel().selectedItemProperty().isNull();
-            switchButton.disableProperty().bind(defaultProperty);
+            checkoutButton.disableProperty().bind(defaultProperty);
             return;
         }
         if(isSelectedBranchCurrentForAllProjects((Branch)currentBranch)) {
-            switchButton.disableProperty().bind(new SimpleBooleanProperty(true));
+            checkoutButton.disableProperty().bind(new SimpleBooleanProperty(true));
         } else {
-            switchButton.disableProperty().bind(new SimpleBooleanProperty(false));
+            checkoutButton.disableProperty().bind(new SimpleBooleanProperty(false));
         }
     }
 

@@ -36,7 +36,7 @@ public interface GitService {
      *
      * @return map with projects and theirs statuses of switching
      */
-    Map<Project, JGitStatus> switchTo(List<Project> projects, Branch branch, ProgressListener progress);
+    Map<Project, JGitStatus> checkoutBranch(List<Project> projects, Branch branch, ProgressListener progress);
 
     /**
      * Switches projects to selected branch
@@ -47,7 +47,7 @@ public interface GitService {
      * @param progress the listener for obtaining data on the process of performing the operation
      * @return map with projects and theirs statuses of switching
      */
-    Map<Project, JGitStatus> switchTo(List<Project> projects, String branchName, boolean isRemote, ProgressListener progress);
+    Map<Project, JGitStatus> checkoutBranch(List<Project> projects, String branchName, boolean isRemote, ProgressListener progress);
 
     /**
      * Gets projects that have uncommited changes

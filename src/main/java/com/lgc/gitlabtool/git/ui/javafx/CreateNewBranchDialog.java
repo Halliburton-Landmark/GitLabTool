@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.lgc.gitlabtool.git.ui.javafx.listeners.PushProgressListener;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -17,6 +16,7 @@ import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
+import com.lgc.gitlabtool.git.ui.javafx.listeners.PushProgressListener;
 import com.lgc.gitlabtool.git.util.NameValidator;
 import com.lgc.gitlabtool.git.util.ScreenUtil;
 
@@ -194,8 +194,8 @@ public class CreateNewBranchDialog extends Dialog<String> {
 
     private ChangeListener<? super String> getInputFilter() {
         return (observable, oldValue, newValue) -> {
-            if (!_branchNameField.getText().isEmpty() 
-                    && isInputValid(_branchNameField.getText()) 
+            if (!_branchNameField.getText().isEmpty()
+                    && isInputValid(_branchNameField.getText())
                     && !_comboBox.getSelectionModel().getSelectedItem().isEmpty()) {
                 _createButton.setDisable(false);
                 _branchNameField.setStyle("-fx-border-color: green;");
@@ -243,7 +243,7 @@ public class CreateNewBranchDialog extends Dialog<String> {
             // we do not show switching on statuses here
             // because we show the statuses of branches creation
             // In the same time we could see that branch is changed on the projects list panel
-            Runnable task = () -> _gitService.switchTo(projects, (String) branchName, false, null);
+            Runnable task = () -> _gitService.checkoutBranch(projects, (String) branchName, false, null);
             new Thread(task, "switch-branch-task").start();
         } else {
             ChangesCheckDialog alert = new ChangesCheckDialog();
