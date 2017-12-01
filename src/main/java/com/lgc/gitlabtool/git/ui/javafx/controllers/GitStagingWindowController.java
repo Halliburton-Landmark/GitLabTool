@@ -19,6 +19,7 @@ import com.lgc.gitlabtool.git.jgit.ChangedFileType;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.listeners.stateListeners.AbstractStateListener;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
+import com.lgc.gitlabtool.git.services.BackgroundService;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
@@ -103,6 +104,9 @@ public class GitStagingWindowController extends AbstractStateListener {
 
     private static final ProjectService _projectService = (ProjectService) ServiceProvider.getInstance()
             .getService(ProjectService.class.getName());
+
+    private static final BackgroundService _backgroundService = (BackgroundService) ServiceProvider.getInstance()
+            .getService(BackgroundService.class.getName());
 
     private final List<Integer> _selectedProjectIds = new ArrayList<>();
     private final ProjectList _projectList = ProjectList.get(null);
@@ -264,7 +268,7 @@ public class GitStagingWindowController extends AbstractStateListener {
                 showStatusDialog(isPushChanges, projects.size());
             }
         };
-        new Thread(task).start();
+        _backgroundService.runInBackgroundThread(task);
     }
 
     @FXML
@@ -455,7 +459,7 @@ public class GitStagingWindowController extends AbstractStateListener {
                 addRemoveFiles(_stagedListView, _unstagedListView, addedFiles);
             }
         };
-        new Thread(task).start();
+        _backgroundService.runInBackgroundThread(task);
     }
 
     private void onResetAction(List<ChangedFile> stagedFiles) {
@@ -467,7 +471,7 @@ public class GitStagingWindowController extends AbstractStateListener {
                 addRemoveFiles(_unstagedListView, _stagedListView, resetFiles);
             }
         };
-        new Thread(task).start();
+        _backgroundService.runInBackgroundThread(task);
     }
 
     private Map<Project, List<ChangedFile>> getMapFiles(List<ChangedFile> list) {
