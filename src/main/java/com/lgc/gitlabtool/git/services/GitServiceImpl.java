@@ -24,7 +24,7 @@ import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 public class GitServiceImpl implements GitService {
 
     private static final Logger _logger = LogManager.getLogger(GitServiceImpl.class);
-    private static final String CHECKOUT_BRANCH_FINISHED_MESSAGE = "Switch branch operation is finished.";
+    private static final String CHECKOUT_BRANCH_FINISHED_MESSAGE = "Checkout branch operation is finished.";
 
     private static JGit _git;
     private static StateService _stateService;

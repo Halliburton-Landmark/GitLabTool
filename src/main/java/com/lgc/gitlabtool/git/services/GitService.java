@@ -28,24 +28,24 @@ public interface GitService {
     boolean containsBranches(Project project, List<Branch> branches, boolean isCommon);
 
     /**
-     * Switches projects to selected branch
+     * Checkouts projects to selected branch
      *
-     * @param projects projects that need to be switched
+     * @param projects projects that need to be checkouted
      * @param branch selected branch
      * @param progress the listener for obtaining data on the process of performing the operation
      *
-     * @return map with projects and theirs statuses of switching
+     * @return map with projects and theirs checkout's statusess
      */
     Map<Project, JGitStatus> checkoutBranch(List<Project> projects, Branch branch, ProgressListener progress);
 
     /**
-     * Switches projects to selected branch
+     * Checkouts projects to selected branch
      *
-     * @param projects projects that need to be switched
+     * @param projects projects that need to be checkouted
      * @param branchName name of the branch
      * @param isRemote <code>true</code> if the branch has {@link BranchType#REMOTE}
      * @param progress the listener for obtaining data on the process of performing the operation
-     * @return map with projects and theirs statuses of switching
+     * @return map with projects and theirs checkout's statuses
      */
     Map<Project, JGitStatus> checkoutBranch(List<Project> projects, String branchName, boolean isRemote, ProgressListener progress);
 
