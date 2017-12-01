@@ -927,7 +927,7 @@ public class JGit {
      * @return tracking branch
      */
     public String getTrackingBranch(Project project) {
-        if (project == null) {
+        if (project == null || !project.isCloned()) {
             return StringUtils.EMPTY;
         }
         String trackingBranch = StringUtils.EMPTY;
