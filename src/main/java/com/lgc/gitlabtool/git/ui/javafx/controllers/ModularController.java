@@ -594,7 +594,7 @@ public class ModularController implements UpdateProgressListener {
         Runnable selectGroup = () -> {
             ProjectList.reset();
             _projectsList = ProjectList.get(_currentGroup);
-            sortAndCheckProjects();
+            hideShadowsAction();
 
             // UI updating
             Platform.runLater(() -> {
