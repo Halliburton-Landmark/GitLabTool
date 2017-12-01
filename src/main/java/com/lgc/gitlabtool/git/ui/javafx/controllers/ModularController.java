@@ -16,8 +16,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -33,6 +31,7 @@ import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.listeners.stateListeners.StateListener;
 import com.lgc.gitlabtool.git.listeners.updateProgressListener.UpdateProgressListener;
+import com.lgc.gitlabtool.git.services.BackgroundService;
 import com.lgc.gitlabtool.git.services.ClonedGroupsService;
 import com.lgc.gitlabtool.git.services.ConsoleService;
 import com.lgc.gitlabtool.git.services.GitService;
@@ -65,6 +64,7 @@ import com.lgc.gitlabtool.git.ui.selection.SelectionsProvider;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarButtons;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarManager;
 import com.lgc.gitlabtool.git.util.ScreenUtil;
+import com.lgc.gitlabtool.git.util.ShutDownUtil;
 import com.lgc.gitlabtool.git.util.UserGuideUtil;
 
 import javafx.application.Platform;
@@ -223,6 +223,9 @@ public class ModularController implements UpdateProgressListener {
 
     private static final PomXMLService _pomXmlService = (PomXMLService) ServiceProvider.getInstance()
             .getService(PomXMLService.class.getName());
+
+    private static final BackgroundService _backgroundService = (BackgroundService) ServiceProvider.getInstance()
+            .getService(BackgroundService.class.getName());
     //endregion
     /*
      *
@@ -743,8 +746,7 @@ public class ModularController implements UpdateProgressListener {
         if (result.orElse(ButtonType.NO) == ButtonType.NO) {
             return;
         }
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.submit(() -> {
+        _backgroundService.runInBackgroundThread(() -> {
             Map<Boolean, String> status = _groupService.removeGroup(group, alert.isCheckBoxSelected());
             for (Entry<Boolean, String> mapStatus : status.entrySet()) {
                 String headerMessage;
@@ -755,7 +757,6 @@ public class ModularController implements UpdateProgressListener {
                 updateClonedGroups();
             }
         });
-        executor.shutdown();
     }
 
     @SuppressWarnings("unused")
@@ -773,8 +774,7 @@ public class ModularController implements UpdateProgressListener {
             return;
         }
 
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.submit(() -> {
+        _backgroundService.runInBackgroundThread(() -> {
 
             Group loadGroup = _groupService.importGroup(selectedDirectory.getAbsolutePath());
             if (loadGroup == null) {
@@ -788,7 +788,6 @@ public class ModularController implements UpdateProgressListener {
                 });
             }
         });
-        executor.shutdown();
     }
 
     @FXML
@@ -908,9 +907,7 @@ public class ModularController implements UpdateProgressListener {
     private void onPushAction(ActionEvent actionEvent) {
         List<Project> filteredProjects = ProjectList.getCorrectProjects(getCurrentProjects());
         if (!filteredProjects.isEmpty()) {
-            ExecutorService executor = Executors.newSingleThreadExecutor();
-            executor.submit(() -> _gitService.push(filteredProjects, PushProgressListener.get()));
-            executor.shutdown();
+            _backgroundService.runInBackgroundThread(() -> _gitService.push(filteredProjects, PushProgressListener.get()));
         } else {
             _consoleService.addMessage(String.format(NO_ANY_PROJECT_FOR_OPERATION, PUSH_OPERATION_NAME), MessageType.ERROR);
         }
@@ -938,9 +935,7 @@ public class ModularController implements UpdateProgressListener {
         if (!alert.isOKButtonPressed(alert.showAndWait())) {
             return;
         }
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.submit(this::revert);
-        executor.shutdown();
+        _backgroundService.runInBackgroundThread(this::revert);
     }
 
     @FXML
@@ -1021,9 +1016,7 @@ public class ModularController implements UpdateProgressListener {
     @FXML
     @SuppressWarnings("unused")
     private void refreshLoadProjects(ActionEvent actionEvent) {
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.submit((Runnable) this::refreshLoadProjects);
-        executor.shutdown();
+        _backgroundService.runInBackgroundThread(this::refreshLoadProjects);
     }
 
     @FXML
@@ -1438,6 +1431,7 @@ public class ModularController implements UpdateProgressListener {
     private void exit() {
         List<ApplicationState> activeStates = _stateService.getActiveStates();
         if (activeStates.isEmpty()) {
+            ShutDownUtil.shutdown();
             Platform.exit();
         }
         JavaFXUI.showWarningAlertForActiveStates(activeStates);
@@ -1564,9 +1558,7 @@ public class ModularController implements UpdateProgressListener {
         @Override
         public void handleEvent(ApplicationState state, boolean isActivate) {
             if (!isActivate) {
-                ExecutorService executor = Executors.newSingleThreadExecutor();
-                executor.submit(() -> updateProjectsByState(state));
-                executor.shutdown();
+                _backgroundService.runInBackgroundThread(() -> updateProjectsByState(state));
             }
             handleRefreshButtonState(state, isActivate);
         }

@@ -6,11 +6,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 import com.lgc.gitlabtool.git.listeners.stateListeners.AbstractStateListener;
+import com.lgc.gitlabtool.git.services.*;
 import javafx.stage.WindowEvent;
 import org.apache.commons.lang.StringUtils;
 
@@ -21,11 +20,6 @@ import com.lgc.gitlabtool.git.entities.ProjectList;
 import com.lgc.gitlabtool.git.jgit.BranchType;
 import com.lgc.gitlabtool.git.jgit.JGit;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
-import com.lgc.gitlabtool.git.listeners.stateListeners.StateListener;
-import com.lgc.gitlabtool.git.services.ConsoleService;
-import com.lgc.gitlabtool.git.services.GitService;
-import com.lgc.gitlabtool.git.services.ServiceProvider;
-import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.icon.LocalRemoteIconHolder;
 import com.lgc.gitlabtool.git.ui.javafx.ChangesCheckDialog;
 import com.lgc.gitlabtool.git.ui.javafx.ProgressDialog;
@@ -37,9 +31,7 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
@@ -94,10 +86,13 @@ public class SwitchBranchWindowController extends AbstractStateListener {
     private static final StateService _stateService = (StateService) ServiceProvider.getInstance()
             .getService(StateService.class.getName());
 
-    private static final ConsoleService _concoleService = (ConsoleService) ServiceProvider.getInstance()
+    private static final ConsoleService _consoleService = (ConsoleService) ServiceProvider.getInstance()
             .getService(ConsoleService.class.getName());
 
-    private static final String ALREADY_SWICHED_MESSAGE = "%d of %d projects have already switched to the selected branch.";
+    private static final BackgroundService _backgroundService = (BackgroundService) ServiceProvider.getInstance()
+            .getService(BackgroundService.class.getName());
+
+    private static final String ALREADY_SWITCHED_MESSAGE = "%d of %d projects have already switched to the selected branch.";
 
     {
         _stateService.addStateListener(ApplicationState.LOAD_PROJECTS, this);
@@ -136,8 +131,8 @@ public class SwitchBranchWindowController extends AbstractStateListener {
                                                       .collect(Collectors.toList());
         int numberSelected = selectedProjects.size();
         if (correctProjects.size() != numberSelected) {
-            _concoleService.addMessage(
-                    String.format(ALREADY_SWICHED_MESSAGE, numberSelected - correctProjects.size(), numberSelected),
+            _consoleService.addMessage(
+                    String.format(ALREADY_SWITCHED_MESSAGE, numberSelected - correctProjects.size(), numberSelected),
                     MessageType.ERROR);
         }
 
@@ -368,8 +363,7 @@ public class SwitchBranchWindowController extends AbstractStateListener {
     @Override
     public void handleEvent(ApplicationState changedState, boolean isActivate) {
         if (!isActivate) {
-            ExecutorService executor = Executors.newSingleThreadExecutor();
-            executor.submit(() -> {
+            _backgroundService.runInBackgroundThread(() -> {
                 Platform.runLater(new Runnable() {
                     @Override
                     public void run() {
@@ -386,7 +380,6 @@ public class SwitchBranchWindowController extends AbstractStateListener {
                     }
                 });
             });
-            executor.shutdown();
         }
     }
 

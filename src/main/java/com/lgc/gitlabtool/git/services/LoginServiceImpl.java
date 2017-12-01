@@ -18,9 +18,11 @@ public class LoginServiceImpl implements LoginService {
 
     private RESTConnector _connector;
     private CurrentUser _currentUser;
+    private BackgroundService _backgroundService;
 
-    public LoginServiceImpl(RESTConnector connector) {
+    public LoginServiceImpl(RESTConnector connector, BackgroundService backgroundService) {
         setConnector(connector);
+        this._backgroundService = backgroundService;
     }
 
     @Override
@@ -39,9 +41,7 @@ public class LoginServiceImpl implements LoginService {
             }
             onSuccess.accept(responseHolder);
         };
-        Thread loginThread = new Thread(runnable);
-        loginThread.setName("LoginThread");
-        loginThread.start();
+        _backgroundService.runInBackgroundThread(runnable);
     }
 
     @Override
