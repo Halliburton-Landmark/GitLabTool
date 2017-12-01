@@ -19,6 +19,7 @@ import com.lgc.gitlabtool.git.jgit.ChangedFileType;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.listeners.stateListeners.AbstractStateListener;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
+import com.lgc.gitlabtool.git.services.BackgroundService;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
@@ -103,6 +104,9 @@ public class GitStagingWindowController extends AbstractStateListener {
 
     private static final ProjectService _projectService = (ProjectService) ServiceProvider.getInstance()
             .getService(ProjectService.class.getName());
+
+    private static final BackgroundService _backgroundService = (BackgroundService) ServiceProvider.getInstance()
+            .getService(BackgroundService.class.getName());
 
     private final List<Integer> _selectedProjectIds = new ArrayList<>();
     private final ProjectList _projectList = ProjectList.get(null);
@@ -263,7 +267,8 @@ public class GitStagingWindowController extends AbstractStateListener {
                 showStatusDialog(isPushChanges, projects.size());
             }
         };
-        new Thread(task).start();
+
+        _backgroundService.runInBackgroundThread(task);
     }
 
     private void updateChangedFiles(List<Project> projects) {
@@ -345,22 +350,6 @@ public class GitStagingWindowController extends AbstractStateListener {
         }
         _unstagedListView.setItems(items);
         setContentAndComparator(_unstagedListView);
-    }
-
-    private void removeItemsFromList(ListView<ChangedFile> fromList, List<ChangedFile> items) {
-        ObservableList<ChangedFile> fromListItems = FXCollections.observableArrayList(fromList.getItems());
-        fromListItems.removeAll(items);
-        fromList.setItems(fromListItems);
-
-        setContentAndComparator(fromList);
-    }
-
-    private void addItemsToList(ListView<ChangedFile> toList, List<ChangedFile> items) {
-        ObservableList<ChangedFile> toListItems = FXCollections.observableArrayList(toList.getItems());
-        toListItems.addAll(items);
-        toList.setItems(toListItems);
-
-        setContentAndComparator(toList);
     }
 
     private Collection<ChangedFile> getFilesInUnstagedList() {
@@ -458,7 +447,7 @@ public class GitStagingWindowController extends AbstractStateListener {
                 updateChangedFiles(getProjects(addedFiles));
             }
         };
-        new Thread(task).start();
+        _backgroundService.runInBackgroundThread(task);
     }
 
     private void onResetAction(List<ChangedFile> stagedFiles) {
@@ -470,7 +459,7 @@ public class GitStagingWindowController extends AbstractStateListener {
                 updateChangedFiles(getProjects(resetFiles));
             }
         };
-        new Thread(task).start();
+        _backgroundService.runInBackgroundThread(task);
     }
 
     private Map<Project, List<ChangedFile>> getMapFiles(List<ChangedFile> list) {
