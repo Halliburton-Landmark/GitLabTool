@@ -15,6 +15,8 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
+import com.lgc.gitlabtool.git.services.BackgroundService;
+import com.lgc.gitlabtool.git.services.ServiceProvider;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -71,6 +73,9 @@ public class JGit {
     private static final String CANCEL_CLONE_MESSAGE = "Cloning process was canceled.";
     private static final String ORIGIN_PREFIX = "origin/";
     private static final String WRONG_PARAMETERS = "Wrong parameters for obtaining branches.";
+
+    private static final BackgroundService _backgroundService = (BackgroundService) ServiceProvider.getInstance()
+            .getService(BackgroundService.class.getName());
 
     static {
         _jgit = new JGit();
@@ -233,8 +238,7 @@ public class JGit {
             progressListener.onFinish(_isCloneCancelled ? CANCEL_CLONE_MESSAGE : FINISH_CLONE_MESSAGE);
         };
 
-        Thread t = new Thread(task, "Clone Group Thread");
-        t.start();
+        _backgroundService.runInBackgroundThread(task);
     }
 
     public void cancelClone() {
@@ -453,8 +457,7 @@ public class JGit {
                     .forEach(project -> pullProject(project, progressListener, progress, step));
             progressListener.onFinish("Pull process was finished");
         };
-        Thread pullThread = new Thread(pullTask, "Pull thread");
-        pullThread.start();
+        _backgroundService.runInBackgroundThread(pullTask);
         return true;
     }
 
