@@ -193,7 +193,7 @@ public class ProjectStatus {
      * @param tracking branch
      */
     public void setTrackingBranch(String trackingBranch) {
-        this._trackingBranch = trackingBranch;
+        _trackingBranch = trackingBranch == null ? StringUtils.EMPTY : trackingBranch;
     }
 
 }

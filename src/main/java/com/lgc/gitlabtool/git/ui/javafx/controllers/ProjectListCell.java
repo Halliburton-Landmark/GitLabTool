@@ -86,10 +86,10 @@ public class ProjectListCell extends ListCell<Project> {
         ProjectStatus projectStatus = item.getProjectStatus();
         return projectStatus.getCurrentBranch();
     }
-    
+
     private String getTrackingBranchName(Project item) {
-    	ProjectStatus projectStatus = item.getProjectStatus();
-		return projectStatus.getTrackingBranch();
+        ProjectStatus projectStatus = item.getProjectStatus();
+        return projectStatus.getTrackingBranch();
     }
 
     private Node[] getProjectPics(Project item) {
