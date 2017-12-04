@@ -9,7 +9,7 @@ import com.lgc.gitlabtool.git.jgit.ChangedFile;
  *
  * @author Lyudmila Lyska
  */
-public class ComparatorProjectsType implements Comparator<ChangedFile> {
+public class ProjectsTypeComparator implements Comparator<ChangedFile> {
 
     @Override
     public int compare(ChangedFile o1, ChangedFile o2) {
