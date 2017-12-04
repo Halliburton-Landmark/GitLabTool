@@ -338,7 +338,7 @@ public class JGit {
         }
         try (Git git = getGit(project.getPath())) {
             return files.stream()
-                        .filter(file -> rmAddCommand(git, file, isCached))
+                        .filter(file -> addRemovedFileToStaging(git, file, isCached))
                         .collect(Collectors.toList());
         } catch (IOException e) {
             logger.error("Error getting Git for " + project.getPath() + " " + e.getMessage());
@@ -359,14 +359,14 @@ public class JGit {
             return false;
         }
         try (Git git = getGit(project.getPath())) {
-            return rmAddCommand(git, fileName, isCached);
+            return addRemovedFileToStaging(git, fileName, isCached);
         } catch (IOException e) {
             logger.error("Error getting Git for " + project.getPath() + " " + e.getMessage());
             return false;
         }
     }
 
-    private boolean rmAddCommand(Git git, String fileName, boolean isCached) {
+    private boolean addRemovedFileToStaging(Git git, String fileName, boolean isCached) {
         try {
             git.rm().setCached(isCached)
                     .addFilepattern(fileName)
