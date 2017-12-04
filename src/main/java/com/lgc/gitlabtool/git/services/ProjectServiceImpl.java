@@ -187,7 +187,6 @@ public class ProjectServiceImpl implements ProjectService {
             projectStatus.setHasChanges(hasChanges);
             projectStatus.setAheadIndex(aheadIndex);
             projectStatus.setBehindIndex(behindIndex);
-            projectStatus.setTrackingBranch(trackingBranch);
         }
     }
 
