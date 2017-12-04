@@ -53,6 +53,7 @@ import org.eclipse.jgit.errors.NoWorkTreeException;
 import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.BaseRepositoryBuilder;
 import org.eclipse.jgit.lib.BranchConfig;
+import org.eclipse.jgit.lib.Config;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectDatabase;
 import org.eclipse.jgit.lib.ObjectId;
@@ -618,6 +619,13 @@ public class JGitTest {
         Git gitMock = getGitMock();
         Repository repoMock = getRepo(NAME_BRANCH);
         Mockito.when(gitMock.getRepository()).thenReturn(repoMock);
+        BranchConfig mockBranchConfig = mock(BranchConfig.class);
+        
+        JGit jGit = mock(JGit.class);
+        Mockito.when(jGit.getBranchConfig(repoMock.getConfig(), NAME_BRANCH)).thenReturn(mockBranchConfig);
+        
+        Mockito.when(mockBranchConfig.getTrackingBranch()).thenReturn(NAME_TRACKING_BRANCH);
+        
         Assert.assertTrue(!getJGitMock(gitMock).getTrackingBranch(getProject(true)).isEmpty());
     }
 
@@ -992,22 +1000,7 @@ public class JGitTest {
 
     private Repository getRepository() {
         return mock(Repository.class);
-    }
-    
-    private StoredConfig getStoredConfig() {
-        return mock(StoredConfig.class);
-    }
-    
-    private BranchConfig getBranchConfig(StoredConfig config, String branchName) {
-        return mock(BranchConfig.class);
-//        return new BranchConfig(config, branchName) {
-//            
-//            @Override
-//            public String getTrackingBranch() {
-//                return NAME_TRACKING_BRANCH;
-//            }
-//        };
-    }
+    }    
 
     private Repository getRepo(String nameBranch) {
         BaseRepositoryBuilder<?, ?> buildMock = mock(BaseRepositoryBuilder.class);
@@ -1059,7 +1052,7 @@ public class JGitTest {
 
                 @Override
                 public StoredConfig getConfig() {
-                    return null;
+                    return mock(StoredConfig.class);
                 }
 
                 @Override
@@ -1124,7 +1117,7 @@ public class JGitTest {
 
             @Override
             public StoredConfig getConfig() {
-                return getStoredConfig();
+                return mock(StoredConfig.class);
             }
 
             @Override
