@@ -74,7 +74,7 @@
          <children>
             <HBox layoutX="-32.0" layoutY="-31.0" prefHeight="27.0" prefWidth="232.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="5.0">
                <children>
-                  <Label text="Sorting by:">
+                  <Label text="Sorting:">
                      <HBox.margin>
                         <Insets top="5.0" />
                      </HBox.margin>

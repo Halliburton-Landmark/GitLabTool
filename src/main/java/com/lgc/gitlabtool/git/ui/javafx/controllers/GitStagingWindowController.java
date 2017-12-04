@@ -7,7 +7,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
@@ -26,9 +25,9 @@ import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.javafx.JavaFXUI;
 import com.lgc.gitlabtool.git.ui.javafx.StatusDialog;
-import com.lgc.gitlabtool.git.ui.javafx.comparators.ComparatorDefaultType;
-import com.lgc.gitlabtool.git.ui.javafx.comparators.ComparatorExtensionsType;
-import com.lgc.gitlabtool.git.ui.javafx.comparators.ComparatorProjectsType;
+import com.lgc.gitlabtool.git.ui.javafx.comparators.DefaultTypeComparator;
+import com.lgc.gitlabtool.git.ui.javafx.comparators.ExtensionsTypeComparator;
+import com.lgc.gitlabtool.git.ui.javafx.comparators.ProjectsTypeComparator;
 import com.lgc.gitlabtool.git.ui.javafx.controllers.listcells.FilesListCell;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.CommitPushProgressListener;
 
@@ -119,9 +118,11 @@ public class GitStagingWindowController extends AbstractStateListener {
     }
 
     /**
+     * Before showing window we initialize all components.
+     * We set ids of projects which were selected in the project window. Also we set their changed files.
      *
-     * @param projectIds
-     * @param files
+     * @param projectIds the ids of projects which were selected in the project window
+     * @param files      the changed files os selected projects
      */
     public void beforeShowing(List<Integer> projectIds, Collection<ChangedFile> files) {
         ObservableList<SortingType> items = FXCollections.observableArrayList
@@ -137,8 +138,9 @@ public class GitStagingWindowController extends AbstractStateListener {
     }
 
     /**
+     * Gets list of {@linkplain ApplicationState} which Git Staging window listenins.
      *
-     * @return
+     * @return a list of states
      */
     public List<ApplicationState> getStagingStates() {
         return _stagingStates;
@@ -247,13 +249,9 @@ public class GitStagingWindowController extends AbstractStateListener {
     }
 
     private List<Project> getProjects(List<ChangedFile> files) {
-
-
-
-        Set<Project> setProjects = files.stream()
-                                        .map(ChangedFile::getProject)
-                                        .collect(Collectors.toSet());
-        return new ArrayList<>(setProjects);
+        return files.stream()
+                    .map(ChangedFile::getProject)
+                    .collect(Collectors.toList());
     }
 
     private void commitChanges(List<Project> projects, boolean isPushChanges) {
@@ -411,11 +409,11 @@ public class GitStagingWindowController extends AbstractStateListener {
 
         private static Comparator<ChangedFile> getComparatorByType(SortingType type) {
             if (type == SortingType.DEFAULT) {
-                return new ComparatorDefaultType();
+                return new DefaultTypeComparator();
             } else if (type == SortingType.PROJECTS) {
-                return new ComparatorProjectsType();
+                return new ProjectsTypeComparator();
             } else {
-                return new ComparatorExtensionsType();
+                return new ExtensionsTypeComparator();
             }
         }
     }
