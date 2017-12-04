@@ -618,14 +618,8 @@ public class JGitTest {
     public void getTrackingBranchTest() {
         Git gitMock = getGitMock();
         Repository repoMock = getRepo(NAME_BRANCH);
-        Mockito.when(gitMock.getRepository()).thenReturn(repoMock);
-        BranchConfig mockBranchConfig = mock(BranchConfig.class);
-        
-        JGit jGit = mock(JGit.class);
-        Mockito.when(jGit.getBranchConfig(repoMock.getConfig(), NAME_BRANCH)).thenReturn(mockBranchConfig);
-        
-        Mockito.when(mockBranchConfig.getTrackingBranch()).thenReturn(NAME_TRACKING_BRANCH);
-        
+        Mockito.when(gitMock.getRepository()).thenReturn(repoMock);        
+        Assert.assertTrue(getJGitMock(gitMock).getTrackingBranch(getProject(true)) != null);
         Assert.assertTrue(!getJGitMock(gitMock).getTrackingBranch(getProject(true)).isEmpty());
     }
 
@@ -989,6 +983,17 @@ public class JGitTest {
             @Override
             protected Git getGit(String path) throws IOException {
                 return gitMock;
+            }
+            
+            @Override
+            protected BranchConfig getBranchConfig(Config config, String branchName) {
+
+                return new BranchConfig(config, branchName) {
+                    @Override
+                    public String getTrackingBranch() {
+                        return NAME_TRACKING_BRANCH;
+                    }
+                };
             }
         };
         return correctJGitMock;

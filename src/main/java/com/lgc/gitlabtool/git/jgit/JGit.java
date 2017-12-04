@@ -698,7 +698,7 @@ public class JGit {
         return Git.open(new File(path + "/.git"));
     }
     
-    public BranchConfig getBranchConfig(Config config, String branchName) {
+    protected BranchConfig getBranchConfig(Config config, String branchName) {
         return new BranchConfig(config, branchName);
     }
 
