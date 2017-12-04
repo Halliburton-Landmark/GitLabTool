@@ -183,18 +183,17 @@ public class ProjectStatus {
      * 
      * @return a name (StringUtils.EMPTY if tracking branch isn't set).
      */
-	public String getTrackingBranch() {
-		return _trackingBranch;
-	}
+    public String getTrackingBranch() {
+        return _trackingBranch;
+    }
 
-	/**
-	 * Set a name of tracking branch.
-	 * StringUtils.EMPTY if the tracking branch is null.
-	 * 
-	 * @param tracking branch
-	 */
-	public void setTrackingBranch(String trackingBranch) {
-		this._trackingBranch = trackingBranch;
-	}
+    /**
+     * Set a name of tracking branch. StringUtils.EMPTY if the tracking branch is null.
+     * 
+     * @param tracking branch
+     */
+    public void setTrackingBranch(String trackingBranch) {
+        this._trackingBranch = trackingBranch;
+    }
 
 }
