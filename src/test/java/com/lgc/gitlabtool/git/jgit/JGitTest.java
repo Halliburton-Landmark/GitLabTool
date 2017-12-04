@@ -620,7 +620,7 @@ public class JGitTest {
         Repository repoMock = getRepo(NAME_BRANCH);
         Mockito.when(gitMock.getRepository()).thenReturn(repoMock);        
         Assert.assertTrue(getJGitMock(gitMock).getTrackingBranch(getProject(true)) != null);
-        Assert.assertTrue(!getJGitMock(gitMock).getTrackingBranch(getProject(true)).isEmpty());
+        Assert.assertFalse(getJGitMock(gitMock).getTrackingBranch(getProject(true)).isEmpty());
     }
 
     @Test(expected = IllegalArgumentException.class)
