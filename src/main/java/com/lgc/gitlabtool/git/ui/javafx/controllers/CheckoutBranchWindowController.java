@@ -90,13 +90,13 @@ public class CheckoutBranchWindowController extends AbstractStateListener {
     private static final StateService _stateService = (StateService) ServiceProvider.getInstance()
             .getService(StateService.class.getName());
 
-    private static final ConsoleService _concoleService = (ConsoleService) ServiceProvider.getInstance()
+    private static final ConsoleService _consoleService = (ConsoleService) ServiceProvider.getInstance()
             .getService(ConsoleService.class.getName());
 
     private static final BackgroundService _backgroundService = (BackgroundService) ServiceProvider.getInstance()
             .getService(BackgroundService.class.getName());
 
-    private static final String ALREADY_SWICHED_MESSAGE = "%d of %d projects have already switched to the selected branch.";
+    private static final String ALREADY_CHECKOUTED_MESSAGE = "%d of %d projects have already checkouted to the selected branch.";
 
     {
         _stateService.addStateListener(ApplicationState.LOAD_PROJECTS, this);
@@ -135,8 +135,8 @@ public class CheckoutBranchWindowController extends AbstractStateListener {
                                                       .collect(Collectors.toList());
         int numberSelected = selectedProjects.size();
         if (correctProjects.size() != numberSelected) {
-            _concoleService.addMessage(
-                    String.format(ALREADY_SWICHED_MESSAGE, numberSelected - correctProjects.size(), numberSelected),
+            _consoleService.addMessage(
+                    String.format(ALREADY_CHECKOUTED_MESSAGE, numberSelected - correctProjects.size(), numberSelected),
                     MessageType.ERROR);
         }
 

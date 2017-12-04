@@ -15,8 +15,6 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
-import com.lgc.gitlabtool.git.services.BackgroundService;
-import com.lgc.gitlabtool.git.services.ServiceProvider;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -50,7 +48,9 @@ import com.lgc.gitlabtool.git.connections.token.CurrentUser;
 import com.lgc.gitlabtool.git.entities.Branch;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.User;
+import com.lgc.gitlabtool.git.services.BackgroundService;
 import com.lgc.gitlabtool.git.services.ProgressListener;
+import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 import com.lgc.gitlabtool.git.util.PathUtilities;
 
@@ -60,7 +60,7 @@ import com.lgc.gitlabtool.git.util.PathUtilities;
  *
  * - clone a group, project or URL of repository;
  * - pull, commit and push of projects;
- * - create, delete and checkout to branch.
+ * - create, delete and checkout branch.
  *
  * @author Lyska Lyudmila
  */
