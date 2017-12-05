@@ -176,18 +176,9 @@ public class ProjectServiceImpl implements ProjectService {
         
         String trackingBranch = _gitService.getTrackingBranch(project);
 
-        ProjectStatus projectStatus;
-        if (project.getProjectStatus() == null) {
-            projectStatus = new ProjectStatus(hasConflicts, hasChanges, aheadIndex, behindIndex, nameBranch, trackingBranch);
-            project.setProjectStatus(projectStatus);
-        } else {
-            projectStatus = project.getProjectStatus();
-            projectStatus.setCurrentBranch(nameBranch);
-            projectStatus.setHasConflicts(hasConflicts);
-            projectStatus.setHasChanges(hasChanges);
-            projectStatus.setAheadIndex(aheadIndex);
-            projectStatus.setBehindIndex(behindIndex);
-        }
+        ProjectStatus projectStatus = new ProjectStatus(hasConflicts, hasChanges, aheadIndex, behindIndex, nameBranch,
+                trackingBranch);
+        project.setProjectStatus(projectStatus);
     }
 
     private Map<String, String> getCurrentPrivateToken() {
