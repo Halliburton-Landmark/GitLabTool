@@ -30,22 +30,22 @@ public interface GitService extends Service {
     /**
      * Checkouts projects to selected branch
      *
-     * @param projects projects that need to be checkouted
+     * @param projects projects that need to be checked out
      * @param branch selected branch
      * @param progress the listener for obtaining data on the process of performing the operation
      *
-     * @return map with projects and theirs checkout's statusess
+     * @return map with projects and theirs checkout statuses
      */
     Map<Project, JGitStatus> checkoutBranch(List<Project> projects, Branch branch, ProgressListener progress);
 
     /**
      * Checkouts projects to selected branch
      *
-     * @param projects projects that need to be checkouted
+     * @param projects projects that need to be checked out
      * @param branchName name of the branch
      * @param isRemote <code>true</code> if the branch has {@link BranchType#REMOTE}
      * @param progress the listener for obtaining data on the process of performing the operation
-     * @return map with projects and theirs checkout's statuses
+     * @return map with projects and theirs checkout statuses
      */
     Map<Project, JGitStatus> checkoutBranch(List<Project> projects, String branchName, boolean isRemote, ProgressListener progress);
 

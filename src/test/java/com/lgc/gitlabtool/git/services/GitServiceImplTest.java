@@ -158,7 +158,7 @@ public class GitServiceImplTest {
     }
 
     @Test(expected = NullPointerException.class)
-    public void testCheckoutBranchOffStateAfterException() {
+    public void testCheckoutBranchSwitchingOffStateAfterException() {
         List<Project> list = new ArrayList<>();
         stubProject = Mockito.mock(Project.class);
         list.add(stubProject);
