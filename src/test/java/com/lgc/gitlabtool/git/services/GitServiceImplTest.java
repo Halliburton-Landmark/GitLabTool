@@ -195,8 +195,11 @@ public class GitServiceImplTest {
 
     @Test
     public void getChangedFilesWrongParameters() {
-        assertTrue(_gitService.getChangedFiles(null).isEmpty());
-        assertTrue(_gitService.getChangedFiles(new Project()).isEmpty());
+        List<ChangedFile> resultWithNullParam = _gitService.getChangedFiles(null);
+        List<ChangedFile> resultNotClonedParam = _gitService.getChangedFiles(new Project());
+
+        assertTrue(resultWithNullParam.isEmpty());
+        assertTrue(resultNotClonedParam.isEmpty());
     }
 
     @Test
@@ -223,8 +226,11 @@ public class GitServiceImplTest {
 
     @Test
     public void addUntrackedFileForCommitIncorrectData() {
-        assertTrue(_gitService.addUntrackedFilesToIndex(null).isEmpty());
-        assertTrue(_gitService.addUntrackedFilesToIndex(Collections.emptyMap()).isEmpty());
+        List<ChangedFile> resultWithNullParam = _gitService.addUntrackedFilesToIndex(null);
+        List<ChangedFile> resultEmptyMapParam = _gitService.addUntrackedFilesToIndex(Collections.emptyMap());
+
+        assertTrue(resultWithNullParam.isEmpty());
+        assertTrue(resultEmptyMapParam.isEmpty());
     }
 
     @Test
