@@ -194,25 +194,30 @@ public class GitServiceImplTest {
     }
 
     @Test
-    public void getChangedFilesIncorrectData() {
+    public void getChangedFilesWrongParameters() {
         assertTrue(_gitService.getChangedFiles(null).isEmpty());
         assertTrue(_gitService.getChangedFiles(new Project()).isEmpty());
+    }
 
-        Project project = getClonedProject();
-        when(_jGit.getStatusProject(project)).thenReturn(getIncorrectStatus());
-        assertTrue(_gitService.getChangedFiles(project).isEmpty());
+    @Test
+    public void getChangedFilesIncorrectStatusFromJGit() {
+        Project clonedProject = getClonedProject();
+        when(_jGit.getStatusProject(clonedProject)).thenReturn(getIncorrectStatus());
+
+        List<ChangedFile> changedFiles = _gitService.getChangedFiles(clonedProject);
+
+        assertTrue(changedFiles.isEmpty());
     }
 
     @Test
     public void getChangedFilesUntrackedFiles() {
         Project project = getClonedProject();
         Set<String> files = getFiles();
-
-        ProjectStatus status = new ProjectStatus(false, 0, 0, "branch", files, files,
-                new HashSet<>(), new HashSet<>(), new HashSet<>(),new HashSet<>());
+        ProjectStatus status = new ProjectStatus(false, 0, 0, "branch", files, files, new HashSet<>(), new HashSet<>(), new HashSet<>(), new HashSet<>());
         project.setProjectStatus(status);
 
         Collection<ChangedFile> changedFiles = _gitService.getChangedFiles(project);
+
         assertEquals(changedFiles.size(), files.size()*2);
     }
 
@@ -225,19 +230,20 @@ public class GitServiceImplTest {
     @Test
     public void addUntrackedFileForCommitCorrectData() {
         Project project = getClonedProject();
-
         Map<Project, List<ChangedFile>> data = getFilesForProject(project);
         when(_changedFilesUtilsMock.getChangedFiles(any(), any(), any())).thenReturn(getChangedFiles());
         when(_jGit.addUntrackedFileToIndex(any(), eq(project))).thenReturn(true);
         when(_jGit.addDeletedFile(any(), eq(project), eq(true))).thenReturn(true);
 
         List<ChangedFile> addedFiles = _gitService.addUntrackedFilesToIndex(data);
+
         assertEquals(addedFiles.size(), getChangedFiles().size());
     }
 
     @Test
     public void getProjectStatusIncorrectData() {
         ProjectStatus status = _gitService.getProjectStatus(null);
+
         assertFalse(status.hasChanges());
         assertFalse(status.hasConflicts());
         assertTrue(status.getConflictedFiles().isEmpty());
@@ -248,22 +254,25 @@ public class GitServiceImplTest {
 
     @Test
     public void getProjectStatusCorrectData() {
+        // data for the test
         Project project = getClonedProject();
         String currentBranch = "test_branch";
         int[] aheadBehindIndex = new int[] {0, 1};
         boolean hasChanges = true;
-
-        Status gitStatus = Mockito.mock(Status.class);
         Set<String> files = getFiles();
-        when(gitStatus.getConflicting()).thenReturn(files);
-        when(gitStatus.getUntracked()).thenReturn(files);
-        when(gitStatus.hasUncommittedChanges()).thenReturn(hasChanges);
-
-        when(_jGit.getStatusProject(project)).thenReturn(Optional.of(gitStatus));
+        Status gitStatusMock = Mockito.mock(Status.class);
+        // set the returned data for mock of git status
+        when(gitStatusMock.getConflicting()).thenReturn(files);
+        when(gitStatusMock.getUntracked()).thenReturn(files);
+        when(gitStatusMock.hasUncommittedChanges()).thenReturn(hasChanges);
+        // mock for JGit methods
+        when(_jGit.getStatusProject(project)).thenReturn(Optional.of(gitStatusMock));
         when(_jGit.getCurrentBranch(project)).thenReturn(Optional.of(currentBranch));
         when(_jGit.getAheadBehindIndexCounts(project, currentBranch)).thenReturn(aheadBehindIndex);
 
+        // checks that all parameters set successfully
         ProjectStatus status = _gitService.getProjectStatus(project);
+
         assertEquals(aheadBehindIndex[1], status.getBehindIndex());
         assertEquals(aheadBehindIndex[0], status.getAheadIndex());
         assertEquals(currentBranch, status.getCurrentBranch());
@@ -273,19 +282,28 @@ public class GitServiceImplTest {
     }
 
     @Test
-    public void resetChangedFilesIncorrectData() {
-        Map<Project, List<ChangedFile>> changedFile = new HashMap<>();
-        assertTrue(_gitService.resetChangedFiles(null).isEmpty());
-        assertTrue(_gitService.resetChangedFiles(changedFile).isEmpty());
+    public void resetChangedFilesWrongParameters() {
+        List<ChangedFile> filesNullParam = _gitService.resetChangedFiles(null);
+        List<ChangedFile> filesEmptyMapParam = _gitService.resetChangedFiles(new HashMap<>());
 
-        changedFile.put(null, getChangedFiles());
-        changedFile.put(new Project(), getChangedFiles());
-        changedFile.put(getClonedProject(), new ArrayList<>());
-        assertTrue(_gitService.resetChangedFiles(changedFile).isEmpty());
+        assertTrue(filesNullParam.isEmpty());
+        assertTrue(filesEmptyMapParam.isEmpty());
     }
 
     @Test
-    public void resetChangedFilesCorrectData() {
+    public void resetChangedFilesIncorrectDataInMap() {
+        Map<Project, List<ChangedFile>> changedFile = new HashMap<>();
+        changedFile.put(null, getChangedFiles());
+        changedFile.put(new Project(), getChangedFiles());
+        changedFile.put(getClonedProject(), new ArrayList<>());
+
+        List<ChangedFile> resetedFiles = _gitService.resetChangedFiles(changedFile);
+
+        assertTrue(resetedFiles.isEmpty());
+    }
+
+    @Test
+    public void resetChangedFilesSuccessfully() {
         Project project = getClonedProject();
         List<String> files = new ArrayList<>(getFiles());
         Map<Project, List<ChangedFile>> data = getFilesForProject(project);
@@ -294,6 +312,7 @@ public class GitServiceImplTest {
         when(_changedFilesUtilsMock.getChangedFiles(eq(files), eq(project), any())).thenReturn(getChangedFiles(files));
 
         List<ChangedFile> modifiedFiles = _gitService.resetChangedFiles(data);
+
         assertFalse(modifiedFiles.isEmpty());
         assertEquals(modifiedFiles.size(), files.size());
     }
