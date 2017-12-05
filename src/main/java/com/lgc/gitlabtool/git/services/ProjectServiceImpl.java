@@ -48,7 +48,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     private static final Logger _logger = LogManager.getLogger(ProjectServiceImpl.class);
     private static final CurrentUser _currentUser = CurrentUser.getInstance();
-    private static final JGit _git = JGit.getInstance();
+    private final JGit _git;
 
     private static ProjectTypeService _projectTypeService;
     private static StateService _stateService;
@@ -63,12 +63,14 @@ public class ProjectServiceImpl implements ProjectService {
                               ProjectTypeService projectTypeService,
                               StateService stateService,
                               ConsoleService consoleService,
-                              GitService gitService) {
+                              GitService gitService,
+                              JGit jGit) {
         setConnector(connector);
         setProjectTypeService(projectTypeService);
         setStateService(stateService);
         setConsoleService(consoleService);
         setGitService(gitService);
+        _git = jGit;
     }
 
     @Override

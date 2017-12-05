@@ -25,16 +25,17 @@ public class ServiceProvider {
     }
 
     private ServiceProvider() {
+        JGit jGit = JGit.getInstance();
         BackgroundService backgroundService = new BackgroundServiceImpl();
         RESTConnector restConnector = RESTConnectorFactory.getInstance().getRESTConnector();
         LoginService loginService = new LoginServiceImpl(restConnector, backgroundService);
         StorageService storageService = new StorageServiceImpl();
         ProjectTypeService projectTypeService = new ProjectTypeServiceImpl();
         StateService stateService = new StateServiceImpl();
-        GitService gitService = new GitServiceImpl(stateService, JGit.getInstance());
+        GitService gitService = new GitServiceImpl(stateService, jGit);
         ConsoleService consoleService = new ConsoleServiceImpl();
         ProjectService projectService = new ProjectServiceImpl(restConnector, projectTypeService,
-                stateService, consoleService, gitService);
+                stateService, consoleService, gitService, jGit);
         ClonedGroupsService programPropertiesService = new ClonedGroupsServiceImpl(storageService, loginService);
         PomXmlEditService pomXmlEditService = new PomXMLEditServiceImpl();
 
