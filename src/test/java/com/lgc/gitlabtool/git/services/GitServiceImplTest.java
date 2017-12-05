@@ -270,7 +270,6 @@ public class GitServiceImplTest {
         when(_jGit.getCurrentBranch(project)).thenReturn(Optional.of(currentBranch));
         when(_jGit.getAheadBehindIndexCounts(project, currentBranch)).thenReturn(aheadBehindIndex);
 
-        // checks that all parameters set successfully
         ProjectStatus status = _gitService.getProjectStatus(project);
 
         assertEquals(aheadBehindIndex[1], status.getBehindIndex());
