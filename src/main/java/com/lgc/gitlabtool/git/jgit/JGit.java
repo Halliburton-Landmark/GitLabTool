@@ -599,12 +599,12 @@ public class JGit {
     }
 
     /**
-     * Checkout to another branch (already existing).
+     * Checkout another branch (already existing).
      *
      * @param project         the cloned project
      * @param nameBranch      the name of the branch to which to checkout
-     * @param isRemoteBranch if value is <true> to checkout to a branch for it, a new local branch
-                              with the same name will be created, if <false> checkout to an existing branch.
+     * @param isRemoteBranch  if value is <true> to checkout branch for it, a new local branch
+                              with the same name will be created, if <false> checkout existing branch.
      *
      * @return JGitStatus: SUCCESSFUL - if a new branch was created,
      *                     FAILED - if the branch could not be created,
@@ -615,7 +615,7 @@ public class JGit {
             throw new IllegalArgumentException(
                     "Incorrect data: project is " + project + ", nameBranch is " + nameBranch);
         }
-        String prefixErrorMessage = "Checkout to branch for the " + project.getName() + " project: ";
+        String prefixErrorMessage = "Checkout branch for the " + project.getName() + " project: ";
         if (!project.isCloned()) {
             logger.error(prefixErrorMessage + ERROR_MSG_NOT_CLONED);
             return JGitStatus.FAILED;
@@ -651,7 +651,7 @@ public class JGit {
             } catch (CheckoutConflictException cce) {
                 logger.info("Failed! Project has unresolved conflicts " + cce.getMessage());
             } catch (GitAPIException e) {
-                logger.info("Checkout to branch failed " + e.getMessage());
+                logger.info("Checkout branch failed " + e.getMessage());
             }
         } catch (IOException e) {
             logger.error("Failed " + prefixErrorMessage + e.getMessage());
