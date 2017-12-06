@@ -73,7 +73,7 @@ public class CheckoutBranchWindowController extends AbstractStateListener {
     private ToggleGroup branchesFilter;
 
     @FXML
-    private ListView branchesListView;
+    private ListView<Branch> branchesListView;
 
     @FXML
     private CheckBox commonMatchingCheckBox;
@@ -96,7 +96,7 @@ public class CheckoutBranchWindowController extends AbstractStateListener {
     private static final BackgroundService _backgroundService = (BackgroundService) ServiceProvider.getInstance()
             .getService(BackgroundService.class.getName());
 
-    private static final String ALREADY_CHECKOUTED_MESSAGE = "%d of %d projects have already checkout out on the selected branch.";
+    private static final String ALREADY_CHECKEDOUT_MESSAGE = "%d of %d projects have already checked out on the selected branch.";
 
     {
         _stateService.addStateListener(ApplicationState.LOAD_PROJECTS, this);
@@ -128,7 +128,7 @@ public class CheckoutBranchWindowController extends AbstractStateListener {
     */
     public void onCheckoutButton() {
         List<Project> selectedProjects = currentProjectsListView.getItems();
-        Branch selectedBranch = (Branch) branchesListView.getSelectionModel().getSelectedItem();
+        Branch selectedBranch = branchesListView.getSelectionModel().getSelectedItem();
 
         List<Project> correctProjects = selectedProjects.stream()
                                                       .filter(project -> !Branch.compareBranches(project, selectedBranch))
@@ -136,7 +136,7 @@ public class CheckoutBranchWindowController extends AbstractStateListener {
         int numberSelected = selectedProjects.size();
         if (correctProjects.size() != numberSelected) {
             _consoleService.addMessage(
-                    String.format(ALREADY_CHECKOUTED_MESSAGE, numberSelected - correctProjects.size(), numberSelected),
+                    String.format(ALREADY_CHECKEDOUT_MESSAGE, numberSelected - correctProjects.size(), numberSelected),
                     MessageType.ERROR);
         }
 
@@ -306,7 +306,7 @@ public class CheckoutBranchWindowController extends AbstractStateListener {
 
         branchesListView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
-                Branch branch = (Branch) newValue;
+                Branch branch = newValue;
                 filteringProjectsListView(Arrays.asList(branch));
 
                 disableSwitchButton(branch);
@@ -372,7 +372,7 @@ public class CheckoutBranchWindowController extends AbstractStateListener {
                     @Override
                     public void run() {
                         String textSearch = searchField.getText();
-                        Branch branch = (Branch) branchesListView.getSelectionModel().getSelectedItem();
+                        Branch branch = branchesListView.getSelectionModel().getSelectedItem();
                         if (textSearch != null && !textSearch.isEmpty() && branch == null) {
                             filterPlantList(null, textSearch);
                         } else if (branch != null) {
