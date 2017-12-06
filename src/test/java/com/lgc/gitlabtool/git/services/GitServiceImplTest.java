@@ -173,5 +173,11 @@ public class GitServiceImplTest {
         verify(stateService, times(1)).stateON(ApplicationState.SWITCH_BRANCH);
         verify(stateService, times(1)).stateOFF(ApplicationState.SWITCH_BRANCH);
     }
-
+    
+    @Test
+    public void testGetTrackingBranch() {
+        stubProject = Mockito.mock(Project.class);
+        when(jGit.getTrackingBranch(stubProject)).thenReturn(JGitStatus.SUCCESSFUL.toString());    
+    }
+    
 }

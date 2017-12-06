@@ -160,4 +160,12 @@ public interface GitService extends Service {
      * Starts canceling process for cloning. This may take some time.
      */
     void cancelClone();
+    
+    /**
+     * This method return tracking branch.
+     * 
+     * @param project
+     * @return tracking branch.
+     */
+    public String getTrackingBranch(Project project);
 }
