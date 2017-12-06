@@ -96,7 +96,7 @@ public class CheckoutBranchWindowController extends AbstractStateListener {
     private static final BackgroundService _backgroundService = (BackgroundService) ServiceProvider.getInstance()
             .getService(BackgroundService.class.getName());
 
-    private static final String ALREADY_CHECKEDOUT_MESSAGE = "%d of %d projects have already checked out on the selected branch.";
+    private static final String ALREADY_CHECKOUTED_MESSAGE = "%d of %d projects have already checked out the selected branch.";
 
     {
         _stateService.addStateListener(ApplicationState.LOAD_PROJECTS, this);
@@ -136,7 +136,7 @@ public class CheckoutBranchWindowController extends AbstractStateListener {
         int numberSelected = selectedProjects.size();
         if (correctProjects.size() != numberSelected) {
             _consoleService.addMessage(
-                    String.format(ALREADY_CHECKEDOUT_MESSAGE, numberSelected - correctProjects.size(), numberSelected),
+                    String.format(ALREADY_CHECKOUTED_MESSAGE, numberSelected - correctProjects.size(), numberSelected),
                     MessageType.ERROR);
         }
 
