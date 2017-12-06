@@ -200,4 +200,12 @@ public interface GitService extends Service {
      * @return ProjectStatus for the project.
      */
     ProjectStatus getProjectStatus(Project project);
+
+    /**
+     * This method return tracking branch.
+     *
+     * @param project
+     * @return tracking branch.
+     */
+    public String getTrackingBranch(Project project);
 }

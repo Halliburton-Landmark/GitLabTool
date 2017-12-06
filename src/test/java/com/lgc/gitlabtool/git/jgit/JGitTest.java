@@ -54,6 +54,8 @@ import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.errors.NoWorkTreeException;
 import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.BaseRepositoryBuilder;
+import org.eclipse.jgit.lib.BranchConfig;
+import org.eclipse.jgit.lib.Config;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectDatabase;
 import org.eclipse.jgit.lib.ObjectId;
@@ -85,6 +87,7 @@ import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 public class JGitTest {
 
     private static final String NAME_BRANCH = "test_name";
+    private static final String NAME_TRACKING_BRANCH = "test_tracking_branch";
     private static final String CORRECT_PATH = "/path";
     private static final String fileName = "test";
 
@@ -643,6 +646,15 @@ public class JGitTest {
         Mockito.when(gitMock.getRepository()).thenReturn(repoMock);
         Assert.assertTrue(getJGitMock(gitMock).getCurrentBranch(getProject(true)).isPresent());
     }
+    
+    @Test
+    public void getTrackingBranchTest() {
+        Git gitMock = getGitMock();
+        Repository repoMock = getRepo(NAME_BRANCH);
+        Mockito.when(gitMock.getRepository()).thenReturn(repoMock);        
+        Assert.assertTrue(getJGitMock(gitMock).getTrackingBranch(getProject(true)) != null);
+        Assert.assertFalse(getJGitMock(gitMock).getTrackingBranch(getProject(true)).isEmpty());
+    }
 
     @Test(expected = IllegalArgumentException.class)
     public void deleteBranchProjectIsNullTest() {
@@ -1098,6 +1110,17 @@ public class JGitTest {
             protected Git getGit(String path) throws IOException {
                 return gitMock;
             }
+            
+            @Override
+            protected BranchConfig getBranchConfig(Config config, String branchName) {
+
+                return new BranchConfig(config, branchName) {
+                    @Override
+                    public String getTrackingBranch() {
+                        return NAME_TRACKING_BRANCH;
+                    }
+                };
+            }
         };
         return correctJGitMock;
     }
@@ -1108,7 +1131,7 @@ public class JGitTest {
 
     private Repository getRepository() {
         return mock(Repository.class);
-    }
+    }    
 
     private Repository getRepo(String nameBranch) {
         BaseRepositoryBuilder<?, ?> buildMock = mock(BaseRepositoryBuilder.class);
@@ -1160,7 +1183,7 @@ public class JGitTest {
 
                 @Override
                 public StoredConfig getConfig() {
-                    return null;
+                    return mock(StoredConfig.class);
                 }
 
                 @Override
@@ -1225,7 +1248,7 @@ public class JGitTest {
 
             @Override
             public StoredConfig getConfig() {
-                return null;
+                return mock(StoredConfig.class);
             }
 
             @Override

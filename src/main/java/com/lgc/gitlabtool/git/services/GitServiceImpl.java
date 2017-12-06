@@ -283,6 +283,7 @@ public class GitServiceImpl implements GitService {
 
         int aheadIndex = 0;
         int behindIndex = 0;
+        String trackingBranch = getTrackingBranch(project);
         String nameBranch = getCurrentBranchName(project);
         if (nameBranch != null) {
             int[] indexCount = getAheadBehindIndexCounts(project, nameBranch);
@@ -290,8 +291,8 @@ public class GitServiceImpl implements GitService {
             behindIndex = indexCount[1];
         }
 
-        return new ProjectStatus(hasChanges, aheadIndex, behindIndex, nameBranch, conflictedFiles,
-                untrackedFiles, changedFiles, removedFiles, missingFiles, modifiedFiles);
+        return new ProjectStatus(hasChanges, aheadIndex, behindIndex, nameBranch, trackingBranch,
+                conflictedFiles, untrackedFiles, changedFiles, removedFiles, missingFiles, modifiedFiles);
     }
 
     @Override
@@ -310,6 +311,11 @@ public class GitServiceImpl implements GitService {
     @Override
     public void cancelClone() {
         JGit.getInstance().cancelClone();
+    }
+
+    @Override
+    public String getTrackingBranch(Project project) {
+        return _git.getTrackingBranch(project);
     }
 
     @Override

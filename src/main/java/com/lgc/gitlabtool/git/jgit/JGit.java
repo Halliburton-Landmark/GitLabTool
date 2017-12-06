@@ -1,3 +1,4 @@
+
 package com.lgc.gitlabtool.git.jgit;
 
 import java.io.File;
@@ -15,8 +16,6 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
-import com.lgc.gitlabtool.git.services.BackgroundService;
-import com.lgc.gitlabtool.git.services.ServiceProvider;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -36,7 +35,9 @@ import org.eclipse.jgit.dircache.DirCacheCheckout;
 import org.eclipse.jgit.errors.CorruptObjectException;
 import org.eclipse.jgit.errors.NoWorkTreeException;
 import org.eclipse.jgit.errors.RevisionSyntaxException;
+import org.eclipse.jgit.lib.BranchConfig;
 import org.eclipse.jgit.lib.BranchTrackingStatus;
+import org.eclipse.jgit.lib.Config;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.EmptyProgressMonitor;
 import org.eclipse.jgit.lib.PersonIdent;
@@ -50,7 +51,9 @@ import com.lgc.gitlabtool.git.connections.token.CurrentUser;
 import com.lgc.gitlabtool.git.entities.Branch;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.User;
+import com.lgc.gitlabtool.git.services.BackgroundService;
 import com.lgc.gitlabtool.git.services.ProgressListener;
+import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 import com.lgc.gitlabtool.git.util.PathUtilities;
 
@@ -1031,4 +1034,34 @@ public class JGit {
         int[] aheadBehind = {commitsAheadIndex, commitsBehindIndex};
         return aheadBehind;
     }
+
+    /**
+     * This method return tracking branch name for the current project
+     *
+     * @param project
+     * @return tracking branch
+     */
+    public String getTrackingBranch(Project project) {
+        if (project == null) {
+            return StringUtils.EMPTY;
+        }
+        String trackingBranch = StringUtils.EMPTY;
+        try (Git git = getGit(project.getPath())) {
+            try (Repository repo = git.getRepository()) {
+                BranchConfig config = getBranchConfig(repo.getConfig(), repo.getBranch());
+                trackingBranch = config.getTrackingBranch();
+                return trackingBranch;
+            } catch (IOException e) {
+                logger.error("Could not get tracking branch " + e.getMessage());
+            }
+        } catch (IOException e) {
+            logger.error("Could not get tracking branch " + e.getMessage());
+        }
+        return trackingBranch;
+    }
+
+    protected BranchConfig getBranchConfig(Config config, String branchName) {
+        return new BranchConfig(config, branchName);
+    }
+
 }

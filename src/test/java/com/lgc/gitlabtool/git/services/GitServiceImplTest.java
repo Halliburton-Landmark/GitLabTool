@@ -216,7 +216,7 @@ public class GitServiceImplTest {
     public void getChangedFilesUntrackedFiles() {
         Project project = getClonedProject();
         Set<String> files = getFiles();
-        ProjectStatus status = new ProjectStatus(false, 0, 0, "branch", files, files, new HashSet<>(), new HashSet<>(), new HashSet<>(), new HashSet<>());
+        ProjectStatus status = new ProjectStatus(false, 0, 0, "branch", null, files, files, new HashSet<>(), new HashSet<>(), new HashSet<>(), new HashSet<>());
         project.setProjectStatus(status);
 
         Collection<ChangedFile> changedFiles = _gitService.getChangedFiles(project);
@@ -362,5 +362,11 @@ public class GitServiceImplTest {
         map.put(new Project(), Collections.emptyList()); // some incorrect value
         map.put(project, getChangedFiles());
         return map;
+    }
+
+    @Test
+    public void testGetTrackingBranch() {
+        _stubProject = Mockito.mock(Project.class);
+        when(_jGit.getTrackingBranch(_stubProject)).thenReturn(JGitStatus.SUCCESSFUL.toString());
     }
 }
