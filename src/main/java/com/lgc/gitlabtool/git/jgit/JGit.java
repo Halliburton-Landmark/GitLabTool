@@ -15,8 +15,6 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
-import com.lgc.gitlabtool.git.services.BackgroundService;
-import com.lgc.gitlabtool.git.services.ServiceProvider;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -50,7 +48,9 @@ import com.lgc.gitlabtool.git.connections.token.CurrentUser;
 import com.lgc.gitlabtool.git.entities.Branch;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.User;
+import com.lgc.gitlabtool.git.services.BackgroundService;
 import com.lgc.gitlabtool.git.services.ProgressListener;
+import com.lgc.gitlabtool.git.services.Service;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 import com.lgc.gitlabtool.git.util.PathUtilities;
 
@@ -64,9 +64,8 @@ import com.lgc.gitlabtool.git.util.PathUtilities;
  *
  * @author Lyska Lyudmila
  */
-public class JGit {
+public class JGit implements Service {
     private static final Logger logger = LogManager.getLogger(JGit.class);
-    private static final JGit _jgit;
     private final String ERROR_MSG_NOT_CLONED = " project is not cloned. The operation is impossible";
 
     public static final String FINISH_CLONE_MESSAGE = "The cloning process is finished.";
@@ -74,20 +73,10 @@ public class JGit {
     private static final String ORIGIN_PREFIX = "origin/";
     private static final String WRONG_PARAMETERS = "Wrong parameters for obtaining branches.";
 
-    private static final BackgroundService _backgroundService = (BackgroundService) ServiceProvider.getInstance()
-            .getService(BackgroundService.class.getName());
+    private final BackgroundService _backgroundService;
 
-    static {
-        _jgit = new JGit();
-    }
-
-    /**
-     * Gets instance's the class
-     *
-     * @return instance
-     */
-    public static JGit getInstance() {
-        return _jgit;
+    public JGit (BackgroundService backgroundService) {
+        _backgroundService = backgroundService;
     }
 
     /**

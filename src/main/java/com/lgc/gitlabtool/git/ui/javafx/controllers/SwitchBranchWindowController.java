@@ -8,9 +8,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.lgc.gitlabtool.git.listeners.stateListeners.AbstractStateListener;
-import com.lgc.gitlabtool.git.services.*;
-import javafx.stage.WindowEvent;
 import org.apache.commons.lang.StringUtils;
 
 import com.lgc.gitlabtool.git.entities.Branch;
@@ -19,7 +16,13 @@ import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.ProjectList;
 import com.lgc.gitlabtool.git.jgit.BranchType;
 import com.lgc.gitlabtool.git.jgit.JGit;
+import com.lgc.gitlabtool.git.listeners.stateListeners.AbstractStateListener;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
+import com.lgc.gitlabtool.git.services.BackgroundService;
+import com.lgc.gitlabtool.git.services.ConsoleService;
+import com.lgc.gitlabtool.git.services.GitService;
+import com.lgc.gitlabtool.git.services.ServiceProvider;
+import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.icon.LocalRemoteIconHolder;
 import com.lgc.gitlabtool.git.ui.javafx.ChangesCheckDialog;
 import com.lgc.gitlabtool.git.ui.javafx.ProgressDialog;
@@ -43,6 +46,7 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 @SuppressWarnings("unchecked")
 public class SwitchBranchWindowController extends AbstractStateListener {
@@ -91,6 +95,8 @@ public class SwitchBranchWindowController extends AbstractStateListener {
 
     private static final BackgroundService _backgroundService = (BackgroundService) ServiceProvider.getInstance()
             .getService(BackgroundService.class.getName());
+
+    private static final JGit _jGit = (JGit) ServiceProvider.getInstance().getService(JGit.class.getName());
 
     private static final String ALREADY_SWITCHED_MESSAGE = "%d of %d projects have already switched to the selected branch.";
 
@@ -238,10 +244,8 @@ public class SwitchBranchWindowController extends AbstractStateListener {
     }
 
     private List<Branch> getBranches(List<Project> selectedProjects, BranchType branchType, Boolean isCommonMatching) {
-        Set<Branch> allBranchesWithTypes = JGit.getInstance().getBranches(selectedProjects,
-                branchType, isCommonMatching);
-
-        List<Branch> list = new ArrayList(allBranchesWithTypes);
+        Set<Branch> allBranchesWithTypes = _jGit.getBranches(selectedProjects, branchType, isCommonMatching);
+        List<Branch> list = new ArrayList<>(allBranchesWithTypes);
         Collections.sort(list, (o1, o2) -> {
 
             String type1 = o1.getBranchType().name();

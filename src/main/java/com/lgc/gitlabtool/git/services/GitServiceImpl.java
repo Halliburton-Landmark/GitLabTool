@@ -256,6 +256,6 @@ public class GitServiceImpl implements GitService {
 
     @Override
     public void cancelClone() {
-        JGit.getInstance().cancelClone();
+        _git.cancelClone();
     }
 }
