@@ -152,45 +152,46 @@ public class GitServiceImplTest {
         String branchName = "foo";
         boolean isRemote = false;
         ProgressListener progressListener = null;
-        when(_jGit.switchTo(_stubProject, branchName, isRemote)).thenReturn(JGitStatus.SUCCESSFUL);
+        when(_jGit.checkoutBranch(_stubProject, branchName, isRemote)).thenReturn(JGitStatus.SUCCESSFUL);
 
-        Map<Project, JGitStatus> statuses = _gitService.switchTo(list, branchName, isRemote, progressListener);
+        Map<Project, JGitStatus> statuses = _gitService.checkoutBranch(list, branchName, isRemote, progressListener);
 
         assertEquals(1, statuses.size());
     }
 
     @Test
-    public void testSwitchBranchSwitchingOffState() {
+    public void testCheckoutBranchOffState() {
         List<Project> list = new ArrayList<>();
         _stubProject = Mockito.mock(Project.class);
         list.add(_stubProject);
         String branchName = "foo";
         boolean isRemote = false;
         ProgressListener progressListener = null;
-        when(_jGit.switchTo(_stubProject, branchName, isRemote)).thenReturn(JGitStatus.SUCCESSFUL);
-        when(_stateService.isActiveState(ApplicationState.SWITCH_BRANCH)).thenReturn(true);
+        when(_jGit.checkoutBranch(_stubProject, branchName, isRemote)).thenReturn(JGitStatus.SUCCESSFUL);
+        when(_stateService.isActiveState(ApplicationState.CHECKOUT_BRANCH)).thenReturn(true);
 
-        _gitService.switchTo(list, branchName, isRemote, progressListener);
+        _gitService.checkoutBranch(list, branchName, isRemote, progressListener);
 
-        verify(_stateService, times(1)).stateON(ApplicationState.SWITCH_BRANCH);
-        verify(_stateService, times(1)).stateOFF(ApplicationState.SWITCH_BRANCH);
+        verify(_stateService, times(1)).stateON(ApplicationState.CHECKOUT_BRANCH);
+        verify(_stateService, times(1)).stateOFF(ApplicationState.CHECKOUT_BRANCH);
     }
 
     @Test(expected = NullPointerException.class)
-    public void testSwitchBranchSwitchingOffStateAfterException() {
+    public void testCheckoutBranchSwitchingOffStateAfterException() {
         List<Project> list = new ArrayList<>();
         _stubProject = Mockito.mock(Project.class);
         list.add(_stubProject);
         String branchName = "foo";
         boolean isRemote = false;
         ProgressListener progressListener = null;
-        when(_jGit.switchTo(_stubProject, branchName, isRemote)).thenThrow(NullPointerException.class);
-        when(_stateService.isActiveState(ApplicationState.SWITCH_BRANCH)).thenReturn(true);
+        when(_jGit.checkoutBranch(_stubProject, branchName, isRemote)).thenThrow(NullPointerException.class);
+        when(_stateService.isActiveState(ApplicationState.CHECKOUT_BRANCH)).thenReturn(true);
 
-        _gitService.switchTo(list, branchName, isRemote, progressListener);
+        _gitService.checkoutBranch(list, branchName, isRemote, progressListener);
 
-        verify(_stateService, times(1)).stateON(ApplicationState.SWITCH_BRANCH);
-        verify(_stateService, times(1)).stateOFF(ApplicationState.SWITCH_BRANCH);
+        verify(_stateService, times(1)).stateON(ApplicationState.CHECKOUT_BRANCH);
+        verify(_stateService, times(1)).stateOFF(ApplicationState.CHECKOUT_BRANCH);
+
     }
 
     @Test
