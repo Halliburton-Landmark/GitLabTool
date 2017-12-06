@@ -18,12 +18,13 @@ public class ProjectStatus {
     private int _aheadIndex;
     private int _behindIndex;
     private String _currentBranch;
+    private String _trackingBranch;
 
     /**
      * Constructs a ProjectStatus with default parameters.
      */
     public ProjectStatus() {
-        this(false, false, 0, 0, null);
+        this(false, false, 0, 0, null, null);
     }
 
     /**
@@ -32,7 +33,7 @@ public class ProjectStatus {
      * @param currentBranch the branch name
      */
     public ProjectStatus(String currentBranch) {
-        this(false, false, 0, 0, currentBranch);
+        this(false, false, 0, 0, currentBranch, null);
     }
 
     /**
@@ -42,7 +43,7 @@ public class ProjectStatus {
      * @param hasChanges   <true> if the project has changes <false> otherwise.
      */
     public ProjectStatus(boolean hasConflicts, boolean hasChanges) {
-        this(hasConflicts, hasChanges, 0, 0, null);
+        this(hasConflicts, hasChanges, 0, 0, null, null);
     }
 
     /**
@@ -53,7 +54,7 @@ public class ProjectStatus {
      * @param currentBranch the branch name
      */
     public ProjectStatus(boolean hasConflicts, boolean hasChanges, String currentBranch) {
-        this(hasConflicts, hasChanges, 0, 0, currentBranch);
+        this(hasConflicts, hasChanges, 0, 0, currentBranch, null);
     }
 
     /**
@@ -64,7 +65,7 @@ public class ProjectStatus {
      * @param currentBranch the branch name
      */
     public ProjectStatus(int aheadIndex, int behindIndex, String currentBranch) {
-        this(false, false, aheadIndex, behindIndex, currentBranch);
+        this(false, false, aheadIndex, behindIndex, currentBranch, null);
     }
 
     /**
@@ -76,12 +77,13 @@ public class ProjectStatus {
      * @param behindIndex   the number of commits behind index
      * @param currentBranch the branch name
      */
-    public ProjectStatus(boolean hasConflicts, boolean hasChanges, int aheadIndex, int behindIndex, String currentBranch) {
+    public ProjectStatus(boolean hasConflicts, boolean hasChanges, int aheadIndex, int behindIndex, String currentBranch, String trackingBranch) {
         setHasConflicts(hasConflicts);
         setHasChanges(hasChanges);
         setAheadIndex(aheadIndex);
         setBehindIndex(behindIndex);
         setCurrentBranch(currentBranch);
+        setTrackingBranch(trackingBranch);
     }
 
     /**
@@ -174,6 +176,24 @@ public class ProjectStatus {
      */
     public void setCurrentBranch(String currentBranch) {
         _currentBranch = currentBranch == null ? StringUtils.EMPTY : currentBranch;
+    }
+
+    /**
+     * Get a name of tracking branch
+     * 
+     * @return a name (StringUtils.EMPTY if tracking branch isn't set).
+     */
+    public String getTrackingBranch() {
+        return _trackingBranch;
+    }
+
+    /**
+     * Set a name of tracking branch. StringUtils.EMPTY if the tracking branch is null.
+     * 
+     * @param tracking branch
+     */
+    private void setTrackingBranch(String trackingBranch) {
+        _trackingBranch = trackingBranch == null ? StringUtils.EMPTY : trackingBranch;
     }
 
 }

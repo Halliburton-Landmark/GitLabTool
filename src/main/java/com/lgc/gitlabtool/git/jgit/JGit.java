@@ -34,7 +34,9 @@ import org.eclipse.jgit.dircache.DirCacheCheckout;
 import org.eclipse.jgit.errors.CorruptObjectException;
 import org.eclipse.jgit.errors.NoWorkTreeException;
 import org.eclipse.jgit.errors.RevisionSyntaxException;
+import org.eclipse.jgit.lib.BranchConfig;
 import org.eclipse.jgit.lib.BranchTrackingStatus;
+import org.eclipse.jgit.lib.Config;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.EmptyProgressMonitor;
 import org.eclipse.jgit.lib.PersonIdent;
@@ -917,5 +919,34 @@ public class JGit {
 
         int[] aheadBehind = {commitsAheadIndex, commitsBehindIndex};
         return aheadBehind;
+    }
+
+    /**
+     * This method return tracking branch name for the current project
+     *
+     * @param project
+     * @return tracking branch
+     */
+    public String getTrackingBranch(Project project) {
+        if (project == null) {
+            return StringUtils.EMPTY;
+        }
+        String trackingBranch = StringUtils.EMPTY;
+        try (Git git = getGit(project.getPath())) {
+            try (Repository repo = git.getRepository()) {
+                BranchConfig config = getBranchConfig(repo.getConfig(), repo.getBranch());
+                trackingBranch = config.getTrackingBranch();
+                return trackingBranch;
+            } catch (IOException e) {
+                logger.error("Could not get tracking branch " + e.getMessage());
+            }
+        } catch (IOException e) {
+            logger.error("Could not get tracking branch " + e.getMessage());
+        }
+        return trackingBranch;
+    }
+
+    protected BranchConfig getBranchConfig(Config config, String branchName) {
+        return new BranchConfig(config, branchName);
     }
 }
