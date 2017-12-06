@@ -9,9 +9,9 @@ import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
  */
 public class CheckoutBranchProgressDialog extends ProgressDialog {
 
-    private static final String SWITCH_BRANCH_DIALOG_TITLE = "Switch operation";
+    private static final String CHECKOUT_BRANCH_DIALOG_TITLE = "Checkout operation";
 
     public CheckoutBranchProgressDialog() {
-        super(SWITCH_BRANCH_DIALOG_TITLE, ApplicationState.CHECKOUT_BRANCH, CancelButtonStatus.DEACTIVATED);
+        super(CHECKOUT_BRANCH_DIALOG_TITLE, ApplicationState.CHECKOUT_BRANCH, CancelButtonStatus.DEACTIVATED);
     }
 }
