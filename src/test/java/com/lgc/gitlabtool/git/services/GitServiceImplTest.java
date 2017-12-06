@@ -1,22 +1,23 @@
 package com.lgc.gitlabtool.git.services;
 
-import com.lgc.gitlabtool.git.entities.Project;
-import com.lgc.gitlabtool.git.jgit.JGit;
-import com.lgc.gitlabtool.git.jgit.JGitStatus;
-import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mockito;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mockito;
+
+import com.lgc.gitlabtool.git.entities.Project;
+import com.lgc.gitlabtool.git.jgit.JGit;
+import com.lgc.gitlabtool.git.jgit.JGitStatus;
+import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 
 public class GitServiceImplTest {
 
@@ -133,45 +134,44 @@ public class GitServiceImplTest {
         String branchName = "foo";
         boolean isRemote = false;
         ProgressListener progressListener = null;
-        when(jGit.switchTo(stubProject, branchName, isRemote)).thenReturn(JGitStatus.SUCCESSFUL);
+        when(jGit.checkoutBranch(stubProject, branchName, isRemote)).thenReturn(JGitStatus.SUCCESSFUL);
 
-        Map<Project, JGitStatus> statuses = gitService.switchTo(list, branchName, isRemote, progressListener);
-
+        Map<Project, JGitStatus> statuses = gitService.checkoutBranch(list, branchName, isRemote, progressListener);
         assertEquals(1, statuses.size());
     }
 
     @Test
-    public void testSwitchBranchSwitchingOffState() {
+    public void testCheckoutBranchOffState() {
         List<Project> list = new ArrayList<>();
         stubProject = Mockito.mock(Project.class);
         list.add(stubProject);
         String branchName = "foo";
         boolean isRemote = false;
         ProgressListener progressListener = null;
-        when(jGit.switchTo(stubProject, branchName, isRemote)).thenReturn(JGitStatus.SUCCESSFUL);
-        when(stateService.isActiveState(ApplicationState.SWITCH_BRANCH)).thenReturn(true);
+        when(jGit.checkoutBranch(stubProject, branchName, isRemote)).thenReturn(JGitStatus.SUCCESSFUL);
+        when(stateService.isActiveState(ApplicationState.CHECKOUT_BRANCH)).thenReturn(true);
 
-        gitService.switchTo(list, branchName, isRemote, progressListener);
+        gitService.checkoutBranch(list, branchName, isRemote, progressListener);
 
-        verify(stateService, times(1)).stateON(ApplicationState.SWITCH_BRANCH);
-        verify(stateService, times(1)).stateOFF(ApplicationState.SWITCH_BRANCH);
+        verify(stateService, times(1)).stateON(ApplicationState.CHECKOUT_BRANCH);
+        verify(stateService, times(1)).stateOFF(ApplicationState.CHECKOUT_BRANCH);
     }
 
     @Test(expected = NullPointerException.class)
-    public void testSwitchBranchSwitchingOffStateAfterException() {
+    public void testCheckoutBranchSwitchingOffStateAfterException() {
         List<Project> list = new ArrayList<>();
         stubProject = Mockito.mock(Project.class);
         list.add(stubProject);
         String branchName = "foo";
         boolean isRemote = false;
         ProgressListener progressListener = null;
-        when(jGit.switchTo(stubProject, branchName, isRemote)).thenThrow(NullPointerException.class);
-        when(stateService.isActiveState(ApplicationState.SWITCH_BRANCH)).thenReturn(true);
+        when(jGit.checkoutBranch(stubProject, branchName, isRemote)).thenThrow(NullPointerException.class);
+        when(stateService.isActiveState(ApplicationState.CHECKOUT_BRANCH)).thenReturn(true);
 
-        gitService.switchTo(list, branchName, isRemote, progressListener);
+        gitService.checkoutBranch(list, branchName, isRemote, progressListener);
 
-        verify(stateService, times(1)).stateON(ApplicationState.SWITCH_BRANCH);
-        verify(stateService, times(1)).stateOFF(ApplicationState.SWITCH_BRANCH);
+        verify(stateService, times(1)).stateON(ApplicationState.CHECKOUT_BRANCH);
+        verify(stateService, times(1)).stateOFF(ApplicationState.CHECKOUT_BRANCH);
     }
     
     @Test
