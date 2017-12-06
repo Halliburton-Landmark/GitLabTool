@@ -24,6 +24,7 @@ public class ProjectStatus implements Serializable {
     private int _aheadIndex;
     private int _behindIndex;
     private String _currentBranch;
+    private String _trackingBranch;
     private Set<String> _conflictedFiles;
     private Set<String> _untrackedFiles;
     private Set<String> _modifiedFiles;
@@ -87,7 +88,7 @@ public class ProjectStatus implements Serializable {
      * @param currentBranch the branch name
      */
     public ProjectStatus(boolean hasChanges, int aheadIndex, int behindIndex, String currentBranch) {
-        this(hasChanges, aheadIndex, behindIndex, currentBranch, new HashSet<>(), new HashSet<>(),
+        this(hasChanges, aheadIndex, behindIndex, currentBranch, null, new HashSet<>(), new HashSet<>(),
                 new HashSet<>(), new HashSet<>(), new HashSet<>(), new HashSet<>(), new HashSet<>());
     }
 
@@ -97,7 +98,8 @@ public class ProjectStatus implements Serializable {
      * @param hasChanges     <code>true</code> if the project has changes <code>false</code> otherwise.
      * @param aheadIndex     the number of commits ahead index
      * @param behindIndex    the number of commits behind index
-     * @param currentBranch  the branch name
+     * @param currentBranch  the current branch name
+     * @param trackingBranch the tracking branch name
      * @param conflicting    the set of files which has conflicting
      * @param untrackedFiles the set of files which weren't not added to index
      * @param changedFiles   the set of changed files which are located in staging
@@ -106,20 +108,21 @@ public class ProjectStatus implements Serializable {
      * @param modifiedFiles  the set of files which were changed but haven't added to staging yet
      */
     public ProjectStatus(boolean hasChanges, int aheadIndex, int behindIndex, String currentBranch,
-                         Set<String> conflicting, Set<String> untrackedFiles, Set<String> changedFiles,
-                         Set<String> addedFiles, Set<String> removedFiles, Set<String> missingFiles,
-                         Set<String> modifiedFiles) {
+                         String trackingBranch, Set<String> conflicting, Set<String> untrackedFiles,
+                         Set<String> changedFiles, Set<String> addedFiles, Set<String> removedFiles,
+                         Set<String> missingFiles, Set<String> modifiedFiles) {
         setHasChanges(hasChanges);
         setAheadIndex(aheadIndex);
         setBehindIndex(behindIndex);
         setCurrentBranch(currentBranch);
+        setTrackingBranch(trackingBranch);
         setConflictedFiles(conflicting);
         setUntrackedFiles(untrackedFiles);
         setChangedFiles(changedFiles);
         setRemovedFiles(removedFiles);
         setMissingFiles(missingFiles);
-        setModifiedFiles(modifiedFiles);
         setAddedFiles(addedFiles);
+        setModifiedFiles(modifiedFiles);
     }
 
     /**
@@ -174,6 +177,15 @@ public class ProjectStatus implements Serializable {
      */
     public String getCurrentBranch() {
         return _currentBranch == null ? StringUtils.EMPTY : _currentBranch;
+    }
+
+    /**
+     * Gets a name of tracking branch
+     *
+     * @return a name (StringUtils.EMPTY if tracking branch isn't set).
+     */
+    public String getTrackingBranch() {
+        return _trackingBranch;
     }
 
     /**
@@ -241,6 +253,10 @@ public class ProjectStatus implements Serializable {
 
     private void setCurrentBranch(String currentBranch) {
         _currentBranch = currentBranch == null ? StringUtils.EMPTY : currentBranch;
+    }
+
+    private void setTrackingBranch(String trackingBranch) {
+        _trackingBranch = trackingBranch == null ? StringUtils.EMPTY : trackingBranch;
     }
 
     private void setHasChanges(boolean hasChanges) {

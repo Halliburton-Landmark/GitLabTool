@@ -54,6 +54,8 @@ import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.errors.NoWorkTreeException;
 import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.BaseRepositoryBuilder;
+import org.eclipse.jgit.lib.BranchConfig;
+import org.eclipse.jgit.lib.Config;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectDatabase;
 import org.eclipse.jgit.lib.ObjectId;
@@ -85,6 +87,7 @@ import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 public class JGitTest {
 
     private static final String NAME_BRANCH = "test_name";
+    private static final String NAME_TRACKING_BRANCH = "test_tracking_branch";
     private static final String CORRECT_PATH = "/path";
     private static final String fileName = "test";
 
@@ -643,6 +646,15 @@ public class JGitTest {
         Mockito.when(gitMock.getRepository()).thenReturn(repoMock);
         Assert.assertTrue(getJGitMock(gitMock).getCurrentBranch(getProject(true)).isPresent());
     }
+    
+    @Test
+    public void getTrackingBranchTest() {
+        Git gitMock = getGitMock();
+        Repository repoMock = getRepo(NAME_BRANCH);
+        Mockito.when(gitMock.getRepository()).thenReturn(repoMock);        
+        Assert.assertTrue(getJGitMock(gitMock).getTrackingBranch(getProject(true)) != null);
+        Assert.assertFalse(getJGitMock(gitMock).getTrackingBranch(getProject(true)).isEmpty());
+    }
 
     @Test(expected = IllegalArgumentException.class)
     public void deleteBranchProjectIsNullTest() {
@@ -709,23 +721,23 @@ public class JGitTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void switchToProjectIsNullTest() {
-        JGit.getInstance().switchTo(null, "__", false);
+    public void checkoutBranchProjectIsNullTest() {
+        JGit.getInstance().checkoutBranch(null, "__", false);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void switchToBranchNameIsNullTest() {
-        JGit.getInstance().switchTo(getProject(false), null, true);
+    public void checkoutBranchNameIsNullTest() {
+        JGit.getInstance().checkoutBranch(getProject(false), null, true);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void switchToBranchNameIsEmptyTest() {
-        JGit.getInstance().switchTo(getProject(true), "", false);
+    public void checkoutBranchNameIsEmptyTest() {
+        JGit.getInstance().checkoutBranch(getProject(true), "", false);
     }
 
     @Test
-    public void switchToIncorrectDataTest() {
-        Assert.assertEquals(getJGitMock(null).switchTo(getProject(false), NAME_BRANCH, false), JGitStatus.FAILED);
+    public void checkoutBranchIncorrectDataTest() {
+        Assert.assertEquals(getJGitMock(null).checkoutBranch(getProject(false), NAME_BRANCH, false), JGitStatus.FAILED);
         //Assert.assertEquals(getJGitMock(null).switchTo(getProject(true), NAME_BRANCH, false), JGitStatus.FAILED);
 
         Ref refMock = mock(Ref.class);
@@ -737,14 +749,14 @@ public class JGitTest {
 
         Repository repoMock = getRepo(NAME_BRANCH);
         Mockito.when(gitMock.getRepository()).thenReturn(repoMock);
-        Assert.assertEquals(getJGitMock(gitMock).switchTo(getProject(true), NAME_BRANCH, false),
+        Assert.assertEquals(getJGitMock(gitMock).checkoutBranch(getProject(true), NAME_BRANCH, false),
                 JGitStatus.BRANCH_DOES_NOT_EXIST);
-        Assert.assertEquals(getJGitMock(gitMock).switchTo(getProject(true), NAME_BRANCH, true),
+        Assert.assertEquals(getJGitMock(gitMock).checkoutBranch(getProject(true), NAME_BRANCH, true),
                 JGitStatus.BRANCH_CURRENTLY_CHECKED_OUT);
 
         listCommandMock = getListCommandMock(refMock);
         Mockito.when(refMock.getName()).thenReturn(Constants.R_HEADS + NAME_BRANCH);
-        Assert.assertEquals(getJGitMock(gitMock).switchTo(getProject(true), NAME_BRANCH, true),
+        Assert.assertEquals(getJGitMock(gitMock).checkoutBranch(getProject(true), NAME_BRANCH, true),
                 JGitStatus.BRANCH_ALREADY_EXISTS);
 
         Mockito.when(refMock.getName()).thenReturn(Constants.R_HEADS + NAME_BRANCH);
@@ -761,7 +773,7 @@ public class JGitTest {
                 return true;
             }
         };
-        Assert.assertEquals(git.switchTo(getProject(true), NAME_BRANCH + "2", true), JGitStatus.CONFLICTS);
+        Assert.assertEquals(git.checkoutBranch(getProject(true), NAME_BRANCH + "2", true), JGitStatus.CONFLICTS);
 
         git = new JGit() {
             @Override
@@ -783,11 +795,11 @@ public class JGitTest {
             }
         };
         Mockito.when(gitMock.checkout()).thenReturn(checkoutCommandMock);
-        Assert.assertEquals(git.switchTo(getProject(true), NAME_BRANCH + "2", true), JGitStatus.FAILED);
+        Assert.assertEquals(git.checkoutBranch(getProject(true), NAME_BRANCH + "2", true), JGitStatus.FAILED);
     }
 
     @Test
-    public void switchToCorrectDataTest() {
+    public void checkoutBranchCorrectDataTest() {
         Git gitMock = getGitMock();
         JGit git = new JGit() {
             @Override
@@ -818,7 +830,7 @@ public class JGitTest {
             }
         };
         Mockito.when(gitMock.checkout()).thenReturn(checkoutCommandMock);
-        Assert.assertEquals(git.switchTo(getProject(true), NAME_BRANCH + "2", true), JGitStatus.SUCCESSFUL);
+        Assert.assertEquals(git.checkoutBranch(getProject(true), NAME_BRANCH + "2", true), JGitStatus.SUCCESSFUL);
     }
 
     @Test
@@ -1098,6 +1110,17 @@ public class JGitTest {
             protected Git getGit(String path) throws IOException {
                 return gitMock;
             }
+            
+            @Override
+            protected BranchConfig getBranchConfig(Config config, String branchName) {
+
+                return new BranchConfig(config, branchName) {
+                    @Override
+                    public String getTrackingBranch() {
+                        return NAME_TRACKING_BRANCH;
+                    }
+                };
+            }
         };
         return correctJGitMock;
     }
@@ -1108,7 +1131,7 @@ public class JGitTest {
 
     private Repository getRepository() {
         return mock(Repository.class);
-    }
+    }    
 
     private Repository getRepo(String nameBranch) {
         BaseRepositoryBuilder<?, ?> buildMock = mock(BaseRepositoryBuilder.class);
@@ -1160,7 +1183,7 @@ public class JGitTest {
 
                 @Override
                 public StoredConfig getConfig() {
-                    return null;
+                    return mock(StoredConfig.class);
                 }
 
                 @Override
@@ -1225,7 +1248,7 @@ public class JGitTest {
 
             @Override
             public StoredConfig getConfig() {
-                return null;
+                return mock(StoredConfig.class);
             }
 
             @Override

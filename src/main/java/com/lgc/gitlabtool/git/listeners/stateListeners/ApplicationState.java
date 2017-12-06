@@ -42,10 +42,10 @@ public enum ApplicationState {
         }
     },
 
-    SWITCH_BRANCH {
+    CHECKOUT_BRANCH {
         @Override
         public String toString() {
-            return "Branch switching";
+            return "Checkouting branch";
         }
     },
 

@@ -20,7 +20,6 @@ import com.lgc.gitlabtool.git.listeners.stateListeners.AbstractStateListener;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.services.BackgroundService;
 import com.lgc.gitlabtool.git.services.GitService;
-import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.javafx.GLTAlert;
@@ -107,9 +106,6 @@ public class GitStagingWindowController extends AbstractStateListener {
     private static final StateService _stateService = (StateService) ServiceProvider.getInstance()
             .getService(StateService.class.getName());
 
-    private static final ProjectService _projectService = (ProjectService) ServiceProvider.getInstance()
-            .getService(ProjectService.class.getName());
-
     private static final BackgroundService _backgroundService = (BackgroundService) ServiceProvider.getInstance()
             .getService(BackgroundService.class.getName());
 
@@ -138,11 +134,11 @@ public class GitStagingWindowController extends AbstractStateListener {
 
         _selectedProjectIds.addAll(projectIds);
         _filterField.textProperty().addListener((observable, oldValue, newValue) -> filterUnstagedList(oldValue, newValue));
+        _commitText.textProperty().addListener((observable, oldValue, newValue) -> updateCommitTextStyle());
 
         configureListViews(files);
         updateProgressBar(false, null);
-
-        _commitText.textProperty().addListener((observable, oldValue, newValue) -> updateCommitTextStyle());
+        updateCommitTextStyle();
     }
 
     private void updateCommitTextStyle() {
