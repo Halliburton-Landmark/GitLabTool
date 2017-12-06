@@ -5,8 +5,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.lgc.gitlabtool.git.services.BackgroundService;
-import com.lgc.gitlabtool.git.ui.javafx.listeners.PushProgressListener;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -15,9 +13,11 @@ import com.lgc.gitlabtool.git.entities.Branch;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.jgit.BranchType;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
+import com.lgc.gitlabtool.git.services.BackgroundService;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
+import com.lgc.gitlabtool.git.ui.javafx.listeners.PushProgressListener;
 import com.lgc.gitlabtool.git.util.NameValidator;
 import com.lgc.gitlabtool.git.util.ScreenUtil;
 
@@ -197,8 +197,8 @@ public class CreateNewBranchDialog extends Dialog<String> {
 
     private ChangeListener<? super String> getInputFilter() {
         return (observable, oldValue, newValue) -> {
-            if (!_branchNameField.getText().isEmpty() 
-                    && isInputValid(_branchNameField.getText()) 
+            if (!_branchNameField.getText().isEmpty()
+                    && isInputValid(_branchNameField.getText())
                     && !_comboBox.getSelectionModel().getSelectedItem().isEmpty()) {
                 _createButton.setDisable(false);
                 _branchNameField.setStyle("-fx-border-color: green;");
@@ -242,7 +242,7 @@ public class CreateNewBranchDialog extends Dialog<String> {
     private void switchBranch(List<Project> projects, Object branchName) {
         List<Project> changedProjects = _gitService.getProjectsWithChanges(getProjects());
 
-        if (changedProjects.isEmpty()) {
+        if (!changedProjects.isEmpty()) {
             // we do not show switching on statuses here
             // because we show the statuses of branches creation
             // In the same time we could see that branch is changed on the projects list panel
