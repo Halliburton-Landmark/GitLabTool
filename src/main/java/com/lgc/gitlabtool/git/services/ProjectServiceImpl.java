@@ -48,7 +48,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     private static final Logger _logger = LogManager.getLogger(ProjectServiceImpl.class);
     private static final CurrentUser _currentUser = CurrentUser.getInstance();
-    private final JGit _git;
+    private static JGit _git;
 
     private static ProjectTypeService _projectTypeService;
     private static StateService _stateService;
@@ -64,13 +64,13 @@ public class ProjectServiceImpl implements ProjectService {
                               StateService stateService,
                               ConsoleService consoleService,
                               GitService gitService,
-                              JGit jGit) {
+                              JGit git) {
         setConnector(connector);
         setProjectTypeService(projectTypeService);
         setStateService(stateService);
         setConsoleService(consoleService);
         setGitService(gitService);
-        _git = jGit;
+        setJGit(git);
     }
 
     @Override
@@ -176,18 +176,11 @@ public class ProjectServiceImpl implements ProjectService {
             behindIndex = indexCount[1];
         }
 
-        ProjectStatus projectStatus;
-        if (project.getProjectStatus() == null) {
-            projectStatus = new ProjectStatus(hasConflicts, hasChanges, aheadIndex, behindIndex, nameBranch);
-            project.setProjectStatus(projectStatus);
-        } else {
-            projectStatus = project.getProjectStatus();
-            projectStatus.setCurrentBranch(nameBranch);
-            projectStatus.setHasConflicts(hasConflicts);
-            projectStatus.setHasChanges(hasChanges);
-            projectStatus.setAheadIndex(aheadIndex);
-            projectStatus.setBehindIndex(behindIndex);
-        }
+        String trackingBranch = _gitService.getTrackingBranch(project);
+
+        ProjectStatus projectStatus = new ProjectStatus(hasConflicts, hasChanges, aheadIndex, behindIndex, nameBranch,
+                trackingBranch);
+        project.setProjectStatus(projectStatus);
     }
 
     private Map<String, String> getCurrentPrivateToken() {
@@ -390,12 +383,6 @@ public class ProjectServiceImpl implements ProjectService {
                 .count() > 0;
     }
 
-    private void setGitService(GitService gitService) {
-        if (gitService != null) {
-            _gitService = gitService;
-        }
-    }
-
     @Override
     public void addUpdateProgressListener(UpdateProgressListener listener) {
         if (listener != null) {
@@ -413,6 +400,18 @@ public class ProjectServiceImpl implements ProjectService {
     private void notifyListenersAboutChangesProgress(String message) {
         if (message != null) {
             _listeners.forEach(listener -> listener.updateProgress(message));
+        }
+    }
+
+    private void setGitService(GitService gitService) {
+        if (gitService != null) {
+            _gitService = gitService;
+        }
+    }
+
+    private void setJGit(JGit jGit) {
+        if (jGit != null) {
+            _git = jGit;
         }
     }
 }

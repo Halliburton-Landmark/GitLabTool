@@ -29,26 +29,26 @@ public interface GitService extends Service {
     boolean containsBranches(Project project, List<Branch> branches, boolean isCommon);
 
     /**
-     * Switches projects to selected branch
+     * Checkouts projects to selected branch
      *
-     * @param projects projects that need to be switched
+     * @param projects projects that need to be checked out
      * @param branch selected branch
      * @param progress the listener for obtaining data on the process of performing the operation
      *
-     * @return map with projects and theirs statuses of switching
+     * @return map with projects and theirs checkout statuses
      */
-    Map<Project, JGitStatus> switchTo(List<Project> projects, Branch branch, ProgressListener progress);
+    Map<Project, JGitStatus> checkoutBranch(List<Project> projects, Branch branch, ProgressListener progress);
 
     /**
-     * Switches projects to selected branch
+     * Checkouts projects to selected branch
      *
-     * @param projects projects that need to be switched
+     * @param projects projects that need to be checked out
      * @param branchName name of the branch
      * @param isRemote <code>true</code> if the branch has {@link BranchType#REMOTE}
      * @param progress the listener for obtaining data on the process of performing the operation
-     * @return map with projects and theirs statuses of switching
+     * @return map with projects and theirs checkout statuses
      */
-    Map<Project, JGitStatus> switchTo(List<Project> projects, String branchName, boolean isRemote, ProgressListener progress);
+    Map<Project, JGitStatus> checkoutBranch(List<Project> projects, String branchName, boolean isRemote, ProgressListener progress);
 
     /**
      * Gets projects that have uncommited changes
@@ -161,6 +161,13 @@ public interface GitService extends Service {
      * Starts canceling process for cloning. This may take some time.
      */
     void cancelClone();
+
+    /** This method return tracking branch.
+     *
+     * @param project
+     * @return tracking branch.
+     */
+    public String getTrackingBranch(Project project);
 
     /**
      * Gets branches of project
