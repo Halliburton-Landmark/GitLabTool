@@ -40,7 +40,6 @@ public class ServiceProvider {
         PomXmlEditService pomXmlEditService = new PomXMLEditServiceImpl();
 
         _services = new HashMap<>();
-        _services.put(JGit.class.getName(), jGit);
         _services.put(LoginService.class.getName(), loginService);
         _services.put(ClonedGroupsService.class.getName(), programPropertiesService);
         _services.put(GroupsUserService.class.getName(), new GroupsUserServiceImpl(restConnector,

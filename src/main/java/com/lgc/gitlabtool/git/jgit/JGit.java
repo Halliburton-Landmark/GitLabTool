@@ -50,7 +50,6 @@ import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.User;
 import com.lgc.gitlabtool.git.services.BackgroundService;
 import com.lgc.gitlabtool.git.services.ProgressListener;
-import com.lgc.gitlabtool.git.services.Service;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 import com.lgc.gitlabtool.git.util.PathUtilities;
 
@@ -64,7 +63,7 @@ import com.lgc.gitlabtool.git.util.PathUtilities;
  *
  * @author Lyska Lyudmila
  */
-public class JGit implements Service {
+public class JGit {
     private static final Logger logger = LogManager.getLogger(JGit.class);
     private final String ERROR_MSG_NOT_CLONED = " project is not cloned. The operation is impossible";
 

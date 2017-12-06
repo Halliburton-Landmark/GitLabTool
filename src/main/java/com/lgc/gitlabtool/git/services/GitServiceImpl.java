@@ -1,5 +1,6 @@
 package com.lgc.gitlabtool.git.services;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -257,5 +258,10 @@ public class GitServiceImpl implements GitService {
     @Override
     public void cancelClone() {
         _git.cancelClone();
+    }
+
+    @Override
+    public Set<Branch> getBranches(Collection<Project> projects, BranchType brType, boolean onlyCommon) {
+        return _git.getBranches(projects, brType, onlyCommon);
     }
 }
