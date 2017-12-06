@@ -264,6 +264,8 @@ public class GitServiceImplTest {
         Project project = getClonedProject();
         String currentBranch = "test_branch";
         int[] aheadBehindIndex = new int[] {0, 1};
+        int expectedBehindIndex = aheadBehindIndex[1];
+        int expectedAheadIndex = aheadBehindIndex[0];
         boolean hasChanges = true;
         Set<String> files = getFiles();
         Status gitStatusMock = Mockito.mock(Status.class);
@@ -278,8 +280,8 @@ public class GitServiceImplTest {
 
         ProjectStatus status = _gitService.getProjectStatus(project);
 
-        assertEquals(aheadBehindIndex[1], status.getBehindIndex());
-        assertEquals(aheadBehindIndex[0], status.getAheadIndex());
+        assertEquals(expectedBehindIndex, status.getBehindIndex());
+        assertEquals(expectedAheadIndex, status.getAheadIndex());
         assertEquals(currentBranch, status.getCurrentBranch());
         assertEquals(files, status.getConflictedFiles());
         assertEquals(files, status.getUntrackedFiles());
@@ -302,9 +304,9 @@ public class GitServiceImplTest {
         changedFile.put(new Project(), getChangedFiles());
         changedFile.put(getClonedProject(), new ArrayList<>());
 
-        List<ChangedFile> resetedFiles = _gitService.resetChangedFiles(changedFile);
+        List<ChangedFile> resetFiles = _gitService.resetChangedFiles(changedFile);
 
-        assertTrue(resetedFiles.isEmpty());
+        assertTrue(resetFiles.isEmpty());
     }
 
     @Test
