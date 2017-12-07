@@ -51,7 +51,6 @@ public class GitServiceImpl implements GitService {
             throw new IllegalArgumentException("Wrong parameters for obtaining branches.");
         }
         List<Branch> projectBranches = _git.getBranches(project, BranchType.ALL);
-
         return isCommon ? projectBranches.containsAll(branches) : !Collections.disjoint(projectBranches, branches);
     }
 
@@ -303,7 +302,7 @@ public class GitServiceImpl implements GitService {
 
     @Override
     public void cancelClone() {
-        JGit.getInstance().cancelClone();
+        _git.cancelClone();
     }
 
     @Override
@@ -333,6 +332,11 @@ public class GitServiceImpl implements GitService {
         return fileNames.stream()
                         .map(fileName -> new ChangedFile(project, fileName, typeFile, statusFile))
                         .collect(Collectors.toList());
+    }
+
+    @Override
+    public Set<Branch> getBranches(Collection<Project> projects, BranchType brType, boolean onlyCommon) {
+        return _git.getBranches(projects, brType, onlyCommon);
     }
 
     @Override
