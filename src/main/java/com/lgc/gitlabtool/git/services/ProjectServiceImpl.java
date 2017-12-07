@@ -23,7 +23,6 @@ import com.lgc.gitlabtool.git.connections.token.CurrentUser;
 import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.MessageType;
 import com.lgc.gitlabtool.git.entities.Project;
-import com.lgc.gitlabtool.git.entities.ProjectStatus;
 import com.lgc.gitlabtool.git.jgit.JGit;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.listeners.updateProgressListener.UpdateProgressListener;
@@ -162,25 +161,7 @@ public class ProjectServiceImpl implements ProjectService {
         if (project == null || project.getPath() == null) {
             return;
         }
-        String nameBranch = _gitService.getCurrentBranchName(project);
-
-        boolean[] result = _gitService.hasConflictsAndChanges(project);
-        boolean hasConflicts = result[0];
-        boolean hasChanges = result[1];
-
-        int aheadIndex = 0;
-        int behindIndex = 0;
-        if (nameBranch != null) {
-            int[] indexCount = _gitService.getAheadBehindIndexCounts(project, nameBranch);
-            aheadIndex = indexCount[0];
-            behindIndex = indexCount[1];
-        }
-
-        String trackingBranch = _gitService.getTrackingBranch(project);
-
-        ProjectStatus projectStatus = new ProjectStatus(hasConflicts, hasChanges, aheadIndex, behindIndex, nameBranch,
-                trackingBranch);
-        project.setProjectStatus(projectStatus);
+        project.setProjectStatus(_gitService.getProjectStatus(project));
     }
 
     private Map<String, String> getCurrentPrivateToken() {
@@ -327,7 +308,7 @@ public class ProjectServiceImpl implements ProjectService {
 
         Project createdProject = projects.get(0); // list of projects always has one element
         if (structures.size() > 0 && isCreatedStructure) {
-            _git.addUntrackedFileForCommit(structures, createdProject);
+            _git.addUntrackedFilesToIndex(structures, createdProject);
         }
         // make first commit to GitLab repository
         _git.commitAndPush(projects, "Created new project", true, null, null, null, null,

@@ -170,7 +170,6 @@ public class JGit {
         }
         try (Git git = getGit(project.getPath())) {
             git.reset().setMode(ResetCommand.ResetType.HARD).call();
-            project.getProjectStatus().setHasChanges(false);
             return JGitStatus.SUCCESSFUL;
         } catch (GitAPIException | IOException e) {
             logger.error("Failed to discard changed for the " + project.getName() +" project: ", e);
@@ -265,33 +264,144 @@ public class JGit {
         return Optional.empty();
     }
 
+
     /**
-     * Adds untracked files for commit
+     * Adds untracked files to index
      *
      * @param files names of files that need to add
-     * @param project the cloned project
+     * @param project the cloned project where located files
      */
-    public boolean addUntrackedFileForCommit(Collection<String> files, Project project) {
+    public List<String> addUntrackedFilesToIndex(Collection<String> files, Project project) {
         if (files == null || project == null) {
             throw new IllegalArgumentException("Incorrect data: project is " + project + ", files is " + files);
         }
         try (Git git = getGit(project.getPath())) {
-            files.stream().forEach((file) -> {
-                if (file != null) {
-                    try {
-                        git.add().addFilepattern(file).call();
-                    } catch (GitAPIException e) {
-                        logger.error("Could not add the " + file + " file");
-                        logger.error("!ERROR: " + e.getMessage());
-                    }
-                }
-            });
-            git.close();
-            return true;
+            return files.stream()
+                        .filter(fileName -> addFiles(git, fileName))
+                        .collect(Collectors.toList());
+        } catch (IOException e) {
+            logger.error("Error opening repository " + project.getPath() + " " + e.getMessage());
+        }
+        return Collections.emptyList();
+    }
+
+    /**
+     * Adds untracked file to index
+     *
+     * @param fileName the file name
+     * @param project  the cloned project where located file
+     */
+    public boolean addUntrackedFileToIndex(String fileName, Project project) {
+        if (fileName == null || project == null) {
+            throw new IllegalArgumentException("Incorrect data: project is " + project + ", fileName is " + fileName);
+        }
+        try (Git git = getGit(project.getPath())) {
+            return addFiles(git, fileName);
         } catch (IOException e) {
             logger.error("Error opening repository " + project.getPath() + " " + e.getMessage());
         }
         return false;
+    }
+
+    private boolean addFiles(Git git, String fileName) {
+        try {
+            git.add()
+               .addFilepattern(fileName)
+               .call();
+            return true;
+        } catch (GitAPIException e) {
+            logger.error("Could not add the " + fileName + " file.");
+            logger.error("!ERROR: " + e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Adds missing or deleted files to the index
+     *
+     * @param files    names of files that need to add
+     * @param project  the cloned project
+     * @param isCached if <code>true</code> allow to remove file from the index (but not from the working directory),
+     *                 otherwise <code>false</code>
+     */
+    public List<String> addDeletedFiles(Collection<String> files, Project project, boolean isCached) {
+        if (files == null || files.isEmpty() || project == null || !project.isCloned()) {
+            return Collections.emptyList();
+        }
+        try (Git git = getGit(project.getPath())) {
+            return files.stream()
+                        .filter(file -> addRemovedFileToStaging(git, file, isCached))
+                        .collect(Collectors.toList());
+        } catch (IOException e) {
+            logger.error("Error getting Git for " + project.getPath() + " " + e.getMessage());
+        }
+        return Collections.emptyList();
+    }
+
+    /**
+     * Adds missing or deleted file to the index
+     *
+     * @param fileName the file which need to add
+     * @param project  the cloned project
+     * @param isCached if <code>true</code> allow to remove file from the index (but not from the working directory),
+     *                 otherwise <code>false</code>
+     */
+    public boolean addDeletedFile(String fileName, Project project, boolean isCached) {
+        if (fileName == null || project == null || !project.isCloned()) {
+            return false;
+        }
+        try (Git git = getGit(project.getPath())) {
+            return addRemovedFileToStaging(git, fileName, isCached);
+        } catch (IOException e) {
+            logger.error("Error getting Git for " + project.getPath() + " " + e.getMessage());
+            return false;
+        }
+    }
+
+    private boolean addRemovedFileToStaging(Git git, String fileName, boolean isCached) {
+        try {
+            git.rm().setCached(isCached)
+                    .addFilepattern(fileName)
+                    .call();
+            return true;
+        } catch (GitAPIException e) {
+            logger.error("Error reseting file to HEAD " + e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Resets changed files to head
+     *
+     * @param  files the changed files (which was added to index)
+     * @param  project the cloned project
+     * @return a list of files name
+     */
+    public List<String> resetChangedFiles(Collection<String> files, Project project) {
+        if (files == null || files.isEmpty() || project == null || !project.isCloned()) {
+            return Collections.emptyList();
+        }
+        try (Git git = getGit(project.getPath())) {
+            return files.stream()
+                        .filter(fileName -> resetFile(git, fileName))
+                        .collect(Collectors.toList());
+        } catch (IOException e) {
+            logger.error("Error opening repository " + e.getMessage());
+        }
+        return Collections.emptyList();
+    }
+
+    private boolean resetFile(Git git, String fileName) {
+        try {
+            git.reset()
+               .setRef(Constants.HEAD)
+               .addPath(fileName)
+               .call();
+            return true;
+        } catch (GitAPIException e) {
+            logger.error("Error reseting file to HEAD " + e.getMessage());
+            return false;
+        }
     }
 
     /**

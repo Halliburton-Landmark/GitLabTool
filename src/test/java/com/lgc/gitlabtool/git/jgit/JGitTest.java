@@ -21,6 +21,8 @@ import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.api.PullCommand;
 import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.PushCommand;
+import org.eclipse.jgit.api.ResetCommand;
+import org.eclipse.jgit.api.RmCommand;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.StatusCommand;
 import org.eclipse.jgit.api.errors.AbortedByHookException;
@@ -89,6 +91,7 @@ public class JGitTest {
     private static final String NAME_BRANCH = "test_name";
     private static final String NAME_TRACKING_BRANCH = "test_tracking_branch";
     private static final String CORRECT_PATH = "/path";
+    private static final String fileName = "test";
 
     @Test(expected = IllegalArgumentException.class)
     public void cloneGroupIncorrectDataExceptionGroupTest() {
@@ -201,7 +204,42 @@ public class JGitTest {
         List<String> files = new ArrayList<>();
         files.add("0");
         files.add(null);
-        Assert.assertTrue(getJGitMock(gitMock).addUntrackedFileForCommit(files, getProject(true)));
+
+        List<String> addedFiles = getJGitMock(gitMock).addUntrackedFilesToIndex(files, getProject(true));
+        Assert.assertFalse(addedFiles.isEmpty());
+        Assert.assertEquals(files.get(0), addedFiles.get(0));
+    }
+
+    @Test
+    public void addUntrackedFileToIndexIncorrectTest() throws NoFilepatternException, GitAPIException {
+        Git gitMock = getGitMock();
+        AddCommand addCommandMock = mock(AddCommand.class);
+        Mockito.when(addCommandMock.addFilepattern(fileName)).thenReturn(addCommandMock);
+        Mockito.when(addCommandMock.call()).thenThrow(getGitAPIException());
+        Mockito.when(gitMock.add()).thenReturn(addCommandMock);
+
+        Assert.assertFalse(getJGitMock(null).addUntrackedFileToIndex(fileName, getProject(true)));
+        Assert.assertFalse(getJGitMock(gitMock).addUntrackedFileToIndex(fileName, getProject(true)));
+    }
+
+    @Test
+    public void addUntrackedFileToIndexCorrectTest() throws NoFilepatternException, GitAPIException {
+        Git gitMock = getGitMock();
+        AddCommand addCommandMock = mock(AddCommand.class);
+        Mockito.when(addCommandMock.addFilepattern(fileName)).thenReturn(addCommandMock);
+        Mockito.when(addCommandMock.call()).thenReturn(getDirCache());
+        Mockito.when(gitMock.add()).thenReturn(addCommandMock);
+
+        Assert.assertTrue(getJGitMock(gitMock).addUntrackedFileToIndex(fileName, getProject(true)));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void addUntrackedFileToIndexFileIncorrectException() {
+        getJGitMock(null).addUntrackedFileToIndex(null, getProject(true));
+    }
+    @Test(expected = IllegalArgumentException.class)
+    public void addUntrackedFileToIndexProjectIncorrectException() {
+        getJGitMock(null).addUntrackedFileToIndex("", null);
     }
 
     @Test
@@ -214,23 +252,18 @@ public class JGitTest {
             }
         };
         Mockito.when(gitMock.add()).thenReturn(addCommandMock);
-        Assert.assertFalse(getJGitMock(null).addUntrackedFileForCommit(new ArrayList<>(), getProject(false)));
-        Assert.assertTrue(getJGitMock(gitMock).addUntrackedFileForCommit(new ArrayList<>(), getProject(true)));
-
-        List<String> files = new ArrayList<>();
-        files.add("0");
-        files.add(null);
-        Assert.assertTrue(getJGitMock(gitMock).addUntrackedFileForCommit(files, getProject(true)));
+        Assert.assertTrue(getJGitMock(gitMock).addUntrackedFilesToIndex(new ArrayList<>(), getProject(true)).isEmpty());
+        Assert.assertTrue(getJGitMock(null).addUntrackedFilesToIndex(new ArrayList<>(), getProject(false)).isEmpty());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void addUntrackedFileForCommitProjectIsNullTest() {
-        getJGitMock(null).addUntrackedFileForCommit(null, getProject(true));
+        getJGitMock(null).addUntrackedFileToIndex(null, getProject(true));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void addUntrackedFileForCommitCollectionIsNullTest() {
-        getJGitMock(null).addUntrackedFileForCommit(new ArrayList<>(), null);
+        getJGitMock(null).addUntrackedFilesToIndex(new ArrayList<>(), null);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -409,7 +442,7 @@ public class JGitTest {
         };
         Mockito.when(gitMock.push()).thenReturn(pushCommandMock);
         Map<Project, JGitStatus> statuses = getJGitMock(gitMock).push(getProjects(),  new EmptyListener());
-        Assert.assertEquals(getCountCorrectStatuses(statuses),getCountCorrectProject(getProjects()));
+        Assert.assertEquals(getCountCorrectStatuses(statuses), getCountCorrectProject(getProjects()));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -915,6 +948,99 @@ public class JGitTest {
         Assert.assertFalse(git.isConflictsBetweenTwoBranches(repoMock, "", ""));
     }
 
+    @Test
+    public void addDeletedFileIncorrectParametersTest() throws NoFilepatternException, GitAPIException {
+        Assert.assertFalse(getJGitMock(getGitMock()).addDeletedFile(null, getProject(true), true));
+        Assert.assertFalse(getJGitMock(getGitMock()).addDeletedFile(fileName, getProject(false), true));
+        Assert.assertFalse(getJGitMock(getGitMock()).addDeletedFile(fileName, null, false));
+        Assert.assertFalse(getJGitMock(null).addDeletedFile(fileName, getProject(true), false));
+
+        Git gitMock = getGitMock();
+        RmCommand rmCommandMock = mock(RmCommand.class);
+        Mockito.when(rmCommandMock.setCached(true)).thenReturn(rmCommandMock);
+        Mockito.when(rmCommandMock.addFilepattern(fileName)).thenReturn(rmCommandMock);
+        Mockito.when(rmCommandMock.call()).thenThrow(getGitAPIException());
+        Mockito.when(gitMock.rm()).thenReturn(rmCommandMock);
+
+        Assert.assertFalse(getJGitMock(gitMock).addDeletedFile(fileName, getProject(true), true));
+    }
+
+    @Test
+    public void addDeletedFileCorrectTest() throws NoFilepatternException, GitAPIException {
+        Git gitMock = getGitMock();
+        RmCommand rmCommandMock = mock(RmCommand.class);
+
+        Mockito.when(rmCommandMock.setCached(true)).thenReturn(rmCommandMock);
+        Mockito.when(rmCommandMock.addFilepattern(fileName)).thenReturn(rmCommandMock);
+        Mockito.when(rmCommandMock.call()).thenReturn(getDirCache());
+        Mockito.when(gitMock.rm()).thenReturn(rmCommandMock);
+
+        Assert.assertTrue(getJGitMock(gitMock).addDeletedFile(fileName, getProject(true), true));
+    }
+
+    @Test
+    public void addDeletedFilesIncorrectParametersTest() throws NoFilepatternException, GitAPIException {
+        List<String> files = new ArrayList<>(Arrays.asList("xyz", "abc"));
+        Assert.assertTrue(getJGitMock(getGitMock()).addDeletedFiles(null, getProject(true), true).isEmpty());
+        Assert.assertTrue(getJGitMock(getGitMock()).addDeletedFiles(new ArrayList<>(), getProject(true), true).isEmpty());
+        Assert.assertTrue(getJGitMock(getGitMock()).addDeletedFiles(files, null, false).isEmpty());
+        Assert.assertTrue(getJGitMock(getGitMock()).addDeletedFiles(files, getProject(false), false).isEmpty());
+        Assert.assertTrue(getJGitMock(null).addDeletedFiles(files, getProject(true), false).isEmpty());
+
+        Git gitMock = getGitMock();
+        RmCommand rmCommandMock = mock(RmCommand.class);
+        Mockito.when(rmCommandMock.setCached(true)).thenReturn(rmCommandMock);
+        Mockito.when(rmCommandMock.addFilepattern(Mockito.anyString())).thenReturn(rmCommandMock);
+        Mockito.when(rmCommandMock.call()).thenThrow(getGitAPIException());
+        Mockito.when(gitMock.rm()).thenReturn(rmCommandMock);
+
+        Assert.assertTrue(getJGitMock(gitMock).addDeletedFiles(files, getProject(true), true).isEmpty());
+    }
+
+    @Test
+    public void addDeletedFilesCorrectTest() throws NoFilepatternException, GitAPIException {
+        List<String> files = new ArrayList<>(Arrays.asList("xyz", "abc"));
+
+        Git gitMock = getGitMock();
+        RmCommand rmCommandMock = mock(RmCommand.class);
+        Mockito.when(rmCommandMock.setCached(true)).thenReturn(rmCommandMock);
+        Mockito.when(rmCommandMock.addFilepattern(Mockito.anyString())).thenReturn(rmCommandMock);
+        Mockito.when(rmCommandMock.call()).thenReturn(getDirCache());
+        Mockito.when(gitMock.rm()).thenReturn(rmCommandMock);
+
+        Assert.assertFalse(getJGitMock(gitMock).addDeletedFiles(files, getProject(true), true).isEmpty());
+    }
+
+    @Test
+    public void resetChangedFilesIncorrectParametersTest() throws CheckoutConflictException, GitAPIException {
+        List<String> files = new ArrayList<>(Arrays.asList("xyz", "abc"));
+        Assert.assertTrue(getJGitMock(getGitMock()).resetChangedFiles(null, getProject(true)).isEmpty());
+        Assert.assertTrue(getJGitMock(getGitMock()).resetChangedFiles(new ArrayList<>(), getProject(true)).isEmpty());
+        Assert.assertTrue(getJGitMock(getGitMock()).resetChangedFiles(files, null).isEmpty());
+        Assert.assertTrue(getJGitMock(getGitMock()).resetChangedFiles(files, getProject(false)).isEmpty());
+        Assert.assertTrue(getJGitMock(null).resetChangedFiles(files, getProject(true)).isEmpty());
+
+        Git gitMock = getGitMock();
+        ResetCommand resetCommandMock = mock(ResetCommand.class);
+        Mockito.when(resetCommandMock.setRef(Constants.HEAD)).thenReturn(resetCommandMock);
+        Mockito.when(resetCommandMock.addPath(Mockito.anyString())).thenReturn(resetCommandMock);
+        Mockito.when(resetCommandMock.call()).thenThrow(getGitAPIException());
+        Mockito.when(gitMock.reset()).thenReturn(resetCommandMock);
+        Assert.assertTrue(getJGitMock(gitMock).resetChangedFiles(files, getProject(true)).isEmpty());
+    }
+
+    @Test
+    public void resetChangedFilesCorrectTest() throws CheckoutConflictException, GitAPIException {
+        List<String> files = new ArrayList<>(Arrays.asList("xyz", "abc"));
+        Git gitMock = getGitMock();
+        ResetCommand resetCommandMock = mock(ResetCommand.class);
+        Mockito.when(resetCommandMock.setRef(Constants.HEAD)).thenReturn(resetCommandMock);
+        Mockito.when(resetCommandMock.addPath(Mockito.anyString())).thenReturn(resetCommandMock);
+        Mockito.when(gitMock.reset()).thenReturn(resetCommandMock);
+        Mockito.when(resetCommandMock.call()).thenReturn(mock(Ref.class));
+        Assert.assertFalse(getJGitMock(gitMock).resetChangedFiles(files, getProject(true)).isEmpty());
+    }
+
     /*************************************************************************************************/
     private Project getProject(boolean isCorrectProject) {
         if (!isCorrectProject) {
@@ -937,7 +1063,7 @@ public class JGitTest {
         listProjects.add(getProject(true));
         listProjects.add(null);
         listProjects.add(getProject(false));
-        listProjects.add(getProject(true));
+        listProjects.add(new Project());
         return listProjects;
     }
 

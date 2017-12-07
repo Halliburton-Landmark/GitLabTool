@@ -5,9 +5,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jgit.api.Git;
+
 import com.lgc.gitlabtool.git.entities.Branch;
 import com.lgc.gitlabtool.git.entities.Project;
+import com.lgc.gitlabtool.git.entities.ProjectStatus;
 import com.lgc.gitlabtool.git.jgit.BranchType;
+import com.lgc.gitlabtool.git.jgit.ChangedFile;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 
@@ -163,11 +167,46 @@ public interface GitService extends Service {
     void cancelClone();
 
     /** This method return tracking branch.
+    *
+    * @param project
+    * @return tracking branch.
+    */
+   public String getTrackingBranch(Project project);
+
+    /**
+     * Gets ChangedFiles for project.
      *
-     * @param project
-     * @return tracking branch.
+     * @param  project the project
+     * @return a ChangedFiles list
      */
-    public String getTrackingBranch(Project project);
+    List<ChangedFile> getChangedFiles(Project project);
+
+    /**
+     * Adds untracked files to index.
+     *
+     * @param  files the map of projects and changed files
+     * @return the list of added files
+     */
+    List<ChangedFile> addUntrackedFilesToIndex(Map<Project, List<ChangedFile>> files);
+
+    /**
+     * Resets changed files to head
+     *
+     * @param  files the map which has projects and their changed files
+     * @return a list of changed files
+     */
+    List<ChangedFile> resetChangedFiles(Map<Project, List<ChangedFile>> files);
+
+    /**
+     * Gets ProjectStatus for project.
+     * We use {@link Status} for getting info about conflicting, untracked files etc.
+     * Also, use it for checking the presence of uncommitted changes.
+     * Gets current branch name, ahead and behind indexes using {@link Git}.
+     *
+     * @param  project the project
+     * @return ProjectStatus for the project.
+     */
+    ProjectStatus getProjectStatus(Project project);
 
     /**
      * Gets branches of project

@@ -22,7 +22,7 @@ public enum ToolbarButtons {
     CREATE_PROJECT_BUTTON(ToolbarConstants.PROJECTS_WINDOW_KEY, "create_project_button", "icons/toolbar/create_project_20x20.png", "Create project", "Create new project"),
     NEW_BRANCH_BUTTON(ToolbarConstants.PROJECTS_WINDOW_KEY, "branch_newBranch", "icons/toolbar/new_branch_20x20.png", "New branch", "Create new branch"),
     CHECKOUT_BRANCH_BUTTON(ToolbarConstants.PROJECTS_WINDOW_KEY, "branch_checkoutBranch", "icons/toolbar/checkout_20x20.png", "Checkout", "Checkout to another branch"),
-    COMMIT_BUTTON(ToolbarConstants.PROJECTS_WINDOW_KEY, "commit", "icons/toolbar/commit_20x20.png", "Commit", "Show commit dialog"),
+    STAGING_BUTTON(ToolbarConstants.PROJECTS_WINDOW_KEY, "git staging", "icons/toolbar/staging_20x20.png", "Staging", "Show Git Staging dialog"),
     PUSH_BUTTON(ToolbarConstants.PROJECTS_WINDOW_KEY, "push", "icons/toolbar/push_20x20.png", "Push", "Show push dialog"),
     EDIT_PROJECT_PROPERTIES_BUTTON(ToolbarConstants.PROJECTS_WINDOW_KEY, "edit_project_propecties", "icons/toolbar/edit_properties_20x20.png", "Edit project properties", "Edit project properties"),
     PULL_BUTTON(ToolbarConstants.PROJECTS_WINDOW_KEY, "pull", "icons/toolbar/pull_20x20.png", "Pull", "Pull projects"),
