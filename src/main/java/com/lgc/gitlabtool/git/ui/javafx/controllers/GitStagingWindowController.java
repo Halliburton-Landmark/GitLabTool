@@ -93,6 +93,7 @@ public class GitStagingWindowController extends AbstractStateListener {
     private static final String STATUS_COMMIT_DIALOG_HEADER = "Committing changes info";
     private static final String STATUS_PUSH_DIALOG_TITLE = "Pushing changes status";
     private static final String STATUS_PUSH_DIALOG_HEADER = "Pushing changes info";
+    private static final String COMMIT_PROMPT_TEXT = "Please enter commit message";
 
     private static final GitService _gitService = (GitService) ServiceProvider.getInstance()
             .getService(GitService.class.getName());
@@ -128,6 +129,7 @@ public class GitStagingWindowController extends AbstractStateListener {
                 (SortingType.PROJECTS,SortingType.EXTENSIONS, SortingType.DEFAULT);
         _sortingListBox.setItems(items);
         _sortingListBox.setValue(SortingType.DEFAULT);
+        _commitText.setPromptText(COMMIT_PROMPT_TEXT);
 
         _selectedProjectIds.addAll(projectIds);
 
