@@ -1,5 +1,6 @@
 package com.lgc.gitlabtool.git.services;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -161,11 +162,21 @@ public interface GitService extends Service {
      */
     void cancelClone();
 
-    /**
-     * This method return tracking branch.
+    /** This method return tracking branch.
      *
      * @param project
      * @return tracking branch.
      */
     public String getTrackingBranch(Project project);
+
+    /**
+     * Gets branches of project
+     *
+     * @param projects    cloned project
+     * @param brType      type branch
+     * @param onlyCommon  if value is <code>true</code> return only common branches of projects,
+     *                    if <code>false</code> return all branches.
+     * @return a list of branches
+     */
+    Set<Branch> getBranches(Collection<Project> projects, BranchType brType, boolean onlyCommon);
 }

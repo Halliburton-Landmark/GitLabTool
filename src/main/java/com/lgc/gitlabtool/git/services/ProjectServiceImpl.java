@@ -48,7 +48,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     private static final Logger _logger = LogManager.getLogger(ProjectServiceImpl.class);
     private static final CurrentUser _currentUser = CurrentUser.getInstance();
-    private static final JGit _git = JGit.getInstance();
+    private static JGit _git;
 
     private static ProjectTypeService _projectTypeService;
     private static StateService _stateService;
@@ -63,12 +63,14 @@ public class ProjectServiceImpl implements ProjectService {
                               ProjectTypeService projectTypeService,
                               StateService stateService,
                               ConsoleService consoleService,
-                              GitService gitService) {
+                              GitService gitService,
+                              JGit git) {
         setConnector(connector);
         setProjectTypeService(projectTypeService);
         setStateService(stateService);
         setConsoleService(consoleService);
         setGitService(gitService);
+        setJGit(git);
     }
 
     @Override
@@ -173,7 +175,7 @@ public class ProjectServiceImpl implements ProjectService {
             aheadIndex = indexCount[0];
             behindIndex = indexCount[1];
         }
-        
+
         String trackingBranch = _gitService.getTrackingBranch(project);
 
         ProjectStatus projectStatus = new ProjectStatus(hasConflicts, hasChanges, aheadIndex, behindIndex, nameBranch,
@@ -381,12 +383,6 @@ public class ProjectServiceImpl implements ProjectService {
                 .count() > 0;
     }
 
-    private void setGitService(GitService gitService) {
-        if (gitService != null) {
-            _gitService = gitService;
-        }
-    }
-
     @Override
     public void addUpdateProgressListener(UpdateProgressListener listener) {
         if (listener != null) {
@@ -404,6 +400,18 @@ public class ProjectServiceImpl implements ProjectService {
     private void notifyListenersAboutChangesProgress(String message) {
         if (message != null) {
             _listeners.forEach(listener -> listener.updateProgress(message));
+        }
+    }
+
+    private void setGitService(GitService gitService) {
+        if (gitService != null) {
+            _gitService = gitService;
+        }
+    }
+
+    private void setJGit(JGit jGit) {
+        if (jGit != null) {
+            _git = jGit;
         }
     }
 }

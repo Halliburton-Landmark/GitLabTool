@@ -26,15 +26,16 @@ public class ServiceProvider {
 
     private ServiceProvider() {
         BackgroundService backgroundService = new BackgroundServiceImpl();
+        JGit jGit = new JGit(backgroundService);
         RESTConnector restConnector = RESTConnectorFactory.getInstance().getRESTConnector();
         LoginService loginService = new LoginServiceImpl(restConnector, backgroundService);
         StorageService storageService = new StorageServiceImpl();
         ProjectTypeService projectTypeService = new ProjectTypeServiceImpl();
         StateService stateService = new StateServiceImpl();
-        GitService gitService = new GitServiceImpl(stateService, JGit.getInstance());
+        GitService gitService = new GitServiceImpl(stateService, jGit);
         ConsoleService consoleService = new ConsoleServiceImpl();
         ProjectService projectService = new ProjectServiceImpl(restConnector, projectTypeService,
-                stateService, consoleService, gitService);
+                stateService, consoleService, gitService, jGit);
         ClonedGroupsService programPropertiesService = new ClonedGroupsServiceImpl(storageService, loginService);
         PomXmlEditService pomXmlEditService = new PomXMLEditServiceImpl();
 
@@ -42,7 +43,7 @@ public class ServiceProvider {
         _services.put(LoginService.class.getName(), loginService);
         _services.put(ClonedGroupsService.class.getName(), programPropertiesService);
         _services.put(GroupsUserService.class.getName(), new GroupsUserServiceImpl(restConnector,
-                programPropertiesService, projectService, stateService, consoleService));
+                programPropertiesService, projectService, stateService, consoleService, jGit));
         _services.put(ProjectService.class.getName(), projectService);
         _services.put(StorageService.class.getName(), storageService);
         _services.put(ReplacementService.class.getName(), new ReplacementServiceImpl());

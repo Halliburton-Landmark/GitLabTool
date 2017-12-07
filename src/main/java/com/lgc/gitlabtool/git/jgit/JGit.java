@@ -68,7 +68,6 @@ import com.lgc.gitlabtool.git.util.PathUtilities;
  */
 public class JGit {
     private static final Logger logger = LogManager.getLogger(JGit.class);
-    private static final JGit _jgit;
     private final String ERROR_MSG_NOT_CLONED = " project is not cloned. The operation is impossible";
 
     public static final String FINISH_CLONE_MESSAGE = "The cloning process is finished.";
@@ -76,20 +75,10 @@ public class JGit {
     private static final String ORIGIN_PREFIX = "origin/";
     private static final String WRONG_PARAMETERS = "Wrong parameters for obtaining branches.";
 
-    private static final BackgroundService _backgroundService = (BackgroundService) ServiceProvider.getInstance()
-            .getService(BackgroundService.class.getName());
+    private final BackgroundService _backgroundService;
 
-    static {
-        _jgit = new JGit();
-    }
-
-    /**
-     * Gets instance's the class
-     *
-     * @return instance
-     */
-    public static JGit getInstance() {
-        return _jgit;
+    public JGit (BackgroundService backgroundService) {
+        _backgroundService = backgroundService;
     }
 
     /**
