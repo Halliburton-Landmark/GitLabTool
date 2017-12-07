@@ -511,13 +511,7 @@ public class GitStagingWindowController extends AbstractStateListener {
                 }
             });
         }
-
-        List<ApplicationState> activeAtates = _stateService.getActiveStates();
-        boolean isVisible = !activeAtates.isEmpty();
-        String text = activeAtates.toString();
-        if (!text.isEmpty()) {
-            text = text.substring(1, text.length()-1);
-        }
-        updateProgressBar(isVisible, text);
+        String text = isActivate ? changedState.toString() : StringUtils.EMPTY;
+        updateProgressBar(isActivate, text);
     }
 }
