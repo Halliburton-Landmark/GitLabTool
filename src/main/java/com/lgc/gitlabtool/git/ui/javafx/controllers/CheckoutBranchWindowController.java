@@ -15,7 +15,6 @@ import com.lgc.gitlabtool.git.entities.MessageType;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.ProjectList;
 import com.lgc.gitlabtool.git.jgit.BranchType;
-import com.lgc.gitlabtool.git.jgit.JGit;
 import com.lgc.gitlabtool.git.listeners.stateListeners.AbstractStateListener;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.services.BackgroundService;
@@ -52,9 +51,6 @@ import javafx.stage.WindowEvent;
 public class CheckoutBranchWindowController extends AbstractStateListener {
 
     private static final String TOTAL_CAPTION = "Total count: ";
-
-    private static final GitService _gitService =
-            (GitService) ServiceProvider.getInstance().getService(GitService.class.getName());
 
     private List<Branch> _allBranches = new ArrayList<>();
 
@@ -95,6 +91,9 @@ public class CheckoutBranchWindowController extends AbstractStateListener {
 
     private static final BackgroundService _backgroundService = (BackgroundService) ServiceProvider.getInstance()
             .getService(BackgroundService.class.getName());
+
+    private static final GitService _gitService = (GitService) ServiceProvider.getInstance()
+            .getService(GitService.class.getName());
 
     private static final String ALREADY_CHECKOUTED_MESSAGE = "%d of %d projects have already checked out the selected branch.";
 
@@ -242,10 +241,8 @@ public class CheckoutBranchWindowController extends AbstractStateListener {
     }
 
     private List<Branch> getBranches(List<Project> selectedProjects, BranchType branchType, Boolean isCommonMatching) {
-        Set<Branch> allBranchesWithTypes = JGit.getInstance().getBranches(selectedProjects,
-                branchType, isCommonMatching);
-
-        List<Branch> list = new ArrayList(allBranchesWithTypes);
+        Set<Branch> allBranchesWithTypes = _gitService.getBranches(selectedProjects, branchType, isCommonMatching);
+        List<Branch> list = new ArrayList<>(allBranchesWithTypes);
         Collections.sort(list, (o1, o2) -> {
 
             String type1 = o1.getBranchType().name();
