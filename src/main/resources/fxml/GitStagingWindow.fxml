@@ -54,15 +54,15 @@
             <AnchorPane prefHeight="32.0" prefWidth="709.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0">
                <children>
                   <ProgressIndicator fx:id="_progressIndicator" maxHeight="20.0" maxWidth="20.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="5.0" />
-                  <Label fx:id="_progressLabel" layoutX="12.0" layoutY="7.0" prefHeight="20.0" prefWidth="274.0" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="5.0">
+                  <Label fx:id="_progressLabel" layoutX="12.0" layoutY="7.0" prefHeight="20.0" prefWidth="255.0" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="5.0">
                      <padding>
                         <Insets left="5.0" top="3.0" />
                      </padding>
                   </Label>
-                  <ButtonBar prefHeight="32.0" prefWidth="386.0" AnchorPane.rightAnchor="0.0">
+                  <ButtonBar prefHeight="32.0" prefWidth="429.0" AnchorPane.rightAnchor="0.0">
                      <buttons>
                         <Button fx:id="_commitButton" mnemonicParsing="false" onAction="#onCommitAction" text="Commit" />
-                        <Button fx:id="_commitPushButton" mnemonicParsing="false" onAction="#onCommitPushAction" text="Commit &amp; Push" />
+                        <Button fx:id="_commitPushButton" mnemonicParsing="false" onAction="#onCommitPushAction" prefHeight="25.0" prefWidth="165.0" text="Commit &amp; Push" />
                         <Button fx:id="_exitButton" mnemonicParsing="false" onAction="#onExitAction" text="Exit" />
                      </buttons>
                   </ButtonBar>
@@ -72,9 +72,9 @@
       </AnchorPane>
       <AnchorPane layoutX="119.0" layoutY="3.0" prefHeight="32.0" prefWidth="224.0" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="5.0">
          <children>
-            <HBox layoutX="-32.0" layoutY="-31.0" prefHeight="27.0" prefWidth="232.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="5.0">
+            <HBox layoutX="-32.0" layoutY="-31.0" prefHeight="27.0" prefWidth="221.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="5.0">
                <children>
-                  <Label text="Sorting:">
+                  <Label text="Sort by">
                      <HBox.margin>
                         <Insets top="5.0" />
                      </HBox.margin>
@@ -90,7 +90,7 @@
       </AnchorPane>
       <AnchorPane layoutX="247.0" layoutY="-76.0" prefHeight="32.0" prefWidth="448.0" AnchorPane.leftAnchor="247.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
          <children>
-            <TextField fx:id="_filterField" layoutY="6.0" prefHeight="25.0" prefWidth="448.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0" />
+            <TextField fx:id="_filterField" layoutX="-7.0" layoutY="6.0" prefHeight="25.0" prefWidth="455.0" AnchorPane.leftAnchor="-7.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0" />
          </children>
       </AnchorPane>
    </children>

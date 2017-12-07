@@ -114,7 +114,7 @@ public class WindowLoader {
             });
 
             /* Set sizing and position */
-            double dialogMinSize = 600;
+            double dialogMinSize = 700;
             double preferedWidth = 900;
             stage.setWidth(preferedWidth);
             ScreenUtil.adaptForMultiScreens(stage, dialogMinSize, dialogMinSize);
