@@ -10,7 +10,7 @@ import com.lgc.gitlabtool.git.entities.Project;
  *
  * @author Lyudmila Lyska
  */
-public class ComparatorProjectList implements Comparator<Project> {
+public class ProjectListComparator implements Comparator<Project> {
 
     @Override
     public int compare(Project o1, Project o2) {

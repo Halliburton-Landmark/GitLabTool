@@ -56,7 +56,7 @@ import com.lgc.gitlabtool.git.ui.javafx.ProgressDialog;
 import com.lgc.gitlabtool.git.ui.javafx.PullProgressDialog;
 import com.lgc.gitlabtool.git.ui.javafx.StatusDialog;
 import com.lgc.gitlabtool.git.ui.javafx.WorkIndicatorDialog;
-import com.lgc.gitlabtool.git.ui.javafx.comparators.ComparatorProjectList;
+import com.lgc.gitlabtool.git.ui.javafx.comparators.ProjectListComparator;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.PushProgressListener;
 import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuItems;
@@ -1249,7 +1249,7 @@ public class ModularController implements UpdateProgressListener {
      */
     private void sortProjectsList() {
         Platform.runLater(() -> {
-            Comparator<Project> comparator = new ComparatorProjectList();
+            Comparator<Project> comparator = new ProjectListComparator();
             ObservableList<Project> obsProjects = FXCollections.observableArrayList(_projectsList.getProjects());
             SortedList<Project> sortList = new SortedList<>(obsProjects);
             sortList.setComparator(comparator);

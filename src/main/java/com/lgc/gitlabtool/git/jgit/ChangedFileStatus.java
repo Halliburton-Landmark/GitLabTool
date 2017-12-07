@@ -1,6 +1,9 @@
 package com.lgc.gitlabtool.git.jgit;
 
 /**
+ * Status for {@link ChangedFile}.
+ *
+ * It shows us file state: removed, added, it was added to the staging or not.
  *
  * @author Lyudmila Lysk
  */
