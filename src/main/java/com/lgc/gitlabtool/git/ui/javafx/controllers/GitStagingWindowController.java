@@ -23,7 +23,6 @@ import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StateService;
-import com.lgc.gitlabtool.git.ui.javafx.GLTAlert;
 import com.lgc.gitlabtool.git.ui.javafx.JavaFXUI;
 import com.lgc.gitlabtool.git.ui.javafx.StatusDialog;
 import com.lgc.gitlabtool.git.ui.javafx.comparators.DefaultTypeComparator;
@@ -41,7 +40,6 @@ import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
@@ -93,13 +91,8 @@ public class GitStagingWindowController extends AbstractStateListener {
 
     private static final String STATUS_COMMIT_DIALOG_TITLE = "Committing changes status";
     private static final String STATUS_COMMIT_DIALOG_HEADER = "Committing changes info";
-
     private static final String STATUS_PUSH_DIALOG_TITLE = "Pushing changes status";
     private static final String STATUS_PUSH_DIALOG_HEADER = "Pushing changes info";
-
-    private static final String COMMIT_ACTION_DIALOG_TITLE = "Commit error";
-    private static final String COMMIT_ACTION_DIALOG_HEADER = "Changes cannot be committed.";
-    private static final String COMMIT_ACTION_DIALOG_CONTENT = "Please enter a commit message.";
 
     private static final GitService _gitService = (GitService) ServiceProvider.getInstance()
             .getService(GitService.class.getName());
@@ -137,20 +130,9 @@ public class GitStagingWindowController extends AbstractStateListener {
         _sortingListBox.setValue(SortingType.DEFAULT);
 
         _selectedProjectIds.addAll(projectIds);
-        _filterField.textProperty().addListener((observable, oldValue, newValue) -> filterUnstagedList(oldValue, newValue));
 
         configureListViews(files);
         updateProgressBar(false, null);
-
-        _commitText.textProperty().addListener((observable, oldValue, newValue) -> updateCommitTextStyle());
-    }
-
-    private void updateCommitTextStyle() {
-        if (canNotCommit()) {
-            _commitText.setStyle("-fx-border-color: red;");
-        } else {
-            _commitText.setStyle("-fx-border-color: green;");
-        }
     }
 
     /**
@@ -175,6 +157,7 @@ public class GitStagingWindowController extends AbstractStateListener {
     private void updateDisableButton() {
         BooleanBinding progressProperty = _progressLabel.textProperty().isNotEmpty();
         BooleanBinding property = Bindings.size(_stagedListView.getItems()).isEqualTo(0)
+                .or(_commitText.textProperty().isEmpty())
                 .or(progressProperty);
         _commitButton.disableProperty().bind(property);
         _commitPushButton.disableProperty().bind(property);
@@ -269,20 +252,7 @@ public class GitStagingWindowController extends AbstractStateListener {
                     .collect(Collectors.toList());
     }
 
-    private boolean canNotCommit() {
-        return _commitText.getText().isEmpty();
-    }
-
-
     private void commitChanges(List<Project> projects, boolean isPushChanges) {
-        if (canNotCommit()) {
-            updateCommitTextStyle();
-            GLTAlert alert = new GLTAlert(AlertType.INFORMATION, COMMIT_ACTION_DIALOG_TITLE,
-                    COMMIT_ACTION_DIALOG_HEADER, COMMIT_ACTION_DIALOG_CONTENT);
-            alert.showAndWait();
-            return;
-        }
-
         Runnable task = new Runnable() {
             @Override
             public void run() {
@@ -360,23 +330,6 @@ public class GitStagingWindowController extends AbstractStateListener {
         updateDisableButton();
     }
 
-    private void filterUnstagedList(String oldValue, String newValue) {
-        ObservableList<ChangedFile> items = FXCollections.observableArrayList(new ArrayList<>());
-        Collection<ChangedFile> unstagedItems = getFilesInUnstagedList();
-
-        if (_filterField == null || _filterField.getText().equals(StringUtils.EMPTY)) {
-            items.addAll(unstagedItems);
-        } else {
-            String searchText = _filterField.getText();
-            List<ChangedFile> foundFiles = unstagedItems.stream()
-                                                        .filter(file -> StringUtils.containsIgnoreCase(file.getFileName(), searchText))
-                                                        .collect(Collectors.toList());
-            items.addAll(foundFiles);
-        }
-        _unstagedListView.setItems(items);
-        setContentAndComparator(_unstagedListView);
-    }
-
     private void removeItemsFromList(ListView<ChangedFile> fromList, List<ChangedFile> items) {
         ObservableList<ChangedFile> fromListItems = FXCollections.observableArrayList(fromList.getItems());
         fromListItems.removeAll(items);
@@ -391,15 +344,6 @@ public class GitStagingWindowController extends AbstractStateListener {
         toList.setItems(toListItems);
 
         setContentAndComparator(toList);
-    }
-
-    private Collection<ChangedFile> getFilesInUnstagedList() {
-        Collection<ChangedFile> unstagedFiles = getChangedFilesSelectedProjects();
-        List<ChangedFile> stagedItems = _stagedListView.getItems();
-        if (!stagedItems.isEmpty()) {
-            unstagedFiles.removeAll(stagedItems);
-        }
-        return unstagedFiles;
     }
 
     private List<Project> getSelectedProjects() {
