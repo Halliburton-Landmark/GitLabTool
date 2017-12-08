@@ -4,7 +4,6 @@ import org.apache.commons.lang.StringUtils;
 
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.jgit.ChangedFile;
-import com.lgc.gitlabtool.git.jgit.ChangedFileStatus;
 
 import javafx.geometry.Pos;
 import javafx.scene.control.ListCell;
@@ -86,19 +85,22 @@ public class FilesListCell extends ListCell<ChangedFile> {
     }
 
     private String getUrlForFile(ChangedFile item) {
-        ChangedFileStatus status = item.getStatusFile();
-        if (status == ChangedFileStatus.CHANGED) {
+        switch (item.getStatusFile()) {
+        case CHANGED:
             return CHANGED_ICON_URL;
-        } else if (status == ChangedFileStatus.ADDED) {
+        case ADDED:
             return ADDED_ICON_URL;
-        } else if (status == ChangedFileStatus.CONFLICTING) {
+        case CONFLICTING:
             return CONFLICTING_ICON_URL;
-        } else if (status == ChangedFileStatus.MODIFIED) {
+        case MODIFIED:
             return MODIFIED_ICON_URL;
-        } else if (status == ChangedFileStatus.UNTRACKED) {
+        case UNTRACKED:
             return UNTRACKED_ICON_URL;
-        } else {
+        case REMOVED:
+        case MISSING:
             return REMOVED_ICON_URL;
+        default:
+            throw new IllegalStateException("Unknown status");
         }
     }
 
