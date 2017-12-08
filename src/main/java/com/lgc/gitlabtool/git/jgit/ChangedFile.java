@@ -97,8 +97,9 @@ public class ChangedFile implements Serializable {
     }
 
     /**
+     * Gets file status (Please see {@link ChangedFileStatus})
      *
-     * @return
+     * @return status
      */
     public ChangedFileStatus getStatusFile() {
         return _statusFile;
