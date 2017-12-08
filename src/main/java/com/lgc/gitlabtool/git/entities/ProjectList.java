@@ -181,11 +181,14 @@ public class ProjectList {
      * @param projects
      */
     public void updateProjectStatuses(List<Project> projects) {
-        _stateService.stateON(ApplicationState.UPDATE_PROJECT_STATUSES);
-        _projects.parallelStream()
-                 .filter(project -> projects.contains(project))
-                 .forEach(project -> _projectService.updateProjectStatus(project));
-        _stateService.stateOFF(ApplicationState.UPDATE_PROJECT_STATUSES);
+        try {
+            _stateService.stateON(ApplicationState.UPDATE_PROJECT_STATUSES);
+            _projects.parallelStream()
+                     .filter(project -> projects.contains(project))
+                     .forEach(project -> _projectService.updateProjectStatus(project));
+        } finally {
+            _stateService.stateOFF(ApplicationState.UPDATE_PROJECT_STATUSES);
+        }
     }
 
     /**
