@@ -59,7 +59,7 @@ public class GroupsUserServiceImpl implements GroupsUserService {
 
     @Override
     public Object getGroups(User user) {
-        privateTokenValue = CurrentUser.getInstance().getPrivateTokenValue();
+        privateTokenValue = CurrentUser.getInstance().getOAuth2TokenValue();
         privateTokenKey = CurrentUser.getInstance().getPrivateTokenKey();
         if (privateTokenValue != null) {
             HashMap<String, String> header = new HashMap<>();
@@ -100,7 +100,7 @@ public class GroupsUserServiceImpl implements GroupsUserService {
 
     @Override
     public Group getGroupById(int idGroup) {
-        privateTokenValue = CurrentUser.getInstance().getPrivateTokenValue();
+        privateTokenValue = CurrentUser.getInstance().getOAuth2TokenValue();
         privateTokenKey = CurrentUser.getInstance().getPrivateTokenKey();
         if (privateTokenValue != null) {
             String sendString = "/groups/" + idGroup;

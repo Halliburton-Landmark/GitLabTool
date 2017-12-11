@@ -49,7 +49,7 @@ public class LoginServiceImpl implements LoginService {
                         User newUser = JSONParser.parseToObject(userJson2, User.class);
                         _currentUser = CurrentUser.getInstance();
                         _currentUser.setCurrentUser(newUser);
-                        _currentUser.setPrivateTokenValue(accessToken.getTokenWithType());
+                        _currentUser.setOAuth2TokenValue(accessToken.getTokenWithType());
                     }
 
                     CredentialsProvider.setDefault(new UsernamePasswordCredentialsProvider(dto.getLogin(), dto.getPassword()));

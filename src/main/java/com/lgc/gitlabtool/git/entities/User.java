@@ -68,6 +68,9 @@ public class User {
     /** The private token of the user **/
     private String private_token;
 
+    /** The OAuth2 token of a user **/
+    private String oauth2Token;
+
     public User(String name, String email) {
         if (name == null || email == null || name.isEmpty() || email.isEmpty()) { // TODO valid
             throw new IllegalArgumentException("Incorrect data!");
@@ -240,8 +243,29 @@ public class User {
         return private_token;
     }
 
+    /**
+     * Set value of a private token
+     * @param token value of a private token
+     */
     public void setPrivate_token(String token){
         private_token = token;
+    }
+
+    /**
+     * Gets the OAuth2 token of a current user
+     *
+     * @return OAuth2 token of a current user
+     */
+    public String getOAuth2token() {
+        return oauth2Token;
+    }
+
+    /**
+     * Set value of a OAuth2 token
+     * @param token value of a OAuth2 token
+     */
+    public void setOAuth2token(String token){
+        oauth2Token = token;
     }
 
 }
