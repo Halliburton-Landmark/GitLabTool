@@ -20,7 +20,6 @@ import com.lgc.gitlabtool.git.listeners.stateListeners.AbstractStateListener;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.services.BackgroundService;
 import com.lgc.gitlabtool.git.services.GitService;
-import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.javafx.JavaFXUI;
@@ -101,9 +100,6 @@ public class GitStagingWindowController extends AbstractStateListener {
     private static final StateService _stateService = (StateService) ServiceProvider.getInstance()
             .getService(StateService.class.getName());
 
-    private static final ProjectService _projectService = (ProjectService) ServiceProvider.getInstance()
-            .getService(ProjectService.class.getName());
-
     private static final BackgroundService _backgroundService = (BackgroundService) ServiceProvider.getInstance()
             .getService(BackgroundService.class.getName());
 
@@ -132,10 +128,12 @@ public class GitStagingWindowController extends AbstractStateListener {
         _commitText.setPromptText(COMMIT_PROMPT_TEXT);
 
         _selectedProjectIds.addAll(projectIds);
+        _filterField.textProperty().addListener((observable, oldValue, newValue) -> filterUnstagedList(oldValue, newValue));
 
         configureListViews(files);
         updateProgressBar(false, null);
     }
+
 
     /**
      * Gets list of {@linkplain ApplicationState} which Git Staging window listenins.
@@ -260,16 +258,17 @@ public class GitStagingWindowController extends AbstractStateListener {
             public void run() {
                 _commitStatuses = _gitService.commitChanges(projects, _commitText.getText(), isPushChanges,
                         new CommitPushProgressListener(isPushChanges ? ApplicationState.PUSH : ApplicationState.COMMIT));
-                _projectService.updateProjectStatuses(projects);
-
-                Collection<ChangedFile> changedFiles = getChangedFilesSelectedProjects();
-                updateContendListViews(changedFiles);
                 _commitText.setText(StringUtils.EMPTY);
-
+                updateChangedFiles(projects);
                 showStatusDialog(isPushChanges, projects.size());
             }
         };
+
         _backgroundService.runInBackgroundThread(task);
+    }
+
+    private void updateChangedFiles(List<Project> projects) {
+        _projectList.updateProjectStatuses(projects);
     }
 
     @FXML
@@ -332,20 +331,30 @@ public class GitStagingWindowController extends AbstractStateListener {
         updateDisableButton();
     }
 
-    private void removeItemsFromList(ListView<ChangedFile> fromList, List<ChangedFile> items) {
-        ObservableList<ChangedFile> fromListItems = FXCollections.observableArrayList(fromList.getItems());
-        fromListItems.removeAll(items);
-        fromList.setItems(fromListItems);
+    private void filterUnstagedList(String oldValue, String newValue) {
+        ObservableList<ChangedFile> items = FXCollections.observableArrayList(new ArrayList<>());
+        Collection<ChangedFile> unstagedItems = getFilesInUnstagedList();
 
-        setContentAndComparator(fromList);
+        if (_filterField == null || _filterField.getText().equals(StringUtils.EMPTY)) {
+            items.addAll(unstagedItems);
+        } else {
+            String searchText = _filterField.getText();
+            List<ChangedFile> foundFiles = unstagedItems.stream()
+                                                        .filter(file -> StringUtils.containsIgnoreCase(file.getFileName(), searchText))
+                                                        .collect(Collectors.toList());
+            items.addAll(foundFiles);
+        }
+        _unstagedListView.setItems(items);
+        setContentAndComparator(_unstagedListView);
     }
 
-    private void addItemsToList(ListView<ChangedFile> toList, List<ChangedFile> items) {
-        ObservableList<ChangedFile> toListItems = FXCollections.observableArrayList(toList.getItems());
-        toListItems.addAll(items);
-        toList.setItems(toListItems);
-
-        setContentAndComparator(toList);
+    private Collection<ChangedFile> getFilesInUnstagedList() {
+        Collection<ChangedFile> unstagedFiles = getChangedFilesSelectedProjects();
+        List<ChangedFile> stagedItems = _stagedListView.getItems();
+        if (!stagedItems.isEmpty()) {
+            unstagedFiles.removeAll(stagedItems);
+        }
+        return unstagedFiles;
     }
 
     private List<Project> getSelectedProjects() {
@@ -431,7 +440,7 @@ public class GitStagingWindowController extends AbstractStateListener {
             public void run() {
                 Map<Project, List<ChangedFile>> map = getMapFiles(unstagedFiles);
                 List<ChangedFile> addedFiles = _gitService.addUntrackedFilesToIndex(map);
-                addRemoveFiles(_stagedListView, _unstagedListView, addedFiles);
+                updateChangedFiles(getProjects(addedFiles));
             }
         };
         _backgroundService.runInBackgroundThread(task);
@@ -443,7 +452,7 @@ public class GitStagingWindowController extends AbstractStateListener {
             public void run() {
                 Map<Project, List<ChangedFile>> map = getMapFiles(stagedFiles);
                 List<ChangedFile> resetFiles = _gitService.resetChangedFiles(map);
-                addRemoveFiles(_unstagedListView, _stagedListView, resetFiles);
+                updateChangedFiles(getProjects(resetFiles));
             }
         };
         _backgroundService.runInBackgroundThread(task);
@@ -491,21 +500,18 @@ public class GitStagingWindowController extends AbstractStateListener {
         list.setOnDragOver(event -> event.acceptTransferModes(TransferMode.MOVE));
     }
 
-    private void addRemoveFiles(ListView<ChangedFile> toList, ListView<ChangedFile> fromList, List<ChangedFile> files) {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                addItemsToList(toList, files);
-                removeItemsFromList(fromList, files);
-            }
-        });
-    }
-
     @Override
     public void handleEvent(ApplicationState changedState, boolean isActivate) {
-        List<ApplicationState> activeAtates = _stateService.getActiveStates();
-        boolean isVisible = !activeAtates.isEmpty();
-        String text = activeAtates.toString();
-        updateProgressBar(isVisible, text);
+        if (changedState == ApplicationState.UPDATE_PROJECT_STATUSES && !isActivate) {
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    Collection<ChangedFile> changedFiles = getChangedFilesSelectedProjects();
+                    updateContendListViews(changedFiles);
+                }
+            });
+        }
+        String text = isActivate ? changedState.toString() : StringUtils.EMPTY;
+        updateProgressBar(isActivate, text);
     }
 }

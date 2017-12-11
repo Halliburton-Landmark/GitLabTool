@@ -11,6 +11,7 @@ import java.math.RoundingMode;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -55,6 +56,7 @@ import com.lgc.gitlabtool.git.ui.javafx.ProgressDialog;
 import com.lgc.gitlabtool.git.ui.javafx.PullProgressDialog;
 import com.lgc.gitlabtool.git.ui.javafx.StatusDialog;
 import com.lgc.gitlabtool.git.ui.javafx.WorkIndicatorDialog;
+import com.lgc.gitlabtool.git.ui.javafx.comparators.ProjectListComparator;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.PushProgressListener;
 import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuItems;
@@ -74,6 +76,7 @@ import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -663,8 +666,6 @@ public class ModularController implements UpdateProgressListener {
         _stateService.addStateListener(ApplicationState.REVERT, _modularStateListener);
         _stateService.addStateListener(ApplicationState.LOAD_PROJECTS, _modularStateListener);
         _stateService.addStateListener(ApplicationState.UPDATE_PROJECT_STATUSES, _modularStateListener);
-        _stateService.addStateListener(ApplicationState.ADD_FILES_TO_INDEX, _modularStateListener);
-        _stateService.addStateListener(ApplicationState.RESET, _modularStateListener);
     }
 
     private void removeProjectsWindowListener() {
@@ -678,8 +679,6 @@ public class ModularController implements UpdateProgressListener {
         _stateService.removeStateListener(ApplicationState.REVERT, _modularStateListener);
         _stateService.removeStateListener(ApplicationState.LOAD_PROJECTS, _modularStateListener);
         _stateService.removeStateListener(ApplicationState.UPDATE_PROJECT_STATUSES, _modularStateListener);
-        _stateService.removeStateListener(ApplicationState.ADD_FILES_TO_INDEX, _modularStateListener);
-        _stateService.removeStateListener(ApplicationState.RESET, _modularStateListener);
     }
 
     //endregion
@@ -1129,10 +1128,9 @@ public class ModularController implements UpdateProgressListener {
             if (preferences != null) {
                 Boolean isHide = preferences.getBoolean(PREF_NAME_HIDE_SHADOWS, false);
                 filterShadowProjects.setSelected(isHide);
-                ObservableList<Project> obsList = FXCollections.observableArrayList(
-                        isHide ? _projectsList.getClonedProjects() : _projectsList.getProjects());
-                projectListView.setItems(obsList);
                 if (isHide) {
+                    ObservableList<Project> obsList = FXCollections.observableArrayList(_projectsList.getClonedProjects());
+                    projectListView.setItems(obsList);
                     projectListView.refresh();
                 } else {
                     sortProjectsList();
@@ -1247,24 +1245,17 @@ public class ModularController implements UpdateProgressListener {
     }
 
     /**
-     * Note: shadow projects should be at the end of list
+     * Shadow projects should be at the end of list.
      */
     private void sortProjectsList() {
-        List<Project> sortedList = _projectsList.getProjects()
-                .stream()
-                .sorted(this::compareProjects)
-                .collect(Collectors.toList());
-
         Platform.runLater(() -> {
-            ObservableList<Project> projectsObservableList = FXCollections.observableList(sortedList);
-            //noinspection unchecked
-            projectListView.setItems(projectsObservableList);
+            Comparator<Project> comparator = new ProjectListComparator();
+            ObservableList<Project> obsProjects = FXCollections.observableArrayList(_projectsList.getProjects());
+            SortedList<Project> sortList = new SortedList<>(obsProjects);
+            sortList.setComparator(comparator);
+            projectListView.setItems(sortList);
             projectListView.refresh();
         });
-    }
-
-    private int compareProjects(Project firstProject, Project secondProject) {
-        return Boolean.compare(secondProject.isCloned(), firstProject.isCloned());
     }
 
     private void checkProjectsList() {
@@ -1291,7 +1282,7 @@ public class ModularController implements UpdateProgressListener {
 
     private void refreshLoadProjects() {
         _projectsList.refreshLoadProjects();
-        sortAndCheckProjects();
+        hideShadowsAction();
     }
 
     private BooleanBinding booleanBindingForShadowProjects() {
@@ -1571,17 +1562,17 @@ public class ModularController implements UpdateProgressListener {
             }
         }
 
-
         private void updateProjectsByState(ApplicationState state) {
-            List<Project> projects = _projectsList.getProjects();
             if (state == ApplicationState.CREATE_PROJECT) {
                 refreshLoadProjects();
                 return;
-            }
-            if (state != ApplicationState.LOAD_PROJECTS && state != ApplicationState.UPDATE_PROJECT_STATUSES) {
-                _projectService.updateProjectStatuses(projects);
+            } else if (state == ApplicationState.CLONE) {
+                sortProjectsList();
+                return;
+            } else if (state != ApplicationState.LOAD_PROJECTS && state != ApplicationState.UPDATE_PROJECT_STATUSES) {
+                _projectsList.updateProjectStatuses();
             } else {
-                hideShadowsAction();
+                projectListView.refresh();
             }
         }
     }
