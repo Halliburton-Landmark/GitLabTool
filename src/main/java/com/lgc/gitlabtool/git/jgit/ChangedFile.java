@@ -105,12 +105,7 @@ public class ChangedFile implements Serializable {
         return _statusFile;
     }
 
-    /**
-     * Sets status for the current file
-     *
-     * @param statusFile the status of file {@link ChangedFileStatus}
-     */
-    public void setStatusFile(ChangedFileStatus statusFile) {
+    private void setStatusFile(ChangedFileStatus statusFile) {
         _statusFile = statusFile;
     }
 
