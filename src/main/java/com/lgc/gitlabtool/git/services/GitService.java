@@ -220,9 +220,9 @@ public interface GitService extends Service {
     Set<Branch> getBranches(Collection<Project> projects, BranchType brType, boolean onlyCommon);
 
     /**
+     * Replaces changed files with HEAD revision
      *
-     *
-     * @param changedFiles
+     * @param changedFiles the files for replacing
      */
     void replaceWithHEADRevision(Collection<ChangedFile> changedFiles);
 }

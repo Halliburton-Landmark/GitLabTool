@@ -107,6 +107,11 @@ public class GitStagingWindowController extends AbstractStateListener {
     private static final String STATUS_PUSH_DIALOG_TITLE = "Pushing changes status";
     private static final String STATUS_PUSH_DIALOG_HEADER = "Pushing changes info";
     private static final String COMMIT_PROMPT_TEXT = "Please enter commit message";
+    private static final String DELETE_FILES_TITLE = "Delete untracked files";
+    private static final String REPLACE_FILES_TITLE = "Replace files with HEAD revision";
+    private static final String CONFIRMATION_OPERATION = "Are you sure you want to make it?";
+    private static final String REPLACE_BUTTON_NAME = "Replace with HEAD Revision";
+    private static final String DELETE_BUTTON_NAME = "Delete";
 
     private static final GitService _gitService = (GitService) ServiceProvider.getInstance()
             .getService(GitService.class.getName());
@@ -230,14 +235,14 @@ public class GitStagingWindowController extends AbstractStateListener {
     private void addReplaceActionToMenu(List<MenuItem> menuItems, List<ChangedFile> selectedItems) {
         Collection<ChangedFile> filesForReplace = getFilesForReplace(selectedItems);
         if (!filesForReplace.isEmpty()) {
-            MenuItem replaceWithHEAD = new MenuItem("Replace with HEAD Revision");
+            MenuItem replaceWithHEAD = new MenuItem(REPLACE_BUTTON_NAME);
             replaceWithHEAD.setGraphic(replaceWithHEADImage);
             replaceWithHEAD.setOnAction(new EventHandler<ActionEvent>() {
                 @Override
                 public void handle(ActionEvent event) {
-                    boolean isYes = showConfirmationDialog("Replace files with HEAD revision",
+                    boolean isYes = requesConfirmationOperation(REPLACE_FILES_TITLE,
                             "You want to replace " + filesForReplace.size() + " file(s) with HEAD revision.",
-                            "Are you sure you want to make it?");
+                            CONFIRMATION_OPERATION);
                     if (isYes) {
                         _gitService.replaceWithHEADRevision(filesForReplace);
                         updateChangedFiles(getProjects(filesForReplace));
@@ -252,14 +257,14 @@ public class GitStagingWindowController extends AbstractStateListener {
     private void addDeleteActionToMenu(List<MenuItem> menuItems, List<ChangedFile> selectedItems) {
         Collection<ChangedFile> selectedUntrackedFiles = getUntrackedFiles(selectedItems);
         if (!selectedUntrackedFiles.isEmpty()) {
-            MenuItem delete = new MenuItem("Delete");
+            MenuItem delete = new MenuItem(DELETE_BUTTON_NAME);
             delete.setGraphic(deleteImage);
             delete.setOnAction(new EventHandler<ActionEvent>() {
                 @Override
                 public void handle(ActionEvent event) {
-                    boolean isYes = showConfirmationDialog("Delete untracked files",
+                    boolean isYes = requesConfirmationOperation(DELETE_FILES_TITLE,
                             "You want to delete " + selectedUntrackedFiles.size() + " untracked file(s).",
-                            "Are you sure you want to make it?");
+                            CONFIRMATION_OPERATION);
                     if (isYes) {
                         selectedUntrackedFiles.forEach(file -> deleteChangedFile(file));
                         updateChangedFiles(getProjects(selectedUntrackedFiles));
@@ -270,7 +275,7 @@ public class GitStagingWindowController extends AbstractStateListener {
         }
     }
 
-    private boolean showConfirmationDialog(String title, String header, String context) {
+    private boolean requesConfirmationOperation(String title, String header, String context) {
         GLTAlert alert = new GLTAlert(title, header, context);
         alert.clearDefaultButtons();
         alert.addButtons(ButtonType.YES, ButtonType.NO);
@@ -329,9 +334,7 @@ public class GitStagingWindowController extends AbstractStateListener {
             if (event.getButton() == MouseButton.SECONDARY) {
                 if (!cell.isEmpty()) {
                     List<ChangedFile> selectedItems = lv.getSelectionModel().getSelectedItems();
-                    lv.contextMenuProperty().bind(Bindings.when(lv.selectionModelProperty().isNull())
-                            .then((ContextMenu)null)
-                            .otherwise(getContextMenu(selectedItems)));
+                    lv.setContextMenu(getContextMenu(selectedItems));
                 } else {
                     lv.setContextMenu(null);
                 }

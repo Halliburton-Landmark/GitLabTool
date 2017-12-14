@@ -404,11 +404,11 @@ public class JGit {
     }
 
     /**
+     * Replaces file with HEAD revision
      *
-     *
-     * @param project
-     * @param fileName
-     * @return
+     * @param project  the cloned project which has fileName
+     * @param fileName the file which need replace
+     * @return <code> true</code> if file replace successfully, otherwise <code>false</code>
      */
     public boolean replaceWithHEADRevision(Project project, String fileName) {
         if (fileName == null || fileName.isEmpty() || project == null || !project.isCloned()) {
