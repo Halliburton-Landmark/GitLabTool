@@ -1,5 +1,6 @@
 package com.lgc.gitlabtool.git.services;
 
+import java.awt.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -39,6 +40,11 @@ public class BackgroundServiceImpl implements BackgroundService {
     @Override
     public void runInBackgroundThread(Runnable runnable) {
         _executorService.submit(runnable);
+    }
+
+    @Override
+    public void runInEventThread(Runnable runnable) {
+        EventQueue.invokeLater(runnable);
     }
 
     @Override

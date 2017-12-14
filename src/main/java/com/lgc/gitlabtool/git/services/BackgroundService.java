@@ -14,4 +14,10 @@ public interface BackgroundService extends Service {
      */
     void runInBackgroundThread(Runnable runnable);
 
+    /**
+     * Launches the task in AWT thread
+     * @param runnable - the task that should be run
+     */
+    void runInEventThread(Runnable runnable);
+
 }

@@ -4,6 +4,8 @@ import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 
+import com.lgc.gitlabtool.git.services.BackgroundService;
+import com.lgc.gitlabtool.git.services.ServiceProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -18,6 +20,9 @@ public class FileLauncherUtil {
     private static final Logger _logger = LogManager.getLogger(FileLauncherUtil.class);
     private static final String ERROR_MESSAGE = "Could not open the file";
 
+    private static final BackgroundService _backgroundService = (BackgroundService) ServiceProvider.getInstance()
+            .getService(BackgroundService.class.getName());
+
     /**
      * Opens the file with user system preferred editor.
      * If user's system has no registered application to open such kind of file, <br>
@@ -30,18 +35,21 @@ public class FileLauncherUtil {
             _logger.warn(ERROR_MESSAGE);
             return;
         }
-        try {
-            Desktop desktop = Desktop.getDesktop();
-            if (desktop.isSupported(Desktop.Action.OPEN)) {
-                _logger.debug("Start to open file: " + document.getName());
-                desktop.open(document);
-                _logger.debug("File opened");
-            } else {
-                _logger.warn("There is no application registered to open file: " + document.getName());
+        Runnable openDocumentTask = () -> {
+            try {
+                Desktop desktop = Desktop.getDesktop();
+                if (desktop.isSupported(Desktop.Action.OPEN)) {
+                    _logger.debug("Start to open file: " + document.getName());
+                    desktop.open(document);
+                    _logger.debug("File opened");
+                } else {
+                    _logger.warn("There is no application registered to open file: " + document.getName());
+                }
+            } catch (IllegalArgumentException | IOException e) {
+                _logger.debug(ERROR_MESSAGE + ": " + e.getMessage());
             }
-        } catch (IllegalArgumentException | IOException e) {
-            _logger.debug(ERROR_MESSAGE + ": " + e.getMessage());
-        }
+        };
+        _backgroundService.runInEventThread(openDocumentTask);
     }
 
     /**
