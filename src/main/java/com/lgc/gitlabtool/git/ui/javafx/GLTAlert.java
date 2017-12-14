@@ -119,4 +119,12 @@ public class GLTAlert extends Alert {
     public void addButtons(ButtonType... buttonTypes) {
         getDialogPane().getButtonTypes().addAll(buttonTypes);
     }
+
+    /**
+     * Removes default buttons on dialog.
+     * You can add own {@link ButtonType}s using com.lgc.gitlabtool.git.ui.javafx.GLTAlert.addButtons(ButtonType...).
+     */
+    public void clearDefaultButtons() {
+        getDialogPane().getButtonTypes().clear();
+    }
 }

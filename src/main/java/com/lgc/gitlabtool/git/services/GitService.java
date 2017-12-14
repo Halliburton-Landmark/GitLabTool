@@ -218,4 +218,11 @@ public interface GitService extends Service {
      * @return a list of branches
      */
     Set<Branch> getBranches(Collection<Project> projects, BranchType brType, boolean onlyCommon);
+
+    /**
+     *
+     *
+     * @param changedFiles
+     */
+    void replaceWithHEADRevision(Collection<ChangedFile> changedFiles);
 }

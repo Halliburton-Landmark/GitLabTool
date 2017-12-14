@@ -52,7 +52,6 @@ import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.User;
 import com.lgc.gitlabtool.git.services.BackgroundService;
 import com.lgc.gitlabtool.git.services.ProgressListener;
-import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 import com.lgc.gitlabtool.git.util.PathUtilities;
 
@@ -400,6 +399,28 @@ public class JGit {
             return true;
         } catch (GitAPIException e) {
             logger.error("Error reseting file to HEAD " + e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     *
+     *
+     * @param project
+     * @param fileName
+     * @return
+     */
+    public boolean replaceWithHEADRevision(Project project, String fileName) {
+        if (fileName == null || fileName.isEmpty() || project == null || !project.isCloned()) {
+            return false;
+        }
+        try (Git git = getGit(project.getPath())) {
+            git.checkout()
+               .addPath(fileName)
+               .call();
+            return true;
+        } catch (IOException | GitAPIException e) {
+            logger.error("Error replacing of file with HEAD revision: " + project.getPath() + " " + e.getMessage());
             return false;
         }
     }

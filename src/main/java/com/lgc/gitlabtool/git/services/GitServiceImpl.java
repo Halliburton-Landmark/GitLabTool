@@ -374,7 +374,7 @@ public class GitServiceImpl implements GitService {
                 if (project != null && project.isCloned() && !changedFiles.isEmpty()) {
                     List<String> fileNames = _changedFilesUtils.getFileNames(changedFiles);
                     List<String> result = _git.resetChangedFiles(fileNames, project);
-                    resetedFiles.addAll(getNewChangedFiles(result, project, changedFiles));
+                    resetedFiles.addAll(_changedFilesUtils.getChangedFiles(result, project, changedFiles));
                 }
             }
         } finally {
@@ -398,18 +398,12 @@ public class GitServiceImpl implements GitService {
                 }
             }
         }
-        return getNewChangedFiles(addedFiles, project, changedFiles);
+        return _changedFilesUtils.getChangedFiles(addedFiles, project, changedFiles);
     }
 
-    private List<ChangedFile> getNewChangedFiles(List<String> fileNames, Project project, List<ChangedFile> sourceList) {
-        return resetConflicts(_changedFilesUtils.getChangedFiles(fileNames, project, sourceList));
-    }
-
-    private List<ChangedFile> resetConflicts(List<ChangedFile> sourceList) {
-        // If the file was added to the index, it can no longer have conflicts even if we do a reset.
-        sourceList.stream()
-                  .filter(changedFile -> changedFile.hasConflicting())
-                  .forEach(changedFile -> changedFile.setStatusFile(ChangedFileStatus.MODIFIED));
-        return sourceList;
+    @Override
+    public void replaceWithHEADRevision(Collection<ChangedFile> changedFiles) {
+        changedFiles.parallelStream()
+                    .forEach(file -> _git.replaceWithHEADRevision(file.getProject(), file.getFileName()));
     }
 }
