@@ -28,6 +28,7 @@ import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.javafx.GLTAlert;
 import com.lgc.gitlabtool.git.ui.javafx.JavaFXUI;
 import com.lgc.gitlabtool.git.ui.javafx.StatusDialog;
+import com.lgc.gitlabtool.git.ui.javafx.comparators.ChangedFileStatusComparator;
 import com.lgc.gitlabtool.git.ui.javafx.comparators.DefaultTypeComparator;
 import com.lgc.gitlabtool.git.ui.javafx.comparators.ExtensionsTypeComparator;
 import com.lgc.gitlabtool.git.ui.javafx.comparators.ProjectsTypeComparator;
@@ -147,7 +148,7 @@ public class GitStagingWindowController extends AbstractStateListener {
      */
     public void beforeShowing(List<Integer> projectIds, Collection<ChangedFile> files) {
         ObservableList<SortingType> items = FXCollections.observableArrayList
-                (SortingType.PROJECTS,SortingType.EXTENSIONS, SortingType.DEFAULT);
+                (SortingType.PROJECTS, SortingType.EXTENSIONS, SortingType.FILE_STATUS, SortingType.DEFAULT);
         _sortingListBox.setItems(items);
         _sortingListBox.setValue(SortingType.DEFAULT);
         _commitText.setPromptText(COMMIT_PROMPT_TEXT);
@@ -538,6 +539,13 @@ public class GitStagingWindowController extends AbstractStateListener {
             public String toString() {
                 return "A-Z";
             }
+        },
+
+        FILE_STATUS {
+            @Override
+            public String toString() {
+                return "file status";
+            }
         };
 
         private static Comparator<ChangedFile> getComparatorByType(SortingType type) {
@@ -545,7 +553,9 @@ public class GitStagingWindowController extends AbstractStateListener {
                 return new DefaultTypeComparator();
             } else if (type == SortingType.PROJECTS) {
                 return new ProjectsTypeComparator();
-            } else {
+            }  else if (type == SortingType.FILE_STATUS) {
+                return new ChangedFileStatusComparator();
+            }else {
                 return new ExtensionsTypeComparator();
             }
         }
