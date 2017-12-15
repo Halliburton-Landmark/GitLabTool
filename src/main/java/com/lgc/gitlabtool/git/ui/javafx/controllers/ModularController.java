@@ -1187,26 +1187,28 @@ public class ModularController implements UpdateProgressListener {
     }
 
     private void openProjectFolder(Project project) {
+        String fileDoesNotExistMessage = "Specified file does not exist";
         Runnable openProjectTask = () -> {
             try {
                 Desktop.getDesktop().open(new File(project.getPath()));
             } catch (IOException e) {
-                showAlert("The specified file has no associated application or the associated application fails to be launched");
+                showAlert("The specified file has no associated application " + System.lineSeparator() +
+                        "or the associated application fails to be launched", e);
             } catch (NullPointerException npe) {
-                showAlert("File is null");
+                showAlert(fileDoesNotExistMessage, npe);
             } catch (UnsupportedOperationException uoe) {
-                showAlert("Current platform does not support this action");
+                showAlert("Current platform does not support this action", uoe);
             } catch (SecurityException se) {
-                showAlert("Denied read access to the file");
+                showAlert("Denied read access to the file", se);
             } catch (IllegalArgumentException iae) {
-                showAlert("The specified file doesn't exist");
+                showAlert(fileDoesNotExistMessage, iae);
             }
         };
         _backgroundService.runInAWTThread(openProjectTask);
     }
 
-    private void showAlert(String message) {
-        _logger.error(message);
+    private void showAlert(String message, Throwable e) {
+        _logger.error(message, e);
         Platform.runLater(() -> new GLTAlert(AlertType.ERROR, "Open folder issue", message, "").showAndWait());
     }
 
