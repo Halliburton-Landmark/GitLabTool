@@ -556,9 +556,9 @@ public class GitStagingWindowController extends AbstractStateListener {
                 return new DefaultTypeComparator();
             } else if (type == SortingType.PROJECTS) {
                 return new ProjectsTypeComparator();
-            }  else if (type == SortingType.FILE_STATUS) {
+            } else if (type == SortingType.FILE_STATUS) {
                 return new ChangedFileStatusComparator();
-            }else {
+            } else {
                 return new ExtensionsTypeComparator();
             }
         }

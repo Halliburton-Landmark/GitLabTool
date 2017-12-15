@@ -327,6 +327,22 @@ public class GitServiceImplTest {
         assertEquals(modifiedFiles.size(), files.size());
     }
 
+    @Test
+    public void replaceWithHEADRevisionWrongParameter() {
+        // we check that we won't get exceptions
+        _gitService.replaceWithHEADRevision(null);
+        _gitService.replaceWithHEADRevision(Collections.emptyList());
+        _gitService.replaceWithHEADRevision(Arrays.asList(null, null, null));
+    }
+
+    @Test
+    public void replaceWithHEADRevisionSuccessfully() {
+        // we check that we won't get NPE
+        Collection<ChangedFile> changedFiles = getChangedFiles();
+        changedFiles.add(null);
+
+        _gitService.replaceWithHEADRevision(changedFiles);
+    }
 
     /*********************************************************************************************************/
 
@@ -366,22 +382,5 @@ public class GitServiceImplTest {
         map.put(new Project(), Collections.emptyList()); // some incorrect value
         map.put(project, getChangedFiles());
         return map;
-    }
-
-    @Test
-    public void replaceWithHEADRevisionWrongParameter() {
-        // we check that we won't get exceptions
-        _gitService.replaceWithHEADRevision(null);
-        _gitService.replaceWithHEADRevision(Collections.emptyList());
-        _gitService.replaceWithHEADRevision(Arrays.asList(null, null, null));
-    }
-
-    @Test
-    public void replaceWithHEADRevisionSuccessfully() {
-        // we check that we won't get NPE
-        Collection<ChangedFile> changedFiles = getChangedFiles();
-        changedFiles.add(null);
-
-        _gitService.replaceWithHEADRevision(changedFiles);
     }
 }
