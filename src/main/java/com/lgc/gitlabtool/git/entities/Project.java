@@ -4,6 +4,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Set;
 
+import com.google.gson.annotations.SerializedName;
 import com.lgc.gitlabtool.git.project.nature.operation.Operation;
 import com.lgc.gitlabtool.git.project.nature.projecttype.ProjectType;
 import com.lgc.gitlabtool.git.util.PathUtilities;
@@ -17,8 +18,13 @@ import com.lgc.gitlabtool.git.util.PathUtilities;
  * @author Lyska Lyudmila
  */
 public class Project {
+    @SerializedName("id")
     private int id;
-    private String http_url_to_repo;
+
+    @SerializedName("http_url_to_repo")
+    private String httpUrlToRepo;
+
+    @SerializedName("name")
     private String name;
     /** Path to the cloned project **/
     private String _pathToClonedProject;
@@ -103,8 +109,8 @@ public class Project {
         return name;
     }
 
-    public String getHttp_url_to_repo() {
-        return http_url_to_repo;
+    public String getHttpUrlToRepo() {
+        return httpUrlToRepo;
     }
 
     /**

@@ -4,6 +4,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
 
+import com.google.gson.annotations.SerializedName;
 import com.lgc.gitlabtool.git.util.PathUtilities;
 
 /**
@@ -18,21 +19,25 @@ public class Group {
     /**
      * The id of the group
      **/
+    @SerializedName("id")
     private int id;
 
     /**
      * The name of the group
      **/
+    @SerializedName("name")
     private String name;
 
     /**
      * The path of the group
      **/
+    @SerializedName("path")
     private String path;
 
     /**
      * Projects in group
      **/
+    @SerializedName("projects")
     private transient Collection<Project> projects;
 
     private String _pathToClonedGroup;

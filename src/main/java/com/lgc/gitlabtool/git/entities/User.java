@@ -1,5 +1,7 @@
 package com.lgc.gitlabtool.git.entities;
 
+import com.google.gson.annotations.SerializedName;
+
 /**
  * Class keeps data about user.
  *
@@ -11,62 +13,83 @@ package com.lgc.gitlabtool.git.entities;
  */
 public class User {
     /** The name of the user **/
+    @SerializedName("name")
     private final String name;
 
     /** The username of the user **/
+    @SerializedName("username")
     private String username;
 
     /** The id of the user **/
+    @SerializedName("id")
     private int id;
 
+    @SerializedName("state")
     private String state;
 
     /** The avatar's URL **/
-    private String avatar_url;
+    @SerializedName("avatar_url")
+    private String avatarUrl;
 
     /** The created date **/
-    private String created_at;
+    @SerializedName("created_at")
+    private String createdAt;
 
     /** The user is admin - true or false (default) **/
-    private boolean is_admin;
+    @SerializedName("is_admin")
+    private boolean isAdmin;
 
     /** The user's biography **/
+    @SerializedName("bio")
     private String bio;
 
     /** The Skype ID **/
+    @SerializedName("skype")
     private String skype;
 
     /** The LinkedIn **/
+    @SerializedName("linkedin")
     private String linkedin;
 
     /** The Twitter account **/
+    @SerializedName("twitter")
     private String twitter;
 
     /** The Website URL **/
-    private String website_url;
+    @SerializedName("website_url")
+    private String websiteUrl;
 
     /** The user of the email **/
+    @SerializedName("email")
     private final String email;
 
-    private int color_scheme_id;
+    @SerializedName("color_scheme_id")
+    private int colorSchemeId;
 
     /** The limit projects each user can create **/
-    private int projects_limit;
+    @SerializedName("projects_limit")
+    private int projectsLimit;
 
-    private String current_sign_in_at;
+    @SerializedName("current_sign_in_at")
+    private String currentSignInAt;
 
+    @SerializedName("identities")
     private Object identities;
 
     /** The user can create groups **/
-    private boolean can_create_group;
+    @SerializedName("can_create_group")
+    private boolean canCreateGroup;
 
     /** The user can create projects **/
-    private boolean can_create_project;
+    @SerializedName("can_create_project")
+    private boolean canCreateProject;
 
-    private boolean two_factor_enabled;
+    @SerializedName("two_factor_enabled")
+    private boolean twoFactorEnabled;
 
     /** The private token of the user **/
-    private String private_token;
+    @SerializedName("private_token")
+    private String privateToken;
 
     /** The OAuth2 token of a user **/
     private String oauth2Token;
@@ -115,8 +138,8 @@ public class User {
      *
      * @return
      */
-    public String getAvatar_url() {
-        return avatar_url;
+    public String getAvatarUrl() {
+        return avatarUrl;
     }
 
     /**
@@ -124,8 +147,8 @@ public class User {
      *
      * @return the created date
      */
-    public String getCreated_at() {
-        return created_at;
+    public String getCreatedAt() {
+        return createdAt;
     }
 
     /**
@@ -133,8 +156,8 @@ public class User {
      *
      * @return the user is admin
      */
-    public boolean isIs_admin() {
-        return is_admin;
+    public boolean isAdmin() {
+        return isAdmin;
     }
 
     /**
@@ -178,8 +201,8 @@ public class User {
      *
      * @return the Website URL
      */
-    public String getWebsite_url() {
-        return website_url;
+    public String getWebsiteUrl() {
+        return websiteUrl;
     }
 
     /**
@@ -191,8 +214,8 @@ public class User {
         return email;
     }
 
-    public int getColor_scheme_id() {
-        return color_scheme_id;
+    public int getColorSchemeId() {
+        return colorSchemeId;
     }
 
     /**
@@ -200,12 +223,12 @@ public class User {
      *
      * @return the limit projects each user can create
      */
-    public int getProjects_limit() {
-        return projects_limit;
+    public int getProjectsLimit() {
+        return projectsLimit;
     }
 
-    public String getCurrent_sign_in_at() {
-        return current_sign_in_at;
+    public String getCurrentSignInAt() {
+        return currentSignInAt;
     }
 
     public Object getIdentities() {
@@ -217,8 +240,8 @@ public class User {
      *
      * @return the user can create groups
      */
-    public boolean isCan_create_group() {
-        return can_create_group;
+    public boolean isCanCreateGroup() {
+        return canCreateGroup;
     }
 
     /**
@@ -226,12 +249,12 @@ public class User {
      *
      * @return the user can create projects
      */
-    public boolean isCan_create_project() {
-        return can_create_project;
+    public boolean isCanCreateProject() {
+        return canCreateProject;
     }
 
-    public boolean isTwo_factor_enabled() {
-        return two_factor_enabled;
+    public boolean isTwoFactorEnabled() {
+        return twoFactorEnabled;
     }
 
     /**
@@ -239,16 +262,16 @@ public class User {
      *
      * @return the private token of the user
      */
-    public String getPrivate_token() {
-        return private_token;
+    public String getPrivateToken() {
+        return privateToken;
     }
 
     /**
      * Set value of a private token
      * @param token value of a private token
      */
-    public void setPrivate_token(String token){
-        private_token = token;
+    public void setPrivateToken(String token){
+        privateToken = token;
     }
 
     /**
