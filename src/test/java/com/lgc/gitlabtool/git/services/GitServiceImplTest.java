@@ -369,8 +369,19 @@ public class GitServiceImplTest {
     }
 
     @Test
-    public void testGetTrackingBranch() {
-        _stubProject = Mockito.mock(Project.class);
-        when(_jGit.getTrackingBranch(_stubProject)).thenReturn(JGitStatus.SUCCESSFUL.toString());
+    public void replaceWithHEADRevisionWrongParameter() {
+        // we check that we won't get exceptions
+        _gitService.replaceWithHEADRevision(null);
+        _gitService.replaceWithHEADRevision(Collections.emptyList());
+        _gitService.replaceWithHEADRevision(Arrays.asList(null, null, null));
+    }
+
+    @Test
+    public void replaceWithHEADRevisionSuccessfully() {
+        // we check that we won't get NPE
+        Collection<ChangedFile> changedFiles = getChangedFiles();
+        changedFiles.add(null);
+
+        _gitService.replaceWithHEADRevision(changedFiles);
     }
 }

@@ -403,7 +403,11 @@ public class GitServiceImpl implements GitService {
 
     @Override
     public void replaceWithHEADRevision(Collection<ChangedFile> changedFiles) {
+        if (changedFiles == null || changedFiles.isEmpty()) {
+            return;
+        }
         changedFiles.parallelStream()
+                    .filter(file -> file != null)
                     .forEach(file -> _git.replaceWithHEADRevision(file.getProject(), file.getFileName()));
     }
 }
