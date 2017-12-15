@@ -67,7 +67,7 @@ public class ToolbarManager {
     public List<Node> createToolbarItems(String windowId) {
 
         items = new ArrayList<>();
-        for (ToolbarButtons button : ToolbarButtons.values()) {
+        for (GLToolButtons button : GLToolButtons.values()) {
             if (button.getViewKey().equals(windowId)) {
                 items.add(createButton(button.getId(), button.getIconUrl(), button.getText(), button.getTooltip()));
             }
@@ -159,6 +159,7 @@ public class ToolbarManager {
     }
 
     private Button createButton(String buttonId, String imgPath, String btnText, String tooltipText) {
+        if (getClass().getClassLoader().getResource(imgPath) == null) return null;
         Image btnImage = new Image(getClass().getClassLoader().getResource(imgPath).toExternalForm());
         Button button = new Button(btnText, new ImageView(btnImage));
         button.setTooltip(new Tooltip(tooltipText));
