@@ -202,7 +202,7 @@ class LoginDialog extends Dialog<DialogDTO> {
         FXMLLoader fxmlLoader = new FXMLLoader(
                 getClass().getClassLoader().getResource(ViewKey.SERVER_INPUT_WINDOW.getPath()));
         Parent root = fxmlLoader.load();
-        ServerInputWindowController controller = (ServerInputWindowController) fxmlLoader.getController();
+        ServerInputWindowController controller = fxmlLoader.getController();
         controller.loadServerInputWindow(root);
     }
 
@@ -219,7 +219,8 @@ class LoginDialog extends Dialog<DialogDTO> {
                 showMessage(MESSAGE_WAITING, Color.GREEN);
                 disableSignInButton(true);
                 String serverURL = URLManager.completeServerURL(comboBox.getValue());
-                DialogDTO dto = new DialogDTO(userTextField.getText(), passwordField.getText(), serverURL);
+                String shortServerURL = URLManager.shortServerURL(comboBox.getValue());
+                DialogDTO dto = new DialogDTO(userTextField.getText(), passwordField.getText(), serverURL, shortServerURL);
                 _loginService.login(dto, this::doAfterLogin);
             } else {
                 logger.warn(MESSAGE_EMPTY_FIELD);
