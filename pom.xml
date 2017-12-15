@@ -13,6 +13,11 @@
     </scm>
 
     <dependencies>
+        <dependency>
+            <groupId>org.fxmisc.cssfx</groupId>
+            <artifactId>cssfx</artifactId>
+            <version>1.0.0</version>
+        </dependency>
         <!-- https://mvnrepository.com/artifact/com.ximpleware/vtd-xml -->
         <dependency>
             <groupId>com.ximpleware</groupId>

@@ -73,6 +73,7 @@ public class ServerInputWindowController {
 
     public void loadServerInputWindow(Parent root) throws IOException {
         Scene scene = new Scene(root);
+        scene.getStylesheets().add(getClass().getClassLoader().getResource("css/modular_dark_style.css").toExternalForm());
         Stage stage = new Stage();
         stage.setScene(scene);
         stage.setTitle("Server selection");

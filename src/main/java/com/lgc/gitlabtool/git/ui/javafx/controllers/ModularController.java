@@ -22,8 +22,6 @@ import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.swing.text.View;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -41,7 +39,6 @@ import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.GroupsUserService;
 import com.lgc.gitlabtool.git.services.LoginService;
 import com.lgc.gitlabtool.git.services.PomXMLService;
-import com.lgc.gitlabtool.git.services.ProgressListener;
 import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StateService;
@@ -82,7 +79,8 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Rectangle2D;
+import javafx.geometry.*;
+import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -104,6 +102,7 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToolBar;
 import javafx.scene.control.Tooltip;
+import javafx.scene.effect.ColorAdjust;
 import javafx.scene.effect.GaussianBlur;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -116,6 +115,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
@@ -305,7 +305,9 @@ public class ModularController implements UpdateProgressListener {
     private ToggleButton filterShadowProjects;
     private Button refreshProjectsButton;
 
-    private static String css_path = "css/style.css";
+    private static final int PROJECTS_TOOLBAR_PADDING = 1;
+
+    private static String css_path = "css/modular_light_style.css";
     //endregion
     /*
      *
@@ -332,9 +334,10 @@ public class ModularController implements UpdateProgressListener {
         preferences = getPreferences(DIVIDER_PROPERTY_NODE);
 
         _stateService.addStateListener(ApplicationState.CLONE, new GroupsWindowStateListener());
-        toolbar.getStylesheets().add(getClass().getClassLoader().getResource(css_path).toExternalForm());
+     //   toolbar.getStylesheets().add(getClass().getClassLoader().getResource(css_path).toExternalForm());
 
         userId.setText(_loginService.getCurrentUser().getName());
+        userId.setTextFill(javafx.scene.paint.Color.DARKGRAY);
 
         initializeProjectsWindow();
         initializeGroupsWindow();
@@ -346,7 +349,7 @@ public class ModularController implements UpdateProgressListener {
     private void initializeProjectsWindow() {
         projectListView = new ListView<>();
         AnchorPane.setBottomAnchor(projectListView, 0.0);
-        AnchorPane.setTopAnchor(projectListView, 30.0);
+        AnchorPane.setTopAnchor(projectListView, 40.0 + (2 * PROJECTS_TOOLBAR_PADDING));
         AnchorPane.setLeftAnchor(projectListView, 0.0);
         AnchorPane.setRightAnchor(projectListView, 0.0);
         configureProjectsListView(projectListView);
@@ -386,6 +389,11 @@ public class ModularController implements UpdateProgressListener {
         }
 
         projectsToolbar = new HBox();
+        projectsToolbar.setId("projectsToolbar");
+
+        AnchorPane.setTopAnchor(projectsToolbar, 0.0);
+        AnchorPane.setLeftAnchor(projectsToolbar, 0.0);
+        AnchorPane.setRightAnchor(projectsToolbar, 0.0);
 
         Image imageRefreshProjects = new Image(
                 getClass().getClassLoader().getResource(REFRESH_PROJECTS_IMAGE_URL).toExternalForm());
@@ -394,23 +402,35 @@ public class ModularController implements UpdateProgressListener {
         Image imageFilterShadow = new Image(
                 getClass().getClassLoader().getResource(FILTER_SHADOW_PROJECTS_IMAGE_URL).toExternalForm());
 
+        ImageView imageViewRefreshProjects = new ImageView(imageRefreshProjects);
+        ImageView imageViewSelectAll = new ImageView(imageSelectAll);
+        ImageView imageViewFilterShadow = new ImageView(imageFilterShadow);
+
+        ColorAdjust colorAdjust = new ColorAdjust();
+        colorAdjust.setBrightness(+0.65);
+
+        imageViewRefreshProjects.setEffect(colorAdjust);
+        imageViewSelectAll.setEffect(colorAdjust);
+        imageViewFilterShadow.setEffect(colorAdjust);
+
+
         selectAllButton = new ToggleButton();
         selectAllButton.setTooltip(new Tooltip("Select all projects"));
-        selectAllButton.setGraphic(new ImageView(imageSelectAll));
+        selectAllButton.setGraphic(imageViewSelectAll);
         selectAllButton.setOnAction(this::onSelectAll);
 
         refreshProjectsButton = new Button();
         refreshProjectsButton.setTooltip(new Tooltip("Refresh projects"));
-        refreshProjectsButton.setGraphic(new ImageView(imageRefreshProjects));
+        refreshProjectsButton.setGraphic(imageViewRefreshProjects);
         refreshProjectsButton.setOnAction(this::refreshLoadProjects);
 
         filterShadowProjects = new ToggleButton();
         filterShadowProjects.setTooltip(new Tooltip("Show/Hide shadow projects"));
-        filterShadowProjects.setGraphic(new ImageView(imageFilterShadow));
+        filterShadowProjects.setGraphic(imageViewFilterShadow);
         filterShadowProjects.setOnAction(this::onShowHideShadowProjects);
 
         projectsToolbar.getChildren().addAll(selectAllButton, refreshProjectsButton, filterShadowProjects);
-
+        projectsToolbar.setPadding(new Insets(PROJECTS_TOOLBAR_PADDING,0,PROJECTS_TOOLBAR_PADDING,0));
     }
 
     private void initActionsToolBar(String windowId) {
@@ -591,6 +611,7 @@ public class ModularController implements UpdateProgressListener {
 
         String groupTitle = group.getName() + " [" + group.getPathToClonedGroup() + "]";
         groupPath.setText(HEADER_GROUP_TITLE + groupTitle);
+        groupPath.setTextFill(javafx.scene.paint.Color.DARKGRAY);
 
         mainPanelBackground.setEffect(new GaussianBlur());
         topBackground.setEffect(new GaussianBlur());
@@ -843,6 +864,7 @@ public class ModularController implements UpdateProgressListener {
             SwitchBranchWindowController switchWindowController  = loader.getController();
 
             Scene scene = new Scene(root);
+            scene.getStylesheets().add(getClass().getClassLoader().getResource("css/modular_dark_style.css").toExternalForm());
             Stage stage = new Stage();
             stage.setScene(scene);
             stage.getIcons().add(_appIcon);
@@ -979,6 +1001,7 @@ public class ModularController implements UpdateProgressListener {
             }
 
             Scene scene = new Scene(root);
+            scene.getStylesheets().add(getClass().getClassLoader().getResource("css/modular_dark_style.css").toExternalForm());
             Stage stage = new Stage();
             stage.setScene(scene);
             stage.getIcons().add(AppIconHolder.getInstance().getAppIcoImage());
@@ -1242,20 +1265,34 @@ public class ModularController implements UpdateProgressListener {
         if (hasCloned) {
             String openFolderIcoUrl = "icons/mainmenu/folder_16x16.png";
             Image openFolderIco = new Image(getClass().getClassLoader().getResource(openFolderIcoUrl).toExternalForm());
+            ImageView view = new ImageView(openFolderIco);
+
+            ColorAdjust colorAdjust = new ColorAdjust();
+            colorAdjust.setBrightness(+0.65);
+
+            view.setEffect(colorAdjust);
+
             MenuItem openFolder = new MenuItem();
             openFolder.setText("Open project folder");
             openFolder.setOnAction(this::onOpenFolder);
-            openFolder.setGraphic(new ImageView(openFolderIco));
+            openFolder.setGraphic(view);
             menuItems.add(openFolder);
         }
 
         if (hasShadow) {
             String cloneProjectIcoUrl = "icons/mainmenu/clone_16x16.png";
             Image cloneProjectIco = new Image(getClass().getClassLoader().getResource(cloneProjectIcoUrl).toExternalForm());
+            ImageView view = new ImageView(cloneProjectIco);
+
+            ColorAdjust colorAdjust = new ColorAdjust();
+            colorAdjust.setBrightness(+0.65);
+
+            view.setEffect(colorAdjust);
+
             MenuItem cloneProject = new MenuItem();
             cloneProject.setText("Clone shadow project");
             cloneProject.setOnAction(this::cloneShadowProject);
-            cloneProject.setGraphic(new ImageView(cloneProjectIco));
+            cloneProject.setGraphic(view);
             menuItems.add(cloneProject);
         }
 
@@ -1558,9 +1595,11 @@ public class ModularController implements UpdateProgressListener {
             }
             Text groupNameText = new Text(item.getName());
             groupNameText.setFont(Font.font(Font.getDefault().getFamily(), 14));
+            groupNameText.setFill(javafx.scene.paint.Color.SILVER);
 
             String localPath = item.getPathToClonedGroup();
             Text localPathText = new Text(localPath);
+            localPathText.setFill(javafx.scene.paint.Color.SILVER);
 
             VBox vboxItem = new VBox(groupNameText, localPathText);
             setGraphic(vboxItem);

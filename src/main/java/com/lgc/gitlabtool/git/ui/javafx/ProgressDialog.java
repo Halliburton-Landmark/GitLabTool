@@ -104,7 +104,7 @@ public abstract class ProgressDialog extends Dialog<Void> {
         _progressIndicator.setMaxSize(20, 20);
 
         Image appIcon = AppIconHolder.getInstance().getAppIcoImage();
-        Scene scene = new Scene(grid, 650, 350);
+        Scene scene = new CssStyledScene(grid, 650, 350);
 
         Stage stage = new Stage();
         stage.setMinWidth(650);
