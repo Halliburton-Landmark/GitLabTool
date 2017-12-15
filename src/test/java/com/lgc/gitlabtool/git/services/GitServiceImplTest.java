@@ -328,6 +328,12 @@ public class GitServiceImplTest {
     }
 
     @Test
+    public void testGetTrackingBranch() {
+        _stubProject = Mockito.mock(Project.class);
+        when(_jGit.getTrackingBranch(_stubProject)).thenReturn(JGitStatus.SUCCESSFUL.toString());
+    }
+
+    @Test
     public void replaceWithHEADRevisionWrongParameter() {
         // we check that we won't get exceptions
         _gitService.replaceWithHEADRevision(null);
