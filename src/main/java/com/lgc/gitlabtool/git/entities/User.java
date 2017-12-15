@@ -72,7 +72,7 @@ public class User {
     private String oauth2Token;
 
     public User(String name, String email) {
-        if (name == null || email == null || name.isEmpty() || email.isEmpty()) { // TODO valid
+        if (name == null || email == null || name.isEmpty() || email.isEmpty()) {
             throw new IllegalArgumentException("Incorrect data!");
         }
         this.name = name;
