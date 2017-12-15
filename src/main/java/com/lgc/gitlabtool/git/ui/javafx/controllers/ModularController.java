@@ -1207,7 +1207,7 @@ public class ModularController implements UpdateProgressListener {
 
     private void showAlert(String message) {
         _logger.error(message);
-        Platform.runLater(() -> new GLTAlert(AlertType.WARNING, "Open folder issue", message, "").showAndWait());
+        Platform.runLater(() -> new GLTAlert(AlertType.ERROR, "Open folder issue", message, "").showAndWait());
     }
 
     @SuppressWarnings("ConstantConditions")
