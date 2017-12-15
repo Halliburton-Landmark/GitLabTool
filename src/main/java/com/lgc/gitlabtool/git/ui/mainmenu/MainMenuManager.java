@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import com.lgc.gitlabtool.git.ui.javafx.controllers.ModularController;
+import com.lgc.gitlabtool.git.ui.toolbar.GLToolButtons;
 
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
@@ -56,16 +57,16 @@ public class MainMenuManager {
         List<Menu> menus = new ArrayList<>();
         LinkedHashSet<String> menusTitles = new LinkedHashSet<>();
 
-        Arrays.stream(MainMenuItems.values())
+        Arrays.stream(GLToolButtons.values())
                 .filter(x -> isValidItemForView(windowId, x))
-                .map(MainMenuItems::getMenuName)
+                .map(GLToolButtons::getMenuName)
                 .forEach(menusTitles::add);
 
         menusTitles.forEach(x -> menus.add(new Menu(x)));
 
         for (Menu menu : menus) {
-            for (MainMenuItems button : MainMenuItems.values()) {
-                if (isValidItemForView(windowId, button) && button.getMenuName().equals(menu.getText())) {
+            for (GLToolButtons button : GLToolButtons.values()) {
+                if (isValidItemForView(windowId, button) && button.getMenuName() != null && button.getMenuName().equals(menu.getText())) {
                     menu.getItems().add(createButton(button.getId(), button.getIconUrl(), button.getText()));
                 }
             }
@@ -82,7 +83,7 @@ public class MainMenuManager {
      * @param menuItem enum item (see {@link MainMenuItems}) assigned to this menu item
      * @return Existing menu item with chosen id and name of parent menu or empty menu item if does not matches
      */
-    public MenuItem getButtonById(MainMenuItems menuItem) {
+    public MenuItem getButtonById(GLToolButtons menuItem) {
         if (items == null) {
             return new MenuItem();
         }
@@ -155,8 +156,8 @@ public class MainMenuManager {
         return menuItem;
     }
 
-    private boolean isValidItemForView(String viewKey, MainMenuItems item) {
+    private boolean isValidItemForView(String viewKey, GLToolButtons item) {
         return item.getViewKey().equals(viewKey)
-                || item.getViewKey().equals(MainMenuItems.MainmenuConstants.ALL_WINDOW_KEY);
+                || item.getViewKey().equals(GLToolButtons.GLToolConstants.ALL_WINDOW_KEY);
     }
 }

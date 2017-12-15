@@ -59,7 +59,6 @@ import com.lgc.gitlabtool.git.ui.javafx.WorkIndicatorDialog;
 import com.lgc.gitlabtool.git.ui.javafx.comparators.ProjectListComparator;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.PushProgressListener;
-import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuItems;
 import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuManager;
 import com.lgc.gitlabtool.git.ui.selection.ListViewKey;
 import com.lgc.gitlabtool.git.ui.selection.SelectionsProvider;
@@ -460,24 +459,24 @@ public class ModularController implements UpdateProgressListener {
 
     private void initActionsMainMenu(String windowId) {
         if (windowId.equals(ViewKey.GROUPS_WINDOW.getKey())) {
-            _mainMenuManager.getButtonById(MainMenuItems.GROUP_WINDOW_CLONE_GROUP).setOnAction(this::onCloneGroups);
+            _mainMenuManager.getButtonById(GLToolButtons.GROUP_WINDOW_CLONE_GROUP).setOnAction(this::onCloneGroups);
 
         } else if (windowId.equals(ViewKey.PROJECTS_WINDOW.getKey())) {
-            _mainMenuManager.getButtonById(MainMenuItems.MAIN_CLONE_PROJECT).setOnAction(this::cloneShadowProject);
-            _mainMenuManager.getButtonById(MainMenuItems.MAIN_CREATE_BRANCH).setOnAction(this::onNewBranchButton);
-            _mainMenuManager.getButtonById(MainMenuItems.MAIN_STAGING).setOnAction(this::openGitStaging);
-            _mainMenuManager.getButtonById(MainMenuItems.MAIN_PUSH).setOnAction(this::onPushAction);
-            _mainMenuManager.getButtonById(MainMenuItems.MAIN_PULL).setOnAction(this::onPullAction);
-            _mainMenuManager.getButtonById(MainMenuItems.MAIN_REVERT).setOnAction(this::onRevertChanges);
-            _mainMenuManager.getButtonById(MainMenuItems.MAIN_CHECKOUT_BRANCH).setOnAction(this::showCheckoutBranchWindow);
+            _mainMenuManager.getButtonById(GLToolButtons.MAIN_CLONE_PROJECT).setOnAction(this::cloneShadowProject);
+            _mainMenuManager.getButtonById(GLToolButtons.MAIN_CREATE_BRANCH).setOnAction(this::onNewBranchButton);
+            _mainMenuManager.getButtonById(GLToolButtons.MAIN_STAGING).setOnAction(this::openGitStaging);
+            _mainMenuManager.getButtonById(GLToolButtons.MAIN_PUSH).setOnAction(this::onPushAction);
+            _mainMenuManager.getButtonById(GLToolButtons.MAIN_PULL).setOnAction(this::onPullAction);
+            _mainMenuManager.getButtonById(GLToolButtons.MAIN_REVERT).setOnAction(this::onRevertChanges);
+            _mainMenuManager.getButtonById(GLToolButtons.MAIN_CHECKOUT_BRANCH).setOnAction(this::showCheckoutBranchWindow);
 
         }
 
-        MenuItem userGuide = _mainMenuManager.getButtonById(MainMenuItems.GENERAL_USER_GUIDE);
+        MenuItem userGuide = _mainMenuManager.getButtonById(GLToolButtons.GENERAL_USER_GUIDE);
         userGuide.setOnAction(this::openUserGuide);
         userGuide.setAccelerator(new KeyCodeCombination(KeyCode.F1));
-        _mainMenuManager.getButtonById(MainMenuItems.GENERAL_EXIT).setOnAction(this::exit);
-        _mainMenuManager.getButtonById(MainMenuItems.GENERAL_ABOUT).setOnAction(this::showAboutPopup);
+        _mainMenuManager.getButtonById(GLToolButtons.GENERAL_EXIT).setOnAction(this::exit);
+        _mainMenuManager.getButtonById(GLToolButtons.GENERAL_ABOUT).setOnAction(this::showAboutPopup);
     }
 
     private void initializeGroupsDisableBinding(ListView listView) {
@@ -1324,13 +1323,13 @@ public class ModularController implements UpdateProgressListener {
     }
 
     private void setMainMenuDisableProperty(BooleanBinding bindingForShadow, BooleanBinding bindingForCloned) {
-        _mainMenuManager.getButtonById(MainMenuItems.MAIN_CLONE_PROJECT).disableProperty().bind(bindingForCloned);
-        _mainMenuManager.getButtonById(MainMenuItems.MAIN_STAGING).disableProperty().bind(bindingForShadow);
-        _mainMenuManager.getButtonById(MainMenuItems.MAIN_CHECKOUT_BRANCH).disableProperty().bind(bindingForShadow);
-        _mainMenuManager.getButtonById(MainMenuItems.MAIN_CREATE_BRANCH).disableProperty().bind(bindingForShadow);
-        _mainMenuManager.getButtonById(MainMenuItems.MAIN_PUSH).disableProperty().bind(bindingForShadow);
-        _mainMenuManager.getButtonById(MainMenuItems.MAIN_PULL).disableProperty().bind(bindingForShadow);
-        _mainMenuManager.getButtonById(MainMenuItems.MAIN_REVERT).disableProperty().bind(bindingForShadow);
+        _mainMenuManager.getButtonById(GLToolButtons.MAIN_CLONE_PROJECT).disableProperty().bind(bindingForCloned);
+        _mainMenuManager.getButtonById(GLToolButtons.MAIN_STAGING).disableProperty().bind(bindingForShadow);
+        _mainMenuManager.getButtonById(GLToolButtons.MAIN_CHECKOUT_BRANCH).disableProperty().bind(bindingForShadow);
+        _mainMenuManager.getButtonById(GLToolButtons.MAIN_CREATE_BRANCH).disableProperty().bind(bindingForShadow);
+        _mainMenuManager.getButtonById(GLToolButtons.MAIN_PUSH).disableProperty().bind(bindingForShadow);
+        _mainMenuManager.getButtonById(GLToolButtons.MAIN_PULL).disableProperty().bind(bindingForShadow);
+        _mainMenuManager.getButtonById(GLToolButtons.MAIN_REVERT).disableProperty().bind(bindingForShadow);
 
     }
     //endregion
