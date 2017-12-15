@@ -165,7 +165,7 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     private Map<String, String> getCurrentPrivateToken() {
-        String privateTokenValue = _currentUser.getPrivateTokenValue();
+        String privateTokenValue = _currentUser.getOAuth2TokenValue();
         String privateTokenKey = _currentUser.getPrivateTokenKey();
 
         Map<String, String> header = new HashMap<>();
