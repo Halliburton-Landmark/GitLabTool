@@ -21,6 +21,8 @@ import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.api.PullCommand;
 import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.PushCommand;
+import org.eclipse.jgit.api.ResetCommand;
+import org.eclipse.jgit.api.RmCommand;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.StatusCommand;
 import org.eclipse.jgit.api.errors.AbortedByHookException;
@@ -73,6 +75,8 @@ import org.mockito.Mockito;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.User;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
+import com.lgc.gitlabtool.git.services.BackgroundService;
+import com.lgc.gitlabtool.git.services.BackgroundServiceImpl;
 import com.lgc.gitlabtool.git.services.ProgressListener;
 import com.lgc.gitlabtool.git.ui.javafx.ProgressDialog;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
@@ -87,15 +91,16 @@ public class JGitTest {
     private static final String NAME_BRANCH = "test_name";
     private static final String NAME_TRACKING_BRANCH = "test_tracking_branch";
     private static final String CORRECT_PATH = "/path";
+    private static final String fileName = "test";
 
     @Test(expected = IllegalArgumentException.class)
     public void cloneGroupIncorrectDataExceptionGroupTest() {
-        JGit.getInstance().clone(null, CORRECT_PATH, getEmptyOperationProgressListener());
+        getJGitMock(null).clone(null, CORRECT_PATH, getEmptyOperationProgressListener());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void cloneGroupIncorrectDataExceptionPathTest() {
-        JGit.getInstance().clone(new ArrayList<>(), null, getEmptyOperationProgressListener());
+        getJGitMock(null).clone(new ArrayList<>(), null, getEmptyOperationProgressListener());
     }
 
 
@@ -112,7 +117,7 @@ public class JGitTest {
                 //Do nothing
             }
         };
-        JGit jgit = new JGit() {
+        JGit jgit = new JGit(getBackgroundServiceMock()) {
             @Override
             protected Git tryClone(String linkClone, String localPath)
                     throws InvalidRemoteException, TransportException, GitAPIException {
@@ -125,7 +130,7 @@ public class JGitTest {
 
     @Test
     public void gitcloneRepositoryCancelExceptionTest() {
-        JGit git = new JGit() {
+        JGit git = new JGit(getBackgroundServiceMock()) {
             @Override
             protected Git tryClone(String linkClone, String localPath) throws JGitInternalException {
                 JGitInternalException cancelException = mock(JGitInternalException.class);
@@ -134,7 +139,7 @@ public class JGitTest {
         };
         Assert.assertTrue(git.clone(getProjects(2), CORRECT_PATH, getEmptyOperationProgressListener()));
 
-        git = new JGit() {
+        git = new JGit(getBackgroundServiceMock()) {
             @Override
             protected Git tryClone(String linkClone, String localPath) throws GitAPIException {
                 throw getGitAPIException();
@@ -199,7 +204,42 @@ public class JGitTest {
         List<String> files = new ArrayList<>();
         files.add("0");
         files.add(null);
-        Assert.assertTrue(getJGitMock(gitMock).addUntrackedFileForCommit(files, getProject(true)));
+
+        List<String> addedFiles = getJGitMock(gitMock).addUntrackedFilesToIndex(files, getProject(true));
+        Assert.assertFalse(addedFiles.isEmpty());
+        Assert.assertEquals(files.get(0), addedFiles.get(0));
+    }
+
+    @Test
+    public void addUntrackedFileToIndexIncorrectTest() throws NoFilepatternException, GitAPIException {
+        Git gitMock = getGitMock();
+        AddCommand addCommandMock = mock(AddCommand.class);
+        Mockito.when(addCommandMock.addFilepattern(fileName)).thenReturn(addCommandMock);
+        Mockito.when(addCommandMock.call()).thenThrow(getGitAPIException());
+        Mockito.when(gitMock.add()).thenReturn(addCommandMock);
+
+        Assert.assertFalse(getJGitMock(null).addUntrackedFileToIndex(fileName, getProject(true)));
+        Assert.assertFalse(getJGitMock(gitMock).addUntrackedFileToIndex(fileName, getProject(true)));
+    }
+
+    @Test
+    public void addUntrackedFileToIndexCorrectTest() throws NoFilepatternException, GitAPIException {
+        Git gitMock = getGitMock();
+        AddCommand addCommandMock = mock(AddCommand.class);
+        Mockito.when(addCommandMock.addFilepattern(fileName)).thenReturn(addCommandMock);
+        Mockito.when(addCommandMock.call()).thenReturn(getDirCache());
+        Mockito.when(gitMock.add()).thenReturn(addCommandMock);
+
+        Assert.assertTrue(getJGitMock(gitMock).addUntrackedFileToIndex(fileName, getProject(true)));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void addUntrackedFileToIndexFileIncorrectException() {
+        getJGitMock(null).addUntrackedFileToIndex(null, getProject(true));
+    }
+    @Test(expected = IllegalArgumentException.class)
+    public void addUntrackedFileToIndexProjectIncorrectException() {
+        getJGitMock(null).addUntrackedFileToIndex("", null);
     }
 
     @Test
@@ -212,37 +252,32 @@ public class JGitTest {
             }
         };
         Mockito.when(gitMock.add()).thenReturn(addCommandMock);
-        Assert.assertFalse(getJGitMock(null).addUntrackedFileForCommit(new ArrayList<>(), getProject(false)));
-        Assert.assertTrue(getJGitMock(gitMock).addUntrackedFileForCommit(new ArrayList<>(), getProject(true)));
-
-        List<String> files = new ArrayList<>();
-        files.add("0");
-        files.add(null);
-        Assert.assertTrue(getJGitMock(gitMock).addUntrackedFileForCommit(files, getProject(true)));
+        Assert.assertTrue(getJGitMock(gitMock).addUntrackedFilesToIndex(new ArrayList<>(), getProject(true)).isEmpty());
+        Assert.assertTrue(getJGitMock(null).addUntrackedFilesToIndex(new ArrayList<>(), getProject(false)).isEmpty());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void addUntrackedFileForCommitProjectIsNullTest() {
-        JGit.getInstance().addUntrackedFileForCommit(null, getProject(true));
+        getJGitMock(null).addUntrackedFileToIndex(null, getProject(true));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void addUntrackedFileForCommitCollectionIsNullTest() {
-        JGit.getInstance().addUntrackedFileForCommit(new ArrayList<>(), null);
+        getJGitMock(null).addUntrackedFilesToIndex(new ArrayList<>(), null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void pullProjectIsNullTest() {
-        JGit.getInstance().pull(null);
+        getJGitMock(null).pull(null);
     }
 
     @Test
     public void pullIncorrectDataTest() {
-        Assert.assertEquals(JGit.getInstance().pull(getProject(false)), JGitStatus.FAILED);
+        Assert.assertEquals(getJGitMock(null).pull(getProject(false)), JGitStatus.FAILED);
         Assert.assertEquals(getJGitMock(null).pull(getProject(true)), JGitStatus.FAILED);
 
         Git gitMock = getGitMock();
-        JGit jGitMock = new JGit();
+        JGit jGitMock = new JGit(mock(BackgroundServiceImpl.class));
         Assert.assertEquals(jGitMock.pull(getProject(true)), JGitStatus.FAILED);
 
         PullCommand pullCommandMock = new PullCommand(getRepository()) {
@@ -283,27 +318,27 @@ public class JGitTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void commitMessageIsNullTest() {
-        JGit.getInstance().commit(getProjects(), null, false, null, null, null, null, new EmptyListener());
+        getJGitMock(null).commit(getProjects(), null, false, null, null, null, null, new EmptyListener());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void commitMessageIsEmptyTest() {
-        JGit.getInstance().commit(getProjects(), "", false, null, null, null, null, new EmptyListener());
+        getJGitMock(null).commit(getProjects(), "", false, null, null, null, null, new EmptyListener());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void commitProjectsIsEmptyTest() {
-        JGit.getInstance().commit(new ArrayList<>(), "__", false, null, null, null, null, new EmptyListener());
+        getJGitMock(null).commit(new ArrayList<>(), "__", false, null, null, null, null, new EmptyListener());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void commitProjectsIsNullTest() {
-        JGit.getInstance().commit(null, "__", false, null, null, null, null, new EmptyListener());
+        getJGitMock(null).commit(null, "__", false, null, null, null, null, new EmptyListener());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void commitProjectIsNullTest() {
-        JGit.getInstance().commitProject(null, "_", false, null, null, null, null);
+        getJGitMock(null).commitProject(null, "_", false, null, null, null, null);
     }
 
     @Test
@@ -366,12 +401,12 @@ public class JGitTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void pushProjectsIsNullTest() {
-        JGit.getInstance().push(null, null);
+        getJGitMock(null).push(null, null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void pushProjectsIsEmptyTest() {
-        JGit.getInstance().push(new ArrayList<>(), null);
+        getJGitMock(null).push(new ArrayList<>(), null);
     }
 
     @Test
@@ -407,27 +442,27 @@ public class JGitTest {
         };
         Mockito.when(gitMock.push()).thenReturn(pushCommandMock);
         Map<Project, JGitStatus> statuses = getJGitMock(gitMock).push(getProjects(),  new EmptyListener());
-        Assert.assertEquals(getCountCorrectStatuses(statuses),getCountCorrectProject(getProjects()));
+        Assert.assertEquals(getCountCorrectStatuses(statuses), getCountCorrectProject(getProjects()));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void commitAndPushProjectsIsNullTest() {
-        JGit.getInstance().commitAndPush(null, "_", false, null, null, null, null, new EmptyListener());
+        getJGitMock(null).commitAndPush(null, "_", false, null, null, null, null, new EmptyListener());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void commitAndPushMessageIsNullTest() {
-        JGit.getInstance().commitAndPush(getProjects(), null, false, null, null, null, null, new EmptyListener());
+        getJGitMock(null).commitAndPush(getProjects(), null, false, null, null, null, null, new EmptyListener());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void commitAndPushProjectsIsEmptyTest() {
-        JGit.getInstance().commitAndPush(new ArrayList<>(), "_", false, null, null, null, null, new EmptyListener());
+        getJGitMock(null).commitAndPush(new ArrayList<>(), "_", false, null, null, null, null, new EmptyListener());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void commitAndPushMessageIsEmptyTest() {
-        JGit.getInstance().commitAndPush(getProjects(), "", false, null, null, null, null, new EmptyListener());
+        getJGitMock(null).commitAndPush(getProjects(), "", false, null, null, null, null, new EmptyListener());
     }
 
     @Test
@@ -463,22 +498,22 @@ public class JGitTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void createBranchProjectsIsNullTest() {
-        JGit.getInstance().createBranch(null, "__", null, false);
+        getJGitMock(null).createBranch(null, "__", null, false);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void createBranchNameBranchIsNullTest() {
-        JGit.getInstance().createBranch(new Project(), null, null, false);
+        getJGitMock(null).createBranch(new Project(), null, null, false);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void createBranchNameBranchIsEmptyTest() {
-        JGit.getInstance().createBranch(new Project(), "", null, false);
+        getJGitMock(null).createBranch(new Project(), "", null, false);
     }
 
     @Test
     public void createBranchIncorrectDataTest() {
-        Assert.assertEquals(JGit.getInstance().createBranch(new Project(), "__", null, false), JGitStatus.FAILED);
+        Assert.assertEquals(getJGitMock(null).createBranch(new Project(), "__", null, false), JGitStatus.FAILED);
         Assert.assertEquals(getJGitMock(null).createBranch(getProject(true), "__", null, false), JGitStatus.FAILED);
 
         Git gitMock = getGitMock();
@@ -535,12 +570,12 @@ public class JGitTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void getBranchesProjectNullTest() {
-        JGit.getInstance().getBranches(null, BranchType.LOCAL);
+        getJGitMock(null).getBranches(null, BranchType.LOCAL);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void getBranchesBranchTypeIsNullTest() {
-        JGit.getInstance().getBranches(new Project(), null);
+        getJGitMock(null).getBranches(new Project(), null);
     }
 
     @Test
@@ -566,18 +601,18 @@ public class JGitTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void getBranchesWithParametersProjectNullTest() {
-        JGit.getInstance().getBranches(null, BranchType.LOCAL, false);
+        getJGitMock(null).getBranches(null, BranchType.LOCAL, false);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void getBranchesWithParametersBranchTypeIsNullTest() {
-        JGit.getInstance().getBranches(new ArrayList<>(), null, false);
+        getJGitMock(null).getBranches(new ArrayList<>(), null, false);
     }
 
     @Test
     public void getBranchesWithParametersCorrectData() {
-        Assert.assertTrue(JGit.getInstance().getBranches(new ArrayList<>(), BranchType.LOCAL, false).isEmpty());
-        Assert.assertTrue(JGit.getInstance().getBranches(new ArrayList<>(), BranchType.REMOTE, false).isEmpty());
+        Assert.assertTrue(getJGitMock(null).getBranches(new ArrayList<>(), BranchType.LOCAL, false).isEmpty());
+        Assert.assertTrue(getJGitMock(null).getBranches(new ArrayList<>(), BranchType.REMOTE, false).isEmpty());
 
         Ref refMock = mock(Ref.class);
         Git gitMock = getGitMock();
@@ -592,12 +627,12 @@ public class JGitTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void getCurrentBranchProjectIsNullTest() {
-        JGit.getInstance().getCurrentBranch(null);
+        getJGitMock(null).getCurrentBranch(null);
     }
 
     @Test
     public void getCurrentBranchIncorrectData() {
-        Assert.assertFalse(JGit.getInstance().getCurrentBranch(getProject(false)).isPresent());
+        Assert.assertFalse(getJGitMock(null).getCurrentBranch(getProject(false)).isPresent());
         Assert.assertFalse(getJGitMock(null).getCurrentBranch(getProject(true)).isPresent());
 
         Git gitMock = getGitMock();
@@ -613,34 +648,34 @@ public class JGitTest {
         Mockito.when(gitMock.getRepository()).thenReturn(repoMock);
         Assert.assertTrue(getJGitMock(gitMock).getCurrentBranch(getProject(true)).isPresent());
     }
-    
+
     @Test
     public void getTrackingBranchTest() {
         Git gitMock = getGitMock();
         Repository repoMock = getRepo(NAME_BRANCH);
-        Mockito.when(gitMock.getRepository()).thenReturn(repoMock);        
+        Mockito.when(gitMock.getRepository()).thenReturn(repoMock);
         Assert.assertTrue(getJGitMock(gitMock).getTrackingBranch(getProject(true)) != null);
         Assert.assertFalse(getJGitMock(gitMock).getTrackingBranch(getProject(true)).isEmpty());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void deleteBranchProjectIsNullTest() {
-        JGit.getInstance().deleteBranch(null, "", false);
+        getJGitMock(null).deleteBranch(null, "", false);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void deleteBranchNameBranchIsNullTest() {
-        JGit.getInstance().deleteBranch(getProject(false), null, false);
+        getJGitMock(null).deleteBranch(getProject(false), null, false);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void deleteBranchNameBranchIsEmptyTest() {
-        JGit.getInstance().deleteBranch(getProject(false), "", false);
+        getJGitMock(null).deleteBranch(getProject(false), "", false);
     }
 
     @Test
     public void deleteBranchIncorrectDataTest() {
-        Assert.assertEquals(JGit.getInstance().deleteBranch(getProject(false), NAME_BRANCH, false), JGitStatus.FAILED);
+        Assert.assertEquals(getJGitMock(null).deleteBranch(getProject(false), NAME_BRANCH, false), JGitStatus.FAILED);
         Assert.assertEquals(getJGitMock(null).deleteBranch(getProject(true), NAME_BRANCH, false), JGitStatus.FAILED);
 
         Git gitMock = getGitMock();
@@ -688,23 +723,23 @@ public class JGitTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void switchToProjectIsNullTest() {
-        JGit.getInstance().switchTo(null, "__", false);
+    public void checkoutBranchProjectIsNullTest() {
+        getJGitMock(null).checkoutBranch(null, "__", false);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void switchToBranchNameIsNullTest() {
-        JGit.getInstance().switchTo(getProject(false), null, true);
+    public void checkoutBranchNameIsNullTest() {
+        getJGitMock(null).checkoutBranch(getProject(false), null, true);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void switchToBranchNameIsEmptyTest() {
-        JGit.getInstance().switchTo(getProject(true), "", false);
+    public void checkoutBranchNameIsEmptyTest() {
+        getJGitMock(null).checkoutBranch(getProject(true), "", false);
     }
 
     @Test
-    public void switchToIncorrectDataTest() {
-        Assert.assertEquals(getJGitMock(null).switchTo(getProject(false), NAME_BRANCH, false), JGitStatus.FAILED);
+    public void checkoutBranchIncorrectDataTest() {
+        Assert.assertEquals(getJGitMock(null).checkoutBranch(getProject(false), NAME_BRANCH, false), JGitStatus.FAILED);
         //Assert.assertEquals(getJGitMock(null).switchTo(getProject(true), NAME_BRANCH, false), JGitStatus.FAILED);
 
         Ref refMock = mock(Ref.class);
@@ -716,19 +751,19 @@ public class JGitTest {
 
         Repository repoMock = getRepo(NAME_BRANCH);
         Mockito.when(gitMock.getRepository()).thenReturn(repoMock);
-        Assert.assertEquals(getJGitMock(gitMock).switchTo(getProject(true), NAME_BRANCH, false),
+        Assert.assertEquals(getJGitMock(gitMock).checkoutBranch(getProject(true), NAME_BRANCH, false),
                 JGitStatus.BRANCH_DOES_NOT_EXIST);
-        Assert.assertEquals(getJGitMock(gitMock).switchTo(getProject(true), NAME_BRANCH, true),
+        Assert.assertEquals(getJGitMock(gitMock).checkoutBranch(getProject(true), NAME_BRANCH, true),
                 JGitStatus.BRANCH_CURRENTLY_CHECKED_OUT);
 
         listCommandMock = getListCommandMock(refMock);
         Mockito.when(refMock.getName()).thenReturn(Constants.R_HEADS + NAME_BRANCH);
-        Assert.assertEquals(getJGitMock(gitMock).switchTo(getProject(true), NAME_BRANCH, true),
+        Assert.assertEquals(getJGitMock(gitMock).checkoutBranch(getProject(true), NAME_BRANCH, true),
                 JGitStatus.BRANCH_ALREADY_EXISTS);
 
         Mockito.when(refMock.getName()).thenReturn(Constants.R_HEADS + NAME_BRANCH);
 
-        JGit git = new JGit() {
+        JGit git = new JGit(getBackgroundServiceMock()) {
 
             @Override
             protected Git getGit(String path) throws IOException {
@@ -740,9 +775,9 @@ public class JGitTest {
                 return true;
             }
         };
-        Assert.assertEquals(git.switchTo(getProject(true), NAME_BRANCH + "2", true), JGitStatus.CONFLICTS);
+        Assert.assertEquals(git.checkoutBranch(getProject(true), NAME_BRANCH + "2", true), JGitStatus.CONFLICTS);
 
-        git = new JGit() {
+        git = new JGit(getBackgroundServiceMock()) {
             @Override
             protected Git getGit(String path) throws IOException {
                 return gitMock;
@@ -762,13 +797,13 @@ public class JGitTest {
             }
         };
         Mockito.when(gitMock.checkout()).thenReturn(checkoutCommandMock);
-        Assert.assertEquals(git.switchTo(getProject(true), NAME_BRANCH + "2", true), JGitStatus.FAILED);
+        Assert.assertEquals(git.checkoutBranch(getProject(true), NAME_BRANCH + "2", true), JGitStatus.FAILED);
     }
 
     @Test
-    public void switchToCorrectDataTest() {
+    public void checkoutBranchCorrectDataTest() {
         Git gitMock = getGitMock();
-        JGit git = new JGit() {
+        JGit git = new JGit(getBackgroundServiceMock()) {
             @Override
             protected Git getGit(String path) throws IOException {
                 return gitMock;
@@ -797,13 +832,13 @@ public class JGitTest {
             }
         };
         Mockito.when(gitMock.checkout()).thenReturn(checkoutCommandMock);
-        Assert.assertEquals(git.switchTo(getProject(true), NAME_BRANCH + "2", true), JGitStatus.SUCCESSFUL);
+        Assert.assertEquals(git.checkoutBranch(getProject(true), NAME_BRANCH + "2", true), JGitStatus.SUCCESSFUL);
     }
 
     @Test
     public void isConflictsBetweenTwoBranchesInorrectDataTest() {
         Repository repoMock = getRepo(null);
-        Assert.assertFalse(JGit.getInstance().isConflictsBetweenTwoBranches(repoMock, "", ""));
+        Assert.assertFalse(getJGitMock(null).isConflictsBetweenTwoBranches(repoMock, "", ""));
 
         repoMock = getRepo(NAME_BRANCH);
         RevWalk revWalkMockException = new RevWalk(getRepository()) {
@@ -816,7 +851,7 @@ public class JGitTest {
                 throw mock(IOException.class);
             }
         };
-        JGit gitException = new JGit() {
+        JGit gitException = new JGit(getBackgroundServiceMock()) {
             @Override
             RevWalk getRevWalk(Repository repo) {
                 return revWalkMockException;
@@ -834,7 +869,7 @@ public class JGitTest {
                 return null;
             }
         };
-        JGit gitNull = new JGit() {
+        JGit gitNull = new JGit(getBackgroundServiceMock()) {
             @Override
             RevWalk getRevWalk(Repository repo) {
                 return revWalkMockNull;
@@ -854,7 +889,7 @@ public class JGitTest {
                 return revCommitMock;
             }
         };
-        JGit git = new JGit() {
+        JGit git = new JGit(getBackgroundServiceMock()) {
             @Override
             RevWalk getRevWalk(Repository repo) {
                 return revWalkMock;
@@ -868,7 +903,7 @@ public class JGitTest {
         };
         Assert.assertTrue(git.isConflictsBetweenTwoBranches(repoMock, "", ""));
 
-        git = new JGit() {
+        git = new JGit(getBackgroundServiceMock()) {
             @Override
             RevWalk getRevWalk(Repository repo) {
                 return revWalkMock;
@@ -898,7 +933,7 @@ public class JGitTest {
                 return revCommitMock;
             }
         };
-        JGit git = new JGit() {
+        JGit git = new JGit(getBackgroundServiceMock()) {
             @Override
             RevWalk getRevWalk(Repository repo) {
                 return revWalkMock;
@@ -911,6 +946,99 @@ public class JGitTest {
             }
         };
         Assert.assertFalse(git.isConflictsBetweenTwoBranches(repoMock, "", ""));
+    }
+
+    @Test
+    public void addDeletedFileIncorrectParametersTest() throws NoFilepatternException, GitAPIException {
+        Assert.assertFalse(getJGitMock(getGitMock()).addDeletedFile(null, getProject(true), true));
+        Assert.assertFalse(getJGitMock(getGitMock()).addDeletedFile(fileName, getProject(false), true));
+        Assert.assertFalse(getJGitMock(getGitMock()).addDeletedFile(fileName, null, false));
+        Assert.assertFalse(getJGitMock(null).addDeletedFile(fileName, getProject(true), false));
+
+        Git gitMock = getGitMock();
+        RmCommand rmCommandMock = mock(RmCommand.class);
+        Mockito.when(rmCommandMock.setCached(true)).thenReturn(rmCommandMock);
+        Mockito.when(rmCommandMock.addFilepattern(fileName)).thenReturn(rmCommandMock);
+        Mockito.when(rmCommandMock.call()).thenThrow(getGitAPIException());
+        Mockito.when(gitMock.rm()).thenReturn(rmCommandMock);
+
+        Assert.assertFalse(getJGitMock(gitMock).addDeletedFile(fileName, getProject(true), true));
+    }
+
+    @Test
+    public void addDeletedFileCorrectTest() throws NoFilepatternException, GitAPIException {
+        Git gitMock = getGitMock();
+        RmCommand rmCommandMock = mock(RmCommand.class);
+
+        Mockito.when(rmCommandMock.setCached(true)).thenReturn(rmCommandMock);
+        Mockito.when(rmCommandMock.addFilepattern(fileName)).thenReturn(rmCommandMock);
+        Mockito.when(rmCommandMock.call()).thenReturn(getDirCache());
+        Mockito.when(gitMock.rm()).thenReturn(rmCommandMock);
+
+        Assert.assertTrue(getJGitMock(gitMock).addDeletedFile(fileName, getProject(true), true));
+    }
+
+    @Test
+    public void addDeletedFilesIncorrectParametersTest() throws NoFilepatternException, GitAPIException {
+        List<String> files = new ArrayList<>(Arrays.asList("xyz", "abc"));
+        Assert.assertTrue(getJGitMock(getGitMock()).addDeletedFiles(null, getProject(true), true).isEmpty());
+        Assert.assertTrue(getJGitMock(getGitMock()).addDeletedFiles(new ArrayList<>(), getProject(true), true).isEmpty());
+        Assert.assertTrue(getJGitMock(getGitMock()).addDeletedFiles(files, null, false).isEmpty());
+        Assert.assertTrue(getJGitMock(getGitMock()).addDeletedFiles(files, getProject(false), false).isEmpty());
+        Assert.assertTrue(getJGitMock(null).addDeletedFiles(files, getProject(true), false).isEmpty());
+
+        Git gitMock = getGitMock();
+        RmCommand rmCommandMock = mock(RmCommand.class);
+        Mockito.when(rmCommandMock.setCached(true)).thenReturn(rmCommandMock);
+        Mockito.when(rmCommandMock.addFilepattern(Mockito.anyString())).thenReturn(rmCommandMock);
+        Mockito.when(rmCommandMock.call()).thenThrow(getGitAPIException());
+        Mockito.when(gitMock.rm()).thenReturn(rmCommandMock);
+
+        Assert.assertTrue(getJGitMock(gitMock).addDeletedFiles(files, getProject(true), true).isEmpty());
+    }
+
+    @Test
+    public void addDeletedFilesCorrectTest() throws NoFilepatternException, GitAPIException {
+        List<String> files = new ArrayList<>(Arrays.asList("xyz", "abc"));
+
+        Git gitMock = getGitMock();
+        RmCommand rmCommandMock = mock(RmCommand.class);
+        Mockito.when(rmCommandMock.setCached(true)).thenReturn(rmCommandMock);
+        Mockito.when(rmCommandMock.addFilepattern(Mockito.anyString())).thenReturn(rmCommandMock);
+        Mockito.when(rmCommandMock.call()).thenReturn(getDirCache());
+        Mockito.when(gitMock.rm()).thenReturn(rmCommandMock);
+
+        Assert.assertFalse(getJGitMock(gitMock).addDeletedFiles(files, getProject(true), true).isEmpty());
+    }
+
+    @Test
+    public void resetChangedFilesIncorrectParametersTest() throws CheckoutConflictException, GitAPIException {
+        List<String> files = new ArrayList<>(Arrays.asList("xyz", "abc"));
+        Assert.assertTrue(getJGitMock(getGitMock()).resetChangedFiles(null, getProject(true)).isEmpty());
+        Assert.assertTrue(getJGitMock(getGitMock()).resetChangedFiles(new ArrayList<>(), getProject(true)).isEmpty());
+        Assert.assertTrue(getJGitMock(getGitMock()).resetChangedFiles(files, null).isEmpty());
+        Assert.assertTrue(getJGitMock(getGitMock()).resetChangedFiles(files, getProject(false)).isEmpty());
+        Assert.assertTrue(getJGitMock(null).resetChangedFiles(files, getProject(true)).isEmpty());
+
+        Git gitMock = getGitMock();
+        ResetCommand resetCommandMock = mock(ResetCommand.class);
+        Mockito.when(resetCommandMock.setRef(Constants.HEAD)).thenReturn(resetCommandMock);
+        Mockito.when(resetCommandMock.addPath(Mockito.anyString())).thenReturn(resetCommandMock);
+        Mockito.when(resetCommandMock.call()).thenThrow(getGitAPIException());
+        Mockito.when(gitMock.reset()).thenReturn(resetCommandMock);
+        Assert.assertTrue(getJGitMock(gitMock).resetChangedFiles(files, getProject(true)).isEmpty());
+    }
+
+    @Test
+    public void resetChangedFilesCorrectTest() throws CheckoutConflictException, GitAPIException {
+        List<String> files = new ArrayList<>(Arrays.asList("xyz", "abc"));
+        Git gitMock = getGitMock();
+        ResetCommand resetCommandMock = mock(ResetCommand.class);
+        Mockito.when(resetCommandMock.setRef(Constants.HEAD)).thenReturn(resetCommandMock);
+        Mockito.when(resetCommandMock.addPath(Mockito.anyString())).thenReturn(resetCommandMock);
+        Mockito.when(gitMock.reset()).thenReturn(resetCommandMock);
+        Mockito.when(resetCommandMock.call()).thenReturn(mock(Ref.class));
+        Assert.assertFalse(getJGitMock(gitMock).resetChangedFiles(files, getProject(true)).isEmpty());
     }
 
     /*************************************************************************************************/
@@ -935,7 +1063,7 @@ public class JGitTest {
         listProjects.add(getProject(true));
         listProjects.add(null);
         listProjects.add(getProject(false));
-        listProjects.add(getProject(true));
+        listProjects.add(new Project());
         return listProjects;
     }
 
@@ -965,7 +1093,7 @@ public class JGitTest {
 
     private JGit getJGitMock(Git gitMock) {
         if (gitMock == null) {
-            return new JGit() {
+            return new JGit(getBackgroundServiceMock()) {
                 @Override
                 protected Git getGit(String path) throws IOException {
                     throw mock(IOException.class);
@@ -973,7 +1101,7 @@ public class JGitTest {
             };
         }
 
-        JGit correctJGitMock = new JGit() {
+        JGit correctJGitMock = new JGit(getBackgroundServiceMock()) {
             @Override
             protected User getUserData() {
                 User user = new User("Lyudmila", "ld@email.com");
@@ -984,7 +1112,7 @@ public class JGitTest {
             protected Git getGit(String path) throws IOException {
                 return gitMock;
             }
-            
+
             @Override
             protected BranchConfig getBranchConfig(Config config, String branchName) {
 
@@ -1005,7 +1133,7 @@ public class JGitTest {
 
     private Repository getRepository() {
         return mock(Repository.class);
-    }    
+    }
 
     private Repository getRepo(String nameBranch) {
         BaseRepositoryBuilder<?, ?> buildMock = mock(BaseRepositoryBuilder.class);
@@ -1156,6 +1284,10 @@ public class JGitTest {
 
     private DirCache getDirCache() {
         return mock(DirCache.class);
+    }
+
+    private BackgroundService getBackgroundServiceMock() {
+        return mock(BackgroundServiceImpl.class);
     }
 
     class EmptyListener implements ProgressListener {

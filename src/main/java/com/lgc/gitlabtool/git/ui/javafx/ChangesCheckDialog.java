@@ -10,6 +10,7 @@ import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
+import com.lgc.gitlabtool.git.ui.javafx.controllers.WindowLoader;
 import com.lgc.gitlabtool.git.util.NullCheckUtil;
 
 import javafx.scene.control.Alert;
@@ -45,12 +46,6 @@ public class ChangesCheckDialog extends GLTAlert {
         cancelButton = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);;
 
         getDialogPane().getButtonTypes().setAll(commitButton, revertButton, cancelButton);
-    }
-
-    private Map<Project, JGitStatus> commitChanges(List<Project> projectsWithChanges) {
-        CommitDialog dialog = new CommitDialog();
-        dialog.commitChanges(projectsWithChanges);
-        return dialog.getStatuses();
     }
 
     private Map<Project, JGitStatus> revertChanges(List<Project> changedProjects) {
@@ -129,9 +124,7 @@ public class ChangesCheckDialog extends GLTAlert {
         Optional<ButtonType> result = alert.showAndWait();
 
         if (alert.getCommitButton().equals(result.orElse(ButtonType.CANCEL))) {
-            Map<Project, JGitStatus> commitStatuses = commitChanges(changedProjects);
-            executeBiConsumer(biConsumer, commitStatuses, selectedProjects, selectedItem);
-
+            WindowLoader.get().loadGitStageWindow(changedProjects);
         } else if (alert.getRevertButton().equals(result.orElse(ButtonType.CANCEL))) {
             Map<Project, JGitStatus> revertStatuses = revertChanges(changedProjects);
             executeBiConsumer(biConsumer, revertStatuses, selectedProjects, selectedItem);
@@ -174,8 +167,11 @@ public class ChangesCheckDialog extends GLTAlert {
      *                 else returns <code>false</code>
      */
     private boolean isNotFailedOperation(Map<Project, JGitStatus> operationStatuses, Project project) {
-        JGitStatus currentStatus = operationStatuses.get(project);
-        return currentStatus == null || currentStatus != JGitStatus.FAILED;
+        if (operationStatuses != null) {
+            JGitStatus currentStatus = operationStatuses.get(project);
+            return currentStatus == null || currentStatus != JGitStatus.FAILED;
+        }
+        return false;
     }
 
 }

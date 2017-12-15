@@ -3,7 +3,7 @@ package com.lgc.gitlabtool.git.ui.javafx.controllers;
 import static com.lgc.gitlabtool.git.util.ProjectPropertiesUtil.getCommitHash;
 import static com.lgc.gitlabtool.git.util.ProjectPropertiesUtil.getProjectNameWithVersion;
 
-import java.awt.*;
+import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -11,6 +11,7 @@ import java.math.RoundingMode;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -20,8 +21,6 @@ import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.lgc.gitlabtool.git.services.*;
-import com.lgc.gitlabtool.git.util.ShutDownUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -33,12 +32,21 @@ import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.listeners.stateListeners.StateListener;
 import com.lgc.gitlabtool.git.listeners.updateProgressListener.UpdateProgressListener;
+import com.lgc.gitlabtool.git.services.BackgroundService;
+import com.lgc.gitlabtool.git.services.ClonedGroupsService;
+import com.lgc.gitlabtool.git.services.ConsoleService;
+import com.lgc.gitlabtool.git.services.GitService;
+import com.lgc.gitlabtool.git.services.GroupsUserService;
+import com.lgc.gitlabtool.git.services.LoginService;
+import com.lgc.gitlabtool.git.services.PomXMLService;
+import com.lgc.gitlabtool.git.services.ProjectService;
+import com.lgc.gitlabtool.git.services.ServiceProvider;
+import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.ViewKey;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 import com.lgc.gitlabtool.git.ui.javafx.AlertWithCheckBox;
 import com.lgc.gitlabtool.git.ui.javafx.ChangesCheckDialog;
 import com.lgc.gitlabtool.git.ui.javafx.CloneProgressDialog;
-import com.lgc.gitlabtool.git.ui.javafx.CommitDialog;
 import com.lgc.gitlabtool.git.ui.javafx.CreateNewBranchDialog;
 import com.lgc.gitlabtool.git.ui.javafx.CreateProjectDialog;
 import com.lgc.gitlabtool.git.ui.javafx.GLTAlert;
@@ -48,6 +56,7 @@ import com.lgc.gitlabtool.git.ui.javafx.ProgressDialog;
 import com.lgc.gitlabtool.git.ui.javafx.PullProgressDialog;
 import com.lgc.gitlabtool.git.ui.javafx.StatusDialog;
 import com.lgc.gitlabtool.git.ui.javafx.WorkIndicatorDialog;
+import com.lgc.gitlabtool.git.ui.javafx.comparators.ProjectListComparator;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.PushProgressListener;
 import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuItems;
@@ -57,6 +66,7 @@ import com.lgc.gitlabtool.git.ui.selection.SelectionsProvider;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarButtons;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarManager;
 import com.lgc.gitlabtool.git.util.ScreenUtil;
+import com.lgc.gitlabtool.git.util.ShutDownUtil;
 import com.lgc.gitlabtool.git.util.UserGuideUtil;
 
 import javafx.application.Platform;
@@ -66,6 +76,7 @@ import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -161,19 +172,17 @@ public class ModularController implements UpdateProgressListener {
      */
     //region PROJECTS-VIEW CONSTANTS
     private static final String WORK_INDICATOR_START_MESSAGE = "Loading projects...";
-    private static final String STATUS_DIALOG_TITLE = "Status dialog";
-    private static final String STATUS_DIALOG_HEADER_COMMIT = "Commit statuses";
     private static final String EDIT_PROJECT_PROPERTIES = "Edit project properties";
     private static final String EDIT_POM_SELECTION_WARNING = "This operation unavailable for some projects: ";
     private static final String REVERT_START_MESSAGE = "Revert operation is starting...";
     private static final String REVERT_FINISH_MESSAGE = "Revert operation finished.";
-    private static final String NO_ANY_PROJECT_FOR_OPERATION = "There isn't any proper project selected for %s operation";
+    public static final String NO_ANY_PROJECT_FOR_OPERATION = "There isn't any proper project selected for %s operation";
 
-    private static final String SWITCH_BRANCH_TITLE = "Switch branch";
+    private static final String CHECKOUT_BRANCH_TITLE = "Checkout branch";
     private static final String NEW_BRANCH_CREATION = "new branch creation";
     private static final String PULL_OPERATION_NAME = "pull";
     private static final String PUSH_OPERATION_NAME = "push";
-    private static final String SWITCH_BEANCH_OPERATION_NAME = "switch branch";
+    private static final String CHECKOUT_BEANCH_OPERATION_NAME = "checkout branch";
 
     private static final String SELECT_ALL_IMAGE_URL = "icons/select_all_20x20.png";
     private static final String REFRESH_PROJECTS_IMAGE_URL = "icons/toolbar/refresh_projects_20x20.png";
@@ -364,9 +373,7 @@ public class ModularController implements UpdateProgressListener {
         groupsWindowToolbarItems = _toolbarManager.createToolbarItems(ViewKey.GROUPS_WINDOW.getKey());
         groupsWindowMainMenuItems = _mainMenuManager.createMainMenuItems(ViewKey.GROUPS_WINDOW.getKey());
         initActionsMainMenu(ViewKey.GROUPS_WINDOW.getKey());
-
         initActionsToolBar(ViewKey.GROUPS_WINDOW.getKey());
-
         initializeGroupsDisableBinding(groupListView);
     }
 
@@ -375,7 +382,6 @@ public class ModularController implements UpdateProgressListener {
         if (projectsToolbar != null) {
             return;
         }
-
         projectsToolbar = new HBox();
 
         Image imageRefreshProjects = new Image(
@@ -422,8 +428,8 @@ public class ModularController implements UpdateProgressListener {
             _toolbarManager.getButtonById(ToolbarButtons.CHANGE_GROUP_BUTTON.getId())
                     .setOnAction(this::loadGroupWindow);
 
-            _toolbarManager.getButtonById(ToolbarButtons.SWITCH_BRANCH_BUTTON.getId())
-                    .setOnAction(this::showSwitchBranchWindow);
+            _toolbarManager.getButtonById(ToolbarButtons.CHECKOUT_BRANCH_BUTTON.getId())
+                    .setOnAction(this::showCheckoutBranchWindow);
 
             _toolbarManager.getButtonById(ToolbarButtons.CLONE_PROJECT_BUTTON.getId())
                     .setOnAction(this::cloneShadowProject);
@@ -434,8 +440,8 @@ public class ModularController implements UpdateProgressListener {
             _toolbarManager.getButtonById(ToolbarButtons.CREATE_PROJECT_BUTTON.getId())
                     .setOnAction(this::createProjectButton);
 
-            _toolbarManager.getButtonById(ToolbarButtons.COMMIT_BUTTON.getId())
-                    .setOnAction(this::onCommitAction);
+            _toolbarManager.getButtonById(ToolbarButtons.STAGING_BUTTON.getId())
+                    .setOnAction(this::openGitStaging);
 
             _toolbarManager.getButtonById(ToolbarButtons.PUSH_BUTTON.getId())
                     .setOnAction(this::onPushAction);
@@ -448,6 +454,7 @@ public class ModularController implements UpdateProgressListener {
 
             _toolbarManager.getButtonById(ToolbarButtons.EDIT_PROJECT_PROPERTIES_BUTTON.getId())
                     .setOnAction(this::showEditProjectPropertiesWindow);
+
         }
     }
 
@@ -455,23 +462,22 @@ public class ModularController implements UpdateProgressListener {
         if (windowId.equals(ViewKey.GROUPS_WINDOW.getKey())) {
             _mainMenuManager.getButtonById(MainMenuItems.GROUP_WINDOW_CLONE_GROUP).setOnAction(this::onCloneGroups);
 
-
         } else if (windowId.equals(ViewKey.PROJECTS_WINDOW.getKey())) {
             _mainMenuManager.getButtonById(MainMenuItems.MAIN_CLONE_PROJECT).setOnAction(this::cloneShadowProject);
             _mainMenuManager.getButtonById(MainMenuItems.MAIN_CREATE_BRANCH).setOnAction(this::onNewBranchButton);
-            _mainMenuManager.getButtonById(MainMenuItems.MAIN_COMMIT).setOnAction(this::onCommitAction);
+            _mainMenuManager.getButtonById(MainMenuItems.MAIN_STAGING).setOnAction(this::openGitStaging);
             _mainMenuManager.getButtonById(MainMenuItems.MAIN_PUSH).setOnAction(this::onPushAction);
             _mainMenuManager.getButtonById(MainMenuItems.MAIN_PULL).setOnAction(this::onPullAction);
             _mainMenuManager.getButtonById(MainMenuItems.MAIN_REVERT).setOnAction(this::onRevertChanges);
-            _mainMenuManager.getButtonById(MainMenuItems.MAIN_SWITCH_BRANCH).setOnAction(this::showSwitchBranchWindow);
+            _mainMenuManager.getButtonById(MainMenuItems.MAIN_CHECKOUT_BRANCH).setOnAction(this::showCheckoutBranchWindow);
 
         }
 
-            MenuItem userGuide = _mainMenuManager.getButtonById(MainMenuItems.GENERAL_USER_GUIDE);
-            userGuide.setOnAction(this::openUserGuide);
-            userGuide.setAccelerator(new KeyCodeCombination(KeyCode.F1));
-            _mainMenuManager.getButtonById(MainMenuItems.GENERAL_EXIT).setOnAction(this::exit);
-            _mainMenuManager.getButtonById(MainMenuItems.GENERAL_ABOUT).setOnAction(this::showAboutPopup);
+        MenuItem userGuide = _mainMenuManager.getButtonById(MainMenuItems.GENERAL_USER_GUIDE);
+        userGuide.setOnAction(this::openUserGuide);
+        userGuide.setAccelerator(new KeyCodeCombination(KeyCode.F1));
+        _mainMenuManager.getButtonById(MainMenuItems.GENERAL_EXIT).setOnAction(this::exit);
+        _mainMenuManager.getButtonById(MainMenuItems.GENERAL_ABOUT).setOnAction(this::showAboutPopup);
     }
 
     private void initializeGroupsDisableBinding(ListView listView) {
@@ -610,7 +616,7 @@ public class ModularController implements UpdateProgressListener {
 
         setupProjectsDividerPosition(groupTitle);
         addProjectsWindowListener();
-        
+
     }
 
     private void loadGroupWindow() {
@@ -655,7 +661,7 @@ public class ModularController implements UpdateProgressListener {
         _stateService.addStateListener(ApplicationState.PUSH, _modularStateListener);
         _stateService.addStateListener(ApplicationState.PULL, _modularStateListener);
         _stateService.addStateListener(ApplicationState.CREATE_PROJECT, _modularStateListener);
-        _stateService.addStateListener(ApplicationState.SWITCH_BRANCH, _modularStateListener);
+        _stateService.addStateListener(ApplicationState.CHECKOUT_BRANCH, _modularStateListener);
         _stateService.addStateListener(ApplicationState.EDIT_POM, _modularStateListener);
         _stateService.addStateListener(ApplicationState.REVERT, _modularStateListener);
         _stateService.addStateListener(ApplicationState.LOAD_PROJECTS, _modularStateListener);
@@ -668,7 +674,7 @@ public class ModularController implements UpdateProgressListener {
         _stateService.removeStateListener(ApplicationState.PUSH, _modularStateListener);
         _stateService.removeStateListener(ApplicationState.PULL, _modularStateListener);
         _stateService.removeStateListener(ApplicationState.CREATE_PROJECT, _modularStateListener);
-        _stateService.removeStateListener(ApplicationState.SWITCH_BRANCH, _modularStateListener);
+        _stateService.removeStateListener(ApplicationState.CHECKOUT_BRANCH, _modularStateListener);
         _stateService.removeStateListener(ApplicationState.EDIT_POM, _modularStateListener);
         _stateService.removeStateListener(ApplicationState.REVERT, _modularStateListener);
         _stateService.removeStateListener(ApplicationState.LOAD_PROJECTS, _modularStateListener);
@@ -753,7 +759,6 @@ public class ModularController implements UpdateProgressListener {
         });
     }
 
-    @FXML
     @SuppressWarnings("unused")
     private void importGroupDialog(ActionEvent actionEvent) {
         if (mainPanelBackground == null) {
@@ -813,27 +818,27 @@ public class ModularController implements UpdateProgressListener {
     //region PROJECT-VIEW ACTIONS
     @FXML
     @SuppressWarnings("unused")
-    private void showSwitchBranchWindow(ActionEvent event) {
+    private void showCheckoutBranchWindow(ActionEvent event) {
         try {
-            @SuppressWarnings("unchecked") List<Project> projects = projectListView.getSelectionModel().getSelectedItems();
+            List<Project> projects = projectListView.getSelectionModel().getSelectedItems();
             projects = ProjectList.getCorrectProjects(projects);
             if (projects.isEmpty()) {
-                String message = String.format(NO_ANY_PROJECT_FOR_OPERATION, SWITCH_BEANCH_OPERATION_NAME);
+                String message = String.format(NO_ANY_PROJECT_FOR_OPERATION, CHECKOUT_BEANCH_OPERATION_NAME);
                 _consoleService.addMessage(message, MessageType.ERROR);
                 return;
             }
 
-            URL switchBranchWindowUrl = getClass().getClassLoader().getResource(ViewKey.SWITCH_BRANCH_WINDOW.getPath());
-            FXMLLoader loader = new FXMLLoader(switchBranchWindowUrl);
+            URL checkoutBranchWindowUrl = getClass().getClassLoader().getResource(ViewKey.CHECKOUT_BRANCH_WINDOW.getPath());
+            FXMLLoader loader = new FXMLLoader(checkoutBranchWindowUrl);
             Parent root = loader.load();
 
-            SwitchBranchWindowController switchWindowController  = loader.getController();
+            CheckoutBranchWindowController checkoutWindowController  = loader.getController();
 
             Scene scene = new Scene(root);
             Stage stage = new Stage();
             stage.setScene(scene);
             stage.getIcons().add(_appIcon);
-            stage.setTitle(SWITCH_BRANCH_TITLE);
+            stage.setTitle(CHECKOUT_BRANCH_TITLE);
             stage.initModality(Modality.APPLICATION_MODAL);
 
             /* Set size and position */
@@ -848,7 +853,7 @@ public class ModularController implements UpdateProgressListener {
             stage.setMinWidth(dialogWidth / 2);
             stage.setMinHeight(dialogHeight / 2);
 
-            switchWindowController.beforeShowing(projects, stage);
+            checkoutWindowController.beforeShowing(projects, stage);
             stage.show();
         } catch (IOException e) {
             _logger.error("Could not load fxml resource", e);
@@ -893,15 +898,8 @@ public class ModularController implements UpdateProgressListener {
 
     @FXML
     @SuppressWarnings("unused")
-    private void onCommitAction(ActionEvent actionEvent) {
-        List<Project> projectWithChanges = _gitService.getProjectsWithChanges(getCurrentProjects());
-        if (projectWithChanges.isEmpty()) {
-            showProjectsWithoutChangesMessage();
-            return;
-        }
-
-        CommitDialog dialog = new CommitDialog();
-        dialog.commitChanges(projectWithChanges);
+    private void openGitStaging(ActionEvent actionEvent) {
+        WindowLoader.get().loadGitStageWindow(null);
     }
 
     @FXML
@@ -945,8 +943,8 @@ public class ModularController implements UpdateProgressListener {
     private void showEditProjectPropertiesWindow(ActionEvent event) {
         try {
 
-            URL switchBranchWindowUrl = getClass().getClassLoader().getResource(ViewKey.EDIT_PROJECT_PROPERTIES.getPath());
-            FXMLLoader loader = new FXMLLoader(switchBranchWindowUrl);
+            URL editProjectPropertiesWindowUrl = getClass().getClassLoader().getResource(ViewKey.EDIT_PROJECT_PROPERTIES.getPath());
+            FXMLLoader loader = new FXMLLoader(editProjectPropertiesWindowUrl);
             Parent root = loader.load();
 
             EditProjectPropertiesController controller = loader.getController();
@@ -1111,7 +1109,7 @@ public class ModularController implements UpdateProgressListener {
     }
 
     /**
-     * USE FOR REPEATABLE OPERATION (like SwitchBranch, EditPomXML etc.)
+     * USE FOR REPEATABLE OPERATION (like CheckoutBranch, EditPomXML etc.)
      *
      * @return list of projects
      */
@@ -1127,25 +1125,18 @@ public class ModularController implements UpdateProgressListener {
 
     private void hideShadowsAction() {
         Platform.runLater(() -> {
-            Boolean isHide = preferences.getBoolean(PREF_NAME_HIDE_SHADOWS, false);
-            filterShadowProjects.setSelected(isHide);
-            ObservableList<Project> obsList = FXCollections.observableArrayList(
-                    isHide ? _projectsList.getClonedProjects() : _projectsList.getProjects());
-            projectListView.setItems(obsList);
-            if (!isHide) {
-                sortProjectsList();
-            } else {
-                projectListView.refresh();
+            if (preferences != null) {
+                Boolean isHide = preferences.getBoolean(PREF_NAME_HIDE_SHADOWS, false);
+                filterShadowProjects.setSelected(isHide);
+                if (isHide) {
+                    ObservableList<Project> obsList = FXCollections.observableArrayList(_projectsList.getClonedProjects());
+                    projectListView.setItems(obsList);
+                    projectListView.refresh();
+                } else {
+                    sortProjectsList();
+                }
             }
         });
-    }
-
-    private void showProjectsWithoutChangesMessage() {
-        String noChangesMessage = "Selected projects do not have changes";
-        _consoleService.addMessage("Selected projects do not have changes", MessageType.SIMPLE);
-        StatusDialog statusDialog = new StatusDialog(STATUS_DIALOG_TITLE, STATUS_DIALOG_HEADER_COMMIT,
-                noChangesMessage);
-        statusDialog.showAndWait();
     }
 
     private void finishAction(String message, MessageType type, ApplicationState state) {
@@ -1254,24 +1245,17 @@ public class ModularController implements UpdateProgressListener {
     }
 
     /**
-     * Note: shadow projects should be at the end of list
+     * Shadow projects should be at the end of list.
      */
     private void sortProjectsList() {
-        List<Project> sortedList = _projectsList.getProjects()
-                .stream()
-                .sorted(this::compareProjects)
-                .collect(Collectors.toList());
-
         Platform.runLater(() -> {
-            ObservableList<Project> projectsObservableList = FXCollections.observableList(sortedList);
-            //noinspection unchecked
-            projectListView.setItems(projectsObservableList);
+            Comparator<Project> comparator = new ProjectListComparator();
+            ObservableList<Project> obsProjects = FXCollections.observableArrayList(_projectsList.getProjects());
+            SortedList<Project> sortList = new SortedList<>(obsProjects);
+            sortList.setComparator(comparator);
+            projectListView.setItems(sortList);
             projectListView.refresh();
         });
-    }
-
-    private int compareProjects(Project firstProject, Project secondProject) {
-        return Boolean.compare(secondProject.isCloned(), firstProject.isCloned());
     }
 
     private void checkProjectsList() {
@@ -1298,7 +1282,7 @@ public class ModularController implements UpdateProgressListener {
 
     private void refreshLoadProjects() {
         _projectsList.refreshLoadProjects();
-        sortAndCheckProjects();
+        hideShadowsAction();
     }
 
     private BooleanBinding booleanBindingForShadowProjects() {
@@ -1329,33 +1313,25 @@ public class ModularController implements UpdateProgressListener {
     }
 
     private void setToolbarDisableProperty(BooleanBinding bindingForShadow, BooleanBinding bindingForCloned) {
-        ToolbarManager.getInstance().getButtonById(ToolbarButtons.CLONE_PROJECT_BUTTON.getId()).disableProperty()
-                .bind(bindingForCloned);
-        ToolbarManager.getInstance().getButtonById(ToolbarButtons.NEW_BRANCH_BUTTON.getId()).disableProperty()
-                .bind(bindingForShadow);
-        ToolbarManager.getInstance().getButtonById(ToolbarButtons.SWITCH_BRANCH_BUTTON.getId()).disableProperty()
-                .bind(bindingForShadow);
-        ToolbarManager.getInstance().getButtonById(ToolbarButtons.COMMIT_BUTTON.getId()).disableProperty()
-                .bind(bindingForShadow);
-        ToolbarManager.getInstance().getButtonById(ToolbarButtons.PUSH_BUTTON.getId()).disableProperty()
-                .bind(bindingForShadow);
-        ToolbarManager.getInstance().getButtonById(ToolbarButtons.EDIT_PROJECT_PROPERTIES_BUTTON.getId())
-                .disableProperty().bind(bindingForShadow);
-        ToolbarManager.getInstance().getButtonById(ToolbarButtons.PULL_BUTTON.getId()).disableProperty()
-                .bind(bindingForShadow);
-        ToolbarManager.getInstance().getButtonById(ToolbarButtons.REVERT_CHANGES.getId()).disableProperty()
-                .bind(bindingForShadow);
+        _toolbarManager.getButtonById(ToolbarButtons.CLONE_PROJECT_BUTTON.getId()).disableProperty().bind(bindingForCloned);
+        _toolbarManager.getButtonById(ToolbarButtons.NEW_BRANCH_BUTTON.getId()).disableProperty().bind(bindingForShadow);
+        _toolbarManager.getButtonById(ToolbarButtons.CHECKOUT_BRANCH_BUTTON.getId()).disableProperty().bind(bindingForShadow);
+        _toolbarManager.getButtonById(ToolbarButtons.STAGING_BUTTON.getId()).disableProperty().bind(bindingForShadow);
+        _toolbarManager.getButtonById(ToolbarButtons.PUSH_BUTTON.getId()).disableProperty().bind(bindingForShadow);
+        _toolbarManager.getButtonById(ToolbarButtons.EDIT_PROJECT_PROPERTIES_BUTTON.getId()).disableProperty().bind(bindingForShadow);
+        _toolbarManager.getButtonById(ToolbarButtons.PULL_BUTTON.getId()).disableProperty().bind(bindingForShadow);
+        _toolbarManager.getButtonById(ToolbarButtons.REVERT_CHANGES.getId()).disableProperty().bind(bindingForShadow);
     }
 
     private void setMainMenuDisableProperty(BooleanBinding bindingForShadow, BooleanBinding bindingForCloned) {
-        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_CLONE_PROJECT).disableProperty().bind(bindingForCloned);
-        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_COMMIT).disableProperty().bind(bindingForShadow);
-        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_SWITCH_BRANCH).disableProperty().bind(bindingForShadow);
-        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_CREATE_BRANCH).disableProperty().bind(bindingForShadow);
-        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_COMMIT).disableProperty().bind(bindingForShadow);
-        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_PUSH).disableProperty().bind(bindingForShadow);
-        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_PULL).disableProperty().bind(bindingForShadow);
-        MainMenuManager.getInstance().getButtonById(MainMenuItems.MAIN_REVERT).disableProperty().bind(bindingForShadow);
+        _mainMenuManager.getButtonById(MainMenuItems.MAIN_CLONE_PROJECT).disableProperty().bind(bindingForCloned);
+        _mainMenuManager.getButtonById(MainMenuItems.MAIN_STAGING).disableProperty().bind(bindingForShadow);
+        _mainMenuManager.getButtonById(MainMenuItems.MAIN_CHECKOUT_BRANCH).disableProperty().bind(bindingForShadow);
+        _mainMenuManager.getButtonById(MainMenuItems.MAIN_CREATE_BRANCH).disableProperty().bind(bindingForShadow);
+        _mainMenuManager.getButtonById(MainMenuItems.MAIN_PUSH).disableProperty().bind(bindingForShadow);
+        _mainMenuManager.getButtonById(MainMenuItems.MAIN_PULL).disableProperty().bind(bindingForShadow);
+        _mainMenuManager.getButtonById(MainMenuItems.MAIN_REVERT).disableProperty().bind(bindingForShadow);
+
     }
     //endregion
     /*
@@ -1586,17 +1562,17 @@ public class ModularController implements UpdateProgressListener {
             }
         }
 
-
         private void updateProjectsByState(ApplicationState state) {
-            List<Project> projects = _projectsList.getProjects();
             if (state == ApplicationState.CREATE_PROJECT) {
                 refreshLoadProjects();
                 return;
-            }
-            if (state != ApplicationState.LOAD_PROJECTS && state != ApplicationState.UPDATE_PROJECT_STATUSES) {
-                _projectService.updateProjectStatuses(projects);
+            } else if (state == ApplicationState.CLONE) {
+                sortProjectsList();
+                return;
+            } else if (state != ApplicationState.LOAD_PROJECTS && state != ApplicationState.UPDATE_PROJECT_STATUSES) {
+                _projectsList.updateProjectStatuses();
             } else {
-                hideShadowsAction();
+                projectListView.refresh();
             }
         }
     }

@@ -1,5 +1,6 @@
 package com.lgc.gitlabtool.git.entities;
 
+import java.io.Serializable;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Set;
@@ -17,7 +18,9 @@ import com.lgc.gitlabtool.git.util.PathUtilities;
  *
  * @author Lyska Lyudmila
  */
-public class Project {
+public class Project implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     @SerializedName("id")
     private int id;
 
@@ -133,4 +136,49 @@ public class Project {
         return _projectStatus;
     }
 
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + (_isCloned ? 1231 : 1237);
+        result = prime * result + ((_pathToClonedProject == null) ? 0 : _pathToClonedProject.hashCode());
+        result = prime * result + id;
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        Project other = (Project) obj;
+        if (_isCloned != other._isCloned) {
+            return false;
+        }
+        if (_pathToClonedProject == null) {
+            if (other._pathToClonedProject != null) {
+                return false;
+            }
+        } else if (!_pathToClonedProject.equals(other._pathToClonedProject)) {
+            return false;
+        }
+        if (id != other.id) {
+            return false;
+        }
+        if (name == null) {
+            if (other.name != null) {
+                return false;
+            }
+        } else if (!name.equals(other.name)) {
+            return false;
+        }
+        return true;
+    }
 }

@@ -7,18 +7,16 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.lgc.gitlabtool.git.listeners.stateListeners.AbstractStateListener;
-import com.lgc.gitlabtool.git.services.BackgroundService;
-import javafx.stage.WindowEvent;
 import org.apache.commons.lang.StringUtils;
 
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.ProjectList;
+import com.lgc.gitlabtool.git.listeners.stateListeners.AbstractStateListener;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
+import com.lgc.gitlabtool.git.services.BackgroundService;
 import com.lgc.gitlabtool.git.services.PomXMLService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StateService;
-import com.lgc.gitlabtool.git.ui.javafx.CommitDialog;
 import com.lgc.gitlabtool.git.ui.javafx.StatusDialog;
 
 import javafx.application.Platform;
@@ -39,6 +37,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 public class EditProjectPropertiesController extends AbstractStateListener {
 
@@ -357,8 +356,7 @@ public class EditProjectPropertiesController extends AbstractStateListener {
     }
 
     private void commitProjects(List<Project> projects) {
-        CommitDialog dialog = new CommitDialog();
-        dialog.commitChanges(projects);
+        WindowLoader.get().loadGitStageWindow(projects);
     }
 
     @FXML

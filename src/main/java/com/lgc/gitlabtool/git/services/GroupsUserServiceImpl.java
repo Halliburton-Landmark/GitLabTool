@@ -38,23 +38,25 @@ public class GroupsUserServiceImpl implements GroupsUserService {
     private static final String GROUP_ALREADY_LOADED_MESSAGE = "The group with this path is already loaded.";
     private static final String GROUP_DOESNT_EXIST_MESSAGE = "This group does not exist.";
     private static final String ERROR_GETTING_GROUP_MESSAGE = "Error getting group from GitLab.";
-    private static final String INCCORECT_DATA_MESSAGE = "ERROR: Incorrect data.";
 
     private static ClonedGroupsService _clonedGroupsService;
     private static ProjectService _projectService;
     private static StateService _stateService;
     private static ConsoleService _consoleService;
+    private static JGit _jGit;
 
     public GroupsUserServiceImpl(RESTConnector connector,
                                  ClonedGroupsService clonedGroupsService,
                                  ProjectService projectService,
                                  StateService stateService,
-                                 ConsoleService consoleService) {
+                                 ConsoleService consoleService,
+                                 JGit jGit) {
         setConnector(connector);
         setClonedGroupsService(clonedGroupsService);
         setProjectService(projectService);
         setStateService(stateService);
         setConsoleService(consoleService);
+        setJGit(jGit);
     }
 
     @Override
@@ -91,7 +93,7 @@ public class GroupsUserServiceImpl implements GroupsUserService {
             }
             progressListener.onFinish((Object)null);
         } else {
-            JGit.getInstance().clone(projects, groupPath, progressListener);
+            _jGit.clone(projects, groupPath, progressListener);
         }
         group.setClonedStatus(true);
         group.setPathToClonedGroup(destinationPath + File.separator + group.getName());
@@ -175,6 +177,12 @@ public class GroupsUserServiceImpl implements GroupsUserService {
     private void setConsoleService(ConsoleService consoleService) {
         if (consoleService != null) {
             _consoleService = consoleService;
+        }
+    }
+
+    private void setJGit(JGit jGit) {
+        if (jGit != null) {
+            _jGit = jGit;
         }
     }
 

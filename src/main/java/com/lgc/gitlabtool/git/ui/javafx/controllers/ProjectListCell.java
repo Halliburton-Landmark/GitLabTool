@@ -25,11 +25,16 @@ public class ProjectListCell extends ListCell<Project> {
     private static final String SHADOW_PROJECT_TOOLTIP = "The project is not cloned.";
     private static final String PROJECT_WITH_CONFLICTS_ICON_URL = "icons/project/list_icons/conflicts_16x16.png";
     private static final String PROJECT_WITH_UNCOMMITTED_CHANGES_ICON_URL = "icons/project/list_icons/uncommitted_changes_16x16.png";
+    private static final String PROJECT_WITH_NEW_FILES_ICON_URL = "icons/project/list_icons/new_files_16x16.png";
     private static final String COMMITS_AHEAD_INDEX_ICON_URL = "icons/project/list_icons/ahead_index_12x12.png";
     private static final String COMMITS_BEHIND_INDEX_ICON_URL = "icons/project/list_icons/behind_index_12x12.png";
+
     private static final String PROJECT_HAS_CONFLICTS_TOOLTIP = "Project has conflicts";
     private static final String PROJECT_HAS_UNCOMMITED_CHANGES_TOOLTIP = "Project has uncommitted changes";
     private static final String TRACKING_BRANCH_TOOLTIP = "Tracking branch name: ";
+    private static final String NEW_FILES_TOOLTIP = "Project has new files";
+
+
     private final Integer LIST_CELL_SPACING = 5;
     private final Double INDEX_FONT_SIZE = 12.0;
     private final String LEFT_BRACKET = "[";
@@ -117,6 +122,13 @@ public class ProjectListCell extends ListCell<Project> {
             return;
         }
 
+        if (projectStatus.hasNewUntrackedFiles()) {
+            Node untrackedImageView = new ImageView(getImage(PROJECT_WITH_NEW_FILES_ICON_URL));
+            setTooltip(untrackedImageView, NEW_FILES_TOOLTIP);
+            pics.add(untrackedImageView);
+        }
+
+
         if (projectStatus.hasChanges()) {
             Node uncommittedChangesImage = new ImageView(getImage(PROJECT_WITH_UNCOMMITTED_CHANGES_ICON_URL));
             setTooltip(uncommittedChangesImage, PROJECT_HAS_UNCOMMITED_CHANGES_TOOLTIP);
@@ -152,14 +164,11 @@ public class ProjectListCell extends ListCell<Project> {
 
         HBox aheadBehindItems = new HBox(items.toArray(new Node[items.size()]));
         aheadBehindItems.setAlignment(Pos.CENTER);
-        
         setTooltip(aheadBehindItems, TRACKING_BRANCH_TOOLTIP + getTrackingBranchName(item));
-        
         return aheadBehindItems;
     }
 
     private void setTooltip(Node node, String tooltip) {
         Tooltip.install(node, new Tooltip(tooltip));
     }
-
 }

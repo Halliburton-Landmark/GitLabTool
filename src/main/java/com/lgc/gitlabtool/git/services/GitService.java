@@ -1,12 +1,17 @@
 package com.lgc.gitlabtool.git.services;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jgit.api.Git;
+
 import com.lgc.gitlabtool.git.entities.Branch;
 import com.lgc.gitlabtool.git.entities.Project;
+import com.lgc.gitlabtool.git.entities.ProjectStatus;
 import com.lgc.gitlabtool.git.jgit.BranchType;
+import com.lgc.gitlabtool.git.jgit.ChangedFile;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 
@@ -28,26 +33,26 @@ public interface GitService extends Service {
     boolean containsBranches(Project project, List<Branch> branches, boolean isCommon);
 
     /**
-     * Switches projects to selected branch
+     * Checkouts projects to selected branch
      *
-     * @param projects projects that need to be switched
+     * @param projects projects that need to be checked out
      * @param branch selected branch
      * @param progress the listener for obtaining data on the process of performing the operation
      *
-     * @return map with projects and theirs statuses of switching
+     * @return map with projects and theirs checkout statuses
      */
-    Map<Project, JGitStatus> switchTo(List<Project> projects, Branch branch, ProgressListener progress);
+    Map<Project, JGitStatus> checkoutBranch(List<Project> projects, Branch branch, ProgressListener progress);
 
     /**
-     * Switches projects to selected branch
+     * Checkouts projects to selected branch
      *
-     * @param projects projects that need to be switched
+     * @param projects projects that need to be checked out
      * @param branchName name of the branch
      * @param isRemote <code>true</code> if the branch has {@link BranchType#REMOTE}
      * @param progress the listener for obtaining data on the process of performing the operation
-     * @return map with projects and theirs statuses of switching
+     * @return map with projects and theirs checkout statuses
      */
-    Map<Project, JGitStatus> switchTo(List<Project> projects, String branchName, boolean isRemote, ProgressListener progress);
+    Map<Project, JGitStatus> checkoutBranch(List<Project> projects, String branchName, boolean isRemote, ProgressListener progress);
 
     /**
      * Gets projects that have uncommited changes
@@ -160,12 +165,57 @@ public interface GitService extends Service {
      * Starts canceling process for cloning. This may take some time.
      */
     void cancelClone();
-    
+
+    /** This method return tracking branch.
+    *
+    * @param project
+    * @return tracking branch.
+    */
+   public String getTrackingBranch(Project project);
+
     /**
-     * This method return tracking branch.
-     * 
-     * @param project
-     * @return tracking branch.
+     * Gets ChangedFiles for project.
+     *
+     * @param  project the project
+     * @return a ChangedFiles list
      */
-    public String getTrackingBranch(Project project);
+    List<ChangedFile> getChangedFiles(Project project);
+
+    /**
+     * Adds untracked files to index.
+     *
+     * @param  files the map of projects and changed files
+     * @return the list of added files
+     */
+    List<ChangedFile> addUntrackedFilesToIndex(Map<Project, List<ChangedFile>> files);
+
+    /**
+     * Resets changed files to head
+     *
+     * @param  files the map which has projects and their changed files
+     * @return a list of changed files
+     */
+    List<ChangedFile> resetChangedFiles(Map<Project, List<ChangedFile>> files);
+
+    /**
+     * Gets ProjectStatus for project.
+     * We use {@link Status} for getting info about conflicting, untracked files etc.
+     * Also, use it for checking the presence of uncommitted changes.
+     * Gets current branch name, ahead and behind indexes using {@link Git}.
+     *
+     * @param  project the project
+     * @return ProjectStatus for the project.
+     */
+    ProjectStatus getProjectStatus(Project project);
+
+    /**
+     * Gets branches of project
+     *
+     * @param projects    cloned project
+     * @param brType      type branch
+     * @param onlyCommon  if value is <code>true</code> return only common branches of projects,
+     *                    if <code>false</code> return all branches.
+     * @return a list of branches
+     */
+    Set<Branch> getBranches(Collection<Project> projects, BranchType brType, boolean onlyCommon);
 }

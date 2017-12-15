@@ -42,10 +42,10 @@ public enum ApplicationState {
         }
     },
 
-    SWITCH_BRANCH {
+    CHECKOUT_BRANCH {
         @Override
         public String toString() {
-            return "Branch switching";
+            return "Checkouting branch";
         }
     },
 
@@ -81,6 +81,20 @@ public enum ApplicationState {
         @Override
         public String toString() {
             return "Reverting changes";
+        }
+    },
+
+    ADD_FILES_TO_INDEX {
+        @Override
+        public String toString() {
+            return "Adding files to index";
+        }
+    },
+
+    RESET {
+        @Override
+        public String toString() {
+            return "Reseting changed files";
         }
     };
 

@@ -1,6 +1,7 @@
 package com.lgc.gitlabtool.git.project.nature.projecttype;
 
 import java.io.File;
+import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -20,7 +21,9 @@ import com.lgc.gitlabtool.git.project.nature.operation.Operation;
  *
  * @author Lyudmila Lyska
  */
-abstract class ProjectTypeImpl implements ProjectType {
+abstract class ProjectTypeImpl implements ProjectType, Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     @SerializedName(ID_KEY)
     private String _id;
