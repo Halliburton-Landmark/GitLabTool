@@ -6,6 +6,11 @@ import java.io.IOException;
 
 import com.lgc.gitlabtool.git.services.BackgroundService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
+import com.lgc.gitlabtool.git.ui.javafx.GLTAlert;
+
+import javafx.application.Platform;
+import javafx.scene.control.Alert.AlertType;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -19,9 +24,6 @@ public class FileLauncherUtil {
 
     private static final Logger _logger = LogManager.getLogger(FileLauncherUtil.class);
     private static final String ERROR_MESSAGE = "Could not open the file";
-
-    private static final BackgroundService _backgroundService = (BackgroundService) ServiceProvider.getInstance()
-            .getService(BackgroundService.class.getName());
 
     /**
      * Opens the file with user system preferred editor.
@@ -43,13 +45,19 @@ public class FileLauncherUtil {
                     desktop.open(document);
                     _logger.debug("File opened");
                 } else {
-                    _logger.warn("There is no application registered to open file: " + document.getName());
+                    String message = "There is no application registered to open file: " + document.getName();
+                    _logger.warn(message);
+                    Platform.runLater(() -> {
+                        new GLTAlert(AlertType.WARNING, "Open file dialog", message, "").showAndWait();
+                    });
                 }
             } catch (IllegalArgumentException | IOException e) {
                 _logger.debug(ERROR_MESSAGE + ": " + e.getMessage());
             }
         };
-        _backgroundService.runInEventThread(openDocumentTask);
+        BackgroundService backgroundService = (BackgroundService) ServiceProvider.getInstance()
+                .getService(BackgroundService.class.getName());
+        backgroundService.runInAWTThread(openDocumentTask);
     }
 
     /**

@@ -43,7 +43,7 @@ public class BackgroundServiceImpl implements BackgroundService {
     }
 
     @Override
-    public void runInEventThread(Runnable runnable) {
+    public void runInAWTThread(Runnable runnable) {
         EventQueue.invokeLater(runnable);
     }
 
