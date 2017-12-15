@@ -22,11 +22,17 @@ public class DialogDTO {
 	 * Selected Gitlab server
 	 */
 	private String serverUrl;
+
+	/**
+	 * Selected Gitlab server (without api-suffix)
+	 */
+	private String shortServerUrl;
 	
-	public DialogDTO(String login, String password, String serverUrl) {
+	public DialogDTO(String login, String password, String serverUrl, String shortServerUrl) {
 		this.login = login;
 		this.password = password;
 		this.serverUrl = serverUrl;
+		this.shortServerUrl = shortServerUrl;
 	}
 	
 	public String getLogin() {
@@ -52,5 +58,7 @@ public class DialogDTO {
 	public void setServerURL(String comboBoxValue) {
 		this.serverUrl = comboBoxValue;
 	}
+
+	public String getShortServerURL() { return shortServerUrl; }
 	
 }

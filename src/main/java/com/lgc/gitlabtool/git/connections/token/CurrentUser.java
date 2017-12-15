@@ -11,7 +11,7 @@ public class CurrentUser {
     private User _currentUser;
     private static CurrentUser _instance;
 
-    private static final String PRIVATE_TOKEN_KEY = "PRIVATE-TOKEN";
+    private static final String PRIVATE_TOKEN_KEY = "Authorization";
 
     private CurrentUser() {}
 
@@ -36,6 +36,30 @@ public class CurrentUser {
      */
     public String getPrivateTokenValue() {
         return _currentUser.getPrivate_token();
+    }
+
+    /**
+     * Set the value of a private token for a current user.
+     * @param token value of a private token
+     */
+    public void setPrivateTokenValue(String token){
+        _currentUser.setPrivate_token(token);
+    }
+
+    /**
+     * Set the value of a OAuth2 token  for a current user.
+     * @param token value of OAuth2 token
+     */
+    public void setOAuth2TokenValue(String token){
+        _currentUser.setOAuth2token(token);
+    }
+
+    /**
+     * Get the value of a OAuth2 token for a current user
+     * @return value
+     */
+    public String getOAuth2TokenValue() {
+        return _currentUser.getOAuth2token();
     }
 
     /**
