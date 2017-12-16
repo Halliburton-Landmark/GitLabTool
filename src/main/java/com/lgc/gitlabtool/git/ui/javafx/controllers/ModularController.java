@@ -1217,7 +1217,55 @@ public class ModularController implements UpdateProgressListener {
             openFolder.setText("Open project folder");
             openFolder.setOnAction(this::onOpenFolder);
             openFolder.setGraphic(new ImageView(openFolderIco));
+            
+            Menu subMenuGit = new Menu("Git");
+           
+            MenuItem itemCreateProject = new MenuItem(GLToolButtons.CREATE_PROJECT_BUTTON.getText());
+            Image itemCreateProjectIco = new Image(getClass().getClassLoader().getResource(GLToolButtons.CREATE_PROJECT_BUTTON.getIconUrl()).toExternalForm());
+            itemCreateProject.setGraphic(new ImageView(itemCreateProjectIco));
+            itemCreateProject.setOnAction(this::createProjectButton);
+            
+            MenuItem itemCreateBranch = new MenuItem(GLToolButtons.MAIN_CREATE_BRANCH.getText());
+            Image itemCreateBranchIco = new Image(getClass().getClassLoader().getResource(GLToolButtons.MAIN_CREATE_BRANCH.getIconUrl()).toExternalForm());
+            itemCreateBranch.setGraphic(new ImageView(itemCreateBranchIco));
+            itemCreateBranch.setOnAction(this::onNewBranchButton);
+            
+            MenuItem itemCheckoutBranch = new MenuItem(GLToolButtons.MAIN_CHECKOUT_BRANCH.getText());
+            Image itemCheckoutBranchIco = new Image(getClass().getClassLoader().getResource(GLToolButtons.MAIN_CHECKOUT_BRANCH.getIconUrl()).toExternalForm());
+            itemCheckoutBranch.setGraphic(new ImageView(itemCheckoutBranchIco));
+            itemCheckoutBranch.setOnAction(this::showCheckoutBranchWindow);
+            
+            MenuItem itemStaging = new MenuItem(GLToolButtons.MAIN_STAGING.getText());
+            Image itemStagingIco = new Image(getClass().getClassLoader().getResource(GLToolButtons.MAIN_STAGING.getIconUrl()).toExternalForm());
+            itemStaging.setGraphic(new ImageView(itemStagingIco));
+            itemStaging.setOnAction(this::openGitStaging);
+            
+            MenuItem itemPull = new MenuItem(GLToolButtons.MAIN_PULL.getText());
+            Image itemPullIco = new Image(getClass().getClassLoader().getResource(GLToolButtons.MAIN_PULL.getIconUrl()).toExternalForm());
+            itemPull.setGraphic(new ImageView(itemPullIco));
+            itemPull.setOnAction(this::onPullAction);
+            
+            MenuItem itemPush = new MenuItem(GLToolButtons.MAIN_PUSH.getText());
+            Image itemPushIco = new Image(getClass().getClassLoader().getResource(GLToolButtons.MAIN_PUSH.getIconUrl()).toExternalForm());
+            itemPush.setGraphic(new ImageView(itemPushIco));
+            itemPush.setOnAction(this::onPushAction);
+            
+            MenuItem itemRevert = new MenuItem(GLToolButtons.MAIN_REVERT.getText());
+            Image itemRevertIco = new Image(getClass().getClassLoader().getResource(GLToolButtons.MAIN_REVERT.getIconUrl()).toExternalForm());
+            itemRevert.setGraphic(new ImageView(itemRevertIco));
+            itemRevert.setOnAction(this::onRevertChanges);
+            
+            subMenuGit.getItems().addAll(itemCreateProject, itemCreateBranch, itemCheckoutBranch,
+            		itemStaging, itemPull, itemPush, itemRevert);
+            
+            MenuItem itemEditProjectProp = new MenuItem(GLToolButtons.EDIT_PROJECT_PROPERTIES_BUTTON.getText());
+            Image itemEditProjectPropIco = new Image(getClass().getClassLoader().getResource(GLToolButtons.EDIT_PROJECT_PROPERTIES_BUTTON.getIconUrl()).toExternalForm());
+            itemEditProjectProp.setGraphic(new ImageView(itemEditProjectPropIco));
+            itemEditProjectProp.setOnAction(this::showEditProjectPropertiesWindow);
+            
             menuItems.add(openFolder);
+            menuItems.add(subMenuGit);
+            menuItems.add(itemEditProjectProp);  
         }
 
         if (hasShadow) {
