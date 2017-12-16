@@ -161,7 +161,6 @@ public class ToolbarManager {
     }
 
     private Button createButton(String buttonId, String imgPath, String btnText, String tooltipText) {
-        if (getClass().getClassLoader().getResource(imgPath) == null) return null;
         Image btnImage = new Image(getClass().getClassLoader().getResource(imgPath).toExternalForm());
         Button button = new Button(btnText, new ImageView(btnImage));
         button.setTooltip(new Tooltip(tooltipText));
