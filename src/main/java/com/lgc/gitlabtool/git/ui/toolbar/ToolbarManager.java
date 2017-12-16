@@ -68,9 +68,9 @@ public class ToolbarManager {
         items = new ArrayList<>();
         for (GLToolButtons button : GLToolButtons.values()) {
             if (button.getViewKey().equals(windowId)) {
-            	Button btn = createButton(button.getId(), button.getIconUrl(), button.getText(), button.getTooltip());
-                if (btn != null) {
-                	items.add(btn);
+                Button btn = createButton(button.getId(), button.getIconUrl(), button.getText(), button.getTooltip());
+                if (btn != null && button.getIconSize() == GLToolButtons.GLToolConstants.ICON_SIZE_20) {
+                    items.add(btn);
                 }
             }
         }

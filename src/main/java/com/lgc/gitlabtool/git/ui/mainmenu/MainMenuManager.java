@@ -68,7 +68,7 @@ public class MainMenuManager {
             for (GLToolButtons button : GLToolButtons.values()) {
                 if (isValidItemForView(windowId, button) && button.getMenuName() != null && button.getMenuName().equals(menu.getText())) {
                 	MenuItem menuItem = createButton(button.getId(), button.getIconUrl(), button.getText());
-                    if (menuItem != null) {
+                    if (menuItem != null && !menu.getItems().contains(menuItem)) {
                     	menu.getItems().add(menuItem);
                     }
                 }
