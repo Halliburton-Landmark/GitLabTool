@@ -69,7 +69,10 @@ public class ToolbarManager {
         items = new ArrayList<>();
         for (GLToolButtons button : GLToolButtons.values()) {
             if (button.getViewKey().equals(windowId)) {
-                items.add(createButton(button.getId(), button.getIconUrl(), button.getText(), button.getTooltip()));
+            	Button btn = createButton(button.getId(), button.getIconUrl(), button.getText(), button.getTooltip());
+                if (btn != null) {
+                	items.add(btn);
+                }
             }
         }
 

@@ -67,7 +67,10 @@ public class MainMenuManager {
         for (Menu menu : menus) {
             for (GLToolButtons button : GLToolButtons.values()) {
                 if (isValidItemForView(windowId, button) && button.getMenuName() != null && button.getMenuName().equals(menu.getText())) {
-                    menu.getItems().add(createButton(button.getId(), button.getIconUrl(), button.getText()));
+                	MenuItem menuItem = createButton(button.getId(), button.getIconUrl(), button.getText());
+                    if (menuItem != null) {
+                    	menu.getItems().add(menuItem);
+                    }
                 }
             }
         }
