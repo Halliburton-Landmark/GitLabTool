@@ -516,7 +516,7 @@ public class ModularController implements UpdateProgressListener {
         });
 
         listView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        listView.addEventFilter(MouseEvent.MOUSE_PRESSED, evt -> {
+        listView.addEventFilter(MouseEvent.MOUSE_CLICKED, evt -> {
             Node node = evt.getPickResult().getIntersectedNode();
 
             while (node != null && node != listView && !(node instanceof ListCell)) {
