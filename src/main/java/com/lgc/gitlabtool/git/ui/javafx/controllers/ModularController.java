@@ -1249,22 +1249,16 @@ public class ModularController implements UpdateProgressListener {
         return listView.getSelectionModel().getSelectedItems().size() == listView.getItems().size();
     }
 
-    private void sortAndCheckProjects() {
-        sortProjectsList();
-        checkProjectsList();
-    }
-
     /**
      * Shadow projects should be at the end of list.
      */
     private void sortProjectsList() {
         Platform.runLater(() -> {
-            Comparator<Project> comparator = new ProjectListComparator();
-            // TODO fix here
             List<Project> loadedProjects = _projectsList.getProjects();
             if (loadedProjects == null) {
                 return;
             }
+            Comparator<Project> comparator = new ProjectListComparator();
             ObservableList<Project> obsProjects = FXCollections.observableArrayList(_projectsList.getProjects());
             SortedList<Project> sortList = new SortedList<>(obsProjects);
             sortList.setComparator(comparator);
@@ -1301,6 +1295,7 @@ public class ModularController implements UpdateProgressListener {
 
     private void refreshLoadProjects() {
         _projectsList.refreshLoadProjects();
+        checkProjectsList();
         hideShadowsAction();
     }
 
