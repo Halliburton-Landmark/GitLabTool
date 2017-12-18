@@ -1,13 +1,6 @@
 package com.lgc.gitlabtool.git.ui.mainmenu;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 import com.lgc.gitlabtool.git.ui.javafx.controllers.ModularController;
 import com.lgc.gitlabtool.git.ui.toolbar.GLToolButtons;
@@ -59,14 +52,17 @@ public class MainMenuManager {
 
         Arrays.stream(GLToolButtons.values())
                 .filter(x -> isValidItemForView(windowId, x))
-                .map(GLToolButtons::getMenuName)
+                .map(GLToolButtons::getMainMenuInfo)
+                .filter(Objects::nonNull)
+                .sorted(Comparator.comparingInt(GLToolButtons.MainMenuInfo::getOrder))
+                .map(GLToolButtons.MainMenuInfo::getName)
                 .forEach(menusTitles::add);
 
         menusTitles.forEach(x -> menus.add(new Menu(x)));
 
         for (Menu menu : menus) {
             for (GLToolButtons button : GLToolButtons.values()) {
-                if (isValidItemForView(windowId, button) && button.getMenuName() != null && button.getMenuName().equals(menu.getText())) {
+                if (isValidItemForView(windowId, button) && button.getMainMenuInfo() != null && button.getMainMenuInfo().getName().equals(menu.getText())) {
                 	MenuItem menuItem = createButton(button.getId(), button.getIconUrl(), button.getText());
                     if (menuItem != null && !menu.getItems().contains(menuItem)) {
                     	menu.getItems().add(menuItem);
@@ -83,7 +79,7 @@ public class MainMenuManager {
     /**
      * Returns menu item from current view
      *
-     * @param menuItem enum item (see {@link MainMenuItems}) assigned to this menu item
+     * @param menuItem enum item (see {@link GLToolButtons}) assigned to this menu item
      * @return Existing menu item with chosen id and name of parent menu or empty menu item if does not matches
      */
     public MenuItem getButtonById(GLToolButtons menuItem) {
@@ -98,7 +94,7 @@ public class MainMenuManager {
         });
 
         return allItems.stream()
-                .filter(x -> x.getParentMenu().getText().equals(menuItem.getMenuName()))
+                .filter(x -> x.getParentMenu().getText().equals(menuItem.getMainMenuInfo().getName()))
                 .filter(x -> x.getId().equals(menuItem.getId()))
                 .findFirst()
                 .orElseGet(MenuItem::new);

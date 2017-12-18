@@ -1220,11 +1220,6 @@ public class ModularController implements UpdateProgressListener {
             
             Menu subMenuGit = new Menu("Git");
            
-            MenuItem itemCreateProject = new MenuItem(GLToolButtons.CREATE_PROJECT_BUTTON.getText());
-            Image itemCreateProjectIco = new Image(getClass().getClassLoader().getResource(GLToolButtons.CREATE_PROJECT_BUTTON.getIconUrl()).toExternalForm());
-            itemCreateProject.setGraphic(new ImageView(itemCreateProjectIco));
-            itemCreateProject.setOnAction(this::createProjectButton);
-            
             MenuItem itemCreateBranch = new MenuItem(GLToolButtons.MAIN_CREATE_BRANCH.getText());
             Image itemCreateBranchIco = new Image(getClass().getClassLoader().getResource(GLToolButtons.MAIN_CREATE_BRANCH.getIconUrl()).toExternalForm());
             itemCreateBranch.setGraphic(new ImageView(itemCreateBranchIco));
@@ -1255,7 +1250,7 @@ public class ModularController implements UpdateProgressListener {
             itemRevert.setGraphic(new ImageView(itemRevertIco));
             itemRevert.setOnAction(this::onRevertChanges);
             
-            subMenuGit.getItems().addAll(itemCreateProject, itemCreateBranch, itemCheckoutBranch,
+            subMenuGit.getItems().addAll(itemCreateBranch, itemCheckoutBranch,
             		itemStaging, itemPull, itemPush, itemRevert);
             
             MenuItem itemEditProjectProp = new MenuItem(GLToolButtons.EDIT_PROJECT_PROPERTIES_BUTTON.getText());
