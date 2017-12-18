@@ -66,10 +66,10 @@ public class ProjectList {
     /**
      * Gets project list of current group.
      *
-     * @return a unmodifiable list of project
+     * @return a unmodifiable list of project or <code>null</code> if projects weren't load.
      */
     public List<Project> getProjects() {
-        return Collections.unmodifiableList(_projects);
+        return _projects == null ? null : Collections.unmodifiableList(_projects);
     }
 
     /**
@@ -77,7 +77,11 @@ public class ProjectList {
      */
     public void refreshLoadProjects() {
         if (_currentGroup != null) {
-            _projects = loadProjects();
+            List<Project> loadedProject = loadProjects();
+            // If we cannot refresh projects we'll work with projects which were loaded at last time.
+            if (_projects != null && loadedProject != null) {
+                _projects = loadedProject;
+            }
         }
     }
 
@@ -172,7 +176,7 @@ public class ProjectList {
     public static void reset() {
         _isLockCreating = false;
         _currentGroup = null;
-        _projects.clear();
+        _projects = null;
     }
 
     /**
