@@ -74,12 +74,12 @@ class LoginDialog extends Dialog<DialogDTO> {
     /** need to store two line message */
     private final double MIN_MESSAGE_HEIGHT = 40;
 
-    private final Text sceneTitle;
+    private final Label sceneTitle;
     private final Label userName;
     private final TextField userTextField;
     private final Label password;
     private final PasswordField passwordField;
-    private final Text repositoryText;
+    private final Label repositoryText;
     private final ComboBox<String> comboBox;
     private final Label message;
     private final Button signInButton;
@@ -96,7 +96,7 @@ class LoginDialog extends Dialog<DialogDTO> {
         grid.setVgap(10);
         grid.setPadding(new Insets(25, 25, 25, 25));
 
-        sceneTitle = new Text("Welcome To GitLab");
+        sceneTitle = new Label("Welcome To GitLab");
         sceneTitle.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
         GridPane.setHalignment(sceneTitle, HPos.CENTER);
         grid.add(sceneTitle, 0, 1, 2, 1);
@@ -129,7 +129,7 @@ class LoginDialog extends Dialog<DialogDTO> {
         message.setVisible(false);
         grid.add(message, 0, 5, 3, 3);
 
-        repositoryText = new Text("Service: ");
+        repositoryText = new Label("Service: ");
         grid.add(repositoryText, 0, 4);
 
         ObservableList<String> options = getBoxOptions();
