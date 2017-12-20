@@ -28,6 +28,7 @@ import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.MessageType;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.ProjectList;
+import com.lgc.gitlabtool.git.jgit.JGit;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.listeners.stateListeners.StateListener;
@@ -49,7 +50,6 @@ import com.lgc.gitlabtool.git.ui.javafx.ChangesCheckDialog;
 import com.lgc.gitlabtool.git.ui.javafx.CloneProgressDialog;
 import com.lgc.gitlabtool.git.ui.javafx.CreateNewBranchDialog;
 import com.lgc.gitlabtool.git.ui.javafx.CreateProjectDialog;
-import com.lgc.gitlabtool.git.ui.javafx.GLTAlert;
 import com.lgc.gitlabtool.git.ui.javafx.IncorrectProjectDialog;
 import com.lgc.gitlabtool.git.ui.javafx.JavaFXUI;
 import com.lgc.gitlabtool.git.ui.javafx.ProgressDialog;
@@ -927,15 +927,18 @@ public class ModularController implements UpdateProgressListener {
     @FXML
     @SuppressWarnings("unused")
     private void onRevertChanges(ActionEvent actionEvent) {
-        GLTAlert alert = new GLTAlert(AlertType.CONFIRMATION, ApplicationState.REVERT.toString(),
-                "Revert changes for selected projects", "Are you sure you want to do it?");
-        alert.addButtons(ButtonType.CANCEL);
-        alert.setTextButton(ButtonType.OK, "Revert");
-        // check that user press OK button
-        if (!alert.isOKButtonPressed(alert.showAndWait())) {
-            return;
-        }
-        _backgroundService.runInBackgroundThread(this::revert);
+        JGit git = new JGit(_backgroundService);
+        git.stashCreate(getCurrentProjects().get(0), "new stash 666");
+        System.out.println("that's all");
+//        GLTAlert alert = new GLTAlert(AlertType.CONFIRMATION, ApplicationState.REVERT.toString(),
+//                "Revert changes for selected projects", "Are you sure you want to do it?");
+//        alert.addButtons(ButtonType.CANCEL);
+//        alert.setTextButton(ButtonType.OK, "Revert");
+//        // check that user press OK button
+//        if (!alert.isOKButtonPressed(alert.showAndWait())) {
+//            return;
+//        }
+//        _backgroundService.runInBackgroundThread(this::revert);
     }
 
     @FXML

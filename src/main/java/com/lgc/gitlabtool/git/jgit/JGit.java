@@ -28,6 +28,7 @@ import org.eclipse.jgit.api.ResetCommand;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.CheckoutConflictException;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.InvalidRefNameException;
 import org.eclipse.jgit.api.errors.JGitInternalException;
 import org.eclipse.jgit.dircache.DirCache;
 import org.eclipse.jgit.dircache.DirCacheCheckout;
@@ -52,7 +53,6 @@ import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.User;
 import com.lgc.gitlabtool.git.services.BackgroundService;
 import com.lgc.gitlabtool.git.services.ProgressListener;
-import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 import com.lgc.gitlabtool.git.util.PathUtilities;
 
@@ -150,6 +150,53 @@ public class JGit {
             mergeCollections(branches, shortNamesBranches, onlyCommon);
         });
         return branches;
+    }
+
+    /**
+     *
+     * @param project
+     * @param stashMessage
+     * @return
+     */
+    public boolean stashCreate(Project project, String stashMessage) {
+        try (Git git = getGit(project.getPath())) {
+            RevCommit stash = git.stashCreate()
+                                 .setWorkingDirectoryMessage(stashMessage)
+                                 .call();
+            return stash != null;
+        } catch (GitAPIException | IOException e) {
+            logger.error("Failed to create stash " + project.getName() +" project: ", e);
+        }
+        return false;
+    }
+
+    /**
+     *
+     *
+     * @param project
+     * @param stashMessage
+     * @return
+     */
+    public List<Stash> getStashes(Project project, String stashMessage) {
+        // checks
+        List<Stash> list = new ArrayList<>();
+        try (Git git = getGit(project.getPath())) {
+            Collection<RevCommit> revCommits = getStashList(git);
+            revCommits.stream()
+                      .filter(revCommit -> revCommit != null)
+                      .forEach(revCommit -> getStash(revCommit));
+        } catch (GitAPIException | IOException e) {
+            logger.error("Failed getting list of stashes " + project.getName() +" project: ", e);
+        }
+        return list;
+    }
+
+    private Collection<RevCommit> getStashList(Git git) throws InvalidRefNameException, GitAPIException {
+        return git.stashList().call();
+    }
+
+    private Stash getStash(RevCommit revCommit) {
+        return new Stash(revCommit.getName(), revCommit.getFullMessage());
     }
 
     /**
