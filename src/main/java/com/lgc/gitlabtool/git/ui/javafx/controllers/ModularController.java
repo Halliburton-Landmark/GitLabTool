@@ -59,11 +59,10 @@ import com.lgc.gitlabtool.git.ui.javafx.WorkIndicatorDialog;
 import com.lgc.gitlabtool.git.ui.javafx.comparators.ProjectListComparator;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.PushProgressListener;
-import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuItems;
 import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuManager;
 import com.lgc.gitlabtool.git.ui.selection.ListViewKey;
 import com.lgc.gitlabtool.git.ui.selection.SelectionsProvider;
-import com.lgc.gitlabtool.git.ui.toolbar.ToolbarButtons;
+import com.lgc.gitlabtool.git.ui.toolbar.GLToolButtons;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarManager;
 import com.lgc.gitlabtool.git.util.ScreenUtil;
 import com.lgc.gitlabtool.git.util.ShutDownUtil;
@@ -412,47 +411,47 @@ public class ModularController implements UpdateProgressListener {
 
     private void initActionsToolBar(String windowId) {
         if (windowId.equals(ViewKey.GROUPS_WINDOW.getKey())) {
-            _toolbarManager.getButtonById(ToolbarButtons.IMPORT_GROUP_BUTTON.getId())
+            _toolbarManager.getButtonById(GLToolButtons.IMPORT_GROUP_BUTTON.getId())
                     .setOnAction(this::importGroupDialog);
 
-            _toolbarManager.getButtonById(ToolbarButtons.REMOVE_GROUP_BUTTON.getId())
+            _toolbarManager.getButtonById(GLToolButtons.REMOVE_GROUP_BUTTON.getId())
                     .setOnAction(this::onRemoveGroup);
 
-            _toolbarManager.getButtonById(ToolbarButtons.CLONE_GROUP_BUTTON.getId())
+            _toolbarManager.getButtonById(GLToolButtons.CLONE_GROUP_BUTTON.getId())
                     .setOnAction(this::onCloneGroups);
 
-            _toolbarManager.getButtonById(ToolbarButtons.SELECT_GROUP_BUTTON.getId())
+            _toolbarManager.getButtonById(GLToolButtons.SELECT_GROUP_BUTTON.getId())
                     .setOnAction(this::loadGroup);
 
         } else if (windowId.equals(ViewKey.PROJECTS_WINDOW.getKey())) {
-            _toolbarManager.getButtonById(ToolbarButtons.CHANGE_GROUP_BUTTON.getId())
+            _toolbarManager.getButtonById(GLToolButtons.CHANGE_GROUP_BUTTON.getId())
                     .setOnAction(this::loadGroupWindow);
 
-            _toolbarManager.getButtonById(ToolbarButtons.CHECKOUT_BRANCH_BUTTON.getId())
+            _toolbarManager.getButtonById(GLToolButtons.CHECKOUT_BRANCH_BUTTON.getId())
                     .setOnAction(this::showCheckoutBranchWindow);
 
-            _toolbarManager.getButtonById(ToolbarButtons.CLONE_PROJECT_BUTTON.getId())
+            _toolbarManager.getButtonById(GLToolButtons.CLONE_PROJECT_BUTTON.getId())
                     .setOnAction(this::cloneShadowProject);
 
-            _toolbarManager.getButtonById(ToolbarButtons.NEW_BRANCH_BUTTON.getId())
+            _toolbarManager.getButtonById(GLToolButtons.NEW_BRANCH_BUTTON.getId())
                     .setOnAction(this::onNewBranchButton);
 
-            _toolbarManager.getButtonById(ToolbarButtons.CREATE_PROJECT_BUTTON.getId())
+            _toolbarManager.getButtonById(GLToolButtons.CREATE_PROJECT_BUTTON.getId())
                     .setOnAction(this::createProjectButton);
 
-            _toolbarManager.getButtonById(ToolbarButtons.STAGING_BUTTON.getId())
+            _toolbarManager.getButtonById(GLToolButtons.STAGING_BUTTON.getId())
                     .setOnAction(this::openGitStaging);
 
-            _toolbarManager.getButtonById(ToolbarButtons.PUSH_BUTTON.getId())
+            _toolbarManager.getButtonById(GLToolButtons.PUSH_BUTTON.getId())
                     .setOnAction(this::onPushAction);
 
-            _toolbarManager.getButtonById(ToolbarButtons.PULL_BUTTON.getId())
+            _toolbarManager.getButtonById(GLToolButtons.PULL_BUTTON.getId())
                     .setOnAction(this::onPullAction);
 
-            _toolbarManager.getButtonById(ToolbarButtons.REVERT_CHANGES.getId())
+            _toolbarManager.getButtonById(GLToolButtons.REVERT_CHANGES.getId())
                     .setOnAction(this::onRevertChanges);
 
-            _toolbarManager.getButtonById(ToolbarButtons.EDIT_PROJECT_PROPERTIES_BUTTON.getId())
+            _toolbarManager.getButtonById(GLToolButtons.EDIT_PROJECT_PROPERTIES_BUTTON.getId())
                     .setOnAction(this::showEditProjectPropertiesWindow);
 
         }
@@ -460,31 +459,31 @@ public class ModularController implements UpdateProgressListener {
 
     private void initActionsMainMenu(String windowId) {
         if (windowId.equals(ViewKey.GROUPS_WINDOW.getKey())) {
-            _mainMenuManager.getButtonById(MainMenuItems.GROUP_WINDOW_CLONE_GROUP).setOnAction(this::onCloneGroups);
+            _mainMenuManager.getButtonById(GLToolButtons.GROUP_WINDOW_CLONE_GROUP).setOnAction(this::onCloneGroups);
 
         } else if (windowId.equals(ViewKey.PROJECTS_WINDOW.getKey())) {
-            _mainMenuManager.getButtonById(MainMenuItems.MAIN_CLONE_PROJECT).setOnAction(this::cloneShadowProject);
-            _mainMenuManager.getButtonById(MainMenuItems.MAIN_CREATE_BRANCH).setOnAction(this::onNewBranchButton);
-            _mainMenuManager.getButtonById(MainMenuItems.MAIN_STAGING).setOnAction(this::openGitStaging);
-            _mainMenuManager.getButtonById(MainMenuItems.MAIN_PUSH).setOnAction(this::onPushAction);
-            _mainMenuManager.getButtonById(MainMenuItems.MAIN_PULL).setOnAction(this::onPullAction);
-            _mainMenuManager.getButtonById(MainMenuItems.MAIN_REVERT).setOnAction(this::onRevertChanges);
-            _mainMenuManager.getButtonById(MainMenuItems.MAIN_CHECKOUT_BRANCH).setOnAction(this::showCheckoutBranchWindow);
+            _mainMenuManager.getButtonById(GLToolButtons.MAIN_CLONE_PROJECT).setOnAction(this::cloneShadowProject);
+            _mainMenuManager.getButtonById(GLToolButtons.MAIN_CREATE_BRANCH).setOnAction(this::onNewBranchButton);
+            _mainMenuManager.getButtonById(GLToolButtons.MAIN_STAGING).setOnAction(this::openGitStaging);
+            _mainMenuManager.getButtonById(GLToolButtons.MAIN_PUSH).setOnAction(this::onPushAction);
+            _mainMenuManager.getButtonById(GLToolButtons.MAIN_PULL).setOnAction(this::onPullAction);
+            _mainMenuManager.getButtonById(GLToolButtons.MAIN_REVERT).setOnAction(this::onRevertChanges);
+            _mainMenuManager.getButtonById(GLToolButtons.MAIN_CHECKOUT_BRANCH).setOnAction(this::showCheckoutBranchWindow);
 
         }
 
-        MenuItem userGuide = _mainMenuManager.getButtonById(MainMenuItems.GENERAL_USER_GUIDE);
+        MenuItem userGuide = _mainMenuManager.getButtonById(GLToolButtons.GENERAL_USER_GUIDE);
         userGuide.setOnAction(this::openUserGuide);
         userGuide.setAccelerator(new KeyCodeCombination(KeyCode.F1));
-        _mainMenuManager.getButtonById(MainMenuItems.GENERAL_EXIT).setOnAction(this::exit);
-        _mainMenuManager.getButtonById(MainMenuItems.GENERAL_ABOUT).setOnAction(this::showAboutPopup);
+        _mainMenuManager.getButtonById(GLToolButtons.GENERAL_EXIT).setOnAction(this::exit);
+        _mainMenuManager.getButtonById(GLToolButtons.GENERAL_ABOUT).setOnAction(this::showAboutPopup);
     }
 
     private void initializeGroupsDisableBinding(ListView listView) {
         BooleanBinding groupListBooleanBinding = listView.getSelectionModel().selectedItemProperty().isNull();
         _toolbarManager.getAllButtonsForCurrentView().stream()
-                .filter(x -> x.getId().equals(ToolbarButtons.REMOVE_GROUP_BUTTON.getId())
-                        || x.getId().equals(ToolbarButtons.SELECT_GROUP_BUTTON.getId()))
+                .filter(x -> x.getId().equals(GLToolButtons.REMOVE_GROUP_BUTTON.getId())
+                        || x.getId().equals(GLToolButtons.SELECT_GROUP_BUTTON.getId()))
                 .forEach(x -> x.disableProperty().bind(groupListBooleanBinding));
     }
 
@@ -1218,7 +1217,50 @@ public class ModularController implements UpdateProgressListener {
             openFolder.setText("Open project folder");
             openFolder.setOnAction(this::onOpenFolder);
             openFolder.setGraphic(new ImageView(openFolderIco));
+            
+            Menu subMenuGit = new Menu("Git");
+           
+            MenuItem itemCreateBranch = new MenuItem(GLToolButtons.MAIN_CREATE_BRANCH.getText());
+            Image itemCreateBranchIco = new Image(getClass().getClassLoader().getResource(GLToolButtons.MAIN_CREATE_BRANCH.getIconUrl()).toExternalForm());
+            itemCreateBranch.setGraphic(new ImageView(itemCreateBranchIco));
+            itemCreateBranch.setOnAction(this::onNewBranchButton);
+            
+            MenuItem itemCheckoutBranch = new MenuItem(GLToolButtons.MAIN_CHECKOUT_BRANCH.getText());
+            Image itemCheckoutBranchIco = new Image(getClass().getClassLoader().getResource(GLToolButtons.MAIN_CHECKOUT_BRANCH.getIconUrl()).toExternalForm());
+            itemCheckoutBranch.setGraphic(new ImageView(itemCheckoutBranchIco));
+            itemCheckoutBranch.setOnAction(this::showCheckoutBranchWindow);
+            
+            MenuItem itemStaging = new MenuItem(GLToolButtons.MAIN_STAGING.getText());
+            Image itemStagingIco = new Image(getClass().getClassLoader().getResource(GLToolButtons.MAIN_STAGING.getIconUrl()).toExternalForm());
+            itemStaging.setGraphic(new ImageView(itemStagingIco));
+            itemStaging.setOnAction(this::openGitStaging);
+            
+            MenuItem itemPull = new MenuItem(GLToolButtons.MAIN_PULL.getText());
+            Image itemPullIco = new Image(getClass().getClassLoader().getResource(GLToolButtons.MAIN_PULL.getIconUrl()).toExternalForm());
+            itemPull.setGraphic(new ImageView(itemPullIco));
+            itemPull.setOnAction(this::onPullAction);
+            
+            MenuItem itemPush = new MenuItem(GLToolButtons.MAIN_PUSH.getText());
+            Image itemPushIco = new Image(getClass().getClassLoader().getResource(GLToolButtons.MAIN_PUSH.getIconUrl()).toExternalForm());
+            itemPush.setGraphic(new ImageView(itemPushIco));
+            itemPush.setOnAction(this::onPushAction);
+            
+            MenuItem itemRevert = new MenuItem(GLToolButtons.MAIN_REVERT.getText());
+            Image itemRevertIco = new Image(getClass().getClassLoader().getResource(GLToolButtons.MAIN_REVERT.getIconUrl()).toExternalForm());
+            itemRevert.setGraphic(new ImageView(itemRevertIco));
+            itemRevert.setOnAction(this::onRevertChanges);
+            
+            subMenuGit.getItems().addAll(itemCreateBranch, itemCheckoutBranch,
+            		itemStaging, itemPull, itemPush, itemRevert);
+            
+            MenuItem itemEditProjectProp = new MenuItem(GLToolButtons.EDIT_PROJECT_PROPERTIES_BUTTON.getText());
+            Image itemEditProjectPropIco = new Image(getClass().getClassLoader().getResource(GLToolButtons.EDIT_PROJECT_PROPERTIES_BUTTON.getIconUrl()).toExternalForm());
+            itemEditProjectProp.setGraphic(new ImageView(itemEditProjectPropIco));
+            itemEditProjectProp.setOnAction(this::showEditProjectPropertiesWindow);
+            
             menuItems.add(openFolder);
+            menuItems.add(subMenuGit);
+            menuItems.add(itemEditProjectProp);  
         }
 
         if (hasShadow) {
@@ -1313,24 +1355,24 @@ public class ModularController implements UpdateProgressListener {
     }
 
     private void setToolbarDisableProperty(BooleanBinding bindingForShadow, BooleanBinding bindingForCloned) {
-        _toolbarManager.getButtonById(ToolbarButtons.CLONE_PROJECT_BUTTON.getId()).disableProperty().bind(bindingForCloned);
-        _toolbarManager.getButtonById(ToolbarButtons.NEW_BRANCH_BUTTON.getId()).disableProperty().bind(bindingForShadow);
-        _toolbarManager.getButtonById(ToolbarButtons.CHECKOUT_BRANCH_BUTTON.getId()).disableProperty().bind(bindingForShadow);
-        _toolbarManager.getButtonById(ToolbarButtons.STAGING_BUTTON.getId()).disableProperty().bind(bindingForShadow);
-        _toolbarManager.getButtonById(ToolbarButtons.PUSH_BUTTON.getId()).disableProperty().bind(bindingForShadow);
-        _toolbarManager.getButtonById(ToolbarButtons.EDIT_PROJECT_PROPERTIES_BUTTON.getId()).disableProperty().bind(bindingForShadow);
-        _toolbarManager.getButtonById(ToolbarButtons.PULL_BUTTON.getId()).disableProperty().bind(bindingForShadow);
-        _toolbarManager.getButtonById(ToolbarButtons.REVERT_CHANGES.getId()).disableProperty().bind(bindingForShadow);
+        _toolbarManager.getButtonById(GLToolButtons.CLONE_PROJECT_BUTTON.getId()).disableProperty().bind(bindingForCloned);
+        _toolbarManager.getButtonById(GLToolButtons.NEW_BRANCH_BUTTON.getId()).disableProperty().bind(bindingForShadow);
+        _toolbarManager.getButtonById(GLToolButtons.CHECKOUT_BRANCH_BUTTON.getId()).disableProperty().bind(bindingForShadow);
+        _toolbarManager.getButtonById(GLToolButtons.STAGING_BUTTON.getId()).disableProperty().bind(bindingForShadow);
+        _toolbarManager.getButtonById(GLToolButtons.PUSH_BUTTON.getId()).disableProperty().bind(bindingForShadow);
+        _toolbarManager.getButtonById(GLToolButtons.EDIT_PROJECT_PROPERTIES_BUTTON.getId()).disableProperty().bind(bindingForShadow);
+        _toolbarManager.getButtonById(GLToolButtons.PULL_BUTTON.getId()).disableProperty().bind(bindingForShadow);
+        _toolbarManager.getButtonById(GLToolButtons.REVERT_CHANGES.getId()).disableProperty().bind(bindingForShadow);
     }
 
     private void setMainMenuDisableProperty(BooleanBinding bindingForShadow, BooleanBinding bindingForCloned) {
-        _mainMenuManager.getButtonById(MainMenuItems.MAIN_CLONE_PROJECT).disableProperty().bind(bindingForCloned);
-        _mainMenuManager.getButtonById(MainMenuItems.MAIN_STAGING).disableProperty().bind(bindingForShadow);
-        _mainMenuManager.getButtonById(MainMenuItems.MAIN_CHECKOUT_BRANCH).disableProperty().bind(bindingForShadow);
-        _mainMenuManager.getButtonById(MainMenuItems.MAIN_CREATE_BRANCH).disableProperty().bind(bindingForShadow);
-        _mainMenuManager.getButtonById(MainMenuItems.MAIN_PUSH).disableProperty().bind(bindingForShadow);
-        _mainMenuManager.getButtonById(MainMenuItems.MAIN_PULL).disableProperty().bind(bindingForShadow);
-        _mainMenuManager.getButtonById(MainMenuItems.MAIN_REVERT).disableProperty().bind(bindingForShadow);
+        _mainMenuManager.getButtonById(GLToolButtons.MAIN_CLONE_PROJECT).disableProperty().bind(bindingForCloned);
+        _mainMenuManager.getButtonById(GLToolButtons.MAIN_STAGING).disableProperty().bind(bindingForShadow);
+        _mainMenuManager.getButtonById(GLToolButtons.MAIN_CHECKOUT_BRANCH).disableProperty().bind(bindingForShadow);
+        _mainMenuManager.getButtonById(GLToolButtons.MAIN_CREATE_BRANCH).disableProperty().bind(bindingForShadow);
+        _mainMenuManager.getButtonById(GLToolButtons.MAIN_PUSH).disableProperty().bind(bindingForShadow);
+        _mainMenuManager.getButtonById(GLToolButtons.MAIN_PULL).disableProperty().bind(bindingForShadow);
+        _mainMenuManager.getButtonById(GLToolButtons.MAIN_REVERT).disableProperty().bind(bindingForShadow);
 
     }
     //endregion
