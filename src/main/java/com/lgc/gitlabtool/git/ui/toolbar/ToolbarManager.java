@@ -1,28 +1,24 @@
 package com.lgc.gitlabtool.git.ui.toolbar;
 
-import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.lgc.gitlabtool.git.ui.ViewKey;
 import com.lgc.gitlabtool.git.ui.javafx.controllers.ModularController;
 
-import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.control.Button;
+import javafx.scene.control.MenuButton;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.stage.Stage;
 
 /**
  * Class for managing an toolbar with buttons
@@ -36,7 +32,7 @@ public class ToolbarManager {
     private static final String CHANGE_GROUP_BUTTON_TOOLTIP = "Change current group";
     private static final String CHANGE_GROUP_BUTTON_ID = "changeGroupButton";
 
-    private Map<String, Boolean> enableMap = new HashMap<>();
+    private final Map<String, Boolean> enableMap = new HashMap<>();
 
     private static ToolbarManager instance = null;
 
@@ -72,6 +68,12 @@ public class ToolbarManager {
                 items.add(createButton(button.getId(), button.getIconUrl(), button.getText(), button.getTooltip()));
             }
         }
+
+        Image btnImage = new Image(getClass().getClassLoader().getResource(CHANGE_GROUP_BUTTON_ICON_URL).toExternalForm());
+        MenuButton qwe = new MenuButton("Stage window");
+        qwe.setGraphic(new ImageView(btnImage));
+        qwe.getItems().addAll(Arrays.asList(new MenuItem("item 1"), new MenuItem("item 2")  ));
+        items.add(qwe);
 
         return items;
     }
