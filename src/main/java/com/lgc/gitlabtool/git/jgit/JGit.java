@@ -53,6 +53,7 @@ import com.lgc.gitlabtool.git.connections.token.CurrentUser;
 import com.lgc.gitlabtool.git.entities.Branch;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.User;
+import com.lgc.gitlabtool.git.jgit.stash.Stash;
 import com.lgc.gitlabtool.git.services.BackgroundService;
 import com.lgc.gitlabtool.git.services.ProgressListener;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
@@ -189,7 +190,7 @@ public class JGit {
                 Collection<RevCommit> revCommits = getStashList(git);
                 return revCommits.stream()
                                  .filter(revCommit -> revCommit != null)
-                                 .map(revCommit -> getStash(revCommit))
+                                 .map(revCommit -> getStash(revCommit, project))
                                  .collect(Collectors.toList());
             } catch (GitAPIException | IOException e) {
                 logger.error("Failed getting list of stashes " + project.getName() + " project: ", e);
@@ -201,12 +202,16 @@ public class JGit {
     /**
      *  Applies stash by name for the project
      *
-     * @param  project the cloned project
-     * @param  stashName the stash name
+     * @param  stash the stash for applying
      * @return <code>true</code> if stash was applied successfully, otherwise <code>false</code>
      */
-    public boolean stashApply(Project project, String stashName) {
-        if (project != null && project.isCloned() && stashName != null) {
+    public boolean stashApply(Stash stash) {
+        if (stash == null) {
+            return false;
+        }
+        Project project = stash.getProject();
+        String stashName = stash.getName();
+        if (project != null&& project.isCloned() && stashName != null) {
             try (Git git = getGit(project.getPath())) {
                 git.stashApply()
                    .setStashRef(stashName)
@@ -255,8 +260,8 @@ public class JGit {
         return git.stashList().call();
     }
 
-    private Stash getStash(RevCommit revCommit) {
-        return new Stash(revCommit.getName(), revCommit.getFullMessage());
+    private Stash getStash(RevCommit revCommit, Project project) {
+        return new Stash(revCommit.getName(), revCommit.getFullMessage(), project);
     }
 
     /**
