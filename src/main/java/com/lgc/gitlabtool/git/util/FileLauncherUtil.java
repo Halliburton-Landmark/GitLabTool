@@ -4,6 +4,13 @@ import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 
+import com.lgc.gitlabtool.git.services.BackgroundService;
+import com.lgc.gitlabtool.git.services.ServiceProvider;
+import com.lgc.gitlabtool.git.ui.javafx.GLTAlert;
+
+import javafx.application.Platform;
+import javafx.scene.control.Alert.AlertType;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -30,18 +37,27 @@ public class FileLauncherUtil {
             _logger.warn(ERROR_MESSAGE);
             return;
         }
-        try {
-            Desktop desktop = Desktop.getDesktop();
-            if (desktop.isSupported(Desktop.Action.OPEN)) {
-                _logger.debug("Start to open file: " + document.getName());
-                desktop.open(document);
-                _logger.debug("File opened");
-            } else {
-                _logger.warn("There is no application registered to open file: " + document.getName());
+        Runnable openDocumentTask = () -> {
+            try {
+                Desktop desktop = Desktop.getDesktop();
+                if (desktop.isSupported(Desktop.Action.OPEN)) {
+                    _logger.debug("Start to open file: " + document.getName());
+                    desktop.open(document);
+                    _logger.debug("File opened");
+                } else {
+                    String message = "There is no application registered to open file: " + document.getName();
+                    _logger.warn(message);
+                    Platform.runLater(() -> {
+                        new GLTAlert(AlertType.WARNING, "Open file dialog", message, "").showAndWait();
+                    });
+                }
+            } catch (IllegalArgumentException | IOException e) {
+                _logger.debug(ERROR_MESSAGE + ": " + e.getMessage());
             }
-        } catch (IllegalArgumentException | IOException e) {
-            _logger.debug(ERROR_MESSAGE + ": " + e.getMessage());
-        }
+        };
+        BackgroundService backgroundService = (BackgroundService) ServiceProvider.getInstance()
+                .getService(BackgroundService.class.getName());
+        backgroundService.runInAWTThread(openDocumentTask);
     }
 
     /**
