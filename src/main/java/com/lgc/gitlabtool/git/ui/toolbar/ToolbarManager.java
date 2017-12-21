@@ -28,7 +28,6 @@ import javafx.scene.image.ImageView;
 public class ToolbarManager {
     private static final Logger logger = LogManager.getLogger(ToolbarManager.class);
     private static final String CHANGE_GROUP_BUTTON_ICON_URL = "icons/toolbar/change_group_20x20.png";
-    private static final String CHANGE_GROUP_BUTTON_TEXT = "Change group";
     private static final String CHANGE_GROUP_BUTTON_TOOLTIP = "Change current group";
     private static final String CHANGE_GROUP_BUTTON_ID = "changeGroupButton";
 
@@ -63,9 +62,12 @@ public class ToolbarManager {
     public List<Node> createToolbarItems(String windowId) {
 
         items = new ArrayList<>();
-        for (ToolbarButtons button : ToolbarButtons.values()) {
+        for (GLToolButtons button : GLToolButtons.values()) {
             if (button.getViewKey().equals(windowId)) {
-                items.add(createButton(button.getId(), button.getIconUrl(), button.getText(), button.getTooltip()));
+                Button btn = createButton(button.getId(), button.getIconUrl(), button.getText(), button.getTooltip());
+                if (btn != null && button.getIconSize() == GLToolButtons.GLToolConstants.ICON_SIZE_20) {
+                    items.add(btn);
+                }
             }
         }
 
