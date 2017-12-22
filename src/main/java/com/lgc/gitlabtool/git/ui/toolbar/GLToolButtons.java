@@ -151,10 +151,19 @@ public enum GLToolButtons {
             null,
             GLToolConstants.ICON_SIZE_20),
 
-    REVERT_CHANGES(GLToolConstants.PROJECTS_WINDOW_KEY, "revert",
+    REVERT_CHANGES(GLToolConstants.PROJECTS_WINDOW_KEY,
+            "revert",
             "icons/toolbar/revert_changes_20x20.png",
             "Revert",
             "Revert changes",
+            null,
+            GLToolConstants.ICON_SIZE_20),
+
+    STASH(GLToolConstants.PROJECTS_WINDOW_KEY,
+            "stash",
+            "icons/toolbar/stash_20x20.png",
+            "Stash",
+            "Stash changes",
             null,
             GLToolConstants.ICON_SIZE_20),
 

@@ -17,7 +17,8 @@ public enum ViewKey {
     CHECKOUT_BRANCH_WINDOW("checkoutBranchWindow", "fxml/CheckoutBranchWindow.fxml"),
     SERVER_INPUT_WINDOW("serverInputWindow", "fxml/ServerInputWindow.fxml"),
     EDIT_PROJECT_PROPERTIES("editProjectProperties", "fxml/EditProjectPropertiesWindow.fxml"),
-    GIT_STAGING_WINDOW("gitStagingWindow", "fxml/GitStagingWindow.fxml");
+    GIT_STAGING_WINDOW("gitStagingWindow", "fxml/GitStagingWindow.fxml"),
+    STASH_WINDOW("stashWindow", "fxml/StashWindow.fxml");
 
     private final String key;
     private final String path;

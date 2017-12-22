@@ -1,7 +1,6 @@
 package com.lgc.gitlabtool.git.ui.toolbar;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -14,8 +13,6 @@ import com.lgc.gitlabtool.git.ui.javafx.controllers.ModularController;
 
 import javafx.scene.Node;
 import javafx.scene.control.Button;
-import javafx.scene.control.MenuButton;
-import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -70,12 +67,6 @@ public class ToolbarManager {
                 }
             }
         }
-
-        Image btnImage = new Image(getClass().getClassLoader().getResource(CHANGE_GROUP_BUTTON_ICON_URL).toExternalForm());
-        MenuButton qwe = new MenuButton("Stage window");
-        qwe.setGraphic(new ImageView(btnImage));
-        qwe.getItems().addAll(Arrays.asList(new MenuItem("item 1"), new MenuItem("item 2")  ));
-        items.add(qwe);
 
         return items;
     }
