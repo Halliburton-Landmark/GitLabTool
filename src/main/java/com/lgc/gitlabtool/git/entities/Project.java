@@ -22,13 +22,13 @@ public class Project implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @SerializedName("id")
-    private int id;
+    private int _id;
 
     @SerializedName("http_url_to_repo")
-    private String httpUrlToRepo;
+    private String _httpUrlToRepo;
 
     @SerializedName("name")
-    private String name;
+    private String _name;
     /** Path to the cloned project **/
     private String _pathToClonedProject;
     private boolean _isCloned;
@@ -105,15 +105,15 @@ public class Project implements Serializable {
     }
 
     public int getId() {
-        return id;
+        return _id;
     }
 
     public String getName() {
-        return name;
+        return _name;
     }
 
     public String getHttpUrlToRepo() {
-        return httpUrlToRepo;
+        return _httpUrlToRepo;
     }
 
     /**
@@ -142,8 +142,8 @@ public class Project implements Serializable {
         int result = 1;
         result = prime * result + (_isCloned ? 1231 : 1237);
         result = prime * result + ((_pathToClonedProject == null) ? 0 : _pathToClonedProject.hashCode());
-        result = prime * result + id;
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + _id;
+        result = prime * result + ((_name == null) ? 0 : _name.hashCode());
         return result;
     }
 
@@ -169,14 +169,14 @@ public class Project implements Serializable {
         } else if (!_pathToClonedProject.equals(other._pathToClonedProject)) {
             return false;
         }
-        if (id != other.id) {
+        if (_id != other._id) {
             return false;
         }
-        if (name == null) {
-            if (other.name != null) {
+        if (_name == null) {
+            if (other._name != null) {
                 return false;
             }
-        } else if (!name.equals(other.name)) {
+        } else if (!_name.equals(other._name)) {
             return false;
         }
         return true;

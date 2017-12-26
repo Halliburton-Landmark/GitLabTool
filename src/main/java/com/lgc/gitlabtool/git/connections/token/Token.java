@@ -13,38 +13,38 @@ public class Token {
      * The value of a OAuth2 token
      **/
     @SerializedName("access_token")
-    private String accessToken;
+    private String _accessToken;
 
     /**
      * The type of a token
      **/
     @SerializedName("token_type")
-    private String tokenType;
+    private String _tokenType;
 
     /**
      * The value of a refresh token
      **/
     @SerializedName("refresh_token")
-    private String refreshToken;
+    private String _refreshToken;
 
     /**
      * The value of a scope
      **/
     @SerializedName("scope")
-    private String scope;
+    private String _scope;
 
     /**
      * The date of creation of a token
      **/
     @SerializedName("created_at")
-    private float createdAt;
+    private float _createdAt;
 
     /**
      * Get the string that contains a OAuth2 token with type
      * @return token with type
      */
     public String getTokenWithType() {
-        return tokenType + " " + accessToken;
+        return _tokenType + " " + _accessToken;
     }
 
     /**
@@ -52,7 +52,7 @@ public class Token {
      * @return value of a OAuth2 token
      */
     public String getAccessToken() {
-        return accessToken;
+        return _accessToken;
     }
 
     /**
@@ -60,7 +60,7 @@ public class Token {
      * @param accessToken value of a OAuth2 token
      */
     public void setAccessToken(String accessToken) {
-        this.accessToken = accessToken;
+        this._accessToken = accessToken;
     }
 
     /**
@@ -68,7 +68,7 @@ public class Token {
      * @return value of a token type
      */
     public String getTokenType() {
-        return tokenType;
+        return _tokenType;
     }
 
     /**
@@ -76,7 +76,7 @@ public class Token {
      * @param tokenType value of a token type
      */
     public void setTokenType(String tokenType) {
-        this.tokenType = tokenType;
+        this._tokenType = tokenType;
     }
 
     /**
@@ -84,7 +84,7 @@ public class Token {
      * @return value of a refresh token
      */
     public String getRefreshToken() {
-        return refreshToken;
+        return _refreshToken;
     }
 
     /**
@@ -92,7 +92,7 @@ public class Token {
      * @param refreshToken value of a refresh token
      */
     public void setRefreshToken(String refreshToken) {
-        this.refreshToken = refreshToken;
+        this._refreshToken = refreshToken;
     }
 
     /**
@@ -100,7 +100,7 @@ public class Token {
      * @return value of a scope
      */
     public String getScope() {
-        return scope;
+        return _scope;
     }
 
     /**
@@ -108,7 +108,7 @@ public class Token {
      * @param scope value of a scope
      */
     public void setScope(String scope) {
-        this.scope = scope;
+        this._scope = scope;
     }
 
     /**
@@ -116,7 +116,7 @@ public class Token {
      * @return date of a token creation
      */
     public float getCreatedAt() {
-        return createdAt;
+        return _createdAt;
     }
 
     /**
@@ -124,6 +124,6 @@ public class Token {
      * @param createdAt date of a token creation
      */
     public void setCreatedAt(float createdAt) {
-        this.createdAt = createdAt;
+        this._createdAt = createdAt;
     }
 }

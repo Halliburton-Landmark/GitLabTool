@@ -20,25 +20,25 @@ public class Group {
      * The id of the group
      **/
     @SerializedName("id")
-    private int id;
+    private int _id;
 
     /**
      * The name of the group
      **/
     @SerializedName("name")
-    private String name;
+    private String _name;
 
     /**
      * The path of the group
      **/
     @SerializedName("path")
-    private String path;
+    private String _path;
 
     /**
      * Projects in group
      **/
     @SerializedName("projects")
-    private transient Collection<Project> projects;
+    private transient Collection<Project> _projects;
 
     private String _pathToClonedGroup;
 
@@ -90,20 +90,20 @@ public class Group {
     }
 
     public int getId() {
-        return id;
+        return _id;
     }
 
     public String getName() {
-        return name;
+        return _name;
     }
 
     public String getPath() {
-        return path;
+        return _path;
     }
 
 
     public Collection<Project> getProjects() {
-        return projects;
+        return _projects;
     }
 
     @Override
@@ -112,9 +112,9 @@ public class Group {
         int result = 1;
         result = prime * result + (_isCloned ? 1231 : 1237);
         result = prime * result + ((_pathToClonedGroup == null) ? 0 : _pathToClonedGroup.hashCode());
-        result = prime * result + id;
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
-        result = prime * result + ((path == null) ? 0 : path.hashCode());
+        result = prime * result + _id;
+        result = prime * result + ((_name == null) ? 0 : _name.hashCode());
+        result = prime * result + ((_path == null) ? 0 : _path.hashCode());
         return result;
     }
 
@@ -140,21 +140,21 @@ public class Group {
         } else if (!_pathToClonedGroup.equals(other._pathToClonedGroup)) {
             return false;
         }
-        if (id != other.id) {
+        if (_id != other._id) {
             return false;
         }
-        if (name == null) {
-            if (other.name != null) {
+        if (_name == null) {
+            if (other._name != null) {
                 return false;
             }
-        } else if (!name.equals(other.name)) {
+        } else if (!_name.equals(other._name)) {
             return false;
         }
-        if (path == null) {
-            if (other.path != null) {
+        if (_path == null) {
+            if (other._path != null) {
                 return false;
             }
-        } else if (!path.equals(other.path)) {
+        } else if (!_path.equals(other._path)) {
             return false;
         }
         return true;
