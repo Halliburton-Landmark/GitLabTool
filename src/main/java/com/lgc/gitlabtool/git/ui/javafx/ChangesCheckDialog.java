@@ -10,6 +10,7 @@ import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
+import com.lgc.gitlabtool.git.services.ThemeService;
 import com.lgc.gitlabtool.git.util.NullCheckUtil;
 
 import javafx.scene.control.Alert;
@@ -24,6 +25,9 @@ public class ChangesCheckDialog extends GLTAlert {
 
     private final GitService _gitService =
             (GitService) ServiceProvider.getInstance().getService(GitService.class.getName());
+
+    private static final ThemeService _themeService = (ThemeService) ServiceProvider.getInstance()
+            .getService(ThemeService.class.getName());
 
     private static final String STATUS_DISCARD_DIALOG_TITLE = "Discarding changes status";
     private static final String STATUS_DISCARD_DIALOG_HEADER = "Discarding changes info";
@@ -45,6 +49,7 @@ public class ChangesCheckDialog extends GLTAlert {
         cancelButton = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);;
 
         getDialogPane().getButtonTypes().setAll(commitButton, revertButton, cancelButton);
+        _themeService.styleScene(getDialogPane().getScene());
     }
 
     private Map<Project, JGitStatus> commitChanges(List<Project> projectsWithChanges) {

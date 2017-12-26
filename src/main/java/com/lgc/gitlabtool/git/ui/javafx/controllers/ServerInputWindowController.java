@@ -3,6 +3,7 @@ package com.lgc.gitlabtool.git.ui.javafx.controllers;
 import java.io.IOException;
 import java.util.List;
 
+import com.lgc.gitlabtool.git.services.ThemeService;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -44,6 +45,8 @@ public class ServerInputWindowController {
             .getService(StorageService.class.getName());
     private final NetworkService networkService = (NetworkService) ServiceProvider.getInstance()
             .getService(NetworkService.class.getName());
+    private static final ThemeService _themeService = (ThemeService) ServiceProvider.getInstance()
+            .getService(ThemeService.class.getName());
 
     @FXML
     private Label server;
@@ -72,14 +75,13 @@ public class ServerInputWindowController {
     }
 
     public void loadServerInputWindow(Parent root) throws IOException {
-        Scene scene = new Scene(root);
-        scene.getStylesheets().add(getClass().getClassLoader().getResource("css/modular_dark_style.css").toExternalForm());
         Stage stage = new Stage();
-        stage.setScene(scene);
+        stage.setScene(new Scene(root));
         stage.setTitle("Server selection");
         Image appIcon = AppIconHolder.getInstance().getAppIcoImage();
         stage.getIcons().add(appIcon);
         stage.initModality(Modality.APPLICATION_MODAL);
+        _themeService.styleScene(stage.getScene());
 
         /* Set sizing and position */
         ScreenUtil.adaptForMultiScreens(stage, 300, 100);

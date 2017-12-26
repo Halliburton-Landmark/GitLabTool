@@ -2,6 +2,8 @@ package com.lgc.gitlabtool.git.ui.javafx;
 
 import static javafx.scene.control.ProgressIndicator.INDETERMINATE_PROGRESS;
 
+import com.lgc.gitlabtool.git.services.ServiceProvider;
+import com.lgc.gitlabtool.git.services.ThemeService;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 
 import javafx.application.Platform;
@@ -41,6 +43,9 @@ public class WorkIndicatorDialog {
     private final VBox vbox = new VBox();
     private final int initWidth = 300;
     private final int initHeight = 100;
+
+    private static final ThemeService _themeService = (ThemeService) ServiceProvider.getInstance()
+            .getService(ThemeService.class.getName());
     /**
      * Constructor
      *
@@ -99,7 +104,6 @@ public class WorkIndicatorDialog {
         double centerXPosition = parentStage.getX() + parentStage.getWidth() / 2;
         double centerYPosition = parentStage.getY() + parentStage.getHeight() / 2;
 
-        scene.getStylesheets().add(getClass().getClassLoader().getResource("css/modular_dark_style.css").toExternalForm());
 
         stage.setX(centerXPosition - initWidth / 2);
         stage.setY(centerYPosition - initHeight / 2);
@@ -107,6 +111,7 @@ public class WorkIndicatorDialog {
         if (stageStyle == StageStyle.TRANSPARENT) {
             scene.setFill(Color.TRANSPARENT);
         }
+
         executeAndShowDialog(title, runnable, stageStyle);
     }
 
@@ -139,6 +144,8 @@ public class WorkIndicatorDialog {
         vbox.getChildren().addAll(_progressLabel, progressIndicator);
         mainPane.setTop(vbox);
         stage.setScene(scene);
+
+        _themeService.styleScene(stage.getScene());
     }
 
     private void setupWorkerThread(Runnable func) {

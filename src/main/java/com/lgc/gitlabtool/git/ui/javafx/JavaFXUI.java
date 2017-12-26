@@ -4,6 +4,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 
+import com.lgc.gitlabtool.git.services.ThemeService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.fxmisc.cssfx.CSSFX;
@@ -47,6 +48,9 @@ public class JavaFXUI extends Application implements UserInterface {
     private static final StateService _stateService = (StateService) ServiceProvider.getInstance()
             .getService(StateService.class.getName());
 
+    private static final ThemeService _themeService = (ThemeService) ServiceProvider.getInstance()
+            .getService(ThemeService.class.getName());
+
     private Image appIcon;
     private Stage mainStage;
 
@@ -72,12 +76,11 @@ public class JavaFXUI extends Application implements UserInterface {
         FXMLLoader fxmlLoader = new FXMLLoader(modularWindow);
         Parent root = fxmlLoader.load();
 
-        Scene scene = new CssStyledScene(root);
-
         primaryStage.setTitle(ProjectPropertiesUtil.getProjectNameWithVersion());
-        primaryStage.setScene(scene);
+        primaryStage.setScene(new Scene(root));
         primaryStage.getIcons().add(appIcon);
         primaryStage.setOnCloseRequest(confirmCloseEventHandler);
+        _themeService.styleScene(primaryStage.getScene());
 
         /* Set sizing and position */
         Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();

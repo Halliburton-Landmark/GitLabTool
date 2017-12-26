@@ -1,5 +1,7 @@
 package com.lgc.gitlabtool.git.ui.javafx;
 
+import com.lgc.gitlabtool.git.services.ServiceProvider;
+import com.lgc.gitlabtool.git.services.ThemeService;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.ButtonType;
@@ -21,6 +23,8 @@ import javafx.scene.control.DialogPane;
  * @author Lyudmila Lyska
  */
 public class AlertWithCheckBox extends GLTAlert {
+    private static final ThemeService _themeService = (ThemeService) ServiceProvider.getInstance()
+            .getService(ThemeService.class.getName());
 
     private CheckBox _optOut;
 
@@ -51,6 +55,7 @@ public class AlertWithCheckBox extends GLTAlert {
 
         setTitle(title);
         setHeaderText(headerText);
+        _themeService.styleScene(getDialogPane().getScene());
     }
 
     /**

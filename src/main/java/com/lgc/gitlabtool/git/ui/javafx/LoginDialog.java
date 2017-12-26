@@ -14,6 +14,7 @@ import com.lgc.gitlabtool.git.services.ConsoleService;
 import com.lgc.gitlabtool.git.services.LoginService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StorageService;
+import com.lgc.gitlabtool.git.services.ThemeService;
 import com.lgc.gitlabtool.git.ui.ViewKey;
 import com.lgc.gitlabtool.git.ui.javafx.controllers.ServerInputWindowController;
 import com.lgc.gitlabtool.git.ui.javafx.dto.DialogDTO;
@@ -61,6 +62,9 @@ class LoginDialog extends Dialog<DialogDTO> {
     private static final ConsoleService _consoleService = (ConsoleService) ServiceProvider.getInstance()
             .getService(ConsoleService.class.getName());
 
+    private static final ThemeService _themeService = (ThemeService) ServiceProvider.getInstance()
+            .getService(ThemeService.class.getName());
+
     private static final String MESSAGE_WRONG_CREDENTIALS              = "Wrong login or password! Please try again";
     private static final String MESSAGE_WAITING                        = "Login... Please wait";
     private static final String MESSAGE_EMPTY_FIELD                    = "Login or password is empty!";
@@ -86,9 +90,7 @@ class LoginDialog extends Dialog<DialogDTO> {
     private final Button infoButton;
 
     LoginDialog() {
-
-
-        getDialogPane().getScene().getStylesheets().add(getClass().getClassLoader().getResource("css/modular_dark_style.css").toExternalForm());
+        _themeService.styleScene(getDialogPane().getScene());
         setTitle("GitLab Welcome");
         final GridPane grid = new GridPane();
         grid.setAlignment(Pos.CENTER);

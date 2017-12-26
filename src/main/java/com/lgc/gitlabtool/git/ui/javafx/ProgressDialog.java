@@ -8,6 +8,7 @@ import com.lgc.gitlabtool.git.entities.MessageType;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StateService;
+import com.lgc.gitlabtool.git.services.ThemeService;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 import com.lgc.gitlabtool.git.util.ScreenUtil;
@@ -59,6 +60,9 @@ public abstract class ProgressDialog extends Dialog<Void> {
     private final StateService _stateService = (StateService) ServiceProvider.getInstance()
             .getService(StateService.class.getName());
 
+    private static final ThemeService _themeService = (ThemeService) ServiceProvider.getInstance()
+            .getService(ThemeService.class.getName());
+
     /**
      * Creates the instance of this class
      *
@@ -104,12 +108,11 @@ public abstract class ProgressDialog extends Dialog<Void> {
         _progressIndicator.setMaxSize(20, 20);
 
         Image appIcon = AppIconHolder.getInstance().getAppIcoImage();
-        Scene scene = new CssStyledScene(grid, 650, 350);
 
         Stage stage = new Stage();
         stage.setMinWidth(650);
         stage.setResizable(false);
-        stage.setScene(scene);
+        stage.setScene(new Scene(grid, 650, 350));
         stage.setTitle(title);
         stage.getIcons().add(appIcon);
         stage.setOnCloseRequest(event -> {
@@ -118,6 +121,7 @@ public abstract class ProgressDialog extends Dialog<Void> {
             }
         });
         stage.initModality(Modality.APPLICATION_MODAL);
+        _themeService.styleScene(stage.getScene());
         _stage = stage;
         /* Set size and position */
         ScreenUtil.adaptForMultiScreens(stage, 500, 350);

@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.lgc.gitlabtool.git.services.ThemeService;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.PushProgressListener;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -49,6 +50,9 @@ public class CreateNewBranchDialog extends Dialog<String> {
     private static final Logger _logger = LogManager.getLogger(CreateNewBranchDialog.class);
     private static final GitService _gitService = (GitService) ServiceProvider.getInstance()
             .getService(GitService.class.getName());
+
+    private static final ThemeService _themeService = (ThemeService) ServiceProvider.getInstance()
+            .getService(ThemeService.class.getName());
 
     private final Label _messageLabel;
     private final Label _textLabel;
@@ -129,6 +133,7 @@ public class CreateNewBranchDialog extends Dialog<String> {
 
          /* Set sizing and position */
         ScreenUtil.adaptForMultiScreens(stage, 300, 150);
+        _themeService.styleScene(getDialogPane().getScene());
 
         initializeOnCloseEvent();
     }

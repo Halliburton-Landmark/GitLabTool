@@ -26,6 +26,9 @@ public enum MainMenuItems {
     MAIN_PULL(MainmenuConstants.PROJECTS_WINDOW_KEY, "Git", "main_git_pull", "icons/mainmenu/pull_16x16.png", "Pull"),
     MAIN_REVERT(MainmenuConstants.PROJECTS_WINDOW_KEY, "Git", "main_git_revert", "icons/mainmenu/revert_changes_16x16.png", "Revert"),
 
+    THEME_DARK(MainmenuConstants.ALL_WINDOW_KEY, "Themes", "all_window_themes_dark", "icons/mainmenu/user_guide_16x16.png", "Dark theme"),
+    THEME_LIGHT(MainmenuConstants.ALL_WINDOW_KEY, "Themes", "all_window_themes_light", "icons/mainmenu/about_16x16.png", "Light theme"),
+
     GENERAL_USER_GUIDE(MainmenuConstants.ALL_WINDOW_KEY, "Help", "all_window_help_user_guide", "icons/mainmenu/user_guide_16x16.png", "User guide"),
     GENERAL_ABOUT(MainmenuConstants.ALL_WINDOW_KEY, "Help", "all_window_help_about", "icons/mainmenu/about_16x16.png", "About");
 

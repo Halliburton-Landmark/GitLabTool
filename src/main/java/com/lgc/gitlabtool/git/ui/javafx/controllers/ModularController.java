@@ -22,6 +22,8 @@ import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.lgc.gitlabtool.git.services.*;
+import com.lgc.gitlabtool.git.ui.javafx.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -33,30 +35,8 @@ import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.listeners.stateListeners.StateListener;
 import com.lgc.gitlabtool.git.listeners.updateProgressListener.UpdateProgressListener;
-import com.lgc.gitlabtool.git.services.ClonedGroupsService;
-import com.lgc.gitlabtool.git.services.ConsoleService;
-import com.lgc.gitlabtool.git.services.GitService;
-import com.lgc.gitlabtool.git.services.GroupsUserService;
-import com.lgc.gitlabtool.git.services.LoginService;
-import com.lgc.gitlabtool.git.services.PomXMLService;
-import com.lgc.gitlabtool.git.services.ProjectService;
-import com.lgc.gitlabtool.git.services.ServiceProvider;
-import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.ViewKey;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
-import com.lgc.gitlabtool.git.ui.javafx.AlertWithCheckBox;
-import com.lgc.gitlabtool.git.ui.javafx.ChangesCheckDialog;
-import com.lgc.gitlabtool.git.ui.javafx.CloneProgressDialog;
-import com.lgc.gitlabtool.git.ui.javafx.CommitDialog;
-import com.lgc.gitlabtool.git.ui.javafx.CreateNewBranchDialog;
-import com.lgc.gitlabtool.git.ui.javafx.CreateProjectDialog;
-import com.lgc.gitlabtool.git.ui.javafx.GLTAlert;
-import com.lgc.gitlabtool.git.ui.javafx.IncorrectProjectDialog;
-import com.lgc.gitlabtool.git.ui.javafx.JavaFXUI;
-import com.lgc.gitlabtool.git.ui.javafx.ProgressDialog;
-import com.lgc.gitlabtool.git.ui.javafx.PullProgressDialog;
-import com.lgc.gitlabtool.git.ui.javafx.StatusDialog;
-import com.lgc.gitlabtool.git.ui.javafx.WorkIndicatorDialog;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.PushProgressListener;
 import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuItems;
@@ -229,6 +209,9 @@ public class ModularController implements UpdateProgressListener {
 
     private static final PomXMLService _pomXmlService = (PomXMLService) ServiceProvider.getInstance()
             .getService(PomXMLService.class.getName());
+
+    private static final ThemeService _themeService = (ThemeService) ServiceProvider.getInstance()
+            .getService(ThemeService.class.getName());
     //endregion
     /*
      *
@@ -334,7 +317,6 @@ public class ModularController implements UpdateProgressListener {
         preferences = getPreferences(DIVIDER_PROPERTY_NODE);
 
         _stateService.addStateListener(ApplicationState.CLONE, new GroupsWindowStateListener());
-     //   toolbar.getStylesheets().add(getClass().getClassLoader().getResource(css_path).toExternalForm());
 
         userId.setText(_loginService.getCurrentUser().getName());
         userId.setTextFill(javafx.scene.paint.Color.DARKGRAY);
@@ -501,6 +483,8 @@ public class ModularController implements UpdateProgressListener {
             userGuide.setAccelerator(new KeyCodeCombination(KeyCode.F1));
             _mainMenuManager.getButtonById(MainMenuItems.GENERAL_EXIT).setOnAction(this::exit);
             _mainMenuManager.getButtonById(MainMenuItems.GENERAL_ABOUT).setOnAction(this::showAboutPopup);
+            _mainMenuManager.getButtonById(MainMenuItems.THEME_DARK).setOnAction(this::setDarkTheme);
+            _mainMenuManager.getButtonById(MainMenuItems.THEME_LIGHT).setOnAction(this::setLightTheme);
     }
 
     private void initializeGroupsDisableBinding(ListView listView) {
@@ -738,6 +722,7 @@ public class ModularController implements UpdateProgressListener {
             stage.setResizable(false);
             stage.setScene(new Scene(root));
             stage.getIcons().add(appIcon);
+            _themeService.styleScene(stage.getScene());
 
              /* Set sizing and position */
             double dialogWidth = 500;
@@ -792,6 +777,7 @@ public class ModularController implements UpdateProgressListener {
             return;
         }
         Stage stage = (Stage) mainPanelBackground.getScene().getWindow();
+
         stage.getIcons().add(_appIcon);
 
         DirectoryChooser chooser = new DirectoryChooser();
@@ -863,13 +849,12 @@ public class ModularController implements UpdateProgressListener {
 
             SwitchBranchWindowController switchWindowController  = loader.getController();
 
-            Scene scene = new Scene(root);
-            scene.getStylesheets().add(getClass().getClassLoader().getResource("css/modular_dark_style.css").toExternalForm());
             Stage stage = new Stage();
-            stage.setScene(scene);
+            stage.setScene(new Scene(root));
             stage.getIcons().add(_appIcon);
             stage.setTitle(SWITCH_BRANCH_TITLE);
             stage.initModality(Modality.APPLICATION_MODAL);
+            _themeService.styleScene(stage.getScene());
 
             /* Set size and position */
             Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
@@ -1000,13 +985,12 @@ public class ModularController implements UpdateProgressListener {
                 return;
             }
 
-            Scene scene = new Scene(root);
-            scene.getStylesheets().add(getClass().getClassLoader().getResource("css/modular_dark_style.css").toExternalForm());
             Stage stage = new Stage();
-            stage.setScene(scene);
+            stage.setScene(new Scene(root));
             stage.getIcons().add(AppIconHolder.getInstance().getAppIcoImage());
             stage.setTitle(EDIT_PROJECT_PROPERTIES);
             stage.initModality(Modality.APPLICATION_MODAL);
+            _themeService.styleScene(stage.getScene());
 
             /* Set size and position */
             Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
@@ -1466,6 +1450,16 @@ public class ModularController implements UpdateProgressListener {
      *
      */
     //region GENERAL OTHER METHODS
+    private void setDarkTheme(ActionEvent actionEvent) {
+
+        _themeService.setTheme("dark");
+        _themeService.styleScene(toolbar.getScene());
+    }
+
+    private void setLightTheme(ActionEvent actionEvent) {
+        _themeService.setTheme("light");
+        _themeService.styleScene(toolbar.getScene());
+    }
 
     private void showAboutPopup() {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -1479,6 +1473,7 @@ public class ModularController implements UpdateProgressListener {
         alert.setHeaderText(ABOUT_POPUP_HEADER);
         alert.setContentText(ABOUT_POPUP_CONTENT);
 
+        _themeService.styleScene(alert.getDialogPane().getScene());
         Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
         stage.getIcons().add(_appIcon);
         stage.initModality(Modality.APPLICATION_MODAL);
@@ -1495,6 +1490,7 @@ public class ModularController implements UpdateProgressListener {
             alert.setTitle(title);
             alert.setHeaderText(header);
             alert.setContentText(content);
+            _themeService.styleScene(alert.getDialogPane().getScene());
             Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
             stage.getIcons().add(_appIcon);
 

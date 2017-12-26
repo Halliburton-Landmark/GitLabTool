@@ -15,6 +15,7 @@ import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ProjectTypeService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StateService;
+import com.lgc.gitlabtool.git.services.ThemeService;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 import com.lgc.gitlabtool.git.util.NameValidator;
 import com.lgc.gitlabtool.git.util.NullCheckUtil;
@@ -69,6 +70,9 @@ public class CreateProjectDialog extends Dialog<String> {
 
     private static final ConsoleService _consoleService = (ConsoleService) ServiceProvider.getInstance()
             .getService(ConsoleService.class.getName());
+
+    private static final ThemeService _themeService = (ThemeService) ServiceProvider.getInstance()
+            .getService(ThemeService.class.getName());
 
     private final GridPane grid = new GridPane();
 
@@ -129,6 +133,7 @@ public class CreateProjectDialog extends Dialog<String> {
 
          /* Set sizing and position */
         ScreenUtil.adaptForMultiScreens(stage, 350, 150);
+        _themeService.styleScene(getDialogPane().getScene());
     }
 
     private void onCreateButton(ActionEvent event) {
