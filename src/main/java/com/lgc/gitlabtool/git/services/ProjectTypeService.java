@@ -11,7 +11,7 @@ import com.lgc.gitlabtool.git.project.nature.projecttype.UnknownProjectType;
  *
  * @author Lyudmila Lyska
  */
-public interface ProjectTypeService {
+public interface ProjectTypeService extends Service {
     static final ProjectType UNKNOWN_TYPE = new UnknownProjectType();
 
     /**

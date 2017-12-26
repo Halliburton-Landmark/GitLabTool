@@ -8,16 +8,16 @@ import java.util.stream.Collectors;
 import com.lgc.gitlabtool.git.services.ThemeService;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.PushProgressListener;
 import org.apache.commons.lang.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import com.lgc.gitlabtool.git.entities.Branch;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.jgit.BranchType;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
+import com.lgc.gitlabtool.git.services.BackgroundService;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
+import com.lgc.gitlabtool.git.ui.javafx.listeners.PushProgressListener;
 import com.lgc.gitlabtool.git.util.NameValidator;
 import com.lgc.gitlabtool.git.util.ScreenUtil;
 
@@ -47,9 +47,10 @@ public class CreateNewBranchDialog extends Dialog<String> {
     private static final String STATUS_DIALOG_HEADER = "Branch creating info";
     private static final String CHOOSE_BRANCH_NAME_MESSAGE = "Please choose a new branch name";
 
-    private static final Logger _logger = LogManager.getLogger(CreateNewBranchDialog.class);
     private static final GitService _gitService = (GitService) ServiceProvider.getInstance()
             .getService(GitService.class.getName());
+    private static final BackgroundService _backgroundService = (BackgroundService) ServiceProvider.getInstance()
+            .getService(BackgroundService.class.getName());
 
     private static final ThemeService _themeService = (ThemeService) ServiceProvider.getInstance()
             .getService(ThemeService.class.getName());
@@ -171,18 +172,18 @@ public class CreateNewBranchDialog extends Dialog<String> {
         String startPoint = _comboBox.getSelectionModel().getSelectedItem();
         Runnable task = () -> {
             Map<Project, JGitStatus> results = _gitService.createBranch(getProjects(), newBranchName, startPoint, false);
-            boolean switchToBranch = _checkoutBox.isSelected();
-            if (switchToBranch) {
-                switchBranch(getProjects(), newBranchName);
+            boolean isCheckoutBranch = _checkoutBox.isSelected();
+            if (isCheckoutBranch) {
+                checkoutBranch(getProjects(), newBranchName);
             }
             boolean pushToUpstream = _pushToUpstreamBox.isSelected();
-            if (pushToUpstream && switchToBranch) {
+            if (pushToUpstream && isCheckoutBranch) {
                 pushBranches(getProjects());
             }
             Platform.runLater(() -> createAndShowStatusDialog(getProjects(), results));
         };
 
-        new Thread(task, "create-branch-task").start();
+        _backgroundService.runInBackgroundThread(task);
         getStage().close();
     }
 
@@ -199,8 +200,8 @@ public class CreateNewBranchDialog extends Dialog<String> {
 
     private ChangeListener<? super String> getInputFilter() {
         return (observable, oldValue, newValue) -> {
-            if (!_branchNameField.getText().isEmpty() 
-                    && isInputValid(_branchNameField.getText()) 
+            if (!_branchNameField.getText().isEmpty()
+                    && isInputValid(_branchNameField.getText())
                     && !_comboBox.getSelectionModel().getSelectedItem().isEmpty()) {
                 _createButton.setDisable(false);
                 _branchNameField.setStyle("-fx-border-color: green;");
@@ -241,18 +242,18 @@ public class CreateNewBranchDialog extends Dialog<String> {
         };
     }
 
-    private void switchBranch(List<Project> projects, Object branchName) {
+    private void checkoutBranch(List<Project> projects, Object branchName) {
         List<Project> changedProjects = _gitService.getProjectsWithChanges(getProjects());
 
         if (changedProjects.isEmpty()) {
-            // we do not show switching on statuses here
+            // we do not show checkout statuses here
             // because we show the statuses of branches creation
             // In the same time we could see that branch is changed on the projects list panel
-            Runnable task = () -> _gitService.switchTo(projects, (String) branchName, false, null);
-            new Thread(task, "switch-branch-task").start();
+            Runnable task = () -> _gitService.checkoutBranch(projects, (String) branchName, false, null);
+            _backgroundService.runInBackgroundThread(task);
         } else {
             ChangesCheckDialog alert = new ChangesCheckDialog();
-            alert.launchConfirmationDialog(changedProjects, projects, branchName, this::switchBranch);
+            alert.launchConfirmationDialog(changedProjects, projects, branchName, this::checkoutBranch);
         }
     }
 

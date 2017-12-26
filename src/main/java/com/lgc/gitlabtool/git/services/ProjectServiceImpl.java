@@ -23,7 +23,6 @@ import com.lgc.gitlabtool.git.connections.token.CurrentUser;
 import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.MessageType;
 import com.lgc.gitlabtool.git.entities.Project;
-import com.lgc.gitlabtool.git.entities.ProjectStatus;
 import com.lgc.gitlabtool.git.jgit.JGit;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.listeners.updateProgressListener.UpdateProgressListener;
@@ -48,7 +47,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     private static final Logger _logger = LogManager.getLogger(ProjectServiceImpl.class);
     private static final CurrentUser _currentUser = CurrentUser.getInstance();
-    private static final JGit _git = JGit.getInstance();
+    private static JGit _git;
 
     private static ProjectTypeService _projectTypeService;
     private static StateService _stateService;
@@ -63,12 +62,14 @@ public class ProjectServiceImpl implements ProjectService {
                               ProjectTypeService projectTypeService,
                               StateService stateService,
                               ConsoleService consoleService,
-                              GitService gitService) {
+                              GitService gitService,
+                              JGit git) {
         setConnector(connector);
         setProjectTypeService(projectTypeService);
         setStateService(stateService);
         setConsoleService(consoleService);
         setGitService(gitService);
+        setJGit(git);
     }
 
     @Override
@@ -160,36 +161,11 @@ public class ProjectServiceImpl implements ProjectService {
         if (project == null || project.getPath() == null) {
             return;
         }
-        String nameBranch = _gitService.getCurrentBranchName(project);
-
-        boolean[] result = _gitService.hasConflictsAndChanges(project);
-        boolean hasConflicts = result[0];
-        boolean hasChanges = result[1];
-
-        int aheadIndex = 0;
-        int behindIndex = 0;
-        if (nameBranch != null) {
-            int[] indexCount = _gitService.getAheadBehindIndexCounts(project, nameBranch);
-            aheadIndex = indexCount[0];
-            behindIndex = indexCount[1];
-        }
-
-        ProjectStatus projectStatus;
-        if (project.getProjectStatus() == null) {
-            projectStatus = new ProjectStatus(hasConflicts, hasChanges, aheadIndex, behindIndex, nameBranch);
-            project.setProjectStatus(projectStatus);
-        } else {
-            projectStatus = project.getProjectStatus();
-            projectStatus.setCurrentBranch(nameBranch);
-            projectStatus.setHasConflicts(hasConflicts);
-            projectStatus.setHasChanges(hasChanges);
-            projectStatus.setAheadIndex(aheadIndex);
-            projectStatus.setBehindIndex(behindIndex);
-        }
+        project.setProjectStatus(_gitService.getProjectStatus(project));
     }
 
     private Map<String, String> getCurrentPrivateToken() {
-        String privateTokenValue = _currentUser.getPrivateTokenValue();
+        String privateTokenValue = _currentUser.getOAuth2TokenValue();
         String privateTokenKey = _currentUser.getPrivateTokenKey();
 
         Map<String, String> header = new HashMap<>();
@@ -332,7 +308,7 @@ public class ProjectServiceImpl implements ProjectService {
 
         Project createdProject = projects.get(0); // list of projects always has one element
         if (structures.size() > 0 && isCreatedStructure) {
-            _git.addUntrackedFileForCommit(structures, createdProject);
+            _git.addUntrackedFilesToIndex(structures, createdProject);
         }
         // make first commit to GitLab repository
         _git.commitAndPush(projects, "Created new project", true, null, null, null, null,
@@ -388,12 +364,6 @@ public class ProjectServiceImpl implements ProjectService {
                 .count() > 0;
     }
 
-    private void setGitService(GitService gitService) {
-        if (gitService != null) {
-            _gitService = gitService;
-        }
-    }
-
     @Override
     public void addUpdateProgressListener(UpdateProgressListener listener) {
         if (listener != null) {
@@ -411,6 +381,18 @@ public class ProjectServiceImpl implements ProjectService {
     private void notifyListenersAboutChangesProgress(String message) {
         if (message != null) {
             _listeners.forEach(listener -> listener.updateProgress(message));
+        }
+    }
+
+    private void setGitService(GitService gitService) {
+        if (gitService != null) {
+            _gitService = gitService;
+        }
+    }
+
+    private void setJGit(JGit jGit) {
+        if (jGit != null) {
+            _git = jGit;
         }
     }
 }

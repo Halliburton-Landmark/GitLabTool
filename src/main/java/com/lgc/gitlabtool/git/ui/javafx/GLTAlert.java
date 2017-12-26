@@ -76,7 +76,7 @@ public class GLTAlert extends Alert {
      * @param content - message that should be shown
     */
    public GLTAlert(AlertType alertType, String title, String headerText, String contentText) {
-       super(DEFAULT_TYPE);
+       super(alertType);
        setTitle(title);
        setHeaderText(headerText);
        setContentText(contentText);

@@ -1,8 +1,12 @@
 package com.lgc.gitlabtool.git.services;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -15,7 +19,12 @@ import org.eclipse.jgit.api.Status;
 
 import com.lgc.gitlabtool.git.entities.Branch;
 import com.lgc.gitlabtool.git.entities.Project;
+import com.lgc.gitlabtool.git.entities.ProjectStatus;
 import com.lgc.gitlabtool.git.jgit.BranchType;
+import com.lgc.gitlabtool.git.jgit.ChangedFile;
+import com.lgc.gitlabtool.git.jgit.ChangedFileStatus;
+import com.lgc.gitlabtool.git.jgit.ChangedFileType;
+import com.lgc.gitlabtool.git.jgit.ChangedFilesUtils;
 import com.lgc.gitlabtool.git.jgit.JGit;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
@@ -24,14 +33,16 @@ import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 public class GitServiceImpl implements GitService {
 
     private static final Logger _logger = LogManager.getLogger(GitServiceImpl.class);
-    private static final String SWITCH_TO_FINISHED_MESSAGE = "Switch branch operation is finished.";
+    private static final String CHECKOUT_BRANCH_FINISHED_MESSAGE = "Checkout branch operation is finished.";
 
     private static JGit _git;
     private static StateService _stateService;
+    private static ChangedFilesUtils _changedFilesUtils;
 
-    public GitServiceImpl(StateService stateService, JGit jGit) {
-        _stateService = stateService;
+    public GitServiceImpl(StateService stateService, JGit jGit, ChangedFilesUtils changedFilesUtils) {
         _git = jGit;
+        _stateService = stateService;
+        _changedFilesUtils = changedFilesUtils;
     }
 
     @Override
@@ -40,64 +51,58 @@ public class GitServiceImpl implements GitService {
             throw new IllegalArgumentException("Wrong parameters for obtaining branches.");
         }
         List<Branch> projectBranches = _git.getBranches(project, BranchType.ALL);
-
         return isCommon ? projectBranches.containsAll(branches) : !Collections.disjoint(projectBranches, branches);
     }
 
     @Override
-    public Map<Project, JGitStatus> switchTo(List<Project> projects, Branch branch, ProgressListener progress) {
+    public Map<Project, JGitStatus> checkoutBranch(List<Project> projects, Branch branch, ProgressListener progress) {
         boolean isRemote = branch.getBranchType().equals(BranchType.REMOTE);
-        return switchTo(projects, branch.getBranchName(), isRemote, progress);
+        return checkoutBranch(projects, branch.getBranchName(), isRemote, progress);
     }
 
     @Override
-    public Map<Project, JGitStatus> switchTo(List<Project> projects,
-                                             String branchName,
-                                             boolean isRemote,
+    public Map<Project, JGitStatus> checkoutBranch(List<Project> projects, String branchName, boolean isRemote,
                                              ProgressListener progress) {
         if (progress == null) {
             progress = EmptyProgressListener.get();
         }
-        return runSwitchAction(projects, branchName, isRemote, progress);
+        return runCheckoutBranchAction(projects, branchName, isRemote, progress);
     }
 
-    private Map<Project, JGitStatus> runSwitchAction(List<Project> projects,
+    private Map<Project, JGitStatus> runCheckoutBranchAction(List<Project> projects,
                                                      String branchName,
                                                      boolean isRemote,
                                                      ProgressListener progress) {
-        final Map<Project, JGitStatus> switchStatuses = new ConcurrentHashMap<>();
+        final Map<Project, JGitStatus> checkoutStatuses = new ConcurrentHashMap<>();
         try {
-            _stateService.stateON(ApplicationState.SWITCH_BRANCH);
+            _stateService.stateON(ApplicationState.CHECKOUT_BRANCH);
             final long step = 100 / projects.size();
             final AtomicLong percentages = new AtomicLong(0);
             projects.parallelStream()
-                    .forEach(project -> switchTo(switchStatuses, project, branchName, isRemote, progress, percentages, step));
+                    .forEach(project -> checkoutBranch(checkoutStatuses, project, branchName, isRemote, progress, percentages, step));
         } finally {
-            progress.onFinish(SWITCH_TO_FINISHED_MESSAGE);
-            if (_stateService.isActiveState(ApplicationState.SWITCH_BRANCH)) {
-                _stateService.stateOFF(ApplicationState.SWITCH_BRANCH);
+            progress.onFinish(CHECKOUT_BRANCH_FINISHED_MESSAGE);
+            if (_stateService.isActiveState(ApplicationState.CHECKOUT_BRANCH)) {
+                _stateService.stateOFF(ApplicationState.CHECKOUT_BRANCH);
             }
         }
-        return switchStatuses;
+        return checkoutStatuses;
     }
 
-    private void switchTo(Map<Project, JGitStatus> switchStatuses,
-                          Project project,
-                          String branchName,
-                          boolean isRemote,
-                          ProgressListener progress,
-                          AtomicLong percentages,
-                          long step) {
+    private void checkoutBranch(Map<Project, JGitStatus> checkoutStatuses, Project project,
+                                String branchName, boolean isRemote,
+                                ProgressListener progress,
+                                AtomicLong percentages, long step) {
         try {
             progress.onStart(project);
             percentages.addAndGet(step);
-            JGitStatus status = _git.switchTo(project, branchName, isRemote);
+            JGitStatus status = _git.checkoutBranch(project, branchName, isRemote);
             if (status == JGitStatus.SUCCESSFUL) {
                 progress.onSuccess(percentages.get(), project, status);
             } else {
                 progress.onError(percentages.get(), project, status);
             }
-            switchStatuses.put(project, status);
+            checkoutStatuses.put(project, status);
         } catch (IllegalArgumentException e) {
             progress.onError(percentages.get(), e.getMessage());
         }
@@ -242,6 +247,47 @@ public class GitServiceImpl implements GitService {
     }
 
     @Override
+    public ProjectStatus getProjectStatus(Project project) {
+        if (project == null) {
+            return new ProjectStatus();
+        }
+        Set<String> conflictedFiles = new HashSet<>();
+        Set<String> untrackedFiles = new HashSet<>();
+        Set<String> changedFiles = new HashSet<>();
+        Set<String> removedFiles = new HashSet<>();
+        Set<String> missingFiles = new HashSet<>();
+        Set<String> modifiedFiles = new HashSet<>();
+        Set<String> addedFiles = new HashSet<>();
+        boolean hasChanges = false;
+
+        Optional<Status> optStatus = _git.getStatusProject(project);
+        if (optStatus.isPresent()) {
+            Status status = optStatus.get();
+            conflictedFiles.addAll(status.getConflicting());
+            changedFiles.addAll(status.getChanged());
+            addedFiles.addAll(status.getAdded());
+            untrackedFiles.addAll(status.getUntracked());
+            modifiedFiles.addAll(status.getModified());
+            removedFiles.addAll(status.getRemoved());
+            missingFiles.addAll(status.getMissing());
+
+            hasChanges = status.hasUncommittedChanges();
+        }
+
+        int aheadIndex = 0;
+        int behindIndex = 0;
+        String trackingBranch = getTrackingBranch(project);
+        String nameBranch = getCurrentBranchName(project);
+        if (nameBranch != null) {
+            int[] indexCount = getAheadBehindIndexCounts(project, nameBranch);
+            aheadIndex = indexCount[0];
+            behindIndex = indexCount[1];
+        }
+        return new ProjectStatus(hasChanges, aheadIndex, behindIndex, nameBranch, trackingBranch, conflictedFiles,
+                untrackedFiles, changedFiles, addedFiles, removedFiles, missingFiles, modifiedFiles);
+    }
+
+    @Override
     public boolean[] hasConflictsAndChanges(Project project) {
         Optional<Status> status = _git.getStatusProject(project);
 
@@ -256,6 +302,114 @@ public class GitServiceImpl implements GitService {
 
     @Override
     public void cancelClone() {
-        JGit.getInstance().cancelClone();
+        _git.cancelClone();
+    }
+
+    @Override
+    public String getTrackingBranch(Project project) {
+        return _git.getTrackingBranch(project);
+    }
+
+    @Override
+    public List<ChangedFile> getChangedFiles(Project project) {
+        List<ChangedFile> files = new ArrayList<>();
+        if (project == null || !project.isCloned()) {
+            return files;
+        }
+        ProjectStatus status = project.getProjectStatus();
+        files.addAll(getChangedFiles(status.getChangedFiles(), project, ChangedFileType.STAGED, ChangedFileStatus.CHANGED));
+        files.addAll(getChangedFiles(status.getRemovedFiles(), project, ChangedFileType.STAGED, ChangedFileStatus.REMOVED));
+        files.addAll(getChangedFiles(status.getAddedFiles(), project, ChangedFileType.STAGED, ChangedFileStatus.ADDED));
+        files.addAll(getChangedFiles(status.getUntrackedFiles(), project, ChangedFileType.UNSTAGED, ChangedFileStatus.UNTRACKED));
+        files.addAll(getChangedFiles(status.getConflictedFiles(), project,  ChangedFileType.UNSTAGED, ChangedFileStatus.CONFLICTING));
+        files.addAll(getChangedFiles(status.getMissingFiles(), project, ChangedFileType.UNSTAGED, ChangedFileStatus.MISSING));
+        files.addAll(getChangedFiles(status.getModifiedFiles(), project,ChangedFileType.UNSTAGED, ChangedFileStatus.MODIFIED));
+        return files;
+    }
+
+    private List<ChangedFile> getChangedFiles(Collection<String> fileNames, Project project,
+            ChangedFileType typeFile, ChangedFileStatus statusFile) {
+        return fileNames.stream()
+                        .map(fileName -> new ChangedFile(project, fileName, typeFile, statusFile))
+                        .collect(Collectors.toList());
+    }
+
+    @Override
+    public Set<Branch> getBranches(Collection<Project> projects, BranchType brType, boolean onlyCommon) {
+        return _git.getBranches(projects, brType, onlyCommon);
+    }
+
+    @Override
+    public List<ChangedFile> addUntrackedFilesToIndex(Map<Project, List<ChangedFile>> files) {
+        List<ChangedFile> addedFiles = new ArrayList<>();
+        if (files == null || files.isEmpty()) {
+            return addedFiles;
+        }
+        _stateService.stateON(ApplicationState.ADD_FILES_TO_INDEX);
+        try {
+            for (Entry<Project, List<ChangedFile>> entry : files.entrySet()) {
+                Project project = entry.getKey();
+                List<ChangedFile> changedFiles = entry.getValue();
+                if (project != null && project.isCloned() && changedFiles != null && !changedFiles.isEmpty()) {
+                    addedFiles.addAll(addFilesToIndex(changedFiles, project));
+                }
+            }
+        } finally {
+            _stateService.stateOFF(ApplicationState.ADD_FILES_TO_INDEX);
+        }
+        return addedFiles;
+    }
+
+    @Override
+    public List<ChangedFile> resetChangedFiles(Map<Project, List<ChangedFile>> files) {
+        List<ChangedFile> resetedFiles = new ArrayList<>();
+        if (files == null || files.isEmpty()) {
+            return resetedFiles;
+        }
+        _stateService.stateON(ApplicationState.RESET);
+        try {
+            for (Entry<Project, List<ChangedFile>> entry : files.entrySet()) {
+                Project project = entry.getKey();
+                List<ChangedFile> changedFiles = entry.getValue();
+                if (project != null && project.isCloned() && !changedFiles.isEmpty()) {
+                    List<String> fileNames = _changedFilesUtils.getFileNames(changedFiles);
+                    List<String> result = _git.resetChangedFiles(fileNames, project);
+                    resetedFiles.addAll(getNewChangedFiles(result, project, changedFiles));
+                }
+            }
+        } finally {
+            _stateService.stateOFF(ApplicationState.RESET);
+        }
+        return resetedFiles;
+    }
+
+    private List<ChangedFile> addFilesToIndex(List<ChangedFile> changedFiles,  Project project) {
+        List<String> addedFiles = new ArrayList<>();
+        for (ChangedFile changedFile : changedFiles) {
+            if (changedFile.wasRemoved() && ChangedFileType.STAGED != changedFile.getTypeFile()) {
+                String fileName = changedFile.getFileName();
+                if (_git.addDeletedFile(fileName, project, true)) {
+                    addedFiles.add(fileName);
+                }
+            } else {
+                String fileName = changedFile.getFileName();
+                if (_git.addUntrackedFileToIndex(fileName, project)) {
+                    addedFiles.add(fileName);
+                }
+            }
+        }
+        return getNewChangedFiles(addedFiles, project, changedFiles);
+    }
+
+    private List<ChangedFile> getNewChangedFiles(List<String> fileNames, Project project, List<ChangedFile> sourceList) {
+        return resetConflicts(_changedFilesUtils.getChangedFiles(fileNames, project, sourceList));
+    }
+
+    private List<ChangedFile> resetConflicts(List<ChangedFile> sourceList) {
+        // If the file was added to the index, it can no longer have conflicts even if we do a reset.
+        sourceList.stream()
+                  .filter(changedFile -> changedFile.hasConflicting())
+                  .forEach(changedFile -> changedFile.setStatusFile(ChangedFileStatus.MODIFIED));
+        return sourceList;
     }
 }

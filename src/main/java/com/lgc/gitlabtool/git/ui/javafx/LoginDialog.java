@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.lgc.gitlabtool.git.util.ShutDownUtil;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -285,6 +286,7 @@ class LoginDialog extends Dialog<DialogDTO> {
         Window window = this.getDialogPane().getScene().getWindow();
         window.setOnCloseRequest(event -> {
             logger.debug("exit without logging in");
+            ShutDownUtil.shutdown();
             System.exit(0);
         });
     }

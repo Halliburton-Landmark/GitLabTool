@@ -1,7 +1,5 @@
 package com.lgc.gitlabtool.git.ui.javafx;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
 import com.lgc.gitlabtool.git.entities.Group;
@@ -9,13 +7,7 @@ import com.lgc.gitlabtool.git.entities.MessageType;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.project.nature.projecttype.ProjectType;
-import com.lgc.gitlabtool.git.services.ConsoleService;
-import com.lgc.gitlabtool.git.services.ProgressListener;
-import com.lgc.gitlabtool.git.services.ProjectService;
-import com.lgc.gitlabtool.git.services.ProjectTypeService;
-import com.lgc.gitlabtool.git.services.ServiceProvider;
-import com.lgc.gitlabtool.git.services.StateService;
-import com.lgc.gitlabtool.git.services.ThemeService;
+import com.lgc.gitlabtool.git.services.*;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 import com.lgc.gitlabtool.git.util.NameValidator;
 import com.lgc.gitlabtool.git.util.NullCheckUtil;
@@ -59,7 +51,7 @@ public class CreateProjectDialog extends Dialog<String> {
     private final ProgressBar _progressBar = new ProgressBar();
     private final NameValidator _validator = NameValidator.get();
 
-    private static final ProjectTypeService _typeServies = (ProjectTypeService) ServiceProvider.getInstance()
+    private static final ProjectTypeService _typeServices = (ProjectTypeService) ServiceProvider.getInstance()
             .getService(ProjectTypeService.class.getName());
 
     private static final ProjectService _projectService =
@@ -73,6 +65,9 @@ public class CreateProjectDialog extends Dialog<String> {
 
     private static final ThemeService _themeService = (ThemeService) ServiceProvider.getInstance()
             .getService(ThemeService.class.getName());
+
+    private static final BackgroundService _backgroundService = (BackgroundService) ServiceProvider.getInstance()
+            .getService(BackgroundService.class.getName());
 
     private final GridPane grid = new GridPane();
 
@@ -94,7 +89,7 @@ public class CreateProjectDialog extends Dialog<String> {
         _typeLabel = new Label("Type project: ");
         grid.add(_typeLabel, 0, 3);
 
-        List<String> idsTypes = (List<String>) _typeServies.getAllIdTypes();
+        List<String> idsTypes = (List<String>) _typeServices.getAllIdTypes();
         ObservableList<String> options = FXCollections.observableArrayList(idsTypes);
         _typeComboBox = new ComboBox<String>(options);
         _typeComboBox.getSelectionModel().select(options.get(idsTypes.size()-1));
@@ -143,14 +138,12 @@ public class CreateProjectDialog extends Dialog<String> {
         _projectNameField.setDisable(true);
 
         addProgressBarOnPanel();
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.submit(() -> {
+        _backgroundService.runInBackgroundThread(() -> {
             CreateProjectProgressListener listener = new CreateProjectProgressListener();
             String idType = _typeComboBox.getSelectionModel().getSelectedItem();
-            ProjectType projectType = _typeServies.getTypeById(idType);
+            ProjectType projectType = _typeServices.getTypeById(idType);
             _projectService.createProject(_selectGroup, _projectNameField.getText(), projectType, listener);
         });
-        executor.shutdown();
     }
 
     class CreateProjectProgressListener implements ProgressListener {

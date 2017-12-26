@@ -6,6 +6,7 @@ import java.util.Date;
 
 import com.lgc.gitlabtool.git.entities.MessageType;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
+import com.lgc.gitlabtool.git.services.BackgroundService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.services.ThemeService;
@@ -62,6 +63,8 @@ public abstract class ProgressDialog extends Dialog<Void> {
 
     private static final ThemeService _themeService = (ThemeService) ServiceProvider.getInstance()
             .getService(ThemeService.class.getName());
+    private final BackgroundService _backgroundService = (BackgroundService) ServiceProvider.getInstance()
+            .getService(BackgroundService.class.getName());
 
     /**
      * Creates the instance of this class
@@ -210,7 +213,7 @@ public abstract class ProgressDialog extends Dialog<Void> {
      */
     public void showDialog() {
         if (_startAction != null) {
-            new Thread(_startAction).start();
+            _backgroundService.runInBackgroundThread(_startAction);
         }
         _stage.showAndWait();
     }

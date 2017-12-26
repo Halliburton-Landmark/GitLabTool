@@ -34,7 +34,9 @@ import org.eclipse.jgit.dircache.DirCacheCheckout;
 import org.eclipse.jgit.errors.CorruptObjectException;
 import org.eclipse.jgit.errors.NoWorkTreeException;
 import org.eclipse.jgit.errors.RevisionSyntaxException;
+import org.eclipse.jgit.lib.BranchConfig;
 import org.eclipse.jgit.lib.BranchTrackingStatus;
+import org.eclipse.jgit.lib.Config;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.EmptyProgressMonitor;
 import org.eclipse.jgit.lib.PersonIdent;
@@ -48,7 +50,9 @@ import com.lgc.gitlabtool.git.connections.token.CurrentUser;
 import com.lgc.gitlabtool.git.entities.Branch;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.User;
+import com.lgc.gitlabtool.git.services.BackgroundService;
 import com.lgc.gitlabtool.git.services.ProgressListener;
+import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 import com.lgc.gitlabtool.git.util.PathUtilities;
 
@@ -58,13 +62,12 @@ import com.lgc.gitlabtool.git.util.PathUtilities;
  *
  * - clone a group, project or URL of repository;
  * - pull, commit and push of projects;
- * - create, delete and switch to branch.
+ * - create, delete and checkout branch.
  *
  * @author Lyska Lyudmila
  */
 public class JGit {
     private static final Logger logger = LogManager.getLogger(JGit.class);
-    private static final JGit _jgit;
     private final String ERROR_MSG_NOT_CLONED = " project is not cloned. The operation is impossible";
 
     public static final String FINISH_CLONE_MESSAGE = "The cloning process is finished.";
@@ -72,17 +75,10 @@ public class JGit {
     private static final String ORIGIN_PREFIX = "origin/";
     private static final String WRONG_PARAMETERS = "Wrong parameters for obtaining branches.";
 
-    static {
-        _jgit = new JGit();
-    }
+    private final BackgroundService _backgroundService;
 
-    /**
-     * Gets instance's the class
-     *
-     * @return instance
-     */
-    public static JGit getInstance() {
-        return _jgit;
+    public JGit (BackgroundService backgroundService) {
+        _backgroundService = backgroundService;
     }
 
     /**
@@ -174,7 +170,6 @@ public class JGit {
         }
         try (Git git = getGit(project.getPath())) {
             git.reset().setMode(ResetCommand.ResetType.HARD).call();
-            project.getProjectStatus().setHasChanges(false);
             return JGitStatus.SUCCESSFUL;
         } catch (GitAPIException | IOException e) {
             logger.error("Failed to discard changed for the " + project.getName() +" project: ", e);
@@ -234,8 +229,7 @@ public class JGit {
             progressListener.onFinish(_isCloneCancelled ? CANCEL_CLONE_MESSAGE : FINISH_CLONE_MESSAGE);
         };
 
-        Thread t = new Thread(task, "Clone Group Thread");
-        t.start();
+        _backgroundService.runInBackgroundThread(task);
     }
 
     public void cancelClone() {
@@ -270,33 +264,144 @@ public class JGit {
         return Optional.empty();
     }
 
+
     /**
-     * Adds untracked files for commit
+     * Adds untracked files to index
      *
      * @param files names of files that need to add
-     * @param project the cloned project
+     * @param project the cloned project where located files
      */
-    public boolean addUntrackedFileForCommit(Collection<String> files, Project project) {
+    public List<String> addUntrackedFilesToIndex(Collection<String> files, Project project) {
         if (files == null || project == null) {
             throw new IllegalArgumentException("Incorrect data: project is " + project + ", files is " + files);
         }
         try (Git git = getGit(project.getPath())) {
-            files.stream().forEach((file) -> {
-                if (file != null) {
-                    try {
-                        git.add().addFilepattern(file).call();
-                    } catch (GitAPIException e) {
-                        logger.error("Could not add the " + file + " file");
-                        logger.error("!ERROR: " + e.getMessage());
-                    }
-                }
-            });
-            git.close();
-            return true;
+            return files.stream()
+                        .filter(fileName -> addFiles(git, fileName))
+                        .collect(Collectors.toList());
+        } catch (IOException e) {
+            logger.error("Error opening repository " + project.getPath() + " " + e.getMessage());
+        }
+        return Collections.emptyList();
+    }
+
+    /**
+     * Adds untracked file to index
+     *
+     * @param fileName the file name
+     * @param project  the cloned project where located file
+     */
+    public boolean addUntrackedFileToIndex(String fileName, Project project) {
+        if (fileName == null || project == null) {
+            throw new IllegalArgumentException("Incorrect data: project is " + project + ", fileName is " + fileName);
+        }
+        try (Git git = getGit(project.getPath())) {
+            return addFiles(git, fileName);
         } catch (IOException e) {
             logger.error("Error opening repository " + project.getPath() + " " + e.getMessage());
         }
         return false;
+    }
+
+    private boolean addFiles(Git git, String fileName) {
+        try {
+            git.add()
+               .addFilepattern(fileName)
+               .call();
+            return true;
+        } catch (GitAPIException e) {
+            logger.error("Could not add the " + fileName + " file.");
+            logger.error("!ERROR: " + e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Adds missing or deleted files to the index
+     *
+     * @param files    names of files that need to add
+     * @param project  the cloned project
+     * @param isCached if <code>true</code> allow to remove file from the index (but not from the working directory),
+     *                 otherwise <code>false</code>
+     */
+    public List<String> addDeletedFiles(Collection<String> files, Project project, boolean isCached) {
+        if (files == null || files.isEmpty() || project == null || !project.isCloned()) {
+            return Collections.emptyList();
+        }
+        try (Git git = getGit(project.getPath())) {
+            return files.stream()
+                        .filter(file -> addRemovedFileToStaging(git, file, isCached))
+                        .collect(Collectors.toList());
+        } catch (IOException e) {
+            logger.error("Error getting Git for " + project.getPath() + " " + e.getMessage());
+        }
+        return Collections.emptyList();
+    }
+
+    /**
+     * Adds missing or deleted file to the index
+     *
+     * @param fileName the file which need to add
+     * @param project  the cloned project
+     * @param isCached if <code>true</code> allow to remove file from the index (but not from the working directory),
+     *                 otherwise <code>false</code>
+     */
+    public boolean addDeletedFile(String fileName, Project project, boolean isCached) {
+        if (fileName == null || project == null || !project.isCloned()) {
+            return false;
+        }
+        try (Git git = getGit(project.getPath())) {
+            return addRemovedFileToStaging(git, fileName, isCached);
+        } catch (IOException e) {
+            logger.error("Error getting Git for " + project.getPath() + " " + e.getMessage());
+            return false;
+        }
+    }
+
+    private boolean addRemovedFileToStaging(Git git, String fileName, boolean isCached) {
+        try {
+            git.rm().setCached(isCached)
+                    .addFilepattern(fileName)
+                    .call();
+            return true;
+        } catch (GitAPIException e) {
+            logger.error("Error reseting file to HEAD " + e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Resets changed files to head
+     *
+     * @param  files the changed files (which was added to index)
+     * @param  project the cloned project
+     * @return a list of files name
+     */
+    public List<String> resetChangedFiles(Collection<String> files, Project project) {
+        if (files == null || files.isEmpty() || project == null || !project.isCloned()) {
+            return Collections.emptyList();
+        }
+        try (Git git = getGit(project.getPath())) {
+            return files.stream()
+                        .filter(fileName -> resetFile(git, fileName))
+                        .collect(Collectors.toList());
+        } catch (IOException e) {
+            logger.error("Error opening repository " + e.getMessage());
+        }
+        return Collections.emptyList();
+    }
+
+    private boolean resetFile(Git git, String fileName) {
+        try {
+            git.reset()
+               .setRef(Constants.HEAD)
+               .addPath(fileName)
+               .call();
+            return true;
+        } catch (GitAPIException e) {
+            logger.error("Error reseting file to HEAD " + e.getMessage());
+            return false;
+        }
     }
 
     /**
@@ -344,8 +449,7 @@ public class JGit {
                     .forEach(project -> pullProject(project, progressListener, progress, step));
             progressListener.onFinish("Pull process was finished");
         };
-        Thread pullThread = new Thread(pullTask, "Pull thread");
-        pullThread.start();
+        _backgroundService.runInBackgroundThread(pullTask);
         return true;
     }
 
@@ -596,23 +700,23 @@ public class JGit {
     }
 
     /**
-     * Switch to another branch (already existing).
+     * Checkout another branch (already existing).
      *
      * @param project         the cloned project
-     * @param nameBranch      the name of the branch to which to switch
-     * @param isRemoteBranch if value is <true> to switch to a branch for it, a new local branch
-                              with the same name will be created, if <false> switch to an existing branch.
+     * @param nameBranch      the name of the branch to which to checkout
+     * @param isRemoteBranch  if value is <true> to checkout branch for it, a new local branch
+                              with the same name will be created, if <false> checkout existing branch.
      *
      * @return JGitStatus: SUCCESSFUL - if a new branch was created,
      *                     FAILED - if the branch could not be created,
      *                     CONFLICTS - if the branch has unsaved changes that can lead to conflicts.
      */
-    public JGitStatus switchTo(Project project, String nameBranch, boolean isRemoteBranch) {
+    public JGitStatus checkoutBranch(Project project, String nameBranch, boolean isRemoteBranch) {
         if (project == null || nameBranch == null || nameBranch.isEmpty()) {
             throw new IllegalArgumentException(
                     "Incorrect data: project is " + project + ", nameBranch is " + nameBranch);
         }
-        String prefixErrorMessage = "Swith to branch for the " + project.getName() + " project: ";
+        String prefixErrorMessage = "Checkout branch for the " + project.getName() + " project: ";
         if (!project.isCloned()) {
             logger.error(prefixErrorMessage + ERROR_MSG_NOT_CLONED);
             return JGitStatus.FAILED;
@@ -633,24 +737,24 @@ public class JGit {
             if (isCurrentBranch(git, nameBranchWithoutAlias)) {
                 return JGitStatus.BRANCH_CURRENTLY_CHECKED_OUT;
             }
-            if (isConflictsBetweenTwoBranches(git.getRepository(), git.getRepository().getFullBranch(),
-                    Constants.R_HEADS + nameBranchWithoutAlias)) {
-                logger.warn(prefixErrorMessage + JGitStatus.CONFLICTS);
-                return JGitStatus.CONFLICTS;
+            try (Repository repository = git.getRepository()) {
+                if (isConflictsBetweenTwoBranches(repository, repository.getFullBranch(),
+                        Constants.R_HEADS + nameBranchWithoutAlias)) {
+                    logger.warn(prefixErrorMessage + JGitStatus.CONFLICTS);
+                    return JGitStatus.CONFLICTS;
+                }
+                git.checkout().setName(nameBranchWithoutAlias)
+                              .setStartPoint(ORIGIN_PREFIX + nameBranchWithoutAlias)
+                              .setCreateBranch(isRemoteBranch).call();
+
+                logger.info(prefixErrorMessage + ORIGIN_PREFIX + nameBranchWithoutAlias);
+                return JGitStatus.SUCCESSFUL;
+            } catch (CheckoutConflictException cce) {
+                logger.info("Failed! Project has unresolved conflicts " + cce.getMessage());
+            } catch (GitAPIException e) {
+                logger.info("Checkout branch failed " + e.getMessage());
             }
-
-            git.checkout().setName(nameBranchWithoutAlias)
-                                    .setStartPoint(ORIGIN_PREFIX + nameBranchWithoutAlias)
-                                    .setCreateBranch(isRemoteBranch)
-                                    .call();
-            logger.info(prefixErrorMessage + ORIGIN_PREFIX + nameBranchWithoutAlias);
-            git.getRepository().close();
-            git.close();
-
-            return JGitStatus.SUCCESSFUL;
-        } catch (CheckoutConflictException cce) {
-            logger.info("Oops..");
-        } catch (IOException | GitAPIException e) {
+        } catch (IOException e) {
             logger.error("Failed " + prefixErrorMessage + e.getMessage());
         }
         return JGitStatus.FAILED;
@@ -874,8 +978,8 @@ public class JGit {
 
 
     private boolean isCurrentBranch(Git git, String nameBranch) {
-        try {
-            String currentBranch = git.getRepository().getFullBranch();
+        try (Repository repo = git.getRepository()) {
+            String currentBranch = repo.getFullBranch();
             String newBranch = Constants.R_HEADS + nameBranch;
             return currentBranch.equals(newBranch);
         } catch (IOException e) {
@@ -914,5 +1018,34 @@ public class JGit {
 
         int[] aheadBehind = {commitsAheadIndex, commitsBehindIndex};
         return aheadBehind;
+    }
+
+    /**
+     * This method return tracking branch name for the current project
+     *
+     * @param project
+     * @return tracking branch
+     */
+    public String getTrackingBranch(Project project) {
+        if (project == null) {
+            return StringUtils.EMPTY;
+        }
+        String trackingBranch = StringUtils.EMPTY;
+        try (Git git = getGit(project.getPath())) {
+            try (Repository repo = git.getRepository()) {
+                BranchConfig config = getBranchConfig(repo.getConfig(), repo.getBranch());
+                trackingBranch = config.getTrackingBranch();
+                return trackingBranch;
+            } catch (IOException e) {
+                logger.error("Could not get tracking branch " + e.getMessage());
+            }
+        } catch (IOException e) {
+            logger.error("Could not get tracking branch " + e.getMessage());
+        }
+        return trackingBranch;
+    }
+
+    protected BranchConfig getBranchConfig(Config config, String branchName) {
+        return new BranchConfig(config, branchName);
     }
 }

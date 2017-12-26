@@ -18,7 +18,7 @@ import com.lgc.gitlabtool.git.listeners.updateConsole.UpdateConsoleGenerator;
  *
  * @author Lyudmila Lyska
  */
-public interface ConsoleService extends UpdateConsoleGenerator{
+public interface ConsoleService extends UpdateConsoleGenerator, Service {
 
     /**
      * Adds new message to UI console and to log file.

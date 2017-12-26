@@ -8,7 +8,7 @@ import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.listeners.updateProgressListener.UpdateProgressGenerator;
 import com.lgc.gitlabtool.git.project.nature.projecttype.ProjectType;
 
-public interface ProjectService extends UpdateProgressGenerator {
+public interface ProjectService extends UpdateProgressGenerator, Service {
 
     /**
      * Gets projects' group from gitlab
@@ -91,5 +91,12 @@ public interface ProjectService extends UpdateProgressGenerator {
      * @param projects - the projects list
      */
     void updateProjectStatuses(List<Project> projects);
+
+    /**
+     * Updates project status.
+     *
+     * @param project - the cloned project
+     */
+    void updateProjectStatus(Project project);
 
 }

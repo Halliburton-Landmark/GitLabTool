@@ -19,9 +19,11 @@ public class LoginServiceImpl implements LoginService {
 
     private RESTConnector _connector;
     private CurrentUser _currentUser;
+    private BackgroundService _backgroundService;
 
-    public LoginServiceImpl(RESTConnector connector) {
+    public LoginServiceImpl(RESTConnector connector, BackgroundService backgroundService) {
         setConnector(connector);
+        this._backgroundService = backgroundService;
     }
 
     @Override
@@ -47,7 +49,7 @@ public class LoginServiceImpl implements LoginService {
                         User newUser = JSONParser.parseToObject(userJson2, User.class);
                         _currentUser = CurrentUser.getInstance();
                         _currentUser.setCurrentUser(newUser);
-                        _currentUser.setPrivateTokenValue(accessToken.getTokenWithType());
+                        _currentUser.setOAuth2TokenValue(accessToken.getTokenWithType());
                     }
 
                     CredentialsProvider.setDefault(new UsernamePasswordCredentialsProvider(dto.getLogin(), dto.getPassword()));
@@ -55,9 +57,7 @@ public class LoginServiceImpl implements LoginService {
             }
             onSuccess.accept(responseHolder);
         };
-        Thread loginThread = new Thread(runnable);
-        loginThread.setName("LoginThread");
-        loginThread.start();
+        _backgroundService.runInBackgroundThread(runnable);
     }
 
     @Override
