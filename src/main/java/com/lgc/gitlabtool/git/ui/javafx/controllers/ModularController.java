@@ -182,6 +182,7 @@ public class ModularController implements UpdateProgressListener {
     private static final String PULL_OPERATION_NAME = "pull";
     private static final String PUSH_OPERATION_NAME = "push";
     private static final String CHECKOUT_BEANCH_OPERATION_NAME = "checkout branch";
+    private static final String STASH_OPERATION_NAME = "stash";
 
     private static final String SELECT_ALL_IMAGE_URL = "icons/select_all_20x20.png";
     private static final String REFRESH_PROJECTS_IMAGE_URL = "icons/toolbar/refresh_projects_20x20.png";
@@ -832,11 +833,30 @@ public class ModularController implements UpdateProgressListener {
     @SuppressWarnings("unused")
     private void showStashWindow(ActionEvent event) {
         try {
+            List<Project> selectedProjects = projectListView.getSelectionModel().getSelectedItems();
+            selectedProjects = ProjectList.getCorrectProjects(selectedProjects);
+            if (selectedProjects.isEmpty()) {
+                String message = String.format(NO_ANY_PROJECT_FOR_OPERATION, STASH_OPERATION_NAME);
+                _consoleService.addMessage(message, MessageType.ERROR);
+                return;
+            }
+            List<Project> changedProjects = selectedProjects.stream()
+                                                            .filter(project -> project.getProjectStatus().hasChanges()
+                                                                  || project.getProjectStatus().hasNewUntrackedFiles())
+                                                            .collect(Collectors.toList());
+            if (changedProjects.isEmpty()) {
+                _consoleService.addMessage("Selected projects don't have changes.", MessageType.ERROR);
+                return;
+            } else {
+                _consoleService.addMessage(changedProjects.size() + " projects have changes for stashing", MessageType.SIMPLE);
+            }
+
             URL stashWindowUrl = getClass().getClassLoader().getResource(ViewKey.STASH_WINDOW.getPath());
             FXMLLoader loader = new FXMLLoader(stashWindowUrl);
             Parent root = loader.load();
 
-            //CheckoutBranchWindowController checkoutWindowController  = loader.getController();
+            StashWindowController stashWindowController  = loader.getController();
+            stashWindowController.beforeShowing(ProjectList.getIdsProjects(changedProjects));
 
             Scene scene = new Scene(root);
             Stage stage = new Stage();
