@@ -947,7 +947,7 @@ public class JGit {
 
     private boolean clone(Project project, String localPath) {
         String path = localPath + File.separator + project.getName();
-        if (!clone(project.getHttp_url_to_repo(), path)) {
+        if (!clone(project.getHttpUrlToRepo(), path)) {
             PathUtilities.deletePath(Paths.get(path));
             return false;
         }
