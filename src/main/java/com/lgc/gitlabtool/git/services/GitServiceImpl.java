@@ -1,8 +1,11 @@
 package com.lgc.gitlabtool.git.services;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -381,6 +384,32 @@ public class GitServiceImpl implements GitService {
             _stateService.stateOFF(ApplicationState.RESET);
         }
         return resetedFiles;
+    }
+
+    @Override
+    public boolean createStash(List<Project> projects, String stashMessage, boolean includeUntracked) {
+        if (projects == null || projects.isEmpty()) {
+            return false;
+        } else if (stashMessage == null) {
+            return false;
+        }
+
+        if (projects.size() == 1) {
+            return _git.stashCreate(projects.get(0), stashMessage, includeUntracked);
+        } else {
+            String indexOperation = "GS" + currentDateToString();
+            System.out.println(indexOperation);
+
+
+        }
+
+        return false;
+    }
+
+    private String currentDateToString() {
+        DateFormat dateFormat = new SimpleDateFormat("yyMMddHHmmss");
+        Date date = new Date();
+        return dateFormat.format(date); //161116120843
     }
 
     private List<ChangedFile> addFilesToIndex(List<ChangedFile> changedFiles,  Project project) {

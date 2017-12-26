@@ -161,13 +161,15 @@ public class JGit {
      *
      * @param  project the cloned project
      * @param  stashMessage the stash message
+     * @param  includeUntracked <code>true</code> if need to include untracked file to stash, otherwise <code>false</code>
      * @return <code>true</code> if stash was created successfully, otherwise <code>false</code>
      */
-    public boolean stashCreate(Project project, String stashMessage) {
+    public boolean stashCreate(Project project, String stashMessage, boolean includeUntracked) {
         if (project != null && project.isCloned() && stashMessage != null) {
             try (Git git = getGit(project.getPath())) {
                 RevCommit stash = git.stashCreate()
                                      .setWorkingDirectoryMessage(stashMessage)
+                                     .setIncludeUntracked(includeUntracked)
                                      .call();
                 return stash != null;
             } catch (GitAPIException | IOException e) {

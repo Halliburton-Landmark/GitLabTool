@@ -218,4 +218,14 @@ public interface GitService extends Service {
      * @return a list of branches
      */
     Set<Branch> getBranches(Collection<Project> projects, BranchType brType, boolean onlyCommon);
+
+    /**
+     *
+     *
+     * @param projects
+     * @param stashMessage
+     * @param includeUntracked
+     * @return
+     */
+    boolean createStash(List<Project> projects, String stashMessage, boolean includeUntracked);
 }

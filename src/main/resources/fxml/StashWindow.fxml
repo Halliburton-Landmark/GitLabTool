@@ -13,9 +13,9 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane prefHeight="500.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.lgc.gitlabtool.git.ui.javafx.controllers.StashWindowController">
+<AnchorPane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.lgc.gitlabtool.git.ui.javafx.controllers.StashWindowController">
    <children>
-      <SplitPane dividerPositions="0.6739130434782609" layoutX="58.0" layoutY="170.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <SplitPane dividerPositions="0.6867283950617284" layoutX="58.0" layoutY="170.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <items>
           <AnchorPane minWidth="400.0">
                <children>
@@ -34,7 +34,7 @@
                                                       <Insets top="2.0" />
                                                    </HBox.margin>
                                                 </Label>
-                                                <TextField prefHeight="25.0" prefWidth="314.0" HBox.hgrow="ALWAYS">
+                                                <TextField fx:id="_stashMessageTextField" prefHeight="25.0" prefWidth="314.0" HBox.hgrow="ALWAYS">
                                                    <HBox.margin>
                                                       <Insets left="2.0" />
                                                    </HBox.margin>
@@ -44,7 +44,7 @@
                                                 <Insets left="5.0" right="5.0" top="15.0" />
                                              </VBox.margin>
                                           </HBox>
-                                          <CheckBox mnemonicParsing="false" text="Include untracked files">
+                                          <CheckBox fx:id="_includeUntrackedComboBox" mnemonicParsing="false" text="Include untracked files">
                                              <VBox.margin>
                                                 <Insets left="5.0" right="5.0" top="10.0" />
                                              </VBox.margin>
@@ -54,7 +54,7 @@
                                                 <Insets bottom="10.0" left="5.0" right="5.0" />
                                              </VBox.margin>
                                              <buttons>
-                                                <Button mnemonicParsing="false" text="Create" />
+                                                <Button fx:id="_createButton" mnemonicParsing="false" onAction="#onCreateStashAction" text="Create" />
                                              </buttons>
                                           </ButtonBar>
                                        </children>
@@ -65,11 +65,11 @@
                       </TitledPane>
                         <AnchorPane prefHeight="354.0" prefWidth="437.0" VBox.vgrow="ALWAYS">
                            <children>
-                              <TitledPane expanded="false" prefHeight="381.0" prefWidth="437.0" text="Stash List" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                              <TitledPane fx:id="_stashListTitledPane" expanded="false" prefHeight="381.0" prefWidth="437.0" text="Stash List" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                  <content>
                                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                        <children>
-                                          <ListView layoutX="19.6" layoutY="18.6" prefHeight="398.0" prefWidth="402.0" AnchorPane.bottomAnchor="25.0" AnchorPane.leftAnchor="-10.0" AnchorPane.rightAnchor="-10.0" AnchorPane.topAnchor="-10.0">
+                                          <ListView fx:id="_stashListView" layoutX="19.6" layoutY="18.6" prefHeight="398.0" prefWidth="402.0" AnchorPane.bottomAnchor="25.0" AnchorPane.leftAnchor="-10.0" AnchorPane.rightAnchor="-10.0" AnchorPane.topAnchor="-10.0">
                                              <padding>
                                                 <Insets right="-6.0" top="10.0" />
                                              </padding>
@@ -90,9 +90,9 @@
                   </VBox>
                </children>
             </AnchorPane>
-          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+          <AnchorPane minWidth="250.0">
                <children>
-                  <ListView layoutX="-29.0" layoutY="183.0" prefHeight="498.0" prefWidth="150.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                  <ListView fx:id="_projectListView" layoutX="-27.0" layoutY="183.0" prefHeight="498.0" prefWidth="219.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                </children>
             </AnchorPane>
         </items>
