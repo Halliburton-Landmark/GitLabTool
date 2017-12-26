@@ -1,29 +1,22 @@
 package com.lgc.gitlabtool.git.services;
 
+import com.lgc.gitlabtool.git.ui.javafx.GLTThemes;
 import javafx.scene.Scene;
 
 import java.util.prefs.Preferences;
 
 public class ThemeServiceImpl implements ThemeService {
 
-    private static String DARK_THEME_PATH = "css/modular_dark_style.css";
-    private static String LIGHT_THEME_PATH = "css/modular_light_style.css";
-
-    private String currentStyle;
-    private static final String THEME_PREFS_KEY = "gtl_theme";
+    private static final String THEME_PREFS_KEY = "glt_theme";
 
     private Preferences themePrefs;
+    private GLTThemes currentGLTThemes;
 
     ThemeServiceImpl() {
         themePrefs = Preferences.userRoot().node(THEME_PREFS_KEY);
 
-        String currentTheme = themePrefs.get(THEME_PREFS_KEY, "light");
-        if(currentTheme.equals("dark")){
-            currentStyle = DARK_THEME_PATH;
-        }else if(currentTheme.equals("light")){
-            currentStyle = LIGHT_THEME_PATH;
-        }
-        System.out.println(currentTheme);
+        String currentThemeKey = themePrefs.get(THEME_PREFS_KEY, GLTThemes.LIGHT_THEME.getKey());
+        currentGLTThemes = GLTThemes.getThemeByKey(currentThemeKey);
     }
 
     public void styleScene(Scene scene) {
@@ -36,16 +29,12 @@ public class ThemeServiceImpl implements ThemeService {
         if (!scene.getStylesheets().isEmpty()) {
             scene.getStylesheets().clear();
         }
-        scene.getStylesheets().add(getClass().getClassLoader().getResource(currentStyle).toExternalForm());
+        scene.getStylesheets().add(
+                getClass().getClassLoader().getResource(currentGLTThemes.getPath()).toExternalForm());
     }
 
     public void setTheme(String themeName){
-        if (themeName.equals("dark")){
-            currentStyle = DARK_THEME_PATH;
-            themePrefs.put(THEME_PREFS_KEY, "dark");
-        }else if(themeName.equals("light")){
-            currentStyle = LIGHT_THEME_PATH;
-            themePrefs.put(THEME_PREFS_KEY, "light");
-        }
+        currentGLTThemes = GLTThemes.getThemeByKey(themeName);
+        themePrefs.put(THEME_PREFS_KEY, currentGLTThemes.getKey());
     }
 }

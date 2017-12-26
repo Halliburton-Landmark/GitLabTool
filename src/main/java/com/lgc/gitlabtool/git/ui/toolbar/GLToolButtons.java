@@ -216,7 +216,7 @@ public enum GLToolButtons {
 
     THEME_DARK(GLToolConstants.ALL_WINDOW_KEY,
             "theme_dark",
-            "icons/mainmenu/revert_changes_16x16.png",
+            "icons/mainmenu/dark_theme_16x16.png",
             "Dark theme",
             null,
             MainMenuInfo.THEMES,
@@ -224,7 +224,7 @@ public enum GLToolButtons {
 
     THEME_LIGHT(GLToolConstants.ALL_WINDOW_KEY,
             "theme_light",
-            "icons/mainmenu/revert_changes_16x16.png",
+            "icons/mainmenu/light_theme_16x16.png",
             "Light theme",
             null,
             MainMenuInfo.THEMES,
