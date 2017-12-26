@@ -867,12 +867,11 @@ public class ModularController implements UpdateProgressListener {
 
             /* Set size and position */
             Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
-            double dialogWidth = primaryScreenBounds.getMaxX() / 1.5;
-            double dialogHeight = primaryScreenBounds.getMaxY() / 1.5;
+            double dialogWidth = primaryScreenBounds.getMaxX() / 2.8;
+            double dialogHeight = primaryScreenBounds.getMaxY() / 2.8;
+            stage.setMinWidth(dialogWidth);
+            stage.setMinHeight(dialogHeight);
             ScreenUtil.adaptForMultiScreens(stage, dialogWidth, dialogHeight);
-
-            stage.setMinWidth(700);
-            stage.setMinHeight(400);
 
             stage.show();
         } catch (IOException e) {

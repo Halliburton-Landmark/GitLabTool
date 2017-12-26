@@ -37,6 +37,7 @@ public class GitServiceImpl implements GitService {
 
     private static final Logger _logger = LogManager.getLogger(GitServiceImpl.class);
     private static final String CHECKOUT_BRANCH_FINISHED_MESSAGE = "Checkout branch operation is finished.";
+    private static final String GROUP_STASH_ID = "[GS%s]";
 
     private static JGit _git;
     private static StateService _stateService;
@@ -397,7 +398,7 @@ public class GitServiceImpl implements GitService {
         if (projects.size() == 1) {
             return _git.stashCreate(projects.get(0), stashMessage, includeUntracked);
         } else {
-            String indexOperation = "GS" + currentDateToString();
+            String indexOperation = String.format(GROUP_STASH_ID, currentDateToString());
             System.out.println(indexOperation);
 
 

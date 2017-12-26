@@ -6,6 +6,8 @@ import java.util.List;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.ProjectList;
 import com.lgc.gitlabtool.git.jgit.stash.StashItem;
+import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
+import com.lgc.gitlabtool.git.listeners.stateListeners.StateListener;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StateService;
@@ -23,7 +25,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.TitledPane;
 import javafx.scene.input.MouseEvent;
 
-public class StashWindowController {
+public class StashWindowController implements StateListener {
 
     @FXML
     private ListView<Project> _projectListView;
@@ -66,6 +68,7 @@ public class StashWindowController {
      * @param projectsIds
      */
     public void beforeShowing(List<Integer> projectsIds) {
+        _stateService.addStateListener(ApplicationState.UPDATE_PROJECT_STATUSES, this);
         _projectsIds.addAll(projectsIds);
 
         ObservableList<Project> items = FXCollections.observableArrayList(getProjectNames());
@@ -106,5 +109,12 @@ public class StashWindowController {
             }
         }
 
+    }
+
+
+
+    @Override
+    public void handleEvent(ApplicationState changedState, boolean isActivate) {
+        System.out.println("Update statuses handler");
     }
 }
