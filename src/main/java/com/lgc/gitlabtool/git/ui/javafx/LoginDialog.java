@@ -160,11 +160,8 @@ class LoginDialog extends Dialog<DialogDTO> {
     }
 
     private void setUpInfoButton(Button infoButton) {
-        Image infoImage = new Image(getClass()
-                .getClassLoader()
-                .getResource(INFO_IMAGE_URL).toExternalForm());
-
-        infoButton.setGraphic(new ImageView(infoImage));
+        ImageView imageViewInfo = _themeService.getStyledImageView(INFO_IMAGE_URL);
+        infoButton.setGraphic(imageViewInfo);
 
         /* ROUND (30 px is optimal size but can be changed) */
         infoButton.setStyle(

@@ -9,6 +9,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import com.lgc.gitlabtool.git.services.ServiceProvider;
+import com.lgc.gitlabtool.git.services.ThemeService;
+import com.lgc.gitlabtool.git.ui.javafx.GLTThemes;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import org.apache.logging.log4j.LogManager;
@@ -46,6 +49,9 @@ public class ToolbarManager {
     private static ToolbarManager instance = null;
 
     private List<Node> items;
+
+    private static final ThemeService _themeService = (ThemeService) ServiceProvider.getInstance()
+            .getService(ThemeService.class.getName());
 
     private ToolbarManager() {
     }
@@ -166,14 +172,20 @@ public class ToolbarManager {
         return buttons;
     }
 
+    public void refreshIcons() {
+        for (Node item : items) {
+            if (_themeService.getCurrentTheme().equals(GLTThemes.DARK_THEME)) {
+                ColorAdjust colorAdjust = new ColorAdjust();
+                colorAdjust.setBrightness(+0.65);
+                item.setEffect(colorAdjust);
+            } else {
+                item.setEffect(null);
+            }
+        }
+    }
+
     private Button createButton(String buttonId, String imgPath, String btnText, String tooltipText) {
-        Image btnImage = new Image(getClass().getClassLoader().getResource(imgPath).toExternalForm());
-        ImageView view = new ImageView(btnImage);
-
-        ColorAdjust colorAdjust = new ColorAdjust();
-        colorAdjust.setBrightness(+0.65);
-
-        view.setEffect(colorAdjust);
+        ImageView view = _themeService.getStyledImageView(imgPath);
 
         Button button = new Button(btnText, view);
         button.setTooltip(new Tooltip(tooltipText));

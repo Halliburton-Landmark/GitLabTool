@@ -2,9 +2,13 @@ package com.lgc.gitlabtool.git.ui.mainmenu;
 
 import java.util.*;
 
+import com.lgc.gitlabtool.git.services.ServiceProvider;
+import com.lgc.gitlabtool.git.services.ThemeService;
+import com.lgc.gitlabtool.git.ui.javafx.GLTThemes;
 import com.lgc.gitlabtool.git.ui.javafx.controllers.ModularController;
 import com.lgc.gitlabtool.git.ui.toolbar.GLToolButtons;
 
+import javafx.scene.Node;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.effect.ColorAdjust;
@@ -22,6 +26,9 @@ public class MainMenuManager {
 
     private List<Menu> items;
     private Map<String, Boolean> enableMap = new HashMap<>();
+
+    private static final ThemeService _themeService = (ThemeService) ServiceProvider.getInstance()
+            .getService(ThemeService.class.getName());
 
     private MainMenuManager() {
     }
@@ -148,14 +155,20 @@ public class MainMenuManager {
                 });
     }
 
+    public void refreshIcons() {
+        for (Menu item : items) {
+            if (_themeService.getCurrentTheme().equals(GLTThemes.DARK_THEME)) {
+                ColorAdjust colorAdjust = new ColorAdjust();
+                colorAdjust.setBrightness(+0.65);
+                item.getItems().forEach(q -> q.getGraphic().setEffect(colorAdjust));
+            } else {
+                item.getItems().forEach(q -> q.getGraphic().setEffect(null));
+            }
+        }
+    }
+
     private MenuItem createButton(String buttonId, String imgPath, String btnText) {
-        Image menuItemImage = new Image(getClass().getClassLoader().getResource(imgPath).toExternalForm());
-        ImageView view = new ImageView(menuItemImage);
-
-        ColorAdjust colorAdjust = new ColorAdjust();
-        colorAdjust.setBrightness(+0.65);
-
-        view.setEffect(colorAdjust);
+        ImageView view = _themeService.getStyledImageView(imgPath);
 
         MenuItem menuItem = new MenuItem(btnText, view);
         menuItem.setId(buttonId);

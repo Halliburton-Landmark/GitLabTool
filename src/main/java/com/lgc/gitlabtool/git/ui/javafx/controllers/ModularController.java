@@ -21,6 +21,7 @@ import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.lgc.gitlabtool.git.ui.javafx.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -45,18 +46,6 @@ import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.services.ThemeService;
 import com.lgc.gitlabtool.git.ui.ViewKey;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
-import com.lgc.gitlabtool.git.ui.javafx.AlertWithCheckBox;
-import com.lgc.gitlabtool.git.ui.javafx.ChangesCheckDialog;
-import com.lgc.gitlabtool.git.ui.javafx.CloneProgressDialog;
-import com.lgc.gitlabtool.git.ui.javafx.CreateNewBranchDialog;
-import com.lgc.gitlabtool.git.ui.javafx.CreateProjectDialog;
-import com.lgc.gitlabtool.git.ui.javafx.GLTAlert;
-import com.lgc.gitlabtool.git.ui.javafx.IncorrectProjectDialog;
-import com.lgc.gitlabtool.git.ui.javafx.JavaFXUI;
-import com.lgc.gitlabtool.git.ui.javafx.ProgressDialog;
-import com.lgc.gitlabtool.git.ui.javafx.PullProgressDialog;
-import com.lgc.gitlabtool.git.ui.javafx.StatusDialog;
-import com.lgc.gitlabtool.git.ui.javafx.WorkIndicatorDialog;
 import com.lgc.gitlabtool.git.ui.javafx.comparators.ProjectListComparator;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.PushProgressListener;
@@ -398,16 +387,9 @@ public class ModularController implements UpdateProgressListener {
         AnchorPane.setLeftAnchor(projectsToolbar, 0.0);
         AnchorPane.setRightAnchor(projectsToolbar, 0.0);
 
-        Image imageRefreshProjects = new Image(
-                getClass().getClassLoader().getResource(REFRESH_PROJECTS_IMAGE_URL).toExternalForm());
-        Image imageSelectAll = new Image(
-                getClass().getClassLoader().getResource(SELECT_ALL_IMAGE_URL).toExternalForm());
-        Image imageFilterShadow = new Image(
-                getClass().getClassLoader().getResource(FILTER_SHADOW_PROJECTS_IMAGE_URL).toExternalForm());
-
-        ImageView imageViewRefreshProjects = new ImageView(imageRefreshProjects);
-        ImageView imageViewSelectAll = new ImageView(imageSelectAll);
-        ImageView imageViewFilterShadow = new ImageView(imageFilterShadow);
+        ImageView imageViewRefreshProjects = _themeService.getStyledImageView(REFRESH_PROJECTS_IMAGE_URL);
+        ImageView imageViewSelectAll = _themeService.getStyledImageView(SELECT_ALL_IMAGE_URL);
+        ImageView imageViewFilterShadow = _themeService.getStyledImageView(FILTER_SHADOW_PROJECTS_IMAGE_URL);
 
         ColorAdjust colorAdjust = new ColorAdjust();
         colorAdjust.setBrightness(+0.65);
@@ -1255,57 +1237,51 @@ public class ModularController implements UpdateProgressListener {
 
         if (hasCloned) {
             String openFolderIcoUrl = "icons/mainmenu/folder_16x16.png";
-            Image openFolderIco = new Image(getClass().getClassLoader().getResource(openFolderIcoUrl).toExternalForm());
-            ImageView view = new ImageView(openFolderIco);
-
-            ColorAdjust colorAdjust = new ColorAdjust();
-            colorAdjust.setBrightness(+0.65);
-
-            view.setEffect(colorAdjust);
+            ImageView imageViewOpenFolder = _themeService.getStyledImageView(openFolderIcoUrl);
 
             MenuItem openFolder = new MenuItem();
             openFolder.setText("Open project folder");
             openFolder.setOnAction(this::onOpenFolder);
-            openFolder.setGraphic(new ImageView(openFolderIco));
+            openFolder.setGraphic(imageViewOpenFolder);
             
             Menu subMenuGit = new Menu("Git");
            
             MenuItem itemCreateBranch = new MenuItem(GLToolButtons.MAIN_CREATE_BRANCH.getText());
-            Image itemCreateBranchIco = new Image(getClass().getClassLoader().getResource(GLToolButtons.MAIN_CREATE_BRANCH.getIconUrl()).toExternalForm());
-            itemCreateBranch.setGraphic(new ImageView(itemCreateBranchIco));
+            ImageView imageViewCreateBranch = _themeService.getStyledImageView(GLToolButtons.MAIN_CREATE_BRANCH.getIconUrl());
+            itemCreateBranch.setGraphic(imageViewCreateBranch);
             itemCreateBranch.setOnAction(this::onNewBranchButton);
             
             MenuItem itemCheckoutBranch = new MenuItem(GLToolButtons.MAIN_CHECKOUT_BRANCH.getText());
-            Image itemCheckoutBranchIco = new Image(getClass().getClassLoader().getResource(GLToolButtons.MAIN_CHECKOUT_BRANCH.getIconUrl()).toExternalForm());
-            itemCheckoutBranch.setGraphic(new ImageView(itemCheckoutBranchIco));
+            ImageView imageViewCheckoutBranch = _themeService.getStyledImageView(GLToolButtons.MAIN_CHECKOUT_BRANCH.getIconUrl());
+            itemCheckoutBranch.setGraphic(imageViewCheckoutBranch);
             itemCheckoutBranch.setOnAction(this::showCheckoutBranchWindow);
             
             MenuItem itemStaging = new MenuItem(GLToolButtons.MAIN_STAGING.getText());
-            Image itemStagingIco = new Image(getClass().getClassLoader().getResource(GLToolButtons.MAIN_STAGING.getIconUrl()).toExternalForm());
-            itemStaging.setGraphic(new ImageView(itemStagingIco));
+            ImageView imageViewStaging = _themeService.getStyledImageView(GLToolButtons.MAIN_STAGING.getIconUrl());
+            itemStaging.setGraphic(imageViewStaging);
             itemStaging.setOnAction(this::openGitStaging);
             
             MenuItem itemPull = new MenuItem(GLToolButtons.MAIN_PULL.getText());
-            Image itemPullIco = new Image(getClass().getClassLoader().getResource(GLToolButtons.MAIN_PULL.getIconUrl()).toExternalForm());
-            itemPull.setGraphic(new ImageView(itemPullIco));
+            ImageView imageViewPull = _themeService.getStyledImageView(GLToolButtons.MAIN_PULL.getIconUrl());
+            itemPull.setGraphic(imageViewPull);
             itemPull.setOnAction(this::onPullAction);
             
             MenuItem itemPush = new MenuItem(GLToolButtons.MAIN_PUSH.getText());
-            Image itemPushIco = new Image(getClass().getClassLoader().getResource(GLToolButtons.MAIN_PUSH.getIconUrl()).toExternalForm());
-            itemPush.setGraphic(new ImageView(itemPushIco));
+            ImageView imageViewPush = _themeService.getStyledImageView(GLToolButtons.MAIN_PUSH.getIconUrl());
+            itemPush.setGraphic(imageViewPush);
             itemPush.setOnAction(this::onPushAction);
             
             MenuItem itemRevert = new MenuItem(GLToolButtons.MAIN_REVERT.getText());
-            Image itemRevertIco = new Image(getClass().getClassLoader().getResource(GLToolButtons.MAIN_REVERT.getIconUrl()).toExternalForm());
-            itemRevert.setGraphic(new ImageView(itemRevertIco));
+            ImageView imageViewRevert = _themeService.getStyledImageView(GLToolButtons.MAIN_REVERT.getIconUrl());
+            itemRevert.setGraphic(imageViewRevert);
             itemRevert.setOnAction(this::onRevertChanges);
             
             subMenuGit.getItems().addAll(itemCreateBranch, itemCheckoutBranch,
             		itemStaging, itemPull, itemPush, itemRevert);
             
             MenuItem itemEditProjectProp = new MenuItem(GLToolButtons.EDIT_PROJECT_PROPERTIES_BUTTON.getText());
-            Image itemEditProjectPropIco = new Image(getClass().getClassLoader().getResource(GLToolButtons.EDIT_PROJECT_PROPERTIES_BUTTON.getIconUrl()).toExternalForm());
-            itemEditProjectProp.setGraphic(new ImageView(itemEditProjectPropIco));
+            ImageView imageViewProjectProp = _themeService.getStyledImageView(GLToolButtons.EDIT_PROJECT_PROPERTIES_BUTTON.getIconUrl());
+            itemEditProjectProp.setGraphic(imageViewProjectProp);
             itemEditProjectProp.setOnAction(this::showEditProjectPropertiesWindow);
 
             menuItems.add(openFolder);
@@ -1315,18 +1291,12 @@ public class ModularController implements UpdateProgressListener {
 
         if (hasShadow) {
             String cloneProjectIcoUrl = "icons/mainmenu/clone_16x16.png";
-            Image cloneProjectIco = new Image(getClass().getClassLoader().getResource(cloneProjectIcoUrl).toExternalForm());
-            ImageView view = new ImageView(cloneProjectIco);
-
-            ColorAdjust colorAdjust = new ColorAdjust();
-            colorAdjust.setBrightness(+0.65);
-
-            view.setEffect(colorAdjust);
+            ImageView imageViewProjectProp = _themeService.getStyledImageView(cloneProjectIcoUrl);
 
             MenuItem cloneProject = new MenuItem();
             cloneProject.setText("Clone shadow project");
             cloneProject.setOnAction(this::cloneShadowProject);
-            cloneProject.setGraphic(view);
+            cloneProject.setGraphic(imageViewProjectProp);
             menuItems.add(cloneProject);
         }
 
@@ -1486,14 +1456,19 @@ public class ModularController implements UpdateProgressListener {
      */
     //region GENERAL OTHER METHODS
     private void setDarkTheme(ActionEvent actionEvent) {
-
-        _themeService.setTheme("dark");
-        _themeService.styleScene(toolbar.getScene());
+        setTheme(GLTThemes.DARK_THEME.getKey());
     }
 
     private void setLightTheme(ActionEvent actionEvent) {
-        _themeService.setTheme("light");
+        setTheme(GLTThemes.LIGHT_THEME.getKey());
+    }
+
+    private void setTheme(String themeId){
+        _themeService.setTheme(themeId);
         _themeService.styleScene(toolbar.getScene());
+
+        _toolbarManager.refreshIcons();
+        _mainMenuManager.refreshIcons();
     }
 
     private void showAboutPopup() {
