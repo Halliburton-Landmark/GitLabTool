@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
-
 /**
  *
  *
@@ -20,9 +18,9 @@ public class GroupStash implements StashItem {
      *
      * @param message
      */
-    public GroupStash() {
-        _message = StringUtils.EMPTY;
-        _group = new ArrayList<>(); // TODO is need concurrent ?
+    public GroupStash(String groupMessage) {
+        _message = groupMessage;
+        _group = new ArrayList<>();
     }
 
     @Override

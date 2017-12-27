@@ -840,23 +840,13 @@ public class ModularController implements UpdateProgressListener {
                 _consoleService.addMessage(message, MessageType.ERROR);
                 return;
             }
-            List<Project> changedProjects = selectedProjects.stream()
-                                                            .filter(project -> project.getProjectStatus().hasChanges()
-                                                                  || project.getProjectStatus().hasNewUntrackedFiles())
-                                                            .collect(Collectors.toList());
-            if (changedProjects.isEmpty()) {
-                _consoleService.addMessage("Selected projects don't have changes.", MessageType.ERROR);
-                return;
-            } else {
-                _consoleService.addMessage(changedProjects.size() + " projects have changes for stashing", MessageType.SIMPLE);
-            }
 
             URL stashWindowUrl = getClass().getClassLoader().getResource(ViewKey.STASH_WINDOW.getPath());
             FXMLLoader loader = new FXMLLoader(stashWindowUrl);
             Parent root = loader.load();
 
             StashWindowController stashWindowController  = loader.getController();
-            stashWindowController.beforeShowing(ProjectList.getIdsProjects(changedProjects));
+            stashWindowController.beforeShowing(ProjectList.getIdsProjects(selectedProjects));
 
             Scene scene = new Scene(root);
             Stage stage = new Stage();

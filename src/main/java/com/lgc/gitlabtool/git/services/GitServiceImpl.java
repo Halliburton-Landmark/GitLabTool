@@ -30,6 +30,9 @@ import com.lgc.gitlabtool.git.jgit.ChangedFileType;
 import com.lgc.gitlabtool.git.jgit.ChangedFilesUtils;
 import com.lgc.gitlabtool.git.jgit.JGit;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
+import com.lgc.gitlabtool.git.jgit.stash.GroupStash;
+import com.lgc.gitlabtool.git.jgit.stash.Stash;
+import com.lgc.gitlabtool.git.jgit.stash.StashItem;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 
@@ -37,7 +40,7 @@ public class GitServiceImpl implements GitService {
 
     private static final Logger _logger = LogManager.getLogger(GitServiceImpl.class);
     private static final String CHECKOUT_BRANCH_FINISHED_MESSAGE = "Checkout branch operation is finished.";
-    private static final String GROUP_STASH_ID = "[GS%s]";
+    private static final String GROUP_STASH_ID = "[GS%s] ";
 
     private static JGit _git;
     private static StateService _stateService;
@@ -388,29 +391,74 @@ public class GitServiceImpl implements GitService {
     }
 
     @Override
-    public boolean createStash(List<Project> projects, String stashMessage, boolean includeUntracked) {
+    public void createStash(List<Project> projects, String stashMessage, boolean includeUntracked) {
         if (projects == null || projects.isEmpty()) {
-            return false;
+            return;
         } else if (stashMessage == null) {
-            return false;
+            return;
         }
 
         if (projects.size() == 1) {
-            return _git.stashCreate(projects.get(0), stashMessage, includeUntracked);
+            _git.stashCreate(projects.get(0), stashMessage, includeUntracked);
         } else {
             String indexOperation = String.format(GROUP_STASH_ID, currentDateToString());
-            System.out.println(indexOperation);
-
-
+            String stashGroupMessage = indexOperation + stashMessage;
+            System.out.println(stashGroupMessage);
+            projects.parallelStream()
+                    .filter(project -> project != null && project.isCloned())
+                    .forEach(project -> _git.stashCreate(project, stashGroupMessage, includeUntracked));
         }
+    }
 
-        return false;
+
+    @Override
+    public List<StashItem> getStashList(List<Project> projects) {
+        if (projects == null || projects.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<StashItem> allStashes = new ArrayList<>();
+        projects.forEach(project -> addStashToList(allStashes, _git.getStashes(project)));
+        return allStashes;
+    }
+
+    private void addStashToList(List<StashItem> allStashes, List<StashItem> currentStashList) {
+        if (allStashes.isEmpty()) {
+            allStashes.addAll(currentStashList);
+            return;
+        }
+        for (StashItem stash : currentStashList) {
+            Optional<StashItem> foundStash = allStashes.stream()
+                                                       .filter(item -> hasGroupIdentificator(item.getMessage(), stash.getMessage()))
+                                                       .findFirst();
+            if (foundStash.isPresent()) {
+              addGroupStash(allStashes, stash, foundStash.get());
+          } else {
+              allStashes.add(stash);
+          }
+        }
+    }
+
+    private boolean hasGroupIdentificator(String currentMessage, String newStashMessage) {
+        return currentMessage.equals(newStashMessage) && currentMessage.matches("\\[GS\\d+\\](.+)?");
+    }
+
+    private void addGroupStash(List<StashItem> stashList, StashItem addStash,  StashItem foundStash) {
+        Stash newStash = (Stash)addStash;
+        if (foundStash instanceof GroupStash) {
+            ((GroupStash) foundStash).addStash(newStash);
+        } else {
+            stashList.remove(foundStash);
+            GroupStash newGroup = new GroupStash(foundStash.getMessage());
+            newGroup.addStash((Stash)foundStash);
+            newGroup.addStash(newStash);
+            stashList.add(newGroup);
+        }
     }
 
     private String currentDateToString() {
         DateFormat dateFormat = new SimpleDateFormat("yyMMddHHmmss");
         Date date = new Date();
-        return dateFormat.format(date); //161116120843
+        return dateFormat.format(date);
     }
 
     private List<ChangedFile> addFilesToIndex(List<ChangedFile> changedFiles,  Project project) {

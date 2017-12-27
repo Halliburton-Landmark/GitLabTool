@@ -54,6 +54,7 @@ import com.lgc.gitlabtool.git.entities.Branch;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.User;
 import com.lgc.gitlabtool.git.jgit.stash.Stash;
+import com.lgc.gitlabtool.git.jgit.stash.StashItem;
 import com.lgc.gitlabtool.git.services.BackgroundService;
 import com.lgc.gitlabtool.git.services.ProgressListener;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
@@ -185,8 +186,8 @@ public class JGit {
      * @param project the cloned project
      * @return a list of stashes
      */
-    public List<Stash> getStashes(Project project) {
-        List<Stash> list = new ArrayList<>();
+    public List<StashItem> getStashes(Project project) {
+        List<StashItem> list = new ArrayList<>();
         if (project != null && project.isCloned()) {
             try (Git git = getGit(project.getPath())) {
                 Collection<RevCommit> revCommits = getStashList(git);
@@ -199,6 +200,10 @@ public class JGit {
             }
         }
         return list;
+    }
+
+    private Stash getStash(RevCommit revCommit, Project project) {
+        return new Stash(revCommit.getName(), revCommit.getFullMessage(), project);
     }
 
     /**
@@ -260,10 +265,6 @@ public class JGit {
 
     private Collection<RevCommit> getStashList(Git git) throws InvalidRefNameException, GitAPIException {
         return git.stashList().call();
-    }
-
-    private Stash getStash(RevCommit revCommit, Project project) {
-        return new Stash(revCommit.getName(), revCommit.getFullMessage(), project);
     }
 
     /**

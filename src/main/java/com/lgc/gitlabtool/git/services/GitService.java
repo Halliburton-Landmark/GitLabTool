@@ -13,6 +13,7 @@ import com.lgc.gitlabtool.git.entities.ProjectStatus;
 import com.lgc.gitlabtool.git.jgit.BranchType;
 import com.lgc.gitlabtool.git.jgit.ChangedFile;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
+import com.lgc.gitlabtool.git.jgit.stash.StashItem;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 
 /**
@@ -225,7 +226,13 @@ public interface GitService extends Service {
      * @param projects
      * @param stashMessage
      * @param includeUntracked
+     */
+    void createStash(List<Project> projects, String stashMessage, boolean includeUntracked);
+
+    /**
+     *
+     * @param projects
      * @return
      */
-    boolean createStash(List<Project> projects, String stashMessage, boolean includeUntracked);
+    List<StashItem> getStashList(List<Project> projects);
 }

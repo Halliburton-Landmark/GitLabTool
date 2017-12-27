@@ -21,7 +21,7 @@ public class Stash implements StashItem {
     public Stash (String name, String message, Project project) {
         setName(name);
         setMessage(message);
-        setProject(_project);
+        setProject(project);
     }
 
     @Override
