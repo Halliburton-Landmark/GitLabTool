@@ -397,19 +397,21 @@ public class GitServiceImpl implements GitService {
         } else if (stashMessage == null) {
             return;
         }
-
-        if (projects.size() == 1) {
-            _git.stashCreate(projects.get(0), stashMessage, includeUntracked);
-        } else {
-            String indexOperation = String.format(GROUP_STASH_ID, currentDateToString());
-            String stashGroupMessage = indexOperation + stashMessage;
-            System.out.println(stashGroupMessage);
-            projects.parallelStream()
-                    .filter(project -> project != null && project.isCloned())
-                    .forEach(project -> _git.stashCreate(project, stashGroupMessage, includeUntracked));
+        _stateService.stateON(ApplicationState.STASH);
+        try {
+            if (projects.size() == 1) {
+                _git.stashCreate(projects.get(0), stashMessage, includeUntracked);
+            } else {
+                String indexOperation = String.format(GROUP_STASH_ID, currentDateToString());
+                String stashGroupMessage = indexOperation + stashMessage;
+                projects.parallelStream()
+                        .filter(project -> project != null && project.isCloned())
+                        .forEach(project -> _git.stashCreate(project, stashGroupMessage, includeUntracked));
+            }
+        } finally {
+            _stateService.stateOFF(ApplicationState.STASH);
         }
     }
-
 
     @Override
     public List<StashItem> getStashList(List<Project> projects) {

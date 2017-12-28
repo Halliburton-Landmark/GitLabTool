@@ -4,13 +4,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.lgc.gitlabtool.git.entities.MessageType;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.ProjectList;
 import com.lgc.gitlabtool.git.entities.ProjectStatus;
+import com.lgc.gitlabtool.git.jgit.stash.GroupStash;
+import com.lgc.gitlabtool.git.jgit.stash.Stash;
 import com.lgc.gitlabtool.git.jgit.stash.StashItem;
+import com.lgc.gitlabtool.git.listeners.stateListeners.AbstractStateListener;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
-import com.lgc.gitlabtool.git.listeners.stateListeners.StateListener;
 import com.lgc.gitlabtool.git.services.ConsoleService;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
@@ -32,7 +36,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.TitledPane;
 import javafx.scene.input.MouseEvent;
 
-public class StashWindowController implements StateListener {
+public class StashWindowController extends AbstractStateListener {
 
     @FXML
     private ListView<Project> _projectListView;
@@ -81,12 +85,15 @@ public class StashWindowController implements StateListener {
         _stateService.addStateListener(ApplicationState.UPDATE_PROJECT_STATUSES, this);
         _projectsIds.addAll(projectsIds);
 
-        ObservableList<Project> items = FXCollections.observableArrayList(getProjects());
+        updateProjectListView();
         _projectListView.addEventFilter(MouseEvent.MOUSE_PRESSED, event -> event.consume());
         _projectListView.setCellFactory(project -> new ProjectListCell());
-        _projectListView.setItems(items);
 
         _stashListTitledPane.expandedProperty().addListener(new StashListChangeListener());
+        _stashListView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+        _stashListView.setCellFactory(project -> new StashListCell());
+        _stashListView.addEventFilter(MouseEvent.MOUSE_CLICKED, event -> filterProjectList());
+
         _createButton.disableProperty().bind(_stashMessageTextField.textProperty().isEmpty());
     }
 
@@ -104,6 +111,10 @@ public class StashWindowController implements StateListener {
         } else {
             _consoleService.addMessage(changedProjects.size() + " of " + projects.size() + " have changes", MessageType.SIMPLE);
             _gitService.createStash(changedProjects, stashMessage, includeUntracked);
+            _projectList.updateProjectStatuses(changedProjects);
+            updateStashListView();
+            _stashMessageTextField.setText(StringUtils.EMPTY);
+            _includeUntrackedComboBox.setSelected(false);
         }
     }
 
@@ -140,21 +151,55 @@ public class StashWindowController implements StateListener {
 
         @Override
         public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+            _stashListTitledPane.expandedProperty().removeListener(this);
             if (_stashListView.getItems().isEmpty()) {
-                _stashListTitledPane.expandedProperty().removeListener(this);
-
-                List<StashItem> stashes = _gitService.getStashList(getProjects());
-                ObservableList<StashItem> items = FXCollections.observableArrayList(stashes);
-                _stashListView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
-                _stashListView.setCellFactory(project -> new StashListCell());
-                _stashListView.setItems(items);
+                updateStashListView();
             }
         }
 
     }
 
+    private void filterProjectList() {
+        _projectListView.getItems().clear();
+        StashItem selectedItem = _stashListView.getSelectionModel().getSelectedItem();
+        List<Project> projects = selectedItem == null ? getProjects() : getStashProjects(selectedItem);
+        ObservableList<Project> items = FXCollections.observableArrayList(projects);
+        _projectListView.setItems(items);
+    }
+
+    private List<Project> getStashProjects(StashItem selectedItem) {
+        List<Project> projects = new ArrayList<>();
+        if (selectedItem instanceof GroupStash) {
+            GroupStash group = (GroupStash) selectedItem;
+            List<Project> groupProjects = group.getGroup().stream()
+                                                          .map(stash -> stash.getProject())
+                                                          .collect(Collectors.toList());
+            projects.addAll(groupProjects);
+        } else {
+            projects.add(((Stash)selectedItem).getProject());
+        }
+        return projects;
+    }
+
     @Override
     public void handleEvent(ApplicationState changedState, boolean isActivate) {
-        System.out.println("Update statuses handler");
+        if (!isActivate) {
+            updateContentLists();
+        }
+    }
+
+    private void updateContentLists() {
+        _projectListView.getItems().clear();
+        _stashListView.getItems().clear();
+        updateProjectListView();
+        updateStashListView();
+    }
+
+    private void updateStashListView() {
+        _stashListView.setItems(FXCollections.observableArrayList(_gitService.getStashList(getProjects())));
+    }
+
+    private void updateProjectListView() {
+        _projectListView.setItems(FXCollections.observableArrayList(getProjects()));
     }
 }

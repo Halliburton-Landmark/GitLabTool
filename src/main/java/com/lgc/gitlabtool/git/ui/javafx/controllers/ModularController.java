@@ -122,6 +122,7 @@ import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.stage.WindowEvent;
 
 public class ModularController implements UpdateProgressListener {
     private static final Logger _logger = LogManager.getLogger(ModularController.class);
@@ -854,6 +855,18 @@ public class ModularController implements UpdateProgressListener {
             stage.getIcons().add(_appIcon);
             stage.setTitle("Stash changes");
             stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+                @Override
+                public void handle(WindowEvent event) {
+                    List<ApplicationState> activeAtates = _stateService.getActiveStates();
+                    if (!activeAtates.isEmpty() && activeAtates.contains(ApplicationState.STASH)) {
+                        event.consume();
+                        JavaFXUI.showWarningAlertForActiveStates(activeAtates);
+                        return;
+                    }
+                    stashWindowController.dispose();
+                }
+            });
 
             /* Set size and position */
             Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
