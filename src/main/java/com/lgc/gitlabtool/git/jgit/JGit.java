@@ -210,25 +210,22 @@ public class JGit {
      *  Applies stash by name for the project
      *
      * @param  stash the stash for applying
-     * @return <code>true</code> if stash was applied successfully, otherwise <code>false</code>
+     * @param  progressListener
      */
-    public boolean stashApply(Stash stash) {
-        if (stash == null) {
-            return false;
+    public void stashApply(Stash stash, ProgressListener progressListener) {
+        if (stash == null || stash.getProject() == null || !stash.getProject().isCloned()) {
+            progressListener.onError("Incorrect values");
         }
         Project project = stash.getProject();
-        String stashName = stash.getName();
-        if (project != null&& project.isCloned() && stashName != null) {
-            try (Git git = getGit(project.getPath())) {
-                git.stashApply()
-                   .setStashRef(stashName)
-                   .call();
-                return true;
-            } catch (GitAPIException | IOException e) {
-                logger.error("Failed applying stash for " + project.getName() + " project: ", e);
-            }
+        String stashName = stash.getName() == null ? StringUtils.EMPTY : stash.getName();
+        try (Git git = getGit(project.getPath())) {
+            git.stashApply()
+               .setStashRef(stashName)
+               .call();
+            progressListener.onSuccess();
+        } catch (GitAPIException | IOException e) {
+            progressListener.onError("Failed applying stash for " + project.getName() + " project: " + e.getMessage());
         }
-        return false;
     }
 
     /**

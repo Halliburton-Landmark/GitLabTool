@@ -492,4 +492,26 @@ public class GitServiceImpl implements GitService {
                   .forEach(changedFile -> changedFile.setStatusFile(ChangedFileStatus.MODIFIED));
         return sourceList;
     }
+
+    @Override
+    public void applyStashes(StashItem stash, ProgressListener progressListener) {
+        if (stash == null) {
+            return;
+        } else if (progressListener == null) {
+            progressListener = EmptyProgressListener.get();
+        }
+        progressListener.onStart();
+        applyStash(stash, progressListener);
+        progressListener.onFinish();
+    }
+
+    private void applyStash(StashItem stashItem, ProgressListener progressListener) {
+        if (stashItem instanceof Stash) {
+            _git.stashApply((Stash)stashItem, progressListener);
+        } else {
+            List<Stash> group = ((GroupStash) stashItem).getGroup();
+            group.parallelStream().filter(stash -> stash != null)
+                                  .forEach(stash -> _git.stashApply(stash, progressListener));
+        }
+    }
 }
