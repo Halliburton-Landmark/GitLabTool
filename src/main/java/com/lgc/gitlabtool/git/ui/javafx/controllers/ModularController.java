@@ -1264,7 +1264,8 @@ public class ModularController implements UpdateProgressListener {
             		itemStaging, itemPull, itemPush, itemRevert);
             
             MenuItem itemEditProjectProp = new MenuItem(GLToolButtons.EDIT_PROJECT_PROPERTIES_BUTTON.getText());
-            Image itemEditProjectPropIco = new Image(getClass().getClassLoader().getResource(GLToolButtons.EDIT_PROJECT_PROPERTIES_BUTTON.getIconUrl()).toExternalForm());
+            String editProjectPrepertiesIcoUrl = "icons/mainmenu/edit_properties_16x16.png";
+            Image itemEditProjectPropIco = new Image(getClass().getClassLoader().getResource(editProjectPrepertiesIcoUrl).toExternalForm());
             itemEditProjectProp.setGraphic(new ImageView(itemEditProjectPropIco));
             itemEditProjectProp.setOnAction(this::showEditProjectPropertiesWindow);
             
