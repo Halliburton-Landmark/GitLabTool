@@ -59,6 +59,11 @@ public class StashWindowController extends AbstractStateListener {
     @FXML
     private ListView<StashItem> _stashListView;
 
+    @FXML
+    private Button _applyButton;
+
+    @FXML
+    private Button _dropButton;
 
     /**************************************** SERVICES ****************************************/
 
@@ -84,24 +89,31 @@ public class StashWindowController extends AbstractStateListener {
     public void beforeShowing(List<Integer> projectsIds) {
         _stateService.addStateListener(ApplicationState.UPDATE_PROJECT_STATUSES, this);
         _projectsIds.addAll(projectsIds);
-
-        updateProjectListView();
         _projectListView.addEventFilter(MouseEvent.MOUSE_PRESSED, event -> event.consume());
         _projectListView.setCellFactory(project -> new ProjectListCell());
+        updateProjectListView();
 
         _stashListTitledPane.expandedProperty().addListener(new StashListChangeListener());
         _stashListView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         _stashListView.setCellFactory(project -> new StashListCell());
         _stashListView.addEventFilter(MouseEvent.MOUSE_CLICKED, event -> filterProjectList());
-
+        _stashListView.focusedProperty().addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> arg0, Boolean oldPropertyValue, Boolean newPropertyValue) {
+                if (!newPropertyValue) {
+                    _stashListView.getSelectionModel().clearSelection();
+                    updateProjectListView();
+                }
+            }
+        });
+        _applyButton.disableProperty().bind(_stashListView.getSelectionModel().selectedItemProperty().isNull());
+        _dropButton.disableProperty().bind(_stashListView.getSelectionModel().selectedItemProperty().isNull());
         _createButton.disableProperty().bind(_stashMessageTextField.textProperty().isEmpty());
     }
 
     @FXML
     public void onCreateStashAction(ActionEvent event) {
         boolean includeUntracked = _includeUntrackedComboBox.isSelected();
-        String stashMessage = _stashMessageTextField.getText();
-
         List<Project> projects = _projectListView.getItems();
         List<Project> changedProjects = getChangedProjects(projects, includeUntracked);
         if (changedProjects.isEmpty()) {
@@ -109,6 +121,7 @@ public class StashWindowController extends AbstractStateListener {
                              "Create stash for " + projects.size() + " projects failed.",
                              "Selected projects don't have changes");
         } else {
+            String stashMessage = _stashMessageTextField.getText();
             _consoleService.addMessage(changedProjects.size() + " of " + projects.size() + " have changes", MessageType.SIMPLE);
             _gitService.createStash(changedProjects, stashMessage, includeUntracked);
             _projectList.updateProjectStatuses(changedProjects);
@@ -116,6 +129,17 @@ public class StashWindowController extends AbstractStateListener {
             _stashMessageTextField.setText(StringUtils.EMPTY);
             _includeUntrackedComboBox.setSelected(false);
         }
+    }
+
+
+    @FXML
+    public void onApplyStashAction(ActionEvent event) {
+        System.out.println("we applied stash =)"); // TODO
+    }
+
+    @FXML
+    public void onDropStashAction(ActionEvent event) {
+        System.out.println("we droped stash =("); // TODO
     }
 
     private List<Project> getChangedProjects(List<Project> projects, boolean includeUntracked) {

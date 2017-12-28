@@ -13,7 +13,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.lgc.gitlabtool.git.ui.javafx.controllers.StashWindowController">
+<AnchorPane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.lgc.gitlabtool.git.ui.javafx.controllers.StashWindowController">
    <children>
       <SplitPane dividerPositions="0.6867283950617284" layoutX="58.0" layoutY="170.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <items>
@@ -72,8 +72,8 @@
                                           <ListView fx:id="_stashListView" AnchorPane.bottomAnchor="30.0" AnchorPane.leftAnchor="-10.0" AnchorPane.rightAnchor="-10.0" AnchorPane.topAnchor="-10.0" />
                                           <ButtonBar AnchorPane.bottomAnchor="-3.0" AnchorPane.rightAnchor="-5.0">
                                              <buttons>
-                                                <Button mnemonicParsing="false" text="Apply" />
-                                                <Button mnemonicParsing="false" text="Drop" />
+                                                <Button fx:id="_applyButton" onAction="#onApplyStashAction" mnemonicParsing="false" text="Apply" />
+                                                <Button fx:id="_dropButton" onAction="#onDropStashAction" mnemonicParsing="false" text="Drop" />
                                              </buttons>
                                           </ButtonBar>
                                        </children>
