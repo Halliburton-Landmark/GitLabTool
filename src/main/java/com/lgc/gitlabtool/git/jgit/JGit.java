@@ -3,29 +3,16 @@ package com.lgc.gitlabtool.git.jgit;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.eclipse.jgit.api.*;
 import org.eclipse.jgit.api.CreateBranchCommand.SetupUpstreamMode;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.ListBranchCommand;
 import org.eclipse.jgit.api.ListBranchCommand.ListMode;
-import org.eclipse.jgit.api.MergeResult;
-import org.eclipse.jgit.api.PullResult;
-import org.eclipse.jgit.api.ResetCommand;
-import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.CheckoutConflictException;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.JGitInternalException;
@@ -406,23 +393,34 @@ public class JGit {
     /**
      * Replaces file with HEAD revision
      *
-     * @param project  the cloned project which has fileName
-     * @param fileName the file which need replace
+     * @param changedFiles files to revert
      * @return <code> true</code> if file replace successfully, otherwise <code>false</code>
      */
-    public boolean replaceWithHEADRevision(Project project, String fileName) {
-        if (fileName == null || fileName.isEmpty() || project == null || !project.isCloned()) {
-            return false;
+    public boolean replaceWithHEADRevision(Collection<ChangedFile> changedFiles)  {
+        boolean replaced = false;
+        Map<Project, List<ChangedFile>> filesByProjects =
+                changedFiles.stream()
+                            .filter(Objects::nonNull)
+                            .collect(Collectors.groupingBy(ChangedFile::getProject));
+
+        for (Project project: filesByProjects.keySet()) {
+            if (project == null || !project.isCloned()) {
+                continue;
+            }
+            List<ChangedFile> changedListInProject = filesByProjects.get(project);
+            try (Git git = getGit(project.getPath())) {
+                CheckoutCommand checkout = git.checkout();
+                changedListInProject.stream()
+                                    .map(ChangedFile::getFileName)
+                                    .forEach(checkout::addPath);
+                checkout.call();
+                replaced = true;
+            } catch (IOException | GitAPIException e) {
+                logger.error("Error replacing of file with HEAD revision: " + project.getPath() + " " + e.getMessage());
+            }
         }
-        try (Git git = getGit(project.getPath())) {
-            git.checkout()
-               .addPath(fileName)
-               .call();
-            return true;
-        } catch (IOException | GitAPIException e) {
-            logger.error("Error replacing of file with HEAD revision: " + project.getPath() + " " + e.getMessage());
-            return false;
-        }
+
+        return replaced;
     }
 
     /**
@@ -1069,4 +1067,5 @@ public class JGit {
     protected BranchConfig getBranchConfig(Config config, String branchName) {
         return new BranchConfig(config, branchName);
     }
+
 }
