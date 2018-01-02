@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Objects;
 import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
@@ -35,7 +35,9 @@ public class ProjectServiceImpl implements ProjectService {
     private static final String PREFIX_SUCCESSFUL_LOAD = " group have been successfully loaded";
     private static final String TOTAL_PAGES_COUNT_HEADER = "X-Total-Pages";
     private static final int MAX_PROJECTS_COUNT_ON_THE_PAGE = 100;
+    private static final int OK_CODE = 200;
 
+    private static final String CREATE_PROJECT_ERROR = "Failed creating of project";
     private static final String CREATE_LOCAL_PROJECT_SUCCESS_MESSAGE = "Local project was successfully created!";
     private static final String CREATE_LOCAL_PROJECT_FAILED_MESSAGE = "Failed creating local project!";
     private static final String CREATE_REMOTE_PROJECT_SUCCESS_MESSAGE = "Remote project was successfully created!";
@@ -88,6 +90,10 @@ public class ProjectServiceImpl implements ProjectService {
     public Collection<Project> loadProjects(Group group) {
         _stateService.stateON(ApplicationState.LOAD_PROJECTS);
         Collection<Project> projects = getProjects(group);
+        if (projects == null) {
+            _stateService.stateOFF(ApplicationState.LOAD_PROJECTS);
+            return null;
+        }
         if (projects.isEmpty()) {
             _consoleService.addMessage(GROUP_DOESNT_HAVE_PROJECTS_MESSAGE, MessageType.ERROR);
             _stateService.stateOFF(ApplicationState.LOAD_PROJECTS);
@@ -118,7 +124,12 @@ public class ProjectServiceImpl implements ProjectService {
         if(group == null || !group.isCloned() || name == null || name.isEmpty() || projectType == null) {
             throw new IllegalArgumentException("Invalid paramenters");
         }
-        boolean isExists = isProjectExists(group, name);
+        Collection<Project> projects = getProjects(group);
+        if (projects == null) {
+            progressListener.onFinish(null, CREATE_PROJECT_ERROR);
+            return;
+        }
+        boolean isExists = isProjectExists(projects, name);
         if (isExists) {
             progressListener.onFinish(null, PROJECT_ALREADY_EXISTS_MESSAGE);
             return;
@@ -135,18 +146,6 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public boolean isProjectExists(Group group, String nameProject) {
-        if(group == null || !group.isCloned() || nameProject == null || nameProject.isEmpty()) {
-            throw new IllegalArgumentException("Invalid paramenters");
-        }
-        Collection<Project> projects = getProjects(group);
-        Optional<Project> resultProject = projects.stream()
-                                                  .filter(project -> project.getName().equals(nameProject))
-                                                  .findAny();
-        return resultProject.isPresent();
-    }
-
-    @Override
     public void updateProjectStatuses(List<Project> projects) {
         if (projects == null || projects.isEmpty()) {
             return;
@@ -157,6 +156,7 @@ public class ProjectServiceImpl implements ProjectService {
         _stateService.stateOFF(ApplicationState.UPDATE_PROJECT_STATUSES);
     }
 
+    @Override
     public void updateProjectStatus(Project project) {
         if (project == null || project.getPath() == null) {
             return;
@@ -177,6 +177,10 @@ public class ProjectServiceImpl implements ProjectService {
 
     private Collection<Project> getProjectsForAllPages(String requestString, Map<String, String> header) {
         HttpResponseHolder httpResponse = getConnector().sendGet(requestString, null, header);
+        if (httpResponse.getResponseCode() != OK_CODE) {
+            _consoleService.addMessage("Error from GitLab: " + httpResponse.getResponseMessage(), MessageType.ERROR);
+            return null;
+        }
         Object jsonProjects = httpResponse.getBody();
         Collection<Project> projects = JSONParser.parseToCollectionObjects(jsonProjects,
                 new TypeToken<List<Project>>() {}.getType());
@@ -394,5 +398,13 @@ public class ProjectServiceImpl implements ProjectService {
         if (jGit != null) {
             _git = jGit;
         }
+    }
+
+
+    private boolean isProjectExists(Collection<Project> projects , String nameProject) {
+        return projects.stream()
+                       .filter(project -> Objects.equals(project.getName(), nameProject))
+                       .findAny()
+                       .isPresent();
     }
 }

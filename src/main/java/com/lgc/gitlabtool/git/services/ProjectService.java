@@ -11,22 +11,23 @@ import com.lgc.gitlabtool.git.project.nature.projecttype.ProjectType;
 public interface ProjectService extends UpdateProgressGenerator, Service {
 
     /**
-     * Gets projects' group from gitlab
+     * Gets projects' group from GitLab
      *
-     * @param group Group
-     * @return Collection with projects' of group<br>
-     * null, if an error occurred during the request
+     * @param group the group
+     * @return a collection of group projects.<br>
+     * Can return <code>null</code>, if an error occurred during the request.
      */
     Collection<Project> getProjects(Group group);
 
     /**
      * We load the list of projects that we have on the local disk.
      *
-     * We get the list of projects from the gitlab and we update their type,
+     * We get the list of projects from the GitLab and we update their type,
      * status and the path to the local folder when taking.
      *
      * @param  group the group for which we need to load projects
-     * @return the list of projects
+     * @return a collection of group projects.<br>
+     * Can return <code>null</code>, if an error occurred during the request.
      */
     Collection<Project> loadProjects(Group group);
 
@@ -42,15 +43,6 @@ public interface ProjectService extends UpdateProgressGenerator, Service {
      * This method nothing return. We get all info from progressListener.
      */
     void createProject(Group group, String name, ProjectType projectType, ProgressListener progressListener);
-
-    /**
-     * Checks that project with this name hasn't existed yet.
-     *
-     * @param group the group where we create new project
-     * @param nameProject the name of project
-     * @return true - if project with this name has already existed, otherwise - false.
-     */
-    boolean isProjectExists(Group group, String nameProject);
 
     /**
      * Clones shadow projects

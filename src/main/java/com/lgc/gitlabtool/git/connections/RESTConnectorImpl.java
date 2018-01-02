@@ -24,8 +24,8 @@ class RESTConnectorImpl implements RESTConnector {
     public RESTConnectorImpl() {}
 
     /**
-     * Opens the HTTP connection to the defined URL 
-     * 
+     * Opens the HTTP connection to the defined URL
+     *
      * @param url - URL to send connection
      * @return created connection for defined URL
      * @throws Exception if URL isn't valid
@@ -77,12 +77,13 @@ class RESTConnectorImpl implements RESTConnector {
                 wr.close();
             }
 
-            responseHolder.setResponseCode(connection.getResponseCode());
-            responseHolder.setResponseMessage(connection.getResponseMessage());
+            final int RESPONSE_CODE = connection.getResponseCode();
+            final String RESPONSE_MESSAGE = connection.getResponseMessage();
             _logger.info("Sending '" + request +"' request to URL : " + url.toString());
-            _logger.info("Response Code : " + connection.getResponseCode());
-            _logger.info("Response Message : " + connection.getResponseMessage());
-
+            _logger.info("Response Code : " + RESPONSE_CODE);
+            _logger.info("Response Message : " + RESPONSE_MESSAGE);
+            responseHolder.setResponseCode(RESPONSE_CODE);
+            responseHolder.setResponseMessage(RESPONSE_MESSAGE);
 
             BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             StringBuilder response = new StringBuilder();
