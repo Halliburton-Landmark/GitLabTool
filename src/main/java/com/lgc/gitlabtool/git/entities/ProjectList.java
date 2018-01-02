@@ -66,7 +66,7 @@ public class ProjectList {
     /**
      * Gets project list of current group.
      *
-     * @return a unmodifiable list of project or <code>null</code> if projects weren't load.
+     * @return a unmodifiable list of project or <code>null</code> if projects weren't loaded.
      */
     public List<Project> getProjects() {
         return _projects == null ? null : Collections.unmodifiableList(_projects);
@@ -101,9 +101,7 @@ public class ProjectList {
             Optional<Project> pr = _projects.parallelStream()
                                             .filter(project -> project.getId() == id)
                                             .findFirst();
-            if (pr.isPresent()) {
-                newList.add(pr.get());
-            }
+            pr.ifPresent(newList::add);
         }
 
         return Collections.unmodifiableList(newList);
@@ -120,7 +118,7 @@ public class ProjectList {
             return Collections.emptyList();
         }
         return projects.parallelStream()
-                       .map(pr -> pr.getId())
+                       .map(Project::getId)
                        .collect(Collectors.toList());
     }
 
@@ -135,7 +133,7 @@ public class ProjectList {
             return Collections.emptyList();
         }
         return projects.stream()
-                       .filter(project -> projectIsClonedAndWithoutConflicts(project))
+                       .filter(ProjectList::projectIsClonedAndWithoutConflicts)
                        .collect(Collectors.toList());
     }
 
@@ -182,14 +180,14 @@ public class ProjectList {
     /**
      * Updates projects statuses for some projects
      *
-     * @param projects
+     * @param projects projects to update statuses
      */
     public void updateProjectStatuses(List<Project> projects) {
         try {
             _stateService.stateON(ApplicationState.UPDATE_PROJECT_STATUSES);
             _projects.parallelStream()
-                     .filter(project -> projects.contains(project))
-                     .forEach(project -> _projectService.updateProjectStatus(project));
+                     .filter(projects::contains)
+                     .forEach(_projectService::updateProjectStatus);
         } finally {
             _stateService.stateOFF(ApplicationState.UPDATE_PROJECT_STATUSES);
         }
