@@ -162,15 +162,7 @@ class LoginDialog extends Dialog<DialogDTO> {
     private void setUpInfoButton(Button infoButton) {
         ImageView imageViewInfo = _themeService.getStyledImageView(INFO_IMAGE_URL);
         infoButton.setGraphic(imageViewInfo);
-
-        /* ROUND (30 px is optimal size but can be changed) */
-        infoButton.setStyle(
-                "-fx-background-radius: 5em; " +
-                        "-fx-min-width: 30px; " +
-                        "-fx-min-height: 30px; " +
-                        "-fx-max-width: 30px; " +
-                        "-fx-max-height: 30px;"
-        );
+        infoButton.setId("infoButtonLogin");
 
         /* HOVER ANIMATION */
         infoButton.getStylesheets().add(getClass().getClassLoader().getResource(CSS_PATH).toExternalForm());
@@ -208,9 +200,10 @@ class LoginDialog extends Dialog<DialogDTO> {
         controller.loadServerInputWindow(root);
     }
 
-    private void showMessage(String msg, Color color) {
+    private void showMessage(String msg, boolean isSuccess) {
         message.setText(msg);
-        message.setTextFill(Color.web(color.toString()));
+        String idStatus = isSuccess ? "label-success" : "label-failure";
+        message.setId(idStatus);
         message.setVisible(true);
     }
 
@@ -218,7 +211,7 @@ class LoginDialog extends Dialog<DialogDTO> {
         button.setOnAction(event -> {
             if (!isEmptyInputFields(userTextField, passwordField)) {
                 logger.info(MESSAGE_WAITING);
-                showMessage(MESSAGE_WAITING, Color.GREEN);
+                showMessage(MESSAGE_WAITING, true);
                 disableSignInButton(true);
                 String serverURL = URLManager.completeServerURL(comboBox.getValue());
                 String shortServerURL = URLManager.shortServerURL(comboBox.getValue());
@@ -226,7 +219,7 @@ class LoginDialog extends Dialog<DialogDTO> {
                 _loginService.login(dto, this::doAfterLogin);
             } else {
                 logger.warn(MESSAGE_EMPTY_FIELD);
-                showMessage(MESSAGE_EMPTY_FIELD, Color.RED);
+                showMessage(MESSAGE_EMPTY_FIELD, false);
             }
         });
     }
@@ -255,7 +248,7 @@ class LoginDialog extends Dialog<DialogDTO> {
     private void showWarningAndDisableSignInButton(String warningMessage) {
         Platform.runLater(() -> {
             logger.warn(warningMessage);
-            showMessage(warningMessage, Color.RED);
+            showMessage(warningMessage, false);
             disableSignInButton(false);
         });
     }

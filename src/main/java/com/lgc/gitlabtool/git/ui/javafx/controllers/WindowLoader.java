@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.lgc.gitlabtool.git.services.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -15,10 +16,6 @@ import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.ProjectList;
 import com.lgc.gitlabtool.git.jgit.ChangedFile;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
-import com.lgc.gitlabtool.git.services.ConsoleService;
-import com.lgc.gitlabtool.git.services.GitService;
-import com.lgc.gitlabtool.git.services.ServiceProvider;
-import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.ViewKey;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 import com.lgc.gitlabtool.git.ui.javafx.JavaFXUI;
@@ -56,6 +53,9 @@ public class WindowLoader {
 
     private static final StateService _stateService = (StateService) ServiceProvider.getInstance()
             .getService(StateService.class.getName());
+
+    private static final ThemeService _themeService = (ThemeService) ServiceProvider.getInstance()
+            .getService(ThemeService.class.getName());
 
     public static WindowLoader get() {
         if (_windowLoader == null) {
@@ -99,6 +99,7 @@ public class WindowLoader {
 
             Scene scene = new Scene(root);
             Stage stage = new Stage();
+            _themeService.styleScene(scene);
             stage.setScene(scene);
             stage.getIcons().add(_appIcon);
             stage.setTitle(STAGING_WINDOW_TITLE);

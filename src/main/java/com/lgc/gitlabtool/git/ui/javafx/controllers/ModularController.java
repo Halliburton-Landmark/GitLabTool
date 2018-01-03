@@ -9,19 +9,15 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.lgc.gitlabtool.git.ui.javafx.*;
+import javafx.beans.binding.ObjectBinding;
+import javafx.scene.effect.Effect;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -290,6 +286,7 @@ public class ModularController implements UpdateProgressListener {
     //region OTHER UI ELEMENTS
     private List<Node> projectsWindowToolbarItems;
     private List<Node> groupsWindowToolbarItems;
+    private List<Node> projectsToolbarItems;
 
     private List<Menu> projectsWindowMainMenuItems;
     private List<Menu> groupsWindowMainMenuItems;
@@ -391,14 +388,6 @@ public class ModularController implements UpdateProgressListener {
         ImageView imageViewSelectAll = _themeService.getStyledImageView(SELECT_ALL_IMAGE_URL);
         ImageView imageViewFilterShadow = _themeService.getStyledImageView(FILTER_SHADOW_PROJECTS_IMAGE_URL);
 
-        ColorAdjust colorAdjust = new ColorAdjust();
-        colorAdjust.setBrightness(+0.65);
-
-        imageViewRefreshProjects.setEffect(colorAdjust);
-        imageViewSelectAll.setEffect(colorAdjust);
-        imageViewFilterShadow.setEffect(colorAdjust);
-
-
         selectAllButton = new ToggleButton();
         selectAllButton.setTooltip(new Tooltip("Select all projects"));
         selectAllButton.setGraphic(imageViewSelectAll);
@@ -414,7 +403,9 @@ public class ModularController implements UpdateProgressListener {
         filterShadowProjects.setGraphic(imageViewFilterShadow);
         filterShadowProjects.setOnAction(this::onShowHideShadowProjects);
 
-        projectsToolbar.getChildren().addAll(selectAllButton, refreshProjectsButton, filterShadowProjects);
+        projectsToolbarItems = new ArrayList<>(Arrays.asList(selectAllButton, refreshProjectsButton, filterShadowProjects));
+        projectsToolbar.getChildren().clear();
+        projectsToolbar.getChildren().addAll(projectsToolbarItems);
         projectsToolbar.setPadding(new Insets(PROJECTS_TOOLBAR_PADDING,0,PROJECTS_TOOLBAR_PADDING,0));
     }
 
@@ -1467,8 +1458,35 @@ public class ModularController implements UpdateProgressListener {
         _themeService.setTheme(themeId);
         _themeService.styleScene(toolbar.getScene());
 
-        _toolbarManager.refreshIcons();
-        _mainMenuManager.refreshIcons();
+        refreshMainMenuToolbarIcons();
+    }
+
+    private void refreshMainMenuToolbarIcons() {
+        Stream.concat(projectsWindowMainMenuItems.stream(), groupsWindowMainMenuItems.stream())
+                .map(Menu::getItems)
+                .forEach(item -> {
+                    if (_themeService.getCurrentTheme().equals(GLTThemes.DARK_THEME)) {
+                        ColorAdjust colorAdjust = new ColorAdjust();
+                        colorAdjust.setBrightness(+0.65);
+                        item.forEach(q -> q.getGraphic().setEffect(colorAdjust));
+                    } else {
+                        item.forEach(q -> q.getGraphic().setEffect(null));
+                    }
+                });
+
+        Stream<Node> mainToolbarStream = Stream.concat(projectsWindowToolbarItems.stream(), groupsWindowToolbarItems.stream());
+        Stream.concat(mainToolbarStream, projectsToolbarItems.stream())
+                .filter(item -> item instanceof Button)
+                .map(item -> (Button) item)
+                .forEach(item -> {
+                    if (_themeService.getCurrentTheme().equals(GLTThemes.DARK_THEME)) {
+                        ColorAdjust colorAdjust = new ColorAdjust();
+                        colorAdjust.setBrightness(+0.65);
+                        item.getGraphic().setEffect(colorAdjust);
+                    } else {
+                        item.getGraphic().setEffect(null);
+                    }
+                });
     }
 
     private void showAboutPopup() {

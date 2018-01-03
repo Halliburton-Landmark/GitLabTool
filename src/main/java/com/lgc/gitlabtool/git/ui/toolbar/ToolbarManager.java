@@ -172,18 +172,6 @@ public class ToolbarManager {
         return buttons;
     }
 
-    public void refreshIcons() {
-        for (Node item : items) {
-            if (_themeService.getCurrentTheme().equals(GLTThemes.DARK_THEME)) {
-                ColorAdjust colorAdjust = new ColorAdjust();
-                colorAdjust.setBrightness(+0.65);
-                item.setEffect(colorAdjust);
-            } else {
-                item.setEffect(null);
-            }
-        }
-    }
-
     private Button createButton(String buttonId, String imgPath, String btnText, String tooltipText) {
         ImageView view = _themeService.getStyledImageView(imgPath);
 

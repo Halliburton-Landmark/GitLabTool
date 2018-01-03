@@ -84,7 +84,7 @@ public abstract class ProgressDialog extends Dialog<Void> {
         grid.setPadding(new Insets(25, 25, 25, 25));
 
         _currentProjectLabel = new Label(DEFAULT_PROJECT_LABEL);
-        _currentProjectLabel.setStyle("-fx-text-fill:blue");
+        _currentProjectLabel.setId("progress_dialog_title");
         grid.add(_currentProjectLabel, 1, 2);
 
         HBox progressBox = new HBox(10);

@@ -3,6 +3,9 @@ package com.lgc.gitlabtool.git.ui.javafx.controllers;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.lgc.gitlabtool.git.services.ServiceProvider;
+import com.lgc.gitlabtool.git.services.ThemeService;
+import javafx.scene.control.Label;
 import org.apache.commons.lang.StringUtils;
 
 import com.lgc.gitlabtool.git.entities.Project;
@@ -40,6 +43,9 @@ public class ProjectListCell extends ListCell<Project> {
     private final String LEFT_BRACKET = "[";
     private final String RIGHT_BRACKET = "]";
 
+    private static final ThemeService _themeService = (ThemeService) ServiceProvider.getInstance()
+            .getService(ThemeService.class.getName());
+
     @Override
     protected void updateItem(Project item, boolean empty) {
         super.updateItem(item, empty);
@@ -50,10 +56,10 @@ public class ProjectListCell extends ListCell<Project> {
             Image fxImage = getImageForProject(item);
             ImageView imageView = new ImageView(fxImage);
 
-            Text projectNameTextView = new Text(item.getName());
-            Color textColor = item.isCloned() ? Color.BLACK : Color.DIMGRAY;
-            projectNameTextView.setFill(textColor);
-            Text currentBranchTextView = getCurrentBrantProjectText(item);
+            Label projectNameTextView = new Label(item.getName());
+            String id = item.isCloned() ? "projectLabelCloned" : "projectLabelShadow";
+            projectNameTextView.setId(id);
+            Label currentBranchTextView = getCurrentBrantProjectText(item);
 
             String tooltipText = item.isCloned() ?
                     item.getName() + " " + currentBranchTextView.getText() : SHADOW_PROJECT_TOOLTIP;
@@ -78,11 +84,11 @@ public class ProjectListCell extends ListCell<Project> {
         return new Image(getClass().getClassLoader().getResource(url).toExternalForm());
     }
 
-    private Text getCurrentBrantProjectText(Project item) {
+    private Label getCurrentBrantProjectText(Project item) {
         String currentBranch = getCurrentBranchName(item);
         String currentBranchFull = item.isCloned() ? LEFT_BRACKET + currentBranch + RIGHT_BRACKET : StringUtils.EMPTY;
-        Text currentBranchTextView = new Text(currentBranchFull);
-        currentBranchTextView.setFill(Color.DARKBLUE);
+        Label currentBranchTextView = new Label(currentBranchFull);
+        currentBranchTextView.setId("projectBranchNameLabel");
 
         return currentBranchTextView;
     }
@@ -116,31 +122,24 @@ public class ProjectListCell extends ListCell<Project> {
         }
         ProjectStatus projectStatus = project.getProjectStatus();
         if (projectStatus.hasConflicts()) {
-            Node conflictsImageView = new ImageView(getImage(PROJECT_WITH_CONFLICTS_ICON_URL));
+            Node conflictsImageView = _themeService.getStyledImageView(PROJECT_WITH_CONFLICTS_ICON_URL);
             setTooltip(conflictsImageView, PROJECT_HAS_CONFLICTS_TOOLTIP);
             pics.add(conflictsImageView);
             return;
         }
 
         if (projectStatus.hasNewUntrackedFiles()) {
-            Node untrackedImageView = new ImageView(getImage(PROJECT_WITH_NEW_FILES_ICON_URL));
+            Node untrackedImageView = _themeService.getStyledImageView(PROJECT_WITH_NEW_FILES_ICON_URL);
             setTooltip(untrackedImageView, NEW_FILES_TOOLTIP);
             pics.add(untrackedImageView);
         }
 
 
         if (projectStatus.hasChanges()) {
-            Node uncommittedChangesImage = new ImageView(getImage(PROJECT_WITH_UNCOMMITTED_CHANGES_ICON_URL));
+            Node uncommittedChangesImage = _themeService.getStyledImageView(PROJECT_WITH_UNCOMMITTED_CHANGES_ICON_URL);
             setTooltip(uncommittedChangesImage, PROJECT_HAS_UNCOMMITED_CHANGES_TOOLTIP);
             pics.add(uncommittedChangesImage);
         }
-    }
-
-    private Image getImage(String path) {
-        Image image = new Image(getClass()
-                .getClassLoader()
-                .getResource(path).toExternalForm());
-        return image;
     }
 
     private Node getAheadBehindCountNode(Project item) {
@@ -148,16 +147,16 @@ public class ProjectListCell extends ListCell<Project> {
         ProjectStatus projectStatus = item.getProjectStatus();
         int ahead = projectStatus.getAheadIndex();
         if (ahead > 0) {
-            items.add(new ImageView(getImage(COMMITS_AHEAD_INDEX_ICON_URL)));
-            Text aheadIndex = new Text(Integer.toString(ahead));
+            items.add(_themeService.getStyledImageView(COMMITS_AHEAD_INDEX_ICON_URL));
+            Label aheadIndex = new Label(Integer.toString(ahead));
             aheadIndex.setFont(new Font(INDEX_FONT_SIZE));
             items.add(aheadIndex);
         }
 
         int behind = projectStatus.getBehindIndex();
         if (behind > 0) {
-            items.add(new ImageView(getImage(COMMITS_BEHIND_INDEX_ICON_URL)));
-            Text behindIndex = new Text(Integer.toString(behind));
+            items.add(_themeService.getStyledImageView(COMMITS_BEHIND_INDEX_ICON_URL));
+            Label behindIndex = new Label(Integer.toString(behind));
             behindIndex.setFont(new Font(INDEX_FONT_SIZE));
             items.add(behindIndex);
         }

@@ -1,5 +1,8 @@
 package com.lgc.gitlabtool.git.ui.javafx.controllers.listcells;
 
+import com.lgc.gitlabtool.git.services.ServiceProvider;
+import com.lgc.gitlabtool.git.services.ThemeService;
+import javafx.scene.control.Label;
 import org.apache.commons.lang.StringUtils;
 
 import com.lgc.gitlabtool.git.entities.Project;
@@ -36,6 +39,9 @@ public class FilesListCell extends ListCell<ChangedFile> {
     private static final String CLOSE_BRACKETS = "]";
     private static final int PROJECT_FONT = 10;
 
+    private static final ThemeService _themeService = (ThemeService) ServiceProvider.getInstance()
+            .getService(ThemeService.class.getName());
+
     @Override
     protected void updateItem(ChangedFile item, boolean empty) {
         super.updateItem(item, empty);
@@ -43,12 +49,11 @@ public class FilesListCell extends ListCell<ChangedFile> {
         setGraphic(null);
 
         if (item != null && !empty) {
-            Image fxImage = getImageForFile(item);
-            ImageView imageView = new ImageView(fxImage);
+            ImageView imageView = _themeService.getStyledImageView(getUrlForFile(item));
             Tooltip.install(imageView, new Tooltip(item.getStatusFile().toString()));
 
-            Text fileNameText = getFileNameText(item);
-            Text projectNameText = getProjectNameText(item);
+            Label fileNameText = getFileNameText(item);
+            Label projectNameText = getProjectNameText(item);
 
             HBox textBox = new HBox(imageView, fileNameText, projectNameText);
             textBox.setAlignment(Pos.CENTER_LEFT);
@@ -56,17 +61,17 @@ public class FilesListCell extends ListCell<ChangedFile> {
         }
     }
 
-    private Text getFileNameText(ChangedFile item) {
-        Text fileNameText = new Text(" " + item.getFileName());
+    private Label getFileNameText(ChangedFile item) {
+        Label fileNameText = new Label(" " + item.getFileName());
         if (item.hasConflicting()) {
-            fileNameText.setFill(Color.DARKRED);
+            fileNameText.setId("file-list-cell-conflicting-files");
         }
         return fileNameText;
     }
 
-    private Text getProjectNameText(ChangedFile item) {
-        Text projectNameText = new Text(getProjectName(item));
-        projectNameText.setFill(Color.DARKCYAN);
+    private Label getProjectNameText(ChangedFile item) {
+        Label projectNameText = new Label(getProjectName(item));
+        projectNameText.setId("file-list-cell-project-name");
         projectNameText.setFont(new Font(PROJECT_FONT));
         return projectNameText;
     }
@@ -77,11 +82,6 @@ public class FilesListCell extends ListCell<ChangedFile> {
             return StringUtils.EMPTY;
         }
         return OPEN_BRACKETS + project.getName() + CLOSE_BRACKETS;
-    }
-
-    private Image getImageForFile(ChangedFile item) {
-        String url = getUrlForFile(item);
-        return new Image(getClass().getClassLoader().getResource(url).toExternalForm());
     }
 
     private String getUrlForFile(ChangedFile item) {

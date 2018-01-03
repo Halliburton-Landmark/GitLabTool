@@ -4,15 +4,11 @@ import java.util.*;
 
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.ThemeService;
-import com.lgc.gitlabtool.git.ui.javafx.GLTThemes;
 import com.lgc.gitlabtool.git.ui.javafx.controllers.ModularController;
 import com.lgc.gitlabtool.git.ui.toolbar.GLToolButtons;
 
-import javafx.scene.Node;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
-import javafx.scene.effect.ColorAdjust;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
 /**
@@ -153,18 +149,6 @@ public class MainMenuManager {
                         menu.setDisable(enableMap.get(menu.getId()));
                     }
                 });
-    }
-
-    public void refreshIcons() {
-        for (Menu item : items) {
-            if (_themeService.getCurrentTheme().equals(GLTThemes.DARK_THEME)) {
-                ColorAdjust colorAdjust = new ColorAdjust();
-                colorAdjust.setBrightness(+0.65);
-                item.getItems().forEach(q -> q.getGraphic().setEffect(colorAdjust));
-            } else {
-                item.getItems().forEach(q -> q.getGraphic().setEffect(null));
-            }
-        }
     }
 
     private MenuItem createButton(String buttonId, String imgPath, String btnText) {
