@@ -38,15 +38,12 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
-import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 
@@ -74,7 +71,6 @@ class LoginDialog extends Dialog<DialogDTO> {
     private static final String MESSAGE_SPACE                          = " ";
     private static final String MESSAGE_DASH                           = "-";
     private static final String INFO_IMAGE_URL                         = "icons/info_20x20.png";
-    private static final String CSS_PATH                               = "css/modular_dark_style.css";
 
     /** need to store two line message */
     private final double MIN_MESSAGE_HEIGHT = 40;
@@ -163,9 +159,6 @@ class LoginDialog extends Dialog<DialogDTO> {
         ImageView imageViewInfo = _themeService.getStyledImageView(INFO_IMAGE_URL);
         infoButton.setGraphic(imageViewInfo);
         infoButton.setId("infoButtonLogin");
-
-        /* HOVER ANIMATION */
-        infoButton.getStylesheets().add(getClass().getClassLoader().getResource(CSS_PATH).toExternalForm());
 
         GridPane.setHalignment(infoButton, HPos.LEFT);
         infoButton.setTooltip(new Tooltip("Get info"));

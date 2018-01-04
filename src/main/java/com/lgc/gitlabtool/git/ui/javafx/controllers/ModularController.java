@@ -590,7 +590,6 @@ public class ModularController implements UpdateProgressListener {
 
         String groupTitle = group.getName() + " [" + group.getPathToClonedGroup() + "]";
         groupPath.setText(HEADER_GROUP_TITLE + groupTitle);
-        groupPath.setTextFill(javafx.scene.paint.Color.DARKGRAY);
 
         mainPanelBackground.setEffect(new GaussianBlur());
         topBackground.setEffect(new GaussianBlur());
@@ -1459,6 +1458,8 @@ public class ModularController implements UpdateProgressListener {
         _themeService.styleScene(toolbar.getScene());
 
         refreshMainMenuToolbarIcons();
+        _consoleController.updateConsole();
+
     }
 
     private void refreshMainMenuToolbarIcons() {
@@ -1476,15 +1477,17 @@ public class ModularController implements UpdateProgressListener {
 
         Stream<Node> mainToolbarStream = Stream.concat(projectsWindowToolbarItems.stream(), groupsWindowToolbarItems.stream());
         Stream.concat(mainToolbarStream, projectsToolbarItems.stream())
-                .filter(item -> item instanceof Button)
-                .map(item -> (Button) item)
+                .filter(item -> item instanceof Button || item instanceof ToggleButton)
                 .forEach(item -> {
-                    if (_themeService.getCurrentTheme().equals(GLTThemes.DARK_THEME)) {
-                        ColorAdjust colorAdjust = new ColorAdjust();
-                        colorAdjust.setBrightness(+0.65);
-                        item.getGraphic().setEffect(colorAdjust);
-                    } else {
-                        item.getGraphic().setEffect(null);
+                    boolean isDarkTheme = _themeService.getCurrentTheme().equals(GLTThemes.DARK_THEME);
+                    ColorAdjust colorAdjust = new ColorAdjust();
+                    colorAdjust.setBrightness(+0.65);
+                    Effect lightEffect = isDarkTheme ? colorAdjust : null;
+
+                    if (item instanceof Button) {
+                        ((Button) item).getGraphic().setEffect(lightEffect);
+                    } else if (item instanceof ToggleButton) {
+                        ((ToggleButton) item).getGraphic().setEffect(lightEffect);
                     }
                 });
     }
@@ -1608,15 +1611,13 @@ public class ModularController implements UpdateProgressListener {
                 return;
 
             }
-            Text groupNameText = new Text(item.getName());
-            groupNameText.setFont(Font.font(Font.getDefault().getFamily(), 14));
-            groupNameText.setFill(javafx.scene.paint.Color.SILVER);
+            Label groupNameLabel = new Label(item.getName());
+            groupNameLabel.setFont(Font.font(Font.getDefault().getFamily(), 14));
 
             String localPath = item.getPathToClonedGroup();
-            Text localPathText = new Text(localPath);
-            localPathText.setFill(javafx.scene.paint.Color.SILVER);
+            Label localPathLabel = new Label(localPath);
 
-            VBox vboxItem = new VBox(groupNameText, localPathText);
+            VBox vboxItem = new VBox(groupNameLabel, localPathLabel);
             setGraphic(vboxItem);
 
             tooltip.setText(item.getName() + " (" + localPath + ")");

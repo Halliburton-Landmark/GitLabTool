@@ -8,7 +8,7 @@
     -fx-font-size: 12;
     -fx-font-family: "Trebuchet MS", "Geneva", "sans-serif";
     -fx-text-fill: foreground-text;
-    -fx-base: #424242;
+    -fx-base: #272727;
     -fx-background: #313131 ;
 
     -fx-focus-color: transparent;
@@ -165,6 +165,18 @@
     -fx-background-radius: 7 ;
 }
 
+.text-area {
+    -fx-text-fill: foreground-text;
+}
+
+.text-area .content{
+    -fx-background-color: rgb(78, 78, 78);
+}
+
+.text-area:focused {
+    -fx-background-color: rgb(107, 107, 107) ;
+}
+
 .label{
     -fx-text-fill: foreground-text;
 }
@@ -207,6 +219,15 @@
 	-fx-background-color: rgb(97, 97, 97);
 }
 
+.choice-box{
+    -fx-padding: 2 4 2 4;
+    -fx-background-color: rgb(78, 78, 78) ;
+}
+.choice-box:hover{
+    -fx-padding: 2 4 2 4;
+    -fx-background-color: rgb(92, 92, 92) ;
+}
+
 .button {
     -fx-background-color: transparent;
     -fx-text-fill: silver;
@@ -228,10 +249,6 @@
     -fx-text-fill: foreground-text;
 }
 
-.list-cell:even {
-    -fx-text-fill: foreground-text;
-}
-
 .list-cell {
     -fx-background-color: #222222;
     -fx-text-fill: foreground-text;
@@ -239,7 +256,17 @@
 
 .list-cell:even {
     -fx-background-color: #272727;
+    -fx-text-fill: foreground-text;
 }
+
+.list-view{
+    /* 3: (This is more specific and therefore overrides the above)*/
+    -fx-background-color: #222222;
+}
+
+.dialog-pane:header .header-panel {
+    -fx-background-color: #4e4e4e;
+  }
 
 
 
@@ -282,4 +309,17 @@
 
 #file-list-cell-project-name{
     -fx-text-fill:DARKCYAN;
+}
+
+
+#message-type-simple{
+    -fx-text-fill:foreground-text;
+}
+
+#message-type-error{
+    -fx-text-fill:rgb(201, 108, 105);
+}
+
+#message-type-success{
+    -fx-text-fill:rgb(116, 201, 105);
 }
