@@ -938,7 +938,6 @@ public class ModularController implements UpdateProgressListener {
     private void onRevertChanges(ActionEvent actionEvent) {
         GLTAlert alert = new GLTAlert(AlertType.CONFIRMATION, ApplicationState.REVERT.toString(),
                 "Revert changes for selected projects", "Are you sure you want to do it?");
-        alert.addButtons(ButtonType.CANCEL);
         alert.setTextButton(ButtonType.OK, "Revert");
         // check that user press OK button
         if (!alert.isOKButtonPressed(alert.showAndWait())) {
