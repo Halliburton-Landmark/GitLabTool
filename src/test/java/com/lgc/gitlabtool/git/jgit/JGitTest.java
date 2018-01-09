@@ -1041,23 +1041,23 @@ public class JGitTest {
         Assert.assertFalse(getJGitMock(gitMock).resetChangedFiles(files, getProject(true)).isEmpty());
     }
 
+    private final List<String> correctFiles = Arrays.asList("test", "564.txt");
+
     @Test
     public void replaceWithHEADRevisionWrongParameters() {
-        String correctFileName = "test";
         Project clonedProject = getProject(true);
 
-        Assert.assertFalse(getJGitMock(null).replaceWithHEADRevision(null, correctFileName));
-        Assert.assertFalse(getJGitMock(null).replaceWithHEADRevision(new Project(), correctFileName));
-        Assert.assertFalse(getJGitMock(null).replaceWithHEADRevision(clonedProject, null));
-        Assert.assertFalse(getJGitMock(null).replaceWithHEADRevision(clonedProject, ""));
+        Assert.assertFalse(getJGitMock(null).replaceFilesWithHEADRevision(null, correctFiles));
+        Assert.assertFalse(getJGitMock(null).replaceFilesWithHEADRevision(new Project(), correctFiles));
+        Assert.assertFalse(getJGitMock(null).replaceFilesWithHEADRevision(clonedProject, null));
+        Assert.assertFalse(getJGitMock(null).replaceFilesWithHEADRevision(clonedProject, new ArrayList<>()));
     }
 
     @Test
     public void replaceWithHEADRevisionGitDoesntExist() {
-        String correctFileName = "test";
         Project clonedProject = getProject(true);
 
-        boolean isSuccessful = getJGitMock(null).replaceWithHEADRevision(clonedProject, correctFileName);
+        boolean isSuccessful = getJGitMock(null).replaceFilesWithHEADRevision(clonedProject, correctFiles);
 
         Assert.assertFalse(isSuccessful);
     }
@@ -1073,7 +1073,7 @@ public class JGitTest {
         Mockito.when(checkCommandMock.call()).thenThrow(getGitAPIException());
         Mockito.when(gitMock.checkout()).thenReturn(checkCommandMock);
 
-        boolean isSuccessful = getJGitMock(gitMock).replaceWithHEADRevision(clonedProject, correctFileName);
+        boolean isSuccessful = getJGitMock(gitMock).replaceFilesWithHEADRevision(clonedProject, correctFiles);
 
         Assert.assertFalse(isSuccessful);
     }
@@ -1089,7 +1089,7 @@ public class JGitTest {
         Mockito.when(checkCommandMock.call()).thenReturn(mock(Ref.class));
         Mockito.when(gitMock.checkout()).thenReturn(checkCommandMock);
 
-        boolean isSuccessful = getJGitMock(gitMock).replaceWithHEADRevision(clonedProject, correctFileName);
+        boolean isSuccessful = getJGitMock(gitMock).replaceFilesWithHEADRevision(clonedProject, correctFiles);
 
         Assert.assertTrue(isSuccessful);
     }

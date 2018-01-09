@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.eclipse.jgit.api.CheckoutCommand;
 import org.eclipse.jgit.api.CreateBranchCommand.SetupUpstreamMode;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ListBranchCommand;
@@ -404,25 +405,26 @@ public class JGit {
     }
 
     /**
-     * Replaces file with HEAD revision
+     * Replaces files with HEAD revision
      *
-     * @param project  the cloned project which has fileName
-     * @param fileName the file which need replace
-     * @return <code> true</code> if file replace successfully, otherwise <code>false</code>
+     * @param project the cloned project which has fileName
+     * @param files the files which need replace
+     * @return <code> true</code> if files replace successfully, otherwise <code>false</code>
      */
-    public boolean replaceWithHEADRevision(Project project, String fileName) {
-        if (fileName == null || fileName.isEmpty() || project == null || !project.isCloned()) {
+    public boolean replaceFilesWithHEADRevision(Project project, List<String> files) {
+        if (files == null || files.isEmpty() || project == null || !project.isCloned()) {
             return false;
         }
+        boolean result = false;
         try (Git git = getGit(project.getPath())) {
-            git.checkout()
-               .addPath(fileName)
-               .call();
-            return true;
+            CheckoutCommand checkout = git.checkout();
+            files.forEach(checkout::addPath);
+            checkout.call();
+            result = true;
         } catch (IOException | GitAPIException e) {
             logger.error("Error replacing of file with HEAD revision: " + project.getPath() + " " + e.getMessage());
-            return false;
         }
+        return result;
     }
 
     /**

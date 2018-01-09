@@ -298,7 +298,7 @@ public class GitStagingWindowController extends AbstractStateListener {
     // We can replace with HEAD revision all file except new or untracked files.
     private Collection<ChangedFile> getFilesForReplace(Collection<ChangedFile> files) {
         return files.stream()
-                    .filter(file -> file.getStatusFile() != ChangedFileStatus.ADDED ||
+                    .filter(file -> file.getStatusFile() != ChangedFileStatus.ADDED &&
                                     file.getStatusFile() != ChangedFileStatus.UNTRACKED)
                     .collect(Collectors.toList());
     }

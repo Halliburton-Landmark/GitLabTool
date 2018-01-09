@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -402,12 +403,26 @@ public class GitServiceImpl implements GitService {
     }
 
     @Override
-    public void replaceWithHEADRevision(Collection<ChangedFile> changedFiles) {
-        if (changedFiles == null || changedFiles.isEmpty()) {
+    public void replaceWithHEADRevision(Collection<ChangedFile> files) {
+        if (files == null || files.isEmpty()) {
             return;
         }
-        changedFiles.parallelStream()
-                    .filter(file -> file != null)
-                    .forEach(file -> _git.replaceWithHEADRevision(file.getProject(), file.getFileName()));
+        Map<Project, List<ChangedFile>> filesByProjects = files.stream()
+                                                               .filter(Objects::nonNull)
+                                                               .collect(Collectors.groupingBy(ChangedFile::getProject));
+        for (Project project : filesByProjects.keySet()) {
+            if (project == null || !project.isCloned()) {
+                continue;
+            }
+            List<ChangedFile> changedFiles = filesByProjects.get(project);
+            _git.replaceFilesWithHEADRevision(project, getFilesList(changedFiles));
+        }
+    }
+
+    private List<String> getFilesList(List<ChangedFile> changedFiles) {
+        return changedFiles.stream()
+                           .filter(Objects::nonNull)
+                           .map(ChangedFile::getFileName)
+                           .collect(Collectors.toList());
     }
 }
