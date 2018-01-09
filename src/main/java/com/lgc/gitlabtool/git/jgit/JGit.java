@@ -1071,4 +1071,5 @@ public class JGit {
     protected BranchConfig getBranchConfig(Config config, String branchName) {
         return new BranchConfig(config, branchName);
     }
+
 }

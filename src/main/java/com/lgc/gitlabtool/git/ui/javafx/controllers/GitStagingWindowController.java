@@ -109,7 +109,7 @@ public class GitStagingWindowController extends AbstractStateListener {
     private static final String COMMIT_PROMPT_TEXT = "Please enter commit message";
     private static final String DELETE_FILES_TITLE = "Delete untracked files";
     private static final String REPLACE_FILES_TITLE = "Replace files with HEAD revision";
-    private static final String CONFIRMATION_OPERATION = "Are you sure you want to make it?";
+    private static final String CONFIRMATION_OPERATION = "Are you sure? You will loose your local changes in those files.";
     private static final String REPLACE_BUTTON_NAME = "Replace with HEAD Revision";
     private static final String DELETE_BUTTON_NAME = "Delete";
 

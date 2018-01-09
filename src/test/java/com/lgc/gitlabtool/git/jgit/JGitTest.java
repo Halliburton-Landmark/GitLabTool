@@ -1086,6 +1086,7 @@ public class JGitTest {
         CheckoutCommand checkCommandMock = mock(CheckoutCommand.class);
         // mock CheckoutCommand and Git methods
         Mockito.when(checkCommandMock.addPath(correctFileName)).thenReturn(checkCommandMock);
+
         Mockito.when(checkCommandMock.call()).thenReturn(mock(Ref.class));
         Mockito.when(gitMock.checkout()).thenReturn(checkCommandMock);
 
