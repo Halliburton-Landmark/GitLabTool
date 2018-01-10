@@ -242,7 +242,7 @@ public class StashWindowController extends AbstractStateListener {
     class ApplyStashProgressListener implements ProgressListener {
         private int _successCount = 0;
         private int _allStashes = 0;
-        private List<Project> _changedProjects;
+        private final List<Project> _changedProjects = new ArrayList<>();
 
         @Override
         public void onSuccess(Object... t) {

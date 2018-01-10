@@ -242,4 +242,11 @@ public interface GitService extends Service {
      * @param progressListener
      */
     void applyStashes(StashItem stash, ProgressListener progressListener);
+
+    /**
+     *
+     * @param stash
+     * @return
+     */
+    boolean stashDrop(StashItem stash);
 }
