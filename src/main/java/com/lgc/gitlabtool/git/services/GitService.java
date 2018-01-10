@@ -248,5 +248,5 @@ public interface GitService extends Service {
      * @param stash
      * @return
      */
-    boolean stashDrop(StashItem stash);
+    Map<Project, Boolean> stashDrop(StashItem stash);
 }

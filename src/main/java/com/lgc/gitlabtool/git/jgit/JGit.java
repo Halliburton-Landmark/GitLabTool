@@ -246,7 +246,7 @@ public class JGit {
                     return true;
                 }
             } catch (GitAPIException | IOException e) {
-                logger.error("Failed droping stash for " + project.getName() + " project: ", e);
+                logger.error("Failed droping stash for " + project.getName() + " project: " + e.getMessage());
             }
         }
         return false;

@@ -2,6 +2,7 @@ package com.lgc.gitlabtool.git.ui.javafx.controllers;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
@@ -149,7 +150,21 @@ public class StashWindowController extends AbstractStateListener {
 
     @FXML
     public void onDropStashAction(ActionEvent event) {
-        System.out.println("we droped stash =("); // TODO
+        StashItem selectedStash = _stashListView.getSelectionModel().getSelectedItem();
+        Map<Project, Boolean> results = _gitService.stashDrop(selectedStash);
+        List<Project> changedProjects = getSuccessfulProjects(results);
+        updateContentOfLists(changedProjects);
+
+        showStatusDialog("Status of droping stash",
+                "Droping stash operation is finished.",
+                "Stash is successfully droping for " + changedProjects.size() + " of " + results.size() + " project(s).");
+    }
+
+    private List<Project> getSuccessfulProjects(Map<Project, Boolean> results) {
+        return results.entrySet().stream()
+                                 .filter(entry -> entry.getValue() != false)
+                                 .map(entry -> entry.getKey())
+                                 .collect(Collectors.toList());
     }
 
     private List<Project> getChangedProjects(List<Project> projects, boolean includeUntracked) {

@@ -18,4 +18,10 @@ public interface StashItem {
      * @return
      */
     boolean isGroup();
+
+    /**
+     *
+     * @return
+     */
+    String getIconURL();
 }

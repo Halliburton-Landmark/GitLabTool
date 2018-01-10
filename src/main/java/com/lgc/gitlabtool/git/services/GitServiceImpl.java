@@ -44,11 +44,13 @@ public class GitServiceImpl implements GitService {
 
     private static JGit _git;
     private static StateService _stateService;
+    private static ConsoleService _consoleService;
     private static ChangedFilesUtils _changedFilesUtils;
 
-    public GitServiceImpl(StateService stateService, JGit jGit, ChangedFilesUtils changedFilesUtils) {
+    public GitServiceImpl(StateService stateService, ConsoleService consoleService, JGit jGit, ChangedFilesUtils changedFilesUtils) {
         _git = jGit;
         _stateService = stateService;
+        _consoleService = consoleService;
         _changedFilesUtils = changedFilesUtils;
     }
 
@@ -362,9 +364,34 @@ public class GitServiceImpl implements GitService {
     }
 
     @Override
-    public boolean stashDrop(StashItem stash) {
-        // TODO Auto-generated method stub
-        return false;
+    public Map<Project, Boolean> stashDrop(StashItem stashItem) {
+        Map<Project, Boolean> resultOperations = new ConcurrentHashMap<>();
+        if (stashItem == null) {
+            return resultOperations;
+        }
+        try {
+            _stateService.stateON(ApplicationState.STASH);
+            if (stashItem instanceof Stash) {
+                Stash stash = (Stash) stashItem;
+                Project project = stash.getProject();
+                boolean resultOperation = _git.stashDrop(project, stash.getName());
+                resultOperations.put(project, resultOperation);
+            } else {
+                List<Stash> group = ((GroupStash) stashItem).getGroup();
+                group.parallelStream()
+                     .filter(stash -> stash != null)
+                     .forEach(stash -> dropStash(resultOperations, stash));
+            }
+        } finally {
+            _stateService.stateOFF(ApplicationState.STASH);
+        }
+        return resultOperations;
+    }
+
+    private void dropStash(Map<Project, Boolean> results, Stash stash) {
+        Project project = stash.getProject();
+        boolean resultOperation = _git.stashDrop(project, stash.getName());
+        results.put(project, resultOperation);
     }
 
     private Map<Project, JGitStatus> runCheckoutBranchAction(List<Project> projects,

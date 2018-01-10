@@ -12,6 +12,8 @@ public class Stash implements StashItem {
     private String _message;
     private Project _project;
 
+    private static final String ICON_URL = "icons/stash/stash_item_20x20.png";
+
     /**
      *
      *
@@ -46,6 +48,10 @@ public class Stash implements StashItem {
         return _project;
     }
 
+    @Override
+    public String getIconURL() {
+        return ICON_URL;
+    }
 
     private void setName(String name) {
         _name = name;
