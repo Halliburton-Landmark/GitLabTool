@@ -21,7 +21,7 @@
                <children>
                   <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                      <children>
-                      <TitledPane alignment="TOP_LEFT" text="Create Stash" VBox.vgrow="ALWAYS">
+                      <TitledPane fx:id="_createStashTitledPane" expanded="true" alignment="TOP_LEFT" text="Create Stash" VBox.vgrow="ALWAYS">
                         <content>
                           <AnchorPane>
                                  <children>

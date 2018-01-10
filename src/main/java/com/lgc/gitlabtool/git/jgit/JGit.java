@@ -222,7 +222,7 @@ public class JGit {
             git.stashApply()
                .setStashRef(stashName)
                .call();
-            progressListener.onSuccess();
+            progressListener.onSuccess(project);
         } catch (GitAPIException | IOException e) {
             progressListener.onError("Failed applying stash for " + project.getName() + " project: " + e.getMessage());
         }

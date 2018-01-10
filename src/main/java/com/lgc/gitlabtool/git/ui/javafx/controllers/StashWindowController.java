@@ -17,6 +17,7 @@ import com.lgc.gitlabtool.git.listeners.stateListeners.AbstractStateListener;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.services.ConsoleService;
 import com.lgc.gitlabtool.git.services.GitService;
+import com.lgc.gitlabtool.git.services.ProgressListener;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.javafx.StatusDialog;
@@ -57,6 +58,9 @@ public class StashWindowController extends AbstractStateListener {
     private TitledPane _stashListTitledPane;
 
     @FXML
+    private TitledPane _createStashTitledPane;
+
+    @FXML
     private ListView<StashItem> _stashListView;
 
     @FXML
@@ -94,47 +98,53 @@ public class StashWindowController extends AbstractStateListener {
         updateProjectListView();
 
         _stashListTitledPane.expandedProperty().addListener(new StashListChangeListener());
+        _createStashTitledPane.expandedProperty().addListener(new CreateStashChangeListener());
         _stashListView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         _stashListView.setCellFactory(project -> new StashListCell());
         _stashListView.addEventFilter(MouseEvent.MOUSE_CLICKED, event -> filterProjectList());
-        _stashListView.focusedProperty().addListener(new ChangeListener<Boolean>() {
-            @Override
-            public void changed(ObservableValue<? extends Boolean> arg0, Boolean oldPropertyValue, Boolean newPropertyValue) {
-                if (!newPropertyValue) {
-                    _stashListView.getSelectionModel().clearSelection();
-                    updateProjectListView();
-                }
-            }
-        });
+
         _applyButton.disableProperty().bind(_stashListView.getSelectionModel().selectedItemProperty().isNull());
         _dropButton.disableProperty().bind(_stashListView.getSelectionModel().selectedItemProperty().isNull());
         _createButton.disableProperty().bind(_stashMessageTextField.textProperty().isEmpty());
     }
 
+    private void updateProjectList() {
+        _stashListView.getSelectionModel().clearSelection();
+        if (_projectsIds.size() != _projectListView.getItems().size()) {
+            updateProjectListView();
+        }
+    }
+
     @FXML
     public void onCreateStashAction(ActionEvent event) {
         boolean includeUntracked = _includeUntrackedComboBox.isSelected();
-        List<Project> projects = _projectListView.getItems();
+        List<Project> projects = getProjects();
         List<Project> changedProjects = getChangedProjects(projects, includeUntracked);
         if (changedProjects.isEmpty()) {
             showStatusDialog("Status of creating stash",
-                             "Create stash for " + projects.size() + " projects failed.",
-                             "Selected projects don't have changes");
+                             "Selected projects don't have changes",
+                             "Creating stash for " + projects.size() + " projects failed.");
         } else {
             String stashMessage = _stashMessageTextField.getText();
-            _consoleService.addMessage(changedProjects.size() + " of " + projects.size() + " have changes", MessageType.SIMPLE);
+            String message = "Creating stash available for " + changedProjects.size() + " of " + projects.size() + " project(s).";
+            _consoleService.addMessage(message, MessageType.SIMPLE);
             _gitService.createStash(changedProjects, stashMessage, includeUntracked);
-            _projectList.updateProjectStatuses(changedProjects);
-            updateStashListView();
+
+            updateContentOfLists(changedProjects);
             _stashMessageTextField.setText(StringUtils.EMPTY);
             _includeUntrackedComboBox.setSelected(false);
         }
     }
 
+    private void updateContentOfLists(List<Project> changedProjects) {
+        _projectList.updateProjectStatuses(changedProjects);
+        updateStashListView();
+    }
 
     @FXML
     public void onApplyStashAction(ActionEvent event) {
-        System.out.println("we applied stash =)"); // TODO
+        StashItem selectedStash = _stashListView.getSelectionModel().getSelectedItem();
+        _gitService.applyStashes(selectedStash, new ApplyStashProgressListener());
     }
 
     @FXML
@@ -158,29 +168,12 @@ public class StashWindowController extends AbstractStateListener {
     }
 
     private void showStatusDialog(String titleText, String headerText, String contentText) {
-        _consoleService.addMessage(headerText, MessageType.determineMessageType(headerText)); // TODO
-        _consoleService.addMessage(contentText, MessageType.SIMPLE);
+        _consoleService.addMessage(headerText, MessageType.determineMessageType(headerText));
+        _consoleService.addMessage(contentText, MessageType.determineMessageType(contentText));
 
         StatusDialog statusDialog = new StatusDialog(titleText, headerText);
         statusDialog.setContentText(contentText);
         statusDialog.showAndWait();
-    }
-
-    /**
-     *  The first time you open a tab, you get a list of stashes
-     *
-     * @author Lyudmila Lyska
-     */
-    class StashListChangeListener implements ChangeListener<Boolean> {
-
-        @Override
-        public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-            _stashListTitledPane.expandedProperty().removeListener(this);
-            if (_stashListView.getItems().isEmpty()) {
-                updateStashListView();
-            }
-        }
-
     }
 
     private void filterProjectList() {
@@ -208,15 +201,8 @@ public class StashWindowController extends AbstractStateListener {
     @Override
     public void handleEvent(ApplicationState changedState, boolean isActivate) {
         if (!isActivate) {
-            updateContentLists();
+            _projectListView.refresh();
         }
-    }
-
-    private void updateContentLists() {
-        _projectListView.getItems().clear();
-        _stashListView.getItems().clear();
-        updateProjectListView();
-        updateStashListView();
     }
 
     private void updateStashListView() {
@@ -225,5 +211,74 @@ public class StashWindowController extends AbstractStateListener {
 
     private void updateProjectListView() {
         _projectListView.setItems(FXCollections.observableArrayList(getProjects()));
+    }
+
+    class StashListChangeListener implements ChangeListener<Boolean> {
+
+        @Override
+        public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+            if (newValue) {
+                if (_stashListView.getItems().isEmpty()) {
+                    updateStashListView();
+                }
+                _createStashTitledPane.setExpanded(false);
+            }
+        }
+
+    }
+
+    class CreateStashChangeListener implements ChangeListener<Boolean> {
+
+        @Override
+        public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+            if (newValue) {
+                updateProjectList();
+                _stashListTitledPane.setExpanded(false);
+            }
+        }
+
+    }
+
+    class ApplyStashProgressListener implements ProgressListener {
+        private int _successCount = 0;
+        private int _allStashes = 0;
+        private List<Project> _changedProjects;
+
+        @Override
+        public void onSuccess(Object... t) {
+            _successCount++;
+            if (t[0] instanceof Project) {
+                Project project = (Project) t[0];
+                String message = "Stash is applied successfully for " + project.getName() + " project";
+                _consoleService.addMessage(message, MessageType.SUCCESS);
+                _changedProjects.add(project);
+            }
+        }
+
+        @Override
+        public void onError(Object... t) {
+            if (t[0] instanceof String) {
+                _consoleService.addMessage((String)t[0], MessageType.ERROR);
+            }
+        }
+
+        @Override
+        public void onStart(Object... t) {
+            _stateService.stateON(ApplicationState.STASH);
+            if (t[0] instanceof Integer) {
+                _allStashes = (Integer)t[0];
+            }
+        }
+
+        @Override
+        public void onFinish(Object... t) {
+            _stateService.stateOFF(ApplicationState.STASH);
+            _projectList.updateProjectStatuses(_changedProjects);
+
+            showStatusDialog("Status of applying stash",
+                    "Applying stash operation is finished.",
+                    "Stash is successfully applied for " + _successCount + " of " + _allStashes + " project(s).");
+        }
+
     }
 }
