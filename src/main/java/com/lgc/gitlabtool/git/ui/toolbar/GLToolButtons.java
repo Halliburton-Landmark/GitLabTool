@@ -143,6 +143,14 @@ public enum GLToolButtons {
             null,
             GLToolConstants.ICON_SIZE_20),
 
+    MAIN_EDIT_PROJECT_PROPERTIES(GLToolConstants.PROJECTS_WINDOW_KEY,
+            "main_edit_project_propecties",
+            "icons/mainmenu/edit_properties_16x16.png",
+            "Edit project properties",
+            "Edit project properties",
+            null,
+            GLToolConstants.ICON_SIZE_16),
+
     PULL_BUTTON(GLToolConstants.PROJECTS_WINDOW_KEY,
             "pull",
             "icons/toolbar/pull_20x20.png",
