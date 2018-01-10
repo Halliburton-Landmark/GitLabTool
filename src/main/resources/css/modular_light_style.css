@@ -151,10 +151,11 @@
 
 /* GENERAL ELEMENTS */
 .text-field {
-    -fx-background-color: rgb(180, 180, 180) ;
+    -fx-background-color: rgb(160, 160, 160) ;
     -fx-background-insets: 0, 0 0 5 0 ;
     -fx-background-radius: 7 ;
     -fx-text-fill: foreground-text;
+    -fx-prompt-text-fill: rgb(122, 122, 122);
 }
 .text-field:focused {
     -fx-background-color: rgb(173, 173, 173) ;
@@ -163,11 +164,11 @@
 
 .text-area {
     -fx-text-fill: foreground-text;
-    -fx-prompt-text-fill: rgb(95, 95, 95);
+    -fx-prompt-text-fill: rgb(122, 122, 122);
 }
 
 .text-area .content{
-    -fx-background-color: rgb(180, 180, 180);
+    -fx-background-color: rgb(160, 160, 160) ;
 }
 
 .text-area:focused {
@@ -180,10 +181,10 @@
 
 .combo-box-base{
     -fx-padding: 2 4 2 4;
-    -fx-background-color: rgb(180, 180, 180);
+    -fx-background-color: rgb(160, 160, 160) ;
 }
 .combo-box-base .arrow-button {
-    -fx-background-color: rgb(180, 180, 180) ;
+    -fx-background-color: rgb(160, 160, 160) ;
 }
 
 .combo-box .cell {
@@ -199,7 +200,7 @@
 
 .choice-box{
     -fx-padding: 2 4 2 4;
-    -fx-background-color: rgb(180, 180, 180) ;
+    -fx-background-color: rgb(160, 160, 160) ;
 }
 .choice-box:hover{
     -fx-padding: 2 4 2 4;
@@ -253,7 +254,7 @@
 }
 
 .list-cell:filled:selected:focused, .list-cell:filled:selected {
-    -fx-background-color: rgb(155, 155, 155);
+    -fx-background-color: rgb(160, 160, 160) ;
     -fx-text-fill: foreground-text;
 }
 

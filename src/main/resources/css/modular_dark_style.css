@@ -159,6 +159,7 @@
     -fx-background-insets: 0, 0 0 5 0 ;
     -fx-background-radius: 7 ;
     -fx-text-fill: foreground-text;
+    -fx-prompt-text-fill: rgb(194, 194, 194);
 }
 .text-field:focused {
     -fx-background-color: rgb(107, 107, 107) ;
@@ -167,6 +168,7 @@
 
 .text-area {
     -fx-text-fill: foreground-text;
+    -fx-prompt-text-fill: rgb(194, 194, 194);
 }
 
 .text-area .content{

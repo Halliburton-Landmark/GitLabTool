@@ -8,7 +8,6 @@ import com.lgc.gitlabtool.git.services.ThemeService;
 import com.lgc.gitlabtool.git.util.ShutDownUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.fxmisc.cssfx.CSSFX;
 
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
@@ -62,7 +61,6 @@ public class JavaFXUI extends Application implements UserInterface {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        CSSFX.start();
 
         mainStage = primaryStage;
         appIcon = AppIconHolder.getInstance().getAppIcoImage();
