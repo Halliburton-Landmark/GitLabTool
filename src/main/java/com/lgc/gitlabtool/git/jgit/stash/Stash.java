@@ -4,9 +4,9 @@ import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.jgit.JGit;
 
 /**
- * Implementation of {@link StashItem} for storing info about stash for single project.
+ * Implementation of {@link StashItem} for storing info about a stash for a single project.
  *
- * It stores info about project for which was created, its message and name.
+ * It stores info about a project for which was created stash, its message and name.
  *
  * @author Lyudmila Lyska
  */
@@ -18,10 +18,11 @@ public class Stash implements StashItem {
     private static final String ICON_URL = "icons/stash/stash_item_20x20.png";
 
     /**
+     * Constructor for creating object.
      *
-     *
-     * @param name
-     * @param message
+     * @param name    the stash name
+     * @param message the stash message
+     * @param project the project for which was created stash
      */
     public Stash (String name, String message, Project project) {
         setName(name);

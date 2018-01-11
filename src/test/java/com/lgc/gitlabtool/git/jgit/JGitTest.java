@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +24,8 @@ import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.PushCommand;
 import org.eclipse.jgit.api.ResetCommand;
 import org.eclipse.jgit.api.RmCommand;
+import org.eclipse.jgit.api.StashCreateCommand;
+import org.eclipse.jgit.api.StashListCommand;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.StatusCommand;
 import org.eclipse.jgit.api.errors.AbortedByHookException;
@@ -74,6 +77,8 @@ import org.mockito.Mockito;
 
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.User;
+import com.lgc.gitlabtool.git.jgit.stash.Stash;
+import com.lgc.gitlabtool.git.jgit.stash.StashItem;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.services.BackgroundService;
 import com.lgc.gitlabtool.git.services.BackgroundServiceImpl;
@@ -1041,7 +1046,116 @@ public class JGitTest {
         Assert.assertFalse(getJGitMock(gitMock).resetChangedFiles(files, getProject(true)).isEmpty());
     }
 
-    /*************************************************************************************************/
+    @Test
+    public void stashCreateIncorrectParameters() {
+        String correctMessage = "test";
+
+        Assert.assertFalse(getJGitMock(null).stashCreate(null, correctMessage, true));
+        Assert.assertFalse(getJGitMock(null).stashCreate(getProject(false), correctMessage, true));
+        Assert.assertFalse(getJGitMock(null).stashCreate(getProject(true), null, true));
+        Assert.assertFalse(getJGitMock(null).stashCreate(getProject(true), "", true));
+    }
+
+    @Test
+    public void stashCreateIncorrectGit() {
+        String correctMessage = "test";
+        Project correctProject = getProject(true);
+
+        boolean resultOperation = getJGitMock(null).stashCreate(correctProject, correctMessage, true);
+
+        Assert.assertFalse(resultOperation);
+    }
+
+    @Test
+    public void stashCreateIncorrectData() throws GitAPIException {
+        String correctMessage = "test";
+        Project correctProject = getProject(true);
+        // mock git operations
+        Git gitMock = getGitMock();
+        StashCreateCommand stashCreateMock = getStashCreateWithSettings(correctMessage, false);
+        Mockito.when(gitMock.stashCreate()).thenReturn(stashCreateMock);
+
+        boolean resultOperation = getJGitMock(gitMock).stashCreate(correctProject, correctMessage, true);
+
+        Assert.assertFalse(resultOperation);
+    }
+
+    @Test
+    public void stashCreateCorrectValue() throws GitAPIException  {
+        String correctMessage = "test";
+        Project correctProject = getProject(true);
+        // mock git operations
+        Git gitMock = getGitMock();
+        StashCreateCommand stashCreateMock = getStashCreateWithSettings(correctMessage, true);
+        Mockito.when(gitMock.stashCreate()).thenReturn(stashCreateMock);
+
+        boolean resultOperation = getJGitMock(gitMock).stashCreate(correctProject, correctMessage, true);
+
+        Assert.assertTrue(resultOperation);
+    }
+
+    @Test
+    public void getStashesIncorrectParameter() {
+        Assert.assertTrue(getJGitMock(null).getStashes(null).isEmpty());
+        Assert.assertTrue(getJGitMock(null).getStashes(getProject(false)).isEmpty());
+    }
+
+    @Test
+    public void getStashesIncorrectGit() {
+        List<StashItem> result = getJGitMock(null).getStashes(getProject(true));
+
+        Assert.assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void getStashesIncorrectData() throws InvalidRefNameException, GitAPIException {
+        Project project = getProject(true);
+        Git gitMock = getGitMock();
+        setStashListToGitMock(gitMock, false);
+
+        List<StashItem> result = getJGitMock(gitMock).getStashes(project);
+
+        Assert.assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void getStashesCorrectValue() throws InvalidRefNameException, GitAPIException {
+        Project project = getProject(true);
+        Git gitMock = getGitMock();
+        setStashListToGitMock(gitMock, true);
+
+        List<StashItem> result = getJGitMock(gitMock).getStashes(project);
+
+        Assert.assertFalse(result.isEmpty());
+    }
+
+    /*************************************************************************************************************/
+
+    private void setStashListToGitMock(Git gitMock, boolean isCorrectStash) throws InvalidRefNameException, GitAPIException {
+        StashListCommand stashListMock = mock(StashListCommand.class);
+        if (isCorrectStash) {
+            Mockito.when(stashListMock.call()).thenReturn(getRevCommits());
+        } else {
+            Mockito.when(stashListMock.call()).thenThrow(getGitAPIException());
+        }
+        Mockito.when(gitMock.stashList()).thenReturn(stashListMock);
+    }
+
+    private Collection<RevCommit> getRevCommits() {
+        return Arrays.asList(mock(RevCommit.class), mock(RevCommit.class));
+    }
+
+    private StashCreateCommand getStashCreateWithSettings(String stashMessage, boolean isCorrectStash) throws GitAPIException {
+        StashCreateCommand stashCreateMock = mock(StashCreateCommand.class);
+        Mockito.when(stashCreateMock.setWorkingDirectoryMessage(stashMessage)).thenReturn(stashCreateMock);
+        Mockito.when(stashCreateMock.setIncludeUntracked(true)).thenReturn(stashCreateMock);
+        if (isCorrectStash) {
+            Mockito.when(stashCreateMock.call()).thenReturn(mock(RevCommit.class));
+        } else {
+            Mockito.when(stashCreateMock.call()).thenThrow(getGitAPIException());
+        }
+        return stashCreateMock;
+    }
     private Project getProject(boolean isCorrectProject) {
         if (!isCorrectProject) {
             return new Project();
@@ -1122,6 +1236,11 @@ public class JGitTest {
                         return NAME_TRACKING_BRANCH;
                     }
                 };
+            }
+
+            @Override
+            Stash getStash(RevCommit revCommit, Project project) {
+                return new Stash("test name", "test message", project);
             }
         };
         return correctJGitMock;

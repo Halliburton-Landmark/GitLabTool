@@ -1,8 +1,7 @@
 package com.lgc.gitlabtool.git.jgit.stash;
 
 /**
- * Interface for getting base info about stash
- * regardless of its type ({@link Stash} or {@link GroupStash}).
+ * Interface for getting base info about a stash regardless of its type ({@link Stash} or {@link GroupStash}).
  *
  * @author Lyudmila Lyska
  */
@@ -16,7 +15,7 @@ public interface StashItem {
     String getMessage();
 
     /**
-     * Gets type of stash
+     * Gets stash type
      *
      * @return <code>true</code> if it is group stash, otherwise <code>false</code>
      */

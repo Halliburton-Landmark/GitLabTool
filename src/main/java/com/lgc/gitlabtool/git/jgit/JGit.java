@@ -248,7 +248,7 @@ public class JGit {
         return false;
     }
 
-    private Stash getStash(RevCommit revCommit, Project project) {
+    Stash getStash(RevCommit revCommit, Project project) {
         return new Stash(revCommit.getName(), revCommit.getFullMessage(), project);
     }
 

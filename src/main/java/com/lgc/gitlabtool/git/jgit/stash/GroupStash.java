@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Implementation of {@link StashItem} for storing info about group stash for few project.
+ * Implementation of {@link StashItem} for storing info about a group stash for few projects.
  *
  * It stores list of {@link Stash}s which include to this group and its message.
  *
