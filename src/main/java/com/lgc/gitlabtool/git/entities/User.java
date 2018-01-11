@@ -1,5 +1,7 @@
 package com.lgc.gitlabtool.git.entities;
 
+import com.google.gson.annotations.SerializedName;
+
 /**
  * Class keeps data about user.
  *
@@ -11,72 +13,93 @@ package com.lgc.gitlabtool.git.entities;
  */
 public class User {
     /** The name of the user **/
-    private final String name;
+    @SerializedName("name")
+    private final String _name;
 
     /** The username of the user **/
-    private String username;
+    @SerializedName("username")
+    private String _username;
 
     /** The id of the user **/
-    private int id;
+    @SerializedName("id")
+    private int _id;
 
-    private String state;
+    @SerializedName("state")
+    private String _state;
 
     /** The avatar's URL **/
-    private String avatar_url;
+    @SerializedName("avatar_url")
+    private String _avatarUrl;
 
     /** The created date **/
-    private String created_at;
+    @SerializedName("created_at")
+    private String _createdAt;
 
     /** The user is admin - true or false (default) **/
-    private boolean is_admin;
+    @SerializedName("is_admin")
+    private boolean _isAdmin;
 
     /** The user's biography **/
-    private String bio;
+    @SerializedName("bio")
+    private String _bio;
 
     /** The Skype ID **/
-    private String skype;
+    @SerializedName("skype")
+    private String _skype;
 
     /** The LinkedIn **/
-    private String linkedin;
+    @SerializedName("linkedin")
+    private String _linkedin;
 
     /** The Twitter account **/
-    private String twitter;
+    @SerializedName("twitter")
+    private String _twitter;
 
     /** The Website URL **/
-    private String website_url;
+    @SerializedName("website_url")
+    private String _websiteUrl;
 
     /** The user of the email **/
-    private final String email;
+    @SerializedName("email")
+    private final String _email;
 
-    private int color_scheme_id;
+    @SerializedName("color_scheme_id")
+    private int _colorSchemeId;
 
     /** The limit projects each user can create **/
-    private int projects_limit;
+    @SerializedName("projects_limit")
+    private int _projectsLimit;
 
-    private String current_sign_in_at;
+    @SerializedName("current_sign_in_at")
+    private String _currentSignInAt;
 
-    private Object identities;
+    @SerializedName("identities")
+    private Object _identities;
 
     /** The user can create groups **/
-    private boolean can_create_group;
+    @SerializedName("can_create_group")
+    private boolean _canCreateGroup;
 
     /** The user can create projects **/
-    private boolean can_create_project;
+    @SerializedName("can_create_project")
+    private boolean _canCreateProject;
 
-    private boolean two_factor_enabled;
+    @SerializedName("two_factor_enabled")
+    private boolean _twoFactorEnabled;
 
     /** The private token of the user **/
-    private String private_token;
+    @SerializedName("private_token")
+    private String _privateToken;
 
     /** The OAuth2 token of a user **/
-    private String oauth2Token;
+    private String _oauth2Token;
 
     public User(String name, String email) {
         if (name == null || email == null || name.isEmpty() || email.isEmpty()) {
             throw new IllegalArgumentException("Incorrect data!");
         }
-        this.name = name;
-        this.email = email;
+        this._name = name;
+        this._email = email;
     }
 
     /**
@@ -85,7 +108,7 @@ public class User {
      * @return the name of the user
      */
     public String getName() {
-        return name;
+        return _name;
     }
 
     /**
@@ -94,7 +117,7 @@ public class User {
      * @return the username of the user
      */
     public String getUsername() {
-        return username;
+        return _username;
     }
 
     /**
@@ -103,11 +126,11 @@ public class User {
      * @return the id of the user
      */
     public int getId() {
-        return id;
+        return _id;
     }
 
     public String getState() {
-        return state;
+        return _state;
     }
 
     /**
@@ -115,8 +138,8 @@ public class User {
      *
      * @return
      */
-    public String getAvatar_url() {
-        return avatar_url;
+    public String getAvatarUrl() {
+        return _avatarUrl;
     }
 
     /**
@@ -124,8 +147,8 @@ public class User {
      *
      * @return the created date
      */
-    public String getCreated_at() {
-        return created_at;
+    public String getCreatedAt() {
+        return _createdAt;
     }
 
     /**
@@ -133,8 +156,8 @@ public class User {
      *
      * @return the user is admin
      */
-    public boolean isIs_admin() {
-        return is_admin;
+    public boolean isAdmin() {
+        return _isAdmin;
     }
 
     /**
@@ -143,7 +166,7 @@ public class User {
      * @return the user's biography
      */
     public String getBio() {
-        return bio;
+        return _bio;
     }
 
     /**
@@ -152,7 +175,7 @@ public class User {
      * @return the Skype ID
      */
     public String getSkype() {
-        return skype;
+        return _skype;
     }
 
     /**
@@ -161,7 +184,7 @@ public class User {
      * @return the LinkedIn
      */
     public String getLinkedin() {
-        return linkedin;
+        return _linkedin;
     }
 
     /**
@@ -170,7 +193,7 @@ public class User {
      * @return the Twitter account
      */
     public String getTwitter() {
-        return twitter;
+        return _twitter;
     }
 
     /**
@@ -178,8 +201,8 @@ public class User {
      *
      * @return the Website URL
      */
-    public String getWebsite_url() {
-        return website_url;
+    public String getWebsiteUrl() {
+        return _websiteUrl;
     }
 
     /**
@@ -188,11 +211,11 @@ public class User {
      * @return the user of the email
      */
     public String getEmail() {
-        return email;
+        return _email;
     }
 
-    public int getColor_scheme_id() {
-        return color_scheme_id;
+    public int getColorSchemeId() {
+        return _colorSchemeId;
     }
 
     /**
@@ -200,16 +223,16 @@ public class User {
      *
      * @return the limit projects each user can create
      */
-    public int getProjects_limit() {
-        return projects_limit;
+    public int getProjectsLimit() {
+        return _projectsLimit;
     }
 
-    public String getCurrent_sign_in_at() {
-        return current_sign_in_at;
+    public String getCurrentSignInAt() {
+        return _currentSignInAt;
     }
 
     public Object getIdentities() {
-        return identities;
+        return _identities;
     }
 
     /**
@@ -217,8 +240,8 @@ public class User {
      *
      * @return the user can create groups
      */
-    public boolean isCan_create_group() {
-        return can_create_group;
+    public boolean isCanCreateGroup() {
+        return _canCreateGroup;
     }
 
     /**
@@ -226,12 +249,12 @@ public class User {
      *
      * @return the user can create projects
      */
-    public boolean isCan_create_project() {
-        return can_create_project;
+    public boolean isCanCreateProject() {
+        return _canCreateProject;
     }
 
-    public boolean isTwo_factor_enabled() {
-        return two_factor_enabled;
+    public boolean isTwoFactorEnabled() {
+        return _twoFactorEnabled;
     }
 
     /**
@@ -239,16 +262,16 @@ public class User {
      *
      * @return the private token of the user
      */
-    public String getPrivate_token() {
-        return private_token;
+    public String getPrivateToken() {
+        return _privateToken;
     }
 
     /**
      * Set value of a private token
      * @param token value of a private token
      */
-    public void setPrivate_token(String token){
-        private_token = token;
+    public void setPrivateToken(String token){
+        _privateToken = token;
     }
 
     /**
@@ -257,7 +280,7 @@ public class User {
      * @return OAuth2 token of a current user
      */
     public String getOAuth2token() {
-        return oauth2Token;
+        return _oauth2Token;
     }
 
     /**
@@ -265,7 +288,7 @@ public class User {
      * @param token value of a OAuth2 token
      */
     public void setOAuth2token(String token){
-        oauth2Token = token;
+        _oauth2Token = token;
     }
 
 }

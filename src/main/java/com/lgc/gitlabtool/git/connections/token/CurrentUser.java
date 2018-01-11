@@ -35,7 +35,7 @@ public class CurrentUser {
      * @return value
      */
     public String getPrivateTokenValue() {
-        return _currentUser.getPrivate_token();
+        return _currentUser.getPrivateToken();
     }
 
     /**
@@ -43,7 +43,7 @@ public class CurrentUser {
      * @param token value of a private token
      */
     public void setPrivateTokenValue(String token){
-        _currentUser.setPrivate_token(token);
+        _currentUser.setPrivateToken(token);
     }
 
     /**

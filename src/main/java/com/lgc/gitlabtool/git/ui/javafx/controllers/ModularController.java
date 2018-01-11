@@ -9,8 +9,16 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -600,15 +608,12 @@ public class ModularController implements UpdateProgressListener {
         Runnable selectGroup = () -> {
             ProjectList.reset();
             _projectsList = ProjectList.get(_currentGroup);
+            resetLoadingProgress();
+            if (_projectsList.getProjects() == null) {
+                loadGroupWindow(null);
+                return;
+            }
             hideShadowsAction();
-
-            // UI updating
-            Platform.runLater(() -> {
-                //noinspection unchecked
-                mainPanelBackground.setEffect(null);
-                topBackground.setEffect(null);
-                _projectService.removeUpdateProgressListener(this);
-            });
         };
         _workIndicatorDialog.executeAndShowDialog("Loading group", selectGroup, StageStyle.TRANSPARENT, stage);
 
@@ -619,6 +624,16 @@ public class ModularController implements UpdateProgressListener {
         setupProjectsDividerPosition(groupTitle);
         addProjectsWindowListener();
 
+    }
+
+    private void resetLoadingProgress() {
+        // UI updating
+        Platform.runLater(() -> {
+            // noinspection unchecked
+            mainPanelBackground.setEffect(null);
+            topBackground.setEffect(null);
+            _projectService.removeUpdateProgressListener(this);
+        });
     }
 
     private void loadGroupWindow() {
@@ -797,7 +812,9 @@ public class ModularController implements UpdateProgressListener {
     @FXML
     @SuppressWarnings("unused")
     private void loadGroupWindow(ActionEvent actionEvent) {
-        loadGroupWindow();
+        Platform.runLater(() -> {
+            loadGroupWindow();
+        });
     }
 
     @FXML
@@ -933,7 +950,6 @@ public class ModularController implements UpdateProgressListener {
     private void onRevertChanges(ActionEvent actionEvent) {
         GLTAlert alert = new GLTAlert(AlertType.CONFIRMATION, ApplicationState.REVERT.toString(),
                 "Revert changes for selected projects", "Are you sure you want to do it?");
-        alert.addButtons(ButtonType.CANCEL);
         alert.setTextButton(ButtonType.OK, "Revert");
         // check that user press OK button
         if (!alert.isOKButtonPressed(alert.showAndWait())) {
@@ -1270,8 +1286,8 @@ public class ModularController implements UpdateProgressListener {
             		itemStaging, itemPull, itemPush, itemRevert);
             
             MenuItem itemEditProjectProp = new MenuItem(GLToolButtons.EDIT_PROJECT_PROPERTIES_BUTTON.getText());
-            ImageView imageViewProjectProp = _themeService.getStyledImageView(GLToolButtons.EDIT_PROJECT_PROPERTIES_BUTTON.getIconUrl());
-            itemEditProjectProp.setGraphic(imageViewProjectProp);
+            Image itemEditProjectPropIco = new Image(getClass().getClassLoader().getResource(GLToolButtons.MAIN_EDIT_PROJECT_PROPERTIES.getIconUrl()).toExternalForm());
+            itemEditProjectProp.setGraphic(new ImageView(itemEditProjectPropIco));
             itemEditProjectProp.setOnAction(this::showEditProjectPropertiesWindow);
 
             menuItems.add(openFolder);
@@ -1298,16 +1314,15 @@ public class ModularController implements UpdateProgressListener {
         return listView.getSelectionModel().getSelectedItems().size() == listView.getItems().size();
     }
 
-    private void sortAndCheckProjects() {
-        sortProjectsList();
-        checkProjectsList();
-    }
-
     /**
      * Shadow projects should be at the end of list.
      */
     private void sortProjectsList() {
         Platform.runLater(() -> {
+            List<Project> loadedProjects = _projectsList.getProjects();
+            if (loadedProjects == null) {
+                return;
+            }
             Comparator<Project> comparator = new ProjectListComparator();
             ObservableList<Project> obsProjects = FXCollections.observableArrayList(_projectsList.getProjects());
             SortedList<Project> sortList = new SortedList<>(obsProjects);
@@ -1329,9 +1344,13 @@ public class ModularController implements UpdateProgressListener {
     }
 
     private List<Project> findIncorrectProjects() {
-        return _projectsList.getProjects().parallelStream()
-                .filter(this::isIncorrectProject)
-                .collect(Collectors.toList());
+        List<Project> gotProjects = _projectsList.getProjects();
+        if (gotProjects == null || gotProjects.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return gotProjects.parallelStream()
+                          .filter(this::isIncorrectProject)
+                          .collect(Collectors.toList());
     }
 
     private boolean isIncorrectProject(Project project) {
@@ -1341,6 +1360,7 @@ public class ModularController implements UpdateProgressListener {
 
     private void refreshLoadProjects() {
         _projectsList.refreshLoadProjects();
+        checkProjectsList();
         hideShadowsAction();
     }
 

@@ -66,10 +66,10 @@ public class ProjectList {
     /**
      * Gets project list of current group.
      *
-     * @return a unmodifiable list of project
+     * @return a unmodifiable list of project or <code>null</code> if projects weren't loaded.
      */
     public List<Project> getProjects() {
-        return Collections.unmodifiableList(_projects);
+        return _projects == null ? null : Collections.unmodifiableList(_projects);
     }
 
     /**
@@ -77,7 +77,11 @@ public class ProjectList {
      */
     public void refreshLoadProjects() {
         if (_currentGroup != null) {
-            _projects = loadProjects();
+            List<Project> loadedProject = loadProjects();
+            // If we cannot refresh projects we'll work with projects which were loaded at last time.
+            if (_projects != null && loadedProject != null) {
+                _projects = loadedProject;
+            }
         }
     }
 
@@ -97,9 +101,7 @@ public class ProjectList {
             Optional<Project> pr = _projects.parallelStream()
                                             .filter(project -> project.getId() == id)
                                             .findFirst();
-            if (pr.isPresent()) {
-                newList.add(pr.get());
-            }
+            pr.ifPresent(newList::add);
         }
 
         return Collections.unmodifiableList(newList);
@@ -116,7 +118,7 @@ public class ProjectList {
             return Collections.emptyList();
         }
         return projects.parallelStream()
-                       .map(pr -> pr.getId())
+                       .map(Project::getId)
                        .collect(Collectors.toList());
     }
 
@@ -131,7 +133,7 @@ public class ProjectList {
             return Collections.emptyList();
         }
         return projects.stream()
-                       .filter(project -> projectIsClonedAndWithoutConflicts(project))
+                       .filter(ProjectList::projectIsClonedAndWithoutConflicts)
                        .collect(Collectors.toList());
     }
 
@@ -172,20 +174,20 @@ public class ProjectList {
     public static void reset() {
         _isLockCreating = false;
         _currentGroup = null;
-        _projects.clear();
+        _projects = null;
     }
 
     /**
      * Updates projects statuses for some projects
      *
-     * @param projects
+     * @param projects projects to update statuses
      */
     public void updateProjectStatuses(List<Project> projects) {
         try {
             _stateService.stateON(ApplicationState.UPDATE_PROJECT_STATUSES);
             _projects.parallelStream()
-                     .filter(project -> projects.contains(project))
-                     .forEach(project -> _projectService.updateProjectStatus(project));
+                     .filter(projects::contains)
+                     .forEach(_projectService::updateProjectStatus);
         } finally {
             _stateService.stateOFF(ApplicationState.UPDATE_PROJECT_STATUSES);
         }
