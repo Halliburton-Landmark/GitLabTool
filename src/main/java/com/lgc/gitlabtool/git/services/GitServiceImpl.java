@@ -405,7 +405,7 @@ public class GitServiceImpl implements GitService {
     @Override
     public void replaceWithHEADRevision(Collection<ChangedFile> files) {
         if (files == null || files.isEmpty()) {
-            return;
+            throw new IllegalArgumentException("Incorrect value. Files is null.");
         }
         Map<Project, List<ChangedFile>> filesByProjects = files.stream()
                                                                .filter(Objects::nonNull)

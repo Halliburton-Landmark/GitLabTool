@@ -234,7 +234,7 @@ public class GitStagingWindowController extends AbstractStateListener {
     // Add replace button for all files
     private void addReplaceActionToMenu(List<MenuItem> menuItems, List<ChangedFile> selectedItems) {
         Collection<ChangedFile> filesForReplace = getFilesForReplace(selectedItems);
-        if (!filesForReplace.isEmpty()) {
+        if (filesForReplace != null && !filesForReplace.isEmpty()) {
             MenuItem replaceWithHEAD = new MenuItem(REPLACE_BUTTON_NAME);
             replaceWithHEAD.setGraphic(replaceWithHEADImage);
             replaceWithHEAD.setOnAction(new EventHandler<ActionEvent>() {

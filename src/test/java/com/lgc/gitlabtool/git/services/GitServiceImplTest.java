@@ -337,12 +337,14 @@ public class GitServiceImplTest {
         assertEquals(result, JGitStatus.SUCCESSFUL.toString());
     }
 
-    @Test
-    public void replaceWithHEADRevisionWrongParameter() {
-        // we check that we won't get exceptions
+    @Test(expected = IllegalArgumentException.class)
+    public void replaceWithHEADRevisionNullParameter() {
         _gitService.replaceWithHEADRevision(null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void replaceWithHEADRevisionEmptyListParameter() {
         _gitService.replaceWithHEADRevision(Collections.emptyList());
-        _gitService.replaceWithHEADRevision(Arrays.asList(null, null, null));
     }
 
     @Test
@@ -354,11 +356,10 @@ public class GitServiceImplTest {
 
     @Test
     public void replaceWithHEADRevisionNullCheck() {
-        // we check that we won't get NPE
-        Collection<ChangedFile> changedFiles = new ArrayList<>();
-        changedFiles.add(null);
+        Collection<ChangedFile> changedFiles = getChangedFiles(); // correct files
+        changedFiles.addAll(Arrays.asList(null, null, null));
 
-        _gitService.replaceWithHEADRevision(changedFiles);
+        _gitService.replaceWithHEADRevision(changedFiles); // we check that we won't get NPE
     }
 
     /*********************************************************************************************************/
