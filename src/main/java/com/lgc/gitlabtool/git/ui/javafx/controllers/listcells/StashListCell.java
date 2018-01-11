@@ -13,12 +13,14 @@ import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
 
 /**
- * ListCell for ListView<StashItem>.
+ * ListCell for ListView<StashItem> in the Stash window.
  *
  * @author Lyudmila Lyska
  */
 public class StashListCell extends ListCell<StashItem> {
-
+    private final static String SINGLE_STASH_TOOLTIP = "Single Stash";
+    private final static String GROUP_STASH_TOOLTIP = "Group Stash";
+    private final static String END_OF_GROUP_PREFIX = "]";
     private final ClassLoader _loader = getClass().getClassLoader();
 
     @Override
@@ -30,7 +32,7 @@ public class StashListCell extends ListCell<StashItem> {
         if (item != null && !empty) {
             Image fxImage = new Image(_loader.getResource(item.getIconURL()).toExternalForm());
             ImageView imageView = new ImageView(fxImage);
-            String tooltip = item instanceof Stash ? "Single Stash" : "Group Stash";
+            String tooltip = item instanceof Stash ? SINGLE_STASH_TOOLTIP : GROUP_STASH_TOOLTIP;
             Tooltip.install(imageView, new Tooltip(tooltip));
 
             Text stashName = new Text(getStashItemMessage(item));
@@ -49,7 +51,7 @@ public class StashListCell extends ListCell<StashItem> {
     }
 
     private String getGroupMessage(String stashMessage) {
-        int index = stashMessage.indexOf("]");
+        int index = stashMessage.indexOf(END_OF_GROUP_PREFIX);
         return stashMessage.substring(++index, stashMessage.length());
     }
 

@@ -137,11 +137,6 @@ public class StashWindowController extends AbstractStateListener {
         }
     }
 
-    private void updateContentOfLists(List<Project> changedProjects) {
-        _projectList.updateProjectStatuses(changedProjects);
-        updateStashListView();
-    }
-
     @FXML
     public void onApplyStashAction(ActionEvent event) {
         StashItem selectedStash = _stashListView.getSelectionModel().getSelectedItem();
@@ -158,6 +153,18 @@ public class StashWindowController extends AbstractStateListener {
         showStatusDialog("Status of droping stash",
                 "Droping stash operation is finished.",
                 "Stash is successfully droping for " + changedProjects.size() + " of " + results.size() + " project(s).");
+    }
+
+    @Override
+    public void handleEvent(ApplicationState changedState, boolean isActivate) {
+        if (!isActivate) {
+            _projectListView.refresh();
+        }
+    }
+
+    private void updateContentOfLists(List<Project> changedProjects) {
+        _projectList.updateProjectStatuses(changedProjects);
+        updateStashListView();
     }
 
     private List<Project> getSuccessfulProjects(Map<Project, Boolean> results) {
@@ -211,13 +218,6 @@ public class StashWindowController extends AbstractStateListener {
             projects.add(((Stash)selectedItem).getProject());
         }
         return projects;
-    }
-
-    @Override
-    public void handleEvent(ApplicationState changedState, boolean isActivate) {
-        if (!isActivate) {
-            _projectListView.refresh();
-        }
     }
 
     private void updateStashListView() {

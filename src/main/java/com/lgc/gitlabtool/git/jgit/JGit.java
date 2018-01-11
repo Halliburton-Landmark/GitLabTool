@@ -174,7 +174,7 @@ public class JGit {
                                      .call();
                 return stash != null;
             } catch (GitAPIException | IOException e) {
-                logger.error("Failed creating stash for " + project.getName() + " project: ", e);
+                logger.error("Failed creating stash for " + project.getName() + " project: " + e.getMessage());
             }
         }
         return false;
@@ -196,18 +196,14 @@ public class JGit {
                                  .map(revCommit -> getStash(revCommit, project))
                                  .collect(Collectors.toList());
             } catch (GitAPIException | IOException e) {
-                logger.error("Failed getting list of stashes " + project.getName() + " project: ", e);
+                logger.error("Failed getting list of stashes for " + project.getName() + " project: " + e.getMessage());
             }
         }
         return list;
     }
 
-    private Stash getStash(RevCommit revCommit, Project project) {
-        return new Stash(revCommit.getName(), revCommit.getFullMessage(), project);
-    }
-
     /**
-     *  Applies stash by name for the project
+     * Applies stash by name for the project
      *
      * @param  stash the stash for applying
      * @param  progressListener
@@ -250,6 +246,10 @@ public class JGit {
             }
         }
         return false;
+    }
+
+    private Stash getStash(RevCommit revCommit, Project project) {
+        return new Stash(revCommit.getName(), revCommit.getFullMessage(), project);
     }
 
     private int getIndexInList(Git git, String stashName) throws InvalidRefNameException, GitAPIException {

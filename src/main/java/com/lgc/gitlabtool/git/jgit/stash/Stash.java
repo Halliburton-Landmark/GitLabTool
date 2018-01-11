@@ -1,9 +1,12 @@
 package com.lgc.gitlabtool.git.jgit.stash;
 
 import com.lgc.gitlabtool.git.entities.Project;
+import com.lgc.gitlabtool.git.jgit.JGit;
 
 /**
+ * Implementation of {@link StashItem} for storing info about stash for single project.
  *
+ * It stores info about project for which was created, its message and name.
  *
  * @author Lyudmila Lyska
  */
@@ -37,13 +40,19 @@ public class Stash implements StashItem {
     }
 
     /**
+     * Gets name of stash (using for operation in {@link JGit}})
      *
-     * @return
+     * @return a stash name
      */
     public String getName() {
         return _name;
     }
 
+    /**
+     * Gets project for which was created stash.
+     *
+     * @return a project
+     */
     public Project getProject() {
         return _project;
     }

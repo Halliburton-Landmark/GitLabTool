@@ -6,9 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.lgc.gitlabtool.git.ui.javafx.controllers.ModularController;
 
 import javafx.scene.Node;
@@ -23,19 +20,13 @@ import javafx.scene.image.ImageView;
  * @author Pavlo Pidhorniy
  */
 public class ToolbarManager {
-    private static final Logger logger = LogManager.getLogger(ToolbarManager.class);
-    private static final String CHANGE_GROUP_BUTTON_ICON_URL = "icons/toolbar/change_group_20x20.png";
-    private static final String CHANGE_GROUP_BUTTON_TOOLTIP = "Change current group";
     private static final String CHANGE_GROUP_BUTTON_ID = "changeGroupButton";
-
-    private final Map<String, Boolean> enableMap = new HashMap<>();
-
     private static ToolbarManager instance = null;
 
-    private List<Node> items;
+    private final Map<String, Boolean> enableMap = new HashMap<>();
+    private final List<Node> items = new ArrayList<>();
 
-    private ToolbarManager() {
-    }
+    private ToolbarManager() {}
 
     /**
      * Gets instance's the class
@@ -57,8 +48,6 @@ public class ToolbarManager {
      * @return List of nodes with buttons
      */
     public List<Node> createToolbarItems(String windowId) {
-
-        items = new ArrayList<>();
         for (GLToolButtons button : GLToolButtons.values()) {
             if (button.getViewKey().equals(windowId)) {
                 Button btn = createButton(button.getId(), button.getIconUrl(), button.getText(), button.getTooltip());
@@ -67,7 +56,6 @@ public class ToolbarManager {
                 }
             }
         }
-
         return items;
     }
 
@@ -83,11 +71,11 @@ public class ToolbarManager {
         }
 
         return items.stream()
-                .filter(x -> x instanceof Button) //only buttons
-                .filter(x -> x.getId().equals(buttonId)) //match by Id
-                .findFirst() //first match
-                .map(node -> (Button) node) //cast to button
-                .orElseGet(Button::new); //result or new Button
+                    .filter(x -> x instanceof Button) //only buttons
+                    .filter(x -> x.getId().equals(buttonId)) //match by Id
+                    .findFirst() //first match
+                    .map(node -> (Button) node) //cast to button
+                    .orElseGet(Button::new); //result or new Button
     }
 
     /**
@@ -99,11 +87,11 @@ public class ToolbarManager {
         }
 
         items.stream().filter(x -> x instanceof Button)
-                .map(node -> (Button) node)
-                .forEach(button -> {
-                    enableMap.put(button.getId(), button.isDisable());
-                    button.setDisable(true);
-                });
+                      .map(node -> (Button) node)
+                      .forEach(button -> {
+                          enableMap.put(button.getId(), button.isDisable());
+                          button.setDisable(true);
+                      });
     }
 
     /**

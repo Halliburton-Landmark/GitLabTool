@@ -5,7 +5,9 @@ import java.util.Collections;
 import java.util.List;
 
 /**
+ * Implementation of {@link StashItem} for storing info about group stash for few project.
  *
+ * It stores list of {@link Stash}s which include to this group and its message.
  *
  * @author Lyudmila Lyska
  */
@@ -16,9 +18,9 @@ public class GroupStash implements StashItem {
     private static final String ICON_URL = "icons/stash/stash_group_item_20x20.png";
 
     /**
+     * Constructor for creating object.
      *
-     *
-     * @param message
+     * @param message the message for current group.
      */
     public GroupStash(String groupMessage) {
         _message = groupMessage;
