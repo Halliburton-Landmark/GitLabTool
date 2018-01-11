@@ -328,9 +328,13 @@ public class GitServiceImplTest {
     }
 
     @Test
-    public void testGetTrackingBranch() {
+    public void testGetTrackingBranchCorrectValue() {
         _stubProject = Mockito.mock(Project.class);
         when(_jGit.getTrackingBranch(_stubProject)).thenReturn(JGitStatus.SUCCESSFUL.toString());
+
+        String result = _gitService.getTrackingBranch(_stubProject);
+
+        assertEquals(result, JGitStatus.SUCCESSFUL.toString());
     }
 
     @Test
@@ -343,8 +347,15 @@ public class GitServiceImplTest {
 
     @Test
     public void replaceWithHEADRevisionSuccessfully() {
-        // we check that we won't get NPE
         Collection<ChangedFile> changedFiles = getChangedFiles();
+
+        _gitService.replaceWithHEADRevision(changedFiles);
+    }
+
+    @Test
+    public void replaceWithHEADRevisionNullCheck() {
+        // we check that we won't get NPE
+        Collection<ChangedFile> changedFiles = new ArrayList<>();
         changedFiles.add(null);
 
         _gitService.replaceWithHEADRevision(changedFiles);
