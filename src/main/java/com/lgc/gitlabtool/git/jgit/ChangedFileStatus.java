@@ -9,10 +9,10 @@ package com.lgc.gitlabtool.git.jgit;
  */
 public enum ChangedFileStatus {
 
-    ADDED {
+    CONFLICTING {
         @Override
         public String toString() {
-            return "added";
+            return "has conflicts";
         }
     },
 
@@ -23,6 +23,13 @@ public enum ChangedFileStatus {
         }
     },
 
+    MODIFIED {
+        @Override
+        public String toString() {
+            return "modified";
+        }
+    },
+
     MISSING {
         @Override
         public String toString() {
@@ -30,24 +37,17 @@ public enum ChangedFileStatus {
         }
     },
 
+    ADDED {
+        @Override
+        public String toString() {
+            return "added";
+        }
+    },
+
     REMOVED {
         @Override
         public String toString() {
             return "removed";
-        }
-    },
-
-    CONFLICTING {
-        @Override
-        public String toString() {
-            return "has conflicts";
-        }
-    },
-
-    MODIFIED {
-        @Override
-        public String toString() {
-            return "modified";
         }
     },
 
