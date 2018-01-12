@@ -62,4 +62,8 @@ public class URLManager {
         return url.matches(regexp);
     }
 
+    boolean testIfURLValid(String url) {
+        return isURLValid(url);
+    }
+
 }
