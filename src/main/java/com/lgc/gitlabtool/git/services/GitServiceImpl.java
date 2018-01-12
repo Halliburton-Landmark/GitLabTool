@@ -358,10 +358,13 @@ public class GitServiceImpl implements GitService {
 
     @Override
     public void applyStashes(StashItem stash, ProgressListener progressListener) {
-        if (stash == null) {
-            return;
-        } else if (progressListener == null) {
+        if (progressListener == null) {
             progressListener = EmptyProgressListener.get();
+        }
+        if (stash == null) {
+            progressListener.onError("Incorrect value");
+            progressListener.onFinish();
+            return;
         }
         applyStash(stash, progressListener);
     }
@@ -556,8 +559,9 @@ public class GitServiceImpl implements GitService {
             } else {
                 List<Stash> group = ((GroupStash) stashItem).getGroup();
                 progressListener.onStart(group.size());
-                group.parallelStream().filter(stash -> stash != null)
-                        .forEach(stash -> _git.stashApply(stash, progressListener));
+                group.parallelStream()
+                     .filter(stash -> stash != null)
+                     .forEach(stash -> _git.stashApply(stash, progressListener));
             }
         } finally {
             progressListener.onFinish();

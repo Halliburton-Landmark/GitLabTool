@@ -22,9 +22,12 @@ import java.util.Set;
 
 import org.eclipse.jgit.api.Status;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.ProjectStatus;
@@ -34,6 +37,7 @@ import com.lgc.gitlabtool.git.jgit.ChangedFileType;
 import com.lgc.gitlabtool.git.jgit.ChangedFilesUtils;
 import com.lgc.gitlabtool.git.jgit.JGit;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
+import com.lgc.gitlabtool.git.jgit.stash.GroupStash;
 import com.lgc.gitlabtool.git.jgit.stash.Stash;
 import com.lgc.gitlabtool.git.jgit.stash.StashItem;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
@@ -427,8 +431,76 @@ public class GitServiceImplTest {
         assertFalse(result.isEmpty());
     }
 
+    @Test
+    public void applyStashNullStashItem() {
+        StashApplyListener progressListener = new StashApplyListener();
+
+        _gitService.applyStashes(null, progressListener);
+
+        Assert.assertFalse(progressListener.isSuccessfully());
+    }
+
+    @Test
+    public void applyStashFailedResult() {
+        StashApplyListener progressListener = new StashApplyListener();
+        Mockito.doNothing().when(_jGit);
+
+        _gitService.applyStashes(new Stash("test", "test", getClonedProject()), progressListener);
+
+        assertFalse(progressListener.isSuccessfully());
+    }
+
+    @Test
+    public void applyStashSucccessffulResult() {
+        StashApplyListener progressListener = new StashApplyListener();
+        GroupStash groupStash = new GroupStash("test message");
+        groupStash.addStash(new Stash("test1", "test message", getClonedProject()));
+        groupStash.addStash(new Stash("test2", "test message", getClonedProject("new path")));
+        groupStash.addStash(null);
+        groupStash.addStash(new Stash(null, null, null));
+
+        Mockito.doAnswer(new Answer<Object>() {
+            @Override
+            public Object answer(InvocationOnMock invocation){
+                Object[] args = invocation.getArguments();
+                if (args[1] instanceof StashApplyListener) {
+                    StashApplyListener listener = (StashApplyListener) args[1];
+                    listener.onSuccess();
+                }
+                return null;
+             }
+         }).when(_jGit).stashApply(any(Stash.class), eq(progressListener));
+
+        _gitService.applyStashes(groupStash, progressListener);
+
+         assertTrue(progressListener.isSuccessfully());
+    }
+
 
     /*********************************************************************************************************/
+
+    class StashApplyListener implements ProgressListener {
+
+        boolean resultOperation = false;
+
+        @Override
+        public void onSuccess(Object... t) {
+            resultOperation = true;
+        }
+
+        @Override
+        public void onStart(Object... t) {}
+
+        @Override
+        public void onFinish(Object... t) {}
+
+        @Override
+        public void onError(Object... t) {}
+
+        public boolean isSuccessfully() {
+            return resultOperation;
+        }
+    }
 
     private int getCountSuccessForMap(Map<Project, Boolean> result) {
         return (int) result.entrySet().stream().filter(entry -> entry.getValue()).count();
