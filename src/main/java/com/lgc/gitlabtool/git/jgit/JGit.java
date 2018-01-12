@@ -56,6 +56,7 @@ import com.lgc.gitlabtool.git.entities.User;
 import com.lgc.gitlabtool.git.jgit.stash.Stash;
 import com.lgc.gitlabtool.git.jgit.stash.StashItem;
 import com.lgc.gitlabtool.git.services.BackgroundService;
+import com.lgc.gitlabtool.git.services.EmptyProgressListener;
 import com.lgc.gitlabtool.git.services.ProgressListener;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 import com.lgc.gitlabtool.git.util.PathUtilities;
@@ -209,11 +210,16 @@ public class JGit {
      * @param  progressListener
      */
     public void stashApply(Stash stash, ProgressListener progressListener) {
-        if (stash == null || stash.getProject() == null || !stash.getProject().isCloned()) {
+        if (progressListener == null) {
+            progressListener = EmptyProgressListener.get();
+        }
+        if (stash == null || stash.getProject() == null || !stash.getProject().isCloned()
+                || stash.getName() == null || stash.getName().isEmpty()) {
             progressListener.onError("Incorrect values");
+            return;
         }
         Project project = stash.getProject();
-        String stashName = stash.getName() == null ? StringUtils.EMPTY : stash.getName();
+        String stashName = stash.getName();
         try (Git git = getGit(project.getPath())) {
             git.stashApply()
                .setStashRef(stashName)
