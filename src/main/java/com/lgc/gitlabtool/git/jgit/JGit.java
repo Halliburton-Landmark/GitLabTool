@@ -54,7 +54,6 @@ import com.lgc.gitlabtool.git.entities.Branch;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.User;
 import com.lgc.gitlabtool.git.jgit.stash.Stash;
-import com.lgc.gitlabtool.git.jgit.stash.StashItem;
 import com.lgc.gitlabtool.git.services.BackgroundService;
 import com.lgc.gitlabtool.git.services.EmptyProgressListener;
 import com.lgc.gitlabtool.git.services.ProgressListener;
@@ -187,8 +186,8 @@ public class JGit {
      * @param project the cloned project
      * @return a list of stashes
      */
-    public List<StashItem> getStashes(Project project) {
-        List<StashItem> list = new ArrayList<>();
+    public List<Stash> getStashes(Project project) {
+        List<Stash> list = new ArrayList<>();
         if (project != null && project.isCloned()) {
             try (Git git = getGit(project.getPath())) {
                 Collection<RevCommit> revCommits = getStashList(git);

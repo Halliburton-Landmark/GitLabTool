@@ -81,7 +81,6 @@ import org.mockito.Mockito;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.User;
 import com.lgc.gitlabtool.git.jgit.stash.Stash;
-import com.lgc.gitlabtool.git.jgit.stash.StashItem;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.services.BackgroundService;
 import com.lgc.gitlabtool.git.services.BackgroundServiceImpl;
@@ -1105,7 +1104,7 @@ public class JGitTest {
 
     @Test
     public void getStashesIncorrectGit() {
-        List<StashItem> result = getJGitMock(null).getStashes(getProject(true));
+        List<Stash> result = getJGitMock(null).getStashes(getProject(true));
 
         Assert.assertTrue(result.isEmpty());
     }
@@ -1116,7 +1115,7 @@ public class JGitTest {
         Git gitMock = getGitMock();
         setStashListToGitMock(gitMock, false);
 
-        List<StashItem> result = getJGitMock(gitMock).getStashes(project);
+        List<Stash> result = getJGitMock(gitMock).getStashes(project);
 
         Assert.assertTrue(result.isEmpty());
     }
@@ -1127,7 +1126,7 @@ public class JGitTest {
         Git gitMock = getGitMock();
         setStashListToGitMock(gitMock, true);
 
-        List<StashItem> result = getJGitMock(gitMock).getStashes(project);
+        List<Stash> result = getJGitMock(gitMock).getStashes(project);
 
         Assert.assertFalse(result.isEmpty());
     }
