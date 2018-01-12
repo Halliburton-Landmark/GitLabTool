@@ -45,17 +45,15 @@ public class WindowLoader {
     private static final Image _appIcon = AppIconHolder.getInstance().getAppIcoImage();
 
     private static final String STAGING_WINDOW_TITLE = "Git Staging";
-    private static final String PROJECTS_DOESNT_HAVE_CHANGED_FILE = "Selected projects doesn't have new or conflicting files";
+    private static final String PROJECTS_DOES_NOT_HAVE_CHANGED_FILE = "Selected projects doesn't have new or conflicting files";
     private static final String GIT_STAGING_OPERATION_NAME = "Git Staging";
 
-    private static final ConsoleService _consoleService = (ConsoleService) ServiceProvider.getInstance()
-            .getService(ConsoleService.class.getName());
+    private static final ConsoleService _consoleService = ServiceProvider.getInstance()
+            .getService(ConsoleService.class);
 
-    private static final GitService _gitService = (GitService) ServiceProvider.getInstance()
-            .getService(GitService.class.getName());
+    private static final GitService _gitService = ServiceProvider.getInstance().getService(GitService.class);
 
-    private static final StateService _stateService = (StateService) ServiceProvider.getInstance()
-            .getService(StateService.class.getName());
+    private static final StateService _stateService = ServiceProvider.getInstance().getService(StateService.class);
 
     public static WindowLoader get() {
         if (_windowLoader == null) {
@@ -86,7 +84,7 @@ public class WindowLoader {
             Collection<ChangedFile> files = new ArrayList<>();
             selectedProjects.forEach(project -> files.addAll(_gitService.getChangedFiles(project)));
             if (files.isEmpty()) {
-                _consoleService.addMessage(PROJECTS_DOESNT_HAVE_CHANGED_FILE, MessageType.ERROR);
+                _consoleService.addMessage(PROJECTS_DOES_NOT_HAVE_CHANGED_FILE, MessageType.ERROR);
                 return;
             }
 
@@ -104,10 +102,10 @@ public class WindowLoader {
             stage.setTitle(STAGING_WINDOW_TITLE);
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.setOnCloseRequest(event -> {
-                List<ApplicationState> activeAtates = _stateService.getActiveStates();
-                if (!activeAtates.isEmpty() || activeAtates.contains(gitStagingWindowController.getStagingStates())) {
+                List<ApplicationState> activeStates = _stateService.getActiveStates();
+                if (!activeStates.isEmpty() || activeStates.contains(gitStagingWindowController.getStagingStates())) {
                     event.consume();
-                    JavaFXUI.showWarningAlertForActiveStates(activeAtates);
+                    JavaFXUI.showWarningAlertForActiveStates(activeStates);
                     return;
                 }
                 gitStagingWindowController.isDisposed();
@@ -115,8 +113,8 @@ public class WindowLoader {
 
             /* Set sizing and position */
             double dialogMinSize = 700;
-            double preferedWidth = 900;
-            stage.setWidth(preferedWidth);
+            double preferredWidth = 900;
+            stage.setWidth(preferredWidth);
             ScreenUtil.adaptForMultiScreens(stage, dialogMinSize, dialogMinSize);
             // if we set the minimum size only in fxml then window does not respond to them.
             stage.setMinHeight(dialogMinSize);

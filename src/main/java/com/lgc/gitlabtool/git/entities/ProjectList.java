@@ -20,14 +20,11 @@ import com.lgc.gitlabtool.git.services.StateService;
  */
 public class ProjectList {
 
-    private static final ProjectService _projectService = (ProjectService) ServiceProvider.getInstance()
-            .getService(ProjectService.class.getName());
+    private static final ProjectService _projectService = ServiceProvider.getInstance().getService(ProjectService.class);
 
-    private static final ConsoleService _consoleService = (ConsoleService) ServiceProvider.getInstance()
-            .getService(ConsoleService.class.getName());
+    private static final ConsoleService _consoleService = ServiceProvider.getInstance().getService(ConsoleService.class);
 
-    private static final StateService _stateService = (StateService) ServiceProvider.getInstance()
-            .getService(StateService.class.getName());
+    private static final StateService _stateService = ServiceProvider.getInstance().getService(StateService.class);
 
     private static final String COULD_NOT_SUBMIT_OPERATION_MESSAGE = "Operation could not be submitted for %s project. "
             + "It is not cloned or has conflicts";
@@ -42,7 +39,7 @@ public class ProjectList {
     private static ProjectList _instance;
 
     /**
-     * Gets instance of PrjectList.
+     * Gets instance of ProjectList.
      *
      * @param group the current group.
      *        The group can be null if ProjectList have already created and _isLockCreating is <code>true</code>.

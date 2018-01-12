@@ -29,8 +29,7 @@ public class IncorrectProjectDialog extends GLTAlert {
 
     private static final Logger _logger = LogManager.getLogger(IncorrectProjectDialog.class);
 
-    private final GitService _gitService = (GitService) ServiceProvider.getInstance()
-            .getService(GitService.class.getName());
+    private final GitService _gitService = ServiceProvider.getInstance().getService(GitService.class);
 
     private final ButtonType _initButton;
     private final ButtonType _deleteButton;

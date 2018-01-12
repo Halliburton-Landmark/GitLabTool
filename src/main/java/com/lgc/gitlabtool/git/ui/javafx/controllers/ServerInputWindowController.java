@@ -40,10 +40,8 @@ public class ServerInputWindowController {
     private final String VERIFYING_MESSAGE = "URL is verifying. Please wait...";
     private final String NO_INTERNET_CONNECTION_MESSAGE = "No Internet connection";
 
-    private final StorageService storageService = (StorageService) ServiceProvider.getInstance()
-            .getService(StorageService.class.getName());
-    private final NetworkService networkService = (NetworkService) ServiceProvider.getInstance()
-            .getService(NetworkService.class.getName());
+    private final StorageService storageService = ServiceProvider.getInstance().getService(StorageService.class);
+    private final NetworkService networkService = ServiceProvider.getInstance().getService(NetworkService.class);
 
     @FXML
     private Label server;

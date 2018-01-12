@@ -13,11 +13,11 @@ import com.lgc.gitlabtool.git.services.StateService;
  */
 public class PushProgressListener implements ProgressListener {
 
-    private static final ConsoleService _consoleService = (ConsoleService) ServiceProvider.getInstance()
-            .getService(ConsoleService.class.getName());
+    private static final ConsoleService _consoleService = ServiceProvider.getInstance()
+            .getService(ConsoleService.class);
 
-    private static final StateService _stateService = (StateService) ServiceProvider.getInstance()
-            .getService(StateService.class.getName());
+    private static final StateService _stateService = ServiceProvider.getInstance()
+            .getService(StateService.class);
 
     private PushProgressListener() {}
 
