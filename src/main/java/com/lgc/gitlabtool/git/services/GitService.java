@@ -223,11 +223,12 @@ public interface GitService extends Service {
     /**
      * Creates stash for the project
      *
-     * @param projects the cloned projects
-     * @param stashMessage the stash message
-     * @param includeUntracked <code>true</code> if need to include untracked file to stash, otherwise <code>false</code>
+     * @param  projects the cloned projects
+     * @param  stashMessage the stash message
+     * @param  includeUntracked <code>true</code> if need to include untracked file to stash, otherwise <code>false</code>
+     * @return a map of operation statuses
      */
-    void createStash(List<Project> projects, String stashMessage, boolean includeUntracked);
+    Map<Project, Boolean> createStash(List<Project> projects, String stashMessage, boolean includeUntracked);
 
     /**
      * Gets list of stashes for projects
@@ -241,7 +242,7 @@ public interface GitService extends Service {
      * Applies stash for the project
      *
      * @param stash the stash for applying
-     * @param progressListener the listener for obtaining data on the process of performing the operation.
+     * @param progressListener the listener for obtaining data on the process of performing the operation
      */
     void applyStashes(StashItem stash, ProgressListener progressListener);
 
@@ -249,7 +250,7 @@ public interface GitService extends Service {
      * Drops stash from the project
      *
      * @param  stash the stash which need to drop
-     * @return a map of operation statuses.
+     * @return a map of operation statuses
      */
     Map<Project, Boolean> stashDrop(StashItem stash);
 }

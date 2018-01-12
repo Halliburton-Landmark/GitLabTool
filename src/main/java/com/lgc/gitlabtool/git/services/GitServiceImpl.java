@@ -321,12 +321,11 @@ public class GitServiceImpl implements GitService {
     }
 
     @Override
-    public void createStash(List<Project> projects, String stashMessage, boolean includeUntracked) {
-        if (projects == null || projects.isEmpty()) {
-            return;
-        } else if (stashMessage == null) {
-            return;
+    public Map<Project, Boolean> createStash(List<Project> projects, String stashMessage, boolean includeUntracked) {
+        if (projects == null || projects.isEmpty() || stashMessage == null) {
+            throw new IllegalAccessError("Incorrect values");
         }
+        Map<Project, Boolean> resultOperations = new ConcurrentHashMap<>();
         _stateService.stateON(ApplicationState.STASH);
         try {
             if (projects.size() == 1) {
@@ -336,11 +335,12 @@ public class GitServiceImpl implements GitService {
                 String stashGroupMessage = indexOperation + stashMessage;
                 projects.parallelStream()
                         .filter(project -> project != null && project.isCloned())
-                        .forEach(project -> _git.stashCreate(project, stashGroupMessage, includeUntracked));
+                        .forEach(project -> createStash(resultOperations, project, stashGroupMessage, includeUntracked));
             }
         } finally {
             _stateService.stateOFF(ApplicationState.STASH);
         }
+        return resultOperations;
     }
 
     @Override
@@ -386,6 +386,12 @@ public class GitServiceImpl implements GitService {
             _stateService.stateOFF(ApplicationState.STASH);
         }
         return resultOperations;
+    }
+
+    private void createStash(Map<Project, Boolean> results, Project project,
+                           String stashGroupMessage, boolean includeUntracked) {
+        boolean result = _git.stashCreate(project, stashGroupMessage, includeUntracked);
+        results.put(project, result);
     }
 
     private void dropStash(Map<Project, Boolean> results, Stash stash) {

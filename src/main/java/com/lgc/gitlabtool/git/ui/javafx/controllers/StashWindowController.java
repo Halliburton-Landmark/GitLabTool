@@ -122,18 +122,21 @@ public class StashWindowController extends AbstractStateListener {
         List<Project> projects = getProjects();
         List<Project> changedProjects = getChangedProjects(projects, includeUntracked);
         if (changedProjects.isEmpty()) {
-            showStatusDialog("Status of creating stash",
-                             "Selected projects don't have changes",
+            showStatusDialog("Status of creating stash", "Selected projects don't have changes",
                              "Creating stash for " + projects.size() + " projects failed.");
         } else {
             String stashMessage = _stashMessageTextField.getText();
             String message = "Creating stash available for " + changedProjects.size() + " of " + projects.size() + " project(s).";
             _consoleService.addMessage(message, MessageType.SIMPLE);
-            _gitService.createStash(changedProjects, stashMessage, includeUntracked);
-
+            Map<Project, Boolean> results = _gitService.createStash(changedProjects, stashMessage, includeUntracked);
+            List<Project> successfulResultProjects = getSuccessfulProjects(results);
             updateContentOfLists(changedProjects);
             _stashMessageTextField.setText(StringUtils.EMPTY);
             _includeUntrackedComboBox.setSelected(false);
+
+            showStatusDialog("Status of creating stash", "Creating stash operation is finished.",
+                    "Stash is successfully created for " + successfulResultProjects.size() + " of " + results.size() + " project(s).");
+
         }
     }
 
@@ -150,9 +153,8 @@ public class StashWindowController extends AbstractStateListener {
         List<Project> changedProjects = getSuccessfulProjects(results);
         updateContentOfLists(changedProjects);
 
-        showStatusDialog("Status of droping stash",
-                "Droping stash operation is finished.",
-                "Stash is successfully droping for " + changedProjects.size() + " of " + results.size() + " project(s).");
+        showStatusDialog("Status of droping stash", "Droping stash operation is finished.",
+                "Stash is successfully droped for " + changedProjects.size() + " of " + results.size() + " project(s).");
     }
 
     @Override
@@ -290,8 +292,7 @@ public class StashWindowController extends AbstractStateListener {
             _stateService.stateOFF(ApplicationState.STASH);
             _projectList.updateProjectStatuses(_changedProjects);
 
-            showStatusDialog("Status of applying stash",
-                    "Applying stash operation is finished.",
+            showStatusDialog("Status of applying stash", "Applying stash operation is finished.",
                     "Stash is successfully applied for " + _successCount + " of " + _allStashes + " project(s).");
         }
 

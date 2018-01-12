@@ -102,12 +102,12 @@ public class JGitTest {
     private static final String fileName = "test";
 
     @Test(expected = IllegalArgumentException.class)
-    public void cloneGroupFailedResultExceptionGroupTest() {
+    public void cloneGroupIncorrectDataExceptionGroupTest() {
         getJGitMock(null).clone(null, CORRECT_PATH, getEmptyOperationProgressListener());
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void cloneGroupFailedResultExceptionPathTest() {
+    public void cloneGroupIncorrectDataExceptionPathTest() {
         getJGitMock(null).clone(new ArrayList<>(), null, getEmptyOperationProgressListener());
     }
 
@@ -171,7 +171,7 @@ public class JGitTest {
     }
 
     @Test
-    public void gitStatusFailedResultTest() {
+    public void gitStatusIncorrectDataTest() {
         StatusCommand statusCommandMock = new StatusCommand(getRepository()) {
             @Override
             public Status call() throws GitAPIException, NoWorkTreeException {
@@ -251,7 +251,7 @@ public class JGitTest {
     }
 
     @Test
-    public void addUntrackedFileForCommitFailedResultTest() {
+    public void addUntrackedFileForCommitIncorrectDataTest() {
         Git gitMock = getGitMock();
         AddCommand addCommandMock = new AddCommand(getRepository()) {
             @Override
@@ -280,7 +280,7 @@ public class JGitTest {
     }
 
     @Test
-    public void pullFailedResultTest() {
+    public void pullIncorrectDataTest() {
         Assert.assertEquals(getJGitMock(null).pull(getProject(false)), JGitStatus.FAILED);
         Assert.assertEquals(getJGitMock(null).pull(getProject(true)), JGitStatus.FAILED);
 
@@ -350,7 +350,7 @@ public class JGitTest {
     }
 
     @Test
-    public void commitProjectFailedResultTest() {
+    public void commitProjectIncorrectDataTest() {
         JGitStatus result = getJGitMock(null).commitProject(getProject(true), "_", false, null, null, null, null);
         Assert.assertEquals(result, JGitStatus.FAILED);
 
@@ -402,7 +402,7 @@ public class JGitTest {
     }
 
     @Test
-    public void commitAllProjectsFailedResultTest() {
+    public void commitAllProjectsIncorrectDataTest() {
         Map<Project, JGitStatus> result = getJGitMock(null).commit(getProjects(), "_", false, null, null, null, null, new EmptyListener());
         Assert.assertEquals(result.size(), getCountIncorrectStatuses(result));
     }
@@ -418,7 +418,7 @@ public class JGitTest {
     }
 
     @Test
-    public void pushFailedResultTest() {
+    public void pushIncorrectDataTest() {
         Map<Project, JGitStatus> statuses = getJGitMock(null).push(getProjects(), new EmptyListener());
         Assert.assertEquals(statuses.size(), getCountIncorrectStatuses(statuses));
 
@@ -474,7 +474,7 @@ public class JGitTest {
     }
 
     @Test
-    public void commitAndPushFailedResultTest() {
+    public void commitAndPushIncorrectDataTest() {
         Map<Project, JGitStatus> result = getJGitMock(null).commitAndPush(getProjects(), "__", false, null, null, null, null, new EmptyListener());
         Assert.assertEquals(result.size(), getCountIncorrectStatuses(result));
     }
@@ -520,7 +520,7 @@ public class JGitTest {
     }
 
     @Test
-    public void createBranchFailedResultTest() {
+    public void createBranchIncorrectDataTest() {
         Assert.assertEquals(getJGitMock(null).createBranch(new Project(), "__", null, false), JGitStatus.FAILED);
         Assert.assertEquals(getJGitMock(null).createBranch(getProject(true), "__", null, false), JGitStatus.FAILED);
 
@@ -600,7 +600,7 @@ public class JGitTest {
     }
 
     @Test
-    public void getBranchesFailedResult() {
+    public void getBranchesIncorrectData() {
         Git gitMock = getGitMock();
         Assert.assertTrue(getJGitMock(null).getBranches(getProject(true), BranchType.REMOTE).isEmpty());
         Assert.assertTrue(getJGitMock(gitMock).getBranches(getProject(false), BranchType.REMOTE).isEmpty());
@@ -639,7 +639,7 @@ public class JGitTest {
     }
 
     @Test
-    public void getCurrentBranchFailedResult() {
+    public void getCurrentBranchIncorrectData() {
         Assert.assertFalse(getJGitMock(null).getCurrentBranch(getProject(false)).isPresent());
         Assert.assertFalse(getJGitMock(null).getCurrentBranch(getProject(true)).isPresent());
 
@@ -682,7 +682,7 @@ public class JGitTest {
     }
 
     @Test
-    public void deleteBranchFailedResultTest() {
+    public void deleteBranchIncorrectDataTest() {
         Assert.assertEquals(getJGitMock(null).deleteBranch(getProject(false), NAME_BRANCH, false), JGitStatus.FAILED);
         Assert.assertEquals(getJGitMock(null).deleteBranch(getProject(true), NAME_BRANCH, false), JGitStatus.FAILED);
 
@@ -746,7 +746,7 @@ public class JGitTest {
     }
 
     @Test
-    public void checkoutBranchFailedResultTest() {
+    public void checkoutBranchIncorrectDataTest() {
         Assert.assertEquals(getJGitMock(null).checkoutBranch(getProject(false), NAME_BRANCH, false), JGitStatus.FAILED);
         //Assert.assertEquals(getJGitMock(null).switchTo(getProject(true), NAME_BRANCH, false), JGitStatus.FAILED);
 
@@ -1084,7 +1084,7 @@ public class JGitTest {
     }
 
     @Test
-    public void stashCreateSuccessResult() throws GitAPIException  {
+    public void stashCreateSuccessfulResult() throws GitAPIException  {
         String correctMessage = "test";
         Project correctProject = getProject(true);
         // mock git operations
@@ -1122,7 +1122,7 @@ public class JGitTest {
     }
 
     @Test
-    public void getStashesSuccessResult() throws InvalidRefNameException, GitAPIException {
+    public void getStashesSuccessfulResult() throws InvalidRefNameException, GitAPIException {
         Project project = getProject(true);
         Git gitMock = getGitMock();
         setStashListToGitMock(gitMock, true);
@@ -1208,7 +1208,7 @@ public class JGitTest {
     }
 
     @Test
-    public void stashApplySuccessResult() throws InvalidRefNameException, GitAPIException {
+    public void stashApplySuccessfulResult() throws InvalidRefNameException, GitAPIException {
         StashApplyListener progressListener = new StashApplyListener();
         Project project = getProject(true);
         String stashName = "test name";
@@ -1254,7 +1254,7 @@ public class JGitTest {
     }
 
     @Test
-    public void stashDropStashSuccessResult() throws InvalidRefNameException, GitAPIException {
+    public void stashDropStashSuccessfulResult() throws InvalidRefNameException, GitAPIException {
         String stashName = "test";
         Project project = getProject(true);
         Git gitMock = getGitMock();

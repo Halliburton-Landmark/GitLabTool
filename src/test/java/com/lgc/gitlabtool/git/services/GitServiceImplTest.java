@@ -329,8 +329,32 @@ public class GitServiceImplTest {
         assertEquals(modifiedFiles.size(), files.size());
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void createStashNullList() {
+        _gitService.createStash(null, "test", true);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void createStashEmptyList() {
+        _gitService.createStash(new ArrayList<>(), "test", false);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void createStashNullStashMessageList() {
+        _gitService.createStash(getProjects(), null, true);
+    }
+
 
     /*********************************************************************************************************/
+
+    private List<Project> getProjects() {
+        List<Project> projects = new ArrayList<>();
+        projects.add(getClonedProject());
+        projects.add(new Project());
+        projects.add(getClonedProject());
+        projects.add(null);
+        return projects;
+    }
 
     private Optional<Status> getIncorrectStatus() {
         return Optional.empty();
