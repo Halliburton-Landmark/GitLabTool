@@ -22,7 +22,7 @@ public class URLManagerTest {
 
     @Test
     public void isURLValid() {
-        boolean actualResult = new URLManager().testIfURLValid(url);
+        boolean actualResult = URLManager.isURLValid(url);
 
         assertEquals(expectedResult, actualResult);
     }
