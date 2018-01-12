@@ -258,7 +258,7 @@ public class JGit {
         return new Stash(revCommit.getName(), revCommit.getFullMessage(), project);
     }
 
-    private int getIndexInList(Git git, String stashName) throws InvalidRefNameException, GitAPIException {
+    int getIndexInList(Git git, String stashName) throws InvalidRefNameException, GitAPIException {
         List<RevCommit> revCommits = new ArrayList<>(getStashList(git));
         return IntStream.range(0, revCommits.size())
                         .filter(index -> Objects.equals(revCommits.get(index).getName(), stashName))
