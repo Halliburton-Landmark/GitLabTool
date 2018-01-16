@@ -8,19 +8,18 @@
     -fx-font-size: 12;
     -fx-font-family: "Trebuchet MS", "Geneva", "sans-serif";
     -fx-text-fill: foreground-text;
-    -fx-base: #a5a5a5;
-    -fx-background: #e0e0e0 ;
+    -fx-base: #e7e7e7;
+    -fx-background: #e7e7e7 ;
 
     -fx-focus-color: transparent;
-    -fx-accent: #da9561;
-    
+    -fx-accent: #7dade0;
 }
 
 
 
 /* TOOLBAR */
 #toolbar {
-    -fx-background-color: #d1d1d1;
+    -fx-background-color: #e0e0e0;
     -fx-border-color:
     linear-gradient(to bottom, rgba(87, 87, 87, 0.3), transparent),
     linear-gradient(to top, rgba(88, 88, 88, 0.3), transparent);
@@ -36,11 +35,11 @@
 }
 
 #toolbar *.button:hover{
-    -fx-background-color: #da9561;
+    -fx-background-color: #a2bbd8;
 }
 
 #toolbar *.button:armed {
-    -fx-background-color: #e28137;
+    -fx-background-color: #7dade0;
 
 }
 
@@ -53,7 +52,7 @@
 
 /* PROJECTS TOOLBAR */
 #projectsToolbar {
-    -fx-background-color: #d1d1d1;
+    -fx-background-color: #e7e7e7;
     -fx-border-color:
         linear-gradient(to bottom, rgba(90, 90, 90, 0.2), transparent),
         linear-gradient(to top, rgba(90, 90, 90, 0.2), transparent);
@@ -67,11 +66,11 @@
 }
 
 #projectsToolbar *.button:hover{
-    -fx-background-color: #ce9362;
+    -fx-background-color: #a2bbd8;
 }
 
 #projectsToolbar *.button:armed {
-    -fx-background-color: #e28137;
+    -fx-background-color: #7dade0;
 }
 
 #projectsToolbar *.toggle-button {
@@ -80,18 +79,18 @@
 }
 
 #projectsToolbar *.toggle-button:hover {
-    -fx-background-color: #ce9362;
+    -fx-background-color: #a2bbd8;
 }
 
 #projectsToolbar *.toggle-button:selected {
-    -fx-background-color: #e28137;
+    -fx-background-color: #7dade0;
 }
 
 
 
 /* TOP SLIM PANEL */
 #top_slim_panel {
-    -fx-background-color: #c4c4c4;
+    -fx-background-color: #dadada;
     -fx-text-fill: foreground-text;
 }
 
@@ -99,28 +98,28 @@
 
 /* CONSOLE */
 #console {
-    -fx-background-color:  #e6e0e0;
+    -fx-background-color:  #ebebeb;
     -fx-padding: 5 5 5 5;
 
 
 }
 
 #viewArea{
-    -fx-background-color:  #e6e0e0;
+    -fx-background-color:  #ebebeb;
 }
 
 
 
 /* MAIN MENU */
 .menu-bar {
-        -fx-background-color: #c4c4c4;
+        -fx-background-color: #ebebeb;
 }
 
 .context-menu {
     -fx-border-color: rgb(128, 122, 122);
     -fx-border-width: 1;
         
-    -fx-background-color: #cfcfcf;
+    -fx-background-color: #ebebeb;
     -fx-background-insets: 0, 1, 2;
     -fx-background-radius: 0 6 6 6, 0 5 5 5, 0 4 4 4;
     -fx-padding: 4 1 4 1;
@@ -142,7 +141,7 @@
 }
 
 .status-bar{
-    -fx-background-color: #c4c4c4;
+    -fx-background-color: #d4d4d4;
     -fx-padding: 3 0 3 0;
 }
 
@@ -151,24 +150,24 @@
 
 /* GENERAL ELEMENTS */
 .text-field {
-    -fx-background-color: rgb(160, 160, 160) ;
+    -fx-background-color: rgb(210, 210, 210);
     -fx-background-insets: 0, 0 0 5 0 ;
     -fx-background-radius: 7 ;
     -fx-text-fill: foreground-text;
-    -fx-prompt-text-fill: rgb(122, 122, 122);
+    -fx-prompt-text-fill: rgb(148, 148, 148);
 }
 .text-field:focused {
-    -fx-background-color: rgb(173, 173, 173) ;
+    -fx-background-color: rgb(197, 197, 197) ;
     -fx-background-radius: 7 ;
 }
 
 .text-area {
     -fx-text-fill: foreground-text;
-    -fx-prompt-text-fill: rgb(122, 122, 122);
+    -fx-prompt-text-fill: rgb(148, 148, 148);
 }
 
 .text-area .content{
-    -fx-background-color: rgb(160, 160, 160) ;
+    -fx-background-color: rgb(210, 210, 210);
 }
 
 .text-area:focused {
@@ -181,10 +180,10 @@
 
 .combo-box-base{
     -fx-padding: 2 4 2 4;
-    -fx-background-color: rgb(160, 160, 160) ;
+    -fx-background-color: rgb(210, 210, 210);
 }
 .combo-box-base .arrow-button {
-    -fx-background-color: rgb(160, 160, 160) ;
+    -fx-background-color: rgb(210, 210, 210);
 }
 
 .combo-box .cell {
@@ -192,7 +191,7 @@
 }
 .combo-box .cell:hover {
     -fx-text-fill: foreground-text;
-    -fx-background-color: #ce9362 ;
+    -fx-background-color: #a2bbd8 ;
 }
 .combo-box .cell:focused {
     -fx-text-fill: foreground-text;
@@ -200,22 +199,11 @@
 
 .choice-box{
     -fx-padding: 2 4 2 4;
-    -fx-background-color: rgb(160, 160, 160) ;
+    -fx-background-color: rgb(210, 210, 210);
 }
 .choice-box:hover{
     -fx-padding: 2 4 2 4;
     -fx-background-color: rgb(197, 197, 197) ;
-}
-
-.combo-box .cell {
-    -fx-text-fill: foreground-text;
-}
-.combo-box .cell:hover {
-    -fx-text-fill: foreground-text;
-    -fx-background-color: #ce9362 ;
-}
-.combo-box .cell:focused {
-    -fx-text-fill: foreground-text;
 }
 
 .split-pane > .split-pane-divider {
@@ -234,7 +222,7 @@
 }
 .split-pane > .split-pane-divider:hover {
     -fx-pref-width: 5;
-	-fx-background-color: rgb(97, 97, 97);
+	-fx-background-color: rgb(185, 185, 185);
 }
 
 .button {
@@ -244,31 +232,31 @@
 }
 
 .button:hover{
-    -fx-background-color: #ce9362;
+    -fx-background-color: #a2bbd8;
     -fx-background-radius: 15, 15, 15;
 }
 
 .button:armed {
-    -fx-background-color: #e28137;
+    -fx-background-color: #7dade0;
 
 }
 
 .list-cell:filled:selected:focused, .list-cell:filled:selected {
-    -fx-background-color: rgb(160, 160, 160) ;
+    -fx-background-color: rgb(210, 210, 210);
     -fx-text-fill: foreground-text;
 }
 
 .list-cell {
-    -fx-background-color: #c4c4c4;
+    -fx-background-color: #f7f7f7;
     -fx-text-fill: foreground-text;
 }
 
 .list-cell:even {
-    -fx-background-color: #dadada;
+    -fx-background-color: rgb(240, 240, 240);
     -fx-text-fill: foreground-text;
 }
 .dialog-pane:header .header-panel {
-    -fx-background-color: #c4c4c4;
+    -fx-background-color: #d3d3d3;
   }
 
 
@@ -304,7 +292,7 @@
 }
 
 #progress_dialog_title{
-    -fx-text-fill:lightblue;
+    -fx-text-fill:rgb(98, 140, 151);
 }
 
 #file-list-cell-conflicting-files{
