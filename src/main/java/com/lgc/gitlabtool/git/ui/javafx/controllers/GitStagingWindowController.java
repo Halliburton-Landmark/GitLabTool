@@ -1,5 +1,6 @@
 package com.lgc.gitlabtool.git.ui.javafx.controllers;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -7,6 +8,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
@@ -14,6 +16,7 @@ import org.apache.commons.lang.StringUtils;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.ProjectList;
 import com.lgc.gitlabtool.git.jgit.ChangedFile;
+import com.lgc.gitlabtool.git.jgit.ChangedFileStatus;
 import com.lgc.gitlabtool.git.jgit.ChangedFileType;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.listeners.stateListeners.AbstractStateListener;
@@ -22,12 +25,15 @@ import com.lgc.gitlabtool.git.services.BackgroundService;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StateService;
+import com.lgc.gitlabtool.git.ui.javafx.GLTAlert;
 import com.lgc.gitlabtool.git.ui.javafx.StatusDialog;
+import com.lgc.gitlabtool.git.ui.javafx.comparators.ChangedFileStatusComparator;
 import com.lgc.gitlabtool.git.ui.javafx.comparators.DefaultTypeComparator;
 import com.lgc.gitlabtool.git.ui.javafx.comparators.ExtensionsTypeComparator;
 import com.lgc.gitlabtool.git.ui.javafx.comparators.ProjectsTypeComparator;
 import com.lgc.gitlabtool.git.ui.javafx.controllers.listcells.FilesListCell;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.CommitPushProgressListener;
+import com.lgc.gitlabtool.git.util.PathUtilities;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -36,19 +42,28 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.SortedList;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DataFormat;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.stage.Stage;
@@ -90,15 +105,18 @@ public class GitStagingWindowController extends AbstractStateListener {
     private static final String STATUS_PUSH_DIALOG_TITLE = "Pushing changes status";
     private static final String STATUS_PUSH_DIALOG_HEADER = "Pushing changes info";
     private static final String COMMIT_PROMPT_TEXT = "Please enter commit message";
+    private static final String DELETE_FILES_TITLE = "Delete untracked files";
+    private static final String REPLACE_FILES_TITLE = "Replace files with HEAD revision";
+    private static final String CONFIRMATION_OPERATION = "Are you sure? You will loose your local changes in those files.";
+    private static final String REPLACE_BUTTON_NAME = "Replace with HEAD Revision";
+    private static final String DELETE_BUTTON_NAME = "Delete untracked/added files";
 
-    private static final GitService _gitService = (GitService) ServiceProvider.getInstance()
-            .getService(GitService.class.getName());
+    private static final GitService _gitService = ServiceProvider.getInstance().getService(GitService.class);
 
-    private static final StateService _stateService = (StateService) ServiceProvider.getInstance()
-            .getService(StateService.class.getName());
+    private static final StateService _stateService = ServiceProvider.getInstance().getService(StateService.class);
 
-    private static final BackgroundService _backgroundService = (BackgroundService) ServiceProvider.getInstance()
-            .getService(BackgroundService.class.getName());
+    private static final BackgroundService _backgroundService = ServiceProvider.getInstance()
+            .getService(BackgroundService.class);
 
     private final List<Integer> _selectedProjectIds = new ArrayList<>();
     private final ProjectList _projectList = ProjectList.get(null);
@@ -106,8 +124,20 @@ public class GitStagingWindowController extends AbstractStateListener {
     private final List<ApplicationState> _stagingStates =
             Arrays.asList(ApplicationState.ADD_FILES_TO_INDEX, ApplicationState.RESET, ApplicationState.COMMIT,
                           ApplicationState.PUSH, ApplicationState.UPDATE_PROJECT_STATUSES);
+
+    private final String replaceWithHEADIconUrl = "icons/mainmenu/revert_changes_16x16.png";
+    private final String deleteIconUrl = "icons/mainmenu/remove_16x16.png";
+    private final ImageView replaceWithHEADImage;
+    private final ImageView deleteImage;
+
     {
         _stagingStates.forEach(state -> _stateService.addStateListener(state, this));
+
+        ClassLoader loader = getClass().getClassLoader();
+        Image replaceIcon = new Image(loader.getResource(replaceWithHEADIconUrl).toExternalForm());
+        replaceWithHEADImage = new ImageView(replaceIcon);
+        Image deleteIcon = new Image(loader.getResource(deleteIconUrl).toExternalForm());
+        deleteImage = new ImageView(deleteIcon);
     }
 
     /**
@@ -119,7 +149,7 @@ public class GitStagingWindowController extends AbstractStateListener {
      */
     public void beforeShowing(List<Integer> projectIds, Collection<ChangedFile> files) {
         ObservableList<SortingType> items = FXCollections.observableArrayList
-                (SortingType.PROJECTS,SortingType.EXTENSIONS, SortingType.DEFAULT);
+                (SortingType.PROJECTS, SortingType.EXTENSIONS, SortingType.FILE_STATUS, SortingType.DEFAULT);
         _sortingListBox.setItems(items);
         _sortingListBox.setValue(SortingType.DEFAULT);
         _commitText.setPromptText(COMMIT_PROMPT_TEXT);
@@ -164,15 +194,99 @@ public class GitStagingWindowController extends AbstractStateListener {
     private void configureListViews(Collection<ChangedFile> files) {
         setupListView(_unstagedListView);
         setDragAndDropToUnstagedListView();
-        _unstagedListView.addEventFilter(MouseEvent.MOUSE_PRESSED,
-                event -> changeFocuseAndSelection(_unstagedListView, _stagedListView));
+        _unstagedListView.addEventFilter(MouseEvent.MOUSE_CLICKED,
+                event -> filterEvent(event, _unstagedListView, _stagedListView));
 
         setupListView(_stagedListView);
         setDragAndDropToStagedListView();
-        _stagedListView.addEventFilter(MouseEvent.MOUSE_PRESSED,
-                event -> changeFocuseAndSelection(_stagedListView, _unstagedListView));
+        _stagedListView.addEventFilter(MouseEvent.MOUSE_CLICKED,
+                event -> filterEvent(event, _stagedListView, _unstagedListView));
 
         updateContendListViews(files);
+    }
+
+    private ContextMenu getContextMenu(List<ChangedFile> selectedItems) {
+
+        ContextMenu contextMenu = new ContextMenu();
+        List<MenuItem> menuItems = new ArrayList<>();
+
+        addReplaceActionToMenu(menuItems, selectedItems);
+        addDeleteActionToMenu(menuItems, selectedItems);
+
+        contextMenu.getItems().addAll(menuItems);
+        return contextMenu;
+    }
+
+    // Add replace button for all files
+    private void addReplaceActionToMenu(List<MenuItem> menuItems, List<ChangedFile> selectedItems) {
+        Collection<ChangedFile> filesForReplace = getFilesForReplace(selectedItems);
+        if (filesForReplace != null && !filesForReplace.isEmpty()) {
+            MenuItem replaceWithHEAD = new MenuItem(REPLACE_BUTTON_NAME);
+            replaceWithHEAD.setGraphic(replaceWithHEADImage);
+            replaceWithHEAD.setOnAction(new EventHandler<ActionEvent>() {
+                @Override
+                public void handle(ActionEvent event) {
+                    boolean isYes = requesConfirmationOperation(REPLACE_FILES_TITLE,
+                            "You want to replace " + filesForReplace.size() + " file(s) with HEAD revision.",
+                            CONFIRMATION_OPERATION);
+                    if (isYes) {
+                        _gitService.replaceWithHEADRevision(filesForReplace);
+                        updateChangedFiles(getProjects(filesForReplace));
+                    }
+                }
+            });
+            menuItems.add(replaceWithHEAD);
+        }
+    }
+
+    // Add delete button if user selected as least one untracked file from a ListView.
+    private void addDeleteActionToMenu(List<MenuItem> menuItems, List<ChangedFile> selectedItems) {
+        Collection<ChangedFile> selectedUntrackedFiles = getUntrackedFiles(selectedItems);
+        if (!selectedUntrackedFiles.isEmpty()) {
+            MenuItem delete = new MenuItem(DELETE_BUTTON_NAME);
+            delete.setGraphic(deleteImage);
+            delete.setOnAction(new EventHandler<ActionEvent>() {
+                @Override
+                public void handle(ActionEvent event) {
+                    boolean isYes = requesConfirmationOperation(DELETE_FILES_TITLE,
+                            "You want to delete " + selectedUntrackedFiles.size() + " untracked file(s).",
+                            CONFIRMATION_OPERATION);
+                    if (isYes) {
+                        selectedUntrackedFiles.forEach(file -> deleteChangedFile(file));
+                        updateChangedFiles(getProjects(selectedUntrackedFiles));
+                    }
+                }
+            });
+            menuItems.add(delete);
+        }
+    }
+
+    private boolean requesConfirmationOperation(String title, String header, String context) {
+        GLTAlert alert = new GLTAlert(title, header, context);
+        alert.clearDefaultButtons();
+        alert.addButtons(ButtonType.YES, ButtonType.NO);
+
+        Optional<ButtonType> result = alert.showAndWait();
+        return !(result.orElse(ButtonType.NO) == ButtonType.NO);
+    }
+
+    private void deleteChangedFile(ChangedFile changedFile) {
+        String path = changedFile.getProject().getPath() + File.separator + changedFile.getFileName();
+        PathUtilities.deletePath(path);
+    }
+
+    private Collection<ChangedFile> getUntrackedFiles(Collection<ChangedFile> files) {
+        return files.stream()
+                    .filter(file -> file.getStatusFile() == ChangedFileStatus.UNTRACKED)
+                    .collect(Collectors.toList());
+    }
+
+    // We can replace with HEAD revision all file except new or untracked files.
+    private Collection<ChangedFile> getFilesForReplace(Collection<ChangedFile> files) {
+        return files.stream()
+                    .filter(file -> file.getStatusFile() != ChangedFileStatus.ADDED &&
+                                    file.getStatusFile() != ChangedFileStatus.UNTRACKED)
+                    .collect(Collectors.toList());
     }
 
     private void updateContendListViews(Collection<ChangedFile> files) {
@@ -188,6 +302,30 @@ public class GitStagingWindowController extends AbstractStateListener {
                 setContentAndComparatorToLists();
             }
         });
+    }
+
+    private void filterEvent(MouseEvent event, ListView<ChangedFile> setFocuseList, ListView<ChangedFile> resetSelectionList) {
+        changeFocuseAndSelection(setFocuseList, resetSelectionList);
+
+        Node node = event.getPickResult().getIntersectedNode();
+        while (node != null && node != setFocuseList && !(node instanceof ListCell)) {
+            node = node.getParent();
+        }
+
+        if (node instanceof ListCell) {
+            @SuppressWarnings("unchecked")
+            ListCell<ChangedFile> cell = (ListCell<ChangedFile>) node;
+            ListView<ChangedFile> lv = cell.getListView();
+
+            if (event.getButton() == MouseButton.SECONDARY) {
+                if (!cell.isEmpty()) {
+                    List<ChangedFile> selectedItems = lv.getSelectionModel().getSelectedItems();
+                    lv.setContextMenu(getContextMenu(selectedItems));
+                } else {
+                    lv.setContextMenu(null);
+                }
+            }
+        }
     }
 
     // Fix bug with double selection. We can have selected items only in one list.
@@ -233,7 +371,7 @@ public class GitStagingWindowController extends AbstractStateListener {
         commitChanges(getProjects(_stagedListView.getItems()), true);
     }
 
-    private List<Project> getProjects(List<ChangedFile> files) {
+    private List<Project> getProjects(Collection<ChangedFile> files) {
         return files.stream()
                     .map(ChangedFile::getProject)
                     .collect(Collectors.toList());
@@ -390,6 +528,13 @@ public class GitStagingWindowController extends AbstractStateListener {
             public String toString() {
                 return "A-Z";
             }
+        },
+
+        FILE_STATUS {
+            @Override
+            public String toString() {
+                return "file status";
+            }
         };
 
         private static Comparator<ChangedFile> getComparatorByType(SortingType type) {
@@ -397,6 +542,8 @@ public class GitStagingWindowController extends AbstractStateListener {
                 return new DefaultTypeComparator();
             } else if (type == SortingType.PROJECTS) {
                 return new ProjectsTypeComparator();
+            } else if (type == SortingType.FILE_STATUS) {
+                return new ChangedFileStatusComparator();
             } else {
                 return new ExtensionsTypeComparator();
             }

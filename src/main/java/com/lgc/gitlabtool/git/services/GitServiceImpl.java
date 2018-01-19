@@ -312,13 +312,30 @@ public class GitServiceImpl implements GitService {
                 if (project != null && project.isCloned() && !changedFiles.isEmpty()) {
                     List<String> fileNames = _changedFilesUtils.getFileNames(changedFiles);
                     List<String> result = _git.resetChangedFiles(fileNames, project);
-                    resetedFiles.addAll(getNewChangedFiles(result, project, changedFiles));
+                    resetedFiles.addAll(_changedFilesUtils.getChangedFiles(result, project, changedFiles));
                 }
             }
         } finally {
             _stateService.stateOFF(ApplicationState.RESET);
         }
         return resetedFiles;
+    }
+
+    @Override
+    public void replaceWithHEADRevision(Collection<ChangedFile> files) {
+        if (files == null || files.isEmpty()) {
+            throw new IllegalArgumentException("Incorrect value. Files is null.");
+        }
+        Map<Project, List<ChangedFile>> filesByProjects = files.stream()
+                                                               .filter(Objects::nonNull)
+                                                               .collect(Collectors.groupingBy(ChangedFile::getProject));
+        for (Project project : filesByProjects.keySet()) {
+            if (project == null || !project.isCloned()) {
+                continue;
+            }
+            List<ChangedFile> changedFiles = filesByProjects.get(project);
+            _git.replaceFilesWithHEADRevision(project, getFilesList(changedFiles));
+        }
     }
 
     @Override
@@ -536,19 +553,14 @@ public class GitServiceImpl implements GitService {
                 }
             }
         }
-        return getNewChangedFiles(addedFiles, project, changedFiles);
+        return _changedFilesUtils.getChangedFiles(addedFiles, project, changedFiles);
     }
 
-    private List<ChangedFile> getNewChangedFiles(List<String> fileNames, Project project, List<ChangedFile> sourceList) {
-        return resetConflicts(_changedFilesUtils.getChangedFiles(fileNames, project, sourceList));
-    }
-
-    private List<ChangedFile> resetConflicts(List<ChangedFile> sourceList) {
-        // If the file was added to the index, it can no longer have conflicts even if we do a reset.
-        sourceList.stream()
-                  .filter(changedFile -> changedFile.hasConflicting())
-                  .forEach(changedFile -> changedFile.setStatusFile(ChangedFileStatus.MODIFIED));
-        return sourceList;
+    private List<String> getFilesList(List<ChangedFile> changedFiles) {
+        return changedFiles.stream()
+                           .filter(Objects::nonNull)
+                           .map(ChangedFile::getFileName)
+                           .collect(Collectors.toList());
     }
 
     private void applyStash(StashItem stashItem, ProgressListener progressListener) {

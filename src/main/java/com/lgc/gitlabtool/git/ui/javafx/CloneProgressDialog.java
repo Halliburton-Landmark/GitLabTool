@@ -15,12 +15,12 @@ import javafx.event.EventHandler;
  */
 public class CloneProgressDialog extends ProgressDialog {
 
-    private static final String CLONE_DIALOG_TITLE = "Clonning...";
+    private static final String CLONE_DIALOG_TITLE = "Cloning...";
     private static final String CANCEL_MESSAGE = "Cancel process is started. This may take some time. Please wait...";
     private static final String CANCEL_LABEL = "canceling";
 
-    private static final GitService _gitService = (GitService) ServiceProvider.getInstance()
-            .getService(GitService.class.getName());
+    private static final GitService _gitService = ServiceProvider.getInstance()
+            .getService(GitService.class);
 
 
     public CloneProgressDialog() {

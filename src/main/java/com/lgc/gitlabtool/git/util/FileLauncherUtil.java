@@ -55,8 +55,7 @@ public class FileLauncherUtil {
                 _logger.debug(ERROR_MESSAGE + ": " + e.getMessage());
             }
         };
-        BackgroundService backgroundService = (BackgroundService) ServiceProvider.getInstance()
-                .getService(BackgroundService.class.getName());
+        BackgroundService backgroundService = ServiceProvider.getInstance().getService(BackgroundService.class);
         backgroundService.runInAWTThread(openDocumentTask);
     }
 

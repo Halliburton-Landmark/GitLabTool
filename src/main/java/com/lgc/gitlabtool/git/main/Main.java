@@ -23,8 +23,8 @@ public class Main {
 
     private static final Logger logger = LogManager.getLogger(Main.class);
 
-    private static final ConsoleService _consoleService = (ConsoleService) ServiceProvider.getInstance()
-            .getService(ConsoleService.class.getName());
+    private static final ConsoleService _consoleService = ServiceProvider.getInstance()
+            .getService(ConsoleService.class);
 
     public static void main(String[] args) {
         Thread.setDefaultUncaughtExceptionHandler(new Log4jExceptionHandler());

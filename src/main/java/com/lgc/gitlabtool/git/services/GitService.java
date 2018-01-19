@@ -221,36 +221,43 @@ public interface GitService extends Service {
     Set<Branch> getBranches(Collection<Project> projects, BranchType brType, boolean onlyCommon);
 
     /**
-     * Creates stash for the project
+     * Replaces changed files with HEAD revision
      *
-     * @param  projects the cloned projects
-     * @param  stashMessage the stash message
-     * @param  includeUntracked <code>true</code> if need to include untracked file to stash, otherwise <code>false</code>
-     * @return a map of operation statuses
+     * @param changedFiles the files for replacing
      */
-    Map<Project, Boolean> createStash(List<Project> projects, String stashMessage, boolean includeUntracked);
+    void replaceWithHEADRevision(Collection<ChangedFile> changedFiles);
 
-    /**
-     * Gets list of stashes for projects
-     *
-     * @param  projects  the cloned projects
-     * @return a list of projects' stashes
-     */
-    List<StashItem> getStashList(List<Project> projects);
+   /**
+    * Creates stash for the project
+    *
+    * @param  projects the cloned projects
+    * @param  stashMessage the stash message
+    * @param  includeUntracked <code>true</code> if need to include untracked file to stash, otherwise <code>false</code>
+    * @return a map of operation statuses
+    */
+   Map<Project, Boolean> createStash(List<Project> projects, String stashMessage, boolean includeUntracked);
 
-    /**
-     * Applies stash for the project
-     *
-     * @param stash the stash for applying
-     * @param progressListener the listener for obtaining data on the process of performing the operation
-     */
-    void applyStashes(StashItem stash, ProgressListener progressListener);
+   /**
+    * Gets list of stashes for projects
+    *
+    * @param  projects  the cloned projects
+    * @return a list of projects' stashes
+    */
+   List<StashItem> getStashList(List<Project> projects);
 
-    /**
-     * Drops stash from the project
-     *
-     * @param  stash the stash which need to drop
-     * @return a map of operation statuses
-     */
-    Map<Project, Boolean> stashDrop(StashItem stash);
+   /**
+    * Applies stash for the project
+    *
+    * @param stash the stash for applying
+    * @param progressListener the listener for obtaining data on the process of performing the operation
+    */
+   void applyStashes(StashItem stash, ProgressListener progressListener);
+
+   /**
+    * Drops stash from the project
+    *
+    * @param  stash the stash which need to drop
+    * @return a map of operation statuses
+    */
+   Map<Project, Boolean> stashDrop(StashItem stash);
 }

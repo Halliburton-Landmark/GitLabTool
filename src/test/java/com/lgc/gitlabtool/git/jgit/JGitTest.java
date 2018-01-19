@@ -1048,6 +1048,60 @@ public class JGitTest {
         Assert.assertFalse(getJGitMock(gitMock).resetChangedFiles(files, getProject(true)).isEmpty());
     }
 
+    private final List<String> correctFiles = Arrays.asList("test", "564.txt");
+
+    @Test
+    public void replaceWithHEADRevisionWrongParameters() {
+        Project clonedProject = getProject(true);
+
+        Assert.assertFalse(getJGitMock(null).replaceFilesWithHEADRevision(null, correctFiles));
+        Assert.assertFalse(getJGitMock(null).replaceFilesWithHEADRevision(new Project(), correctFiles));
+        Assert.assertFalse(getJGitMock(null).replaceFilesWithHEADRevision(clonedProject, null));
+        Assert.assertFalse(getJGitMock(null).replaceFilesWithHEADRevision(clonedProject, new ArrayList<>()));
+    }
+
+    @Test
+    public void replaceWithHEADRevisionGitDoesntExist() {
+        Project clonedProject = getProject(true);
+
+        boolean isSuccessful = getJGitMock(null).replaceFilesWithHEADRevision(clonedProject, correctFiles);
+
+        Assert.assertFalse(isSuccessful);
+    }
+
+    @Test
+    public void replaceWithHEADRevisionFailedReplaced() throws GitAPIException {
+        String correctFileName = "test";
+        Project clonedProject = getProject(true);
+        Git gitMock = getGitMock();
+        CheckoutCommand checkCommandMock = mock(CheckoutCommand.class);
+        // mock CheckoutCommand and Git methods
+        Mockito.when(checkCommandMock.addPath(correctFileName)).thenReturn(checkCommandMock);
+        Mockito.when(checkCommandMock.call()).thenThrow(getGitAPIException());
+        Mockito.when(gitMock.checkout()).thenReturn(checkCommandMock);
+
+        boolean isSuccessful = getJGitMock(gitMock).replaceFilesWithHEADRevision(clonedProject, correctFiles);
+
+        Assert.assertFalse(isSuccessful);
+    }
+
+    @Test
+    public void replaceWithHEADRevisionSuccessfullyReplaced() throws GitAPIException {
+        String correctFileName = "test";
+        Project clonedProject = getProject(true);
+        Git gitMock = getGitMock();
+        CheckoutCommand checkCommandMock = mock(CheckoutCommand.class);
+        // mock CheckoutCommand and Git methods
+        Mockito.when(checkCommandMock.addPath(correctFileName)).thenReturn(checkCommandMock);
+
+        Mockito.when(checkCommandMock.call()).thenReturn(mock(Ref.class));
+        Mockito.when(gitMock.checkout()).thenReturn(checkCommandMock);
+
+        boolean isSuccessful = getJGitMock(gitMock).replaceFilesWithHEADRevision(clonedProject, correctFiles);
+
+        Assert.assertTrue(isSuccessful);
+    }
+
     @Test
     public void stashCreateIncorrectParameters() {
         String correctMessage = "test";

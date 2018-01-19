@@ -53,14 +53,14 @@ class LoginDialog extends Dialog<DialogDTO> {
 
     private static final Logger logger = LogManager.getLogger(LoginDialog.class);
 
-    private static final StorageService storageService = (StorageService) ServiceProvider.getInstance()
-            .getService(StorageService.class.getName());
+    private static final StorageService storageService = ServiceProvider.getInstance()
+            .getService(StorageService.class);
 
-    private static final LoginService _loginService = (LoginService) ServiceProvider.getInstance()
-            .getService(LoginService.class.getName());
+    private static final LoginService _loginService = ServiceProvider.getInstance()
+            .getService(LoginService.class);
 
-    private static final ConsoleService _consoleService = (ConsoleService) ServiceProvider.getInstance()
-            .getService(ConsoleService.class.getName());
+    private static final ConsoleService _consoleService = ServiceProvider.getInstance()
+            .getService(ConsoleService.class);
 
     private static final String MESSAGE_WRONG_CREDENTIALS              = "Wrong login or password! Please try again";
     private static final String MESSAGE_WAITING                        = "Login... Please wait";

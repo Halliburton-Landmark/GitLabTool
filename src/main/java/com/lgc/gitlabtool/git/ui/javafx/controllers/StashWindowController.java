@@ -76,14 +76,9 @@ public class StashWindowController extends AbstractStateListener {
 
     /**************************************** SERVICES ****************************************/
 
-    private static final GitService _gitService = (GitService) ServiceProvider.getInstance()
-            .getService(GitService.class.getName());
-
-    private static final ConsoleService _consoleService = (ConsoleService) ServiceProvider.getInstance()
-            .getService(ConsoleService.class.getName());
-
-    private static final StateService _stateService = (StateService) ServiceProvider.getInstance()
-            .getService(StateService.class.getName());
+    private static final GitService _gitService = ServiceProvider.getInstance().getService(GitService.class);
+    private static final StateService _stateService = ServiceProvider.getInstance().getService(StateService.class);
+    private static final ConsoleService _consoleService = ServiceProvider.getInstance().getService(ConsoleService.class);
 
     /******************************************************************************************/
 

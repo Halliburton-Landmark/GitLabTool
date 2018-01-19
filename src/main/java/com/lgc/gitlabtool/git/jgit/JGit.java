@@ -20,6 +20,7 @@ import java.util.stream.IntStream;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.eclipse.jgit.api.CheckoutCommand;
 import org.eclipse.jgit.api.CreateBranchCommand.SetupUpstreamMode;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ListBranchCommand;
@@ -519,6 +520,29 @@ public class JGit {
             logger.error("Error reseting file to HEAD " + e.getMessage());
             return false;
         }
+    }
+
+    /**
+     * Replaces files with HEAD revision
+     *
+     * @param project the cloned project which has fileName
+     * @param files the files which need replace
+     * @return <code> true</code> if files replace successfully, otherwise <code>false</code>
+     */
+    public boolean replaceFilesWithHEADRevision(Project project, List<String> files) {
+        if (files == null || files.isEmpty() || project == null || !project.isCloned()) {
+            return false;
+        }
+        boolean result = false;
+        try (Git git = getGit(project.getPath())) {
+            CheckoutCommand checkout = git.checkout();
+            files.forEach(checkout::addPath);
+            checkout.call();
+            result = true;
+        } catch (IOException | GitAPIException e) {
+            logger.error("Error replacing of file with HEAD revision: " + project.getPath() + " " + e.getMessage());
+        }
+        return result;
     }
 
     /**
@@ -1165,4 +1189,5 @@ public class JGit {
     protected BranchConfig getBranchConfig(Config config, String branchName) {
         return new BranchConfig(config, branchName);
     }
+
 }

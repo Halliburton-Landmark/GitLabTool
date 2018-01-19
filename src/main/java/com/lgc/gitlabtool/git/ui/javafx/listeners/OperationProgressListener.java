@@ -38,11 +38,11 @@ public class OperationProgressListener implements ProgressListener {
     private Consumer<Object> _finishedAction;
     private final ApplicationState _applicationState;
 
-    private final StateService _stateService = (StateService) ServiceProvider.getInstance()
-            .getService(StateService.class.getName());
+    private final StateService _stateService = ServiceProvider.getInstance()
+            .getService(StateService.class);
 
-    private final ProjectService _projectService = (ProjectService) ServiceProvider.getInstance()
-            .getService(ProjectService.class.getName());
+    private final ProjectService _projectService = ServiceProvider.getInstance()
+            .getService(ProjectService.class);
 
     public OperationProgressListener(ProgressDialog progressDialog, ApplicationState applicationState) {
         if (progressDialog == null || applicationState == null) {

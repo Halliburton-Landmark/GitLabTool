@@ -52,16 +52,15 @@ public abstract class ProgressDialog extends Dialog<Void> {
     private final Label _currentProjectLabel;
 
     private final Button _cancelButton;
-    private final ListView<OperationMessage> _messageConcole;
+    private final ListView<OperationMessage> _messageConsole;
     private Runnable _startAction;
 
     private final String DEFAULT_PROJECT_LABEL = "...";
 
-    private final StateService _stateService = (StateService) ServiceProvider.getInstance()
-            .getService(StateService.class.getName());
+    private final StateService _stateService = ServiceProvider.getInstance().getService(StateService.class);
 
-    private final BackgroundService _backgroundService = (BackgroundService) ServiceProvider.getInstance()
-            .getService(BackgroundService.class.getName());
+    private final BackgroundService _backgroundService = ServiceProvider.getInstance()
+            .getService(BackgroundService.class);
 
     /**
      * Creates the instance of this class
@@ -90,12 +89,12 @@ public abstract class ProgressDialog extends Dialog<Void> {
         progressBox.getChildren().add(_progressIndicator);
         grid.add(progressBox, 0, 2);
 
-        _messageConcole = new ListView<>();
-        _messageConcole.setCellFactory(param -> getNewListCell());
-        _messageConcole.setMouseTransparent(false);
-        _messageConcole.setFocusTraversable(false);
-        _messageConcole.setMinSize(600, 100);
-        grid.add(_messageConcole, 0, 3, 4, 3);
+        _messageConsole = new ListView<>();
+        _messageConsole.setCellFactory(param -> getNewListCell());
+        _messageConsole.setMouseTransparent(false);
+        _messageConsole.setFocusTraversable(false);
+        _messageConsole.setMinSize(600, 100);
+        grid.add(_messageConsole, 0, 3, 4, 3);
 
         _cancelButton = new Button("Cancel");
         HBox hbBtn = new HBox(10);
@@ -176,8 +175,8 @@ public abstract class ProgressDialog extends Dialog<Void> {
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
-                _messageConcole.getItems().add(new OperationMessage(currentDateToString() + message, status));
-                _messageConcole.refresh();
+                _messageConsole.getItems().add(new OperationMessage(currentDateToString() + message, status));
+                _messageConsole.refresh();
             }
         });
     }
