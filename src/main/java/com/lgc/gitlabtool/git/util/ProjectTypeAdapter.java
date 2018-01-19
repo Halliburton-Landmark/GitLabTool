@@ -21,8 +21,8 @@ import com.lgc.gitlabtool.git.services.ServiceProvider;
  */
 public class ProjectTypeAdapter implements JsonDeserializer<ProjectType>, JsonSerializer<ProjectType> {
 
-    private static final ProjectTypeService _typeService = (ProjectTypeService) ServiceProvider.getInstance()
-            .getService(ProjectTypeService.class.getName());
+    private static final ProjectTypeService _typeService = ServiceProvider.getInstance()
+            .getService(ProjectTypeService.class);
 
     @Override
     public ProjectType deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)

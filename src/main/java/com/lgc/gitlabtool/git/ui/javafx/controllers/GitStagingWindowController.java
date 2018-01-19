@@ -113,14 +113,12 @@ public class GitStagingWindowController extends AbstractStateListener {
     private static final String REPLACE_BUTTON_NAME = "Replace with HEAD Revision";
     private static final String DELETE_BUTTON_NAME = "Delete untracked/added files";
 
-    private static final GitService _gitService = (GitService) ServiceProvider.getInstance()
-            .getService(GitService.class.getName());
+    private static final GitService _gitService = ServiceProvider.getInstance().getService(GitService.class);
 
-    private static final StateService _stateService = (StateService) ServiceProvider.getInstance()
-            .getService(StateService.class.getName());
+    private static final StateService _stateService = ServiceProvider.getInstance().getService(StateService.class);
 
-    private static final BackgroundService _backgroundService = (BackgroundService) ServiceProvider.getInstance()
-            .getService(BackgroundService.class.getName());
+    private static final BackgroundService _backgroundService = ServiceProvider.getInstance()
+            .getService(BackgroundService.class);
 
     private final List<Integer> _selectedProjectIds = new ArrayList<>();
     private final ProjectList _projectList = ProjectList.get(null);
