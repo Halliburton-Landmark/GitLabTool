@@ -109,13 +109,6 @@ public class StashWindowController extends AbstractStateListener {
         _createButton.disableProperty().bind(_stashMessageTextField.textProperty().isEmpty());
     }
 
-    private void updateProjectList() {
-        _stashListView.getSelectionModel().clearSelection();
-        if (_projectsIds.size() != _projectListView.getItems().size()) {
-            updateProjectListView();
-        }
-    }
-
     @FXML
     public void onCreateStashAction(ActionEvent event) {
         boolean includeUntracked = _includeUntrackedComboBox.isSelected();
@@ -161,6 +154,13 @@ public class StashWindowController extends AbstractStateListener {
     public void handleEvent(ApplicationState changedState, boolean isActivate) {
         if (!isActivate) {
             _projectListView.refresh();
+        }
+    }
+
+    private void updateProjectList() {
+        _stashListView.getSelectionModel().clearSelection();
+        if (_projectsIds.size() != _projectListView.getItems().size()) {
+            updateProjectListView();
         }
     }
 

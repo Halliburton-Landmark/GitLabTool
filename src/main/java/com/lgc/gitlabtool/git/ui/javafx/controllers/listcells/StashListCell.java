@@ -47,7 +47,14 @@ public class StashListCell extends ListCell<StashItem> {
 
     private String getStashItemMessage(StashItem item) {
         String stashMessage = item.getMessage();
-        return item instanceof Stash ? " " + stashMessage : getGroupMessage(stashMessage);
+        if (item instanceof Stash) {
+            return hasGroupIdentificator(stashMessage) ? getGroupMessage(stashMessage) : " " + stashMessage;
+        }
+        return getGroupMessage(stashMessage);
+    }
+
+    private boolean hasGroupIdentificator(String currentMessage) {
+        return currentMessage.matches("\\[GS\\d+\\](.+)?");
     }
 
     private String getGroupMessage(String stashMessage) {

@@ -845,6 +845,9 @@ public class ModularController implements UpdateProgressListener {
     private void showStashWindow(ActionEvent event) {
         try {
             List<Project> selectedProjects = projectListView.getSelectionModel().getSelectedItems();
+            if (selectedProjects.isEmpty()) { // if nothing selected in a list then all projects is loaded
+                selectedProjects = projectListView.getItems();
+            }
             selectedProjects = ProjectList.getCorrectProjects(selectedProjects);
             if (selectedProjects.isEmpty()) {
                 String message = String.format(NO_ANY_PROJECT_FOR_OPERATION, STASH_OPERATION_NAME);
@@ -1409,7 +1412,6 @@ public class ModularController implements UpdateProgressListener {
         _toolbarManager.getButtonById(GLToolButtons.EDIT_PROJECT_PROPERTIES_BUTTON.getId()).disableProperty().bind(bindingForShadow);
         _toolbarManager.getButtonById(GLToolButtons.PULL_BUTTON.getId()).disableProperty().bind(bindingForShadow);
         _toolbarManager.getButtonById(GLToolButtons.REVERT_CHANGES.getId()).disableProperty().bind(bindingForShadow);
-        _toolbarManager.getButtonById(GLToolButtons.STASH.getId()).disableProperty().bind(bindingForShadow);
     }
 
     private void setMainMenuDisableProperty(BooleanBinding bindingForShadow, BooleanBinding bindingForCloned) {
