@@ -3,6 +3,7 @@ package com.lgc.gitlabtool.git.ui.javafx.controllers;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
@@ -21,6 +22,7 @@ import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.ProgressListener;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StateService;
+import com.lgc.gitlabtool.git.ui.javafx.GLTAlert;
 import com.lgc.gitlabtool.git.ui.javafx.StatusDialog;
 import com.lgc.gitlabtool.git.ui.javafx.controllers.listcells.StashListCell;
 
@@ -30,7 +32,9 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
@@ -82,6 +86,10 @@ public class StashWindowController extends AbstractStateListener {
             .getService(StateService.class.getName());
 
     /******************************************************************************************/
+
+    private static final String TITLE_DROP_STASH = "Confirmation of dropping";
+    private static final String HEADER_MESSAGE_DROP_STASH = "Dropping of stashes from the selected project(s).";
+    private static final String CONTENT_MESSAGE_DROP_STASH = "Are you sure you want to do it?";
 
     private final ProjectList _projectList = ProjectList.get(null);
     private final List<Integer> _projectsIds = new ArrayList<>();
@@ -141,13 +149,14 @@ public class StashWindowController extends AbstractStateListener {
 
     @FXML
     public void onDropStashAction(ActionEvent event) {
+        boolean isContinue = requesConfirmationOperation();
+        if (!isContinue) {
+            return;
+        }
         StashItem selectedStash = _stashListView.getSelectionModel().getSelectedItem();
         Map<Project, Boolean> results = _gitService.stashDrop(selectedStash);
         List<Project> changedProjects = getSuccessfulProjects(results);
         updateContentOfLists(changedProjects);
-
-        showStatusDialog("Status of droping stash", "Droping stash operation is finished.",
-                "Stash is successfully droped for " + changedProjects.size() + " of " + results.size() + " project(s).");
     }
 
     @Override
@@ -155,6 +164,14 @@ public class StashWindowController extends AbstractStateListener {
         if (!isActivate) {
             _projectListView.refresh();
         }
+    }
+
+    private boolean requesConfirmationOperation() {
+        GLTAlert alert = new GLTAlert(AlertType.CONFIRMATION, TITLE_DROP_STASH, HEADER_MESSAGE_DROP_STASH, CONTENT_MESSAGE_DROP_STASH);
+        alert.clearDefaultButtons();
+        alert.addButtons(ButtonType.YES, ButtonType.NO);
+        Optional<ButtonType> result = alert.showAndWait();
+        return !(result.orElse(ButtonType.NO) == ButtonType.NO);
     }
 
     private void updateProjectList() {
