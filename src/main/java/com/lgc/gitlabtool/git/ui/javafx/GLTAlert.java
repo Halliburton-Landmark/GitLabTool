@@ -127,5 +127,4 @@ public class GLTAlert extends Alert {
     public void clearDefaultButtons() {
         getDialogPane().getButtonTypes().clear();
     }
-
 }

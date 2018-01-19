@@ -101,9 +101,9 @@ public class StashWindowController extends AbstractStateListener {
     private final List<Integer> _projectsIds = new ArrayList<>();
 
     /**
-     * .....
+     * Sets selected ids of projects for the Stash window
      *
-     * @param projectsIds
+     * @param projectsIds project ids
      */
     public void beforeShowing(List<Integer> projectsIds) {
         _stateService.addStateListener(ApplicationState.UPDATE_PROJECT_STATUSES, this);

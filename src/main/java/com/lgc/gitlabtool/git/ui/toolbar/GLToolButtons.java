@@ -171,7 +171,7 @@ public enum GLToolButtons {
             "stash",
             "icons/toolbar/stash_20x20.png",
             "Stash",
-            "Stash changes",
+            "Stash",
             null,
             GLToolConstants.ICON_SIZE_20),
 
@@ -227,6 +227,14 @@ public enum GLToolButtons {
             "main_git_revert",
             "icons/mainmenu/revert_changes_16x16.png",
             "Revert",
+            null,
+            MainMenuInfo.GIT,
+            GLToolConstants.ICON_SIZE_16),
+
+    MAIN_STASH(GLToolConstants.PROJECTS_WINDOW_KEY,
+            "main_git_stash",
+            "icons/mainmenu/stash_16x16.png",
+            "Stash",
             null,
             MainMenuInfo.GIT,
             GLToolConstants.ICON_SIZE_16);
