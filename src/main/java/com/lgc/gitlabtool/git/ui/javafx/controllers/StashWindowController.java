@@ -17,6 +17,7 @@ import com.lgc.gitlabtool.git.jgit.stash.Stash;
 import com.lgc.gitlabtool.git.jgit.stash.StashItem;
 import com.lgc.gitlabtool.git.listeners.stateListeners.AbstractStateListener;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
+import com.lgc.gitlabtool.git.services.BackgroundService;
 import com.lgc.gitlabtool.git.services.ConsoleService;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.ProgressListener;
@@ -26,6 +27,7 @@ import com.lgc.gitlabtool.git.ui.javafx.GLTAlert;
 import com.lgc.gitlabtool.git.ui.javafx.StatusDialog;
 import com.lgc.gitlabtool.git.ui.javafx.controllers.listcells.StashListCell;
 
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -36,7 +38,9 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TitledPane;
@@ -74,11 +78,18 @@ public class StashWindowController extends AbstractStateListener {
     @FXML
     private Button _dropButton;
 
+    @FXML
+    private ProgressIndicator _progressIndicator;
+
+    @FXML
+    private Label _progressLabel;
+
     /**************************************** SERVICES ****************************************/
 
     private static final GitService _gitService = ServiceProvider.getInstance().getService(GitService.class);
     private static final StateService _stateService = ServiceProvider.getInstance().getService(StateService.class);
     private static final ConsoleService _consoleService = ServiceProvider.getInstance().getService(ConsoleService.class);
+    private static final BackgroundService _backgroundService = ServiceProvider.getInstance().getService(BackgroundService.class);
 
     /******************************************************************************************/
 
@@ -90,12 +101,14 @@ public class StashWindowController extends AbstractStateListener {
     private final List<Integer> _projectsIds = new ArrayList<>();
 
     /**
-     *
+     * .....
      *
      * @param projectsIds
      */
     public void beforeShowing(List<Integer> projectsIds) {
         _stateService.addStateListener(ApplicationState.UPDATE_PROJECT_STATUSES, this);
+        _stateService.addStateListener(ApplicationState.STASH, this);
+
         _projectsIds.addAll(projectsIds);
         _projectListView.addEventFilter(MouseEvent.MOUSE_PRESSED, event -> event.consume());
         _projectListView.setCellFactory(project -> new ProjectListCell());
@@ -121,25 +134,14 @@ public class StashWindowController extends AbstractStateListener {
             showStatusDialog("Status of creating stash", "Selected projects don't have changes",
                              "Creating stash for " + projects.size() + " projects failed.");
         } else {
-            String stashMessage = _stashMessageTextField.getText();
-            String message = "Creating stash available for " + changedProjects.size() + " of " + projects.size() + " project(s).";
-            _consoleService.addMessage(message, MessageType.SIMPLE);
-            Map<Project, Boolean> results = _gitService.createStash(changedProjects, stashMessage, includeUntracked);
-            List<Project> successfulResultProjects = getSuccessfulProjects(results);
-            updateContentOfLists(changedProjects);
-            _stashMessageTextField.setText(StringUtils.EMPTY);
-            _includeUntrackedComboBox.setSelected(false);
-
-            showStatusDialog("Status of creating stash", "Creating stash operation is finished.",
-                    "Stash is successfully created for " + successfulResultProjects.size() + " of " + results.size() + " project(s).");
-
+            Runnable task = () -> createStashAction(changedProjects, includeUntracked, projects.size());
+            _backgroundService.runInBackgroundThread(task);
         }
     }
 
     @FXML
     public void onApplyStashAction(ActionEvent event) {
-        StashItem selectedStash = _stashListView.getSelectionModel().getSelectedItem();
-        _gitService.applyStashes(selectedStash, new ApplyStashProgressListener());
+        _backgroundService.runInBackgroundThread(this::onApplyStash);
     }
 
     @FXML
@@ -148,17 +150,56 @@ public class StashWindowController extends AbstractStateListener {
         if (!isContinue) {
             return;
         }
-        StashItem selectedStash = _stashListView.getSelectionModel().getSelectedItem();
-        Map<Project, Boolean> results = _gitService.stashDrop(selectedStash);
-        List<Project> changedProjects = getSuccessfulProjects(results);
-        updateContentOfLists(changedProjects);
+        _backgroundService.runInBackgroundThread(this::onDropStash);
     }
 
     @Override
     public void handleEvent(ApplicationState changedState, boolean isActivate) {
-        if (!isActivate) {
+        if (isActivate) {
+            updateProgress(changedState.toString(), true);
+        } else {
+            updateProgress(StringUtils.EMPTY, false);
+        }
+
+        if (!isActivate && changedState == ApplicationState.UPDATE_PROJECT_STATUSES) {
             _projectListView.refresh();
         }
+    }
+
+    private void updateProgress(String progressLabel, boolean isVisibleIndicator) {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                _progressLabel.setText(progressLabel);
+                _progressIndicator.setVisible(isVisibleIndicator);
+            }
+        });
+    }
+
+    private void createStashAction(List<Project> changedProjects, boolean includeUntracked, int projectSize) {
+        String stashMessage = _stashMessageTextField.getText();
+        String message = "Creating stash available for " + changedProjects.size() + " of " + projectSize + " project(s).";
+        _consoleService.addMessage(message, MessageType.SIMPLE);
+        Map<Project, Boolean> results = _gitService.createStash(changedProjects, stashMessage, includeUntracked);
+        List<Project> successfulResultProjects = getSuccessfulProjects(results);
+        updateContentOfLists(changedProjects);
+        _stashMessageTextField.setText(StringUtils.EMPTY);
+        _includeUntrackedComboBox.setSelected(false);
+
+        showStatusDialog("Status of creating stash", "Creating stash operation is finished.",
+                "Stash is successfully created for " + successfulResultProjects.size() + " of " + results.size() + " project(s).");
+    }
+
+    private void onApplyStash() {
+        StashItem selectedStash = _stashListView.getSelectionModel().getSelectedItem();
+        _gitService.applyStashes(selectedStash, new ApplyStashProgressListener());
+    }
+
+    private void onDropStash() {
+        StashItem selectedStash = _stashListView.getSelectionModel().getSelectedItem();
+        Map<Project, Boolean> results = _gitService.stashDrop(selectedStash);
+        List<Project> changedProjects = getSuccessfulProjects(results);
+        updateContentOfLists(changedProjects);
     }
 
     private boolean requesConfirmationOperation() {
@@ -177,8 +218,13 @@ public class StashWindowController extends AbstractStateListener {
     }
 
     private void updateContentOfLists(List<Project> changedProjects) {
-        _projectList.updateProjectStatuses(changedProjects);
-        updateStashListView();
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                _projectList.updateProjectStatuses(changedProjects);
+                updateStashListView();
+            }
+        });
     }
 
     private List<Project> getSuccessfulProjects(Map<Project, Boolean> results) {

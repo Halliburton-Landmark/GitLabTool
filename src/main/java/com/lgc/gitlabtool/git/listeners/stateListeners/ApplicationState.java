@@ -101,7 +101,7 @@ public enum ApplicationState {
     STASH {
         @Override
         public String toString() {
-            return "Stashing changes";
+            return "Stashing";
         }
     };
 

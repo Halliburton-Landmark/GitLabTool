@@ -6,6 +6,7 @@
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ProgressIndicator?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.TitledPane?>
@@ -21,7 +22,7 @@
                <children>
                   <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                      <children>
-                      <TitledPane fx:id="_createStashTitledPane" expanded="true" alignment="TOP_LEFT" text="Create Stash" VBox.vgrow="ALWAYS">
+                      <TitledPane fx:id="_createStashTitledPane" alignment="TOP_LEFT" expanded="true" text="Create Stash" VBox.vgrow="ALWAYS">
                         <content>
                           <AnchorPane>
                                  <children>
@@ -72,8 +73,8 @@
                                           <ListView fx:id="_stashListView" AnchorPane.bottomAnchor="30.0" AnchorPane.leftAnchor="-10.0" AnchorPane.rightAnchor="-10.0" AnchorPane.topAnchor="-10.0" />
                                           <ButtonBar AnchorPane.bottomAnchor="-3.0" AnchorPane.rightAnchor="-5.0">
                                              <buttons>
-                                                <Button fx:id="_applyButton" onAction="#onApplyStashAction" mnemonicParsing="false" text="Apply" />
-                                                <Button fx:id="_dropButton" onAction="#onDropStashAction" mnemonicParsing="false" text="Drop" />
+                                                <Button fx:id="_applyButton" mnemonicParsing="false" onAction="#onApplyStashAction" text="Apply" />
+                                                <Button fx:id="_dropButton" mnemonicParsing="false" onAction="#onDropStashAction" text="Drop" />
                                              </buttons>
                                           </ButtonBar>
                                        </children>
@@ -88,7 +89,9 @@
             </AnchorPane>
           <AnchorPane minWidth="250.0">
                <children>
-                  <ListView fx:id="_projectListView" layoutX="-27.0" layoutY="183.0" prefHeight="498.0" prefWidth="219.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                  <ListView fx:id="_projectListView" layoutX="-27.0" layoutY="183.0" prefHeight="498.0" prefWidth="219.0" AnchorPane.bottomAnchor="30.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                  <ProgressIndicator fx:id="_progressIndicator" layoutX="207.0" layoutY="489.0" maxHeight="20.0" maxWidth="20.0" visible="false" AnchorPane.bottomAnchor="5.0" AnchorPane.rightAnchor="5.0" />
+                  <Label fx:id="_progressLabel" layoutX="163.0" layoutY="495.0" nodeOrientation="RIGHT_TO_LEFT" prefHeight="20.0" prefWidth="212.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="33.0" />
                </children>
             </AnchorPane>
         </items>
