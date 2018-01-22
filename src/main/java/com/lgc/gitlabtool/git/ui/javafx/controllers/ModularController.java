@@ -1479,7 +1479,7 @@ public class ModularController implements UpdateProgressListener {
 
         refreshMainMenuToolbarIcons();
         _consoleController.updateConsole();
-        _projectsList.updateProjectStatuses();
+        projectListView.refresh();
     }
 
     private void refreshMainMenuToolbarIcons() {
