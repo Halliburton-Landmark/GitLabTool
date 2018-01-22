@@ -193,9 +193,9 @@ class LoginDialog extends Dialog<DialogDTO> {
         controller.loadServerInputWindow(root);
     }
 
-    private void showMessage(String msg, boolean isSuccess) {
+    private void showMessage(String msg, MessageType messageType) {
         message.setText(msg);
-        String idStatus = isSuccess ? "label-success" : "label-failure";
+        String idStatus = messageType.equals(MessageType.SUCCESS) ? "label-success" : "label-failure";
         message.setId(idStatus);
         message.setVisible(true);
     }
@@ -204,7 +204,7 @@ class LoginDialog extends Dialog<DialogDTO> {
         button.setOnAction(event -> {
             if (!isEmptyInputFields(userTextField, passwordField)) {
                 logger.info(MESSAGE_WAITING);
-                showMessage(MESSAGE_WAITING, true);
+                showMessage(MESSAGE_WAITING, MessageType.SUCCESS);
                 disableSignInButton(true);
                 String serverURL = URLManager.completeServerURL(comboBox.getValue());
                 String shortServerURL = URLManager.shortServerURL(comboBox.getValue());
@@ -212,7 +212,7 @@ class LoginDialog extends Dialog<DialogDTO> {
                 _loginService.login(dto, this::doAfterLogin);
             } else {
                 logger.warn(MESSAGE_EMPTY_FIELD);
-                showMessage(MESSAGE_EMPTY_FIELD, false);
+                showMessage(MESSAGE_EMPTY_FIELD, MessageType.ERROR);
             }
         });
     }
@@ -241,7 +241,7 @@ class LoginDialog extends Dialog<DialogDTO> {
     private void showWarningAndDisableSignInButton(String warningMessage) {
         Platform.runLater(() -> {
             logger.warn(warningMessage);
-            showMessage(warningMessage, false);
+            showMessage(warningMessage, MessageType.ERROR);
             disableSignInButton(false);
         });
     }
