@@ -166,6 +166,14 @@ public enum GLToolButtons {
             null,
             GLToolConstants.ICON_SIZE_20),
 
+    OPEN_FOLDER(GLToolConstants.GROUPS_WINDOW_KEY,
+            "open_folder",
+            "icons/mainmenu/folder_16x16.png",
+            "Show in folder",
+            "Show in system explorer",
+            null,
+            GLToolConstants.ICON_SIZE_16),
+
     MAIN_CLONE_PROJECT(GLToolConstants.PROJECTS_WINDOW_KEY,
             "main_git_clone_project",
             "icons/mainmenu/clone_16x16.png",
