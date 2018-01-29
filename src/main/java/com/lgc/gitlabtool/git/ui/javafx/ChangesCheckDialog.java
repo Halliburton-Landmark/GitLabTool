@@ -10,7 +10,6 @@ import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
-import com.lgc.gitlabtool.git.services.ThemeService;
 import com.lgc.gitlabtool.git.ui.javafx.controllers.WindowLoader;
 import com.lgc.gitlabtool.git.util.NullCheckUtil;
 
@@ -26,9 +25,6 @@ public class ChangesCheckDialog extends GLTAlert {
 
     private final GitService _gitService =
             (GitService) ServiceProvider.getInstance().getService(GitService.class.getName());
-
-    private static final ThemeService _themeService = (ThemeService) ServiceProvider.getInstance()
-            .getService(ThemeService.class.getName());
 
     private static final String STATUS_DISCARD_DIALOG_TITLE = "Discarding changes status";
     private static final String STATUS_DISCARD_DIALOG_HEADER = "Discarding changes info";
