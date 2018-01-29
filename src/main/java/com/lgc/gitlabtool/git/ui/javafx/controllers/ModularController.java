@@ -729,9 +729,8 @@ public class ModularController implements UpdateProgressListener {
             stage.initStyle(StageStyle.DECORATED);
             stage.setTitle(CLONE_WINDOW_TITLE);
             stage.setResizable(false);
-            stage.setScene(new Scene(root));
+            stage.setScene(new GLTScene(root));
             stage.getIcons().add(appIcon);
-            _themeService.styleScene(stage.getScene());
 
              /* Set sizing and position */
             double dialogWidth = 500;
@@ -856,11 +855,10 @@ public class ModularController implements UpdateProgressListener {
             CheckoutBranchWindowController checkoutWindowController  = loader.getController();
 
             Stage stage = new Stage();
-            stage.setScene(new Scene(root));
+            stage.setScene(new GLTScene(root));
             stage.getIcons().add(_appIcon);
             stage.setTitle(CHECKOUT_BRANCH_TITLE);
             stage.initModality(Modality.APPLICATION_MODAL);
-            _themeService.styleScene(stage.getScene());
 
             /* Set size and position */
             Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
@@ -980,11 +978,10 @@ public class ModularController implements UpdateProgressListener {
             }
 
             Stage stage = new Stage();
-            stage.setScene(new Scene(root));
+            stage.setScene(new GLTScene(root));
             stage.getIcons().add(AppIconHolder.getInstance().getAppIcoImage());
             stage.setTitle(EDIT_PROJECT_PROPERTIES);
             stage.initModality(Modality.APPLICATION_MODAL);
-            _themeService.styleScene(stage.getScene());
 
             /* Set size and position */
             Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();

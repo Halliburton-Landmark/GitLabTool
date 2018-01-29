@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.lgc.gitlabtool.git.services.*;
+import com.lgc.gitlabtool.git.ui.javafx.GLTScene;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -97,9 +98,8 @@ public class WindowLoader {
             GitStagingWindowController gitStagingWindowController = loader.getController();
             gitStagingWindowController.beforeShowing(ProjectList.getIdsProjects(selectedProjects), files);
 
-            Scene scene = new Scene(root);
+            Scene scene = new GLTScene(root);
             Stage stage = new Stage();
-            _themeService.styleScene(scene);
             stage.setScene(scene);
             stage.getIcons().add(_appIcon);
             stage.setTitle(STAGING_WINDOW_TITLE);

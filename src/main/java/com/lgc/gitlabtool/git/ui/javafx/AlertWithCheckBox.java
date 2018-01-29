@@ -55,7 +55,6 @@ public class AlertWithCheckBox extends GLTAlert {
 
         setTitle(title);
         setHeaderText(headerText);
-        _themeService.styleScene(getDialogPane().getScene());
     }
 
     /**

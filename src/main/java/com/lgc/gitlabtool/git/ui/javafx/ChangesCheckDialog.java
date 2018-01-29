@@ -50,7 +50,6 @@ public class ChangesCheckDialog extends GLTAlert {
         cancelButton = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);;
 
         getDialogPane().getButtonTypes().setAll(commitButton, revertButton, cancelButton);
-        _themeService.styleScene(getDialogPane().getScene());
     }
 
     private Map<Project, JGitStatus> revertChanges(List<Project> changedProjects) {

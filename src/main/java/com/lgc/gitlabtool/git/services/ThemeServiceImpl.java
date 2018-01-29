@@ -1,6 +1,7 @@
 package com.lgc.gitlabtool.git.services;
 
 import com.lgc.gitlabtool.git.ui.javafx.GLTThemes;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.effect.ColorAdjust;
 import javafx.scene.image.Image;

@@ -76,10 +76,9 @@ public class JavaFXUI extends Application implements UserInterface {
         Parent root = fxmlLoader.load();
 
         primaryStage.setTitle(ProjectPropertiesUtil.getProjectNameWithVersion());
-        primaryStage.setScene(new Scene(root));
+        primaryStage.setScene(new GLTScene(root));
         primaryStage.getIcons().add(appIcon);
         primaryStage.setOnCloseRequest(confirmCloseEventHandler);
-        _themeService.styleScene(primaryStage.getScene());
 
         /* Set sizing and position */
         Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();

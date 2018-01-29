@@ -115,7 +115,7 @@ public abstract class ProgressDialog extends Dialog<Void> {
         Stage stage = new Stage();
         stage.setMinWidth(650);
         stage.setResizable(false);
-        stage.setScene(new Scene(grid, 650, 350));
+        stage.setScene(new GLTScene(grid, 650, 350));
         stage.setTitle(title);
         stage.getIcons().add(appIcon);
         stage.setOnCloseRequest(event -> {
@@ -124,7 +124,6 @@ public abstract class ProgressDialog extends Dialog<Void> {
             }
         });
         stage.initModality(Modality.APPLICATION_MODAL);
-        _themeService.styleScene(stage.getScene());
         _stage = stage;
         /* Set size and position */
         ScreenUtil.adaptForMultiScreens(stage, 500, 350);

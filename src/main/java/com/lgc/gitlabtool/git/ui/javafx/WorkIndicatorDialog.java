@@ -38,7 +38,7 @@ public class WorkIndicatorDialog {
     private final Stage stage = new Stage();
     private final Label _progressLabel = new Label();
     private final Group root = new Group();
-    private final Scene scene = new Scene(root);
+    private final Scene scene = new GLTScene(root);
     private final BorderPane mainPane = new BorderPane();
     private final VBox vbox = new VBox();
     private final int initWidth = 300;
@@ -145,7 +145,6 @@ public class WorkIndicatorDialog {
         mainPane.setTop(vbox);
         stage.setScene(scene);
 
-        _themeService.styleScene(stage.getScene());
     }
 
     private void setupWorkerThread(Runnable func) {

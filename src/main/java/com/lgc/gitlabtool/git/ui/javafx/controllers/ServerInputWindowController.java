@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import com.lgc.gitlabtool.git.services.ThemeService;
+import com.lgc.gitlabtool.git.ui.javafx.GLTScene;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -76,12 +77,11 @@ public class ServerInputWindowController {
 
     public void loadServerInputWindow(Parent root) throws IOException {
         Stage stage = new Stage();
-        stage.setScene(new Scene(root));
+        stage.setScene(new GLTScene(root));
         stage.setTitle("Server selection");
         Image appIcon = AppIconHolder.getInstance().getAppIcoImage();
         stage.getIcons().add(appIcon);
         stage.initModality(Modality.APPLICATION_MODAL);
-        _themeService.styleScene(stage.getScene());
 
         /* Set sizing and position */
         ScreenUtil.adaptForMultiScreens(stage, 300, 100);
