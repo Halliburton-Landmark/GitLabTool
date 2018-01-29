@@ -1,7 +1,6 @@
 package com.lgc.gitlabtool.git.services;
 
-import com.lgc.gitlabtool.git.ui.javafx.GLTThemes;
-import javafx.scene.Parent;
+import com.lgc.gitlabtool.git.ui.javafx.GLTTheme;
 import javafx.scene.Scene;
 import javafx.scene.effect.ColorAdjust;
 import javafx.scene.image.Image;
@@ -14,13 +13,13 @@ public class ThemeServiceImpl implements ThemeService {
     private static final String THEME_PREFS_KEY = "glt_theme";
 
     private Preferences themePrefs;
-    private GLTThemes currentGLTThemes;
+    private GLTTheme currentGLTThemes;
 
     ThemeServiceImpl() {
         themePrefs = Preferences.userRoot().node(THEME_PREFS_KEY);
 
-        String currentThemeKey = themePrefs.get(THEME_PREFS_KEY, GLTThemes.LIGHT_THEME.getKey());
-        currentGLTThemes = GLTThemes.getThemeByKey(currentThemeKey);
+        String currentThemeKey = themePrefs.get(THEME_PREFS_KEY, GLTTheme.LIGHT_THEME.getKey());
+        currentGLTThemes = GLTTheme.getThemeByKey(currentThemeKey);
     }
 
     public void styleScene(Scene scene) {
@@ -38,7 +37,7 @@ public class ThemeServiceImpl implements ThemeService {
     }
 
     public void setTheme(String themeName) {
-        currentGLTThemes = GLTThemes.getThemeByKey(themeName);
+        currentGLTThemes = GLTTheme.getThemeByKey(themeName);
         themePrefs.put(THEME_PREFS_KEY, currentGLTThemes.getKey());
     }
 
@@ -48,7 +47,7 @@ public class ThemeServiceImpl implements ThemeService {
         Image image = new Image(getClass().getClassLoader().getResource(path).toExternalForm());
         ImageView view = new ImageView(image);
 
-        if (currentGLTThemes.equals(GLTThemes.DARK_THEME)) {
+        if (currentGLTThemes.equals(GLTTheme.DARK_THEME)) {
             ColorAdjust colorAdjust = new ColorAdjust();
             colorAdjust.setBrightness(+0.65);
 
@@ -59,7 +58,7 @@ public class ThemeServiceImpl implements ThemeService {
     }
 
     @Override
-    public GLTThemes getCurrentTheme() {
+    public GLTTheme getCurrentTheme() {
         return currentGLTThemes;
     }
 }

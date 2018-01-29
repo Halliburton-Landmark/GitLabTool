@@ -1,37 +1,22 @@
 package com.lgc.gitlabtool.git.ui.toolbar;
 
-import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.ThemeService;
-import com.lgc.gitlabtool.git.ui.javafx.GLTThemes;
-import javafx.scene.control.MenuButton;
-import javafx.scene.control.MenuItem;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.lgc.gitlabtool.git.ui.ViewKey;
 import com.lgc.gitlabtool.git.ui.javafx.controllers.ModularController;
 
-import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Tooltip;
-import javafx.scene.effect.ColorAdjust;
-import javafx.scene.effect.Light;
-import javafx.scene.effect.Lighting;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.paint.Color;
-import javafx.stage.Stage;
 
 /**
  * Class for managing an toolbar with buttons

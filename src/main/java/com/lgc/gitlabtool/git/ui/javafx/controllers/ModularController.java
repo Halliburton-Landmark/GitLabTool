@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.lgc.gitlabtool.git.ui.javafx.*;
-import javafx.beans.binding.ObjectBinding;
 import javafx.scene.effect.Effect;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -78,7 +77,6 @@ import javafx.geometry.*;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
@@ -110,9 +108,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.*;
 import javafx.scene.text.Font;
-import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
@@ -1463,11 +1459,11 @@ public class ModularController implements UpdateProgressListener {
      */
     //region GENERAL OTHER METHODS
     private void setDarkTheme(ActionEvent actionEvent) {
-        setTheme(GLTThemes.DARK_THEME.getKey());
+        setTheme(GLTTheme.DARK_THEME.getKey());
     }
 
     private void setLightTheme(ActionEvent actionEvent) {
-        setTheme(GLTThemes.LIGHT_THEME.getKey());
+        setTheme(GLTTheme.LIGHT_THEME.getKey());
     }
 
     private void setTheme(String themeId){
@@ -1483,7 +1479,7 @@ public class ModularController implements UpdateProgressListener {
         Stream.concat(projectsWindowMainMenuItems.stream(), groupsWindowMainMenuItems.stream())
                 .map(Menu::getItems)
                 .forEach(item -> {
-                    if (_themeService.getCurrentTheme().equals(GLTThemes.DARK_THEME)) {
+                    if (_themeService.getCurrentTheme().equals(GLTTheme.DARK_THEME)) {
                         ColorAdjust colorAdjust = new ColorAdjust();
                         colorAdjust.setBrightness(+0.65);
                         item.forEach(q -> q.getGraphic().setEffect(colorAdjust));
@@ -1496,7 +1492,7 @@ public class ModularController implements UpdateProgressListener {
         Stream.concat(mainToolbarStream, projectsToolbarItems.stream())
                 .filter(item -> item instanceof Button || item instanceof ToggleButton)
                 .forEach(item -> {
-                    boolean isDarkTheme = _themeService.getCurrentTheme().equals(GLTThemes.DARK_THEME);
+                    boolean isDarkTheme = _themeService.getCurrentTheme().equals(GLTTheme.DARK_THEME);
                     ColorAdjust colorAdjust = new ColorAdjust();
                     colorAdjust.setBrightness(+0.65);
                     Effect lightEffect = isDarkTheme ? colorAdjust : null;

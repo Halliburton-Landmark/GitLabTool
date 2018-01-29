@@ -4,7 +4,7 @@ import javafx.scene.paint.Color;
 
 import java.util.Arrays;
 
-public enum GLTThemes {
+public enum GLTTheme {
     DARK_THEME("dark", "css/modular_dark_style.css", Color.SILVER, Color.LIGHTGREEN, Color.rgb(201,108,105)),
     LIGHT_THEME("light", "css/modular_light_style.css", Color.rgb(59,59,59), Color.GREEN, Color.RED);
 
@@ -14,7 +14,7 @@ public enum GLTThemes {
     private Color _successFontColorCss;
     private Color _errorFontColorCss;
 
-    GLTThemes(String key, String path, Color mainFontColorCss, Color successFontColorCss, Color errorFontColorCss){
+    GLTTheme(String key, String path, Color mainFontColorCss, Color successFontColorCss, Color errorFontColorCss){
         _themeKey = key;
         _themePath = path;
         _mainFontColorCss = mainFontColorCss;
@@ -30,8 +30,8 @@ public enum GLTThemes {
         return _themePath;
     }
 
-    public static GLTThemes getThemeByKey(String key){
-        return Arrays.stream(GLTThemes.values())
+    public static GLTTheme getThemeByKey(String key){
+        return Arrays.stream(GLTTheme.values())
                 .filter(theme -> theme.getKey().equals(key))
                 .findFirst()
                 .orElse(LIGHT_THEME);

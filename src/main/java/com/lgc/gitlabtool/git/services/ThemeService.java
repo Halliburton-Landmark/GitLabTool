@@ -1,6 +1,6 @@
 package com.lgc.gitlabtool.git.services;
 
-import com.lgc.gitlabtool.git.ui.javafx.GLTThemes;
+import com.lgc.gitlabtool.git.ui.javafx.GLTTheme;
 import javafx.scene.Scene;
 import javafx.scene.image.ImageView;
 
@@ -11,5 +11,5 @@ public interface ThemeService extends Service {
 
     ImageView getStyledImageView(String path);
 
-    GLTThemes getCurrentTheme();
+    GLTTheme getCurrentTheme();
 }
