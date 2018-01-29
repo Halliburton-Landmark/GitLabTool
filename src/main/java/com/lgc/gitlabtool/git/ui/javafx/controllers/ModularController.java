@@ -514,10 +514,6 @@ public class ModularController implements UpdateProgressListener {
         });
     }
 
-    /*private <T> ContextMenu addContextMenu( menu) {
-
-    }*/
-
     @SuppressWarnings("unchecked")
     private void configureProjectsListView(ListView listView) {
         // config displayable string
