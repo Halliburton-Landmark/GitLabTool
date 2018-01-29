@@ -847,13 +847,12 @@ public class ModularController implements UpdateProgressListener {
         try {
             List<Project> selectedProjects = projectListView.getSelectionModel().getSelectedItems();
             if (selectedProjects.isEmpty()) { // if nothing selected in a list then all projects is loaded
-                selectedProjects = projectListView.getItems();
-            }
-            selectedProjects = ProjectList.getCorrectProjects(selectedProjects);
-            if (selectedProjects.isEmpty()) {
-                String message = String.format(NO_ANY_PROJECT_FOR_OPERATION, STASH_OPERATION_NAME);
-                _consoleService.addMessage(message, MessageType.ERROR);
-                return;
+                selectedProjects = ProjectList.getCorrectProjects(projectListView.getItems());
+                if (selectedProjects.isEmpty()) {
+                    String message = String.format(NO_ANY_PROJECT_FOR_OPERATION, STASH_OPERATION_NAME);
+                    _consoleService.addMessage(message, MessageType.ERROR);
+                    return;
+                }
             }
 
             URL stashWindowUrl = getClass().getClassLoader().getResource(ViewKey.STASH_WINDOW.getPath());
@@ -884,15 +883,15 @@ public class ModularController implements UpdateProgressListener {
 
             /* Set size and position */
             Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
-            double dialogWidth = primaryScreenBounds.getMaxX() / 2.8;
-            double dialogHeight = primaryScreenBounds.getMaxY() / 2.8;
-            stage.setMinWidth(dialogWidth);
-            stage.setMinHeight(dialogHeight);
-            ScreenUtil.adaptForMultiScreens(stage, dialogWidth, dialogHeight);
+            double minWidth = primaryScreenBounds.getMaxX() / 2.5;
+            double minHeight = primaryScreenBounds.getMaxY() / 2;
+            stage.setMinWidth(minWidth);
+            stage.setMinHeight(minHeight);
+            ScreenUtil.adaptForMultiScreens(stage, minWidth, minHeight);
 
             stage.show();
         } catch (IOException e) {
-            _logger.error("Could not load fxml resource", e);
+            _logger.error("Could not load fxml resource: " + e.getMessage());
         }
     }
 

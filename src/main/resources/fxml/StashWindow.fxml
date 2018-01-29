@@ -14,11 +14,11 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.lgc.gitlabtool.git.ui.javafx.controllers.StashWindowController">
+<AnchorPane xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.lgc.gitlabtool.git.ui.javafx.controllers.StashWindowController">
    <children>
-      <SplitPane dividerPositions="0.6867283950617284" layoutX="58.0" layoutY="170.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <SplitPane dividerPositions="0.5" layoutX="58.0" layoutY="170.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <items>
-          <AnchorPane minWidth="400.0">
+          <AnchorPane minWidth="250.0">
                <children>
                   <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                      <children>
@@ -35,7 +35,7 @@
                                                       <Insets top="2.0" />
                                                    </HBox.margin>
                                                 </Label>
-                                                <TextField fx:id="_stashMessageTextField" prefHeight="25.0" prefWidth="314.0" HBox.hgrow="ALWAYS">
+                                                <TextField fx:id="_stashMessageTextField" prefHeight="25.0" HBox.hgrow="ALWAYS">
                                                    <HBox.margin>
                                                       <Insets left="2.0" />
                                                    </HBox.margin>
@@ -64,9 +64,9 @@
                               </AnchorPane>
                         </content>
                       </TitledPane>
-                        <AnchorPane prefHeight="354.0" prefWidth="437.0" VBox.vgrow="ALWAYS">
+                        <AnchorPane VBox.vgrow="ALWAYS">
                            <children>
-                              <TitledPane fx:id="_stashListTitledPane" expanded="false" prefHeight="381.0" prefWidth="437.0" text="Stash List" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                              <TitledPane fx:id="_stashListTitledPane" expanded="false" text="Stash List" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                  <content>
                                     <AnchorPane>
                                        <children>
@@ -87,9 +87,9 @@
                   </VBox>
                </children>
             </AnchorPane>
-          <AnchorPane minWidth="250.0">
+          <AnchorPane minWidth="300.0">
                <children>
-                  <ListView fx:id="_projectListView" layoutX="-27.0" layoutY="183.0" prefHeight="498.0" prefWidth="219.0" AnchorPane.bottomAnchor="30.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                  <ListView fx:id="_projectListView" layoutX="-27.0" layoutY="183.0" AnchorPane.bottomAnchor="30.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                   <ProgressIndicator fx:id="_progressIndicator" layoutX="207.0" layoutY="489.0" maxHeight="20.0" maxWidth="20.0" visible="false" AnchorPane.bottomAnchor="5.0" AnchorPane.rightAnchor="5.0" />
                   <Label fx:id="_progressLabel" layoutX="163.0" layoutY="495.0" nodeOrientation="RIGHT_TO_LEFT" prefHeight="20.0" prefWidth="212.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="33.0" />
                </children>
