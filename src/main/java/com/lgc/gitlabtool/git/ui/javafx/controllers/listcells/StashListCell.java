@@ -1,7 +1,7 @@
 package com.lgc.gitlabtool.git.ui.javafx.controllers.listcells;
 
+import com.lgc.gitlabtool.git.jgit.stash.SingleProjectStash;
 import com.lgc.gitlabtool.git.jgit.stash.Stash;
-import com.lgc.gitlabtool.git.jgit.stash.StashItem;
 
 import javafx.geometry.Pos;
 import javafx.scene.control.ListCell;
@@ -17,14 +17,14 @@ import javafx.scene.text.Text;
  *
  * @author Lyudmila Lyska
  */
-public class StashListCell extends ListCell<StashItem> {
+public class StashListCell extends ListCell<Stash> {
     private final static String SINGLE_STASH_TOOLTIP = "Single Stash";
     private final static String GROUP_STASH_TOOLTIP = "Group Stash";
     private final static String END_OF_GROUP_PREFIX = "]";
     private final ClassLoader _loader = getClass().getClassLoader();
 
     @Override
-    protected void updateItem(StashItem item, boolean empty) {
+    protected void updateItem(Stash item, boolean empty) {
         super.updateItem(item, empty);
         setText(null);
         setGraphic(null);
@@ -32,7 +32,7 @@ public class StashListCell extends ListCell<StashItem> {
         if (item != null && !empty) {
             Image fxImage = new Image(_loader.getResource(item.getIconURL()).toExternalForm());
             ImageView imageView = new ImageView(fxImage);
-            String tooltip = item instanceof Stash ? SINGLE_STASH_TOOLTIP : GROUP_STASH_TOOLTIP;
+            String tooltip = item instanceof SingleProjectStash ? SINGLE_STASH_TOOLTIP : GROUP_STASH_TOOLTIP;
             Tooltip.install(imageView, new Tooltip(tooltip));
 
             Text stashName = new Text(getStashItemMessage(item));
@@ -45,9 +45,9 @@ public class StashListCell extends ListCell<StashItem> {
         }
     }
 
-    private String getStashItemMessage(StashItem item) {
+    private String getStashItemMessage(Stash item) {
         String stashMessage = item.getMessage();
-        if (item instanceof Stash) {
+        if (item instanceof SingleProjectStash) {
             return hasGroupIdentificator(stashMessage) ? getGroupMessage(stashMessage) : " " + stashMessage;
         }
         return getGroupMessage(stashMessage);

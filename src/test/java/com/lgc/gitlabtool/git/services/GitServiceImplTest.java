@@ -38,8 +38,8 @@ import com.lgc.gitlabtool.git.jgit.ChangedFilesUtils;
 import com.lgc.gitlabtool.git.jgit.JGit;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.jgit.stash.GroupStash;
+import com.lgc.gitlabtool.git.jgit.stash.SingleProjectStash;
 import com.lgc.gitlabtool.git.jgit.stash.Stash;
-import com.lgc.gitlabtool.git.jgit.stash.StashItem;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 
 public class GitServiceImplTest {
@@ -450,7 +450,7 @@ public class GitServiceImplTest {
         List<Project> projects = getProjects();
         when(_jGit.getStashes(any(Project.class))).thenReturn(new ArrayList<>());
 
-        List<StashItem> result = _gitService.getStashList(projects);
+        List<Stash> result = _gitService.getStashList(projects);
 
         assertTrue(result.isEmpty());
     }
@@ -458,10 +458,10 @@ public class GitServiceImplTest {
     @Test
     public void getStashListSuccessffulResult() {
         List<Project> projects = getProjects();
-        List<Stash> stashes = getStashesWithoutGroup();
+        List<SingleProjectStash> stashes = getStashesWithoutGroup();
         when(_jGit.getStashes(any(Project.class))).thenReturn(stashes);
 
-        List<StashItem> result = _gitService.getStashList(projects);
+        List<Stash> result = _gitService.getStashList(projects);
 
         assertFalse(result.isEmpty());
     }
@@ -480,7 +480,7 @@ public class GitServiceImplTest {
         StashApplyListener progressListener = new StashApplyListener();
         Mockito.doNothing().when(_jGit);
 
-        _gitService.applyStashes(new Stash("test", "test", getClonedProject()), progressListener);
+        _gitService.applyStashes(new SingleProjectStash("test", "test", getClonedProject()), progressListener);
 
         assertFalse(progressListener.isSuccessfully());
     }
@@ -489,10 +489,10 @@ public class GitServiceImplTest {
     public void applyStashSucccessffulResult() {
         StashApplyListener progressListener = new StashApplyListener();
         GroupStash groupStash = new GroupStash("test message");
-        groupStash.addStash(new Stash("test1", "test message", getClonedProject()));
-        groupStash.addStash(new Stash("test2", "test message", getClonedProject("new path")));
+        groupStash.addStash(new SingleProjectStash("test1", "test message", getClonedProject()));
+        groupStash.addStash(new SingleProjectStash("test2", "test message", getClonedProject("new path")));
         groupStash.addStash(null);
-        groupStash.addStash(new Stash(null, null, null));
+        groupStash.addStash(new SingleProjectStash(null, null, null));
 
         Mockito.doAnswer(new Answer<Object>() {
             @Override
@@ -504,7 +504,7 @@ public class GitServiceImplTest {
                 }
                 return null;
              }
-         }).when(_jGit).stashApply(any(Stash.class), eq(progressListener));
+         }).when(_jGit).stashApply(any(SingleProjectStash.class), eq(progressListener));
 
         _gitService.applyStashes(groupStash, progressListener);
 
@@ -545,11 +545,11 @@ public class GitServiceImplTest {
         return (int) result.stream().filter(project -> project != null && project.isCloned()).count();
     }
 
-    private List<Stash> getStashesWithoutGroup() {
-        Stash firstStash = new Stash("first", "[GS0112181412] test", getClonedProject());
-        Stash secondStash = new Stash("second", "[GS0112181412] test", getClonedProject());
-        Stash thirdStash = new Stash("second", "test 3", new Project());
-        Stash fourthStash = new Stash("second", "test 4", getClonedProject("new path 2"));
+    private List<SingleProjectStash> getStashesWithoutGroup() {
+        SingleProjectStash firstStash = new SingleProjectStash("first", "[GS0112181412] test", getClonedProject());
+        SingleProjectStash secondStash = new SingleProjectStash("second", "[GS0112181412] test", getClonedProject());
+        SingleProjectStash thirdStash = new SingleProjectStash("second", "test 3", new Project());
+        SingleProjectStash fourthStash = new SingleProjectStash("second", "test 4", getClonedProject("new path 2"));
         return Arrays.asList(firstStash, secondStash, thirdStash, fourthStash);
     }
 

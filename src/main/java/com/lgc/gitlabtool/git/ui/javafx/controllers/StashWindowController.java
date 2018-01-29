@@ -13,8 +13,8 @@ import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.ProjectList;
 import com.lgc.gitlabtool.git.entities.ProjectStatus;
 import com.lgc.gitlabtool.git.jgit.stash.GroupStash;
+import com.lgc.gitlabtool.git.jgit.stash.SingleProjectStash;
 import com.lgc.gitlabtool.git.jgit.stash.Stash;
-import com.lgc.gitlabtool.git.jgit.stash.StashItem;
 import com.lgc.gitlabtool.git.listeners.stateListeners.AbstractStateListener;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.services.BackgroundService;
@@ -70,7 +70,7 @@ public class StashWindowController extends AbstractStateListener {
     private TitledPane _createStashTitledPane;
 
     @FXML
-    private ListView<StashItem> _stashListView;
+    private ListView<Stash> _stashListView;
 
     @FXML
     private Button _applyButton;
@@ -191,12 +191,12 @@ public class StashWindowController extends AbstractStateListener {
     }
 
     private void onApplyStash() {
-        StashItem selectedStash = _stashListView.getSelectionModel().getSelectedItem();
+        Stash selectedStash = _stashListView.getSelectionModel().getSelectedItem();
         _gitService.applyStashes(selectedStash, new ApplyStashProgressListener());
     }
 
     private void onDropStash() {
-        StashItem selectedStash = _stashListView.getSelectionModel().getSelectedItem();
+        Stash selectedStash = _stashListView.getSelectionModel().getSelectedItem();
         Map<Project, Boolean> results = _gitService.stashDrop(selectedStash);
         List<Project> changedProjects = getSuccessfulProjects(results);
         updateContentOfLists(changedProjects);
@@ -260,13 +260,13 @@ public class StashWindowController extends AbstractStateListener {
 
     private void filterProjectList() {
         _projectListView.getItems().clear();
-        StashItem selectedItem = _stashListView.getSelectionModel().getSelectedItem();
+        Stash selectedItem = _stashListView.getSelectionModel().getSelectedItem();
         List<Project> projects = selectedItem == null ? getProjects() : getStashProjects(selectedItem);
         ObservableList<Project> items = FXCollections.observableArrayList(projects);
         _projectListView.setItems(items);
     }
 
-    private List<Project> getStashProjects(StashItem selectedItem) {
+    private List<Project> getStashProjects(Stash selectedItem) {
         List<Project> projects = new ArrayList<>();
         if (selectedItem instanceof GroupStash) {
             GroupStash group = (GroupStash) selectedItem;
@@ -275,7 +275,7 @@ public class StashWindowController extends AbstractStateListener {
                                                           .collect(Collectors.toList());
             projects.addAll(groupProjects);
         } else {
-            projects.add(((Stash)selectedItem).getProject());
+            projects.add(((SingleProjectStash)selectedItem).getProject());
         }
         return projects;
     }

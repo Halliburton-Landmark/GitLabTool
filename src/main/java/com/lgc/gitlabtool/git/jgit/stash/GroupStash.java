@@ -5,15 +5,15 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Implementation of {@link StashItem} for storing info about a group stash for few projects.
+ * Implementation of {@link Stash} for storing info about a group stash for few projects.
  *
- * It stores list of {@link Stash}s which include to this group and its message.
+ * It stores list of {@link SingleProjectStash}s which include to this group and its message.
  *
  * @author Lyudmila Lyska
  */
-public class GroupStash implements StashItem {
+public class GroupStash implements Stash {
     private final String _message;
-    private final List<Stash> _group;
+    private final List<SingleProjectStash> _group;
 
     private static final String ICON_URL = "icons/stash/stash_group_item_20x20.png";
 
@@ -45,14 +45,14 @@ public class GroupStash implements StashItem {
     /**
      * Adds stash to the current group
      */
-    public void addStash(Stash stash) {
+    public void addStash(SingleProjectStash stash) {
         _group.add(stash);
     }
 
     /**
      * Gets all group stashes. Return unmodifiable list
      */
-    public List<Stash> getGroup() {
+    public List<SingleProjectStash> getGroup() {
         return Collections.unmodifiableList(_group);
     }
 

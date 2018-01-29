@@ -80,7 +80,7 @@ import org.mockito.Mockito;
 
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.User;
-import com.lgc.gitlabtool.git.jgit.stash.Stash;
+import com.lgc.gitlabtool.git.jgit.stash.SingleProjectStash;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.services.BackgroundService;
 import com.lgc.gitlabtool.git.services.BackgroundServiceImpl;
@@ -1158,7 +1158,7 @@ public class JGitTest {
 
     @Test
     public void getStashesIncorrectGit() {
-        List<Stash> result = getJGitMock(null).getStashes(getProject(true));
+        List<SingleProjectStash> result = getJGitMock(null).getStashes(getProject(true));
 
         Assert.assertTrue(result.isEmpty());
     }
@@ -1169,7 +1169,7 @@ public class JGitTest {
         Git gitMock = getGitMock();
         setStashListToGitMock(gitMock, false);
 
-        List<Stash> result = getJGitMock(gitMock).getStashes(project);
+        List<SingleProjectStash> result = getJGitMock(gitMock).getStashes(project);
 
         Assert.assertTrue(result.isEmpty());
     }
@@ -1180,7 +1180,7 @@ public class JGitTest {
         Git gitMock = getGitMock();
         setStashListToGitMock(gitMock, true);
 
-        List<Stash> result = getJGitMock(gitMock).getStashes(project);
+        List<SingleProjectStash> result = getJGitMock(gitMock).getStashes(project);
 
         Assert.assertFalse(result.isEmpty());
     }
@@ -1197,7 +1197,7 @@ public class JGitTest {
     @Test
     public void stashApplyNullProject() {
         StashApplyListener progressListener = new StashApplyListener();
-        Stash stash = new Stash(null, null, null);
+        SingleProjectStash stash = new SingleProjectStash(null, null, null);
 
         getJGitMock(null).stashApply(stash, progressListener);
 
@@ -1207,7 +1207,7 @@ public class JGitTest {
     @Test
     public void stashApplyNotClonedProject() {
         StashApplyListener progressListener = new StashApplyListener();
-        Stash stash = new Stash("test name", "test message", new Project());
+        SingleProjectStash stash = new SingleProjectStash("test name", "test message", new Project());
 
         getJGitMock(null).stashApply(stash, progressListener);
 
@@ -1217,7 +1217,7 @@ public class JGitTest {
     @Test
     public void stashApplyStashNameNull() {
         StashApplyListener progressListener = new StashApplyListener();
-        Stash stash = new Stash(null, "test message", getProject(true));
+        SingleProjectStash stash = new SingleProjectStash(null, "test message", getProject(true));
 
         getJGitMock(null).stashApply(stash, progressListener);
 
@@ -1228,7 +1228,7 @@ public class JGitTest {
     @Test
     public void stashApplyEmptyStashName() {
         StashApplyListener progressListener = new StashApplyListener();
-        Stash stash = new Stash("", "test message", getProject(true));
+        SingleProjectStash stash = new SingleProjectStash("", "test message", getProject(true));
 
         getJGitMock(null).stashApply(stash, progressListener);
 
@@ -1239,7 +1239,7 @@ public class JGitTest {
     public void stashApplyIncorrectGit() {
         StashApplyListener progressListener = new StashApplyListener();
         Project project = getProject(true);
-        Stash stash = new Stash("test name", "test message", project);
+        SingleProjectStash stash = new SingleProjectStash("test name", "test message", project);
 
         getJGitMock(null).stashApply(stash, progressListener);
 
@@ -1251,7 +1251,7 @@ public class JGitTest {
         StashApplyListener progressListener = new StashApplyListener();
         Project project = getProject(true);
         String stashName = "test name";
-        Stash stash = new Stash(stashName, "test message", project);
+        SingleProjectStash stash = new SingleProjectStash(stashName, "test message", project);
         Git gitMock = getGitMock();
         setStashApplyCommandToGit(gitMock, stashName, false);
 
@@ -1265,7 +1265,7 @@ public class JGitTest {
         StashApplyListener progressListener = new StashApplyListener();
         Project project = getProject(true);
         String stashName = "test name";
-        Stash stash = new Stash(stashName, "test message", project);
+        SingleProjectStash stash = new SingleProjectStash(stashName, "test message", project);
         Git gitMock = getGitMock();
         setStashApplyCommandToGit(gitMock, stashName, true);
 
@@ -1482,8 +1482,8 @@ public class JGitTest {
             }
 
             @Override
-            Stash getStash(RevCommit revCommit, Project project) {
-                return new Stash("test name", "test message", project);
+            SingleProjectStash getStash(RevCommit revCommit, Project project) {
+                return new SingleProjectStash("test name", "test message", project);
             }
 
             @Override

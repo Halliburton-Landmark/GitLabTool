@@ -32,8 +32,8 @@ import com.lgc.gitlabtool.git.jgit.ChangedFilesUtils;
 import com.lgc.gitlabtool.git.jgit.JGit;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.jgit.stash.GroupStash;
+import com.lgc.gitlabtool.git.jgit.stash.SingleProjectStash;
 import com.lgc.gitlabtool.git.jgit.stash.Stash;
-import com.lgc.gitlabtool.git.jgit.stash.StashItem;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 
@@ -364,17 +364,17 @@ public class GitServiceImpl implements GitService {
     }
 
     @Override
-    public List<StashItem> getStashList(List<Project> projects) {
+    public List<Stash> getStashList(List<Project> projects) {
         if (projects == null || projects.isEmpty()) {
             return Collections.emptyList();
         }
-        List<StashItem> allStashes = new ArrayList<>();
+        List<Stash> allStashes = new ArrayList<>();
         projects.forEach(project -> addStashToList(allStashes, _git.getStashes(project)));
         return allStashes;
     }
 
     @Override
-    public void applyStashes(StashItem stash, ProgressListener progressListener) {
+    public void applyStashes(Stash stash, ProgressListener progressListener) {
         if (progressListener == null) {
             progressListener = EmptyProgressListener.get();
         }
@@ -387,20 +387,20 @@ public class GitServiceImpl implements GitService {
     }
 
     @Override
-    public Map<Project, Boolean> stashDrop(StashItem stashItem) {
+    public Map<Project, Boolean> stashDrop(Stash stashItem) {
         Map<Project, Boolean> resultOperations = new ConcurrentHashMap<>();
         if (stashItem == null) {
             return resultOperations;
         }
         try {
             _stateService.stateON(ApplicationState.STASH);
-            if (stashItem instanceof Stash) {
-                Stash stash = (Stash) stashItem;
+            if (stashItem instanceof SingleProjectStash) {
+                SingleProjectStash stash = (SingleProjectStash) stashItem;
                 Project project = stash.getProject();
                 boolean resultOperation = _git.stashDrop(project, stash.getName());
                 resultOperations.put(project, resultOperation);
             } else {
-                List<Stash> group = ((GroupStash) stashItem).getGroup();
+                List<SingleProjectStash> group = ((GroupStash) stashItem).getGroup();
                 group.parallelStream()
                      .filter(stash -> stash != null)
                      .forEach(stash -> dropStash(resultOperations, stash));
@@ -420,7 +420,7 @@ public class GitServiceImpl implements GitService {
         results.put(project, result);
     }
 
-    private void dropStash(Map<Project, Boolean> results, Stash stash) {
+    private void dropStash(Map<Project, Boolean> results, SingleProjectStash stash) {
         Project project = stash.getProject();
         boolean resultOperation = _git.stashDrop(project, stash.getName());
         results.put(project, resultOperation);
@@ -498,13 +498,13 @@ public class GitServiceImpl implements GitService {
                         .collect(Collectors.toList());
     }
 
-    private void addStashToList(List<StashItem> allStashes, List<Stash> currentStashList) {
+    private void addStashToList(List<Stash> allStashes, List<SingleProjectStash> currentStashList) {
         if (allStashes.isEmpty()) {
             allStashes.addAll(currentStashList);
             return;
         }
-        for (StashItem stash : currentStashList) {
-            Optional<StashItem> foundStash = allStashes.stream()
+        for (Stash stash : currentStashList) {
+            Optional<Stash> foundStash = allStashes.stream()
                                                        .filter(item -> hasGroupIdentificator(item.getMessage(), stash.getMessage()))
                                                        .findFirst();
             if (foundStash.isPresent()) {
@@ -519,14 +519,14 @@ public class GitServiceImpl implements GitService {
         return currentMessage.equals(newStashMessage) && currentMessage.matches("\\[GS\\d+\\](.+)?");
     }
 
-    private void addGroupStash(List<StashItem> stashList, StashItem addStash,  StashItem foundStash) {
-        Stash newStash = (Stash)addStash;
+    private void addGroupStash(List<Stash> stashList, Stash addStash,  Stash foundStash) {
+        SingleProjectStash newStash = (SingleProjectStash)addStash;
         if (foundStash instanceof GroupStash) {
             ((GroupStash) foundStash).addStash(newStash);
         } else {
             stashList.remove(foundStash);
             GroupStash newGroup = new GroupStash(foundStash.getMessage());
-            newGroup.addStash((Stash)foundStash);
+            newGroup.addStash((SingleProjectStash)foundStash);
             newGroup.addStash(newStash);
             stashList.add(newGroup);
         }
@@ -563,13 +563,13 @@ public class GitServiceImpl implements GitService {
                            .collect(Collectors.toList());
     }
 
-    private void applyStash(StashItem stashItem, ProgressListener progressListener) {
+    private void applyStash(Stash stashItem, ProgressListener progressListener) {
         try {
-            if (stashItem instanceof Stash) {
+            if (stashItem instanceof SingleProjectStash) {
                 progressListener.onStart(1);
-                _git.stashApply((Stash) stashItem, progressListener);
+                _git.stashApply((SingleProjectStash) stashItem, progressListener);
             } else {
-                List<Stash> group = ((GroupStash) stashItem).getGroup();
+                List<SingleProjectStash> group = ((GroupStash) stashItem).getGroup();
                 progressListener.onStart(group.size());
                 group.parallelStream()
                      .filter(stash -> stash != null)

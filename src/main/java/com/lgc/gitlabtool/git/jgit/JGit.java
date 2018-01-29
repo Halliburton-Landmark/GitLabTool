@@ -54,7 +54,7 @@ import com.lgc.gitlabtool.git.connections.token.CurrentUser;
 import com.lgc.gitlabtool.git.entities.Branch;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.User;
-import com.lgc.gitlabtool.git.jgit.stash.Stash;
+import com.lgc.gitlabtool.git.jgit.stash.SingleProjectStash;
 import com.lgc.gitlabtool.git.services.BackgroundService;
 import com.lgc.gitlabtool.git.services.EmptyProgressListener;
 import com.lgc.gitlabtool.git.services.ProgressListener;
@@ -162,7 +162,7 @@ public class JGit {
      * Creates stash for the project
      *
      * @param  project the cloned project
-     * @param  stashMessage the stash message
+     * @param  stashMessage the stash message. Cannot be null
      * @param  includeUntracked <code>true</code> if need to include untracked file to stash, otherwise <code>false</code>
      * @return <code>true</code> if stash was created successfully, otherwise <code>false</code>
      */
@@ -187,13 +187,13 @@ public class JGit {
      * @param project the cloned project
      * @return a list of stashes
      */
-    public List<Stash> getStashes(Project project) {
-        List<Stash> list = new ArrayList<>();
+    public List<SingleProjectStash> getStashes(Project project) {
+        List<SingleProjectStash> list = new ArrayList<>();
         if (project != null && project.isCloned()) {
             try (Git git = getGit(project.getPath())) {
                 Collection<RevCommit> revCommits = getStashList(git);
                 return revCommits.stream()
-                                 .filter(revCommit -> revCommit != null)
+                                 .filter(Objects::nonNull)
                                  .map(revCommit -> getStash(revCommit, project))
                                  .collect(Collectors.toList());
             } catch (GitAPIException | IOException e) {
@@ -204,12 +204,12 @@ public class JGit {
     }
 
     /**
-     * Applies stash by name for the project
+     * Applies stash for the project
      *
      * @param  stash the stash for applying
-     * @param  progressListener
+     * @param  progressListener the listener for obtaining data on the process of performing the operation.
      */
-    public void stashApply(Stash stash, ProgressListener progressListener) {
+    public void stashApply(SingleProjectStash stash, ProgressListener progressListener) {
         if (progressListener == null) {
             progressListener = EmptyProgressListener.get();
         }
@@ -254,8 +254,8 @@ public class JGit {
         return false;
     }
 
-    Stash getStash(RevCommit revCommit, Project project) {
-        return new Stash(revCommit.getName(), revCommit.getFullMessage(), project);
+    SingleProjectStash getStash(RevCommit revCommit, Project project) {
+        return new SingleProjectStash(revCommit.getName(), revCommit.getFullMessage(), project);
     }
 
     int getIndexInList(Git git, String stashName) throws InvalidRefNameException, GitAPIException {
