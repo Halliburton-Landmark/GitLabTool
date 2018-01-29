@@ -63,6 +63,14 @@ public enum GLToolButtons {
             null,
             GLToolConstants.ICON_SIZE_20),
 
+    REMOVE_GROUP(GLToolConstants.GROUPS_WINDOW_KEY,
+            "group_removeGroup",
+            "icons/mainmenu/remove_16x16.png",
+            "Remove group",
+            "Remove selected group",
+            null,
+            GLToolConstants.ICON_SIZE_16),
+
     IMPORT_GROUP_BUTTON(GLToolConstants.GROUPS_WINDOW_KEY,
             "group_importGroup",
             "icons/toolbar/import_20x20.png",
@@ -78,6 +86,14 @@ public enum GLToolButtons {
             "Load selected group",
             null,
             GLToolConstants.ICON_SIZE_20),
+
+    LOAD_GROUP(GLToolConstants.GROUPS_WINDOW_KEY,
+            "load_selected_group",
+            "icons/mainmenu/load_group_16x16.png",
+            "Load group",
+            "Load selected group",
+            null,
+            GLToolConstants.ICON_SIZE_16),
 
     CHANGE_GROUP_BUTTON(GLToolConstants.PROJECTS_WINDOW_KEY,
             "change_group",

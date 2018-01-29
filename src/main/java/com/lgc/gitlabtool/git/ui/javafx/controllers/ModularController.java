@@ -9,20 +9,12 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.lgc.gitlabtool.git.ui.javafx.actions.OpenFolderAction;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -1039,12 +1031,14 @@ public class ModularController implements UpdateProgressListener {
     private void onOpenFolder(ActionEvent event) {
         getCurrentProjects().parallelStream()
                 .filter(Project::isCloned)
-                .forEach(this::openProjectFolder);
+                .map(Project::getPath)
+                .forEach(this::openFolder);
     }
 
-    private void onOpenFolder(ActionEvent event, List<Group> items) {
-        items.parallelStream().forEach(elem -> new OpenFolderAction().
-                openFolder(elem.getPathToClonedGroup()));
+    private void onOpenGroupFolder(List<Group> items) {
+        items.parallelStream()
+                .map(Group::getPathToClonedGroup)
+                .forEach(this::openFolder);
     }
 
     @FXML
@@ -1227,11 +1221,11 @@ public class ModularController implements UpdateProgressListener {
                 .collect(Collectors.toList());
     }
 
-    private void openProjectFolder(Project project) {
+    private void openFolder(String path) {
         String fileDoesNotExistMessage = "Specified file does not exist";
-        Runnable openProjectTask = () -> {
+        Runnable openFolderTask = () -> {
             try {
-                Desktop.getDesktop().open(new File(project.getPath()));
+                Desktop.getDesktop().open(new File(path));
             } catch (IOException e) {
                 showAlert("The specified file has no associated application " + System.lineSeparator() +
                         "or the associated application fails to be launched", e);
@@ -1245,7 +1239,7 @@ public class ModularController implements UpdateProgressListener {
                 showAlert(fileDoesNotExistMessage, iae);
             }
         };
-        _backgroundService.runInAWTThread(openProjectTask);
+        _backgroundService.runInAWTThread(openFolderTask);
     }
 
     private void showAlert(String message, Throwable e) {
@@ -1263,55 +1257,22 @@ public class ModularController implements UpdateProgressListener {
         boolean hasCloned = _projectService.hasCloned(items);
 
         if (hasCloned) {
-            /*String openFolderIcoUrl = "icons/mainmenu/folder_16x16.png";
-            Image openFolderIco = new Image(getClass().getClassLoader().getResource(openFolderIcoUrl).toExternalForm());
-            MenuItem openFolder = new MenuItem();
-            openFolder.setText("Open project folder");*/
-            MenuItem openFolder = new MenuItem(GLToolButtons.OPEN_FOLDER.getText());
-            Image openFolderIco = new Image(getClass().getClassLoader()
-                    .getResource(GLToolButtons.OPEN_FOLDER.getIconUrl()).toExternalForm());
-            openFolder.setGraphic(new ImageView(openFolderIco));
-            openFolder.setOnAction(this::onOpenFolder);
+            MenuItem openFolder = createMenuItem(GLToolButtons.OPEN_FOLDER, this::onOpenFolder);
 
             Menu subMenuGit = new Menu("Git");
 
-            MenuItem itemCreateBranch = new MenuItem(GLToolButtons.MAIN_CREATE_BRANCH.getText());
-            Image itemCreateBranchIco = new Image(getClass().getClassLoader().getResource(GLToolButtons.MAIN_CREATE_BRANCH.getIconUrl()).toExternalForm());
-            itemCreateBranch.setGraphic(new ImageView(itemCreateBranchIco));
-            itemCreateBranch.setOnAction(this::onNewBranchButton);
-
-            MenuItem itemCheckoutBranch = new MenuItem(GLToolButtons.MAIN_CHECKOUT_BRANCH.getText());
-            Image itemCheckoutBranchIco = new Image(getClass().getClassLoader().getResource(GLToolButtons.MAIN_CHECKOUT_BRANCH.getIconUrl()).toExternalForm());
-            itemCheckoutBranch.setGraphic(new ImageView(itemCheckoutBranchIco));
-            itemCheckoutBranch.setOnAction(this::showCheckoutBranchWindow);
-
-            MenuItem itemStaging = new MenuItem(GLToolButtons.MAIN_STAGING.getText());
-            Image itemStagingIco = new Image(getClass().getClassLoader().getResource(GLToolButtons.MAIN_STAGING.getIconUrl()).toExternalForm());
-            itemStaging.setGraphic(new ImageView(itemStagingIco));
-            itemStaging.setOnAction(this::openGitStaging);
-
-            MenuItem itemPull = new MenuItem(GLToolButtons.MAIN_PULL.getText());
-            Image itemPullIco = new Image(getClass().getClassLoader().getResource(GLToolButtons.MAIN_PULL.getIconUrl()).toExternalForm());
-            itemPull.setGraphic(new ImageView(itemPullIco));
-            itemPull.setOnAction(this::onPullAction);
-
-            MenuItem itemPush = new MenuItem(GLToolButtons.MAIN_PUSH.getText());
-            Image itemPushIco = new Image(getClass().getClassLoader().getResource(GLToolButtons.MAIN_PUSH.getIconUrl()).toExternalForm());
-            itemPush.setGraphic(new ImageView(itemPushIco));
-            itemPush.setOnAction(this::onPushAction);
-
-            MenuItem itemRevert = new MenuItem(GLToolButtons.MAIN_REVERT.getText());
-            Image itemRevertIco = new Image(getClass().getClassLoader().getResource(GLToolButtons.MAIN_REVERT.getIconUrl()).toExternalForm());
-            itemRevert.setGraphic(new ImageView(itemRevertIco));
-            itemRevert.setOnAction(this::onRevertChanges);
+            MenuItem itemCreateBranch = createMenuItem(GLToolButtons.MAIN_CREATE_BRANCH, this::onNewBranchButton);
+            MenuItem itemCheckoutBranch = createMenuItem(GLToolButtons.MAIN_CHECKOUT_BRANCH, this::showCheckoutBranchWindow);
+            MenuItem itemStaging = createMenuItem(GLToolButtons.MAIN_STAGING, this::openGitStaging);
+            MenuItem itemPull = createMenuItem(GLToolButtons.MAIN_PULL, this::onPullAction);
+            MenuItem itemPush = createMenuItem(GLToolButtons.MAIN_PUSH, this::onPushAction);
+            MenuItem itemRevert = createMenuItem(GLToolButtons.MAIN_REVERT, this::onRevertChanges);
 
             subMenuGit.getItems().addAll(itemCreateBranch, itemCheckoutBranch,
             		itemStaging, itemPull, itemPush, itemRevert);
 
-            MenuItem itemEditProjectProp = new MenuItem(GLToolButtons.EDIT_PROJECT_PROPERTIES_BUTTON.getText());
-            Image itemEditProjectPropIco = new Image(getClass().getClassLoader().getResource(GLToolButtons.MAIN_EDIT_PROJECT_PROPERTIES.getIconUrl()).toExternalForm());
-            itemEditProjectProp.setGraphic(new ImageView(itemEditProjectPropIco));
-            itemEditProjectProp.setOnAction(this::showEditProjectPropertiesWindow);
+            MenuItem itemEditProjectProp = createMenuItem(GLToolButtons.MAIN_EDIT_PROJECT_PROPERTIES,
+                    this::showEditProjectPropertiesWindow);
 
             menuItems.add(openFolder);
             menuItems.add(subMenuGit);
@@ -1319,12 +1280,8 @@ public class ModularController implements UpdateProgressListener {
         }
 
         if (hasShadow) {
-            String cloneProjectIcoUrl = "icons/mainmenu/clone_16x16.png";
-            Image cloneProjectIco = new Image(getClass().getClassLoader().getResource(cloneProjectIcoUrl).toExternalForm());
-            MenuItem cloneProject = new MenuItem();
+            MenuItem cloneProject = createMenuItem(GLToolButtons.MAIN_CLONE_PROJECT, this::cloneShadowProject);
             cloneProject.setText("Clone shadow project");
-            cloneProject.setOnAction(this::cloneShadowProject);
-            cloneProject.setGraphic(new ImageView(cloneProjectIco));
             menuItems.add(cloneProject);
         }
 
@@ -1332,18 +1289,28 @@ public class ModularController implements UpdateProgressListener {
         return contextMenu;
     }
 
+    /**
+     * Creates {@link MenuItem} for specified {@link GLToolButtons} and set onAction EventHandler for it
+     * @param button - instance of {@link GLToolButtons}
+     * @param onAction - action that should be performed for this menu item
+     * @return menu item for specified GLToolButtons
+     */
+    private MenuItem createMenuItem(GLToolButtons button, EventHandler<ActionEvent> onAction) {
+        MenuItem item = new MenuItem(button.getText());
+        Image itemImage = new Image(getClass().getClassLoader().getResource(button.getIconUrl()).toExternalForm());
+        item.setGraphic(new ImageView(itemImage));
+        item.setOnAction(onAction);
+        return item;
+    }
+
     private ContextMenu getGroupContextMenu(List<Group> items) {
         ContextMenu groupContextMenu = new ContextMenu();
-        List<MenuItem> groupMenuItems = new ArrayList<>();
 
-        MenuItem openFolder = new MenuItem(GLToolButtons.OPEN_FOLDER.getText());
-        Image openFolderIco = new Image(getClass().getClassLoader()
-                .getResource(GLToolButtons.OPEN_FOLDER.getIconUrl()).toExternalForm());
-        openFolder.setGraphic(new ImageView(openFolderIco));
-        openFolder.setOnAction(event -> onOpenFolder(event, items));
-        groupMenuItems.add(openFolder);
+        MenuItem openFolder = createMenuItem(GLToolButtons.OPEN_FOLDER, event -> onOpenGroupFolder(items));
+        MenuItem loadGroup = createMenuItem(GLToolButtons.LOAD_GROUP, this::loadGroup);
+        MenuItem removeGroup = createMenuItem(GLToolButtons.REMOVE_GROUP, this::onRemoveGroup);
 
-        groupContextMenu.getItems().addAll(groupMenuItems);
+        groupContextMenu.getItems().addAll(openFolder, loadGroup, removeGroup);
         return groupContextMenu;
     }
 
