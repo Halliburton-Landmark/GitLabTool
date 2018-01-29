@@ -15,10 +15,8 @@ import com.lgc.gitlabtool.git.services.ProjectTypeService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.services.ThemeService;
-import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 import com.lgc.gitlabtool.git.util.NameValidator;
 import com.lgc.gitlabtool.git.util.NullCheckUtil;
-import com.lgc.gitlabtool.git.util.ScreenUtil;
 
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
@@ -31,16 +29,14 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 
-public class CreateProjectDialog extends Dialog<String> {
+public class CreateProjectDialog extends GLTDialog<String> {
 
     private static final String DIALOG_TITLE = "Create Project Dialog";
 
@@ -79,6 +75,8 @@ public class CreateProjectDialog extends Dialog<String> {
     private final GridPane grid = new GridPane();
 
     public CreateProjectDialog(Group selectGroup, Consumer<Object> onSuccessAction) {
+        super(DIALOG_TITLE);
+
         _selectGroup = selectGroup;
         _onSuccessAction = onSuccessAction;
 
@@ -122,20 +120,13 @@ public class CreateProjectDialog extends Dialog<String> {
 
         getDialogPane().setContent(grid);
 
-        Image appIcon = AppIconHolder.getInstance().getAppIcoImage();
         Stage stage = (Stage) getDialogPane().getScene().getWindow();
-        stage.setResizable(false);
-        stage.setTitle(DIALOG_TITLE);
-        stage.getIcons().add(appIcon);
         stage.setOnCloseRequest(event -> {
             if (_stateService.isActiveState(ApplicationState.CREATE_PROJECT)) {
                 event.consume();
             }
         });
 
-         /* Set sizing and position */
-        ScreenUtil.adaptForMultiScreens(stage, 350, 150);
-        _themeService.styleScene(getDialogPane().getScene());
     }
 
     private void onCreateButton(ActionEvent event) {

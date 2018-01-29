@@ -1510,7 +1510,7 @@ public class ModularController implements UpdateProgressListener {
     }
 
     private void showAboutPopup() {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        Alert alert = new GLTAlert(Alert.AlertType.INFORMATION);
 
         ImageView imageView = AppIconHolder.getInstance().getAppIcoImageView();
         imageView.setFitWidth(48);
@@ -1520,14 +1520,6 @@ public class ModularController implements UpdateProgressListener {
         alert.setTitle(ABOUT_POPUP_TITLE);
         alert.setHeaderText(ABOUT_POPUP_HEADER);
         alert.setContentText(ABOUT_POPUP_CONTENT);
-
-        _themeService.styleScene(alert.getDialogPane().getScene());
-        Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
-        stage.getIcons().add(_appIcon);
-        stage.initModality(Modality.APPLICATION_MODAL);
-
-        /* Set sizing and position */
-        ScreenUtil.adaptForMultiScreens(stage, 300, 150);
 
         alert.show();
     }

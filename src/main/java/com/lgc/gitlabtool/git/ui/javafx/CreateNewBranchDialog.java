@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.lgc.gitlabtool.git.services.ThemeService;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.PushProgressListener;
 import org.apache.commons.lang.StringUtils;
 
@@ -16,10 +15,7 @@ import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.services.BackgroundService;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
-import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
-import com.lgc.gitlabtool.git.ui.javafx.listeners.PushProgressListener;
 import com.lgc.gitlabtool.git.util.NameValidator;
-import com.lgc.gitlabtool.git.util.ScreenUtil;
 
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -31,16 +27,14 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 
-public class CreateNewBranchDialog extends Dialog<String> {
+public class CreateNewBranchDialog extends GLTDialog<String> {
 
     private static final String DIALOG_TITLE = "Create new branch";
     private static final String STATUS_DIALOG_TITLE = "Branch Creating status";
@@ -51,9 +45,6 @@ public class CreateNewBranchDialog extends Dialog<String> {
             .getService(GitService.class.getName());
     private static final BackgroundService _backgroundService = (BackgroundService) ServiceProvider.getInstance()
             .getService(BackgroundService.class.getName());
-
-    private static final ThemeService _themeService = (ThemeService) ServiceProvider.getInstance()
-            .getService(ThemeService.class.getName());
 
     private final Label _messageLabel;
     private final Label _textLabel;
@@ -77,6 +68,7 @@ public class CreateNewBranchDialog extends Dialog<String> {
     }
 
     public CreateNewBranchDialog(List<Project> projects) {
+        super(DIALOG_TITLE);
 
         setProjects(projects);
 
@@ -126,15 +118,6 @@ public class CreateNewBranchDialog extends Dialog<String> {
         grid.add(hbBtn, 2, 7);
 
         getDialogPane().setContent(grid);
-        Image appIcon = AppIconHolder.getInstance().getAppIcoImage();
-        Stage stage = getStage();
-        stage.setResizable(false);
-        stage.setTitle(DIALOG_TITLE);
-        stage.getIcons().add(appIcon);
-
-         /* Set sizing and position */
-        ScreenUtil.adaptForMultiScreens(stage, 300, 150);
-        _themeService.styleScene(getDialogPane().getScene());
 
         initializeOnCloseEvent();
     }
