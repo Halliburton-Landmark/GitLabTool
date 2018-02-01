@@ -96,6 +96,13 @@ public enum ApplicationState {
         public String toString() {
             return "Reseting changed files";
         }
+    },
+
+    STASH {
+        @Override
+        public String toString() {
+            return "Stashing";
+        }
     };
 
     public String getState() {
