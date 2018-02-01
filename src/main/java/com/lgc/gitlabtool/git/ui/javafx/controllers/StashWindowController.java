@@ -110,7 +110,7 @@ public class StashWindowController extends AbstractStateListener {
         _stateService.addStateListener(ApplicationState.STASH, this);
 
         _projectsIds.addAll(projectsIds);
-        _projectListView.addEventFilter(MouseEvent.MOUSE_PRESSED, event -> event.consume());
+        _projectListView.addEventFilter(MouseEvent.MOUSE_PRESSED, MouseEvent::consume);
         _projectListView.setCellFactory(project -> new ProjectListCell());
         updateProjectListView();
 
@@ -229,8 +229,8 @@ public class StashWindowController extends AbstractStateListener {
 
     private List<Project> getSuccessfulProjects(Map<Project, Boolean> results) {
         return results.entrySet().stream()
-                                 .filter(entry -> entry.getValue() != false)
-                                 .map(entry -> entry.getKey())
+                                 .filter(Map.Entry::getValue)
+                                 .map(Map.Entry::getKey)
                                  .collect(Collectors.toList());
     }
 
@@ -271,7 +271,7 @@ public class StashWindowController extends AbstractStateListener {
         if (selectedItem instanceof GroupStash) {
             GroupStash group = (GroupStash) selectedItem;
             List<Project> groupProjects = group.getGroup().stream()
-                                                          .map(stash -> stash.getProject())
+                                                          .map(SingleProjectStash::getProject)
                                                           .collect(Collectors.toList());
             projects.addAll(groupProjects);
         } else {
