@@ -14,6 +14,7 @@ public class ThemeServiceImpl implements ThemeService {
 
     private Preferences themePrefs;
     private GLTTheme currentGLTThemes;
+    private static final Double LIGHTING_COEFFICIENT_FOR_DARK_THEMES = +0.65;
 
     ThemeServiceImpl() {
         themePrefs = Preferences.userRoot().node(THEME_PREFS_KEY);
@@ -49,7 +50,7 @@ public class ThemeServiceImpl implements ThemeService {
 
         if (currentGLTThemes.equals(GLTTheme.DARK_THEME)) {
             ColorAdjust colorAdjust = new ColorAdjust();
-            colorAdjust.setBrightness(+0.65);
+            colorAdjust.setBrightness(LIGHTING_COEFFICIENT_FOR_DARK_THEMES);
 
             view.setEffect(colorAdjust);
         }
@@ -60,5 +61,10 @@ public class ThemeServiceImpl implements ThemeService {
     @Override
     public GLTTheme getCurrentTheme() {
         return currentGLTThemes;
+    }
+
+    @Override
+    public Double getLightningCoefficient() {
+        return LIGHTING_COEFFICIENT_FOR_DARK_THEMES;
     }
 }

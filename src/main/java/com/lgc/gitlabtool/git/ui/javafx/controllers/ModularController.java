@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.lgc.gitlabtool.git.ui.javafx.*;
+import javafx.scene.control.*;
 import javafx.scene.effect.Effect;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -77,24 +78,7 @@ import javafx.geometry.*;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.SelectionMode;
-import javafx.scene.control.SelectionModel;
-import javafx.scene.control.SplitPane;
-import javafx.scene.control.ToggleButton;
-import javafx.scene.control.ToolBar;
-import javafx.scene.control.Tooltip;
 import javafx.scene.effect.ColorAdjust;
 import javafx.scene.effect.GaussianBlur;
 import javafx.scene.image.Image;
@@ -1479,30 +1463,23 @@ public class ModularController implements UpdateProgressListener {
         Stream.concat(projectsWindowMainMenuItems.stream(), groupsWindowMainMenuItems.stream())
                 .map(Menu::getItems)
                 .forEach(item -> {
-                    if (_themeService.getCurrentTheme().equals(GLTTheme.DARK_THEME)) {
-                        ColorAdjust colorAdjust = new ColorAdjust();
-                        colorAdjust.setBrightness(+0.65);
-                        item.forEach(q -> q.getGraphic().setEffect(colorAdjust));
-                    } else {
-                        item.forEach(q -> q.getGraphic().setEffect(null));
-                    }
+                    item.forEach(q -> q.getGraphic().setEffect(getLightEffect()));
                 });
 
         Stream<Node> mainToolbarStream = Stream.concat(projectsWindowToolbarItems.stream(), groupsWindowToolbarItems.stream());
         Stream.concat(mainToolbarStream, projectsToolbarItems.stream())
                 .filter(item -> item instanceof Button || item instanceof ToggleButton)
                 .forEach(item -> {
-                    boolean isDarkTheme = _themeService.getCurrentTheme().equals(GLTTheme.DARK_THEME);
-                    ColorAdjust colorAdjust = new ColorAdjust();
-                    colorAdjust.setBrightness(+0.65);
-                    Effect lightEffect = isDarkTheme ? colorAdjust : null;
-
-                    if (item instanceof Button) {
-                        ((Button) item).getGraphic().setEffect(lightEffect);
-                    } else if (item instanceof ToggleButton) {
-                        ((ToggleButton) item).getGraphic().setEffect(lightEffect);
-                    }
+                    ((ButtonBase) item).getGraphic().setEffect(getLightEffect());
                 });
+    }
+
+    private Effect getLightEffect(){
+        boolean isDarkTheme = _themeService.getCurrentTheme().equals(GLTTheme.DARK_THEME);
+        ColorAdjust colorAdjust = new ColorAdjust();
+        colorAdjust.setBrightness(_themeService.getLightningCoefficient());
+
+        return isDarkTheme ? colorAdjust : null;
     }
 
     private void showAboutPopup() {
