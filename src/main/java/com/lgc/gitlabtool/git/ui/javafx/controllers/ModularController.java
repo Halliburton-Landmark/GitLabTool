@@ -596,7 +596,7 @@ public class ModularController implements UpdateProgressListener {
 
         _workIndicatorDialog = new WorkIndicatorDialog(stage, WORK_INDICATOR_START_MESSAGE);
         Runnable selectGroup = () -> {
-            ProjectList.reset();
+            ProjectList.get(null).reset();
             _projectsList = ProjectList.get(_currentGroup);
             resetLoadingProgress();
             if (_projectsList.getProjects() == null) {
@@ -830,7 +830,7 @@ public class ModularController implements UpdateProgressListener {
     private void showCheckoutBranchWindow(ActionEvent event) {
         try {
             List<Project> projects = projectListView.getSelectionModel().getSelectedItems();
-            projects = ProjectList.getCorrectProjects(projects);
+            projects = _projectService.getCorrectProjects(projects);
             if (projects.isEmpty()) {
                 String message = String.format(NO_ANY_PROJECT_FOR_OPERATION, CHECKOUT_BEANCH_OPERATION_NAME);
                 _consoleService.addMessage(message, MessageType.ERROR);
@@ -889,7 +889,7 @@ public class ModularController implements UpdateProgressListener {
     @FXML
     @SuppressWarnings("unused")
     private void onNewBranchButton(ActionEvent actionEvent) {
-        List<Project> clonedProjectsWithoutConflicts = ProjectList.getCorrectProjects(getCurrentProjects());
+        List<Project> clonedProjectsWithoutConflicts = getCorrectCurrentProjects();
         if (!clonedProjectsWithoutConflicts.isEmpty()) {
             CreateNewBranchDialog dialog = new CreateNewBranchDialog(clonedProjectsWithoutConflicts);
             dialog.showAndWait();
@@ -914,7 +914,7 @@ public class ModularController implements UpdateProgressListener {
     @FXML
     @SuppressWarnings("unused")
     private void onPushAction(ActionEvent actionEvent) {
-        List<Project> filteredProjects = ProjectList.getCorrectProjects(getCurrentProjects());
+        List<Project> filteredProjects = getCorrectCurrentProjects();
         if (!filteredProjects.isEmpty()) {
             _backgroundService.runInBackgroundThread(() -> _gitService.push(filteredProjects, PushProgressListener.get()));
         } else {
@@ -925,7 +925,7 @@ public class ModularController implements UpdateProgressListener {
     @FXML
     @SuppressWarnings("unused")
     private void onPullAction(ActionEvent actionEvent) {
-        List<Project> projectsToPull = ProjectList.getCorrectProjects(getCurrentProjects());
+        List<Project> projectsToPull = getCorrectCurrentProjects();
         if (!projectsToPull.isEmpty()) {
             checkChangesAndPull(projectsToPull, new Object());
         } else {
@@ -1122,7 +1122,7 @@ public class ModularController implements UpdateProgressListener {
      * @return list of projects
      */
     private List<Integer> getIdSelectedProjects() {
-        return ProjectList.getIdsProjects(getCurrentProjects());
+        return _projectService.getIdsProjects(getCurrentProjects());
     }
 
     private boolean startClone(List<Project> shadowProjects, String path, CloneProgressDialog progressDialog) {
@@ -1175,7 +1175,7 @@ public class ModularController implements UpdateProgressListener {
         _stateService.stateON(ApplicationState.REVERT);
         _consoleService.addMessage(REVERT_START_MESSAGE, MessageType.SIMPLE);
 
-        List<Project> correctProjects = ProjectList.getCorrectProjects(getCurrentProjects());
+        List<Project> correctProjects = getCorrectCurrentProjects();
         List<Project> projectsWithChanges = _gitService.getProjectsWithChanges(correctProjects);
         _consoleService.addMessage(projectsWithChanges.size() + " selected projects have changes.", MessageType.SIMPLE);
         if (projectsWithChanges.isEmpty()) {
@@ -1189,9 +1189,13 @@ public class ModularController implements UpdateProgressListener {
 
     private List<Project> getUnavailableProjectsForEditingPom(List<Project> projects) {
         return projects.parallelStream()
-                .filter(project -> !ProjectList.projectIsClonedAndWithoutConflicts(project)
+                .filter(project -> !_projectService.projectIsClonedAndWithoutConflicts(project)
                         || !_pomXmlService.hasPomFile(project))
                 .collect(Collectors.toList());
+    }
+
+    private List<Project> getCorrectCurrentProjects() {
+        return _projectService.getCorrectProjects(getCurrentProjects());
     }
 
     private void openProjectFolder(Project project) {
