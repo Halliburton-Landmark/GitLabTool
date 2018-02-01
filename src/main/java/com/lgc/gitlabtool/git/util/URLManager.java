@@ -58,7 +58,7 @@ public class URLManager {
      * @return <code>true</code> if <code>url</code> matches regexp and <code>false</code> if not
      */
     public static boolean isURLValid(String url) {
-        String regexp = "(" + HTTP + "|" + HTTPS + ")?([a-z0-9]*\\.?[a-z0-9]+)+(" + URL_SUFFIX + ")?";
+        String regexp = "(" + HTTP + "|" + HTTPS + ")?([a-z0-9]*\\.?[a-z0-9]+)+(" + URL_SUFFIX + ")?" + "/?";
         return url.matches(regexp);
     }
 

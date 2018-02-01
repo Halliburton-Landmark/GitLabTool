@@ -18,8 +18,8 @@ public enum MessageType {
 
     ERROR, SUCCESS, SIMPLE;
 
-    private static final ThemeService _themeService = (ThemeService) ServiceProvider.getInstance()
-            .getService(ThemeService.class.getName());
+    private static final ThemeService _themeService = ServiceProvider.getInstance()
+            .getService(ThemeService.class);
 
     /**
      * Gets CSS id for type

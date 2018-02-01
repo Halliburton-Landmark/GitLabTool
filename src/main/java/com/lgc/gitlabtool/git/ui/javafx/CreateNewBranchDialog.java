@@ -41,10 +41,10 @@ public class CreateNewBranchDialog extends GLTDialog<String> {
     private static final String STATUS_DIALOG_HEADER = "Branch creating info";
     private static final String CHOOSE_BRANCH_NAME_MESSAGE = "Please choose a new branch name";
 
-    private static final GitService _gitService = (GitService) ServiceProvider.getInstance()
-            .getService(GitService.class.getName());
-    private static final BackgroundService _backgroundService = (BackgroundService) ServiceProvider.getInstance()
-            .getService(BackgroundService.class.getName());
+    private static final GitService _gitService = ServiceProvider.getInstance()
+            .getService(GitService.class);
+    private static final BackgroundService _backgroundService = ServiceProvider.getInstance()
+            .getService(BackgroundService.class);
 
     private final Label _messageLabel;
     private final Label _textLabel;

@@ -23,8 +23,8 @@ public class MainMenuManager {
     private List<Menu> items;
     private Map<String, Boolean> enableMap = new HashMap<>();
 
-    private static final ThemeService _themeService = (ThemeService) ServiceProvider.getInstance()
-            .getService(ThemeService.class.getName());
+    private static final ThemeService _themeService = ServiceProvider.getInstance()
+            .getService(ThemeService.class);
 
     private MainMenuManager() {
     }

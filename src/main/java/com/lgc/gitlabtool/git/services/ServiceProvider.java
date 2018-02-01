@@ -12,7 +12,7 @@ public class ServiceProvider {
 
     private static ServiceProvider _instance;
 
-    private final Map<String, Service> _services;
+    private final Map<Class<? extends Service>, Service> _services;
 
     public static ServiceProvider getInstance() {
         if (_instance == null) {
@@ -21,8 +21,9 @@ public class ServiceProvider {
         return _instance;
     }
 
-    public Service getService(String serviceName) {
-        return _services.get(serviceName);
+    @SuppressWarnings("unchecked")
+    public <T> T getService(Class<? extends Service> service) {
+        return (T) _services.get(service);
     }
 
     private ServiceProvider() {
@@ -42,21 +43,22 @@ public class ServiceProvider {
         ThemeService themeService = new ThemeServiceImpl();
 
         _services = new HashMap<>();
-        _services.put(LoginService.class.getName(), loginService);
-        _services.put(ClonedGroupsService.class.getName(), programPropertiesService);
-        _services.put(GroupsUserService.class.getName(), new GroupsUserServiceImpl(restConnector,
+        _services.put(LoginService.class, loginService);
+        _services.put(ClonedGroupsService.class, programPropertiesService);
+        _services.put(GroupsUserService.class, new GroupsUserServiceImpl(restConnector,
                 programPropertiesService, projectService, stateService, consoleService, jGit));
-        _services.put(ProjectService.class.getName(), projectService);
-        _services.put(StorageService.class.getName(), storageService);
-        _services.put(ReplacementService.class.getName(), new ReplacementServiceImpl());
-        _services.put(PomXMLService.class.getName(), new PomXMLServiceImpl(consoleService, stateService, pomXmlEditService));
-        _services.put(ProjectTypeService.class.getName(), projectTypeService);
-        _services.put(NetworkService.class.getName(), new NetworkServiceImpl(backgroundService));
-        _services.put(GitService.class.getName(), gitService);
-        _services.put(StateService.class.getName(), stateService);
-        _services.put(ConsoleService.class.getName(), consoleService);
-        _services.put(ThemeService.class.getName(), themeService);
-        _services.put(BackgroundService.class.getName(), backgroundService);
+
+        _services.put(ProjectService.class, projectService);
+        _services.put(StorageService.class, storageService);
+        _services.put(ReplacementService.class, new ReplacementServiceImpl());
+        _services.put(PomXMLService.class, new PomXMLServiceImpl(consoleService, stateService, pomXmlEditService));
+        _services.put(ProjectTypeService.class, projectTypeService);
+        _services.put(NetworkService.class, new NetworkServiceImpl(backgroundService));
+        _services.put(GitService.class, gitService);
+        _services.put(StateService.class, stateService);
+        _services.put(ConsoleService.class, consoleService);
+        _services.put(ThemeService.class, themeService);
+        _services.put(BackgroundService.class, backgroundService);
     }
 
     public void stop() {

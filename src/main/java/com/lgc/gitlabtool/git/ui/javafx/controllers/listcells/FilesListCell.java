@@ -39,8 +39,8 @@ public class FilesListCell extends ListCell<ChangedFile> {
     private static final String CLOSE_BRACKETS = "]";
     private static final int PROJECT_FONT = 10;
 
-    private static final ThemeService _themeService = (ThemeService) ServiceProvider.getInstance()
-            .getService(ThemeService.class.getName());
+    private static final ThemeService _themeService = ServiceProvider.getInstance()
+            .getService(ThemeService.class);
 
     @Override
     protected void updateItem(ChangedFile item, boolean empty) {

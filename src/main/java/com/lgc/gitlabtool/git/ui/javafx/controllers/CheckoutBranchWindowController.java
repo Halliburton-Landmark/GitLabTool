@@ -79,22 +79,20 @@ public class CheckoutBranchWindowController extends AbstractStateListener {
     @FXML
     private Button checkoutButton;
 
-    private static final StateService _stateService = (StateService) ServiceProvider.getInstance()
-            .getService(StateService.class.getName());
+    private static final StateService _stateService = ServiceProvider.getInstance().getService(StateService.class);
 
-    private static final ConsoleService _consoleService = (ConsoleService) ServiceProvider.getInstance()
-            .getService(ConsoleService.class.getName());
+    private static final ConsoleService _consoleService = ServiceProvider.getInstance().getService(ConsoleService.class);
 
-    private static final BackgroundService _backgroundService = (BackgroundService) ServiceProvider.getInstance()
-            .getService(BackgroundService.class.getName());
+    private static final BackgroundService _backgroundService = ServiceProvider.getInstance()
+            .getService(BackgroundService.class);
 
-    private static final GitService _gitService = (GitService) ServiceProvider.getInstance()
-            .getService(GitService.class.getName());
+    private static final GitService _gitService = ServiceProvider.getInstance().getService(GitService.class);
 
     private static final ThemeService _themeService = (ThemeService) ServiceProvider.getInstance()
-            .getService(ThemeService.class.getName());
+            .getService(ThemeService.class);
 
-    private static final String ALREADY_CHECKOUTED_MESSAGE = "%d of %d projects have already checked out the selected branch.";
+    private static final String ALREADY_CHECKED_OUT_MESSAGE = "%d of %d projects have already checked out the selected branch.";
+
 
     {
         _stateService.addStateListener(ApplicationState.LOAD_PROJECTS, this);
@@ -134,7 +132,7 @@ public class CheckoutBranchWindowController extends AbstractStateListener {
         int numberSelected = selectedProjects.size();
         if (correctProjects.size() != numberSelected) {
             _consoleService.addMessage(
-                    String.format(ALREADY_CHECKOUTED_MESSAGE, numberSelected - correctProjects.size(), numberSelected),
+                    String.format(ALREADY_CHECKED_OUT_MESSAGE, numberSelected - correctProjects.size(), numberSelected),
                     MessageType.ERROR);
         }
 

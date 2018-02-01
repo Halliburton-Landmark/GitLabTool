@@ -35,8 +35,8 @@ public class ToolbarManager {
 
     private List<Node> items;
 
-    private static final ThemeService _themeService = (ThemeService) ServiceProvider.getInstance()
-            .getService(ThemeService.class.getName());
+    private static final ThemeService _themeService = ServiceProvider.getInstance()
+            .getService(ThemeService.class);
 
     private ToolbarManager() {
     }

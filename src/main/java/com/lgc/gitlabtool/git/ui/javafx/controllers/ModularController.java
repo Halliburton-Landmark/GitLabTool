@@ -179,35 +179,35 @@ public class ModularController implements UpdateProgressListener {
      *
      */
     //region SERVICES
-    private static final ConsoleService _consoleService = (ConsoleService) ServiceProvider.getInstance()
-            .getService(ConsoleService.class.getName());
+    private static final ConsoleService _consoleService = ServiceProvider.getInstance()
+            .getService(ConsoleService.class);
 
-    private static final GroupsUserService _groupService = (GroupsUserService) ServiceProvider.getInstance()
-            .getService(GroupsUserService.class.getName());
+    private static final GroupsUserService _groupService = ServiceProvider.getInstance()
+            .getService(GroupsUserService.class);
 
-    private static final StateService _stateService = (StateService) ServiceProvider.getInstance()
-            .getService(StateService.class.getName());
+    private static final StateService _stateService = ServiceProvider.getInstance()
+            .getService(StateService.class);
 
-    private static final ClonedGroupsService _clonedGroupsService = (ClonedGroupsService) ServiceProvider.getInstance()
-            .getService(ClonedGroupsService.class.getName());
+    private static final ClonedGroupsService _clonedGroupsService = ServiceProvider.getInstance()
+            .getService(ClonedGroupsService.class);
 
-    private static final ProjectService _projectService = (ProjectService) ServiceProvider.getInstance()
-            .getService(ProjectService.class.getName());
+    private static final ProjectService _projectService = ServiceProvider.getInstance()
+            .getService(ProjectService.class);
 
-    private static final LoginService _loginService = (LoginService) ServiceProvider.getInstance()
-            .getService(LoginService.class.getName());
+    private static final LoginService _loginService = ServiceProvider.getInstance()
+            .getService(LoginService.class);
 
-    private static final GitService _gitService = (GitService) ServiceProvider.getInstance()
-            .getService(GitService.class.getName());
+    private static final GitService _gitService = ServiceProvider.getInstance()
+            .getService(GitService.class);
 
-    private static final PomXMLService _pomXmlService = (PomXMLService) ServiceProvider.getInstance()
-            .getService(PomXMLService.class.getName());
+    private static final PomXMLService _pomXmlService = ServiceProvider.getInstance()
+            .getService(PomXMLService.class);
 
     private static final ThemeService _themeService = (ThemeService) ServiceProvider.getInstance()
-            .getService(ThemeService.class.getName());
+            .getService(ThemeService.class);
 
-    private static final BackgroundService _backgroundService = (BackgroundService) ServiceProvider.getInstance()
-            .getService(BackgroundService.class.getName());
+    private static final BackgroundService _backgroundService = ServiceProvider.getInstance()
+            .getService(BackgroundService.class);
 
     //endregion
     /*

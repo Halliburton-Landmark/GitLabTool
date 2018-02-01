@@ -37,11 +37,10 @@ public class CloningGroupsWindowController {
     // Uncomment if you want to log something
     // private static final Logger logger = LogManager.getLogger(CloningGroupsWindowController.class);
 
-    private final LoginService _loginService = (LoginService) ServiceProvider.getInstance()
-            .getService(LoginService.class.getName());
+    private final LoginService _loginService = ServiceProvider.getInstance().getService(LoginService.class);
 
-    private final GroupsUserService _groupsService = (GroupsUserService) ServiceProvider.getInstance()
-            .getService(GroupsUserService.class.getName());
+    private final GroupsUserService _groupsService = ServiceProvider.getInstance()
+            .getService(GroupsUserService.class);
 
     @FXML
     private TextField folderPath;

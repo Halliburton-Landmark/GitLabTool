@@ -43,8 +43,8 @@ public class ProjectListCell extends ListCell<Project> {
     private final String LEFT_BRACKET = "[";
     private final String RIGHT_BRACKET = "]";
 
-    private static final ThemeService _themeService = (ThemeService) ServiceProvider.getInstance()
-            .getService(ThemeService.class.getName());
+    private static final ThemeService _themeService = ServiceProvider.getInstance()
+            .getService(ThemeService.class);
 
     @Override
     protected void updateItem(Project item, boolean empty) {

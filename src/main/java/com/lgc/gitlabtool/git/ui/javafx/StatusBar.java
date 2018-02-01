@@ -26,8 +26,7 @@ import javafx.scene.layout.HBox;
  */
 public class StatusBar extends HBox implements StateListener {
 
-    private static final StateService _stateService =
-            (StateService) ServiceProvider.getInstance().getService(StateService.class.getName());
+    private static final StateService _stateService = ServiceProvider.getInstance().getService(StateService.class);
 
     private static final double STATUS_BAR_HEIGHT = 15.0;
     private static final int ELEMENTS_SPACING = 5;
@@ -81,9 +80,8 @@ public class StatusBar extends HBox implements StateListener {
 
     private String getStatusChain() {
         List<ApplicationState> activeStates = _stateService.getActiveStates();
-        String status = activeStates.stream()
-                                    .map(elem -> elem.toString())
-                                    .collect(Collectors.joining(", "));
-        return status;
+        return activeStates.stream()
+                           .map(ApplicationState::toString)
+                           .collect(Collectors.joining(", "));
     }
 }

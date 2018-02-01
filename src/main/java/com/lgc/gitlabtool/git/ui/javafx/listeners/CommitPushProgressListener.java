@@ -12,8 +12,7 @@ public class CommitPushProgressListener implements ProgressListener {
 
     private static final Logger _logger = LogManager.getLogger(CommitPushProgressListener.class);
 
-    private final StateService _stateService = (StateService) ServiceProvider.getInstance()
-            .getService(StateService.class.getName());
+    private final StateService _stateService = ServiceProvider.getInstance().getService(StateService.class);
 
     private final ApplicationState _currentState;
 

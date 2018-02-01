@@ -29,8 +29,8 @@ public class GLTAlert extends Alert {
 
     private final static AlertType DEFAULT_TYPE = AlertType.INFORMATION;
 
-    private static final ThemeService _themeService = (ThemeService) ServiceProvider.getInstance()
-            .getService(ThemeService.class.getName());
+    private static final ThemeService _themeService = ServiceProvider.getInstance()
+            .getService(ThemeService.class);
 
     /**
      * Creates an alert with the given AlertType
@@ -125,5 +125,13 @@ public class GLTAlert extends Alert {
      */
     public void addButtons(ButtonType... buttonTypes) {
         getDialogPane().getButtonTypes().addAll(buttonTypes);
+    }
+
+    /**
+     * Removes default buttons on dialog.
+     * You can add own {@link ButtonType}s using com.lgc.gitlabtool.git.ui.javafx.GLTAlert.addButtons(ButtonType...).
+     */
+    public void clearDefaultButtons() {
+        getDialogPane().getButtonTypes().clear();
     }
 }

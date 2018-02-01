@@ -26,11 +26,7 @@ public class ConsoleController implements UpdateConsoleListener {
     private ScrollPane _scrollPane;
 
     private static ConsoleController _consoleController;
-    private static ConsoleService _consoleService;
-
-    static {
-        _consoleService = (ConsoleService) ServiceProvider.getInstance().getService(ConsoleService.class.getName());
-    }
+    private static ConsoleService _consoleService = ServiceProvider.getInstance().getService(ConsoleService.class);
 
     private ConsoleController() {
         _consoleController = this;

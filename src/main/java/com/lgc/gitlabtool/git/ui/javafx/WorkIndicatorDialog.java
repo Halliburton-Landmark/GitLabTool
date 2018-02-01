@@ -44,8 +44,6 @@ public class WorkIndicatorDialog {
     private final int initWidth = 300;
     private final int initHeight = 100;
 
-    private static final ThemeService _themeService = (ThemeService) ServiceProvider.getInstance()
-            .getService(ThemeService.class.getName());
     /**
      * Constructor
      *

@@ -23,8 +23,6 @@ import javafx.scene.control.DialogPane;
  * @author Lyudmila Lyska
  */
 public class AlertWithCheckBox extends GLTAlert {
-    private static final ThemeService _themeService = (ThemeService) ServiceProvider.getInstance()
-            .getService(ThemeService.class.getName());
 
     private CheckBox _optOut;
 

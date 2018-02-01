@@ -327,6 +327,40 @@ public class GitServiceImplTest {
         assertEquals(modifiedFiles.size(), files.size());
     }
 
+    @Test
+    public void testGetTrackingBranchCorrectValue() {
+        _stubProject = Mockito.mock(Project.class);
+        when(_jGit.getTrackingBranch(_stubProject)).thenReturn(JGitStatus.SUCCESSFUL.toString());
+
+        String result = _gitService.getTrackingBranch(_stubProject);
+
+        assertEquals(result, JGitStatus.SUCCESSFUL.toString());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void replaceWithHEADRevisionNullParameter() {
+        _gitService.replaceWithHEADRevision(null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void replaceWithHEADRevisionEmptyListParameter() {
+        _gitService.replaceWithHEADRevision(Collections.emptyList());
+    }
+
+    @Test
+    public void replaceWithHEADRevisionSuccessfully() {
+        Collection<ChangedFile> changedFiles = getChangedFiles();
+
+        _gitService.replaceWithHEADRevision(changedFiles);
+    }
+
+    @Test
+    public void replaceWithHEADRevisionNullCheck() {
+        Collection<ChangedFile> changedFiles = getChangedFiles(); // correct files
+        changedFiles.addAll(Arrays.asList(null, null, null));
+
+        _gitService.replaceWithHEADRevision(changedFiles); // we check that we won't get NPE
+    }
 
     /*********************************************************************************************************/
 
@@ -366,11 +400,5 @@ public class GitServiceImplTest {
         map.put(new Project(), Collections.emptyList()); // some incorrect value
         map.put(project, getChangedFiles());
         return map;
-    }
-
-    @Test
-    public void testGetTrackingBranch() {
-        _stubProject = Mockito.mock(Project.class);
-        when(_jGit.getTrackingBranch(_stubProject)).thenReturn(JGitStatus.SUCCESSFUL.toString());
     }
 }

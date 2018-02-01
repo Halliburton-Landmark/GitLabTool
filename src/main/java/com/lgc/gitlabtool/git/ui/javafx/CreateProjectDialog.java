@@ -54,23 +54,19 @@ public class CreateProjectDialog extends GLTDialog<String> {
     private final ProgressBar _progressBar = new ProgressBar();
     private final NameValidator _validator = NameValidator.get();
 
-    private static final ProjectTypeService _typeServices = (ProjectTypeService) ServiceProvider.getInstance()
-            .getService(ProjectTypeService.class.getName());
+    private static final ProjectTypeService _typeServices = ServiceProvider.getInstance()
+            .getService(ProjectTypeService.class);
 
-    private static final ProjectService _projectService =
-            (ProjectService) ServiceProvider.getInstance().getService(ProjectService.class.getName());
+    private static final ProjectService _projectService = ServiceProvider.getInstance()
+            .getService(ProjectService.class);
 
-    private final StateService _stateService = (StateService) ServiceProvider.getInstance()
-            .getService(StateService.class.getName());
+    private final StateService _stateService = ServiceProvider.getInstance().getService(StateService.class);
 
-    private static final ConsoleService _consoleService = (ConsoleService) ServiceProvider.getInstance()
-            .getService(ConsoleService.class.getName());
-
-    private static final ThemeService _themeService = (ThemeService) ServiceProvider.getInstance()
-            .getService(ThemeService.class.getName());
+    private static final ConsoleService _consoleService = ServiceProvider.getInstance()
+            .getService(ConsoleService.class);
 
     private static final BackgroundService _backgroundService = (BackgroundService) ServiceProvider.getInstance()
-            .getService(BackgroundService.class.getName());
+            .getService(BackgroundService.class);
 
     private final GridPane grid = new GridPane();
 

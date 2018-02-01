@@ -51,14 +51,14 @@ public class EditProjectPropertiesController extends AbstractStateListener {
     private static final String EDITING_REPO_HEADER_MESSAGE = "Editing repository status";
     private static final String REMOVING_REPO_HEADER_MESSAGE = "Removing repository status";
 
-    private static final PomXMLService _pomXmlService = (PomXMLService) ServiceProvider.getInstance()
-            .getService(PomXMLService.class.getName());
+    private static final PomXMLService _pomXmlService = ServiceProvider.getInstance()
+            .getService(PomXMLService.class);
 
-    private static final StateService _stateService = (StateService) ServiceProvider.getInstance()
-            .getService(StateService.class.getName());
+    private static final StateService _stateService = ServiceProvider.getInstance()
+            .getService(StateService.class);
 
-    private static final BackgroundService _backgroundService = (BackgroundService) ServiceProvider.getInstance()
-            .getService(BackgroundService.class.getName());
+    private static final BackgroundService _backgroundService = ServiceProvider.getInstance()
+            .getService(BackgroundService.class);
 
     private Stage _stage;
 

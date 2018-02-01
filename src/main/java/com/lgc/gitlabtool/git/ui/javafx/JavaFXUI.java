@@ -45,11 +45,7 @@ public class JavaFXUI extends Application implements UserInterface {
     private static final String CONTENT_STATE_PREFIX_MESSAGE ="Unfinished operations: ";
     private static final String EXIT_BUTTON_NAME = "Exit";
 
-    private static final StateService _stateService = (StateService) ServiceProvider.getInstance()
-            .getService(StateService.class.getName());
-
-    private static final ThemeService _themeService = (ThemeService) ServiceProvider.getInstance()
-            .getService(ThemeService.class.getName());
+    private static final StateService _stateService = ServiceProvider.getInstance().getService(StateService.class);
 
     private Image appIcon;
     private Stage mainStage;

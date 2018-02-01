@@ -23,8 +23,7 @@ import javafx.scene.control.ButtonType;
  */
 public class ChangesCheckDialog extends GLTAlert {
 
-    private final GitService _gitService =
-            (GitService) ServiceProvider.getInstance().getService(GitService.class.getName());
+    private final GitService _gitService = ServiceProvider.getInstance().getService(GitService.class);
 
     private static final String STATUS_DISCARD_DIALOG_TITLE = "Discarding changes status";
     private static final String STATUS_DISCARD_DIALOG_HEADER = "Discarding changes info";
@@ -104,7 +103,7 @@ public class ChangesCheckDialog extends GLTAlert {
      * Launches the instance of this dialog and provides different
      * actions depends on pushed button type.
      * <p>
-     * If button type equals to commit button the {@link CommitDialog} will be invoked and
+     * If button type equals to commit button the GitStaging window will be invoked and
      * after that the code from <code>biConsumer</code> will be executed</br>
      * If button type equals to discard button the discard logic will be run
      * and after that the code from <code>biConsumer</code> will be executed</br>
