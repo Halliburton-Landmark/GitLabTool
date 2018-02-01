@@ -846,7 +846,7 @@ public class ModularController implements UpdateProgressListener {
     private void showStashWindow(ActionEvent event) {
         try {
             List<Project> selectedProjects = projectListView.getSelectionModel().getSelectedItems();
-            if (selectedProjects.isEmpty()) { // if nothing selected in a list then all projects is loaded
+            if (selectedProjects.isEmpty()) { // if nothing selected in a list then all projects are loaded
                 selectedProjects = ProjectList.getCorrectProjects(projectListView.getItems());
                 if (selectedProjects.isEmpty()) {
                     String message = String.format(NO_ANY_PROJECT_FOR_OPERATION, STASH_OPERATION_NAME);
@@ -860,6 +860,10 @@ public class ModularController implements UpdateProgressListener {
             Parent root = loader.load();
 
             StashWindowController stashWindowController  = loader.getController();
+            if(stashWindowController == null) {
+                _logger.error("Failed getting StashWindowController.");
+                return;
+            }
             stashWindowController.beforeShowing(ProjectList.getIdsProjects(selectedProjects));
 
             Scene scene = new Scene(root);
@@ -868,18 +872,7 @@ public class ModularController implements UpdateProgressListener {
             stage.getIcons().add(_appIcon);
             stage.setTitle("Stash changes");
             stage.initModality(Modality.APPLICATION_MODAL);
-            stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
-                @Override
-                public void handle(WindowEvent event) {
-                    List<ApplicationState> activeAtates = _stateService.getActiveStates();
-                    if (!activeAtates.isEmpty() && activeAtates.contains(ApplicationState.STASH)) {
-                        event.consume();
-                        JavaFXUI.showWarningAlertForActiveStates(activeAtates);
-                        return;
-                    }
-                    stashWindowController.dispose();
-                }
-            });
+            stage.setOnCloseRequest(new StashEventHandler(stashWindowController));
 
             /* Set size and position */
             Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
@@ -1643,6 +1636,27 @@ public class ModularController implements UpdateProgressListener {
                 projectListView.refresh();
             }
         }
+    }
+
+    class StashEventHandler implements EventHandler<WindowEvent> {
+
+        private final StashWindowController _stashWindowController;
+
+        public StashEventHandler(StashWindowController stashWindowController) {
+            _stashWindowController = stashWindowController;
+        }
+
+        @Override
+        public void handle(WindowEvent event) {
+            List<ApplicationState> activeAtates = _stateService.getActiveStates();
+            if (!activeAtates.isEmpty() && activeAtates.contains(ApplicationState.STASH)) {
+                event.consume();
+                JavaFXUI.showWarningAlertForActiveStates(activeAtates);
+                return;
+            }
+            _stashWindowController.dispose();
+        }
+
     }
 
     //endregion
