@@ -22,9 +22,12 @@ import java.util.Set;
 
 import org.eclipse.jgit.api.Status;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.ProjectStatus;
@@ -34,6 +37,9 @@ import com.lgc.gitlabtool.git.jgit.ChangedFileType;
 import com.lgc.gitlabtool.git.jgit.ChangedFilesUtils;
 import com.lgc.gitlabtool.git.jgit.JGit;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
+import com.lgc.gitlabtool.git.jgit.stash.GroupStash;
+import com.lgc.gitlabtool.git.jgit.stash.SingleProjectStash;
+import com.lgc.gitlabtool.git.jgit.stash.Stash;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 
 public class GitServiceImplTest {
@@ -42,15 +48,17 @@ public class GitServiceImplTest {
     private Project _stubProject;
 
     private StateService _stateService;
+    private ConsoleService _consoleService;
     private JGit _jGit;
     private ChangedFilesUtils _changedFilesUtilsMock;
 
     @Before
     public void init() {
         _stateService = Mockito.mock(StateService.class);
+        _consoleService = Mockito.mock(ConsoleService.class);
         _jGit = Mockito.mock(JGit.class);
         _changedFilesUtilsMock = Mockito.mock(ChangedFilesUtils.class);
-        _gitService = new GitServiceImpl(_stateService, _jGit, _changedFilesUtilsMock);
+        _gitService = new GitServiceImpl(_stateService, _consoleService, _jGit, _changedFilesUtilsMock);
     }
 
     @After
@@ -362,7 +370,197 @@ public class GitServiceImplTest {
         _gitService.replaceWithHEADRevision(changedFiles); // we check that we won't get NPE
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void createStashNullList() {
+        _gitService.createStash(null, "test", true);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void createStashEmptyList() {
+        _gitService.createStash(new ArrayList<>(), "test", false);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void createStashNullStashMessageList() {
+        _gitService.createStash(getProjects(), null, true);
+    }
+
+    @Test
+    public void createStashFailedResultForOneProject() {
+       Project clonedProject = getClonedProject();
+       List<Project> projects = Arrays.asList(clonedProject);
+       String stashMessage = "test message";
+       when(_jGit.stashCreate(clonedProject, stashMessage, true)).thenReturn(false);
+
+       Map<Project, Boolean> result = _gitService.createStash(projects, stashMessage, true);
+
+       assertFalse(result.get(clonedProject));
+    }
+
+    @Test
+    public void createStashFailedResultForSomeProject() {
+       Project firstProject = getClonedProject();
+       Project secondProject = new Project();
+       List<Project> projects = Arrays.asList(firstProject, secondProject, null);
+       String stashMessage = "test message";
+       when(_jGit.stashCreate(any(Project.class), eq(stashMessage), eq(true))).thenReturn(false);
+
+       Map<Project, Boolean> result = _gitService.createStash(projects, stashMessage, true);
+
+       assertFalse(result.get(firstProject));
+       assertFalse(result.get(secondProject));
+       assertEquals(result.size(), projects.size()-1);
+    }
+
+    @Test
+    public void createStashSuccessffulResultForOneProject() {
+       Project clonedProject = getClonedProject();
+       List<Project> projects = Arrays.asList(clonedProject);
+       String stashMessage = "test message";
+       when(_jGit.stashCreate(clonedProject, stashMessage, true)).thenReturn(true);
+
+       Map<Project, Boolean> result = _gitService.createStash(projects, stashMessage, true);
+
+       assertTrue(result.get(clonedProject));
+    }
+
+    @Test
+    public void createStashSuccessffulResultForSomeProject() {
+       List<Project> projects = getProjects();
+       when(_jGit.stashCreate(any(Project.class), any(String.class), eq(true))).thenReturn(true);
+
+       Map<Project, Boolean> result = _gitService.createStash(projects, "test message", true);
+
+       assertEquals(projects.size()-1, result.size());
+       assertEquals(getCountSuccessForList(projects), getCountSuccessForMap(result));
+    }
+
+    @Test
+    public void getStashListNullList() {
+        assertTrue(_gitService.getStashList(null).isEmpty());
+    }
+
+    @Test
+    public void getStashListEmptyList() {
+        assertTrue(_gitService.getStashList(new ArrayList<>()).isEmpty());
+    }
+
+    @Test
+    public void getStashListFailedResult() {
+        List<Project> projects = getProjects();
+        when(_jGit.getStashes(any(Project.class))).thenReturn(new ArrayList<>());
+
+        List<Stash> result = _gitService.getStashList(projects);
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void getStashListSuccessffulResult() {
+        List<Project> projects = getProjects();
+        List<SingleProjectStash> stashes = getStashesWithoutGroup();
+        when(_jGit.getStashes(any(Project.class))).thenReturn(stashes);
+
+        List<Stash> result = _gitService.getStashList(projects);
+
+        assertFalse(result.isEmpty());
+    }
+
+    @Test
+    public void applyStashNullStashItem() {
+        StashApplyListener progressListener = new StashApplyListener();
+
+        _gitService.applyStashes(null, progressListener);
+
+        Assert.assertFalse(progressListener.isSuccessfully());
+    }
+
+    @Test
+    public void applyStashFailedResult() {
+        StashApplyListener progressListener = new StashApplyListener();
+        Mockito.doNothing().when(_jGit);
+
+        _gitService.applyStashes(new SingleProjectStash("test", "test", getClonedProject()), progressListener);
+
+        assertFalse(progressListener.isSuccessfully());
+    }
+
+    @Test
+    public void applyStashSucccessffulResult() {
+        StashApplyListener progressListener = new StashApplyListener();
+        GroupStash groupStash = new GroupStash("test message");
+        groupStash.addStash(new SingleProjectStash("test1", "test message", getClonedProject()));
+        groupStash.addStash(new SingleProjectStash("test2", "test message", getClonedProject("new path")));
+        groupStash.addStash(null);
+        groupStash.addStash(new SingleProjectStash(null, null, null));
+
+        Mockito.doAnswer(new Answer<Object>() {
+            @Override
+            public Object answer(InvocationOnMock invocation){
+                Object[] args = invocation.getArguments();
+                if (args[1] instanceof StashApplyListener) {
+                    StashApplyListener listener = (StashApplyListener) args[1];
+                    listener.onSuccess();
+                }
+                return null;
+             }
+         }).when(_jGit).stashApply(any(SingleProjectStash.class), eq(progressListener));
+
+        _gitService.applyStashes(groupStash, progressListener);
+
+         assertTrue(progressListener.isSuccessfully());
+    }
+
+
     /*********************************************************************************************************/
+
+    class StashApplyListener implements ProgressListener {
+
+        boolean resultOperation = false;
+
+        @Override
+        public void onSuccess(Object... t) {
+            resultOperation = true;
+        }
+
+        @Override
+        public void onStart(Object... t) {}
+
+        @Override
+        public void onFinish(Object... t) {}
+
+        @Override
+        public void onError(Object... t) {}
+
+        public boolean isSuccessfully() {
+            return resultOperation;
+        }
+    }
+
+    private int getCountSuccessForMap(Map<Project, Boolean> result) {
+        return (int) result.entrySet().stream().filter(entry -> entry.getValue()).count();
+    }
+
+    private int getCountSuccessForList(List<Project> result) {
+        return (int) result.stream().filter(project -> project != null && project.isCloned()).count();
+    }
+
+    private List<SingleProjectStash> getStashesWithoutGroup() {
+        SingleProjectStash firstStash = new SingleProjectStash("first", "[GS0112181412] test", getClonedProject());
+        SingleProjectStash secondStash = new SingleProjectStash("second", "[GS0112181412] test", getClonedProject());
+        SingleProjectStash thirdStash = new SingleProjectStash("second", "test 3", new Project());
+        SingleProjectStash fourthStash = new SingleProjectStash("second", "test 4", getClonedProject("new path 2"));
+        return Arrays.asList(firstStash, secondStash, thirdStash, fourthStash);
+    }
+
+    private List<Project> getProjects() {
+        List<Project> projects = new ArrayList<>();
+        projects.add(getClonedProject("new path"));
+        projects.add(new Project());
+        projects.add(getClonedProject());
+        projects.add(null);
+        return projects;
+    }
 
     private Optional<Status> getIncorrectStatus() {
         return Optional.empty();
@@ -373,6 +571,14 @@ public class GitServiceImplTest {
         project.setClonedStatus(true);
         project.setProjectStatus(new ProjectStatus());
         project.setPathToClonedProject(".");
+        return project;
+    }
+
+    private Project getClonedProject(String path) {
+        Project project = new Project();
+        project.setClonedStatus(true);
+        project.setProjectStatus(new ProjectStatus());
+        project.setPathToClonedProject(path);
         return project;
     }
 

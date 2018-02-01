@@ -13,6 +13,7 @@ import com.lgc.gitlabtool.git.entities.ProjectStatus;
 import com.lgc.gitlabtool.git.jgit.BranchType;
 import com.lgc.gitlabtool.git.jgit.ChangedFile;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
+import com.lgc.gitlabtool.git.jgit.stash.Stash;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 
 /**
@@ -225,4 +226,38 @@ public interface GitService extends Service {
      * @param changedFiles the files for replacing
      */
     void replaceWithHEADRevision(Collection<ChangedFile> changedFiles);
+
+   /**
+    * Creates stash for projects
+    *
+    * @param  projects the cloned projects
+    * @param  stashMessage the stash message
+    * @param  includeUntracked <code>true</code> if need to include untracked file to stash, otherwise <code>false</code>
+    * @return a map of operation statuses
+    */
+   Map<Project, Boolean> createStash(List<Project> projects, String stashMessage, boolean includeUntracked);
+
+   /**
+    * Gets list of stashes for projects
+    *
+    * @param  projects  the cloned projects
+    * @return a list of projects' stashes
+    */
+   List<Stash> getStashList(List<Project> projects);
+
+   /**
+    * Applies stash for the project
+    *
+    * @param stash the stash for applying
+    * @param progressListener the listener for obtaining data on the process of performing the operation
+    */
+   void applyStashes(Stash stash, ProgressListener progressListener);
+
+   /**
+    * Drops stash from the project
+    *
+    * @param  stash the stash which need to drop
+    * @return a map of operation statuses
+    */
+   Map<Project, Boolean> stashDrop(Stash stash);
 }
