@@ -1328,8 +1328,8 @@ public class ModularController implements UpdateProgressListener {
      */
     private MenuItem createMenuItem(GLToolButtons button, EventHandler<ActionEvent> onAction) {
         MenuItem item = new MenuItem(button.getText());
-        Image itemImage = new Image(getClass().getClassLoader().getResource(button.getIconUrl()).toExternalForm());
-        item.setGraphic(new ImageView(itemImage));
+        ImageView itemImageView = _themeService.getStyledImageView(button.getIconUrl());
+        item.setGraphic(itemImageView);
         item.setOnAction(onAction);
         return item;
     }
