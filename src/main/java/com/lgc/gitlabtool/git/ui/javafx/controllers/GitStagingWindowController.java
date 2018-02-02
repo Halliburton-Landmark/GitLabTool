@@ -26,7 +26,6 @@ import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.javafx.GLTAlert;
-import com.lgc.gitlabtool.git.ui.javafx.JavaFXUI;
 import com.lgc.gitlabtool.git.ui.javafx.StatusDialog;
 import com.lgc.gitlabtool.git.ui.javafx.comparators.ChangedFileStatusComparator;
 import com.lgc.gitlabtool.git.ui.javafx.comparators.DefaultTypeComparator;
@@ -68,7 +67,6 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
 
 public class GitStagingWindowController extends AbstractStateListener {
 
@@ -114,11 +112,8 @@ public class GitStagingWindowController extends AbstractStateListener {
     private static final String DELETE_BUTTON_NAME = "Delete untracked/added files";
 
     private static final GitService _gitService = ServiceProvider.getInstance().getService(GitService.class);
-
     private static final StateService _stateService = ServiceProvider.getInstance().getService(StateService.class);
-
-    private static final BackgroundService _backgroundService = ServiceProvider.getInstance()
-            .getService(BackgroundService.class);
+    private static final BackgroundService _backgroundService = ServiceProvider.getInstance().getService(BackgroundService.class);
 
     private final List<Integer> _selectedProjectIds = new ArrayList<>();
     private final ProjectList _projectList = ProjectList.get(null);
@@ -172,16 +167,6 @@ public class GitStagingWindowController extends AbstractStateListener {
     public List<ApplicationState> getStagingStates() {
         return _stagingStates;
     }
-
-    public final EventHandler<WindowEvent> confirmCloseEventHandler = event -> {
-        List<ApplicationState> activeAtates = _stateService.getActiveStates();
-        if (!activeAtates.isEmpty() || activeAtates.contains(_stagingStates)) {
-            event.consume();
-            JavaFXUI.showWarningAlertForActiveStates(activeAtates);
-            return;
-        }
-        isDisposed();
-    };
 
     private void updateDisableButton() {
         BooleanBinding progressProperty = _progressLabel.textProperty().isNotEmpty();

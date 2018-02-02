@@ -10,10 +10,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -29,6 +31,7 @@ import org.eclipse.jgit.api.ResetCommand;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.CheckoutConflictException;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.InvalidRefNameException;
 import org.eclipse.jgit.api.errors.JGitInternalException;
 import org.eclipse.jgit.dircache.DirCache;
 import org.eclipse.jgit.dircache.DirCacheCheckout;
@@ -51,7 +54,9 @@ import com.lgc.gitlabtool.git.connections.token.CurrentUser;
 import com.lgc.gitlabtool.git.entities.Branch;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.User;
+import com.lgc.gitlabtool.git.jgit.stash.SingleProjectStash;
 import com.lgc.gitlabtool.git.services.BackgroundService;
+import com.lgc.gitlabtool.git.services.EmptyProgressListener;
 import com.lgc.gitlabtool.git.services.ProgressListener;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 import com.lgc.gitlabtool.git.util.PathUtilities;
@@ -74,6 +79,7 @@ public class JGit {
     private static final String CANCEL_CLONE_MESSAGE = "Cloning process was canceled.";
     private static final String ORIGIN_PREFIX = "origin/";
     private static final String WRONG_PARAMETERS = "Wrong parameters for obtaining branches.";
+    private static final int NOT_FOUND = -1;
 
     private final BackgroundService _backgroundService;
 
@@ -150,6 +156,118 @@ public class JGit {
             mergeCollections(branches, shortNamesBranches, onlyCommon);
         });
         return branches;
+    }
+
+    /**
+     * Creates stash for the project
+     *
+     * @param  project the cloned project
+     * @param  stashMessage the stash message. Cannot be null
+     * @param  includeUntracked <code>true</code> if need to include untracked file to stash, otherwise <code>false</code>
+     * @return <code>true</code> if stash was created successfully, otherwise <code>false</code>
+     */
+    public boolean stashCreate(Project project, String stashMessage, boolean includeUntracked) {
+        if (project != null && project.isCloned() && stashMessage != null) {
+            try (Git git = getGit(project.getPath())) {
+                RevCommit stash = git.stashCreate()
+                                     .setWorkingDirectoryMessage(stashMessage)
+                                     .setIncludeUntracked(includeUntracked)
+                                     .call();
+                return stash != null;
+            } catch (GitAPIException | IOException e) {
+                logger.error("Failed creating stash for " + project.getName() + " project: " + e.getMessage());
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Gets list of project's stashes
+     *
+     * @param project the cloned project
+     * @return a list of stashes
+     */
+    public List<SingleProjectStash> getStashes(Project project) {
+        List<SingleProjectStash> list = new ArrayList<>();
+        if (project != null && project.isCloned()) {
+            try (Git git = getGit(project.getPath())) {
+                Collection<RevCommit> revCommits = getStashList(git);
+                return revCommits.stream()
+                                 .filter(Objects::nonNull)
+                                 .map(revCommit -> getStash(revCommit, project))
+                                 .collect(Collectors.toList());
+            } catch (GitAPIException | IOException e) {
+                logger.error("Failed getting list of stashes for " + project.getName() + " project: " + e.getMessage());
+            }
+        }
+        return list;
+    }
+
+    /**
+     * Applies stash for the project
+     *
+     * @param  stash the stash for applying
+     * @param  progressListener the listener for obtaining data on the process of performing the operation.
+     */
+    public void stashApply(SingleProjectStash stash, ProgressListener progressListener) {
+        if (progressListener == null) {
+            progressListener = EmptyProgressListener.get();
+        }
+        if (stash == null || stash.getProject() == null || !stash.getProject().isCloned()
+                || stash.getName() == null || stash.getName().isEmpty()) {
+            progressListener.onError("Incorrect values");
+            return;
+        }
+        Project project = stash.getProject();
+        String stashName = stash.getName();
+        try (Git git = getGit(project.getPath())) {
+            git.stashApply()
+               .setStashRef(stashName)
+               .call();
+            progressListener.onSuccess(project);
+        } catch (GitAPIException | IOException e) {
+            progressListener.onError("Failed applying stash for " + project.getName() + " project: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Drops stash by name from a list
+     *
+     * @param  project the cloned project
+     * @param  stashName the stash name
+     * @return <code>true</code> if stash was dropped successfully, otherwise <code>false</code>
+     */
+    public boolean stashDrop(Project project, String stashName) {
+        if (project != null && project.isCloned() && stashName != null) {
+            try (Git git = getGit(project.getPath())) {
+                int indexOfStash = getIndexInList(git, stashName);
+                if (indexOfStash != NOT_FOUND) {
+                    git.stashDrop()
+                       .setStashRef(indexOfStash)
+                       .call();
+                    return true;
+                }
+            } catch (GitAPIException | IOException e) {
+                logger.error("Failed droping stash for " + project.getName() + " project: " + e.getMessage());
+            }
+        }
+        return false;
+    }
+
+    SingleProjectStash getStash(RevCommit revCommit, Project project) {
+        return new SingleProjectStash(revCommit.getName(), revCommit.getFullMessage(), project);
+    }
+
+    int getIndexInList(Git git, String stashName) throws InvalidRefNameException, GitAPIException {
+        List<RevCommit> revCommits = new ArrayList<>(getStashList(git));
+        return IntStream.range(0, revCommits.size())
+                        .filter(index -> Objects.equals(revCommits.get(index).getName(), stashName))
+                        .findFirst()
+                        .orElse(NOT_FOUND);
+    }
+
+    private Collection<RevCommit> getStashList(Git git) throws InvalidRefNameException, GitAPIException {
+        return git.stashList().call();
     }
 
     /**

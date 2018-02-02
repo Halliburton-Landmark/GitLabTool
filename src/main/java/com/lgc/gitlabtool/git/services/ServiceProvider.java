@@ -34,8 +34,8 @@ public class ServiceProvider {
         StorageService storageService = new StorageServiceImpl();
         ProjectTypeService projectTypeService = new ProjectTypeServiceImpl();
         StateService stateService = new StateServiceImpl();
-        GitService gitService = new GitServiceImpl(stateService, jGit, new ChangedFilesUtils());
         ConsoleService consoleService = new ConsoleServiceImpl();
+        GitService gitService = new GitServiceImpl(stateService, consoleService, jGit, new ChangedFilesUtils());
         ProjectService projectService = new ProjectServiceImpl(restConnector, projectTypeService,
                 stateService, consoleService, gitService, jGit);
         ClonedGroupsService programPropertiesService = new ClonedGroupsServiceImpl(storageService, loginService);
