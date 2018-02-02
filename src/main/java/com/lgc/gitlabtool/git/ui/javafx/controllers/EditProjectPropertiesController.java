@@ -116,10 +116,10 @@ public class EditProjectPropertiesController extends AbstractStateListener {
     private TextField addIdField;
 
     @FXML
-    private Text releaseNameText;
+    private Label releaseNameText;
 
     @FXML
-    private Text eclipseVersionText;
+    private Label eclipseVersionText;
 
     @FXML
     private TabPane editingTabs;

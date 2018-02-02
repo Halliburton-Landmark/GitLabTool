@@ -1,5 +1,7 @@
 package com.lgc.gitlabtool.git.ui.javafx;
 
+import com.lgc.gitlabtool.git.services.ServiceProvider;
+import com.lgc.gitlabtool.git.services.ThemeService;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.ButtonType;
