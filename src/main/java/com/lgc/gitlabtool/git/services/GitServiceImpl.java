@@ -421,14 +421,15 @@ public class GitServiceImpl implements GitService {
             _logger.error("Error during to delete branch. A branch name is null or empty.");
             return statuses;
         }
+        boolean isRemote = deletedBranch.getBranchType() == BranchType.REMOTE;
         projects.parallelStream()
                 .filter(Objects::nonNull)
-                .forEach(project -> deleteBranch(project, deletedBranch.getBranchName(), statuses));
+                .forEach(project -> deleteBranch(project, deletedBranch.getBranchName(), isRemote, statuses));
         return statuses;
     }
 
-    private void deleteBranch(Project project, String branchName, Map<Project, Boolean> statuses) {
-        JGitStatus result = _git.deleteBranch(project, branchName);
+    private void deleteBranch(Project project, String branchName, boolean isRemote, Map<Project, Boolean> statuses) {
+        JGitStatus result = _git.deleteBranch(project, branchName, isRemote);
         statuses.put(project, result == JGitStatus.SUCCESSFUL);
     }
 

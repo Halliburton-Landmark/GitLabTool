@@ -124,6 +124,7 @@ public class CheckoutBranchWindowController extends AbstractStateListener {
 
     @FXML
     public void deleteAction() {
+        //_stateService.stateON(ApplicationState.CHECKOUT_BRANCH);
         _consoleService.addMessage("Deleting branch is started", MessageType.SIMPLE);
         List<Project> selectedProjects = currentProjectsListView.getItems();
         Branch selectedBranch = branchesListView.getSelectionModel().getSelectedItem();
@@ -136,6 +137,7 @@ public class CheckoutBranchWindowController extends AbstractStateListener {
                             numberSelected, selectedBranch.getBranchName()), MessageType.ERROR);
         }
         Map<Project, Boolean> statuses = _gitService.deleteBranch(correctProjects, selectedBranch);
+        //_stateService.stateOFF(ApplicationState.CHECKOUT_BRANCH);
         showStatusDialog("Delete branch status", "Deleting branch from projects was finished.", statuses);
     }
 

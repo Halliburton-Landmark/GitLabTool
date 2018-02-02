@@ -29,10 +29,14 @@ import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.ResetCommand;
 import org.eclipse.jgit.api.Status;
+import org.eclipse.jgit.api.errors.CannotDeleteCurrentBranchException;
 import org.eclipse.jgit.api.errors.CheckoutConflictException;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRefNameException;
+import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.JGitInternalException;
+import org.eclipse.jgit.api.errors.NotMergedException;
+import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.dircache.DirCache;
 import org.eclipse.jgit.dircache.DirCacheCheckout;
 import org.eclipse.jgit.errors.CorruptObjectException;
@@ -49,6 +53,7 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.transport.RefSpec;
 
 import com.lgc.gitlabtool.git.connections.token.CurrentUser;
 import com.lgc.gitlabtool.git.entities.Branch;
@@ -945,10 +950,11 @@ public class JGit {
      * @param nameBranch   the name of the branch for delete
      * @param force        false - a check will be performed whether the branch to be deleted is already
      *                     merged into the current branch and deletion will be refused in this case.
+     * @param isRemoteBranch
      * @return JGitStatus: SUCCESSFUL - if a new branch was created,
      *                     FAILED - if the branch could not be created.
      */
-    public JGitStatus deleteBranch(Project project, String nameBranch) {
+    public JGitStatus deleteBranch(Project project, String nameBranch, boolean isRemoteBranch) {
         if (project == null || nameBranch == null || nameBranch.isEmpty()) {
             throw new IllegalArgumentException(
                     "Incorrect data: project is " + project + ", nameBranch is " + nameBranch);
@@ -962,14 +968,33 @@ public class JGit {
                 logger.error("The current branch can not be deleted.");
                 return JGitStatus.FAILED;
             }
-            git.branchDelete().setBranchNames(nameBranch).setForce(true).call();
+            if (isRemoteBranch) {
+                deleteRemoteBranch(git, nameBranch);
+            } else {
+                deleteLocalBranch(git, nameBranch);
+            }
             logger.info("!Branch \"" + nameBranch + "\" deleted from the " + project.getPath());
             return JGitStatus.SUCCESSFUL;
         } catch (GitAPIException | IOException e) {
             logger.error("Error deleting branch for the " + project.getName() + " project: " + e.getMessage());
         }
-
         return JGitStatus.FAILED;
+    }
+
+    private void deleteLocalBranch(Git git, String nameBranch) throws NotMergedException, CannotDeleteCurrentBranchException, GitAPIException {
+        git.branchDelete()
+           .setBranchNames(nameBranch)
+           .setForce(true)
+           .call();
+    }
+
+    private void deleteRemoteBranch(Git git, String nameBranch) throws InvalidRemoteException, TransportException, GitAPIException {
+        String nameBranchWithoutAlias = nameBranch.replace(ORIGIN_PREFIX, StringUtils.EMPTY);
+        RefSpec refSpec = new RefSpec(":refs/heads/" + nameBranchWithoutAlias);
+        git.push()
+           .setRefSpecs(refSpec)
+           .setRemote("origin")
+           .call();
     }
 
     private boolean clone(Project project, String localPath) {
