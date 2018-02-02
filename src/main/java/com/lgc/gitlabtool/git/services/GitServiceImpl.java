@@ -1,8 +1,11 @@
 package com.lgc.gitlabtool.git.services;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +31,9 @@ import com.lgc.gitlabtool.git.jgit.ChangedFileType;
 import com.lgc.gitlabtool.git.jgit.ChangedFilesUtils;
 import com.lgc.gitlabtool.git.jgit.JGit;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
+import com.lgc.gitlabtool.git.jgit.stash.GroupStash;
+import com.lgc.gitlabtool.git.jgit.stash.SingleProjectStash;
+import com.lgc.gitlabtool.git.jgit.stash.Stash;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 
@@ -35,14 +41,17 @@ public class GitServiceImpl implements GitService {
 
     private static final Logger _logger = LogManager.getLogger(GitServiceImpl.class);
     private static final String CHECKOUT_BRANCH_FINISHED_MESSAGE = "Checkout branch operation is finished.";
+    private static final String GROUP_STASH_ID = "[GS%s] ";
 
     private static JGit _git;
     private static StateService _stateService;
+    private static ConsoleService _consoleService;
     private static ChangedFilesUtils _changedFilesUtils;
 
-    public GitServiceImpl(StateService stateService, JGit jGit, ChangedFilesUtils changedFilesUtils) {
+    public GitServiceImpl(StateService stateService, ConsoleService consoleService, JGit jGit, ChangedFilesUtils changedFilesUtils) {
         _git = jGit;
         _stateService = stateService;
+        _consoleService = consoleService;
         _changedFilesUtils = changedFilesUtils;
     }
 
@@ -70,45 +79,6 @@ public class GitServiceImpl implements GitService {
         return runCheckoutBranchAction(projects, branchName, isRemote, progress);
     }
 
-    private Map<Project, JGitStatus> runCheckoutBranchAction(List<Project> projects,
-                                                     String branchName,
-                                                     boolean isRemote,
-                                                     ProgressListener progress) {
-        final Map<Project, JGitStatus> checkoutStatuses = new ConcurrentHashMap<>();
-        try {
-            _stateService.stateON(ApplicationState.CHECKOUT_BRANCH);
-            final long step = 100 / projects.size();
-            final AtomicLong percentages = new AtomicLong(0);
-            projects.parallelStream()
-                    .forEach(project -> checkoutBranch(checkoutStatuses, project, branchName, isRemote, progress, percentages, step));
-        } finally {
-            progress.onFinish(CHECKOUT_BRANCH_FINISHED_MESSAGE);
-            if (_stateService.isActiveState(ApplicationState.CHECKOUT_BRANCH)) {
-                _stateService.stateOFF(ApplicationState.CHECKOUT_BRANCH);
-            }
-        }
-        return checkoutStatuses;
-    }
-
-    private void checkoutBranch(Map<Project, JGitStatus> checkoutStatuses, Project project,
-                                String branchName, boolean isRemote,
-                                ProgressListener progress,
-                                AtomicLong percentages, long step) {
-        try {
-            progress.onStart(project);
-            percentages.addAndGet(step);
-            JGitStatus status = _git.checkoutBranch(project, branchName, isRemote);
-            if (status == JGitStatus.SUCCESSFUL) {
-                progress.onSuccess(percentages.get(), project, status);
-            } else {
-                progress.onError(percentages.get(), project, status);
-            }
-            checkoutStatuses.put(project, status);
-        } catch (IllegalArgumentException e) {
-            progress.onError(percentages.get(), e.getMessage());
-        }
-    }
-
     @Override
     public List<Project> getProjectsWithChanges(List<Project> projects) {
         if (projects == null) {
@@ -119,10 +89,6 @@ public class GitServiceImpl implements GitService {
                 .filter(this::projectHasChanges)
                 .collect(Collectors.toList());
         return changedProjects;
-    }
-
-    private boolean projectHasChanges(Project project) {
-        return project.getProjectStatus().hasChanges();
     }
 
     @Override
@@ -161,28 +127,6 @@ public class GitServiceImpl implements GitService {
                 _stateService.stateOFF(ApplicationState.CREATE_BRANCH);
             }
         }
-    }
-
-    private void revertChanges(Project project, Map<Project, JGitStatus> results) {
-        if (project == null) {
-            results.put(project, JGitStatus.FAILED);
-            return;
-        }
-        results.put(project, _git.revertChanges(project));
-    }
-
-    private Map<Project, JGitStatus> commit(List<Project> projects,
-                                            String commitMessage,
-                                            ProgressListener progressListener) {
-        // use null for getting default user-info
-        return _git.commit(projects, commitMessage, true, null, null, null, null, progressListener);
-    }
-
-    private Map<Project, JGitStatus> commitAndPush(List<Project> projects,
-                                                   String commitMessage,
-                                                   ProgressListener progressListener) {
-        // use null for getting default user-info
-        return _git.commitAndPush(projects, commitMessage, true, null, null, null, null, progressListener);
     }
 
     @Override
@@ -328,13 +272,6 @@ public class GitServiceImpl implements GitService {
         return files;
     }
 
-    private List<ChangedFile> getChangedFiles(Collection<String> fileNames, Project project,
-            ChangedFileType typeFile, ChangedFileStatus statusFile) {
-        return fileNames.stream()
-                        .map(fileName -> new ChangedFile(project, fileName, typeFile, statusFile))
-                        .collect(Collectors.toList());
-    }
-
     @Override
     public Set<Branch> getBranches(Collection<Project> projects, BranchType brType, boolean onlyCommon) {
         return _git.getBranches(projects, brType, onlyCommon);
@@ -384,6 +321,223 @@ public class GitServiceImpl implements GitService {
         return resetedFiles;
     }
 
+    @Override
+    public void replaceWithHEADRevision(Collection<ChangedFile> files) {
+        if (files == null || files.isEmpty()) {
+            throw new IllegalArgumentException("Incorrect value. Files is null.");
+        }
+        Map<Project, List<ChangedFile>> filesByProjects = files.stream()
+                                                               .filter(Objects::nonNull)
+                                                               .collect(Collectors.groupingBy(ChangedFile::getProject));
+        for (Project project : filesByProjects.keySet()) {
+            if (project == null || !project.isCloned()) {
+                continue;
+            }
+            List<ChangedFile> changedFiles = filesByProjects.get(project);
+            _git.replaceFilesWithHEADRevision(project, getFilesList(changedFiles));
+        }
+    }
+
+    @Override
+    public Map<Project, Boolean> createStash(List<Project> projects, String stashMessage, boolean includeUntracked) {
+        if (projects == null || projects.isEmpty() || stashMessage == null) {
+            throw new IllegalArgumentException("Incorrect values");
+        }
+        Map<Project, Boolean> resultOperations = new ConcurrentHashMap<>();
+        _stateService.stateON(ApplicationState.STASH);
+        try {
+            if (projects.size() == 1) {
+                Project project = projects.get(0);
+                boolean result = _git.stashCreate(project, stashMessage, includeUntracked);
+                resultOperations.put(project, result);
+            } else {
+                String indexOperation = String.format(GROUP_STASH_ID, currentDateToString());
+                String stashGroupMessage = indexOperation + stashMessage;
+                projects.parallelStream()
+                        .filter(Objects::nonNull)
+                        .forEach(project -> createStash(resultOperations, project, stashGroupMessage, includeUntracked));
+            }
+        } finally {
+            _stateService.stateOFF(ApplicationState.STASH);
+        }
+        return resultOperations;
+    }
+
+    @Override
+    public List<Stash> getStashList(List<Project> projects) {
+        if (projects == null || projects.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<Stash> allStashes = new ArrayList<>();
+        projects.forEach(project -> addStashToList(allStashes, _git.getStashes(project)));
+        return allStashes;
+    }
+
+    @Override
+    public void applyStashes(Stash stash, ProgressListener progressListener) {
+        if (progressListener == null) {
+            progressListener = EmptyProgressListener.get();
+        }
+        if (stash == null) {
+            progressListener.onError("Incorrect value");
+            progressListener.onFinish();
+            return;
+        }
+        applyStash(stash, progressListener);
+    }
+
+    @Override
+    public Map<Project, Boolean> stashDrop(Stash stashItem) {
+        Map<Project, Boolean> resultOperations = new ConcurrentHashMap<>();
+        if (stashItem == null) {
+            return resultOperations;
+        }
+        try {
+            _stateService.stateON(ApplicationState.STASH);
+            if (stashItem instanceof SingleProjectStash) {
+                SingleProjectStash stash = (SingleProjectStash) stashItem;
+                Project project = stash.getProject();
+                boolean resultOperation = _git.stashDrop(project, stash.getName());
+                resultOperations.put(project, resultOperation);
+            } else {
+                List<SingleProjectStash> group = ((GroupStash) stashItem).getGroup();
+                group.parallelStream()
+                     .filter(stash -> stash != null)
+                     .forEach(stash -> dropStash(resultOperations, stash));
+            }
+        } finally {
+            _stateService.stateOFF(ApplicationState.STASH);
+        }
+        return resultOperations;
+    }
+
+    private void createStash(Map<Project, Boolean> results, Project project,
+                           String stashGroupMessage, boolean includeUntracked) {
+        boolean result = false;
+        if (project.isCloned()) {
+            result = _git.stashCreate(project, stashGroupMessage, includeUntracked);
+        }
+        results.put(project, result);
+    }
+
+    private void dropStash(Map<Project, Boolean> results, SingleProjectStash stash) {
+        Project project = stash.getProject();
+        boolean resultOperation = _git.stashDrop(project, stash.getName());
+        results.put(project, resultOperation);
+    }
+
+    private Map<Project, JGitStatus> runCheckoutBranchAction(List<Project> projects,
+                                                     String branchName,
+                                                     boolean isRemote,
+                                                     ProgressListener progress) {
+        final Map<Project, JGitStatus> checkoutStatuses = new ConcurrentHashMap<>();
+        try {
+            _stateService.stateON(ApplicationState.CHECKOUT_BRANCH);
+            final long step = 100 / projects.size();
+            final AtomicLong percentages = new AtomicLong(0);
+            projects.parallelStream()
+                    .forEach(project -> checkoutBranch(checkoutStatuses, project, branchName, isRemote, progress, percentages, step));
+        } finally {
+            progress.onFinish(CHECKOUT_BRANCH_FINISHED_MESSAGE);
+            if (_stateService.isActiveState(ApplicationState.CHECKOUT_BRANCH)) {
+                _stateService.stateOFF(ApplicationState.CHECKOUT_BRANCH);
+            }
+        }
+        return checkoutStatuses;
+    }
+
+    private void checkoutBranch(Map<Project, JGitStatus> checkoutStatuses, Project project,
+                                String branchName, boolean isRemote,
+                                ProgressListener progress,
+                                AtomicLong percentages, long step) {
+        try {
+            progress.onStart(project);
+            percentages.addAndGet(step);
+            JGitStatus status = _git.checkoutBranch(project, branchName, isRemote);
+            if (status == JGitStatus.SUCCESSFUL) {
+                progress.onSuccess(percentages.get(), project, status);
+            } else {
+                progress.onError(percentages.get(), project, status);
+            }
+            checkoutStatuses.put(project, status);
+        } catch (IllegalArgumentException e) {
+            progress.onError(percentages.get(), e.getMessage());
+        }
+    }
+
+    private boolean projectHasChanges(Project project) {
+        return project.getProjectStatus().hasChanges();
+    }
+
+    private void revertChanges(Project project, Map<Project, JGitStatus> results) {
+        if (project == null) {
+            results.put(project, JGitStatus.FAILED);
+            return;
+        }
+        results.put(project, _git.revertChanges(project));
+    }
+
+    private Map<Project, JGitStatus> commit(List<Project> projects,
+                                            String commitMessage,
+                                            ProgressListener progressListener) {
+        // use null for getting default user-info
+        return _git.commit(projects, commitMessage, true, null, null, null, null, progressListener);
+    }
+
+    private Map<Project, JGitStatus> commitAndPush(List<Project> projects,
+                                                   String commitMessage,
+                                                   ProgressListener progressListener) {
+        // use null for getting default user-info
+        return _git.commitAndPush(projects, commitMessage, true, null, null, null, null, progressListener);
+    }
+
+    private List<ChangedFile> getChangedFiles(Collection<String> fileNames, Project project,
+            ChangedFileType typeFile, ChangedFileStatus statusFile) {
+        return fileNames.stream()
+                        .map(fileName -> new ChangedFile(project, fileName, typeFile, statusFile))
+                        .collect(Collectors.toList());
+    }
+
+    private void addStashToList(List<Stash> allStashes, List<SingleProjectStash> currentStashList) {
+        if (allStashes.isEmpty()) {
+            allStashes.addAll(currentStashList);
+            return;
+        }
+        for (Stash stash : currentStashList) {
+            Optional<Stash> foundStash = allStashes.stream()
+                                                       .filter(item -> hasGroupIdentificator(item.getMessage(), stash.getMessage()))
+                                                       .findFirst();
+            if (foundStash.isPresent()) {
+                addGroupStash(allStashes, stash, foundStash.get());
+            } else {
+                allStashes.add(stash);
+            }
+        }
+    }
+
+    private boolean hasGroupIdentificator(String currentMessage, String newStashMessage) {
+        return currentMessage.equals(newStashMessage) && currentMessage.matches("\\[GS\\d+\\](.+)?");
+    }
+
+    private void addGroupStash(List<Stash> stashList, Stash addStash,  Stash foundStash) {
+        SingleProjectStash newStash = (SingleProjectStash)addStash;
+        if (foundStash instanceof GroupStash) {
+            ((GroupStash) foundStash).addStash(newStash);
+        } else {
+            stashList.remove(foundStash);
+            GroupStash newGroup = new GroupStash(foundStash.getMessage());
+            newGroup.addStash((SingleProjectStash)foundStash);
+            newGroup.addStash(newStash);
+            stashList.add(newGroup);
+        }
+    }
+
+    private String currentDateToString() {
+        DateFormat dateFormat = new SimpleDateFormat("yyMMddHHmmss");
+        Date date = new Date();
+        return dateFormat.format(date);
+    }
+
     private List<ChangedFile> addFilesToIndex(List<ChangedFile> changedFiles,  Project project) {
         List<String> addedFiles = new ArrayList<>();
         for (ChangedFile changedFile : changedFiles) {
@@ -402,27 +556,27 @@ public class GitServiceImpl implements GitService {
         return _changedFilesUtils.getChangedFiles(addedFiles, project, changedFiles);
     }
 
-    @Override
-    public void replaceWithHEADRevision(Collection<ChangedFile> files) {
-        if (files == null || files.isEmpty()) {
-            throw new IllegalArgumentException("Incorrect value. Files is null.");
-        }
-        Map<Project, List<ChangedFile>> filesByProjects = files.stream()
-                                                               .filter(Objects::nonNull)
-                                                               .collect(Collectors.groupingBy(ChangedFile::getProject));
-        for (Project project : filesByProjects.keySet()) {
-            if (project == null || !project.isCloned()) {
-                continue;
-            }
-            List<ChangedFile> changedFiles = filesByProjects.get(project);
-            _git.replaceFilesWithHEADRevision(project, getFilesList(changedFiles));
-        }
-    }
-
     private List<String> getFilesList(List<ChangedFile> changedFiles) {
         return changedFiles.stream()
                            .filter(Objects::nonNull)
                            .map(ChangedFile::getFileName)
                            .collect(Collectors.toList());
+    }
+
+    private void applyStash(Stash stashItem, ProgressListener progressListener) {
+        try {
+            if (stashItem instanceof SingleProjectStash) {
+                progressListener.onStart(1);
+                _git.stashApply((SingleProjectStash) stashItem, progressListener);
+            } else {
+                List<SingleProjectStash> group = ((GroupStash) stashItem).getGroup();
+                progressListener.onStart(group.size());
+                group.parallelStream()
+                     .filter(stash -> stash != null)
+                     .forEach(stash -> _git.stashApply(stash, progressListener));
+            }
+        } finally {
+            progressListener.onFinish();
+        }
     }
 }

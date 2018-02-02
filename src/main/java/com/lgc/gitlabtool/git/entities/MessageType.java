@@ -1,5 +1,7 @@
 package com.lgc.gitlabtool.git.entities;
 
+import com.lgc.gitlabtool.git.services.ServiceProvider;
+import com.lgc.gitlabtool.git.services.ThemeService;
 import org.apache.commons.lang.StringUtils;
 
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
@@ -16,6 +18,22 @@ public enum MessageType {
 
     ERROR, SUCCESS, SIMPLE;
 
+    private static final ThemeService _themeService = ServiceProvider.getInstance()
+            .getService(ThemeService.class);
+
+    /**
+     * Gets CSS id for type
+     *
+     * @param type for getting CSS id
+     * @return string with id
+     */
+    public static String getCssIdForStatus(MessageType type) {
+        if (type == null || type == MessageType.SIMPLE) {
+            return "message-type-simple";
+        }
+        return type == MessageType.ERROR ? "message-type-error" : "message-type-success";
+    }
+
     /**
      * Gets CSS style for type
      *
@@ -23,10 +41,12 @@ public enum MessageType {
      * @return string with code style
      */
     public static String getCSSForStatus(MessageType type) {
+        String prefix = "-fx-text-fill:";
         if (type == null || type == MessageType.SIMPLE) {
-            return "-fx-text-fill:black";
+            return prefix + toHexString(_themeService.getCurrentTheme().getMainFontColorCss());
         }
-        return type == MessageType.ERROR ? "-fx-text-fill:red" : "-fx-text-fill:green";
+        return type == MessageType.ERROR ? prefix + toHexString(_themeService.getCurrentTheme().getErrorFontColorCss())
+                : prefix + toHexString(_themeService.getCurrentTheme().getSuccessFontColorCss());
     }
 
     /**
@@ -37,9 +57,10 @@ public enum MessageType {
     */
     public static Color getColor(MessageType type) {
         if (type == null || type == MessageType.SIMPLE) {
-            return Color.BLACK;
+            return _themeService.getCurrentTheme().getMainFontColorCss();
         }
-        return type == MessageType.ERROR ? Color.RED : Color.GREEN;
+        return type == MessageType.ERROR ? _themeService.getCurrentTheme().getErrorFontColorCss() :
+                _themeService.getCurrentTheme().getSuccessFontColorCss();
     }
 
     /**
@@ -85,5 +106,12 @@ public enum MessageType {
         } else {
             return MessageType.SIMPLE;
         }
+    }
+
+    private static String toHexString(Color color) throws NullPointerException {
+        return String.format( "#%02X%02X%02X",
+                (int)( color.getRed() * 255 ),
+                (int)( color.getGreen() * 255 ),
+                (int)( color.getBlue() * 255 ) );
     }
 }

@@ -21,6 +21,7 @@ import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.ViewKey;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
+import com.lgc.gitlabtool.git.ui.javafx.GLTScene;
 import com.lgc.gitlabtool.git.ui.javafx.JavaFXUI;
 import com.lgc.gitlabtool.git.ui.selection.SelectionsProvider;
 import com.lgc.gitlabtool.git.util.ScreenUtil;
@@ -93,7 +94,7 @@ public class WindowLoader {
             GitStagingWindowController gitStagingWindowController = loader.getController();
             gitStagingWindowController.beforeShowing(_projectService.getIdsProjects(selectedProjects), files);
 
-            Scene scene = new Scene(root);
+            Scene scene = new GLTScene(root);
             Stage stage = new Stage();
             stage.setScene(scene);
             stage.getIcons().add(_appIcon);

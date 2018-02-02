@@ -2,6 +2,8 @@ package com.lgc.gitlabtool.git.ui.javafx;
 
 import static javafx.scene.control.ProgressIndicator.INDETERMINATE_PROGRESS;
 
+import com.lgc.gitlabtool.git.services.ServiceProvider;
+import com.lgc.gitlabtool.git.services.ThemeService;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 
 import javafx.application.Platform;
@@ -36,11 +38,12 @@ public class WorkIndicatorDialog {
     private final Stage stage = new Stage();
     private final Label _progressLabel = new Label();
     private final Group root = new Group();
-    private final Scene scene = new Scene(root);
+    private final Scene scene = new GLTScene(root);
     private final BorderPane mainPane = new BorderPane();
     private final VBox vbox = new VBox();
     private final int initWidth = 300;
     private final int initHeight = 100;
+
     /**
      * Constructor
      *
@@ -99,12 +102,14 @@ public class WorkIndicatorDialog {
         double centerXPosition = parentStage.getX() + parentStage.getWidth() / 2;
         double centerYPosition = parentStage.getY() + parentStage.getHeight() / 2;
 
+
         stage.setX(centerXPosition - initWidth / 2);
         stage.setY(centerYPosition - initHeight / 2);
 
         if (stageStyle == StageStyle.TRANSPARENT) {
             scene.setFill(Color.TRANSPARENT);
         }
+
         executeAndShowDialog(title, runnable, stageStyle);
     }
 
@@ -137,6 +142,7 @@ public class WorkIndicatorDialog {
         vbox.getChildren().addAll(_progressLabel, progressIndicator);
         mainPane.setTop(vbox);
         stage.setScene(scene);
+
     }
 
     private void setupWorkerThread(Runnable func) {

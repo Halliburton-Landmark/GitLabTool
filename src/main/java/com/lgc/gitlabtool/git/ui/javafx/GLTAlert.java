@@ -2,6 +2,8 @@ package com.lgc.gitlabtool.git.ui.javafx;
 
 import java.util.Optional;
 
+import com.lgc.gitlabtool.git.services.ServiceProvider;
+import com.lgc.gitlabtool.git.services.ThemeService;
 import org.apache.commons.lang.StringUtils;
 
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
@@ -27,6 +29,9 @@ public class GLTAlert extends Alert {
 
     private final static AlertType DEFAULT_TYPE = AlertType.INFORMATION;
 
+    private static final ThemeService _themeService = ServiceProvider.getInstance()
+            .getService(ThemeService.class);
+
     /**
      * Creates an alert with the given AlertType
      *
@@ -35,6 +40,7 @@ public class GLTAlert extends Alert {
     public GLTAlert(AlertType alertType) {
         super(alertType);
         setAdvancedOptions();
+        _themeService.styleScene(getDialogPane().getScene());
     }
 
     /**
@@ -75,6 +81,7 @@ public class GLTAlert extends Alert {
        setHeaderText(headerText);
        setContentText(contentText);
        setAdvancedOptions();
+       _themeService.styleScene(getDialogPane().getScene());
    }
 
    /**
