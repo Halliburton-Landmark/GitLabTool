@@ -86,6 +86,9 @@ public class CloningGroupsWindowController {
     @FXML
     public void onBrowseButton() throws Exception {
         Stage stage = (Stage) browseButton.getScene().getWindow();
+        browseButton.getScene().getStylesheets()
+                .add(getClass().getClassLoader().getResource("css/modular_dark_style.css").toExternalForm());
+
 
         DirectoryChooser chooser = new DirectoryChooser();
         chooser.setTitle(FOLDER_CHOOSER_DIALOG);

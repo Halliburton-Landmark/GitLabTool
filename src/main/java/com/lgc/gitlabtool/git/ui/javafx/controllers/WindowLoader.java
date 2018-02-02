@@ -7,6 +7,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.lgc.gitlabtool.git.services.*;
+import com.lgc.gitlabtool.git.ui.javafx.GLTScene;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -15,10 +17,6 @@ import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.ProjectList;
 import com.lgc.gitlabtool.git.jgit.ChangedFile;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
-import com.lgc.gitlabtool.git.services.ConsoleService;
-import com.lgc.gitlabtool.git.services.GitService;
-import com.lgc.gitlabtool.git.services.ServiceProvider;
-import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.ViewKey;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 import com.lgc.gitlabtool.git.ui.javafx.JavaFXUI;
@@ -95,7 +93,7 @@ public class WindowLoader {
             GitStagingWindowController gitStagingWindowController = loader.getController();
             gitStagingWindowController.beforeShowing(ProjectList.getIdsProjects(selectedProjects), files);
 
-            Scene scene = new Scene(root);
+            Scene scene = new GLTScene(root);
             Stage stage = new Stage();
             stage.setScene(scene);
             stage.getIcons().add(_appIcon);

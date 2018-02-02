@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.lgc.gitlabtool.git.services.*;
 import org.apache.commons.lang.StringUtils;
 
 import com.lgc.gitlabtool.git.entities.Branch;
@@ -17,11 +18,6 @@ import com.lgc.gitlabtool.git.entities.ProjectList;
 import com.lgc.gitlabtool.git.jgit.BranchType;
 import com.lgc.gitlabtool.git.listeners.stateListeners.AbstractStateListener;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
-import com.lgc.gitlabtool.git.services.BackgroundService;
-import com.lgc.gitlabtool.git.services.ConsoleService;
-import com.lgc.gitlabtool.git.services.GitService;
-import com.lgc.gitlabtool.git.services.ServiceProvider;
-import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.icon.LocalRemoteIconHolder;
 import com.lgc.gitlabtool.git.ui.javafx.ChangesCheckDialog;
 import com.lgc.gitlabtool.git.ui.javafx.CheckoutBranchProgressDialog;
@@ -92,7 +88,11 @@ public class CheckoutBranchWindowController extends AbstractStateListener {
 
     private static final GitService _gitService = ServiceProvider.getInstance().getService(GitService.class);
 
+    private static final ThemeService _themeService = (ThemeService) ServiceProvider.getInstance()
+            .getService(ThemeService.class);
+
     private static final String ALREADY_CHECKED_OUT_MESSAGE = "%d of %d projects have already checked out the selected branch.";
+
 
     {
         _stateService.addStateListener(ApplicationState.LOAD_PROJECTS, this);

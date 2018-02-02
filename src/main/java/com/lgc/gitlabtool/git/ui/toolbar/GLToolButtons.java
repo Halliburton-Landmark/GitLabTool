@@ -356,7 +356,8 @@ public enum GLToolButtons {
     public enum MainMenuInfo {
         FILE("File", 1),
         GIT("Git", 2),
-        HELP("Help", 3);
+        THEMES("Themes", 3),
+        HELP("Help", 4);
 
         private final String name;
         private final int order;

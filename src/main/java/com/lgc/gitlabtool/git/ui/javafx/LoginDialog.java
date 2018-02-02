@@ -15,6 +15,7 @@ import com.lgc.gitlabtool.git.services.ConsoleService;
 import com.lgc.gitlabtool.git.services.LoginService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StorageService;
+import com.lgc.gitlabtool.git.services.ThemeService;
 import com.lgc.gitlabtool.git.ui.ViewKey;
 import com.lgc.gitlabtool.git.ui.javafx.controllers.ServerInputWindowController;
 import com.lgc.gitlabtool.git.ui.javafx.dto.DialogDTO;
@@ -37,15 +38,12 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
-import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 
@@ -62,6 +60,9 @@ class LoginDialog extends Dialog<DialogDTO> {
     private static final ConsoleService _consoleService = ServiceProvider.getInstance()
             .getService(ConsoleService.class);
 
+    private static final ThemeService _themeService = (ThemeService) ServiceProvider.getInstance()
+            .getService(ThemeService.class);
+
     private static final String MESSAGE_WRONG_CREDENTIALS              = "Wrong login or password! Please try again";
     private static final String MESSAGE_WAITING                        = "Login... Please wait";
     private static final String MESSAGE_EMPTY_FIELD                    = "Login or password is empty!";
@@ -70,23 +71,23 @@ class LoginDialog extends Dialog<DialogDTO> {
     private static final String MESSAGE_SPACE                          = " ";
     private static final String MESSAGE_DASH                           = "-";
     private static final String INFO_IMAGE_URL                         = "icons/info_20x20.png";
-    private static final String CSS_PATH                               = "css/style.css";
 
     /** need to store two line message */
     private final double MIN_MESSAGE_HEIGHT = 40;
 
-    private final Text sceneTitle;
+    private final Label sceneTitle;
     private final Label userName;
     private final TextField userTextField;
     private final Label password;
     private final PasswordField passwordField;
-    private final Text repositoryText;
+    private final Label repositoryText;
     private final ComboBox<String> comboBox;
     private final Label message;
     private final Button signInButton;
     private final Button infoButton;
 
     LoginDialog() {
+        _themeService.styleScene(getDialogPane().getScene());
         setTitle("GitLab Welcome");
         final GridPane grid = new GridPane();
         grid.setAlignment(Pos.CENTER);
@@ -94,7 +95,7 @@ class LoginDialog extends Dialog<DialogDTO> {
         grid.setVgap(10);
         grid.setPadding(new Insets(25, 25, 25, 25));
 
-        sceneTitle = new Text("Welcome To GitLab");
+        sceneTitle = new Label("Welcome To GitLab");
         sceneTitle.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
         GridPane.setHalignment(sceneTitle, HPos.CENTER);
         grid.add(sceneTitle, 0, 1, 2, 1);
@@ -127,7 +128,7 @@ class LoginDialog extends Dialog<DialogDTO> {
         message.setVisible(false);
         grid.add(message, 0, 5, 3, 3);
 
-        repositoryText = new Text("Service: ");
+        repositoryText = new Label("Service: ");
         grid.add(repositoryText, 0, 4);
 
         ObservableList<String> options = getBoxOptions();
@@ -155,23 +156,9 @@ class LoginDialog extends Dialog<DialogDTO> {
     }
 
     private void setUpInfoButton(Button infoButton) {
-        Image infoImage = new Image(getClass()
-                .getClassLoader()
-                .getResource(INFO_IMAGE_URL).toExternalForm());
-
-        infoButton.setGraphic(new ImageView(infoImage));
-
-        /* ROUND (30 px is optimal size but can be changed) */
-        infoButton.setStyle(
-                "-fx-background-radius: 5em; " +
-                        "-fx-min-width: 30px; " +
-                        "-fx-min-height: 30px; " +
-                        "-fx-max-width: 30px; " +
-                        "-fx-max-height: 30px;"
-        );
-
-        /* HOVER ANIMATION */
-        infoButton.getStylesheets().add(getClass().getClassLoader().getResource(CSS_PATH).toExternalForm());
+        ImageView imageViewInfo = _themeService.getStyledImageView(INFO_IMAGE_URL);
+        infoButton.setGraphic(imageViewInfo);
+        infoButton.setId("infoButtonLogin");
 
         GridPane.setHalignment(infoButton, HPos.LEFT);
         infoButton.setTooltip(new Tooltip("Get info"));
@@ -206,9 +193,10 @@ class LoginDialog extends Dialog<DialogDTO> {
         controller.loadServerInputWindow(root);
     }
 
-    private void showMessage(String msg, Color color) {
+    private void showMessage(String msg, MessageType messageType) {
         message.setText(msg);
-        message.setTextFill(Color.web(color.toString()));
+        String idStatus = messageType.equals(MessageType.SUCCESS) ? "label-success" : "label-failure";
+        message.setId(idStatus);
         message.setVisible(true);
     }
 
@@ -216,7 +204,7 @@ class LoginDialog extends Dialog<DialogDTO> {
         button.setOnAction(event -> {
             if (!isEmptyInputFields(userTextField, passwordField)) {
                 logger.info(MESSAGE_WAITING);
-                showMessage(MESSAGE_WAITING, Color.GREEN);
+                showMessage(MESSAGE_WAITING, MessageType.SUCCESS);
                 disableSignInButton(true);
                 String serverURL = URLManager.completeServerURL(comboBox.getValue());
                 String shortServerURL = URLManager.shortServerURL(comboBox.getValue());
@@ -224,7 +212,7 @@ class LoginDialog extends Dialog<DialogDTO> {
                 _loginService.login(dto, this::doAfterLogin);
             } else {
                 logger.warn(MESSAGE_EMPTY_FIELD);
-                showMessage(MESSAGE_EMPTY_FIELD, Color.RED);
+                showMessage(MESSAGE_EMPTY_FIELD, MessageType.ERROR);
             }
         });
     }
@@ -253,7 +241,7 @@ class LoginDialog extends Dialog<DialogDTO> {
     private void showWarningAndDisableSignInButton(String warningMessage) {
         Platform.runLater(() -> {
             logger.warn(warningMessage);
-            showMessage(warningMessage, Color.RED);
+            showMessage(warningMessage, MessageType.ERROR);
             disableSignInButton(false);
         });
     }

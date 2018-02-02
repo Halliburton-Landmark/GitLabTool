@@ -15,6 +15,10 @@ import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.lgc.gitlabtool.git.ui.javafx.*;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.effect.Effect;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -36,20 +40,9 @@ import com.lgc.gitlabtool.git.services.PomXMLService;
 import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StateService;
+import com.lgc.gitlabtool.git.services.ThemeService;
 import com.lgc.gitlabtool.git.ui.ViewKey;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
-import com.lgc.gitlabtool.git.ui.javafx.AlertWithCheckBox;
-import com.lgc.gitlabtool.git.ui.javafx.ChangesCheckDialog;
-import com.lgc.gitlabtool.git.ui.javafx.CloneProgressDialog;
-import com.lgc.gitlabtool.git.ui.javafx.CreateNewBranchDialog;
-import com.lgc.gitlabtool.git.ui.javafx.CreateProjectDialog;
-import com.lgc.gitlabtool.git.ui.javafx.GLTAlert;
-import com.lgc.gitlabtool.git.ui.javafx.IncorrectProjectDialog;
-import com.lgc.gitlabtool.git.ui.javafx.JavaFXUI;
-import com.lgc.gitlabtool.git.ui.javafx.ProgressDialog;
-import com.lgc.gitlabtool.git.ui.javafx.PullProgressDialog;
-import com.lgc.gitlabtool.git.ui.javafx.StatusDialog;
-import com.lgc.gitlabtool.git.ui.javafx.WorkIndicatorDialog;
 import com.lgc.gitlabtool.git.ui.javafx.comparators.ProjectListComparator;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.PushProgressListener;
@@ -74,28 +67,12 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Rectangle2D;
+import javafx.geometry.*;
+import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.SelectionMode;
-import javafx.scene.control.SelectionModel;
-import javafx.scene.control.SplitPane;
-import javafx.scene.control.ToggleButton;
-import javafx.scene.control.ToolBar;
-import javafx.scene.control.Tooltip;
+import javafx.scene.effect.ColorAdjust;
 import javafx.scene.effect.GaussianBlur;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -109,7 +86,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
-import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
@@ -222,8 +198,12 @@ public class ModularController implements UpdateProgressListener {
     private static final PomXMLService _pomXmlService = ServiceProvider.getInstance()
             .getService(PomXMLService.class);
 
+    private static final ThemeService _themeService = (ThemeService) ServiceProvider.getInstance()
+            .getService(ThemeService.class);
+
     private static final BackgroundService _backgroundService = ServiceProvider.getInstance()
             .getService(BackgroundService.class);
+
     //endregion
     /*
      *
@@ -289,6 +269,7 @@ public class ModularController implements UpdateProgressListener {
     //region OTHER UI ELEMENTS
     private List<Node> projectsWindowToolbarItems;
     private List<Node> groupsWindowToolbarItems;
+    private List<Node> projectsToolbarItems;
 
     private List<Menu> projectsWindowMainMenuItems;
     private List<Menu> groupsWindowMainMenuItems;
@@ -300,7 +281,9 @@ public class ModularController implements UpdateProgressListener {
     private ToggleButton filterShadowProjects;
     private Button refreshProjectsButton;
 
-    private static String css_path = "css/style.css";
+    private static final int PROJECTS_TOOLBAR_PADDING = 1;
+
+    private static String css_path = "css/modular_light_style.css";
     //endregion
     /*
      *
@@ -327,12 +310,13 @@ public class ModularController implements UpdateProgressListener {
         preferences = getPreferences(DIVIDER_PROPERTY_NODE);
 
         _stateService.addStateListener(ApplicationState.CLONE, new GroupsWindowStateListener());
-        toolbar.getStylesheets().add(getClass().getClassLoader().getResource(css_path).toExternalForm());
 
         userId.setText(_loginService.getCurrentUser().getName());
+        userId.setTextFill(javafx.scene.paint.Color.DARKGRAY);
 
         initializeProjectsWindow();
         initializeGroupsWindow();
+        initializeThemesMenu();
 
         loadGroupWindow();
         updateCurrentConsole();
@@ -341,7 +325,7 @@ public class ModularController implements UpdateProgressListener {
     private void initializeProjectsWindow() {
         projectListView = new ListView<>();
         AnchorPane.setBottomAnchor(projectListView, 0.0);
-        AnchorPane.setTopAnchor(projectListView, 30.0);
+        AnchorPane.setTopAnchor(projectListView, 40.0 + (2 * PROJECTS_TOOLBAR_PADDING));
         AnchorPane.setLeftAnchor(projectListView, 0.0);
         AnchorPane.setRightAnchor(projectListView, 0.0);
         configureProjectsListView(projectListView);
@@ -378,31 +362,35 @@ public class ModularController implements UpdateProgressListener {
             return;
         }
         projectsToolbar = new HBox();
+        projectsToolbar.setId("projectsToolbar");
 
-        Image imageRefreshProjects = new Image(
-                getClass().getClassLoader().getResource(REFRESH_PROJECTS_IMAGE_URL).toExternalForm());
-        Image imageSelectAll = new Image(
-                getClass().getClassLoader().getResource(SELECT_ALL_IMAGE_URL).toExternalForm());
-        Image imageFilterShadow = new Image(
-                getClass().getClassLoader().getResource(FILTER_SHADOW_PROJECTS_IMAGE_URL).toExternalForm());
+        AnchorPane.setTopAnchor(projectsToolbar, 0.0);
+        AnchorPane.setLeftAnchor(projectsToolbar, 0.0);
+        AnchorPane.setRightAnchor(projectsToolbar, 0.0);
+
+        ImageView imageViewRefreshProjects = _themeService.getStyledImageView(REFRESH_PROJECTS_IMAGE_URL);
+        ImageView imageViewSelectAll = _themeService.getStyledImageView(SELECT_ALL_IMAGE_URL);
+        ImageView imageViewFilterShadow = _themeService.getStyledImageView(FILTER_SHADOW_PROJECTS_IMAGE_URL);
 
         selectAllButton = new ToggleButton();
         selectAllButton.setTooltip(new Tooltip("Select all projects"));
-        selectAllButton.setGraphic(new ImageView(imageSelectAll));
+        selectAllButton.setGraphic(imageViewSelectAll);
         selectAllButton.setOnAction(this::onSelectAll);
 
         refreshProjectsButton = new Button();
         refreshProjectsButton.setTooltip(new Tooltip("Refresh projects"));
-        refreshProjectsButton.setGraphic(new ImageView(imageRefreshProjects));
+        refreshProjectsButton.setGraphic(imageViewRefreshProjects);
         refreshProjectsButton.setOnAction(this::refreshLoadProjects);
 
         filterShadowProjects = new ToggleButton();
         filterShadowProjects.setTooltip(new Tooltip("Show/Hide shadow projects"));
-        filterShadowProjects.setGraphic(new ImageView(imageFilterShadow));
+        filterShadowProjects.setGraphic(imageViewFilterShadow);
         filterShadowProjects.setOnAction(this::onShowHideShadowProjects);
 
-        projectsToolbar.getChildren().addAll(selectAllButton, refreshProjectsButton, filterShadowProjects);
-
+        projectsToolbarItems = new ArrayList<>(Arrays.asList(selectAllButton, refreshProjectsButton, filterShadowProjects));
+        projectsToolbar.getChildren().clear();
+        projectsToolbar.getChildren().addAll(projectsToolbarItems);
+        projectsToolbar.setPadding(new Insets(PROJECTS_TOOLBAR_PADDING,0,PROJECTS_TOOLBAR_PADDING,0));
     }
 
     private void initActionsToolBar(String windowId) {
@@ -445,6 +433,7 @@ public class ModularController implements UpdateProgressListener {
         userGuide.setAccelerator(new KeyCodeCombination(KeyCode.F1));
         _mainMenuManager.getButtonById(GLToolButtons.GENERAL_EXIT).setOnAction(this::exit);
         _mainMenuManager.getButtonById(GLToolButtons.GENERAL_ABOUT).setOnAction(this::showAboutPopup);
+
     }
 
     private void initializeGroupsDisableBinding(ListView<Group> listView) {
@@ -535,7 +524,6 @@ public class ModularController implements UpdateProgressListener {
                 }
         );
 
-
         listView.refresh();
 
     }
@@ -546,6 +534,34 @@ public class ModularController implements UpdateProgressListener {
 
     public static void setCss_path(String css_path) {
         ModularController.css_path = css_path;
+    }
+
+    private void initializeThemesMenu() {
+        String themeMenuTitle = GLToolButtons.MainMenuInfo.THEMES.getName();
+
+        addItemsToMenu(groupsWindowMainMenuItems, createThemesMenuItems(), themeMenuTitle);
+        addItemsToMenu(projectsWindowMainMenuItems, createThemesMenuItems(), themeMenuTitle);
+    }
+
+    private void addItemsToMenu(List<Menu> parentMenu, List<MenuItem> childItems, String menuTitle) {
+        parentMenu.stream()
+                .filter(menu -> menu.getText().equals(menuTitle))
+                .findFirst()
+                .map(menu -> menu.getItems().addAll(childItems));
+    }
+
+    private List<MenuItem> createThemesMenuItems() {
+        return Arrays.stream(GLTTheme.values())
+                .map(theme -> {
+                    MenuItem item = createMenuItem(theme.getThemeTitle(), theme.getIconPath());
+                    item.setOnAction(event -> setTheme(theme.getKey()));
+                    return item;
+                })
+                .collect(Collectors.toList());
+    }
+
+    private MenuItem createMenuItem(String title, String iconPath) {
+        return new MenuItem(title, _themeService.getStyledImageView(iconPath));
     }
 
     //endregion
@@ -707,7 +723,7 @@ public class ModularController implements UpdateProgressListener {
             stage.initStyle(StageStyle.DECORATED);
             stage.setTitle(CLONE_WINDOW_TITLE);
             stage.setResizable(false);
-            stage.setScene(new Scene(root));
+            stage.setScene(new GLTScene(root));
             stage.getIcons().add(appIcon);
 
              /* Set sizing and position */
@@ -760,6 +776,7 @@ public class ModularController implements UpdateProgressListener {
             return;
         }
         Stage stage = (Stage) mainPanelBackground.getScene().getWindow();
+
         stage.getIcons().add(_appIcon);
 
         DirectoryChooser chooser = new DirectoryChooser();
@@ -831,9 +848,8 @@ public class ModularController implements UpdateProgressListener {
 
             CheckoutBranchWindowController checkoutWindowController  = loader.getController();
 
-            Scene scene = new Scene(root);
             Stage stage = new Stage();
-            stage.setScene(scene);
+            stage.setScene(new GLTScene(root));
             stage.getIcons().add(_appIcon);
             stage.setTitle(CHECKOUT_BRANCH_TITLE);
             stage.initModality(Modality.APPLICATION_MODAL);
@@ -882,7 +898,7 @@ public class ModularController implements UpdateProgressListener {
             }
             stashWindowController.beforeShowing(ProjectList.getIdsProjects(selectedProjects));
 
-            Scene scene = new Scene(root);
+            Scene scene = new GLTScene(root);
             Stage stage = new Stage();
             stage.setScene(scene);
             stage.getIcons().add(_appIcon);
@@ -1002,9 +1018,8 @@ public class ModularController implements UpdateProgressListener {
                 return;
             }
 
-            Scene scene = new Scene(root);
             Stage stage = new Stage();
-            stage.setScene(scene);
+            stage.setScene(new GLTScene(root));
             stage.getIcons().add(AppIconHolder.getInstance().getAppIcoImage());
             stage.setTitle(EDIT_PROJECT_PROPERTIES);
             stage.initModality(Modality.APPLICATION_MODAL);
@@ -1486,8 +1501,40 @@ public class ModularController implements UpdateProgressListener {
      */
     //region GENERAL OTHER METHODS
 
+    private void setTheme(String themeId){
+        _themeService.setTheme(themeId);
+        _themeService.styleScene(toolbar.getScene());
+
+        refreshMainMenuToolbarIcons();
+        _consoleController.updateConsole();
+        projectListView.refresh();
+    }
+
+    private void refreshMainMenuToolbarIcons() {
+        Stream.concat(projectsWindowMainMenuItems.stream(), groupsWindowMainMenuItems.stream())
+                .map(Menu::getItems)
+                .forEach(item -> {
+                    item.forEach(q -> q.getGraphic().setEffect(getLightEffect()));
+                });
+
+        Stream<Node> mainToolbarStream = Stream.concat(projectsWindowToolbarItems.stream(), groupsWindowToolbarItems.stream());
+        Stream.concat(mainToolbarStream, projectsToolbarItems.stream())
+                .filter(item -> item instanceof Button || item instanceof ToggleButton)
+                .forEach(item -> {
+                    ((ButtonBase) item).getGraphic().setEffect(getLightEffect());
+                });
+    }
+
+    private Effect getLightEffect(){
+        boolean isDarkTheme = _themeService.getCurrentTheme().equals(GLTTheme.DARK_THEME);
+        ColorAdjust colorAdjust = new ColorAdjust();
+        colorAdjust.setBrightness(_themeService.getLightningCoefficient());
+
+        return isDarkTheme ? colorAdjust : null;
+    }
+
     private void showAboutPopup() {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        Alert alert = new GLTAlert(Alert.AlertType.INFORMATION);
 
         ImageView imageView = AppIconHolder.getInstance().getAppIcoImageView();
         imageView.setFitWidth(48);
@@ -1497,13 +1544,6 @@ public class ModularController implements UpdateProgressListener {
         alert.setTitle(ABOUT_POPUP_TITLE);
         alert.setHeaderText(ABOUT_POPUP_HEADER);
         alert.setContentText(ABOUT_POPUP_CONTENT);
-
-        Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
-        stage.getIcons().add(_appIcon);
-        stage.initModality(Modality.APPLICATION_MODAL);
-
-        /* Set sizing and position */
-        ScreenUtil.adaptForMultiScreens(stage, 300, 150);
 
         alert.show();
     }
@@ -1604,13 +1644,13 @@ public class ModularController implements UpdateProgressListener {
                 return;
 
             }
-            Text groupNameText = new Text(item.getName());
-            groupNameText.setFont(Font.font(Font.getDefault().getFamily(), 14));
+            Label groupNameLabel = new Label(item.getName());
+            groupNameLabel.setFont(Font.font(Font.getDefault().getFamily(), 14));
 
             String localPath = item.getPathToClonedGroup();
-            Text localPathText = new Text(localPath);
+            Label localPathLabel = new Label(localPath);
 
-            VBox vboxItem = new VBox(groupNameText, localPathText);
+            VBox vboxItem = new VBox(groupNameLabel, localPathLabel);
             setGraphic(vboxItem);
 
             tooltip.setText(item.getName() + " (" + localPath + ")");
