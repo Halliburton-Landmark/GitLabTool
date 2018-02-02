@@ -231,22 +231,6 @@ public enum GLToolButtons {
             MainMenuInfo.GIT,
             GLToolConstants.ICON_SIZE_16),
 
-    THEME_DARK(GLToolConstants.ALL_WINDOW_KEY,
-            "theme_dark",
-            "icons/mainmenu/dark_theme_16x16.png",
-            "Dark theme",
-            null,
-            MainMenuInfo.THEMES,
-            GLToolConstants.ICON_SIZE_16),
-
-    THEME_LIGHT(GLToolConstants.ALL_WINDOW_KEY,
-            "theme_light",
-            "icons/mainmenu/light_theme_16x16.png",
-            "Light theme",
-            null,
-            MainMenuInfo.THEMES,
-            GLToolConstants.ICON_SIZE_16),
-
     MAIN_STASH(GLToolConstants.PROJECTS_WINDOW_KEY,
             "main_git_stash",
             "icons/mainmenu/stash_16x16.png",

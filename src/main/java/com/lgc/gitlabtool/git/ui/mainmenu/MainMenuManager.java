@@ -1,14 +1,18 @@
 package com.lgc.gitlabtool.git.ui.mainmenu;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.ThemeService;
+import com.lgc.gitlabtool.git.ui.javafx.GLTTheme;
 import com.lgc.gitlabtool.git.ui.javafx.controllers.ModularController;
 import com.lgc.gitlabtool.git.ui.toolbar.GLToolButtons;
 
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
 /**
@@ -54,10 +58,12 @@ public class MainMenuManager {
         List<Menu> menus = new ArrayList<>();
         LinkedHashSet<String> menusTitles = new LinkedHashSet<>();
 
-        Arrays.stream(GLToolButtons.values())
+        Stream<GLToolButtons.MainMenuInfo> streamOfMenusFromButtons = Arrays.stream(GLToolButtons.values())
                 .filter(x -> isValidItemForView(windowId, x))
                 .map(GLToolButtons::getMainMenuInfo)
-                .filter(Objects::nonNull)
+                .filter(Objects::nonNull);
+
+        Stream.concat(streamOfMenusFromButtons, Stream.of(GLToolButtons.MainMenuInfo.THEMES))
                 .sorted(Comparator.comparingInt(GLToolButtons.MainMenuInfo::getOrder))
                 .map(GLToolButtons.MainMenuInfo::getName)
                 .forEach(menusTitles::add);
@@ -76,7 +82,6 @@ public class MainMenuManager {
         }
 
         items = menus;
-
         return menus;
     }
 

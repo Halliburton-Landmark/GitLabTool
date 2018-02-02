@@ -324,6 +324,7 @@ public class ModularController implements UpdateProgressListener {
 
         initializeProjectsWindow();
         initializeGroupsWindow();
+        initializeThemesMenu();
 
         loadGroupWindow();
         updateCurrentConsole();
@@ -440,8 +441,6 @@ public class ModularController implements UpdateProgressListener {
         userGuide.setAccelerator(new KeyCodeCombination(KeyCode.F1));
         _mainMenuManager.getButtonById(GLToolButtons.GENERAL_EXIT).setOnAction(this::exit);
         _mainMenuManager.getButtonById(GLToolButtons.GENERAL_ABOUT).setOnAction(this::showAboutPopup);
-        _mainMenuManager.getButtonById(GLToolButtons.THEME_DARK).setOnAction(this::setDarkTheme);
-        _mainMenuManager.getButtonById(GLToolButtons.THEME_LIGHT).setOnAction(this::setLightTheme);
 
     }
 
@@ -510,7 +509,6 @@ public class ModularController implements UpdateProgressListener {
                 }
         );
 
-
         listView.refresh();
 
     }
@@ -521,6 +519,34 @@ public class ModularController implements UpdateProgressListener {
 
     public static void setCss_path(String css_path) {
         ModularController.css_path = css_path;
+    }
+
+    private void initializeThemesMenu() {
+        String themeMenuTitle = GLToolButtons.MainMenuInfo.THEMES.getName();
+
+        addItemsToMenu(groupsWindowMainMenuItems, createThemesMenuItems(), themeMenuTitle);
+        addItemsToMenu(projectsWindowMainMenuItems, createThemesMenuItems(), themeMenuTitle);
+    }
+
+    private void addItemsToMenu(List<Menu> parentMenu, List<MenuItem> childItems, String menuTitle) {
+        parentMenu.stream()
+                .filter(menu -> menu.getText().equals(menuTitle))
+                .findFirst()
+                .map(menu -> menu.getItems().addAll(childItems));
+    }
+
+    private List<MenuItem> createThemesMenuItems() {
+        return Arrays.stream(GLTTheme.values())
+                .map(theme -> {
+                    MenuItem item = createMenuItem(theme.getThemeTitle(), theme.getIconPath());
+                    item.setOnAction(event -> setTheme(theme.getKey()));
+                    return item;
+                })
+                .collect(Collectors.toList());
+    }
+
+    private MenuItem createMenuItem(String title, String iconPath) {
+        return new MenuItem(title, _themeService.getStyledImageView(iconPath));
     }
 
     //endregion
@@ -1437,13 +1463,6 @@ public class ModularController implements UpdateProgressListener {
      *
      */
     //region GENERAL OTHER METHODS
-    private void setDarkTheme(ActionEvent actionEvent) {
-        setTheme(GLTTheme.DARK_THEME.getKey());
-    }
-
-    private void setLightTheme(ActionEvent actionEvent) {
-        setTheme(GLTTheme.LIGHT_THEME.getKey());
-    }
 
     private void setTheme(String themeId){
         _themeService.setTheme(themeId);
