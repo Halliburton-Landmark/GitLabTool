@@ -114,10 +114,9 @@ public class CreateProjectDialog extends GLTDialog<String> {
         hbBtn.getChildren().addAll(_createButton, _cancelButton);
         grid.add(hbBtn, 2, 7);
 
-        getDialogPane().setContent(grid);
+        setDialogContent(grid);
 
-        Stage stage = (Stage) getDialogPane().getScene().getWindow();
-        stage.setOnCloseRequest(event -> {
+        getStage().setOnCloseRequest(event -> {
             if (_stateService.isActiveState(ApplicationState.CREATE_PROJECT)) {
                 event.consume();
             }

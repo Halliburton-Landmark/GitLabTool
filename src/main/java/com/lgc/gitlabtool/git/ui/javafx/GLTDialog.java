@@ -6,6 +6,7 @@ import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 import com.lgc.gitlabtool.git.util.ScreenUtil;
 import javafx.scene.control.Dialog;
 import javafx.scene.image.Image;
+import javafx.scene.layout.Pane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;;
 
@@ -32,9 +33,21 @@ public class GLTDialog<T> extends Dialog<T> {
         ScreenUtil.adaptForMultiScreens(stage, 300, 150);
     }
 
-    private Stage getStage() {
-        return (Stage) getDialogPane().getScene().getWindow();
+    /**
+     * Creates a dialog without a specified owner.
+     */
+    public GLTDialog(String title, Pane layout) {
+        this(title);
+
+
     }
 
+    protected void setDialogContent(Pane content){
+        getDialogPane().setContent(content);
+    }
+
+    protected Stage getStage() {
+        return (Stage) getDialogPane().getScene().getWindow();
+    }
 
 }

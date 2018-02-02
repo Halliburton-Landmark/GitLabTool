@@ -117,13 +117,9 @@ public class CreateNewBranchDialog extends GLTDialog<String> {
         hbBtn.getChildren().addAll(_createButton, _cancelButton);
         grid.add(hbBtn, 2, 7);
 
-        getDialogPane().setContent(grid);
+        setDialogContent(grid);
 
         initializeOnCloseEvent();
-    }
-
-    private Stage getStage() {
-        return (Stage) getDialogPane().getScene().getWindow();
     }
 
     private ObservableList<String> getBoxOptions() {
