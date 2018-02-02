@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.lgc.gitlabtool.git.ui.javafx.listeners.PushProgressListener;
 import org.apache.commons.lang.StringUtils;
 
 import com.lgc.gitlabtool.git.entities.Branch;
@@ -14,10 +15,7 @@ import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.services.BackgroundService;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
-import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
-import com.lgc.gitlabtool.git.ui.javafx.listeners.PushProgressListener;
 import com.lgc.gitlabtool.git.util.NameValidator;
-import com.lgc.gitlabtool.git.util.ScreenUtil;
 
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -29,16 +27,14 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 
-public class CreateNewBranchDialog extends Dialog<String> {
+public class CreateNewBranchDialog extends GLTDialog<String> {
 
     private static final String DIALOG_TITLE = "Create new branch";
     private static final String STATUS_DIALOG_TITLE = "Branch Creating status";
@@ -72,6 +68,7 @@ public class CreateNewBranchDialog extends Dialog<String> {
     }
 
     public CreateNewBranchDialog(List<Project> projects) {
+        super(DIALOG_TITLE);
 
         setProjects(projects);
 
@@ -120,21 +117,9 @@ public class CreateNewBranchDialog extends Dialog<String> {
         hbBtn.getChildren().addAll(_createButton, _cancelButton);
         grid.add(hbBtn, 2, 7);
 
-        getDialogPane().setContent(grid);
-        Image appIcon = AppIconHolder.getInstance().getAppIcoImage();
-        Stage stage = getStage();
-        stage.setResizable(false);
-        stage.setTitle(DIALOG_TITLE);
-        stage.getIcons().add(appIcon);
-
-         /* Set sizing and position */
-        ScreenUtil.adaptForMultiScreens(stage, 300, 150);
+        setDialogContent(grid);
 
         initializeOnCloseEvent();
-    }
-
-    private Stage getStage() {
-        return (Stage) getDialogPane().getScene().getWindow();
     }
 
     private ObservableList<String> getBoxOptions() {

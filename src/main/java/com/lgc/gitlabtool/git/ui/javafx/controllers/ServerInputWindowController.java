@@ -3,6 +3,8 @@ package com.lgc.gitlabtool.git.ui.javafx.controllers;
 import java.io.IOException;
 import java.util.List;
 
+import com.lgc.gitlabtool.git.services.ThemeService;
+import com.lgc.gitlabtool.git.ui.javafx.GLTScene;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -42,6 +44,7 @@ public class ServerInputWindowController {
 
     private final StorageService storageService = ServiceProvider.getInstance().getService(StorageService.class);
     private final NetworkService networkService = ServiceProvider.getInstance().getService(NetworkService.class);
+    private final ThemeService _themeService = ServiceProvider.getInstance().getService(ThemeService.class);
 
     @FXML
     private Label server;
@@ -70,9 +73,8 @@ public class ServerInputWindowController {
     }
 
     public void loadServerInputWindow(Parent root) throws IOException {
-        Scene scene = new Scene(root);
         Stage stage = new Stage();
-        stage.setScene(scene);
+        stage.setScene(new GLTScene(root));
         stage.setTitle("Server selection");
         Image appIcon = AppIconHolder.getInstance().getAppIcoImage();
         stage.getIcons().add(appIcon);
@@ -86,17 +88,17 @@ public class ServerInputWindowController {
 
     @FXML
     public void onOkButton() {
-        showMessage(VERIFYING_MESSAGE, Color.GREEN);
+        showMessage(VERIFYING_MESSAGE, _themeService.getCurrentTheme().getSuccessFontColorCss());
         getStage().getScene().setCursor(Cursor.WAIT);
         if (!isInputValid(serverTextField.getText())) {
             logger.warn(WRONG_INPUT_MESSAGE + ": " + serverTextField.getText());
-            showMessage(WRONG_INPUT_MESSAGE, Color.RED);
+            showMessage(WRONG_INPUT_MESSAGE, _themeService.getCurrentTheme().getErrorFontColorCss());
             getStage().getScene().setCursor(Cursor.DEFAULT);
             return;
         }
         if (isServerAlreadyExists(serverTextField.getText())) {
             logger.warn(SERVER_ALREADY_EXISTS_MESSAGE + ": " + serverTextField.getText());
-            showMessage(SERVER_ALREADY_EXISTS_MESSAGE, Color.RED);
+            showMessage(SERVER_ALREADY_EXISTS_MESSAGE, _themeService.getCurrentTheme().getErrorFontColorCss());
             getStage().getScene().setCursor(Cursor.DEFAULT);
             return;
         }
@@ -112,12 +114,12 @@ public class ServerInputWindowController {
                 } else if (responseCode < 0 || responseCode > HttpStatus.SC_UNAUTHORIZED) {
                     Platform.runLater(() -> {
                         logger.warn(WRONG_SERVER_ADDRESS_MESSAGE + ": " + serverTextField.getText());
-                        showMessage(WRONG_SERVER_ADDRESS_MESSAGE, Color.RED);
+                        showMessage(WRONG_SERVER_ADDRESS_MESSAGE, _themeService.getCurrentTheme().getErrorFontColorCss());
                     });
                 } else {
                     Platform.runLater(() -> {
                         logger.warn(NO_INTERNET_CONNECTION_MESSAGE);
-                        showMessage(NO_INTERNET_CONNECTION_MESSAGE, Color.RED);
+                        showMessage(NO_INTERNET_CONNECTION_MESSAGE, _themeService.getCurrentTheme().getErrorFontColorCss());
                     });
                 }
 

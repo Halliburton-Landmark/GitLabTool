@@ -40,12 +40,14 @@ public class ServiceProvider {
                 stateService, consoleService, gitService, jGit);
         ClonedGroupsService programPropertiesService = new ClonedGroupsServiceImpl(storageService, loginService);
         PomXmlEditService pomXmlEditService = new PomXMLEditServiceImpl();
+        ThemeService themeService = new ThemeServiceImpl();
 
         _services = new HashMap<>();
         _services.put(LoginService.class, loginService);
         _services.put(ClonedGroupsService.class, programPropertiesService);
         _services.put(GroupsUserService.class, new GroupsUserServiceImpl(restConnector,
                 programPropertiesService, projectService, stateService, consoleService, jGit));
+
         _services.put(ProjectService.class, projectService);
         _services.put(StorageService.class, storageService);
         _services.put(ReplacementService.class, new ReplacementServiceImpl());
@@ -55,6 +57,7 @@ public class ServiceProvider {
         _services.put(GitService.class, gitService);
         _services.put(StateService.class, stateService);
         _services.put(ConsoleService.class, consoleService);
+        _services.put(ThemeService.class, themeService);
         _services.put(BackgroundService.class, backgroundService);
     }
 

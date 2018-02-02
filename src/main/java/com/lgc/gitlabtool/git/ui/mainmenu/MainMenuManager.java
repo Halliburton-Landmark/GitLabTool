@@ -1,7 +1,12 @@
 package com.lgc.gitlabtool.git.ui.mainmenu;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import com.lgc.gitlabtool.git.services.ServiceProvider;
+import com.lgc.gitlabtool.git.services.ThemeService;
+import com.lgc.gitlabtool.git.ui.javafx.GLTTheme;
 import com.lgc.gitlabtool.git.ui.javafx.controllers.ModularController;
 import com.lgc.gitlabtool.git.ui.toolbar.GLToolButtons;
 
@@ -21,6 +26,9 @@ public class MainMenuManager {
 
     private List<Menu> items;
     private Map<String, Boolean> enableMap = new HashMap<>();
+
+    private static final ThemeService _themeService = ServiceProvider.getInstance()
+            .getService(ThemeService.class);
 
     private MainMenuManager() {
     }
@@ -50,10 +58,12 @@ public class MainMenuManager {
         List<Menu> menus = new ArrayList<>();
         LinkedHashSet<String> menusTitles = new LinkedHashSet<>();
 
-        Arrays.stream(GLToolButtons.values())
+        Stream<GLToolButtons.MainMenuInfo> streamOfMenusFromButtons = Arrays.stream(GLToolButtons.values())
                 .filter(x -> isValidItemForView(windowId, x))
                 .map(GLToolButtons::getMainMenuInfo)
-                .filter(Objects::nonNull)
+                .filter(Objects::nonNull);
+
+        Stream.concat(streamOfMenusFromButtons, Stream.of(GLToolButtons.MainMenuInfo.THEMES))
                 .sorted(Comparator.comparingInt(GLToolButtons.MainMenuInfo::getOrder))
                 .map(GLToolButtons.MainMenuInfo::getName)
                 .forEach(menusTitles::add);
@@ -72,7 +82,6 @@ public class MainMenuManager {
         }
 
         items = menus;
-
         return menus;
     }
 
@@ -148,8 +157,9 @@ public class MainMenuManager {
     }
 
     private MenuItem createButton(String buttonId, String imgPath, String btnText) {
-        Image menuItemImage = new Image(getClass().getClassLoader().getResource(imgPath).toExternalForm());
-        MenuItem menuItem = new MenuItem(btnText, new ImageView(menuItemImage));
+        ImageView view = _themeService.getStyledImageView(imgPath);
+
+        MenuItem menuItem = new MenuItem(btnText, view);
         menuItem.setId(buttonId);
 
         return menuItem;

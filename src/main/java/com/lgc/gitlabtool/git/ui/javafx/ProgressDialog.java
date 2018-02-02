@@ -9,6 +9,7 @@ import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.services.BackgroundService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StateService;
+import com.lgc.gitlabtool.git.services.ThemeService;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 import com.lgc.gitlabtool.git.util.ScreenUtil;
@@ -59,7 +60,7 @@ public abstract class ProgressDialog extends Dialog<Void> {
 
     private final StateService _stateService = ServiceProvider.getInstance().getService(StateService.class);
 
-    private final BackgroundService _backgroundService = ServiceProvider.getInstance()
+    private final BackgroundService _backgroundService = (BackgroundService) ServiceProvider.getInstance()
             .getService(BackgroundService.class);
 
     /**
@@ -80,7 +81,7 @@ public abstract class ProgressDialog extends Dialog<Void> {
         grid.setPadding(new Insets(25, 25, 25, 25));
 
         _currentProjectLabel = new Label(DEFAULT_PROJECT_LABEL);
-        _currentProjectLabel.setStyle("-fx-text-fill:blue");
+        _currentProjectLabel.setId("progress_dialog_title");
         grid.add(_currentProjectLabel, 1, 2);
 
         HBox progressBox = new HBox(10);
@@ -107,12 +108,11 @@ public abstract class ProgressDialog extends Dialog<Void> {
         _progressIndicator.setMaxSize(20, 20);
 
         Image appIcon = AppIconHolder.getInstance().getAppIcoImage();
-        Scene scene = new Scene(grid, 650, 350);
 
         Stage stage = new Stage();
         stage.setMinWidth(650);
         stage.setResizable(false);
-        stage.setScene(scene);
+        stage.setScene(new GLTScene(grid, 650, 350));
         stage.setTitle(title);
         stage.getIcons().add(appIcon);
         stage.setOnCloseRequest(event -> {
