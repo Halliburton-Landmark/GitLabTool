@@ -5,7 +5,10 @@ import javafx.scene.Scene;
 import javafx.scene.effect.ColorAdjust;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+import java.net.URL;
 import java.util.prefs.Preferences;
 
 public class ThemeServiceImpl implements ThemeService {
@@ -15,6 +18,8 @@ public class ThemeServiceImpl implements ThemeService {
     private Preferences themePrefs;
     private GLTTheme currentGLTThemes;
     private static final Double LIGHTING_COEFFICIENT_FOR_DARK_THEMES = +0.65;
+
+    private static final Logger _logger = LogManager.getLogger(ThemeService.class);
 
     ThemeServiceImpl() {
         themePrefs = Preferences.userRoot().node(THEME_PREFS_KEY);
@@ -33,8 +38,14 @@ public class ThemeServiceImpl implements ThemeService {
         if (!scene.getStylesheets().isEmpty()) {
             scene.getStylesheets().clear();
         }
-        scene.getStylesheets().add(
-                getClass().getClassLoader().getResource(currentGLTThemes.getPath()).toExternalForm());
+
+        URL cssUrl = getClass().getClassLoader().getResource(currentGLTThemes.getPath());
+        if (cssUrl == null) {
+            _logger.error("Could not load css resource: " + currentGLTThemes.getPath());
+            return;
+        }
+
+        scene.getStylesheets().add(cssUrl.toExternalForm());
     }
 
     public void setTheme(String themeName) {
@@ -44,8 +55,12 @@ public class ThemeServiceImpl implements ThemeService {
 
     @Override
     public ImageView getStyledImageView(String path) {
-
-        Image image = new Image(getClass().getClassLoader().getResource(path).toExternalForm());
+        URL imageUrl = getClass().getClassLoader().getResource(path);
+        if (imageUrl == null) {
+            _logger.error("Could not load image resource: " + path);
+            return new ImageView();
+        }
+        Image image = new Image(imageUrl.toExternalForm());
         ImageView view = new ImageView(image);
 
         if (currentGLTThemes.equals(GLTTheme.DARK_THEME)) {
