@@ -231,8 +231,9 @@
 }
 
 .button {
-    -fx-background-color: transparent;
+    -fx-background-color: rgb(78, 78, 78);
     -fx-text-fill: silver;
+    -fx-background-radius: 15, 15, 15;
 
 }
 

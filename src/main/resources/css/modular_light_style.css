@@ -226,9 +226,9 @@
 }
 
 .button {
-    -fx-background-color: transparent;
+    -fx-background-color: rgb(200, 200, 200);
     -fx-text-fill: foreground-text;
-
+    -fx-background-radius: 15, 15, 15;
 }
 
 .button:hover{
