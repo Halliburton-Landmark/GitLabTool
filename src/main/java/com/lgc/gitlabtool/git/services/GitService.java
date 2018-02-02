@@ -260,4 +260,13 @@ public interface GitService extends Service {
     * @return a map of operation statuses
     */
    Map<Project, Boolean> stashDrop(Stash stash);
+
+   /**
+    * Deletes branch from projects
+    *
+    * @param  projects the cloned projects
+    * @param  deletedBranch the branch which will be deleted
+    * @return a map of operation statuses
+    */
+   Map<Project, Boolean> deleteBranch(List<Project> projects, Branch deletedBranch);
 }

@@ -411,6 +411,27 @@ public class GitServiceImpl implements GitService {
         return resultOperations;
     }
 
+    @Override
+    public Map<Project, Boolean> deleteBranch(List<Project> projects, Branch deletedBranch) {
+        Map<Project, Boolean> statuses = new ConcurrentHashMap<>();
+        if (projects == null || projects.isEmpty() || deletedBranch == null) {
+            _logger.error("Error during to delete branch. Incorrect projects or branch.");
+            return statuses;
+        } else if (deletedBranch.getBranchName() == null || deletedBranch.getBranchName().isEmpty()) {
+            _logger.error("Error during to delete branch. A branch name is null or empty.");
+            return statuses;
+        }
+        projects.parallelStream()
+                .filter(Objects::nonNull)
+                .forEach(project -> deleteBranch(project, deletedBranch.getBranchName(), statuses));
+        return statuses;
+    }
+
+    private void deleteBranch(Project project, String branchName, Map<Project, Boolean> statuses) {
+        JGitStatus result = _git.deleteBranch(project, branchName);
+        statuses.put(project, result == JGitStatus.SUCCESSFUL);
+    }
+
     private void createStash(Map<Project, Boolean> results, Project project,
                            String stashGroupMessage, boolean includeUntracked) {
         boolean result = false;
@@ -579,4 +600,5 @@ public class GitServiceImpl implements GitService {
             progressListener.onFinish();
         }
     }
+
 }

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -26,12 +27,13 @@ import com.lgc.gitlabtool.git.ui.icon.LocalRemoteIconHolder;
 import com.lgc.gitlabtool.git.ui.javafx.ChangesCheckDialog;
 import com.lgc.gitlabtool.git.ui.javafx.CheckoutBranchProgressDialog;
 import com.lgc.gitlabtool.git.ui.javafx.ProgressDialog;
+import com.lgc.gitlabtool.git.ui.javafx.StatusDialog;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -83,16 +85,17 @@ public class CheckoutBranchWindowController extends AbstractStateListener {
     @FXML
     private Button checkoutButton;
 
+    @FXML
+    private Button deleteButton;
+
     private static final StateService _stateService = ServiceProvider.getInstance().getService(StateService.class);
-
     private static final ConsoleService _consoleService = ServiceProvider.getInstance().getService(ConsoleService.class);
-
-    private static final BackgroundService _backgroundService = ServiceProvider.getInstance()
-            .getService(BackgroundService.class);
-
+    private static final BackgroundService _backgroundService = ServiceProvider.getInstance().getService(BackgroundService.class);
     private static final GitService _gitService = ServiceProvider.getInstance().getService(GitService.class);
 
     private static final String ALREADY_CHECKED_OUT_MESSAGE = "%d of %d projects have already checked out the selected branch.";
+    private static final String DELETE_CURRENT_BRANCH_MESSAGE = "The operation isn't possible for %d of %d projects. "
+            + "Projects checked out on %s branch.";
 
     {
         _stateService.addStateListener(ApplicationState.LOAD_PROJECTS, this);
@@ -119,6 +122,37 @@ public class CheckoutBranchWindowController extends AbstractStateListener {
         onUpdateList();
     }
 
+    @FXML
+    public void deleteAction() {
+        _consoleService.addMessage("Deleting branch is started", MessageType.SIMPLE);
+        List<Project> selectedProjects = currentProjectsListView.getItems();
+        Branch selectedBranch = branchesListView.getSelectionModel().getSelectedItem();
+
+        List<Project> correctProjects = getCorrectProjects(selectedProjects, selectedBranch);
+        int numberSelected = selectedProjects.size();
+        if (correctProjects.size() != selectedProjects.size()) {
+            _consoleService.addMessage(
+                    String.format(DELETE_CURRENT_BRANCH_MESSAGE, numberSelected - correctProjects.size(),
+                            numberSelected, selectedBranch.getBranchName()), MessageType.ERROR);
+        }
+        Map<Project, Boolean> statuses = _gitService.deleteBranch(correctProjects, selectedBranch);
+        showStatusDialog("Delete branch status", "Deleting branch from projects was finished.", statuses);
+    }
+
+    private List<Project> getCorrectProjects(List<Project> projects, Branch selectedBranch) {
+        return projects.stream()
+                       .filter(project -> !Branch.compareBranches(project, selectedBranch))
+                       .collect(Collectors.toList());
+    }
+
+    private void showStatusDialog(String titleText, String headerText, Map<Project, Boolean> statuses) {
+        _consoleService.addMessage(headerText, MessageType.determineMessageType(headerText));
+
+        StatusDialog statusDialog = new StatusDialog(titleText, headerText);
+        statusDialog.showMessageForSimpleStatuses(statuses, statuses.size(), "type000");
+        statusDialog.showAndWait();
+    }
+
     /*
     Buttons
     */
@@ -126,9 +160,7 @@ public class CheckoutBranchWindowController extends AbstractStateListener {
         List<Project> selectedProjects = currentProjectsListView.getItems();
         Branch selectedBranch = branchesListView.getSelectionModel().getSelectedItem();
 
-        List<Project> correctProjects = selectedProjects.stream()
-                                                      .filter(project -> !Branch.compareBranches(project, selectedBranch))
-                                                      .collect(Collectors.toList());
+        List<Project> correctProjects = getCorrectProjects(selectedProjects, selectedBranch);
         int numberSelected = selectedProjects.size();
         if (correctProjects.size() != numberSelected) {
             _consoleService.addMessage(
@@ -309,16 +341,15 @@ public class CheckoutBranchWindowController extends AbstractStateListener {
     }
 
     private void disableSwitchButton(Object currentBranch) {
+        ObservableValue<Boolean> disableProperty;
         if (currentBranch == null) {
-            BooleanBinding defaultProperty = branchesListView.getSelectionModel().selectedItemProperty().isNull();
-            checkoutButton.disableProperty().bind(defaultProperty);
-            return;
-        }
-        if(isSelectedBranchCurrentForAllProjects((Branch)currentBranch)) {
-            checkoutButton.disableProperty().bind(new SimpleBooleanProperty(true));
+            disableProperty = branchesListView.getSelectionModel().selectedItemProperty().isNull();
         } else {
-            checkoutButton.disableProperty().bind(new SimpleBooleanProperty(false));
+            boolean isDisable = isSelectedBranchCurrentForAllProjects((Branch)currentBranch);
+            disableProperty = new SimpleBooleanProperty(isDisable);
         }
+        checkoutButton.disableProperty().bind(disableProperty);
+        deleteButton.disableProperty().bind(disableProperty);
     }
 
     private boolean isSelectedBranchCurrentForAllProjects(Branch currentBranch) {

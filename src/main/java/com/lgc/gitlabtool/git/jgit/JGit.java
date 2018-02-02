@@ -948,7 +948,7 @@ public class JGit {
      * @return JGitStatus: SUCCESSFUL - if a new branch was created,
      *                     FAILED - if the branch could not be created.
      */
-    public JGitStatus deleteBranch(Project project, String nameBranch, boolean force) {
+    public JGitStatus deleteBranch(Project project, String nameBranch) {
         if (project == null || nameBranch == null || nameBranch.isEmpty()) {
             throw new IllegalArgumentException(
                     "Incorrect data: project is " + project + ", nameBranch is " + nameBranch);
@@ -962,7 +962,7 @@ public class JGit {
                 logger.error("The current branch can not be deleted.");
                 return JGitStatus.FAILED;
             }
-            git.branchDelete().setBranchNames(nameBranch).setForce(force).call();
+            git.branchDelete().setBranchNames(nameBranch).setForce(true).call();
             logger.info("!Branch \"" + nameBranch + "\" deleted from the " + project.getPath());
             return JGitStatus.SUCCESSFUL;
         } catch (GitAPIException | IOException e) {

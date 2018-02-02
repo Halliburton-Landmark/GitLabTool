@@ -667,28 +667,28 @@ public class JGitTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void deleteBranchProjectIsNullTest() {
-        getJGitMock(null).deleteBranch(null, "", false);
+        getJGitMock(null).deleteBranch(null, "");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void deleteBranchNameBranchIsNullTest() {
-        getJGitMock(null).deleteBranch(getProject(false), null, false);
+        getJGitMock(null).deleteBranch(getProject(false), null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void deleteBranchNameBranchIsEmptyTest() {
-        getJGitMock(null).deleteBranch(getProject(false), "", false);
+        getJGitMock(null).deleteBranch(getProject(false), "");
     }
 
     @Test
     public void deleteBranchIncorrectDataTest() {
-        Assert.assertEquals(getJGitMock(null).deleteBranch(getProject(false), NAME_BRANCH, false), JGitStatus.FAILED);
-        Assert.assertEquals(getJGitMock(null).deleteBranch(getProject(true), NAME_BRANCH, false), JGitStatus.FAILED);
+        Assert.assertEquals(getJGitMock(null).deleteBranch(getProject(false), NAME_BRANCH), JGitStatus.FAILED);
+        Assert.assertEquals(getJGitMock(null).deleteBranch(getProject(true), NAME_BRANCH), JGitStatus.FAILED);
 
         Git gitMock = getGitMock();
         Repository repoMock = getRepo(NAME_BRANCH);
         when(gitMock.getRepository()).thenReturn(repoMock);
-        Assert.assertEquals(getJGitMock(gitMock).deleteBranch(getProject(true), NAME_BRANCH, false), JGitStatus.FAILED);
+        Assert.assertEquals(getJGitMock(gitMock).deleteBranch(getProject(true), NAME_BRANCH), JGitStatus.FAILED);
 
         DeleteBranchCommand deleteBranchMock = new DeleteBranchCommand(getRepository()) {
             @Override
@@ -704,7 +704,7 @@ public class JGitTest {
         repoMock = getRepo(null);
         when(gitMock.getRepository()).thenReturn(repoMock);
         when(gitMock.branchDelete()).thenReturn(deleteBranchMock);
-        Assert.assertEquals(getJGitMock(gitMock).deleteBranch(getProject(true), NAME_BRANCH, false), JGitStatus.FAILED);
+        Assert.assertEquals(getJGitMock(gitMock).deleteBranch(getProject(true), NAME_BRANCH), JGitStatus.FAILED);
     }
 
     @Test
@@ -725,7 +725,7 @@ public class JGitTest {
         };
         when(gitMock.getRepository()).thenReturn(repoMock);
         when(gitMock.branchDelete()).thenReturn(deleteBranchMock);
-        Assert.assertEquals(getJGitMock(gitMock).deleteBranch(getProject(true), NAME_BRANCH, false),
+        Assert.assertEquals(getJGitMock(gitMock).deleteBranch(getProject(true), NAME_BRANCH),
                 JGitStatus.SUCCESSFUL);
     }
 
