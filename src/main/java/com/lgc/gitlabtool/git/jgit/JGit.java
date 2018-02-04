@@ -29,10 +29,7 @@ import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.ResetCommand;
 import org.eclipse.jgit.api.Status;
-import org.eclipse.jgit.api.errors.CheckoutConflictException;
-import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.api.errors.InvalidRefNameException;
-import org.eclipse.jgit.api.errors.JGitInternalException;
+import org.eclipse.jgit.api.errors.*;
 import org.eclipse.jgit.dircache.DirCache;
 import org.eclipse.jgit.dircache.DirCacheCheckout;
 import org.eclipse.jgit.errors.CorruptObjectException;
@@ -1184,6 +1181,28 @@ public class JGit {
             logger.error("Could not get tracking branch " + e.getMessage());
         }
         return trackingBranch;
+    }
+
+    /**
+     * This method return all commits for currently selected branch
+     *
+     * @param project
+     * @param branchName
+     * @return list of commits
+     */
+    public Iterable<RevCommit> getAllCommits(Project project, String branchName) {
+        if (project == null) {
+            return Collections.EMPTY_LIST;
+        }
+        try (Git git = getGit(project.getPath())) {
+            try (Repository repo = git.getRepository()) {
+                Iterable<RevCommit> commits = git.log().add(repo.resolve(branchName)).call();
+                return commits;
+            }
+        } catch (IOException | GitAPIException e) {
+            logger.error("Could not get commits for selected branch " + e.getMessage());
+        }
+        return Collections.EMPTY_LIST;
     }
 
     protected BranchConfig getBranchConfig(Config config, String branchName) {

@@ -36,6 +36,7 @@ import com.lgc.gitlabtool.git.jgit.stash.SingleProjectStash;
 import com.lgc.gitlabtool.git.jgit.stash.Stash;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
+import org.eclipse.jgit.revwalk.RevCommit;
 
 public class GitServiceImpl implements GitService {
 
@@ -253,6 +254,11 @@ public class GitServiceImpl implements GitService {
     @Override
     public String getTrackingBranch(Project project) {
         return _git.getTrackingBranch(project);
+    }
+
+    @Override
+    public Iterable<RevCommit> getAllCommits(Project project, String branchName) {
+        return _git.getAllCommits(project, branchName);
     }
 
     @Override

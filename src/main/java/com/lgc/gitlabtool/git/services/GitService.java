@@ -15,6 +15,7 @@ import com.lgc.gitlabtool.git.jgit.ChangedFile;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.jgit.stash.Stash;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
+import org.eclipse.jgit.revwalk.RevCommit;
 
 /**
  * Service for working with Git features.
@@ -173,6 +174,15 @@ public interface GitService extends Service {
     * @return tracking branch.
     */
    public String getTrackingBranch(Project project);
+
+    /**
+     * This method return all commits for currently selected branch
+     *
+     * @param project
+     * @param branchName
+     * @return list of commits
+     */
+    public Iterable<RevCommit> getAllCommits(Project project, String branchName);
 
     /**
      * Gets ChangedFiles for project.
