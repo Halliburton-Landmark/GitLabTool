@@ -15,6 +15,7 @@ import com.lgc.gitlabtool.git.jgit.ChangedFile;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.jgit.stash.Stash;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
+import org.eclipse.jgit.api.Status;
 
 /**
  * Service for working with Git features.
