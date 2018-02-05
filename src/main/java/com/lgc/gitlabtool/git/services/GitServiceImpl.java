@@ -66,8 +66,7 @@ public class GitServiceImpl implements GitService {
 
     @Override
     public Map<Project, JGitStatus> checkoutBranch(List<Project> projects, Branch branch, ProgressListener progress) {
-        boolean isRemote = branch.getBranchType().equals(BranchType.REMOTE);
-        return checkoutBranch(projects, branch.getBranchName(), isRemote, progress);
+        return checkoutBranch(projects, branch.getBranchName(), branch.isRemote(), progress);
     }
 
     @Override
@@ -412,25 +411,46 @@ public class GitServiceImpl implements GitService {
     }
 
     @Override
-    public Map<Project, Boolean> deleteBranch(List<Project> projects, Branch deletedBranch) {
+    public Map<Project, Boolean> deleteBranch(List<Project> projects,
+                                              Branch deletedBranch,
+                                              ProgressListener progressListener) {
         Map<Project, Boolean> statuses = new ConcurrentHashMap<>();
-        if (projects == null || projects.isEmpty() || deletedBranch == null) {
-            _logger.error("Error during to delete branch. Incorrect projects or branch.");
-            return statuses;
-        } else if (deletedBranch.getBranchName() == null || deletedBranch.getBranchName().isEmpty()) {
-            _logger.error("Error during to delete branch. A branch name is null or empty.");
-            return statuses;
+        try {
+            _stateService.stateON(ApplicationState.DELETE_BRANCH);
+            progressListener.onStart("Delete branch operation is started.");
+            if (projects == null || projects.isEmpty() || deletedBranch == null) {
+                _logger.error("Error during to delete branch. Incorrect projects or branch.");
+                return statuses;
+            } else if (deletedBranch.getBranchName() == null || deletedBranch.getBranchName().isEmpty()) {
+                _logger.error("Error during to delete branch. A branch name is null or empty.");
+                return statuses;
+            }
+            long step = 100 / projects.size();
+            AtomicLong progress = new AtomicLong(0);
+            projects.parallelStream()
+                    .filter(Objects::nonNull)
+                    .forEach(project -> deleteBranch(project, deletedBranch, statuses, progressListener, progress, step));
+        } finally {
+            progressListener.onFinish("Delete branch operation is finished.");
         }
-        boolean isRemote = deletedBranch.getBranchType() == BranchType.REMOTE;
-        projects.parallelStream()
-                .filter(Objects::nonNull)
-                .forEach(project -> deleteBranch(project, deletedBranch.getBranchName(), isRemote, statuses));
         return statuses;
     }
 
-    private void deleteBranch(Project project, String branchName, boolean isRemote, Map<Project, Boolean> statuses) {
-        JGitStatus result = _git.deleteBranch(project, branchName, isRemote);
+    private void deleteBranch(Project project, Branch deletedBranch,
+                              Map<Project, Boolean> statuses,
+                              ProgressListener progressListener,
+                              AtomicLong progress, long step) {
+        progressListener.onStart(project);
+        String branchName = deletedBranch.getBranchName();
+        JGitStatus result = _git.deleteBranch(project, branchName, deletedBranch.isRemote());
         statuses.put(project, result == JGitStatus.SUCCESSFUL);
+        progress.addAndGet(step);
+
+        if (result == JGitStatus.SUCCESSFUL) {
+            progressListener.onSuccess(progress.get(), project, result);
+        } else {
+            progressListener.onError(progress.get(), project, result);
+        }
     }
 
     private void createStash(Map<Project, Boolean> results, Project project,

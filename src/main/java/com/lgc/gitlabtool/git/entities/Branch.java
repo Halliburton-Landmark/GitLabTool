@@ -53,6 +53,10 @@ public class Branch {
         return branchType;
     }
 
+    public boolean isRemote() {
+        return getBranchType() == BranchType.REMOTE;
+    }
+
     /**
      * Sets type of branch
      *

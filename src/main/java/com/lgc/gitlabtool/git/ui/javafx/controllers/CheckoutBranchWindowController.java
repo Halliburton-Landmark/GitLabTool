@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -21,14 +22,17 @@ import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.services.BackgroundService;
 import com.lgc.gitlabtool.git.services.ConsoleService;
 import com.lgc.gitlabtool.git.services.GitService;
+import com.lgc.gitlabtool.git.services.ProgressListener;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.icon.LocalRemoteIconHolder;
 import com.lgc.gitlabtool.git.ui.javafx.ChangesCheckDialog;
-import com.lgc.gitlabtool.git.ui.javafx.CheckoutBranchProgressDialog;
-import com.lgc.gitlabtool.git.ui.javafx.ProgressDialog;
+import com.lgc.gitlabtool.git.ui.javafx.GLTAlert;
 import com.lgc.gitlabtool.git.ui.javafx.StatusDialog;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
+import com.lgc.gitlabtool.git.ui.javafx.progressdialog.CheckoutBranchProgressDialog;
+import com.lgc.gitlabtool.git.ui.javafx.progressdialog.DeleteBranchProgresDialog;
+import com.lgc.gitlabtool.git.ui.javafx.progressdialog.ProgressDialog;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -37,6 +41,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
@@ -96,7 +101,7 @@ public class CheckoutBranchWindowController extends AbstractStateListener {
     private static final String ALREADY_CHECKED_OUT_MESSAGE = "%d of %d projects have already checked out the selected branch.";
     private static final String DELETE_CURRENT_BRANCH_MESSAGE = "The operation isn't possible for %d of %d projects. "
             + "Projects checked out on %s branch.";
-
+    private static final String DELETE_BRANCHE_TITLE = "Delete branch";
 
     {
         _stateService.addStateListener(ApplicationState.LOAD_PROJECTS, this);
@@ -126,9 +131,16 @@ public class CheckoutBranchWindowController extends AbstractStateListener {
 
     @FXML
     public void deleteAction() {
-        _stateService.stateON(ApplicationState.DELETE_BRANCH);
         List<Project> selectedProjects = currentProjectsListView.getItems();
         Branch selectedBranch = branchesListView.getSelectionModel().getSelectedItem();
+
+        boolean isYes = requesConfirmationOperation(DELETE_BRANCHE_TITLE,
+                "The " + selectedBranch.getBranchName() + " branch will delete from " + selectedProjects.size() + " project(s).",
+                "Are you sure that you want carry out operation?");
+        if (!isYes) {
+            return;
+        }
+
         List<Project> correctProjects = getCorrectProjects(selectedProjects, selectedBranch);
         int numberSelected = selectedProjects.size();
         if (correctProjects.size() != selectedProjects.size()) {
@@ -136,10 +148,22 @@ public class CheckoutBranchWindowController extends AbstractStateListener {
                     String.format(DELETE_CURRENT_BRANCH_MESSAGE, numberSelected - correctProjects.size(),
                             numberSelected, selectedBranch.getBranchName()), MessageType.ERROR);
         }
-        Map<Project, Boolean> statuses = _gitService.deleteBranch(correctProjects, selectedBranch);
         branchesListView.getSelectionModel().clearSelection();
-        _stateService.stateOFF(ApplicationState.DELETE_BRANCH);
-        showStatusDialog("Delete branch status", "Deleting branch from projects was finished.", statuses);
+        ProgressListener progressListener;
+        if (selectedBranch.isRemote()) {
+            ProgressDialog progressDialog = new DeleteBranchProgresDialog();
+            progressListener = new OperationProgressListener(progressDialog, ApplicationState.DELETE_BRANCH);
+            progressDialog.setStartAction(() ->  deleteAction(correctProjects, selectedBranch, progressListener));
+            progressDialog.showDialog();
+        } else {
+            progressListener = new DeleteBranchProgressListener();
+            Map<Project, Boolean> statuses =  _gitService.deleteBranch(correctProjects, selectedBranch, progressListener);
+            showStatusDialog("Delete branch status", "Deleting branch from projects was finished.", statuses);
+        }
+    }
+
+    private void deleteAction(List<Project> projects, Branch selectedBranch, ProgressListener progressListener) {
+        _gitService.deleteBranch(projects, selectedBranch, progressListener);
     }
 
     private List<Project> getCorrectProjects(List<Project> projects, Branch selectedBranch) {
@@ -414,6 +438,33 @@ public class CheckoutBranchWindowController extends AbstractStateListener {
                 });
             });
         }
+    }
+
+    class DeleteBranchProgressListener implements ProgressListener {
+
+        @Override
+        public void onSuccess(Object... t) {}
+
+        @Override
+        public void onError(Object... t) {}
+
+        @Override
+        public void onStart(Object... t) {}
+
+        @Override
+        public void onFinish(Object... t) {
+            _stateService.stateOFF(ApplicationState.DELETE_BRANCH);
+        }
+
+    }
+
+    private boolean requesConfirmationOperation(String title, String header, String context) {
+        GLTAlert alert = new GLTAlert(title, header, context);
+        alert.clearDefaultButtons();
+        alert.addButtons(ButtonType.YES, ButtonType.NO);
+
+        Optional<ButtonType> result = alert.showAndWait();
+        return !(result.orElse(ButtonType.NO) == ButtonType.NO);
     }
 
 }
