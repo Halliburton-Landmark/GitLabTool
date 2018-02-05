@@ -266,7 +266,7 @@ public interface GitService extends Service {
     *
     * @param  projects the cloned projects
     * @param  deletedBranch the branch which will be deleted
-    * @param progressListener the listener for obtaining data on the process of performing the operation
+    * @param  progressListener the listener for obtaining data on the process of performing the operation
     * @return a map of operation statuses
     */
    Map<Project, Boolean> deleteBranch(List<Project> projects, Branch deletedBranch, ProgressListener progressListener);
