@@ -53,6 +53,11 @@ public class Branch {
         return branchType;
     }
 
+    /**
+     * Checks whether the current branch is remote.
+     *
+     * @return <code>true</code> if the branch is remote, otherwise <code>false</code>
+     */
     public boolean isRemote() {
         return getBranchType() == BranchType.REMOTE;
     }

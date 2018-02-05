@@ -41,17 +41,17 @@ public class GitServiceImpl implements GitService {
 
     private static final Logger _logger = LogManager.getLogger(GitServiceImpl.class);
     private static final String CHECKOUT_BRANCH_FINISHED_MESSAGE = "Checkout branch operation is finished.";
+    private static final String DELETE_BRANCH_STARTED = "Delete branch operation is started.";
+    private static final String DELETE_BRANCH_FINISHED = "Delete branch operation is finished.";
     private static final String GROUP_STASH_ID = "[GS%s] ";
 
     private static JGit _git;
     private static StateService _stateService;
-    private static ConsoleService _consoleService;
     private static ChangedFilesUtils _changedFilesUtils;
 
-    public GitServiceImpl(StateService stateService, ConsoleService consoleService, JGit jGit, ChangedFilesUtils changedFilesUtils) {
+    public GitServiceImpl(StateService stateService, JGit jGit, ChangedFilesUtils changedFilesUtils) {
         _git = jGit;
         _stateService = stateService;
-        _consoleService = consoleService;
         _changedFilesUtils = changedFilesUtils;
     }
 
@@ -417,7 +417,7 @@ public class GitServiceImpl implements GitService {
         Map<Project, Boolean> statuses = new ConcurrentHashMap<>();
         try {
             _stateService.stateON(ApplicationState.DELETE_BRANCH);
-            progressListener.onStart("Delete branch operation is started.");
+            progressListener.onStart(DELETE_BRANCH_STARTED);
             if (projects == null || projects.isEmpty() || deletedBranch == null) {
                 _logger.error("Error during to delete branch. Incorrect projects or branch.");
                 return statuses;
@@ -431,7 +431,7 @@ public class GitServiceImpl implements GitService {
                     .filter(Objects::nonNull)
                     .forEach(project -> deleteBranch(project, deletedBranch, statuses, progressListener, progress, step));
         } finally {
-            progressListener.onFinish("Delete branch operation is finished.");
+            progressListener.onFinish(DELETE_BRANCH_FINISHED);
         }
         return statuses;
     }
@@ -621,5 +621,4 @@ public class GitServiceImpl implements GitService {
             progressListener.onFinish();
         }
     }
-
 }

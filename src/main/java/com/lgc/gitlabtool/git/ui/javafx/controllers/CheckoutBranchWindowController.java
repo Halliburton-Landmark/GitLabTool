@@ -31,7 +31,7 @@ import com.lgc.gitlabtool.git.ui.javafx.GLTAlert;
 import com.lgc.gitlabtool.git.ui.javafx.StatusDialog;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 import com.lgc.gitlabtool.git.ui.javafx.progressdialog.CheckoutBranchProgressDialog;
-import com.lgc.gitlabtool.git.ui.javafx.progressdialog.DeleteBranchProgresDialog;
+import com.lgc.gitlabtool.git.ui.javafx.progressdialog.DeleteBranchProgressDialog;
 import com.lgc.gitlabtool.git.ui.javafx.progressdialog.ProgressDialog;
 
 import javafx.application.Platform;
@@ -133,7 +133,6 @@ public class CheckoutBranchWindowController extends AbstractStateListener {
     public void deleteAction() {
         List<Project> selectedProjects = currentProjectsListView.getItems();
         Branch selectedBranch = branchesListView.getSelectionModel().getSelectedItem();
-
         boolean isYes = requesConfirmationOperation(DELETE_BRANCHE_TITLE,
                 "The " + selectedBranch.getBranchName() + " branch will delete from " + selectedProjects.size() + " project(s).",
                 "Are you sure that you want carry out operation?");
@@ -148,18 +147,25 @@ public class CheckoutBranchWindowController extends AbstractStateListener {
                     String.format(DELETE_CURRENT_BRANCH_MESSAGE, numberSelected - correctProjects.size(),
                             numberSelected, selectedBranch.getBranchName()), MessageType.ERROR);
         }
+
         branchesListView.getSelectionModel().clearSelection();
-        ProgressListener progressListener;
         if (selectedBranch.isRemote()) {
-            ProgressDialog progressDialog = new DeleteBranchProgresDialog();
-            progressListener = new OperationProgressListener(progressDialog, ApplicationState.DELETE_BRANCH);
-            progressDialog.setStartAction(() ->  deleteAction(correctProjects, selectedBranch, progressListener));
-            progressDialog.showDialog();
+            deleteRemoteBranch(correctProjects, selectedBranch);
         } else {
-            progressListener = new DeleteBranchProgressListener();
-            Map<Project, Boolean> statuses =  _gitService.deleteBranch(correctProjects, selectedBranch, progressListener);
-            showStatusDialog("Delete branch status", "Deleting branch from projects was finished.", statuses);
+            deleteLocalBranch(correctProjects, selectedBranch);
         }
+    }
+    private void deleteRemoteBranch(List<Project> projects, Branch selectedBranch) {
+        ProgressDialog progressDialog = new DeleteBranchProgressDialog();
+        ProgressListener progress = new OperationProgressListener(progressDialog, ApplicationState.DELETE_BRANCH);
+        progressDialog.setStartAction(() ->  deleteAction(projects, selectedBranch, progress));
+        progressDialog.showDialog();
+    }
+
+    private void deleteLocalBranch(List<Project> projects, Branch selectedBranch) {
+        ProgressListener progressListener = new DeleteBranchProgressListener();
+        Map<Project, Boolean> statuses =  _gitService.deleteBranch(projects, selectedBranch, progressListener);
+        showStatusDialog("Delete branch status", "Deleting branch from projects was finished.", statuses);
     }
 
     private void deleteAction(List<Project> projects, Branch selectedBranch, ProgressListener progressListener) {

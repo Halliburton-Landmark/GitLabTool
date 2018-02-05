@@ -48,17 +48,15 @@ public class GitServiceImplTest {
     private Project _stubProject;
 
     private StateService _stateService;
-    private ConsoleService _consoleService;
     private JGit _jGit;
     private ChangedFilesUtils _changedFilesUtilsMock;
 
     @Before
     public void init() {
         _stateService = Mockito.mock(StateService.class);
-        _consoleService = Mockito.mock(ConsoleService.class);
         _jGit = Mockito.mock(JGit.class);
         _changedFilesUtilsMock = Mockito.mock(ChangedFilesUtils.class);
-        _gitService = new GitServiceImpl(_stateService, _consoleService, _jGit, _changedFilesUtilsMock);
+        _gitService = new GitServiceImpl(_stateService, _jGit, _changedFilesUtilsMock);
     }
 
     @After

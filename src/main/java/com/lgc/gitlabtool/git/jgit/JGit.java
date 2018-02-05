@@ -846,6 +846,48 @@ public class JGit {
     }
 
     /**
+     * Removes a branch by name.
+     *
+     * @param  project      the cloned project
+     * @param  nameBranch   the branch name for deleting
+     * @param  isRemoteBranch if <code>true</code> deleted branch is remote, otherwise <code>false</code>
+     * @return JGitStatus: SUCCESSFUL - a new branch was created, otherwise - FAILED
+     */
+    public JGitStatus deleteBranch(Project project, String nameBranch, boolean isRemoteBranch) {
+        if (project == null || nameBranch == null || nameBranch.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Incorrect data: project is " + project + ", nameBranch is " + nameBranch);
+        }
+        JGitStatus result = JGitStatus.FAILED;
+        if (project.isCloned()) {
+            try (Git git = getGit(project.getPath())) {
+                result = isRemoteBranch ? deleteRemoteBranch(git, nameBranch) : deleteLocalBranch(git, nameBranch);
+            } catch (GitAPIException | IOException e) {
+                logger.error("Error deleting branch for the " + project.getName() + " project: " + e.getMessage());
+            }
+        }
+        return result;
+    }
+
+    private JGitStatus deleteLocalBranch(Git git, String nameBranch) throws NotMergedException, CannotDeleteCurrentBranchException, GitAPIException {
+        git.branchDelete()
+           .setBranchNames(nameBranch)
+           .setForce(true)
+           .call();
+        return JGitStatus.SUCCESSFUL;
+    }
+
+    private JGitStatus deleteRemoteBranch(Git git, String nameBranch) throws InvalidRemoteException, TransportException, GitAPIException {
+        String nameBranchWithoutAlias = nameBranch.replace(ORIGIN_PREFIX, StringUtils.EMPTY);
+        RefSpec refSpec = new RefSpec(":refs/heads/" + nameBranchWithoutAlias);
+        git.push()
+           .setRefSpecs(refSpec)
+           .setRemote("origin")
+           .call();
+        return JGitStatus.SUCCESSFUL;
+    }
+
+    /**
      * Checkout another branch (already existing).
      *
      * @param project         the cloned project
@@ -941,60 +983,6 @@ public class JGit {
 
     protected Git getGit(String path) throws IOException {
         return Git.open(new File(path + "/.git"));
-    }
-
-    /**
-     * Removes a branch by name.
-     *
-     * @param project      the cloned project
-     * @param nameBranch   the name of the branch for delete
-     * @param force        false - a check will be performed whether the branch to be deleted is already
-     *                     merged into the current branch and deletion will be refused in this case.
-     * @param isRemoteBranch if <code>true</code> deleted branch is remote, otherwise <code>false</code>
-     * @return JGitStatus: SUCCESSFUL - if a new branch was created,
-     *                     FAILED - if the branch could not be created.
-     */
-    public JGitStatus deleteBranch(Project project, String nameBranch, boolean isRemoteBranch) {
-        if (project == null || nameBranch == null || nameBranch.isEmpty()) {
-            throw new IllegalArgumentException(
-                    "Incorrect data: project is " + project + ", nameBranch is " + nameBranch);
-        }
-        if (!project.isCloned()) {
-            logger.debug(project.getName() + ERROR_MSG_NOT_CLONED);
-            return JGitStatus.FAILED;
-        }
-        try (Git git = getGit(project.getPath())) {
-            if (isCurrentBranch(git, nameBranch)) {
-                logger.error("The current branch can not be deleted.");
-                return JGitStatus.FAILED;
-            }
-            if (isRemoteBranch) {
-                deleteRemoteBranch(git, nameBranch);
-            } else {
-                deleteLocalBranch(git, nameBranch);
-            }
-            logger.info("!Branch \"" + nameBranch + "\" deleted from the " + project.getPath());
-            return JGitStatus.SUCCESSFUL;
-        } catch (GitAPIException | IOException e) {
-            logger.error("Error deleting branch for the " + project.getName() + " project: " + e.getMessage());
-        }
-        return JGitStatus.FAILED;
-    }
-
-    private void deleteLocalBranch(Git git, String nameBranch) throws NotMergedException, CannotDeleteCurrentBranchException, GitAPIException {
-        git.branchDelete()
-           .setBranchNames(nameBranch)
-           .setForce(true)
-           .call();
-    }
-
-    private void deleteRemoteBranch(Git git, String nameBranch) throws InvalidRemoteException, TransportException, GitAPIException {
-        String nameBranchWithoutAlias = nameBranch.replace(ORIGIN_PREFIX, StringUtils.EMPTY);
-        RefSpec refSpec = new RefSpec(":refs/heads/" + nameBranchWithoutAlias);
-        git.push()
-           .setRefSpecs(refSpec)
-           .setRemote("origin")
-           .call();
     }
 
     private boolean clone(Project project, String localPath) {

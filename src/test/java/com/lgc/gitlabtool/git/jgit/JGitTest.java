@@ -1,5 +1,6 @@
 package com.lgc.gitlabtool.git.jgit;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -15,6 +16,7 @@ import org.eclipse.jgit.api.AddCommand;
 import org.eclipse.jgit.api.CheckoutCommand;
 import org.eclipse.jgit.api.CommitCommand;
 import org.eclipse.jgit.api.CreateBranchCommand;
+import org.eclipse.jgit.api.DeleteBranchCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ListBranchCommand;
 import org.eclipse.jgit.api.MergeResult;
@@ -31,6 +33,7 @@ import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.StatusCommand;
 import org.eclipse.jgit.api.errors.AbortedByHookException;
 import org.eclipse.jgit.api.errors.CanceledException;
+import org.eclipse.jgit.api.errors.CannotDeleteCurrentBranchException;
 import org.eclipse.jgit.api.errors.CheckoutConflictException;
 import org.eclipse.jgit.api.errors.ConcurrentRefUpdateException;
 import org.eclipse.jgit.api.errors.DetachedHeadException;
@@ -42,6 +45,7 @@ import org.eclipse.jgit.api.errors.JGitInternalException;
 import org.eclipse.jgit.api.errors.NoFilepatternException;
 import org.eclipse.jgit.api.errors.NoHeadException;
 import org.eclipse.jgit.api.errors.NoMessageException;
+import org.eclipse.jgit.api.errors.NotMergedException;
 import org.eclipse.jgit.api.errors.RefAlreadyExistsException;
 import org.eclipse.jgit.api.errors.RefNotAdvertisedException;
 import org.eclipse.jgit.api.errors.RefNotFoundException;
@@ -70,6 +74,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.transport.PushResult;
+import org.eclipse.jgit.transport.RefSpec;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -660,70 +665,6 @@ public class JGitTest {
         Assert.assertTrue(getJGitMock(gitMock).getTrackingBranch(getProject(true)) != null);
         Assert.assertFalse(getJGitMock(gitMock).getTrackingBranch(getProject(true)).isEmpty());
     }
-//
-//    @Test(expected = IllegalArgumentException.class)
-//    public void deleteBranchProjectIsNullTest() {
-//        getJGitMock(null).deleteBranch(null, "");
-//    }
-//
-//    @Test(expected = IllegalArgumentException.class)
-//    public void deleteBranchNameBranchIsNullTest() {
-//        getJGitMock(null).deleteBranch(getProject(false), null);
-//    }
-//
-//    @Test(expected = IllegalArgumentException.class)
-//    public void deleteBranchNameBranchIsEmptyTest() {
-//        getJGitMock(null).deleteBranch(getProject(false), "");
-//    }
-//
-//    @Test
-//    public void deleteBranchIncorrectDataTest() {
-//        Assert.assertEquals(getJGitMock(null).deleteBranch(getProject(false), NAME_BRANCH), JGitStatus.FAILED);
-//        Assert.assertEquals(getJGitMock(null).deleteBranch(getProject(true), NAME_BRANCH), JGitStatus.FAILED);
-//
-//        Git gitMock = getGitMock();
-//        Repository repoMock = getRepo(NAME_BRANCH);
-//        when(gitMock.getRepository()).thenReturn(repoMock);
-//        Assert.assertEquals(getJGitMock(gitMock).deleteBranch(getProject(true), NAME_BRANCH), JGitStatus.FAILED);
-//
-//        DeleteBranchCommand deleteBranchMock = new DeleteBranchCommand(getRepository()) {
-//            @Override
-//            public DeleteBranchCommand setBranchNames(String... branchnames) {
-//                return super.setBranchNames(NAME_BRANCH);
-//            }
-//
-//            @Override
-//            public List<String> call() throws GitAPIException, NotMergedException, CannotDeleteCurrentBranchException {
-//                throw getGitAPIException();
-//            }
-//        };
-//        repoMock = getRepo(null);
-//        when(gitMock.getRepository()).thenReturn(repoMock);
-//        when(gitMock.branchDelete()).thenReturn(deleteBranchMock);
-//        Assert.assertEquals(getJGitMock(gitMock).deleteBranch(getProject(true), NAME_BRANCH), JGitStatus.FAILED);
-//    }
-//
-//    @Test
-//    public void deleteBranchCorrectDataTest() {
-//        Git gitMock = getGitMock();
-//        Repository repoMock = getRepo(null);
-//        when(gitMock.getRepository()).thenReturn(repoMock);
-//        DeleteBranchCommand deleteBranchMock = new DeleteBranchCommand(getRepository()) {
-//            @Override
-//            public DeleteBranchCommand setBranchNames(String... branchnames) {
-//                return super.setBranchNames(NAME_BRANCH);
-//            }
-//
-//            @Override
-//            public List<String> call() throws GitAPIException, NotMergedException, CannotDeleteCurrentBranchException {
-//                return Collections.emptyList();
-//            }
-//        };
-//        when(gitMock.getRepository()).thenReturn(repoMock);
-//        when(gitMock.branchDelete()).thenReturn(deleteBranchMock);
-//        Assert.assertEquals(getJGitMock(gitMock).deleteBranch(getProject(true), NAME_BRANCH),
-//                JGitStatus.SUCCESSFUL);
-//    }
 
     @Test(expected = IllegalArgumentException.class)
     public void checkoutBranchProjectIsNullTest() {
@@ -1314,8 +1255,110 @@ public class JGitTest {
         Assert.assertTrue(resultOperation);
     }
 
+    @Test(expected=IllegalArgumentException.class)
+    public void deleteLocalBranchNullProject() {
+        getJGitMock(null).deleteBranch(null, "", false);
+    }
+
+    @Test(expected=IllegalArgumentException.class)
+    public void deleteLocalBranchNullBranchName() {
+        getJGitMock(null).deleteBranch(getProject(true), null, false);
+    }
+
+    @Test(expected=IllegalArgumentException.class)
+    public void deleteLocalBranchNameIsEmpty() {
+        getJGitMock(null).deleteBranch(getProject(true), "", false);
+    }
+
+    @Test
+    public void deleteLocalBranchProjectNotCloned() {
+        JGitStatus result = getJGitMock(null).deleteBranch(new Project(), "test", false);
+
+        assertEquals(result, JGitStatus.FAILED);
+    }
+
+    @Test
+    public void deleteBranchGitFailed() {
+        JGitStatus result = getJGitMock(null).deleteBranch(getProject(true), "test", false);
+
+        assertEquals(result, JGitStatus.FAILED);
+    }
+
+    @Test
+    public void deleteLocalBranchFailed() throws NotMergedException, CannotDeleteCurrentBranchException, GitAPIException {
+        String branchName = "test";
+        Project project = getProject(true);
+        Git gitMock = getGitMock();
+        setDeleteBranchCommandToGit(gitMock, false);
+
+        JGitStatus result = getJGitMock(gitMock).deleteBranch(project, branchName, false);
+
+        assertEquals(result, JGitStatus.FAILED);
+    }
+
+    @Test
+    public void deleteLocalBranchSuccessfulResult() throws NotMergedException, CannotDeleteCurrentBranchException, GitAPIException {
+        String branchName = "test";
+        Project project = getProject(true);
+        Git gitMock = getGitMock();
+        setDeleteBranchCommandToGit(gitMock, true);
+
+        JGitStatus result = getJGitMock(gitMock).deleteBranch(project, branchName, false);
+
+        assertEquals(result, JGitStatus.SUCCESSFUL);
+    }
+
+    @Test
+    public void deleteRemoteBranchFailed() throws InvalidRemoteException, TransportException, GitAPIException {
+        String branchName = "test";
+        Project project = getProject(true);
+        Git gitMock = getGitMock();
+        setPushRemoteToGit(gitMock, false);
+
+        JGitStatus result = getJGitMock(gitMock).deleteBranch(project, branchName, true);
+
+        assertEquals(result, JGitStatus.FAILED);
+    }
+
+    @Test
+    public void deleteRemoteBranchSuccessfulResult() throws InvalidRemoteException, TransportException, GitAPIException {
+        String branchName = "test";
+        Project project = getProject(true);
+        Git gitMock = getGitMock();
+        setPushRemoteToGit(gitMock, true);
+
+        JGitStatus result = getJGitMock(gitMock).deleteBranch(project, branchName, true);
+
+        assertEquals(result, JGitStatus.SUCCESSFUL);
+    }
 
     /***************************************************************************************************************/
+
+    private void setPushRemoteToGit(Git gitMock, boolean isSuccessfulOperation) throws InvalidRemoteException, TransportException, GitAPIException {
+        PushCommand pushCommand = mock(PushCommand.class);
+        when(pushCommand.setRefSpecs(Mockito.any(RefSpec.class))).thenReturn(pushCommand);
+        when(pushCommand.setRemote(Mockito.anyString())).thenReturn(pushCommand);
+
+        if (isSuccessfulOperation) {
+            when(pushCommand.call()).thenReturn(new ArrayList<>());
+        } else {
+            when(pushCommand.call()).thenThrow(getGitAPIException());
+        }
+        when(gitMock.push()).thenReturn(pushCommand);
+    }
+
+    private void setDeleteBranchCommandToGit(Git gitMock, boolean isSuccessfulOperation) throws NotMergedException, CannotDeleteCurrentBranchException, GitAPIException {
+        DeleteBranchCommand deleteBranchCommand = mock(DeleteBranchCommand.class);
+        when(deleteBranchCommand.setBranchNames(Mockito.anyString())).thenReturn(deleteBranchCommand);
+        when(deleteBranchCommand.setForce(true)).thenReturn(deleteBranchCommand);
+
+        if (isSuccessfulOperation) {
+            when(deleteBranchCommand.call()).thenReturn(new ArrayList<>());
+        } else {
+            when(deleteBranchCommand.call()).thenThrow(getGitAPIException());
+        }
+        when(gitMock.branchDelete()).thenReturn(deleteBranchCommand);
+    }
 
     private void setStashDropCommandToGit(Git gitMock, boolean isCorrectStash)
             throws InvalidRefNameException, GitAPIException {
