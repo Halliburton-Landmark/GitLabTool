@@ -7,15 +7,15 @@
 <AnchorPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.lgc.gitlabtool.git.ui.javafx.controllers.TableController"
-            prefHeight="600.0" prefWidth="700.0">
+            prefHeight="400.0" prefWidth="900.0">
     <children>
             <CommitHistoryTableView
                 fx:id="historyTable"
                 editable="true"
-                layoutX="14.0"
-                layoutY="14.0"
-                prefHeight="573.0"
-                prefWidth="673.0">
+                layoutX="0.0"
+                layoutY="0.0"
+                prefHeight="400.0"
+                prefWidth="900.0">
             <columns>
                 <TableColumn
                     fx:id="idColumn"
@@ -23,7 +23,7 @@
                     text="Id"/>
                 <TableColumn
                     fx:id="messageColumn"
-                    prefWidth="160"
+                    prefWidth="400"
                     text="Message"/>
                 <TableColumn
                     fx:id="authorColumn"

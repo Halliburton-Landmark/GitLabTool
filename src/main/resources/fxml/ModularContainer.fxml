@@ -16,6 +16,7 @@
 <?import javafx.scene.text.TextFlow?>
 <?import javafx.stage.Screen?>
 <?import com.lgc.gitlabtool.git.ui.javafx.StatusBar?>
+<?import com.lgc.gitlabtool.git.ui.table.CommitHistoryTableView?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.layout.Pane?>
 <AnchorPane prefHeight="${screen.visualBounds.maxY / 1.5}"
@@ -70,24 +71,7 @@
                     <center>
                         <SplitPane fx:id="dividerMainPane" dividerPositions="0.30">
                             <AnchorPane fx:id="listPane" BorderPane.alignment="CENTER"/>
-                            <GridPane id="viewArea" prefHeight="210.0" BorderPane.alignment="CENTER">
-                                <columnConstraints>
-                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0"/>
-                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0"/>
-                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0"/>
-                                </columnConstraints>
-
-                                <rowConstraints>
-                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
-                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
-                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
-                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
-                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
-                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
-                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
-                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
-                                </rowConstraints>
-                            </GridPane>
+                            <fx:include source="HistoryTable.fxml" fx:id="historyTable"/>
                         </SplitPane>
                     </center>
                 </BorderPane>

@@ -63,9 +63,9 @@ public class TableController {
         committedDateColumn.setCellValueFactory(committedDateProperty);
 
         ObservableList<Commit> data = FXCollections.observableArrayList();
-        data.add(new Commit(1,"test","Kozlov","2/2/2018","Kozlov","4/2/2018"));
-        data.add(new Commit(2,"test2","Kozlov","3/2/2018","Kozlov","4/2/2018"));
-        data.add(new Commit(3,"test3","Kozlov","3/2/2018","Kozlov","4/2/2018"));
+        data.add(new Commit(1,"bug 435210 concurrent modification exception in log file","Kozlov","2/2/2018","Kozlov","4/2/2018"));
+        data.add(new Commit(2,"refactoring / minor changes","Kozlov","3/2/2018","Kozlov","4/2/2018"));
+        data.add(new Commit(3,"new feature for supporting legacy code","Kozlov","3/2/2018","Kozlov","4/2/2018"));
 
         historyTable.setItems(data);
     }
