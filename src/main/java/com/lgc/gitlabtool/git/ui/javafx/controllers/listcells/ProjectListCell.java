@@ -1,27 +1,25 @@
-package com.lgc.gitlabtool.git.ui.javafx.controllers;
+package com.lgc.gitlabtool.git.ui.javafx.controllers.listcells;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import com.lgc.gitlabtool.git.services.ServiceProvider;
-import com.lgc.gitlabtool.git.services.ThemeService;
-import javafx.scene.control.Label;
 import org.apache.commons.lang.StringUtils;
 
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.ProjectStatus;
+import com.lgc.gitlabtool.git.services.ServiceProvider;
+import com.lgc.gitlabtool.git.services.ThemeService;
 
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
-import javafx.scene.text.Text;
 
 public class ProjectListCell extends ListCell<Project> {
     private static final String SHADOW_PROJECT_ICON_URL = "icons/project/shadow_project.png";
@@ -43,8 +41,7 @@ public class ProjectListCell extends ListCell<Project> {
     private final String LEFT_BRACKET = "[";
     private final String RIGHT_BRACKET = "]";
 
-    private static final ThemeService _themeService = ServiceProvider.getInstance()
-            .getService(ThemeService.class);
+    private static final ThemeService _themeService = ServiceProvider.getInstance().getService(ThemeService.class);
 
     @Override
     protected void updateItem(Project item, boolean empty) {
