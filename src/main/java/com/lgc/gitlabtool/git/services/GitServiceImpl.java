@@ -416,17 +416,14 @@ public class GitServiceImpl implements GitService {
                                               ProgressListener progressListener) {
         Map<Project, Boolean> statuses = new ConcurrentHashMap<>();
         try {
-            _stateService.stateON(ApplicationState.DELETE_BRANCH);
             progressListener.onStart(DELETE_BRANCH_STARTED);
             if (projects == null || projects.isEmpty() || deletedBranch == null) {
                 _logger.error("Error during to delete branch. Incorrect projects or branch.");
                 return statuses;
-            } else if (deletedBranch.getBranchName() == null || deletedBranch.getBranchName().isEmpty()) {
-                _logger.error("Error during to delete branch. A branch name is null or empty.");
-                return statuses;
             }
             long step = 100 / projects.size();
             AtomicLong progress = new AtomicLong(0);
+            _stateService.stateON(ApplicationState.DELETE_BRANCH);
             projects.parallelStream()
                     .filter(Objects::nonNull)
                     .forEach(project -> deleteBranch(project, deletedBranch, statuses, progressListener, progress, step));

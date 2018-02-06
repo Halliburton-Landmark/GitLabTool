@@ -182,7 +182,7 @@ public class CheckoutBranchWindowController extends AbstractStateListener {
         _consoleService.addMessage(headerText, MessageType.determineMessageType(headerText));
 
         StatusDialog statusDialog = new StatusDialog(titleText, headerText);
-        statusDialog.showMessageForSimpleStatuses(statuses, statuses.size(), "type000");
+        statusDialog.showMessageForSimpleStatuses(statuses, statuses.size());
         statusDialog.showAndWait();
     }
 
