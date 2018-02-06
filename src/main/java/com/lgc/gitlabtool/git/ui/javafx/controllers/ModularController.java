@@ -9,16 +9,8 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -462,6 +454,29 @@ public class ModularController implements UpdateProgressListener {
     private void configureGroupListView(ListView<Group> listView) {
         // config displayable string
         listView.setCellFactory(p -> new GroupListCell());
+
+        listView.addEventFilter(MouseEvent.MOUSE_CLICKED, event -> {
+            Node node = event.getPickResult().getIntersectedNode();
+
+            while (node != null && node != listView && !(node instanceof ListCell)) {
+                node = node.getParent();
+            }
+
+            if (node instanceof ListCell) {
+
+                ListCell<Group> cell = (ListCell<Group>) node;
+                ListView<Group> lv = cell.getListView();
+
+                if (event.getButton() == MouseButton.SECONDARY) {
+                    if (!cell.isEmpty()) {
+                        List<Group> selectedItems = lv.getSelectionModel().getSelectedItems();
+                        lv.setContextMenu(getGroupContextMenu(selectedItems));
+                    } else {
+                        lv.setContextMenu(null);
+                    }
+                }
+            }
+        });
     }
 
     private void configureProjectsListView(ListView<Project> listView) {
@@ -1049,7 +1064,14 @@ public class ModularController implements UpdateProgressListener {
     private void onOpenFolder(ActionEvent event) {
         getCurrentProjects().parallelStream()
                 .filter(Project::isCloned)
-                .forEach(this::openProjectFolder);
+                .map(Project::getPath)
+                .forEach(this::openFolder);
+    }
+
+    private void onOpenGroupFolder(List<Group> items) {
+        items.parallelStream()
+                .map(Group::getPathToClonedGroup)
+                .forEach(this::openFolder);
     }
 
     @FXML
@@ -1232,11 +1254,11 @@ public class ModularController implements UpdateProgressListener {
                 .collect(Collectors.toList());
     }
 
-    private void openProjectFolder(Project project) {
+    private void openFolder(String path) {
         String fileDoesNotExistMessage = "Specified file does not exist";
-        Runnable openProjectTask = () -> {
+        Runnable openFolderTask = () -> {
             try {
-                Desktop.getDesktop().open(new File(project.getPath()));
+                Desktop.getDesktop().open(new File(path));
             } catch (IOException e) {
                 showAlert("The specified file has no associated application " + System.lineSeparator() +
                         "or the associated application fails to be launched", e);
@@ -1250,7 +1272,7 @@ public class ModularController implements UpdateProgressListener {
                 showAlert(fileDoesNotExistMessage, iae);
             }
         };
-        _backgroundService.runInAWTThread(openProjectTask);
+        _backgroundService.runInAWTThread(openFolderTask);
     }
 
     private void showAlert(String message, Throwable e) {
@@ -1268,26 +1290,23 @@ public class ModularController implements UpdateProgressListener {
         boolean hasCloned = _projectService.hasCloned(items);
 
         if (hasCloned) {
-            MenuItem itemCreateBranch = getMenuItem(GLToolButtons.MAIN_CREATE_BRANCH.getText(),
-                    GLToolButtons.MAIN_CREATE_BRANCH.getIconUrl(), this::onNewBranchButton);
-            MenuItem itemCheckoutBranch = getMenuItem(GLToolButtons.MAIN_CHECKOUT_BRANCH.getText(),
-                    GLToolButtons.MAIN_CHECKOUT_BRANCH.getIconUrl(), this::showCheckoutBranchWindow);
-            MenuItem itemStaging = getMenuItem(GLToolButtons.MAIN_STAGING.getText(),
-                    GLToolButtons.MAIN_STAGING.getIconUrl(), this::openGitStaging);
-            MenuItem itemPull = getMenuItem(GLToolButtons.MAIN_PULL.getText(),
-                    GLToolButtons.MAIN_PULL.getIconUrl(), this::onPullAction);
-            MenuItem itemPush = getMenuItem(GLToolButtons.MAIN_PUSH.getText(),
-                    GLToolButtons.MAIN_PUSH.getIconUrl(), this::onPushAction);
-            MenuItem itemRevert = getMenuItem(GLToolButtons.MAIN_REVERT.getText(),
-                    GLToolButtons.MAIN_REVERT.getIconUrl(), this::onRevertChanges);
-            MenuItem itemStash = getMenuItem(GLToolButtons.MAIN_STASH.getText(),
-                    GLToolButtons.MAIN_STASH.getIconUrl(), this::showStashWindow);
-            Menu subMenuGit = new Menu("Git");
-            subMenuGit.getItems().addAll(itemCreateBranch, itemCheckoutBranch, itemStaging, itemPull, itemPush, itemRevert, itemStash);
+            MenuItem openFolder = createMenuItem(GLToolButtons.OPEN_FOLDER, this::onOpenFolder);
 
-            MenuItem openFolder = getMenuItem("Open project folder", "icons/mainmenu/folder_16x16.png", this::onOpenFolder);
-            MenuItem itemEditProjectProp = getMenuItem(GLToolButtons.EDIT_PROJECT_PROPERTIES_BUTTON.getText(),
-                    GLToolButtons.MAIN_EDIT_PROJECT_PROPERTIES.getIconUrl(), this::showEditProjectPropertiesWindow);
+            Menu subMenuGit = new Menu("Git");
+
+            MenuItem itemCreateBranch = createMenuItem(GLToolButtons.MAIN_CREATE_BRANCH, this::onNewBranchButton);
+            MenuItem itemCheckoutBranch = createMenuItem(GLToolButtons.MAIN_CHECKOUT_BRANCH, this::showCheckoutBranchWindow);
+            MenuItem itemStaging = createMenuItem(GLToolButtons.MAIN_STAGING, this::openGitStaging);
+            MenuItem itemPull = createMenuItem(GLToolButtons.MAIN_PULL, this::onPullAction);
+            MenuItem itemPush = createMenuItem(GLToolButtons.MAIN_PUSH, this::onPushAction);
+            MenuItem itemRevert = createMenuItem(GLToolButtons.MAIN_REVERT, this::onRevertChanges);
+            MenuItem itemStash = createMenuItem(GLToolButtons.MAIN_STASH, this::showStashWindow);
+
+            subMenuGit.getItems().addAll(itemCreateBranch, itemCheckoutBranch,
+            		itemStaging, itemPull, itemPush, itemRevert, itemStash);
+
+            MenuItem itemEditProjectProp = createMenuItem(GLToolButtons.MAIN_EDIT_PROJECT_PROPERTIES,
+                    this::showEditProjectPropertiesWindow);
 
             menuItems.add(openFolder);
             menuItems.add(subMenuGit);
@@ -1295,7 +1314,8 @@ public class ModularController implements UpdateProgressListener {
         }
 
         if (hasShadow) {
-            MenuItem cloneProject = getMenuItem("Clone shadow project", "icons/mainmenu/clone_16x16.png", this::cloneShadowProject);
+            MenuItem cloneProject = createMenuItem(GLToolButtons.MAIN_CLONE_PROJECT, this::cloneShadowProject);
+            cloneProject.setText("Clone shadow project");
             menuItems.add(cloneProject);
         }
 
@@ -1303,12 +1323,29 @@ public class ModularController implements UpdateProgressListener {
         return contextMenu;
     }
 
-    private MenuItem getMenuItem(String text, String isonURL, EventHandler<ActionEvent> action) {
-        MenuItem menuItem = new MenuItem(text);
-        ImageView itemImageView = _themeService.getStyledImageView(isonURL);
-        menuItem.setGraphic(itemImageView);
-        menuItem.setOnAction(action);
-        return menuItem;
+    /**
+     * Creates {@link MenuItem} for specified {@link GLToolButtons} and set onAction EventHandler for it
+     * @param button - instance of {@link GLToolButtons}
+     * @param onAction - action that should be performed for this menu item
+     * @return menu item for specified GLToolButtons
+     */
+    private MenuItem createMenuItem(GLToolButtons button, EventHandler<ActionEvent> onAction) {
+        MenuItem item = new MenuItem(button.getText());
+        ImageView itemImageView = _themeService.getStyledImageView(button.getIconUrl());
+        item.setGraphic(itemImageView);
+        item.setOnAction(onAction);
+        return item;
+    }
+
+    private ContextMenu getGroupContextMenu(List<Group> items) {
+        ContextMenu groupContextMenu = new ContextMenu();
+
+        MenuItem openFolder = createMenuItem(GLToolButtons.OPEN_FOLDER, event -> onOpenGroupFolder(items));
+        MenuItem loadGroup = createMenuItem(GLToolButtons.LOAD_GROUP, this::loadGroup);
+        MenuItem removeGroup = createMenuItem(GLToolButtons.REMOVE_GROUP, this::onRemoveGroup);
+
+        groupContextMenu.getItems().addAll(openFolder, loadGroup, removeGroup);
+        return groupContextMenu;
     }
 
     private boolean areAllItemsSelected(ListView<?> listView) {
