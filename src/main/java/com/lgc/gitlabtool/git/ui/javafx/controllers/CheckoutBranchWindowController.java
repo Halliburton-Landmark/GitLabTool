@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -27,12 +26,12 @@ import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.icon.LocalRemoteIconHolder;
 import com.lgc.gitlabtool.git.ui.javafx.ChangesCheckDialog;
-import com.lgc.gitlabtool.git.ui.javafx.GLTAlert;
 import com.lgc.gitlabtool.git.ui.javafx.StatusDialog;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 import com.lgc.gitlabtool.git.ui.javafx.progressdialog.CheckoutBranchProgressDialog;
 import com.lgc.gitlabtool.git.ui.javafx.progressdialog.DeleteBranchProgressDialog;
 import com.lgc.gitlabtool.git.ui.javafx.progressdialog.ProgressDialog;
+import com.lgc.gitlabtool.git.util.GLTAlertUtils;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -41,7 +40,6 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
@@ -133,7 +131,7 @@ public class CheckoutBranchWindowController extends AbstractStateListener {
     public void deleteAction() {
         List<Project> selectedProjects = currentProjectsListView.getItems();
         Branch selectedBranch = branchesListView.getSelectionModel().getSelectedItem();
-        boolean isYes = requesConfirmationOperation(DELETE_BRANCHE_TITLE,
+        boolean isYes = GLTAlertUtils.requesConfirmationOperation(DELETE_BRANCHE_TITLE,
                 "The " + selectedBranch.getBranchName() + " branch will delete from " + selectedProjects.size() + " project(s).",
                 "Are you sure that you want carry out operation?");
         if (!isYes) {
@@ -462,15 +460,6 @@ public class CheckoutBranchWindowController extends AbstractStateListener {
             _stateService.stateOFF(ApplicationState.DELETE_BRANCH);
         }
 
-    }
-
-    private boolean requesConfirmationOperation(String title, String header, String context) {
-        GLTAlert alert = new GLTAlert(title, header, context);
-        alert.clearDefaultButtons();
-        alert.addButtons(ButtonType.YES, ButtonType.NO);
-
-        Optional<ButtonType> result = alert.showAndWait();
-        return !(result.orElse(ButtonType.NO) == ButtonType.NO);
     }
 
 }
