@@ -6,12 +6,12 @@ import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.ThemeService;
 
 import javafx.geometry.Pos;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.text.Text;
 
 /**
  * ListCell for ListView<StashItem> in the Stash window.
@@ -36,7 +36,7 @@ public class StashListCell extends ListCell<Stash> {
             String tooltip = item instanceof SingleProjectStash ? SINGLE_STASH_TOOLTIP : GROUP_STASH_TOOLTIP;
             Tooltip.install(imageView, new Tooltip(tooltip));
 
-            Text stashName = new Text(getStashItemMessage(item));
+            Label stashName = new Label(getStashItemMessage(item));
             HBox textBox = new HBox(imageView, stashName);
             textBox.setAlignment(Pos.CENTER_LEFT);
 
