@@ -2,6 +2,9 @@ package com.lgc.gitlabtool.git.util;
 
 import java.io.IOException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 public class OpenTerminalUtil {
     /**
      * Template for Windows command prompt
@@ -16,6 +19,8 @@ public class OpenTerminalUtil {
 
     private static final String OS = System.getProperty("os.name").toLowerCase();
 
+    private static final Logger _logger = LogManager.getLogger(OpenTerminalUtil.class);
+
     /**
      * Opens a terminal in the specified folder despite of the operation system
      *
@@ -26,7 +31,7 @@ public class OpenTerminalUtil {
             String command = getCommandForCurrentOS(path);
             Runtime.getRuntime().exec(command);
         } catch (IOException e) {
-            e.printStackTrace();
+            _logger.error("Could not open terminal: " + e.getMessage());
         }
     }
 

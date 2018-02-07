@@ -1285,46 +1285,48 @@ public class ModularController implements UpdateProgressListener {
     private ContextMenu getContextMenu(List<Project> items) {
 
         ContextMenu contextMenu = new ContextMenu();
-        List<MenuItem> menuItems = new ArrayList<>();
+        if (items.size() > 0) {
+            List<MenuItem> menuItems = new ArrayList<>();
 
-        boolean hasShadow = _projectService.hasShadow(items);
-        boolean hasCloned = _projectService.hasCloned(items);
+            boolean hasShadow = _projectService.hasShadow(items);
+            boolean hasCloned = _projectService.hasCloned(items);
 
-        if (hasCloned) {
-            MenuItem openFolder = createMenuItem(GLToolButtons.OPEN_FOLDER, this::onOpenFolder);
-            MenuItem openInTerminal = createMenuItem(GLToolButtons.OPEN_IN_TERMINAL, this::openInTerminal);
+            if (hasCloned) {
+                MenuItem openFolder = createMenuItem(GLToolButtons.OPEN_FOLDER, this::onOpenFolder);
+                MenuItem openInTerminal = createMenuItem(GLToolButtons.OPEN_IN_TERMINAL, this::openInTerminal);
 
-            Menu subMenuGit = new Menu("Git");
+                Menu subMenuGit = new Menu("Git");
 
-            MenuItem itemCreateBranch = createMenuItem(GLToolButtons.MAIN_CREATE_BRANCH, this::onNewBranchButton);
-            MenuItem itemCheckoutBranch = createMenuItem(GLToolButtons.MAIN_CHECKOUT_BRANCH, this::showCheckoutBranchWindow);
-            MenuItem itemStaging = createMenuItem(GLToolButtons.MAIN_STAGING, this::openGitStaging);
-            MenuItem itemPull = createMenuItem(GLToolButtons.MAIN_PULL, this::onPullAction);
-            MenuItem itemPush = createMenuItem(GLToolButtons.MAIN_PUSH, this::onPushAction);
-            MenuItem itemRevert = createMenuItem(GLToolButtons.MAIN_REVERT, this::onRevertChanges);
-            MenuItem itemStash = createMenuItem(GLToolButtons.MAIN_STASH, this::showStashWindow);
+                MenuItem itemCreateBranch = createMenuItem(GLToolButtons.MAIN_CREATE_BRANCH, this::onNewBranchButton);
+                MenuItem itemCheckoutBranch = createMenuItem(GLToolButtons.MAIN_CHECKOUT_BRANCH, this::showCheckoutBranchWindow);
+                MenuItem itemStaging = createMenuItem(GLToolButtons.MAIN_STAGING, this::openGitStaging);
+                MenuItem itemPull = createMenuItem(GLToolButtons.MAIN_PULL, this::onPullAction);
+                MenuItem itemPush = createMenuItem(GLToolButtons.MAIN_PUSH, this::onPushAction);
+                MenuItem itemRevert = createMenuItem(GLToolButtons.MAIN_REVERT, this::onRevertChanges);
+                MenuItem itemStash = createMenuItem(GLToolButtons.MAIN_STASH, this::showStashWindow);
 
-            subMenuGit.getItems().addAll(itemCreateBranch, itemCheckoutBranch,
-            		itemStaging, itemPull, itemPush, itemRevert, itemStash);
+                subMenuGit.getItems().addAll(itemCreateBranch, itemCheckoutBranch,
+                        itemStaging, itemPull, itemPush, itemRevert, itemStash);
 
-            MenuItem itemEditProjectProp = createMenuItem(GLToolButtons.MAIN_EDIT_PROJECT_PROPERTIES,
-                    this::showEditProjectPropertiesWindow);
+                MenuItem itemEditProjectProp = createMenuItem(GLToolButtons.MAIN_EDIT_PROJECT_PROPERTIES,
+                        this::showEditProjectPropertiesWindow);
 
-            menuItems.add(openFolder);
-            if (projectListView.getSelectionModel().getSelectedItems().size() == 1) {
-                menuItems.add(openInTerminal);
+                menuItems.add(openFolder);
+                if (projectListView.getSelectionModel().getSelectedItems().size() == 1) {
+                    menuItems.add(openInTerminal);
+                }
+                menuItems.add(subMenuGit);
+                menuItems.add(itemEditProjectProp);
             }
-            menuItems.add(subMenuGit);
-            menuItems.add(itemEditProjectProp);
-        }
 
-        if (hasShadow) {
-            MenuItem cloneProject = createMenuItem(GLToolButtons.MAIN_CLONE_PROJECT, this::cloneShadowProject);
-            cloneProject.setText("Clone shadow project");
-            menuItems.add(cloneProject);
-        }
+            if (hasShadow) {
+                MenuItem cloneProject = createMenuItem(GLToolButtons.MAIN_CLONE_PROJECT, this::cloneShadowProject);
+                cloneProject.setText("Clone shadow project");
+                menuItems.add(cloneProject);
+            }
 
-        contextMenu.getItems().addAll(menuItems);
+            contextMenu.getItems().addAll(menuItems);
+        }
         return contextMenu;
     }
 
