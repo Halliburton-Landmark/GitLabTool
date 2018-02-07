@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.lgc.gitlabtool.git.ui.javafx.*;
+import com.lgc.gitlabtool.git.util.OpenTerminalUtil;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.effect.Effect;
@@ -805,9 +806,7 @@ public class ModularController implements UpdateProgressListener {
     @FXML
     @SuppressWarnings("unused")
     private void loadGroupWindow(ActionEvent actionEvent) {
-        Platform.runLater(() -> {
-            loadGroupWindow();
-        });
+        Platform.runLater(this::loadGroupWindow);
     }
 
     @FXML
@@ -815,6 +814,11 @@ public class ModularController implements UpdateProgressListener {
     private void loadGroup(ActionEvent actionEvent) {
         Group selectedGroup = groupListView.getSelectionModel().getSelectedItem();
         loadGroup(selectedGroup);
+    }
+
+    private void openInTerminal(ActionEvent actionEvent) {
+        Project selectedProject = projectListView.getSelectionModel().getSelectedItems().get(0);
+        OpenTerminalUtil.openInTerminal(selectedProject.getPath());
     }
 
     //endregion
@@ -1288,6 +1292,7 @@ public class ModularController implements UpdateProgressListener {
 
         if (hasCloned) {
             MenuItem openFolder = createMenuItem(GLToolButtons.OPEN_FOLDER, this::onOpenFolder);
+            MenuItem openInTerminal = createMenuItem(GLToolButtons.OPEN_IN_TERMINAL, this::openInTerminal);
 
             Menu subMenuGit = new Menu("Git");
 
@@ -1306,6 +1311,9 @@ public class ModularController implements UpdateProgressListener {
                     this::showEditProjectPropertiesWindow);
 
             menuItems.add(openFolder);
+            if (projectListView.getSelectionModel().getSelectedItems().size() == 1) {
+                menuItems.add(openInTerminal);
+            }
             menuItems.add(subMenuGit);
             menuItems.add(itemEditProjectProp);
         }
