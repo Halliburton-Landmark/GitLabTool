@@ -5,7 +5,6 @@
 
 /* GENERAL */
 .root{
-    -fx-font-size: 12;
     -fx-font-family: "Trebuchet MS", "Geneva", "sans-serif";
     -fx-text-fill: foreground-text;
     -fx-base: #e7e7e7;
