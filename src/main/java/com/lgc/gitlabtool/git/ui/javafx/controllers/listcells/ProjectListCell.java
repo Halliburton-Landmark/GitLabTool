@@ -1,4 +1,4 @@
-package com.lgc.gitlabtool.git.ui.javafx.controllers;
+package com.lgc.gitlabtool.git.ui.javafx.controllers.listcells;
 
 import java.util.ArrayList;
 import java.util.List;
