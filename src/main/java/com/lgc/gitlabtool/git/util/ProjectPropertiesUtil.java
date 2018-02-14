@@ -23,6 +23,7 @@ public class ProjectPropertiesUtil {
     private static final String PROJECT_NAME_KEY           = "gitlabtool.name";
     /** commit hash key in pom.properties file */
     private static final String COMMIT_HASH_KEY            = "gitlabtool.commithash";
+    private static final String BUILD_TIMESTAMP_KEY        = "gitlabtool.buildtimestamp";
     private static final String UNDEFINED_VALUE            = "undefined";
     private static final String VERSION_PREFIX = " v.";
 
@@ -54,6 +55,10 @@ public class ProjectPropertiesUtil {
 
     public static String getCommitHash() {
         return getProperty(PROJECT_PROPERTY_FILE_NAME, COMMIT_HASH_KEY);
+    }
+
+    public static String getBuildTimestamp() {
+        return getProperty(PROJECT_PROPERTY_FILE_NAME, BUILD_TIMESTAMP_KEY);
     }
 
     /**

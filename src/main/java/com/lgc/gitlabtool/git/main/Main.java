@@ -32,7 +32,8 @@ public class Main {
         logger.debug("==================== application started");
         _consoleService.addMessage(ProjectPropertiesUtil.getProjectName().toUpperCase() +
                                    " version: " + ProjectPropertiesUtil.getProjectVersion() +
-                                   " (" + ProjectPropertiesUtil.getCommitHash() + ")", MessageType.SIMPLE);
+                                   " (" + ProjectPropertiesUtil.getCommitHash() + " from " +
+                                   ProjectPropertiesUtil.getBuildTimestamp() + ") ", MessageType.SIMPLE);
         detectProxy();
         ui.run(args);
     }
