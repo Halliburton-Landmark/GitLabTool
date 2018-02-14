@@ -2,21 +2,13 @@ package com.lgc.gitlabtool.git.services;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
+import com.lgc.gitlabtool.git.ui.table.Commit;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.jgit.api.Status;
@@ -257,8 +249,22 @@ public class GitServiceImpl implements GitService {
     }
 
     @Override
-    public Iterable<RevCommit> getAllCommits(Project project, String branchName) {
-        return _git.getAllCommits(project, branchName);
+    public List<Commit> getAllCommits(Project project, String branchName) {
+        Iterable<RevCommit> revCommits = _git.getAllCommits(project, branchName);
+        Iterator<RevCommit> iterator = revCommits.iterator();
+        List<Commit> commits = new ArrayList<>();
+        while(iterator.hasNext()) {
+            Commit commit = new Commit();
+            RevCommit revCommit = iterator.next();
+            commit.setId(revCommit.getId().toString());
+            commit.setMessage(revCommit.getFullMessage());
+            commit.setAuthor(revCommit.getAuthorIdent().getName());
+            commit.setAuthoredDate(revCommit.getAuthorIdent().getWhen().toString());
+            commit.setCommitter(revCommit.getCommitterIdent().getName());
+            commit.setCommittedDate(revCommit.getCommitterIdent().getWhen().toString());
+            commits.add(commit);
+        }
+        return commits;
     }
 
     @Override

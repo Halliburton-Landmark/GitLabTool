@@ -5,14 +5,16 @@ package com.lgc.gitlabtool.git.ui.table;
  */
 public class Commit {
 
-    private int id;
+    private String id;
     private String message;
     private String author;
     private String authoredDate;
     private String committer;
     private String committedDate;
 
-    public Commit(int id, String message, String author, String authoredDate, String committer, String committedDate) {
+    public Commit() {}
+
+    public Commit(String id, String message, String author, String authoredDate, String committer, String committedDate) {
         this.id = id;
         this.message = message;
         this.author = author;
@@ -21,11 +23,11 @@ public class Commit {
         this.committedDate = committedDate;
     }
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 

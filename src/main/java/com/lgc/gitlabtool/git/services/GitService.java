@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.lgc.gitlabtool.git.ui.table.Commit;
 import org.eclipse.jgit.api.Git;
 
 import com.lgc.gitlabtool.git.entities.Branch;
@@ -182,7 +183,7 @@ public interface GitService extends Service {
      * @param branchName
      * @return list of commits
      */
-    public Iterable<RevCommit> getAllCommits(Project project, String branchName);
+    public List<Commit> getAllCommits(Project project, String branchName);
 
     /**
      * Gets ChangedFiles for project.
