@@ -18,7 +18,7 @@
             <columns>
                 <TableColumn
                     fx:id="idColumn"
-                    prefWidth="80"
+                    prefWidth="160"
                     text="Id"/>
                 <TableColumn
                     fx:id="messageColumn"
