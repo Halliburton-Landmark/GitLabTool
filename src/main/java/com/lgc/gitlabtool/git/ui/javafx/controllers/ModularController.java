@@ -11,10 +11,10 @@ import java.math.RoundingMode;
 import java.net.URL;
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.lgc.gitlabtool.git.preferences.ApplicationPreferences;
 import com.lgc.gitlabtool.git.ui.javafx.*;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -158,7 +158,6 @@ public class ModularController implements UpdateProgressListener {
     private static final String SELECT_ALL_IMAGE_URL = "icons/select_all_20x20.png";
     private static final String REFRESH_PROJECTS_IMAGE_URL = "icons/toolbar/refresh_projects_20x20.png";
     private static final String FILTER_SHADOW_PROJECTS_IMAGE_URL = "icons/toolbar/filter_shadow_projects_20x20.png";
-    private static final String DIVIDER_PROPERTY_NODE = "MainWindowController_Dividers";
     private static final String PREF_NAME_HIDE_SHADOWS = "is_hide_shadows";
     ////endregion
     /*
@@ -291,7 +290,7 @@ public class ModularController implements UpdateProgressListener {
      *
      ***********************************************************************************************/
 
-    private Preferences preferences;
+    private ApplicationPreferences preferences;
     private Group _currentGroup;
     private String _currentView;
     private ProjectList _projectsList;
@@ -307,7 +306,7 @@ public class ModularController implements UpdateProgressListener {
     @FXML
     @SuppressWarnings("ConstantConditions")
     private void initialize() {
-        preferences = getPreferences(DIVIDER_PROPERTY_NODE);
+        preferences = getPreferences();
 
         _stateService.addStateListener(ApplicationState.CLONE, new GroupsWindowStateListener());
 
@@ -1148,9 +1147,9 @@ public class ModularController implements UpdateProgressListener {
     }
 
     // Gets preferences by key, could return null (used for divider position)
-    private Preferences getPreferences(String key) {
+    private ApplicationPreferences getPreferences() {
         try {
-            return Preferences.userRoot().node(key);
+            return ApplicationPreferences.getInstance();
         } catch (IllegalArgumentException iae) {
             _logger.error("Consecutive slashes in path");
             return null;
