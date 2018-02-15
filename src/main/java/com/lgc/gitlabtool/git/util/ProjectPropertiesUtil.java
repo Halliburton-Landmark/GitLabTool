@@ -22,7 +22,7 @@ public class ProjectPropertiesUtil {
     /** project name key in pom.properties file */
     private static final String PROJECT_NAME_KEY           = "gitlabtool.name";
     /** commit hash key in pom.properties file */
-    private static final String COMMIT_HASH_KEY            = "gitlabtool.commithash";
+    private static final String COMMIT_HASH_KEY            = "gitlabtool.buildhash";
     private static final String BUILD_TIMESTAMP_KEY        = "gitlabtool.buildtimestamp";
     private static final String UNDEFINED_VALUE            = "undefined";
     private static final String VERSION_PREFIX = " v.";
