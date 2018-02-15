@@ -22,6 +22,12 @@ public class ApplicationPreferences {
         return _instance;
     }
 
+    //TODO
+    // 1. move default Preferences from ThemeServiceImpl
+    // 2. Look for the Preferences usages in GTL and change it to use this class
+    // 3. Think about splitting preferences on the nodes
+
+
     private void setUpDefauls() {
         // TODO
         // 1. set up OS
