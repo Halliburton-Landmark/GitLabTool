@@ -91,4 +91,30 @@ public interface ProjectService extends UpdateProgressGenerator, Service {
      */
     void updateProjectStatus(Project project);
 
+    /**
+     * Gets list of projects ids.
+     *
+     * @param projects the project list
+     * @return ids list
+     */
+    List<Integer> getIdsProjects(List<Project> projects);
+
+    /**
+     * Gets a filtered projects list which doesn't have shadow projects and projects with conflicts.
+     *
+     * @param  projects the list which need to filter
+     * @return filtered list
+     */
+     List<Project> getCorrectProjects(List<Project> projects);
+
+     /**
+      * Checks that project is cloned and doesn't have conflicts.
+      *
+      * @param project the project for checking
+      * @return <code>true</code> if project ready for operation,
+      *         <code>false</code> otherwise. Also, in this case we add message to IU console and log.
+      */
+     boolean projectIsClonedAndWithoutConflicts(Project project);
+
+
 }
