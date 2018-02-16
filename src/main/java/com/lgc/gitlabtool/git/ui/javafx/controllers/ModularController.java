@@ -19,6 +19,8 @@ import com.lgc.gitlabtool.git.ui.javafx.*;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.effect.Effect;
+import javafx.scene.input.*;
+import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -76,10 +78,6 @@ import javafx.scene.effect.ColorAdjust;
 import javafx.scene.effect.GaussianBlur;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyCodeCombination;
-import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -524,8 +522,37 @@ public class ModularController implements UpdateProgressListener {
                 }
         );
 
+        initializeDragNDropAction(listView);
         listView.refresh();
 
+    }
+
+    private void initializeDragNDropAction(ListView listView){
+        Clipboard clipboard = Clipboard.getSystemClipboard();
+        ClipboardContent content = new ClipboardContent();
+
+        listView.setOnDragDetected(dragItem -> {
+            if (listView.getSelectionModel().getSelectedItems().size() > 1
+                    || !(listView.getSelectionModel().getSelectedItem() instanceof Project)) {
+                return;
+            }
+
+            Project selectedProject = (Project) listView.getSelectionModel().getSelectedItem();
+
+            Dragboard db = listView.startDragAndDrop(TransferMode.COPY);
+            String repoUrl = selectedProject.getHttpUrlToRepo();
+            content.putString(repoUrl);
+            content.putHtml("<a>" + repoUrl + "</a>");
+            db.setContent(content);
+            clipboard.setContent(content);
+
+            dragItem.consume();
+        });
+
+        listView.setOnDragDone((DragEvent dragEvent) -> {
+            dragEvent.acceptTransferModes(TransferMode.COPY);
+            dragEvent.consume();
+        });
     }
 
     public static String getCss_path() {
@@ -1065,6 +1092,21 @@ public class ModularController implements UpdateProgressListener {
                 .forEach(this::openFolder);
     }
 
+    @SuppressWarnings("unused")
+    private void onCopyRepoUrl(ActionEvent event) {
+
+        String url = getCurrentProjects().parallelStream()
+                .map(Project::getHttpUrlToRepo)
+                .findFirst()
+                .orElse(StringUtils.EMPTY);
+
+        final Clipboard clipboard = Clipboard.getSystemClipboard();
+        final ClipboardContent content = new ClipboardContent();
+        content.putString(url);
+        content.putHtml("<a>" + url + "</a>");
+        clipboard.setContent(content);
+    }
+
     private void onOpenGroupFolder(List<Group> items) {
         items.parallelStream()
                 .map(Group::getPathToClonedGroup)
@@ -1288,6 +1330,12 @@ public class ModularController implements UpdateProgressListener {
 
         if (hasCloned) {
             MenuItem openFolder = createMenuItem(GLToolButtons.OPEN_FOLDER, this::onOpenFolder);
+            MenuItem copyRepoUrl = createMenuItem(GLToolButtons.COPY_REPO_URL, this::onCopyRepoUrl);
+
+            BooleanBinding multipleSelection = Bindings.createBooleanBinding( () ->
+                    projectListView.getSelectionModel().getSelectedItems().size() > 1);
+
+            copyRepoUrl.disableProperty().bind(multipleSelection);
 
             Menu subMenuGit = new Menu("Git");
 
@@ -1306,6 +1354,7 @@ public class ModularController implements UpdateProgressListener {
                     this::showEditProjectPropertiesWindow);
 
             menuItems.add(openFolder);
+            menuItems.add(copyRepoUrl);
             menuItems.add(subMenuGit);
             menuItems.add(itemEditProjectProp);
         }

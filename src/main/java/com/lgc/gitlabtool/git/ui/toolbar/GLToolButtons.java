@@ -199,6 +199,14 @@ public enum GLToolButtons {
             null,
             GLToolConstants.ICON_SIZE_16),
 
+    COPY_REPO_URL(GLToolConstants.PROJECTS_WINDOW_KEY,
+            "copy_repo_url",
+            "icons/mainmenu/copy_url_16x16.png",
+            "Copy URL",
+            "Copy link to repository",
+            null,
+            GLToolConstants.ICON_SIZE_16),
+
     MAIN_CLONE_PROJECT(GLToolConstants.PROJECTS_WINDOW_KEY,
             "main_git_clone_project",
             "icons/mainmenu/clone_16x16.png",
