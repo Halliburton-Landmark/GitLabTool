@@ -18,6 +18,7 @@ import com.lgc.gitlabtool.git.services.PomXMLService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.javafx.StatusDialog;
+import com.lgc.gitlabtool.git.ui.javafx.controllers.listcells.ProjectListCell;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
