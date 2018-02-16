@@ -152,12 +152,13 @@ public class ModularController implements UpdateProgressListener {
     private static final String NEW_BRANCH_CREATION = "new branch creation";
     private static final String PULL_OPERATION_NAME = "pull";
     private static final String PUSH_OPERATION_NAME = "push";
-    private static final String CHECKOUT_BEANCH_OPERATION_NAME = "checkout branch";
+    private static final String CHECKOUT_BRANCH_OPERATION_NAME = "checkout branch";
     private static final String STASH_OPERATION_NAME = "stash";
 
     private static final String SELECT_ALL_IMAGE_URL = "icons/select_all_20x20.png";
     private static final String REFRESH_PROJECTS_IMAGE_URL = "icons/toolbar/refresh_projects_20x20.png";
     private static final String FILTER_SHADOW_PROJECTS_IMAGE_URL = "icons/toolbar/filter_shadow_projects_20x20.png";
+    private static final String DIVIDER_PROPERTY_NODE = "modular_controller_dividers";
     private static final String PREF_NAME_HIDE_SHADOWS = "is_hide_shadows";
     ////endregion
     /*
@@ -836,7 +837,7 @@ public class ModularController implements UpdateProgressListener {
             List<Project> projects = projectListView.getSelectionModel().getSelectedItems();
             projects = ProjectList.getCorrectProjects(projects);
             if (projects.isEmpty()) {
-                String message = String.format(NO_ANY_PROJECT_FOR_OPERATION, CHECKOUT_BEANCH_OPERATION_NAME);
+                String message = String.format(NO_ANY_PROJECT_FOR_OPERATION, CHECKOUT_BRANCH_OPERATION_NAME);
                 _consoleService.addMessage(message, MessageType.ERROR);
                 return;
             }
@@ -1149,7 +1150,7 @@ public class ModularController implements UpdateProgressListener {
     // Gets preferences by key, could return null (used for divider position)
     private ApplicationPreferences getPreferences() {
         try {
-            return ApplicationPreferences.getInstance();
+            return ApplicationPreferences.getInstance().node(DIVIDER_PROPERTY_NODE);
         } catch (IllegalArgumentException iae) {
             _logger.error("Consecutive slashes in path");
             return null;

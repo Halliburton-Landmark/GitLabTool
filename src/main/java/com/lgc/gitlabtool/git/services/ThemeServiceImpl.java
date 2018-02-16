@@ -1,5 +1,6 @@
 package com.lgc.gitlabtool.git.services;
 
+import com.lgc.gitlabtool.git.preferences.ApplicationPreferences;
 import com.lgc.gitlabtool.git.ui.javafx.GLTTheme;
 import javafx.scene.Scene;
 import javafx.scene.effect.ColorAdjust;
@@ -9,20 +10,19 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.net.URL;
-import java.util.prefs.Preferences;
 
 public class ThemeServiceImpl implements ThemeService {
 
     private static final String THEME_PREFS_KEY = "glt_theme";
 
-    private Preferences themePrefs;
+    private ApplicationPreferences themePrefs;
     private GLTTheme currentGLTThemes;
     private static final Double LIGHTING_COEFFICIENT_FOR_DARK_THEMES = +0.65;
 
     private static final Logger _logger = LogManager.getLogger(ThemeService.class);
 
     ThemeServiceImpl() {
-        themePrefs = Preferences.userRoot().node(THEME_PREFS_KEY);
+        themePrefs = ApplicationPreferences.getInstance().node(THEME_PREFS_KEY);
 
         String currentThemeKey = themePrefs.get(THEME_PREFS_KEY, GLTTheme.LIGHT_THEME.getKey());
         currentGLTThemes = GLTTheme.getThemeByKey(currentThemeKey);
