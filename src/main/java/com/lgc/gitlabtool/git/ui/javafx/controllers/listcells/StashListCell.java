@@ -2,15 +2,16 @@ package com.lgc.gitlabtool.git.ui.javafx.controllers.listcells;
 
 import com.lgc.gitlabtool.git.jgit.stash.SingleProjectStash;
 import com.lgc.gitlabtool.git.jgit.stash.Stash;
+import com.lgc.gitlabtool.git.services.ServiceProvider;
+import com.lgc.gitlabtool.git.services.ThemeService;
 
 import javafx.geometry.Pos;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.Tooltip;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.text.Text;
 
 /**
  * ListCell for ListView<StashItem> in the Stash window.
@@ -21,7 +22,8 @@ public class StashListCell extends ListCell<Stash> {
     private final static String SINGLE_STASH_TOOLTIP = "Single Stash";
     private final static String GROUP_STASH_TOOLTIP = "Group Stash";
     private final static String END_OF_GROUP_PREFIX = "]";
-    private final ClassLoader _loader = getClass().getClassLoader();
+
+    private static final ThemeService _themeService = ServiceProvider.getInstance().getService(ThemeService.class);
 
     @Override
     protected void updateItem(Stash item, boolean empty) {
@@ -30,12 +32,11 @@ public class StashListCell extends ListCell<Stash> {
         setGraphic(null);
 
         if (item != null && !empty) {
-            Image fxImage = new Image(_loader.getResource(item.getIconURL()).toExternalForm());
-            ImageView imageView = new ImageView(fxImage);
+            ImageView imageView = _themeService.getStyledImageView(item.getIconURL());
             String tooltip = item instanceof SingleProjectStash ? SINGLE_STASH_TOOLTIP : GROUP_STASH_TOOLTIP;
             Tooltip.install(imageView, new Tooltip(tooltip));
 
-            Text stashName = new Text(getStashItemMessage(item));
+            Label stashName = new Label(getStashItemMessage(item));
             HBox textBox = new HBox(imageView, stashName);
             textBox.setAlignment(Pos.CENTER_LEFT);
 

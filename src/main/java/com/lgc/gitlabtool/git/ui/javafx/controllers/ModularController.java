@@ -9,16 +9,20 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.lgc.gitlabtool.git.ui.javafx.*;
-import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.effect.Effect;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -43,7 +47,19 @@ import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.services.ThemeService;
 import com.lgc.gitlabtool.git.ui.ViewKey;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
+import com.lgc.gitlabtool.git.ui.javafx.AlertWithCheckBox;
+import com.lgc.gitlabtool.git.ui.javafx.ChangesCheckDialog;
+import com.lgc.gitlabtool.git.ui.javafx.CreateNewBranchDialog;
+import com.lgc.gitlabtool.git.ui.javafx.CreateProjectDialog;
+import com.lgc.gitlabtool.git.ui.javafx.GLTAlert;
+import com.lgc.gitlabtool.git.ui.javafx.GLTScene;
+import com.lgc.gitlabtool.git.ui.javafx.GLTTheme;
+import com.lgc.gitlabtool.git.ui.javafx.IncorrectProjectDialog;
+import com.lgc.gitlabtool.git.ui.javafx.JavaFXUI;
+import com.lgc.gitlabtool.git.ui.javafx.StatusDialog;
+import com.lgc.gitlabtool.git.ui.javafx.WorkIndicatorDialog;
 import com.lgc.gitlabtool.git.ui.javafx.comparators.ProjectListComparator;
+import com.lgc.gitlabtool.git.ui.javafx.controllers.listcells.ProjectListCell;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.PushProgressListener;
 import com.lgc.gitlabtool.git.ui.javafx.progressdialog.CloneProgressDialog;
@@ -70,12 +86,32 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.*;
 import javafx.geometry.Insets;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBase;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.SelectionMode;
+import javafx.scene.control.SelectionModel;
+import javafx.scene.control.SplitPane;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToolBar;
+import javafx.scene.control.Tooltip;
 import javafx.scene.effect.ColorAdjust;
+import javafx.scene.effect.Effect;
 import javafx.scene.effect.GaussianBlur;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -151,11 +187,11 @@ public class ModularController implements UpdateProgressListener {
     private static final String REVERT_FINISH_MESSAGE = "Revert operation finished.";
     public static final String NO_ANY_PROJECT_FOR_OPERATION = "There isn't any proper project selected for %s operation";
 
-    private static final String CHECKOUT_BRANCH_TITLE = "Checkout branch";
+    private static final String CHECKOUT_BRANCH_TITLE = "Branches";
     private static final String NEW_BRANCH_CREATION = "new branch creation";
     private static final String PULL_OPERATION_NAME = "pull";
     private static final String PUSH_OPERATION_NAME = "push";
-    private static final String CHECKOUT_BEANCH_OPERATION_NAME = "checkout branch";
+    private static final String BRANCES_OPERATION_NAME = "operation with branches";
     private static final String STASH_OPERATION_NAME = "stash";
 
     private static final String SELECT_ALL_IMAGE_URL = "icons/select_all_20x20.png";
@@ -404,7 +440,7 @@ public class ModularController implements UpdateProgressListener {
             _toolbarManager.getButtonById(GLToolButtons.SELECT_GROUP_BUTTON.getId()).setOnAction(this::loadGroup);
         } else if (windowId.equals(ViewKey.PROJECTS_WINDOW.getKey())) {
             _toolbarManager.getButtonById(GLToolButtons.CHANGE_GROUP_BUTTON.getId()).setOnAction(this::loadGroupWindow);
-            _toolbarManager.getButtonById(GLToolButtons.CHECKOUT_BRANCH_BUTTON.getId()).setOnAction(this::showCheckoutBranchWindow);
+            _toolbarManager.getButtonById(GLToolButtons.BRANCHES_BUTTON.getId()).setOnAction(this::showBranchesWindow);
             _toolbarManager.getButtonById(GLToolButtons.CLONE_PROJECT_BUTTON.getId()).setOnAction(this::cloneShadowProject);
             _toolbarManager.getButtonById(GLToolButtons.NEW_BRANCH_BUTTON.getId()).setOnAction(this::onNewBranchButton);
             _toolbarManager.getButtonById(GLToolButtons.CREATE_PROJECT_BUTTON.getId()).setOnAction(this::createProjectButton);
@@ -427,7 +463,7 @@ public class ModularController implements UpdateProgressListener {
             _mainMenuManager.getButtonById(GLToolButtons.MAIN_PUSH).setOnAction(this::onPushAction);
             _mainMenuManager.getButtonById(GLToolButtons.MAIN_PULL).setOnAction(this::onPullAction);
             _mainMenuManager.getButtonById(GLToolButtons.MAIN_REVERT).setOnAction(this::onRevertChanges);
-            _mainMenuManager.getButtonById(GLToolButtons.MAIN_CHECKOUT_BRANCH).setOnAction(this::showCheckoutBranchWindow);
+            _mainMenuManager.getButtonById(GLToolButtons.MAIN_BRANCHES).setOnAction(this::showBranchesWindow);
             _mainMenuManager.getButtonById(GLToolButtons.MAIN_STASH).setOnAction(this::showStashWindow);
         }
 
@@ -603,7 +639,7 @@ public class ModularController implements UpdateProgressListener {
 
         _workIndicatorDialog = new WorkIndicatorDialog(stage, WORK_INDICATOR_START_MESSAGE);
         Runnable selectGroup = () -> {
-            ProjectList.reset();
+            ProjectList.get(null).reset();
             _projectsList = ProjectList.get(_currentGroup);
             resetLoadingProgress();
             if (_projectsList.getProjects() == null) {
@@ -779,7 +815,6 @@ public class ModularController implements UpdateProgressListener {
             return;
         }
         Stage stage = (Stage) mainPanelBackground.getScene().getWindow();
-
         stage.getIcons().add(_appIcon);
 
         DirectoryChooser chooser = new DirectoryChooser();
@@ -835,21 +870,21 @@ public class ModularController implements UpdateProgressListener {
     //region PROJECT-VIEW ACTIONS
     @FXML
     @SuppressWarnings("unused")
-    private void showCheckoutBranchWindow(ActionEvent event) {
+    private void showBranchesWindow(ActionEvent event) {
         try {
             List<Project> projects = projectListView.getSelectionModel().getSelectedItems();
-            projects = ProjectList.getCorrectProjects(projects);
+            projects = _projectService.getCorrectProjects(projects);
             if (projects.isEmpty()) {
-                String message = String.format(NO_ANY_PROJECT_FOR_OPERATION, CHECKOUT_BEANCH_OPERATION_NAME);
+                String message = String.format(NO_ANY_PROJECT_FOR_OPERATION, BRANCES_OPERATION_NAME);
                 _consoleService.addMessage(message, MessageType.ERROR);
                 return;
             }
 
-            URL checkoutBranchWindowUrl = getClass().getClassLoader().getResource(ViewKey.CHECKOUT_BRANCH_WINDOW.getPath());
-            FXMLLoader loader = new FXMLLoader(checkoutBranchWindowUrl);
+            URL branchesWindowUrl = getClass().getClassLoader().getResource(ViewKey.BRANCHES_WINDOW.getPath());
+            FXMLLoader loader = new FXMLLoader(branchesWindowUrl);
             Parent root = loader.load();
 
-            CheckoutBranchWindowController checkoutWindowController  = loader.getController();
+            BranchesWindowController branchesWindowController  = loader.getController();
 
             Stage stage = new Stage();
             stage.setScene(new GLTScene(root));
@@ -869,7 +904,7 @@ public class ModularController implements UpdateProgressListener {
             stage.setMinWidth(dialogWidth / 2);
             stage.setMinHeight(dialogHeight / 2);
 
-            checkoutWindowController.beforeShowing(projects, stage);
+            branchesWindowController.beforeShowing(projects, stage);
             stage.show();
         } catch (IOException e) {
             _logger.error("Could not load fxml resource", e);
@@ -882,7 +917,7 @@ public class ModularController implements UpdateProgressListener {
         try {
             List<Project> selectedProjects = projectListView.getSelectionModel().getSelectedItems();
             if (selectedProjects.isEmpty()) { // if nothing selected in a list then all projects are loaded
-                selectedProjects = ProjectList.getCorrectProjects(projectListView.getItems());
+                selectedProjects = _projectService.getCorrectProjects(projectListView.getItems());
                 if (selectedProjects.isEmpty()) {
                     String message = String.format(NO_ANY_PROJECT_FOR_OPERATION, STASH_OPERATION_NAME);
                     _consoleService.addMessage(message, MessageType.ERROR);
@@ -899,7 +934,7 @@ public class ModularController implements UpdateProgressListener {
                 _logger.error("Failed getting StashWindowController.");
                 return;
             }
-            stashWindowController.beforeShowing(ProjectList.getIdsProjects(selectedProjects));
+            stashWindowController.beforeShowing(_projectService.getIdsProjects(selectedProjects));
 
             Scene scene = new GLTScene(root);
             Stage stage = new Stage();
@@ -943,7 +978,7 @@ public class ModularController implements UpdateProgressListener {
     @FXML
     @SuppressWarnings("unused")
     private void onNewBranchButton(ActionEvent actionEvent) {
-        List<Project> clonedProjectsWithoutConflicts = ProjectList.getCorrectProjects(getCurrentProjects());
+        List<Project> clonedProjectsWithoutConflicts = getCorrectCurrentProjects();
         if (!clonedProjectsWithoutConflicts.isEmpty()) {
             CreateNewBranchDialog dialog = new CreateNewBranchDialog(clonedProjectsWithoutConflicts);
             dialog.showAndWait();
@@ -968,7 +1003,7 @@ public class ModularController implements UpdateProgressListener {
     @FXML
     @SuppressWarnings("unused")
     private void onPushAction(ActionEvent actionEvent) {
-        List<Project> filteredProjects = ProjectList.getCorrectProjects(getCurrentProjects());
+        List<Project> filteredProjects = getCorrectCurrentProjects();
         if (!filteredProjects.isEmpty()) {
             _backgroundService.runInBackgroundThread(() -> _gitService.push(filteredProjects, PushProgressListener.get()));
         } else {
@@ -979,7 +1014,7 @@ public class ModularController implements UpdateProgressListener {
     @FXML
     @SuppressWarnings("unused")
     private void onPullAction(ActionEvent actionEvent) {
-        List<Project> projectsToPull = ProjectList.getCorrectProjects(getCurrentProjects());
+        List<Project> projectsToPull = getCorrectCurrentProjects();
         if (!projectsToPull.isEmpty()) {
             checkChangesAndPull(projectsToPull, new Object());
         } else {
@@ -1182,7 +1217,7 @@ public class ModularController implements UpdateProgressListener {
      * @return list of projects
      */
     private List<Integer> getIdSelectedProjects() {
-        return ProjectList.getIdsProjects(getCurrentProjects());
+        return _projectService.getIdsProjects(getCurrentProjects());
     }
 
     private boolean startClone(List<Project> shadowProjects, String path, CloneProgressDialog progressDialog) {
@@ -1235,7 +1270,7 @@ public class ModularController implements UpdateProgressListener {
         _stateService.stateON(ApplicationState.REVERT);
         _consoleService.addMessage(REVERT_START_MESSAGE, MessageType.SIMPLE);
 
-        List<Project> correctProjects = ProjectList.getCorrectProjects(getCurrentProjects());
+        List<Project> correctProjects = getCorrectCurrentProjects();
         List<Project> projectsWithChanges = _gitService.getProjectsWithChanges(correctProjects);
         _consoleService.addMessage(projectsWithChanges.size() + " selected projects have changes.", MessageType.SIMPLE);
         if (projectsWithChanges.isEmpty()) {
@@ -1249,9 +1284,13 @@ public class ModularController implements UpdateProgressListener {
 
     private List<Project> getUnavailableProjectsForEditingPom(List<Project> projects) {
         return projects.parallelStream()
-                .filter(project -> !ProjectList.projectIsClonedAndWithoutConflicts(project)
+                .filter(project -> !_projectService.projectIsClonedAndWithoutConflicts(project)
                         || !_pomXmlService.hasPomFile(project))
                 .collect(Collectors.toList());
+    }
+
+    private List<Project> getCorrectCurrentProjects() {
+        return _projectService.getCorrectProjects(getCurrentProjects());
     }
 
     private void openFolder(String path) {
@@ -1295,7 +1334,7 @@ public class ModularController implements UpdateProgressListener {
             Menu subMenuGit = new Menu("Git");
 
             MenuItem itemCreateBranch = createMenuItem(GLToolButtons.MAIN_CREATE_BRANCH, this::onNewBranchButton);
-            MenuItem itemCheckoutBranch = createMenuItem(GLToolButtons.MAIN_CHECKOUT_BRANCH, this::showCheckoutBranchWindow);
+            MenuItem itemCheckoutBranch = createMenuItem(GLToolButtons.MAIN_BRANCHES, this::showBranchesWindow);
             MenuItem itemStaging = createMenuItem(GLToolButtons.MAIN_STAGING, this::openGitStaging);
             MenuItem itemPull = createMenuItem(GLToolButtons.MAIN_PULL, this::onPullAction);
             MenuItem itemPush = createMenuItem(GLToolButtons.MAIN_PUSH, this::onPushAction);
@@ -1432,7 +1471,7 @@ public class ModularController implements UpdateProgressListener {
     private void setToolbarDisableProperty(BooleanBinding bindingForShadow, BooleanBinding bindingForCloned) {
         _toolbarManager.getButtonById(GLToolButtons.CLONE_PROJECT_BUTTON.getId()).disableProperty().bind(bindingForCloned);
         _toolbarManager.getButtonById(GLToolButtons.NEW_BRANCH_BUTTON.getId()).disableProperty().bind(bindingForShadow);
-        _toolbarManager.getButtonById(GLToolButtons.CHECKOUT_BRANCH_BUTTON.getId()).disableProperty().bind(bindingForShadow);
+        _toolbarManager.getButtonById(GLToolButtons.BRANCHES_BUTTON.getId()).disableProperty().bind(bindingForShadow);
         _toolbarManager.getButtonById(GLToolButtons.STAGING_BUTTON.getId()).disableProperty().bind(bindingForShadow);
         _toolbarManager.getButtonById(GLToolButtons.PUSH_BUTTON.getId()).disableProperty().bind(bindingForShadow);
         _toolbarManager.getButtonById(GLToolButtons.EDIT_PROJECT_PROPERTIES_BUTTON.getId()).disableProperty().bind(bindingForShadow);
@@ -1443,7 +1482,7 @@ public class ModularController implements UpdateProgressListener {
     private void setMainMenuDisableProperty(BooleanBinding bindingForShadow, BooleanBinding bindingForCloned) {
         _mainMenuManager.getButtonById(GLToolButtons.MAIN_CLONE_PROJECT).disableProperty().bind(bindingForCloned);
         _mainMenuManager.getButtonById(GLToolButtons.MAIN_STAGING).disableProperty().bind(bindingForShadow);
-        _mainMenuManager.getButtonById(GLToolButtons.MAIN_CHECKOUT_BRANCH).disableProperty().bind(bindingForShadow);
+        _mainMenuManager.getButtonById(GLToolButtons.MAIN_BRANCHES).disableProperty().bind(bindingForShadow);
         _mainMenuManager.getButtonById(GLToolButtons.MAIN_CREATE_BRANCH).disableProperty().bind(bindingForShadow);
         _mainMenuManager.getButtonById(GLToolButtons.MAIN_PUSH).disableProperty().bind(bindingForShadow);
         _mainMenuManager.getButtonById(GLToolButtons.MAIN_PULL).disableProperty().bind(bindingForShadow);

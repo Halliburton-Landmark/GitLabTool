@@ -22,11 +22,13 @@ import com.lgc.gitlabtool.git.services.BackgroundService;
 import com.lgc.gitlabtool.git.services.ConsoleService;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.ProgressListener;
+import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.icon.LocalRemoteIconHolder;
 import com.lgc.gitlabtool.git.ui.javafx.ChangesCheckDialog;
 import com.lgc.gitlabtool.git.ui.javafx.StatusDialog;
+import com.lgc.gitlabtool.git.ui.javafx.controllers.listcells.ProjectListCell;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 import com.lgc.gitlabtool.git.ui.javafx.progressdialog.CheckoutBranchProgressDialog;
 import com.lgc.gitlabtool.git.ui.javafx.progressdialog.DeleteBranchProgressDialog;
@@ -53,7 +55,7 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
 @SuppressWarnings("unchecked")
-public class CheckoutBranchWindowController extends AbstractStateListener {
+public class BranchesWindowController extends AbstractStateListener {
 
     private static final String TOTAL_CAPTION = "Total count: ";
 
@@ -94,6 +96,7 @@ public class CheckoutBranchWindowController extends AbstractStateListener {
     private static final StateService _stateService = ServiceProvider.getInstance().getService(StateService.class);
     private static final ConsoleService _consoleService = ServiceProvider.getInstance().getService(ConsoleService.class);
     private static final BackgroundService _backgroundService = ServiceProvider.getInstance().getService(BackgroundService.class);
+    private static final ProjectService _projectService = ServiceProvider.getInstance().getService(ProjectService.class);
     private static final GitService _gitService = ServiceProvider.getInstance().getService(GitService.class);
 
     private static final String ALREADY_CHECKED_OUT_MESSAGE = "%d of %d projects have already checked out the selected branch.";
@@ -118,7 +121,7 @@ public class CheckoutBranchWindowController extends AbstractStateListener {
         _stage.addEventFilter(WindowEvent.WINDOW_HIDDEN, event -> dispose());
 
         _projectList = ProjectList.get(null);
-        _selectedProjectsIds = ProjectList.getIdsProjects(projects);
+        _selectedProjectsIds = _projectService.getIdsProjects(projects);
         setProjectListItems(getProjectsByIds(), currentProjectsListView);
 
         configureProjectsListView(currentProjectsListView);
