@@ -12,6 +12,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 
 import java.util.List;
@@ -91,6 +92,8 @@ public class TableController {
         committerColumn.setCellValueFactory(committerProperty);
         committedDateColumn.setCellValueFactory(committedDateProperty);
 
+        configTable();
+
         clearTableContent();
 
         initListeners();
@@ -104,6 +107,10 @@ public class TableController {
         ObservableList<Commit> data = FXCollections.observableArrayList();
         data.add(new Commit());
         historyTable.setItems(data);
+    }
+
+    private void configTable() {
+        historyTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
     }
 
 }
