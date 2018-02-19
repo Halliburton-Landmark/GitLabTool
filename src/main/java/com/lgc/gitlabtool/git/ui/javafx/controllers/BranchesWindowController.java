@@ -27,6 +27,7 @@ import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.icon.LocalRemoteIconHolder;
 import com.lgc.gitlabtool.git.ui.javafx.ChangesCheckDialog;
+import com.lgc.gitlabtool.git.ui.javafx.CreateNewBranchDialog;
 import com.lgc.gitlabtool.git.ui.javafx.StatusDialog;
 import com.lgc.gitlabtool.git.ui.javafx.controllers.listcells.ProjectListCell;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
@@ -93,6 +94,9 @@ public class BranchesWindowController extends AbstractStateListener {
     @FXML
     private Button deleteButton;
 
+    @FXML
+    private Button newBranchButton;
+
     private static final StateService _stateService = ServiceProvider.getInstance().getService(StateService.class);
     private static final ConsoleService _consoleService = ServiceProvider.getInstance().getService(ConsoleService.class);
     private static final BackgroundService _backgroundService = ServiceProvider.getInstance().getService(BackgroundService.class);
@@ -103,10 +107,14 @@ public class BranchesWindowController extends AbstractStateListener {
     private static final String DELETE_CURRENT_BRANCH_MESSAGE = "The operation isn't possible for %d of %d projects. "
             + "Projects checked out on %s branch.";
     private static final String DELETE_BRANCHE_TITLE = "Delete branch";
+    private static final String NEW_BRANCH_CREATION = "new branch creation";
 
     {
         _stateService.addStateListener(ApplicationState.LOAD_PROJECTS, this);
         _stateService.addStateListener(ApplicationState.DELETE_BRANCH, this);
+        _stateService.addStateListener(ApplicationState.PUSH, this);
+        _stateService.addStateListener(ApplicationState.CREATE_BRANCH, this);
+        _stateService.addStateListener(ApplicationState.CHECKOUT_BRANCH, this);
         _stateService.addStateListener(ApplicationState.UPDATE_PROJECT_STATUSES, this);
     }
 
@@ -156,6 +164,19 @@ public class BranchesWindowController extends AbstractStateListener {
             deleteLocalBranch(correctProjects, selectedBranch);
         }
     }
+
+    @FXML
+    public void newBranchAction() {
+        List<Project> projects = getProjectsByIds();
+        if (projects.isEmpty()) {
+            _consoleService.addMessage(String.format(ModularController.NO_ANY_PROJECT_FOR_OPERATION,
+                    NEW_BRANCH_CREATION), MessageType.ERROR);
+        } else {
+            CreateNewBranchDialog dialog = new CreateNewBranchDialog(projects);
+            dialog.showAndWait();
+        }
+    }
+
     private void deleteRemoteBranch(List<Project> projects, Branch selectedBranch) {
         ProgressDialog progressDialog = new DeleteBranchProgressDialog();
         ProgressListener progress = new OperationProgressListener(progressDialog, ApplicationState.DELETE_BRANCH);
@@ -430,6 +451,12 @@ public class BranchesWindowController extends AbstractStateListener {
                 Platform.runLater(new Runnable() {
                     @Override
                     public void run() {
+                        if (changedState == ApplicationState.PUSH
+                                || changedState == ApplicationState.CREATE_BRANCH) {
+                            currentProjectsListView.setItems(FXCollections.observableArrayList(getProjectsByIds()));
+                            onUpdateList();
+                            return;
+                        }
                         String textSearch = searchField.getText();
                         Branch branch = branchesListView.getSelectionModel().getSelectedItem();
                         if (textSearch != null && !textSearch.isEmpty() && branch == null) {

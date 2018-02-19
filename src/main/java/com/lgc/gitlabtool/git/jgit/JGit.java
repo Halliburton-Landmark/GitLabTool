@@ -772,10 +772,10 @@ public class JGit {
         if (projects == null || projects.isEmpty() || progressListener == null) {
             throw new IllegalArgumentException("Incorrect data: projects is " + projects);
         }
-        progressListener.onStart();
         try {
             Map<Project, JGitStatus> statuses = new HashMap<>();
             for (Project project : projects) {
+                progressListener.onStart(project);
                 if (project == null || !project.isCloned()) {
                     progressListener.onError(project);
                     statuses.put(null, JGitStatus.FAILED);

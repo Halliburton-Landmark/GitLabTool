@@ -187,7 +187,6 @@ public class ModularController implements UpdateProgressListener {
     public static final String NO_ANY_PROJECT_FOR_OPERATION = "There isn't any proper project selected for %s operation";
 
     private static final String CHECKOUT_BRANCH_TITLE = "Branches";
-    private static final String NEW_BRANCH_CREATION = "new branch creation";
     private static final String PULL_OPERATION_NAME = "pull";
     private static final String PUSH_OPERATION_NAME = "push";
     private static final String BRANCES_OPERATION_NAME = "operation with branches";
