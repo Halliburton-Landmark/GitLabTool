@@ -153,16 +153,16 @@ public class CreateNewBranchDialog extends GLTDialog<String> {
         String newBranchName = _branchNameField.getText().trim();
         String startPoint = _comboBox.getSelectionModel().getSelectedItem();
         Runnable task = () -> {
-            //Map<Project, JGitStatus> results = _gitService.createBranch(getProjects(), newBranchName, startPoint, false);
+            Map<Project, JGitStatus> results = _gitService.createBranch(getProjects(), newBranchName, startPoint, false);
             boolean isCheckoutBranch = _checkoutBox.isSelected();
-//            if (isCheckoutBranch) {
-//                checkoutBranch(getProjects(), newBranchName);
-//            }
+            if (isCheckoutBranch) {
+                checkoutBranch(getProjects(), newBranchName);
+            }
             boolean pushToUpstream = _pushToUpstreamBox.isSelected();
             if (pushToUpstream && isCheckoutBranch) {
                 pushBranches(getProjects());
             }
-            //Platform.runLater(() -> createAndShowStatusDialog(getProjects(), results));
+            Platform.runLater(() -> createAndShowStatusDialog(getProjects(), results));
         };
 
         _backgroundService.runInBackgroundThread(task);
