@@ -1,7 +1,6 @@
 package com.lgc.gitlabtool.git.ui.javafx.controllers;
 
 import com.lgc.gitlabtool.git.entities.Project;
-import com.lgc.gitlabtool.git.entities.ProjectList;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ProjectSelectionChangeListener;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
@@ -13,10 +12,8 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableRow;
 import javafx.scene.control.cell.PropertyValueFactory;
 
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -51,7 +48,8 @@ public class TableController {
     ProjectSelectionChangeListener projectSelectionChangeListener = new ProjectSelectionChangeListener() {
 
         @Override
-        public void onChanged(Project project) {
+        public void onChanged(List<Project> projects) {
+            Project project = projects.get(0);
             List<Project> projectsList = SelectionsProvider.getInstance().getSelectionItems(ListViewKey.MAIN_WINDOW_PROJECTS.getKey());
             if ( !projectsList.isEmpty() ) {
                 String nameBranch = _gitService.getCurrentBranchName(project);
@@ -59,6 +57,8 @@ public class TableController {
                 ObservableList<Commit> data = FXCollections.observableArrayList();
                 data.addAll(commits);
                 historyTable.setItems(data);
+            } else {
+                clearTableContent();
             }
         }
     };
@@ -91,16 +91,19 @@ public class TableController {
         committerColumn.setCellValueFactory(committerProperty);
         committedDateColumn.setCellValueFactory(committedDateProperty);
 
-        ObservableList<Commit> data = FXCollections.observableArrayList();
-        data.add(new Commit());
-
-        historyTable.setItems(data);
+        clearTableContent();
 
         initListeners();
     }
 
     private void initListeners() {
         SelectionsProvider.getInstance().addProjectSelectionChangeListener(projectSelectionChangeListener);
+    }
+
+    private void clearTableContent() {
+        ObservableList<Commit> data = FXCollections.observableArrayList();
+        data.add(new Commit());
+        historyTable.setItems(data);
     }
 
 }

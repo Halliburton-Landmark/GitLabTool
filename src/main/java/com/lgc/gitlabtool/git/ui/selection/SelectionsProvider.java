@@ -76,8 +76,7 @@ public class SelectionsProvider {
         } else {
             _listItemsMap.put(listViewId, items);
         }
-        Project project = (Project)items.get(0);
-        notifyProjectSelectionChangeEvent(project);
+        notifyProjectSelectionChangeEvent(items);
     }
 
     public void addProjectSelectionChangeListener(ProjectSelectionChangeListener listener) {
@@ -88,7 +87,7 @@ public class SelectionsProvider {
         projectSelectionChangeListeners.remove(listener);
     }
 
-    private void notifyProjectSelectionChangeEvent(Project project) {
+    private void notifyProjectSelectionChangeEvent(List<Project> project) {
         for(ProjectSelectionChangeListener projectSelectionChangeListener : projectSelectionChangeListeners) {
             projectSelectionChangeListener.onChanged(project);
         }
