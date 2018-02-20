@@ -19,9 +19,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
-import javafx.scene.text.Text;
 
 public class ProjectListCell extends ListCell<Project> {
     private static final String SHADOW_PROJECT_ICON_URL = "icons/project/shadow_project.png";

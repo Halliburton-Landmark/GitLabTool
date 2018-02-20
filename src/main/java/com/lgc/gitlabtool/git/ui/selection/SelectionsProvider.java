@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.lgc.gitlabtool.git.listeners.stateListeners.ProjectSelectionChangeListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -25,8 +24,6 @@ public class SelectionsProvider {
     private static SelectionsProvider _instance;
 
     private final Map<String, List> _listItemsMap;
-
-    private ArrayList<ProjectSelectionChangeListener> projectSelectionChangeListeners = new ArrayList<>();
 
     private SelectionsProvider() {
         _listItemsMap = new HashMap<>();
@@ -75,21 +72,6 @@ public class SelectionsProvider {
             _listItemsMap.get(listViewId).addAll(items);
         } else {
             _listItemsMap.put(listViewId, items);
-        }
-        notifyProjectSelectionChangeEvent(items);
-    }
-
-    public void addProjectSelectionChangeListener(ProjectSelectionChangeListener listener) {
-        projectSelectionChangeListeners.add(listener);
-    }
-
-    public void removeProjectSelectionChangeListener(ProjectSelectionChangeListener listener) {
-        projectSelectionChangeListeners.remove(listener);
-    }
-
-    private void notifyProjectSelectionChangeEvent(List<Project> project) {
-        for(ProjectSelectionChangeListener projectSelectionChangeListener : projectSelectionChangeListeners) {
-            projectSelectionChangeListener.onChanged(project);
         }
     }
 }

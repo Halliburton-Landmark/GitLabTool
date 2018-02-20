@@ -1,14 +1,16 @@
 package com.lgc.gitlabtool.git.ui.javafx.controllers;
 
 import com.lgc.gitlabtool.git.entities.Project;
-import com.lgc.gitlabtool.git.listeners.stateListeners.ProjectSelectionChangeListener;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
-import com.lgc.gitlabtool.git.ui.selection.ListViewKey;
-import com.lgc.gitlabtool.git.ui.selection.SelectionsProvider;
+import com.lgc.gitlabtool.git.ui.ViewKey;
+import com.lgc.gitlabtool.git.ui.javafx.controllers.listview.ActiveViewChangeListener;
+import com.lgc.gitlabtool.git.ui.javafx.controllers.listview.ListViewMgrProvider;
+import com.lgc.gitlabtool.git.ui.javafx.controllers.listview.ProjectListView;
 import com.lgc.gitlabtool.git.ui.table.Commit;
 import com.lgc.gitlabtool.git.ui.table.CommitHistoryTableView;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.TableColumn;
@@ -46,12 +48,15 @@ public class TableController {
     private static final GitService _gitService = ServiceProvider.getInstance()
             .getService(GitService.class);
 
-    ProjectSelectionChangeListener projectSelectionChangeListener = new ProjectSelectionChangeListener() {
+    private static final ListViewMgrProvider listViewMgrProvider = ListViewMgrProvider.getInstance();
 
+    private ProjectListView projectListView;
+
+    private ListChangeListener<Project> listChangeListener = new ListChangeListener<Project>() {
         @Override
-        public void onChanged(List<Project> projects) {
-            Project project = projects.get(0);
-            List<Project> projectsList = SelectionsProvider.getInstance().getSelectionItems(ListViewKey.MAIN_WINDOW_PROJECTS.getKey());
+        public void onChanged(Change<? extends Project> projects) {
+            List<Project> projectsList = projectListView.getSelectionModel().getSelectedItems();
+            Project project = projects.getList().get(0);
             if ( !projectsList.isEmpty() ) {
                 String nameBranch = _gitService.getCurrentBranchName(project);
                 List<Commit> commits = _gitService.getAllCommits(project, nameBranch);
@@ -60,6 +65,17 @@ public class TableController {
                 historyTable.setItems(data);
             } else {
                 clearTableContent();
+            }
+        }
+    };
+
+    private ActiveViewChangeListener activeViewChangeListener = new ActiveViewChangeListener() {
+        @Override
+        public void onChanged(String activeView) {
+            if (activeView.equals(ViewKey.GROUPS_WINDOW.getKey())) {
+                    historyTable.setVisible(false);
+            } else if (activeView.equals(ViewKey.PROJECTS_WINDOW.getKey())) {
+                historyTable.setVisible(true);
             }
         }
     };
@@ -97,10 +113,14 @@ public class TableController {
         clearTableContent();
 
         initListeners();
+
     }
 
-    private void initListeners() {
-        SelectionsProvider.getInstance().addProjectSelectionChangeListener(projectSelectionChangeListener);
+    public void initListeners() {
+        projectListView = listViewMgrProvider.getFeature().getProjectListView();
+        projectListView.getSelectionModel().getSelectedItems().addListener(listChangeListener);
+
+        listViewMgrProvider.getFeature().addChangeActiveViewListener(activeViewChangeListener);
     }
 
     private void clearTableContent() {

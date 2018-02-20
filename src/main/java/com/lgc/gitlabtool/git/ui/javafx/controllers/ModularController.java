@@ -24,6 +24,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.lgc.gitlabtool.git.ui.javafx.*;
+import com.lgc.gitlabtool.git.ui.javafx.controllers.listview.GroupListView;
+import com.lgc.gitlabtool.git.ui.javafx.controllers.listview.ListViewMgr;
+import com.lgc.gitlabtool.git.ui.javafx.controllers.listview.ListViewMgrProvider;
+import com.lgc.gitlabtool.git.ui.javafx.controllers.listview.ProjectListView;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.effect.Effect;
@@ -116,6 +120,8 @@ public class ModularController implements UpdateProgressListener {
 
     private static final ToolbarManager _toolbarManager = ToolbarManager.getInstance();
     private static final MainMenuManager _mainMenuManager = MainMenuManager.getInstance();
+
+    private static final ListViewMgrProvider listViewMgrProvider = ListViewMgrProvider.getInstance();
 
     /***********************************************************************************************
      *
@@ -304,6 +310,7 @@ public class ModularController implements UpdateProgressListener {
     private String _currentView;
     private ProjectList _projectsList;
     private StateListener _modularStateListener;
+    private ListViewMgr listViewMgr;
 
     /***********************************************************************************************
      *
@@ -311,6 +318,14 @@ public class ModularController implements UpdateProgressListener {
      *
      */
     //region INITIALIZATION
+
+    {
+        projectListView = new ProjectListView<>();
+        groupListView = new GroupListView<>();
+        listViewMgr = listViewMgrProvider.getFeature();
+        listViewMgr.add(projectListView);
+        listViewMgr.add(groupListView);
+    }
 
     @FXML
     @SuppressWarnings("ConstantConditions")
@@ -331,7 +346,7 @@ public class ModularController implements UpdateProgressListener {
     }
 
     private void initializeProjectsWindow() {
-        projectListView = new ListView<>();
+
         AnchorPane.setBottomAnchor(projectListView, 0.0);
         AnchorPane.setTopAnchor(projectListView, 40.0 + (2 * PROJECTS_TOOLBAR_PADDING));
         AnchorPane.setLeftAnchor(projectListView, 0.0);
@@ -349,7 +364,6 @@ public class ModularController implements UpdateProgressListener {
     }
 
     private void initializeGroupsWindow() {
-        groupListView = new ListView<>();
         AnchorPane.setBottomAnchor(groupListView, 0.0);
         AnchorPane.setTopAnchor(groupListView, 0.0);
         AnchorPane.setLeftAnchor(groupListView, 0.0);
@@ -565,6 +579,7 @@ public class ModularController implements UpdateProgressListener {
 
     private void loadGroup(Group group) {
         _currentView = ViewKey.PROJECTS_WINDOW.getKey();
+        listViewMgr.setActiveView(_currentView);
         _currentGroup = group;
 
         toolbar.getItems().clear();
@@ -617,6 +632,7 @@ public class ModularController implements UpdateProgressListener {
 
     private void loadGroupWindow() {
         _currentView = ViewKey.GROUPS_WINDOW.getKey();
+        listViewMgr.setActiveView(_currentView);
 
         toolbar.getItems().clear();
         menuBar.getMenus().clear();
