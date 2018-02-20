@@ -12,7 +12,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -55,7 +54,6 @@ import com.lgc.gitlabtool.git.ui.javafx.CreateProjectDialog;
 import com.lgc.gitlabtool.git.ui.javafx.GLTAlert;
 import com.lgc.gitlabtool.git.ui.javafx.GLTScene;
 import com.lgc.gitlabtool.git.ui.javafx.GLTTheme;
-import com.lgc.gitlabtool.git.ui.javafx.IncorrectProjectDialog;
 import com.lgc.gitlabtool.git.ui.javafx.JavaFXUI;
 import com.lgc.gitlabtool.git.ui.javafx.ProgressDialog;
 import com.lgc.gitlabtool.git.ui.javafx.PullProgressDialog;
@@ -1409,35 +1407,9 @@ public class ModularController implements UpdateProgressListener {
         });
     }
 
-    private void checkProjectsList() {
-        List<Project> incorrectProjects = findIncorrectProjects();
-        if (incorrectProjects.isEmpty()) {
-            return;
-        }
-        Platform.runLater(() -> {
-            IncorrectProjectDialog dialog = new IncorrectProjectDialog();
-            dialog.showDialog(incorrectProjects, (obj) -> refreshLoadProjects());
-        });
-    }
-
-    private List<Project> findIncorrectProjects() {
-        List<Project> gotProjects = _projectsList.getProjects();
-        if (gotProjects == null || gotProjects.isEmpty()) {
-            return Collections.emptyList();
-        }
-        return gotProjects.parallelStream()
-                          .filter(this::isIncorrectProject)
-                          .collect(Collectors.toList());
-    }
-
-    private boolean isIncorrectProject(Project project) {
-        // we check only cloned projects
-        return project.isCloned() && !_gitService.hasAtLeastOneReference(project);
-    }
-
     private void refreshLoadProjects() {
         _projectsList.refreshLoadProjects();
-        checkProjectsList();
+        //checkProjectsList(); TODO : fix working with IncorrectProjectDialog
         hideShadowsAction();
     }
 
