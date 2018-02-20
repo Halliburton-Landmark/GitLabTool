@@ -130,6 +130,7 @@ public class BranchesWindowController extends AbstractStateListener {
 
         _projectList = ProjectList.get(null);
         _selectedProjectsIds = _projectService.getIdsProjects(projects);
+        projectsCountLabel.setText(TOTAL_CAPTION + _selectedProjectsIds.size());
         setProjectListItems(getProjectsByIds(), currentProjectsListView);
 
         configureProjectsListView(currentProjectsListView);

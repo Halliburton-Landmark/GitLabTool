@@ -774,24 +774,28 @@ public class JGit {
         }
         try {
             Map<Project, JGitStatus> statuses = new HashMap<>();
+            long step = 100 / projects.size();
+            AtomicLong progress = new AtomicLong(0);
             for (Project project : projects) {
+                JGitStatus pushStatus = JGitStatus.FAILED;
+                progress.addAndGet(step);
                 progressListener.onStart(project);
                 if (project == null || !project.isCloned()) {
-                    progressListener.onError(project);
-                    statuses.put(null, JGitStatus.FAILED);
+                    progressListener.onError(progress.get(), project, pushStatus);
+                    statuses.put(null, pushStatus);
                     continue;
                 }
-                JGitStatus pushStatus = push(project);
+                pushStatus = push(project);
                 if (pushStatus.equals(JGitStatus.FAILED)) {
-                    progressListener.onError(project);
+                    progressListener.onError(progress.get(), project, pushStatus);
                 } else {
-                    progressListener.onSuccess(project);
+                    progressListener.onSuccess(progress.get(), project, pushStatus);
                 }
                 statuses.put(project, pushStatus);
             }
             return statuses;
         } finally {
-            progressListener.onFinish();
+            progressListener.onFinish("Push operation was finished.");
         }
     }
 

@@ -44,10 +44,8 @@ public class CreateNewBranchDialog extends GLTDialog<String> {
     private static final String STATUS_DIALOG_HEADER = "Branch creating info";
     private static final String CHOOSE_BRANCH_NAME_MESSAGE = "Please choose a new branch name";
 
-    private static final GitService _gitService = ServiceProvider.getInstance()
-            .getService(GitService.class);
-    private static final BackgroundService _backgroundService = ServiceProvider.getInstance()
-            .getService(BackgroundService.class);
+    private static final GitService _gitService = ServiceProvider.getInstance().getService(GitService.class);
+    private static final BackgroundService _backgroundService = ServiceProvider.getInstance().getService(BackgroundService.class);
 
     private final Label _messageLabel;
     private final Label _textLabel;
@@ -152,20 +150,12 @@ public class CreateNewBranchDialog extends GLTDialog<String> {
     private void onCreateButton(ActionEvent event) {
         String newBranchName = _branchNameField.getText().trim();
         String startPoint = _comboBox.getSelectionModel().getSelectedItem();
-        Runnable task = () -> {
-            Map<Project, JGitStatus> results = _gitService.createBranch(getProjects(), newBranchName, startPoint, false);
-            boolean isCheckoutBranch = _checkoutBox.isSelected();
-            if (isCheckoutBranch) {
-                checkoutBranch(getProjects(), newBranchName);
-            }
-            boolean pushToUpstream = _pushToUpstreamBox.isSelected();
-            if (pushToUpstream && isCheckoutBranch) {
-                pushBranches(getProjects());
-            }
-            Platform.runLater(() -> createAndShowStatusDialog(getProjects(), results));
-        };
-
-        _backgroundService.runInBackgroundThread(task);
+        Map<Project, JGitStatus> results = _gitService.createBranch(getProjects(), newBranchName, startPoint, false);
+        createAndShowStatusDialog(getProjects(), results);
+        boolean isCheckoutBranch = _checkoutBox.isSelected();
+        if (isCheckoutBranch) {
+            checkoutBranch(getProjects(), newBranchName);
+        }
         getStage().close();
     }
 
@@ -231,8 +221,11 @@ public class CreateNewBranchDialog extends GLTDialog<String> {
             // we do not show checkout statuses here
             // because we show the statuses of branches creation
             // In the same time we could see that branch is changed on the projects list panel
-            Runnable task = () -> _gitService.checkoutBranch(projects, (String) branchName, false, null);
-            _backgroundService.runInBackgroundThread(task);
+            _gitService.checkoutBranch(projects, (String) branchName, false, null);
+            boolean pushToUpstream = _pushToUpstreamBox.isSelected();
+            if (pushToUpstream) {
+                pushBranches(getProjects());
+            }
         } else {
             ChangesCheckDialog alert = new ChangesCheckDialog();
             alert.launchConfirmationDialog(changedProjects, projects, branchName, this::checkoutBranch);
