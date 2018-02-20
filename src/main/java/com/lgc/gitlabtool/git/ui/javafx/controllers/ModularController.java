@@ -1409,6 +1409,7 @@ public class ModularController implements UpdateProgressListener {
 
     private void refreshLoadProjects() {
         _projectsList.refreshLoadProjects();
+        //checkProjectsList(); TODO : fix working with IncorrectProjectDialog
         hideShadowsAction();
     }
 
