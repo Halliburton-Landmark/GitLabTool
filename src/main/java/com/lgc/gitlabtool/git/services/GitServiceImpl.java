@@ -154,6 +154,7 @@ public class GitServiceImpl implements GitService {
         if(progressListener == null){
             progressListener = EmptyProgressListener.get();
         }
+        _stateService.stateON(ApplicationState.PUSH); // state must be off in the progressListener by a finish action
         return _git.push(projects, progressListener);
     }
 

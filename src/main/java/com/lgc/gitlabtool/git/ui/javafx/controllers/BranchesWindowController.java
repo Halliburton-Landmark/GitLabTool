@@ -112,7 +112,6 @@ public class BranchesWindowController extends AbstractStateListener {
     {
         _stateService.addStateListener(ApplicationState.LOAD_PROJECTS, this);
         _stateService.addStateListener(ApplicationState.DELETE_BRANCH, this);
-        _stateService.addStateListener(ApplicationState.PUSH, this);
         _stateService.addStateListener(ApplicationState.CREATE_BRANCH, this);
         _stateService.addStateListener(ApplicationState.CHECKOUT_BRANCH, this);
         _stateService.addStateListener(ApplicationState.UPDATE_PROJECT_STATUSES, this);
@@ -458,6 +457,7 @@ public class BranchesWindowController extends AbstractStateListener {
                             onUpdateList();
                             return;
                         }
+                        currentProjectsListView.refresh();
                         String textSearch = searchField.getText();
                         Branch branch = branchesListView.getSelectionModel().getSelectedItem();
                         if (textSearch != null && !textSearch.isEmpty() && branch == null) {
