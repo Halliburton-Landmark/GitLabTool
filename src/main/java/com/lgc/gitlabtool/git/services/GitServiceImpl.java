@@ -428,6 +428,7 @@ public class GitServiceImpl implements GitService {
                     .filter(Objects::nonNull)
                     .forEach(project -> deleteBranch(project, deletedBranch, statuses, progressListener, progress, step));
         } finally {
+            // ApplicationState.DELETE_BRANCH state should turn off in the progressListener by the finish action
             progressListener.onFinish(DELETE_BRANCH_FINISHED);
         }
         return statuses;

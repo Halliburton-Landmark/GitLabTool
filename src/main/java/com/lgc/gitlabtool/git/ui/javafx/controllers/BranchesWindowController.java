@@ -142,10 +142,10 @@ public class BranchesWindowController extends AbstractStateListener {
     public void deleteAction() {
         List<Project> selectedProjects = currentProjectsListView.getItems();
         Branch selectedBranch = branchesListView.getSelectionModel().getSelectedItem();
-        boolean isYes = GLTAlertUtils.requesConfirmationOperation(DELETE_BRANCHE_TITLE,
+        boolean isYesButtonPressed = GLTAlertUtils.requesConfirmationOperation(DELETE_BRANCHE_TITLE,
                 "The " + selectedBranch.getBranchName() + " branch will delete from " + selectedProjects.size() + " project(s).",
-                "Are you sure that you want carry out operation?");
-        if (!isYes) {
+                "Are you sure you want to do this?");
+        if (!isYesButtonPressed) {
             return;
         }
 
@@ -196,7 +196,7 @@ public class BranchesWindowController extends AbstractStateListener {
 
     private List<Project> getCorrectProjects(List<Project> projects, Branch selectedBranch) {
         return projects.stream()
-                       .filter(project -> !Branch.compareBranches(project, selectedBranch))
+                       .filter(project -> !selectedBranch.compareBranchesNames(project.getProjectStatus().getCurrentBranch()))
                        .collect(Collectors.toList());
     }
 
@@ -409,7 +409,7 @@ public class BranchesWindowController extends AbstractStateListener {
 
     private boolean isSelectedBranchCurrentForAllProjects(Branch currentBranch) {
         return !currentProjectsListView.getItems().parallelStream()
-                                                  .filter(project -> !Branch.compareBranches(project, currentBranch))
+                                                  .filter(project -> !currentBranch.compareBranchesNames(project.getProjectStatus().getCurrentBranch()))
                                                   .findFirst()
                                                   .isPresent();
     }
@@ -474,7 +474,7 @@ public class BranchesWindowController extends AbstractStateListener {
         }
     }
 
-    class DeleteBranchProgressListener implements ProgressListener {
+    private class DeleteBranchProgressListener implements ProgressListener {
 
         @Override
         public void onSuccess(Object... t) {}
