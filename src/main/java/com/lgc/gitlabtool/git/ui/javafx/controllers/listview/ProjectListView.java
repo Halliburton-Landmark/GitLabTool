@@ -21,6 +21,4 @@ public class ProjectListView<T extends Project> extends ListView {
         return ListViewType.PROJECT_LIST;
     }
 
-//    set
-
 }
