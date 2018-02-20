@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.Status;
 
 import com.lgc.gitlabtool.git.entities.Branch;
 import com.lgc.gitlabtool.git.entities.Project;
@@ -15,7 +16,6 @@ import com.lgc.gitlabtool.git.jgit.ChangedFile;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.jgit.stash.Stash;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
-import org.eclipse.jgit.api.Status;
 
 /**
  * Service for working with Git features.
@@ -268,7 +268,8 @@ public interface GitService extends Service {
     * @param  projects the cloned projects
     * @param  deletedBranch the branch which will be deleted
     * @param  progressListener the listener for obtaining data on the process of performing the operation
-    * @return a map of operation statuses
+    * @return a map of operation statuses by each project.
+    *         <code>true</code> if a branch was successfully deleted from a project, otherwise <code>false</code>.
     */
    Map<Project, Boolean> deleteBranch(List<Project> projects, Branch deletedBranch, ProgressListener progressListener);
 }
