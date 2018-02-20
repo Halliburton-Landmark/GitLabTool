@@ -20,6 +20,7 @@ import com.lgc.gitlabtool.git.ui.javafx.*;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.effect.Effect;
+import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -105,7 +106,7 @@ public class ModularController implements UpdateProgressListener {
     private static final Image _appIcon = AppIconHolder.getInstance().getAppIcoImage();
     private static final String ABOUT_POPUP_CONTENT = "Contacts: Yurii Pitomets (yurii.pitomets2@halliburton.com)";
     private static final String ABOUT_POPUP_HEADER =
-            getProjectNameWithVersion() + " (" + getCommitHash() + " from " + getBuildTimestamp() +  "), powered by Luxoft";
+            getProjectNameWithVersion() + " (" + getBuildTimestamp() + " " + getCommitHash() + "), powered by Luxoft";
 
     private static final ToolbarManager _toolbarManager = ToolbarManager.getInstance();
     private static final MainMenuManager _mainMenuManager = MainMenuManager.getInstance();
