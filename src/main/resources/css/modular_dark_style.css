@@ -271,6 +271,41 @@
     -fx-background-color: #4e4e4e;
   }
 
+.table-view{
+   -fx-background-color: transparent;
+}
+
+.table-view:focused{
+    -fx-background-color: transparent;
+}
+
+.table-view .column-header-background{
+    -fx-background-color: #222222;
+}
+
+.table-view .column-header-background .label{
+    -fx-text-fill: foreground-text;
+}
+
+.table-view .column-header {
+    -fx-background-color: transparent;
+}
+
+.table-view .table-cell{
+    -fx-text-fill: foreground-text;
+}
+
+.table-row-cell{
+    -fx-background-color: #222222;
+}
+
+.table-row-cell:odd{
+    -fx-background-color: #272727;
+}
+
+.table-row-cell:selected {
+    -fx-background-color: #4e4e4e;
+}
 
 
 /* USING ID */
