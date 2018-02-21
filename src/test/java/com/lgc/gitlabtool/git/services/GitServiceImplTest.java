@@ -543,7 +543,9 @@ public class GitServiceImplTest {
         Project project = getClonedProject();
         List<Project> projects = Arrays.asList(project);
         Branch branch = new Branch("test", BranchType.LOCAL);
-        when(_jGit.deleteBranch(eq(project), Mockito.anyString(), eq(false))).thenReturn(JGitStatus.FAILED);
+        Map<JGitStatus, String> jGitMapResult = new HashMap<>();
+        jGitMapResult.put(JGitStatus.FAILED, "Failed");
+        when(_jGit.deleteBranch(eq(project), Mockito.anyString(), eq(false))).thenReturn(jGitMapResult);
 
         Map<Project, Boolean> result = _gitService.deleteBranch(projects, branch, new DeleteBranchListener());
 
@@ -557,7 +559,9 @@ public class GitServiceImplTest {
         Project project = getClonedProject();
         List<Project> projects = Arrays.asList(project);
         Branch branch = new Branch("test", BranchType.LOCAL);
-        when(_jGit.deleteBranch(eq(project), Mockito.anyString(), eq(false))).thenReturn(JGitStatus.SUCCESSFUL);
+        Map<JGitStatus, String> jGitMapResult = new HashMap<>();
+        jGitMapResult.put(JGitStatus.SUCCESSFUL, "Successful");
+        when(_jGit.deleteBranch(eq(project), Mockito.anyString(), eq(false))).thenReturn(jGitMapResult);
 
         Map<Project, Boolean> result = _gitService.deleteBranch(projects, branch, new DeleteBranchListener());
 

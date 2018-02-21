@@ -440,14 +440,17 @@ public class GitServiceImpl implements GitService {
                               AtomicLong progress, long step) {
         progressListener.onStart(project);
         String branchName = deletedBranch.getBranchName();
-        JGitStatus result = _git.deleteBranch(project, branchName, deletedBranch.isRemote());
-        statuses.put(project, result == JGitStatus.SUCCESSFUL);
-        progress.addAndGet(step);
+        Map<JGitStatus, String> mapResult = _git.deleteBranch(project, branchName, deletedBranch.isRemote());
+        for (Entry<JGitStatus, String> result : mapResult.entrySet()) {
+            boolean isSuccessful = result.getKey().isSuccessful();
+            statuses.put(project, isSuccessful);
+            progress.addAndGet(step);
 
-        if (result == JGitStatus.SUCCESSFUL) {
-            progressListener.onSuccess(progress.get(), project, result);
-        } else {
-            progressListener.onError(progress.get(), project, result);
+            if (isSuccessful) {
+                progressListener.onSuccess(progress.get(), project, result.getValue());
+            } else {
+                progressListener.onError(progress.get(), project, result.getValue());
+            }
         }
     }
 

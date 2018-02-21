@@ -166,6 +166,20 @@ public enum JGitStatus {
             return "Branch currently checked out";
         }
 
+    },
+
+    REJECTED_OTHER_REASON {
+        @Override
+        public boolean isSuccessful() {
+            return false;
+        }
+    },
+
+    OK {
+        @Override
+        public boolean isSuccessful() {
+            return true;
+        }
     };
 
     /**
