@@ -257,6 +257,7 @@ public class GitServiceImpl implements GitService {
             Commit commit = new Commit();
             RevCommit revCommit = iterator.next();
             commit.setHash(revCommit.getId().getName());
+            commit.setProject(project.getName());
             commit.setMessage(revCommit.getFullMessage());
             commit.setAuthor(revCommit.getAuthorIdent().getName());
             commit.setAuthoredDate(DateFormat.getInstance().format(revCommit.getCommitterIdent().getWhen()));

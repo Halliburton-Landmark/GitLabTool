@@ -21,6 +21,10 @@
                         prefWidth="120"
                         text="Date"/>
                 <TableColumn
+                        fx:id="projectColumn"
+                        prefWidth="120"
+                        text="Project"/>
+                <TableColumn
                     fx:id="messageColumn"
                     prefWidth="400"
                     text="Message"/>

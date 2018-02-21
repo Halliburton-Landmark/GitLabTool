@@ -11,16 +11,18 @@ public class Commit {
     private String authoredDate;
     private String committer;
     private String date;
+    private String project;
 
     public Commit() {}
 
-    public Commit(String hash, String message, String author, String authoredDate, String committer, String date) {
+    public Commit(String hash, String message, String author, String authoredDate, String committer, String date, String project) {
         this.hash = hash;
         this.message = message;
         this.author = author;
         this.authoredDate = authoredDate;
         this.committer = committer;
         this.date = date;
+        this.project = project;
     }
 
     public String getHash() {
@@ -69,6 +71,14 @@ public class Commit {
 
     public void setDate(String date) {
         this.date = date;
+    }
+
+    public String getProject() {
+        return project;
+    }
+
+    public void setProject(String project) {
+        this.project = project;
     }
 
 }

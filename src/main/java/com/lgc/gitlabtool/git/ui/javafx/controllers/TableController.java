@@ -45,6 +45,9 @@ public class TableController {
     @FXML
     private TableColumn<Commit, String> dateColumn;
 
+    @FXML
+    private TableColumn<Commit, String> projectColumn;
+
     private static final GitService _gitService = ServiceProvider.getInstance()
             .getService(GitService.class);
 
@@ -56,12 +59,13 @@ public class TableController {
         @Override
         public void onChanged(Change<? extends Project> projects) {
             List<Project> projectsList = projectListView.getSelectionModel().getSelectedItems();
-            Project project = projects.getList().get(0);
             if ( !projectsList.isEmpty() ) {
-                String nameBranch = _gitService.getCurrentBranchName(project);
-                List<Commit> commits = _gitService.getAllCommits(project, nameBranch);
                 ObservableList<Commit> data = FXCollections.observableArrayList();
-                data.addAll(commits);
+                for(Project project : projectsList) {
+                    String nameBranch = _gitService.getCurrentBranchName(project);
+                    List<Commit> commits = _gitService.getAllCommits(project, nameBranch);
+                    data.addAll(commits);
+                }
                 historyTable.setItems(data);
                 historyTable.setVisible(true);
             } else {
@@ -102,12 +106,16 @@ public class TableController {
         PropertyValueFactory<Commit, String> dateProperty
                 = new PropertyValueFactory<Commit, String>("date");
 
+        PropertyValueFactory<Commit, String> projectProperty
+                = new PropertyValueFactory<Commit, String>("project");
+
         hashColumn.setCellValueFactory(hashProperty);
         messageColumn.setCellValueFactory(messageProperty);
         authorColumn.setCellValueFactory(authorProperty);
         authoredDateColumn.setCellValueFactory(authoredDateProperty);
         committerColumn.setCellValueFactory(committerProperty);
         dateColumn.setCellValueFactory(dateProperty);
+        projectColumn.setCellValueFactory(projectProperty);
 
         configTable();
 
