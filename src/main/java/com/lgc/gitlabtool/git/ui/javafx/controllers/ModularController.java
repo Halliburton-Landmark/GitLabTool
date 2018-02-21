@@ -423,7 +423,7 @@ public class ModularController implements UpdateProgressListener {
         refreshProjectsButton.setOnAction(this::refreshLoadProjects);
 
         quickUpdateButton = new Button();
-        quickUpdateButton.setTooltip(new Tooltip("Update statuses"));
+        quickUpdateButton.setTooltip(new Tooltip("Quick update"));
         quickUpdateButton.setGraphic(imageViewQuickUpdate);
         quickUpdateButton.setOnAction(this::updateProjectsStatuses);
 
