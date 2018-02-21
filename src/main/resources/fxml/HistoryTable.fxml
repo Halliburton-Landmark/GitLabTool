@@ -17,9 +17,9 @@
                 AnchorPane.topAnchor = "0.0" AnchorPane.bottomAnchor = "0.0" AnchorPane.leftAnchor = "0.0" AnchorPane.rightAnchor = "0.0">
             <columns>
                 <TableColumn
-                    fx:id="idColumn"
-                    prefWidth="100"
-                    text="Id"/>
+                        fx:id="committedDateColumn"
+                        prefWidth="120"
+                        text="Date"/>
                 <TableColumn
                     fx:id="messageColumn"
                     prefWidth="400"
@@ -37,9 +37,9 @@
                     prefWidth="120"
                     text="Committer"/>
                 <TableColumn
-                    fx:id="committedDateColumn"
-                    prefWidth="120"
-                    text="Committer date"/>
+                        fx:id="idColumn"
+                        prefWidth="100"
+                        text="Hash"/>
             </columns>
             </CommitHistoryTableView>
     </children>
