@@ -84,6 +84,8 @@ public class JGit {
     private static final String CANCEL_CLONE_MESSAGE = "Cloning process was canceled.";
     private static final String ORIGIN_PREFIX = "origin/";
     private static final String WRONG_PARAMETERS = "Wrong parameters for obtaining branches.";
+    private static final String PUSH_START_MESSAGE = "Push operation is started.";
+    private static final String PUSH_FINISH_MESSAGE = "Push operation is finished.";
     private static final int NOT_FOUND = -1;
 
     private final BackgroundService _backgroundService;
@@ -773,6 +775,7 @@ public class JGit {
             throw new IllegalArgumentException("Incorrect data: projects is " + projects);
         }
         try {
+            progressListener.onStart(PUSH_START_MESSAGE);
             Map<Project, JGitStatus> statuses = new HashMap<>();
             long step = 100 / projects.size();
             AtomicLong progress = new AtomicLong(0);
@@ -795,7 +798,7 @@ public class JGit {
             }
             return statuses;
         } finally {
-            progressListener.onFinish("Push operation was finished.");
+            progressListener.onFinish(PUSH_FINISH_MESSAGE);
         }
     }
 
