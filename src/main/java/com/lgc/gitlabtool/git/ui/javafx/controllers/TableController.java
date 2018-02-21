@@ -74,7 +74,7 @@ public class TableController {
         @Override
         public void onChanged(String activeView) {
             if (activeView.equals(ViewKey.GROUPS_WINDOW.getKey())) {
-                    historyTable.setVisible(false);
+                historyTable.setVisible(false);
             } else if (activeView.equals(ViewKey.PROJECTS_WINDOW.getKey())) {
                 historyTable.setVisible(false);
             }
