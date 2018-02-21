@@ -194,6 +194,7 @@ public class ModularController implements UpdateProgressListener {
 
     private static final String SELECT_ALL_IMAGE_URL = "icons/select_all_20x20.png";
     private static final String REFRESH_PROJECTS_IMAGE_URL = "icons/toolbar/refresh_projects_20x20.png";
+    private static final String QUICK_UPDATE_IMAGE_URL = "icons/project/quick_update.png";
     private static final String FILTER_SHADOW_PROJECTS_IMAGE_URL = "icons/toolbar/filter_shadow_projects_20x20.png";
     private static final String DIVIDER_PROPERTY_NODE = "MainWindowController_Dividers";
     private static final String PREF_NAME_HIDE_SHADOWS = "is_hide_shadows";
@@ -317,6 +318,7 @@ public class ModularController implements UpdateProgressListener {
     private ToggleButton selectAllButton;
     private ToggleButton filterShadowProjects;
     private Button refreshProjectsButton;
+    private Button quickUpdateButton;
 
     private static final int PROJECTS_TOOLBAR_PADDING = 1;
 
@@ -406,6 +408,7 @@ public class ModularController implements UpdateProgressListener {
         AnchorPane.setRightAnchor(projectsToolbar, 0.0);
 
         ImageView imageViewRefreshProjects = _themeService.getStyledImageView(REFRESH_PROJECTS_IMAGE_URL);
+        ImageView imageViewQuickUpdate = _themeService.getStyledImageView(QUICK_UPDATE_IMAGE_URL);
         ImageView imageViewSelectAll = _themeService.getStyledImageView(SELECT_ALL_IMAGE_URL);
         ImageView imageViewFilterShadow = _themeService.getStyledImageView(FILTER_SHADOW_PROJECTS_IMAGE_URL);
 
@@ -419,12 +422,18 @@ public class ModularController implements UpdateProgressListener {
         refreshProjectsButton.setGraphic(imageViewRefreshProjects);
         refreshProjectsButton.setOnAction(this::refreshLoadProjects);
 
+        quickUpdateButton = new Button();
+        quickUpdateButton.setTooltip(new Tooltip("Update statuses"));
+        quickUpdateButton.setGraphic(imageViewQuickUpdate);
+        quickUpdateButton.setOnAction(this::updateProjectsStatuses);
+
         filterShadowProjects = new ToggleButton();
         filterShadowProjects.setTooltip(new Tooltip("Show/Hide shadow projects"));
         filterShadowProjects.setGraphic(imageViewFilterShadow);
         filterShadowProjects.setOnAction(this::onShowHideShadowProjects);
 
-        projectsToolbarItems = new ArrayList<>(Arrays.asList(selectAllButton, refreshProjectsButton, filterShadowProjects));
+        projectsToolbarItems = new ArrayList<>(Arrays.asList(selectAllButton, refreshProjectsButton,
+                quickUpdateButton, filterShadowProjects));
         projectsToolbar.getChildren().clear();
         projectsToolbar.getChildren().addAll(projectsToolbarItems);
         projectsToolbar.setPadding(new Insets(PROJECTS_TOOLBAR_PADDING,0,PROJECTS_TOOLBAR_PADDING,0));
@@ -1112,6 +1121,12 @@ public class ModularController implements UpdateProgressListener {
     private void onShowHideShadowProjects(ActionEvent actionEvent) {
         preferences.putBoolean(PREF_NAME_HIDE_SHADOWS, filterShadowProjects.isSelected());
         hideShadowsAction();
+    }
+
+    @FXML
+    @SuppressWarnings("unused")
+    private void updateProjectsStatuses(ActionEvent actionEvent) {
+        _backgroundService.runInBackgroundThread(() -> _projectsList.updateProjectStatuses());
     }
 
     @FXML
