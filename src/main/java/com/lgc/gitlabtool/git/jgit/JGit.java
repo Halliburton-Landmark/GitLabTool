@@ -53,6 +53,7 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.jgit.transport.RefSpec;
 
 import com.lgc.gitlabtool.git.connections.token.CurrentUser;
@@ -858,22 +859,31 @@ public class JGit {
      * @param  project      the cloned project
      * @param  nameBranch   the branch name for deleting
      * @param  isRemoteBranch if <code>true</code> deleted branch is remote, otherwise <code>false</code>
-     * @return JGitStatus: SUCCESSFUL - a new branch was created, otherwise - FAILED
+     * @return TODO
      */
-    public JGitStatus deleteBranch(Project project, String nameBranch, boolean isRemoteBranch) {
+    public Map<JGitStatus, String> deleteBranch(Project project, String nameBranch, boolean isRemoteBranch) {
         if (project == null || nameBranch == null || nameBranch.isEmpty()) {
             throw new IllegalArgumentException(
                     "Incorrect data: project is " + project + ", nameBranch is " + nameBranch);
         }
-        JGitStatus result = JGitStatus.FAILED;
+        JGitStatus resultStatus = JGitStatus.FAILED;
+        String resultMessage = "";
         if (project.isCloned()) {
             try (Git git = getGit(project.getPath())) {
-                result = isRemoteBranch ? deleteRemoteBranch(git, nameBranch) : deleteLocalBranch(git, nameBranch);
+                if (isRemoteBranch) {
+                    return deleteRemoteBranch(git, nameBranch);
+                }
+                resultStatus = deleteLocalBranch(git, nameBranch);
+                resultMessage = "Branch was deleted successfully.";
             } catch (GitAPIException | IOException e) {
-                logger.error("Error deleting branch for the " + project.getName() + " project: " + e.getMessage());
+                resultMessage = "Failed deleting branch " + e.getMessage();
+                logger.error(resultMessage);
             }
         }
-        return result;
+
+        Map<JGitStatus, String> mapResult = new HashMap<>();
+        mapResult.put(resultStatus, resultMessage);
+        return mapResult;
     }
 
     private JGitStatus deleteLocalBranch(Git git, String nameBranch) throws NotMergedException, CannotDeleteCurrentBranchException, GitAPIException {
@@ -884,14 +894,32 @@ public class JGit {
         return JGitStatus.SUCCESSFUL;
     }
 
-    private JGitStatus deleteRemoteBranch(Git git, String nameBranch) throws InvalidRemoteException, TransportException, GitAPIException {
+    private Map<JGitStatus, String> deleteRemoteBranch(Git git, String nameBranch) throws InvalidRemoteException, TransportException, GitAPIException {
+        JGitStatus jGitResult = JGitStatus.FAILED;
+        String message = "";
+
         String nameBranchWithoutAlias = nameBranch.replace(ORIGIN_PREFIX, StringUtils.EMPTY);
         RefSpec refSpec = new RefSpec(":refs/heads/" + nameBranchWithoutAlias);
-        git.push()
-           .setRefSpecs(refSpec)
-           .setRemote("origin")
-           .call();
-        return JGitStatus.SUCCESSFUL;
+        Iterable<PushResult> pushResultIterable = git.push()
+                                                     .setRefSpecs(refSpec)
+                                                     .setRemote("origin")
+                                                     .call();
+        for (PushResult pushResult : pushResultIterable) {
+            org.eclipse.jgit.transport.RemoteRefUpdate.Status status = pushResult.getRemoteUpdates().iterator().next().getStatus();
+            try {
+                jGitResult = JGitStatus.getStatus(status.toString());
+            } catch (IllegalArgumentException e) {
+                jGitResult = JGitStatus.FAILED;
+            }
+            if (JGitStatus.OK == jGitResult || JGitStatus.SUCCESSFUL == jGitResult) {
+                message = "Branch was deleted successfully.";
+            } else {
+                message = pushResult.getMessages();
+            }
+        }
+        Map<JGitStatus, String> mapResult = new HashMap<>();
+        mapResult.put(jGitResult, message);
+        return mapResult;
     }
 
     /**

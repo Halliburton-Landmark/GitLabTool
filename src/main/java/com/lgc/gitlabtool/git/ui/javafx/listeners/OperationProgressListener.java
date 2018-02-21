@@ -80,6 +80,11 @@ public class OperationProgressListener implements ProgressListener {
             _progressDialog.addMessageToConcole(message, MessageType.SUCCESS);
             _logger.info(_applicationState + ": " + message);
         }
+        if (t.length >= 3 && t[1] instanceof Project && t[2] instanceof String) {
+            String message = ((Project) t[1]).getName() + ": " + t[2];
+            _progressDialog.addMessageToConcole(message, MessageType.SUCCESS);
+            _logger.error(_applicationState + ": " + message);
+        }
     }
 
     /**
@@ -101,6 +106,12 @@ public class OperationProgressListener implements ProgressListener {
             _logger.error(_applicationState + ": " + message);
         }
         if (t.length >= 3 && t[1] instanceof Project && t[2] instanceof JGitStatus) {
+            String message = ((Project) t[1]).getName() + ": " + t[2];
+            _progressDialog.addMessageToConcole(message, MessageType.ERROR);
+            _logger.error(_applicationState + ": " + message);
+        }
+
+        if (t.length >= 3 && t[1] instanceof Project && t[2] instanceof String) {
             String message = ((Project) t[1]).getName() + ": " + t[2];
             _progressDialog.addMessageToConcole(message, MessageType.ERROR);
             _logger.error(_applicationState + ": " + message);

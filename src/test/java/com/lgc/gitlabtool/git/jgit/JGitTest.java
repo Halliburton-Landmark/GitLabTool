@@ -1,6 +1,7 @@
 package com.lgc.gitlabtool.git.jgit;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -75,6 +76,7 @@ import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.jgit.transport.RefSpec;
+import org.eclipse.jgit.transport.RemoteRefUpdate;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -1272,16 +1274,18 @@ public class JGitTest {
 
     @Test
     public void deleteLocalBranchProjectNotCloned() {
-        JGitStatus result = getJGitMock(null).deleteBranch(new Project(), "test", false);
+        Map<JGitStatus, String> mapResult = getJGitMock(null).deleteBranch(new Project(), "test", false);
+        JGitStatus status = mapResult.entrySet().iterator().next().getKey();
 
-        assertEquals(result, JGitStatus.FAILED);
+        assertFalse(status.isSuccessful());
     }
 
     @Test
     public void deleteBranchGitFailed() {
-        JGitStatus result = getJGitMock(null).deleteBranch(getProject(true), "test", false);
+        Map<JGitStatus, String> mapResult = getJGitMock(null).deleteBranch(getProject(true), "test", false);
+        JGitStatus status = mapResult.entrySet().iterator().next().getKey();
 
-        assertEquals(result, JGitStatus.FAILED);
+        assertFalse(status.isSuccessful());
     }
 
     @Test
@@ -1291,9 +1295,10 @@ public class JGitTest {
         Git gitMock = getGitMock();
         setDeleteBranchCommandToGit(gitMock, false);
 
-        JGitStatus result = getJGitMock(gitMock).deleteBranch(project, branchName, false);
+        Map<JGitStatus, String> mapResult = getJGitMock(gitMock).deleteBranch(project, branchName, false);
+        JGitStatus status = mapResult.entrySet().iterator().next().getKey();
 
-        assertEquals(result, JGitStatus.FAILED);
+        assertFalse(status.isSuccessful());
     }
 
     @Test
@@ -1303,9 +1308,10 @@ public class JGitTest {
         Git gitMock = getGitMock();
         setDeleteBranchCommandToGit(gitMock, true);
 
-        JGitStatus result = getJGitMock(gitMock).deleteBranch(project, branchName, false);
+        Map<JGitStatus, String> mapResult = getJGitMock(gitMock).deleteBranch(project, branchName, false);
+        JGitStatus status = mapResult.entrySet().iterator().next().getKey();
 
-        assertEquals(result, JGitStatus.SUCCESSFUL);
+        assertTrue(status.isSuccessful());
     }
 
     @Test
@@ -1313,11 +1319,25 @@ public class JGitTest {
         String branchName = "test";
         Project project = getProject(true);
         Git gitMock = getGitMock();
-        setPushRemoteToGit(gitMock, false);
+        setPushRemoteToGit(gitMock, true, false);
 
-        JGitStatus result = getJGitMock(gitMock).deleteBranch(project, branchName, true);
+        Map<JGitStatus, String> mapResult = getJGitMock(gitMock).deleteBranch(project, branchName, true);
+        JGitStatus status = mapResult.entrySet().iterator().next().getKey();
 
-        assertEquals(result, JGitStatus.FAILED);
+        assertFalse(status.isSuccessful());
+    }
+
+    @Test
+    public void deleteRemoteBranchFailedPushResult() throws InvalidRemoteException, TransportException, GitAPIException {
+        String branchName = "test";
+        Project project = getProject(true);
+        Git gitMock = getGitMock();
+        setPushRemoteToGit(gitMock, false, false);
+
+        Map<JGitStatus, String> mapResult = getJGitMock(gitMock).deleteBranch(project, branchName, true);
+        JGitStatus status = mapResult.entrySet().iterator().next().getKey();
+
+        assertFalse(status.isSuccessful());
     }
 
     @Test
@@ -1325,26 +1345,42 @@ public class JGitTest {
         String branchName = "test";
         Project project = getProject(true);
         Git gitMock = getGitMock();
-        setPushRemoteToGit(gitMock, true);
+        setPushRemoteToGit(gitMock, false, true);
 
-        JGitStatus result = getJGitMock(gitMock).deleteBranch(project, branchName, true);
+        Map<JGitStatus, String> mapResult = getJGitMock(gitMock).deleteBranch(project, branchName, true);
+        JGitStatus status = mapResult.entrySet().iterator().next().getKey();
 
-        assertEquals(result, JGitStatus.SUCCESSFUL);
+        assertTrue(status.isSuccessful());
     }
 
     /***************************************************************************************************************/
 
-    private void setPushRemoteToGit(Git gitMock, boolean isSuccessfulOperation) throws InvalidRemoteException, TransportException, GitAPIException {
+    private void setPushRemoteToGit(Git gitMock, boolean throwException, boolean pushResultSuccess)
+            throws InvalidRemoteException, TransportException, GitAPIException {
         PushCommand pushCommand = mock(PushCommand.class);
         when(pushCommand.setRefSpecs(Mockito.any(RefSpec.class))).thenReturn(pushCommand);
         when(pushCommand.setRemote(Mockito.anyString())).thenReturn(pushCommand);
 
-        if (isSuccessfulOperation) {
-            when(pushCommand.call()).thenReturn(new ArrayList<>());
-        } else {
+        if (throwException) {
             when(pushCommand.call()).thenThrow(getGitAPIException());
+        } else {
+            PushResult pushResult = getPushResult(pushResultSuccess);
+            when(pushCommand.call()).thenReturn(Arrays.asList(pushResult));
         }
         when(gitMock.push()).thenReturn(pushCommand);
+    }
+
+    private PushResult getPushResult(boolean isSuccessfulOperation) {
+        PushResult pushResult = mock(PushResult.class);
+        RemoteRefUpdate remoteRefUpdate = mock(RemoteRefUpdate.class);
+        if (isSuccessfulOperation) {
+            when(remoteRefUpdate.getStatus()).thenReturn(org.eclipse.jgit.transport.RemoteRefUpdate.Status.OK);
+        } else {
+            when(remoteRefUpdate.getStatus()).thenReturn(org.eclipse.jgit.transport.RemoteRefUpdate.Status.REJECTED_OTHER_REASON);
+        }
+        when(pushResult.getRemoteUpdates()).thenReturn(Arrays.asList(remoteRefUpdate));
+        when(pushResult.getMessages()).thenReturn("");
+        return pushResult;
     }
 
     private void setDeleteBranchCommandToGit(Git gitMock, boolean isSuccessfulOperation) throws NotMergedException, CannotDeleteCurrentBranchException, GitAPIException {
