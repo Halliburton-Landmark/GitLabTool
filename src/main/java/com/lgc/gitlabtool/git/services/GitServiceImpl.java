@@ -259,9 +259,9 @@ public class GitServiceImpl implements GitService {
             commit.setHash(revCommit.getId().getName());
             commit.setMessage(revCommit.getFullMessage());
             commit.setAuthor(revCommit.getAuthorIdent().getName());
-            commit.setAuthoredDate(revCommit.getAuthorIdent().getWhen().toString());
+            commit.setAuthoredDate(DateFormat.getInstance().format(revCommit.getCommitterIdent().getWhen()));
             commit.setCommitter(revCommit.getCommitterIdent().getName());
-            commit.setDate(revCommit.getCommitterIdent().getWhen().toString());
+            commit.setDate(DateFormat.getInstance().format(revCommit.getCommitterIdent().getWhen()));
             commits.add(commit);
         }
         return commits;
