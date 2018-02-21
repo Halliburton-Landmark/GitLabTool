@@ -1,14 +1,13 @@
 package com.lgc.gitlabtool.git.ui.javafx.controllers.listview;
 
-import com.lgc.gitlabtool.git.entities.Project;
-import com.lgc.gitlabtool.git.ui.ViewKey;
-import javafx.scene.control.Control;
 import javafx.scene.control.ListView;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * This class represents list view manager
+ *
  * Created by Oleksandr Kozlov on 2/19/2018.
  */
 public class ListViewMgr implements ComponentMgr<ListView> {
@@ -52,14 +51,20 @@ public class ListViewMgr implements ComponentMgr<ListView> {
         return listViews;
     }
 
-    public ProjectListView getProjectListView() {
+    /**
+     * This method return instance of particular list view
+     *
+     * @param viewClass
+     * @return list view
+     */
+    public ListView getListView(Class viewClass) {
         ListView lv = null;
         for(ListView listView : listViews) {
-            if (listView instanceof ProjectListView) {
+            if (viewClass.isInstance(listView)) {
                 lv = listView;
             }
         }
-        return (ProjectListView)lv;
+        return lv;
     }
 
     public void addChangeActiveViewListener(ActiveViewChangeListener listener) {

@@ -117,7 +117,7 @@ public class TableController {
     }
 
     public void initListeners() {
-        projectListView = listViewMgrProvider.getFeature().getProjectListView();
+        projectListView = (ProjectListView) listViewMgrProvider.getFeature().getListView(ProjectListView.class);
         projectListView.getSelectionModel().getSelectedItems().addListener(listChangeListener);
 
         listViewMgrProvider.getFeature().addChangeActiveViewListener(activeViewChangeListener);
