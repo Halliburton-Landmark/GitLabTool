@@ -28,7 +28,7 @@ public class TableController {
     private CommitHistoryTableView<Commit> historyTable;
 
     @FXML
-    private TableColumn<Commit, Integer> idColumn;
+    private TableColumn<Commit, String> hashColumn;
 
     @FXML
     private TableColumn<Commit, String> messageColumn;
@@ -43,7 +43,7 @@ public class TableController {
     private TableColumn<Commit, String> committerColumn;
 
     @FXML
-    private TableColumn<Commit, String> committedDateColumn;
+    private TableColumn<Commit, String> dateColumn;
 
     private static final GitService _gitService = ServiceProvider.getInstance()
             .getService(GitService.class);
@@ -84,8 +84,8 @@ public class TableController {
     @FXML
     protected void initialize() {
 
-        PropertyValueFactory<Commit, Integer> idProperty
-                = new PropertyValueFactory<Commit, Integer>("id");
+        PropertyValueFactory<Commit, String> hashProperty
+                = new PropertyValueFactory<Commit, String>("hash");
 
         PropertyValueFactory<Commit, String> messageProperty
                 = new PropertyValueFactory<Commit, String>("message");
@@ -99,15 +99,15 @@ public class TableController {
         PropertyValueFactory<Commit, String> committerProperty
                 = new PropertyValueFactory<Commit, String>("committer");
 
-        PropertyValueFactory<Commit, String> committedDateProperty
-                = new PropertyValueFactory<Commit, String>("committedDate");
+        PropertyValueFactory<Commit, String> dateProperty
+                = new PropertyValueFactory<Commit, String>("date");
 
-        idColumn.setCellValueFactory(idProperty);
+        hashColumn.setCellValueFactory(hashProperty);
         messageColumn.setCellValueFactory(messageProperty);
         authorColumn.setCellValueFactory(authorProperty);
         authoredDateColumn.setCellValueFactory(authoredDateProperty);
         committerColumn.setCellValueFactory(committerProperty);
-        committedDateColumn.setCellValueFactory(committedDateProperty);
+        dateColumn.setCellValueFactory(dateProperty);
 
         configTable();
 

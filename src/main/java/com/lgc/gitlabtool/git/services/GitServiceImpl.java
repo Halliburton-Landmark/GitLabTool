@@ -256,12 +256,12 @@ public class GitServiceImpl implements GitService {
         while(iterator.hasNext()) {
             Commit commit = new Commit();
             RevCommit revCommit = iterator.next();
-            commit.setId(revCommit.getId().getName());
+            commit.setHash(revCommit.getId().getName());
             commit.setMessage(revCommit.getFullMessage());
             commit.setAuthor(revCommit.getAuthorIdent().getName());
             commit.setAuthoredDate(revCommit.getAuthorIdent().getWhen().toString());
             commit.setCommitter(revCommit.getCommitterIdent().getName());
-            commit.setCommittedDate(revCommit.getCommitterIdent().getWhen().toString());
+            commit.setDate(revCommit.getCommitterIdent().getWhen().toString());
             commits.add(commit);
         }
         return commits;

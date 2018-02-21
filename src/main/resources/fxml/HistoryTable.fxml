@@ -17,7 +17,7 @@
                 AnchorPane.topAnchor = "0.0" AnchorPane.bottomAnchor = "0.0" AnchorPane.leftAnchor = "0.0" AnchorPane.rightAnchor = "0.0">
             <columns>
                 <TableColumn
-                        fx:id="committedDateColumn"
+                        fx:id="dateColumn"
                         prefWidth="120"
                         text="Date"/>
                 <TableColumn
@@ -37,7 +37,7 @@
                     prefWidth="120"
                     text="Committer"/>
                 <TableColumn
-                        fx:id="idColumn"
+                        fx:id="hashColumn"
                         prefWidth="100"
                         text="Hash"/>
             </columns>
