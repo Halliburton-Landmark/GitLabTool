@@ -63,8 +63,9 @@ public class TableController {
                 ObservableList<Commit> data = FXCollections.observableArrayList();
                 data.addAll(commits);
                 historyTable.setItems(data);
+                historyTable.setVisible(true);
             } else {
-                clearTableContent();
+                historyTable.setVisible(false);
             }
         }
     };
@@ -75,7 +76,7 @@ public class TableController {
             if (activeView.equals(ViewKey.GROUPS_WINDOW.getKey())) {
                     historyTable.setVisible(false);
             } else if (activeView.equals(ViewKey.PROJECTS_WINDOW.getKey())) {
-                historyTable.setVisible(true);
+                historyTable.setVisible(false);
             }
         }
     };
@@ -110,10 +111,7 @@ public class TableController {
 
         configTable();
 
-        clearTableContent();
-
         initListeners();
-
     }
 
     public void initListeners() {
@@ -121,12 +119,6 @@ public class TableController {
         projectListView.getSelectionModel().getSelectedItems().addListener(listChangeListener);
 
         listViewMgrProvider.getFeature().addChangeActiveViewListener(activeViewChangeListener);
-    }
-
-    private void clearTableContent() {
-        ObservableList<Commit> data = FXCollections.observableArrayList();
-        data.add(new Commit());
-        historyTable.setItems(data);
     }
 
     private void configTable() {
