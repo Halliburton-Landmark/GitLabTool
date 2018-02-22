@@ -1150,7 +1150,8 @@ public class ModularController implements UpdateProgressListener {
     // Gets preferences by key, could return null (used for divider position)
     private ApplicationPreferences getPreferences() {
         try {
-            return ApplicationPreferences.getInstance().node(DIVIDER_PROPERTY_NODE);
+            return ((ApplicationPreferences) ServiceProvider.getInstance()
+                    .getService(ApplicationPreferences.class)).node(DIVIDER_PROPERTY_NODE);
         } catch (IllegalArgumentException iae) {
             _logger.error("Consecutive slashes in path");
             return null;

@@ -4,7 +4,6 @@ import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.prefs.Preferences;
 
 import com.lgc.gitlabtool.git.preferences.ApplicationPreferences;
 import org.apache.commons.lang.StringUtils;
@@ -58,7 +57,9 @@ public class CloningGroupsWindowController {
     @FXML
     private Button browseButton;
 
-    private final ApplicationPreferences _prefs = ApplicationPreferences.getInstance().node("cloning_group_prefs");
+    private final ApplicationPreferences _prefs = ((ApplicationPreferences) ServiceProvider.getInstance()
+            .getService(ApplicationPreferences.class)).node("cloning_group_prefs");
+
     private static final String PREF_NAME = "path_to_group";
 
     @FXML

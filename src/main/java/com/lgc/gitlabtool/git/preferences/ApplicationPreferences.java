@@ -1,5 +1,6 @@
 package com.lgc.gitlabtool.git.preferences;
 
+import com.lgc.gitlabtool.git.services.Service;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -7,31 +8,22 @@ import java.io.*;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
-public class ApplicationPreferences {
+public class ApplicationPreferences implements Service {
 
     private static final Logger _logger = LogManager.getLogger(ApplicationPreferences.class);
 
     private static final String GLT_PREFERENCES_NODE = "gitlab_tool_application_preferences";
 
-    private final Preferences _preferences;
+    private final Preferences parentPrefs;
 
-    private static ApplicationPreferences _instance;
+    private String currentNode = GLT_PREFERENCES_NODE;
 
-    private ApplicationPreferences() {
-        _preferences = Preferences.userRoot().node(GLT_PREFERENCES_NODE);
-    }
-
-    public static ApplicationPreferences getInstance() {
-        if (_instance == null) {
-            _instance = new ApplicationPreferences();
-        }
-        return _instance;
+    public ApplicationPreferences() {
+        parentPrefs = Preferences.userRoot().node(GLT_PREFERENCES_NODE);
     }
 
     // TODO
-    // 1. move default Preferences from ThemeServiceImpl
-    // 2. Look for the Preferences usages in GTL and change it to use this class
-    // 3. Think about splitting preferences on the nodes
+    // Think about splitting preferences on the nodes
 
 
     private void setUpDefauls() {
@@ -53,68 +45,79 @@ public class ApplicationPreferences {
      */
 
     public String get(String key, String def) {
-        return _preferences.get(key, def);
+        return getCurrentNode().get(key, def);
     }
 
     public void put(String key, String value) {
-        _preferences.put(key, value);
+        getCurrentNode().put(key, value);
     }
 
     public void remove(String key) {
-        _preferences.remove(key);
+        getCurrentNode().remove(key);
     }
 
     public void putInt(String key, int value) {
-        _preferences.putInt(key, value);
+        getCurrentNode().putInt(key, value);
     }
 
     public int getInt(String key, int def) {
-        return _preferences.getInt(key, def);
+        return getCurrentNode().getInt(key, def);
     }
 
     public void putLong(String key, long value) {
-        _preferences.putLong(key, value);
+        getCurrentNode().putLong(key, value);
     }
 
     public long getLong(String key, long def) {
-        return _preferences.getLong(key, def);
+        return getCurrentNode().getLong(key, def);
     }
 
     public void putBoolean(String key, boolean value) {
-        _preferences.putBoolean(key, value);
+        getCurrentNode().putBoolean(key, value);
     }
 
     public boolean getBoolean(String key, boolean def) {
-        return _preferences.getBoolean(key, def);
+        return getCurrentNode().getBoolean(key, def);
     }
 
     public void putFloat(String key, float value) {
-        _preferences.putFloat(key, value);
+        getCurrentNode().putFloat(key, value);
     }
 
     public float getFloat(String key, float def) {
-        return _preferences.getFloat(key, def);
+        return getCurrentNode().getFloat(key, def);
     }
 
     public void putDouble(String key, double value) {
-        _preferences.putDouble(key, value);
+        getCurrentNode().putDouble(key, value);
     }
 
     public double getDouble(String key, double def) {
-        return _preferences.getDouble(key, def);
+        return getCurrentNode().getDouble(key, def);
     }
 
     public void putByteArray(String key, byte[] value) {
-        _preferences.putByteArray(key, value);
+        getCurrentNode().putByteArray(key, value);
     }
 
     public byte[] getByteArray(String key, byte[] def) {
-        return _preferences.getByteArray(key, def);
+        return getCurrentNode().getByteArray(key, def);
     }
 
     public ApplicationPreferences node(String pathName) {
-        _preferences.node(pathName);
+//        parentPrefs.node(pathName);
+        setCurrentNode(pathName);
         return this;
+    }
+
+    private void setCurrentNode(String node) {
+        this.currentNode = node;
+    }
+
+    private Preferences getCurrentNode() {
+        return currentNode.equals(GLT_PREFERENCES_NODE)
+                ? parentPrefs
+                : parentPrefs.node(currentNode);
     }
 
     /**
@@ -129,13 +132,13 @@ public class ApplicationPreferences {
         // TODO: split to the parts according to the store size
         byte[] bytes = object2Bytes(object);
         if (bytes != null) {
-            _preferences.putByteArray(key, bytes);
+            getCurrentNode().putByteArray(key, bytes);
         }
     }
 
     public Object getObject(String key, Object def) {
         // TODO: split to the parts according to the store size
-        byte[] bytes = _preferences.getByteArray(key, null);
+        byte[] bytes = getCurrentNode().getByteArray(key, null);
         if (bytes != null) {
             Object obj = bytes2Object(bytes);
             return obj != null ? obj : def;
@@ -168,10 +171,10 @@ public class ApplicationPreferences {
     }
 
     public String[] keys() throws BackingStoreException {
-        return _preferences.keys();
+        return getCurrentNode().keys();
     }
 
     public String absolutePath() {
-        return _preferences.absolutePath();
+        return getCurrentNode().absolutePath();
     }
 }

@@ -21,8 +21,8 @@ public class ThemeServiceImpl implements ThemeService {
 
     private static final Logger _logger = LogManager.getLogger(ThemeService.class);
 
-    ThemeServiceImpl() {
-        themePrefs = ApplicationPreferences.getInstance().node(THEME_PREFS_KEY);
+    ThemeServiceImpl(ApplicationPreferences preferences) {
+        themePrefs = preferences.node(THEME_PREFS_KEY);
 
         String currentThemeKey = themePrefs.get(THEME_PREFS_KEY, GLTTheme.LIGHT_THEME.getKey());
         currentGLTThemes = GLTTheme.getThemeByKey(currentThemeKey);
