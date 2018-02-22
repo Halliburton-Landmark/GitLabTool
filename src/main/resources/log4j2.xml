@@ -12,25 +12,37 @@
         </Console>
 
         <RollingFile name="ApplicationDevFile" filename="${filepath}/GitlabTool_full.log"
-            filepattern="${logPath}/%d{YYYYMMddHHmmss}-section.log">
+                     filepattern="${filepath}/GitlabTool_full.%d{MM-dd-yyyy}.%i.log">
             <PatternLayout
                 pattern="%d{YYYY-MM-dd HH:mm:ss} [%t] %-5p %c{1}:%L - %msg%n" />
             <Policies>
-                <SizeBasedTriggeringPolicy
-                    size="100 MB" />
+                <OnStartupTriggeringPolicy />
+                <SizeBasedTriggeringPolicy size="500 KB" />
+                <TimeBasedTriggeringPolicy />
             </Policies>
-            <DefaultRolloverStrategy max="20" />
+            <DefaultRolloverStrategy max="10">
+                <Delete basePath="${filepath}" maxDepth="2">
+                    <IfFileName glob="${filepath}/GitlabTool_full.*.log" />
+                    <IfLastModified age="10d" />
+                </Delete>
+            </DefaultRolloverStrategy>
         </RollingFile>
 
-        <RollingFile name="ApplicationErrorsFile" filename="${filepath}/GitlabTool_full_errors.log"
-            filepattern="${logPath}/%d{YYYYMMddHHmmss}-section.log">
+        <RollingFile name="ApplicationErrorsFile" filename="${filepath}/GitlabTool_errors.log"
+                     filepattern="${filepath}/GitlabTool_errors.%d{MM-dd-yyyy}.%i.log">
             <PatternLayout
                 pattern="%d{YYYY-MM-dd HH:mm:ss} [%t] %-5p %c{1}:%L - %msg%n" />
             <Policies>
-                <SizeBasedTriggeringPolicy
-                    size="100 MB" />
+                <OnStartupTriggeringPolicy />
+                <SizeBasedTriggeringPolicy size="200 KB" />
+                <TimeBasedTriggeringPolicy />
             </Policies>
-            <DefaultRolloverStrategy max="20" />
+            <DefaultRolloverStrategy max="5">
+                <Delete basePath="${filepath}" maxDepth="2">
+                    <IfFileName glob="${filepath}/GitlabTool_errors.*.log" />
+                    <IfLastModified age="10d" />
+                </Delete>
+            </DefaultRolloverStrategy>
         </RollingFile>
 
     </Appenders>

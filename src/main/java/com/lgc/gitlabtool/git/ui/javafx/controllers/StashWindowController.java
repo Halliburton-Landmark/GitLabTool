@@ -25,6 +25,7 @@ import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.javafx.GLTAlert;
 import com.lgc.gitlabtool.git.ui.javafx.StatusDialog;
+import com.lgc.gitlabtool.git.ui.javafx.controllers.listcells.ProjectListCell;
 import com.lgc.gitlabtool.git.ui.javafx.controllers.listcells.StashListCell;
 
 import javafx.application.Platform;
