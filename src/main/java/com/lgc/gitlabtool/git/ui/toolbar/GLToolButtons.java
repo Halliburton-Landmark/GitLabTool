@@ -199,6 +199,14 @@ public enum GLToolButtons {
             null,
             GLToolConstants.ICON_SIZE_16),
 
+    OPEN_IN_TERMINAL(GLToolConstants.PROJECTS_WINDOW_KEY,
+            "open_in_terminal",
+            "icons/mb3/open_terminal_16x16.png",
+            "Open in Terminal",
+            "Open in Terminal",
+            null,
+            GLToolConstants.ICON_SIZE_16),
+
     MAIN_CLONE_PROJECT(GLToolConstants.PROJECTS_WINDOW_KEY,
             "main_git_clone_project",
             "icons/mainmenu/clone_16x16.png",
