@@ -1,5 +1,6 @@
 package com.lgc.gitlabtool.git.ui.javafx.controllers;
 
+import static com.lgc.gitlabtool.git.util.ProjectPropertiesUtil.getBuildTimestamp;
 import static com.lgc.gitlabtool.git.util.ProjectPropertiesUtil.getCommitHash;
 import static com.lgc.gitlabtool.git.util.ProjectPropertiesUtil.getProjectNameWithVersion;
 
@@ -141,7 +142,7 @@ public class ModularController implements UpdateProgressListener {
     private static final Image _appIcon = AppIconHolder.getInstance().getAppIcoImage();
     private static final String ABOUT_POPUP_CONTENT = "Contacts: Yurii Pitomets (yurii.pitomets2@halliburton.com)";
     private static final String ABOUT_POPUP_HEADER =
-            getProjectNameWithVersion() + " (" + getCommitHash() + "), powered by Luxoft";
+            getProjectNameWithVersion() + " (" + getBuildTimestamp() + " " + getCommitHash() + "), powered by Luxoft";
 
     private static final ToolbarManager _toolbarManager = ToolbarManager.getInstance();
     private static final MainMenuManager _mainMenuManager = MainMenuManager.getInstance();
