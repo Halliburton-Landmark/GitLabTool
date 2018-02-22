@@ -194,7 +194,7 @@ public class ModularController implements UpdateProgressListener {
 
     private static final String SELECT_ALL_IMAGE_URL = "icons/select_all_20x20.png";
     private static final String REFRESH_PROJECTS_IMAGE_URL = "icons/toolbar/refresh_projects_20x20.png";
-    private static final String QUICK_UPDATE_IMAGE_URL = "icons/project/quick_update.png";
+    private static final String QUICK_UPDATE_IMAGE_URL = "icons/project/quick_update_20x20.png";
     private static final String FILTER_SHADOW_PROJECTS_IMAGE_URL = "icons/toolbar/filter_shadow_projects_20x20.png";
     private static final String DIVIDER_PROPERTY_NODE = "MainWindowController_Dividers";
     private static final String PREF_NAME_HIDE_SHADOWS = "is_hide_shadows";
@@ -1126,7 +1126,7 @@ public class ModularController implements UpdateProgressListener {
     @FXML
     @SuppressWarnings("unused")
     private void updateProjectsStatuses(ActionEvent actionEvent) {
-        _backgroundService.runInBackgroundThread(() -> _projectsList.updateProjectStatuses());
+        _backgroundService.runInBackgroundThread(_projectsList::updateProjectStatuses);
     }
 
     @FXML
