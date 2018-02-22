@@ -12,7 +12,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -54,7 +53,6 @@ import com.lgc.gitlabtool.git.ui.javafx.CreateProjectDialog;
 import com.lgc.gitlabtool.git.ui.javafx.GLTAlert;
 import com.lgc.gitlabtool.git.ui.javafx.GLTScene;
 import com.lgc.gitlabtool.git.ui.javafx.GLTTheme;
-import com.lgc.gitlabtool.git.ui.javafx.IncorrectProjectDialog;
 import com.lgc.gitlabtool.git.ui.javafx.JavaFXUI;
 import com.lgc.gitlabtool.git.ui.javafx.StatusDialog;
 import com.lgc.gitlabtool.git.ui.javafx.WorkIndicatorDialog;
@@ -70,6 +68,7 @@ import com.lgc.gitlabtool.git.ui.selection.ListViewKey;
 import com.lgc.gitlabtool.git.ui.selection.SelectionsProvider;
 import com.lgc.gitlabtool.git.ui.toolbar.GLToolButtons;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarManager;
+import com.lgc.gitlabtool.git.util.OpenTerminalUtil;
 import com.lgc.gitlabtool.git.util.ScreenUtil;
 import com.lgc.gitlabtool.git.util.ShutDownUtil;
 import com.lgc.gitlabtool.git.util.UserGuideUtil;
@@ -187,7 +186,7 @@ public class ModularController implements UpdateProgressListener {
     private static final String REVERT_FINISH_MESSAGE = "Revert operation finished.";
     public static final String NO_ANY_PROJECT_FOR_OPERATION = "There isn't any proper project selected for %s operation";
 
-    private static final String CHECKOUT_BRANCH_TITLE = "Branches";
+    private static final String BRANCHES_TITLE = "Branches";
     private static final String NEW_BRANCH_CREATION = "new branch creation";
     private static final String PULL_OPERATION_NAME = "pull";
     private static final String PUSH_OPERATION_NAME = "push";
@@ -843,9 +842,7 @@ public class ModularController implements UpdateProgressListener {
     @FXML
     @SuppressWarnings("unused")
     private void loadGroupWindow(ActionEvent actionEvent) {
-        Platform.runLater(() -> {
-            loadGroupWindow();
-        });
+        Platform.runLater(this::loadGroupWindow);
     }
 
     @FXML
@@ -853,6 +850,11 @@ public class ModularController implements UpdateProgressListener {
     private void loadGroup(ActionEvent actionEvent) {
         Group selectedGroup = groupListView.getSelectionModel().getSelectedItem();
         loadGroup(selectedGroup);
+    }
+
+    private void openInTerminal(ActionEvent actionEvent) {
+        Project selectedProject = projectListView.getSelectionModel().getSelectedItems().get(0);
+        OpenTerminalUtil.openInTerminal(selectedProject.getPath());
     }
 
     //endregion
@@ -889,7 +891,7 @@ public class ModularController implements UpdateProgressListener {
             Stage stage = new Stage();
             stage.setScene(new GLTScene(root));
             stage.getIcons().add(_appIcon);
-            stage.setTitle(CHECKOUT_BRANCH_TITLE);
+            stage.setTitle(BRANCHES_TITLE);
             stage.initModality(Modality.APPLICATION_MODAL);
 
             /* Set size and position */
@@ -1323,42 +1325,48 @@ public class ModularController implements UpdateProgressListener {
     private ContextMenu getContextMenu(List<Project> items) {
 
         ContextMenu contextMenu = new ContextMenu();
-        List<MenuItem> menuItems = new ArrayList<>();
+        if (items.size() > 0) {
+            List<MenuItem> menuItems = new ArrayList<>();
 
-        boolean hasShadow = _projectService.hasShadow(items);
-        boolean hasCloned = _projectService.hasCloned(items);
+            boolean hasShadow = _projectService.hasShadow(items);
+            boolean hasCloned = _projectService.hasCloned(items);
 
-        if (hasCloned) {
-            MenuItem openFolder = createMenuItem(GLToolButtons.OPEN_FOLDER, this::onOpenFolder);
+            if (hasCloned) {
+                MenuItem openFolder = createMenuItem(GLToolButtons.OPEN_FOLDER, this::onOpenFolder);
+                MenuItem openInTerminal = createMenuItem(GLToolButtons.OPEN_IN_TERMINAL, this::openInTerminal);
 
-            Menu subMenuGit = new Menu("Git");
+                Menu subMenuGit = new Menu("Git");
 
-            MenuItem itemCreateBranch = createMenuItem(GLToolButtons.MAIN_CREATE_BRANCH, this::onNewBranchButton);
-            MenuItem itemCheckoutBranch = createMenuItem(GLToolButtons.MAIN_BRANCHES, this::showBranchesWindow);
-            MenuItem itemStaging = createMenuItem(GLToolButtons.MAIN_STAGING, this::openGitStaging);
-            MenuItem itemPull = createMenuItem(GLToolButtons.MAIN_PULL, this::onPullAction);
-            MenuItem itemPush = createMenuItem(GLToolButtons.MAIN_PUSH, this::onPushAction);
-            MenuItem itemRevert = createMenuItem(GLToolButtons.MAIN_REVERT, this::onRevertChanges);
-            MenuItem itemStash = createMenuItem(GLToolButtons.MAIN_STASH, this::showStashWindow);
+                MenuItem itemCreateBranch = createMenuItem(GLToolButtons.MAIN_CREATE_BRANCH, this::onNewBranchButton);
+                MenuItem itemBranches = createMenuItem(GLToolButtons.MAIN_BRANCHES, this::showBranchesWindow);
+                MenuItem itemStaging = createMenuItem(GLToolButtons.MAIN_STAGING, this::openGitStaging);
+                MenuItem itemPull = createMenuItem(GLToolButtons.MAIN_PULL, this::onPullAction);
+                MenuItem itemPush = createMenuItem(GLToolButtons.MAIN_PUSH, this::onPushAction);
+                MenuItem itemRevert = createMenuItem(GLToolButtons.MAIN_REVERT, this::onRevertChanges);
+                MenuItem itemStash = createMenuItem(GLToolButtons.MAIN_STASH, this::showStashWindow);
 
-            subMenuGit.getItems().addAll(itemCreateBranch, itemCheckoutBranch,
-            		itemStaging, itemPull, itemPush, itemRevert, itemStash);
+                subMenuGit.getItems().addAll(itemCreateBranch, itemBranches, itemStaging,
+                        itemPull, itemPush, itemRevert, itemStash);
 
-            MenuItem itemEditProjectProp = createMenuItem(GLToolButtons.MAIN_EDIT_PROJECT_PROPERTIES,
-                    this::showEditProjectPropertiesWindow);
+                MenuItem itemEditProjectProp = createMenuItem(GLToolButtons.MAIN_EDIT_PROJECT_PROPERTIES,
+                        this::showEditProjectPropertiesWindow);
 
-            menuItems.add(openFolder);
-            menuItems.add(subMenuGit);
-            menuItems.add(itemEditProjectProp);
+                menuItems.add(openFolder);
+                if (projectListView.getSelectionModel().getSelectedItems().size() == 1) {
+                    menuItems.add(openInTerminal);
+                }
+                menuItems.add(subMenuGit);
+                menuItems.add(itemEditProjectProp);
+            }
+
+            if (hasShadow) {
+                MenuItem cloneProject = createMenuItem(GLToolButtons.MAIN_CLONE_PROJECT, this::cloneShadowProject);
+                cloneProject.setText("Clone shadow project");
+                menuItems.add(cloneProject);
+            }
+
+            contextMenu.getItems().addAll(menuItems);
         }
-
-        if (hasShadow) {
-            MenuItem cloneProject = createMenuItem(GLToolButtons.MAIN_CLONE_PROJECT, this::cloneShadowProject);
-            cloneProject.setText("Clone shadow project");
-            menuItems.add(cloneProject);
-        }
-
-        contextMenu.getItems().addAll(menuItems);
         return contextMenu;
     }
 
@@ -1409,35 +1417,9 @@ public class ModularController implements UpdateProgressListener {
         });
     }
 
-    private void checkProjectsList() {
-        List<Project> incorrectProjects = findIncorrectProjects();
-        if (incorrectProjects.isEmpty()) {
-            return;
-        }
-        Platform.runLater(() -> {
-            IncorrectProjectDialog dialog = new IncorrectProjectDialog();
-            dialog.showDialog(incorrectProjects, (obj) -> refreshLoadProjects());
-        });
-    }
-
-    private List<Project> findIncorrectProjects() {
-        List<Project> gotProjects = _projectsList.getProjects();
-        if (gotProjects == null || gotProjects.isEmpty()) {
-            return Collections.emptyList();
-        }
-        return gotProjects.parallelStream()
-                          .filter(this::isIncorrectProject)
-                          .collect(Collectors.toList());
-    }
-
-    private boolean isIncorrectProject(Project project) {
-        // we check only cloned projects
-        return project.isCloned() && !_gitService.hasAtLeastOneReference(project);
-    }
-
     private void refreshLoadProjects() {
         _projectsList.refreshLoadProjects();
-        checkProjectsList();
+        //checkProjectsList(); TODO : fix working with IncorrectProjectDialog
         hideShadowsAction();
     }
 
