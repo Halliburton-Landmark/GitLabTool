@@ -528,14 +528,6 @@ public class ModularController implements UpdateProgressListener {
 
     }
 
-    public static String getCss_path() {
-        return css_path;
-    }
-
-    public static void setCss_path(String css_path) {
-        ModularController.css_path = css_path;
-    }
-
     private void initializeThemesMenu() {
         String themeMenuTitle = GLToolButtons.MainMenuInfo.THEMES.getName();
 
@@ -805,9 +797,7 @@ public class ModularController implements UpdateProgressListener {
     @FXML
     @SuppressWarnings("unused")
     private void loadGroupWindow(ActionEvent actionEvent) {
-        Platform.runLater(() -> {
-            loadGroupWindow();
-        });
+        Platform.runLater(this::loadGroupWindow);
     }
 
     @FXML
@@ -1404,7 +1394,7 @@ public class ModularController implements UpdateProgressListener {
         return Bindings.createBooleanBinding(() ->
                         getCurrentProjects().stream()
                                 .filter(Objects::nonNull)
-                                .allMatch(project -> !project.isCloned()),
+                                .noneMatch(Project::isCloned),
                 Stream.of(projectListView.getSelectionModel()).map(SelectionModel::selectedItemProperty).toArray(Observable[]::new));
     }
 
@@ -1727,10 +1717,10 @@ public class ModularController implements UpdateProgressListener {
 
         @Override
         public void handle(WindowEvent event) {
-            List<ApplicationState> activeAtates = _stateService.getActiveStates();
-            if (!activeAtates.isEmpty() && activeAtates.contains(ApplicationState.STASH)) {
+            List<ApplicationState> activeStates = _stateService.getActiveStates();
+            if (!activeStates.isEmpty() && activeStates.contains(ApplicationState.STASH)) {
                 event.consume();
-                JavaFXUI.showWarningAlertForActiveStates(activeAtates);
+                JavaFXUI.showWarningAlertForActiveStates(activeStates);
                 return;
             }
             _stashWindowController.dispose();
