@@ -427,7 +427,7 @@ public class GitServiceImpl implements GitService {
             _stateService.stateON(ApplicationState.DELETE_BRANCH);
             projects.parallelStream()
                     .filter(Objects::nonNull)
-                    .forEach(project -> deleteBranch(project, deletedBranch, statuses, progressListener, progress, step));
+                    .forEach(project -> deleteBranchAndUpdateProgress(project, deletedBranch, statuses, progressListener, progress, step));
         } finally {
             // ApplicationState.DELETE_BRANCH state should turn off in the progressListener by the finish action
             progressListener.onFinish(DELETE_BRANCH_FINISHED);
@@ -435,10 +435,10 @@ public class GitServiceImpl implements GitService {
         return statuses;
     }
 
-    private void deleteBranch(Project project, Branch deletedBranch,
-                              Map<Project, Boolean> statuses,
-                              ProgressListener progressListener,
-                              AtomicLong progress, long step) {
+    private void deleteBranchAndUpdateProgress(Project project, Branch deletedBranch,
+                                               Map<Project, Boolean> statuses,
+                                               ProgressListener progressListener,
+                                               AtomicLong progress, long step) {
         progressListener.onStart(project);
         String branchName = deletedBranch.getBranchName();
         Map<JGitStatus, String> mapResult = _git.deleteBranch(project, branchName, deletedBranch.isRemote());

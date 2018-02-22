@@ -143,7 +143,7 @@ public class BranchesWindowController extends AbstractStateListener {
         List<Project> selectedProjects = currentProjectsListView.getItems();
         Branch selectedBranch = branchesListView.getSelectionModel().getSelectedItem();
         boolean isYesButtonPressed = GLTAlertUtils.requesConfirmationOperation(DELETE_BRANCHE_TITLE,
-                "The " + selectedBranch.getBranchName() + " branch will delete from " + selectedProjects.size() + " project(s).",
+                "The " + selectedBranch.getBranchName() + " branch will be deleted from " + selectedProjects.size() + " project(s).",
                 "Are you sure you want to do this?");
         if (!isYesButtonPressed) {
             return;
@@ -180,7 +180,7 @@ public class BranchesWindowController extends AbstractStateListener {
     private void deleteRemoteBranch(List<Project> projects, Branch selectedBranch) {
         ProgressDialog progressDialog = new DeleteBranchProgressDialog();
         ProgressListener progress = new OperationProgressListener(progressDialog, ApplicationState.DELETE_BRANCH);
-        progressDialog.setStartAction(() ->  deleteAction(projects, selectedBranch, progress));
+        progressDialog.setStartAction(() ->  _gitService.deleteBranch(projects, selectedBranch, progress));
         progressDialog.showDialog();
     }
 
@@ -188,10 +188,6 @@ public class BranchesWindowController extends AbstractStateListener {
         ProgressListener progressListener = new DeleteBranchProgressListener();
         Map<Project, Boolean> statuses =  _gitService.deleteBranch(projects, selectedBranch, progressListener);
         showStatusDialog("Delete branch status", "Deleting branch from projects was finished.", statuses);
-    }
-
-    private void deleteAction(List<Project> projects, Branch selectedBranch, ProgressListener progressListener) {
-        _gitService.deleteBranch(projects, selectedBranch, progressListener);
     }
 
     private List<Project> getCorrectProjects(List<Project> projects, Branch selectedBranch) {

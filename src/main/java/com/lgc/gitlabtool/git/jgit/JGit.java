@@ -859,7 +859,7 @@ public class JGit {
      * @param  project      the cloned project
      * @param  nameBranch   the branch name for deleting
      * @param  isRemoteBranch if <code>true</code> deleted branch is remote, otherwise <code>false</code>
-     * @return TODO
+     * @return a map with operation status and message.
      */
     public Map<JGitStatus, String> deleteBranch(Project project, String nameBranch, boolean isRemoteBranch) {
         if (project == null || nameBranch == null || nameBranch.isEmpty()) {
