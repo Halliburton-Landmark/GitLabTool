@@ -22,6 +22,9 @@ import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.lgc.gitlabtool.git.util.OpenTerminalUtil;
+import javafx.scene.Scene;
+import javafx.scene.effect.Effect;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -88,7 +91,6 @@ import javafx.geometry.Insets;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
@@ -109,7 +111,6 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToolBar;
 import javafx.scene.control.Tooltip;
 import javafx.scene.effect.ColorAdjust;
-import javafx.scene.effect.Effect;
 import javafx.scene.effect.GaussianBlur;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -841,9 +842,7 @@ public class ModularController implements UpdateProgressListener {
     @FXML
     @SuppressWarnings("unused")
     private void loadGroupWindow(ActionEvent actionEvent) {
-        Platform.runLater(() -> {
-            loadGroupWindow();
-        });
+        Platform.runLater(this::loadGroupWindow);
     }
 
     @FXML
@@ -851,6 +850,11 @@ public class ModularController implements UpdateProgressListener {
     private void loadGroup(ActionEvent actionEvent) {
         Group selectedGroup = groupListView.getSelectionModel().getSelectedItem();
         loadGroup(selectedGroup);
+    }
+
+    private void openInTerminal(ActionEvent actionEvent) {
+        Project selectedProject = projectListView.getSelectionModel().getSelectedItems().get(0);
+        OpenTerminalUtil.openInTerminal(selectedProject.getPath());
     }
 
     //endregion
@@ -1321,42 +1325,48 @@ public class ModularController implements UpdateProgressListener {
     private ContextMenu getContextMenu(List<Project> items) {
 
         ContextMenu contextMenu = new ContextMenu();
-        List<MenuItem> menuItems = new ArrayList<>();
+        if (items.size() > 0) {
+            List<MenuItem> menuItems = new ArrayList<>();
 
-        boolean hasShadow = _projectService.hasShadow(items);
-        boolean hasCloned = _projectService.hasCloned(items);
+            boolean hasShadow = _projectService.hasShadow(items);
+            boolean hasCloned = _projectService.hasCloned(items);
 
-        if (hasCloned) {
-            MenuItem openFolder = createMenuItem(GLToolButtons.OPEN_FOLDER, this::onOpenFolder);
+            if (hasCloned) {
+                MenuItem openFolder = createMenuItem(GLToolButtons.OPEN_FOLDER, this::onOpenFolder);
+                MenuItem openInTerminal = createMenuItem(GLToolButtons.OPEN_IN_TERMINAL, this::openInTerminal);
 
-            Menu subMenuGit = new Menu("Git");
+                Menu subMenuGit = new Menu("Git");
 
-            MenuItem itemCreateBranch = createMenuItem(GLToolButtons.MAIN_CREATE_BRANCH, this::onNewBranchButton);
-            MenuItem itemCheckoutBranch = createMenuItem(GLToolButtons.MAIN_CHECKOUT_BRANCH, this::showCheckoutBranchWindow);
-            MenuItem itemStaging = createMenuItem(GLToolButtons.MAIN_STAGING, this::openGitStaging);
-            MenuItem itemPull = createMenuItem(GLToolButtons.MAIN_PULL, this::onPullAction);
-            MenuItem itemPush = createMenuItem(GLToolButtons.MAIN_PUSH, this::onPushAction);
-            MenuItem itemRevert = createMenuItem(GLToolButtons.MAIN_REVERT, this::onRevertChanges);
-            MenuItem itemStash = createMenuItem(GLToolButtons.MAIN_STASH, this::showStashWindow);
+                MenuItem itemCreateBranch = createMenuItem(GLToolButtons.MAIN_CREATE_BRANCH, this::onNewBranchButton);
+                MenuItem itemCheckoutBranch = createMenuItem(GLToolButtons.MAIN_CHECKOUT_BRANCH, this::showCheckoutBranchWindow);
+                MenuItem itemStaging = createMenuItem(GLToolButtons.MAIN_STAGING, this::openGitStaging);
+                MenuItem itemPull = createMenuItem(GLToolButtons.MAIN_PULL, this::onPullAction);
+                MenuItem itemPush = createMenuItem(GLToolButtons.MAIN_PUSH, this::onPushAction);
+                MenuItem itemRevert = createMenuItem(GLToolButtons.MAIN_REVERT, this::onRevertChanges);
+                MenuItem itemStash = createMenuItem(GLToolButtons.MAIN_STASH, this::showStashWindow);
 
-            subMenuGit.getItems().addAll(itemCreateBranch, itemCheckoutBranch,
-            		itemStaging, itemPull, itemPush, itemRevert, itemStash);
+                subMenuGit.getItems().addAll(itemCreateBranch, itemCheckoutBranch,
+                        itemStaging, itemPull, itemPush, itemRevert, itemStash);
 
-            MenuItem itemEditProjectProp = createMenuItem(GLToolButtons.MAIN_EDIT_PROJECT_PROPERTIES,
-                    this::showEditProjectPropertiesWindow);
+                MenuItem itemEditProjectProp = createMenuItem(GLToolButtons.MAIN_EDIT_PROJECT_PROPERTIES,
+                        this::showEditProjectPropertiesWindow);
 
-            menuItems.add(openFolder);
-            menuItems.add(subMenuGit);
-            menuItems.add(itemEditProjectProp);
+                menuItems.add(openFolder);
+                if (projectListView.getSelectionModel().getSelectedItems().size() == 1) {
+                    menuItems.add(openInTerminal);
+                }
+                menuItems.add(subMenuGit);
+                menuItems.add(itemEditProjectProp);
+            }
+
+            if (hasShadow) {
+                MenuItem cloneProject = createMenuItem(GLToolButtons.MAIN_CLONE_PROJECT, this::cloneShadowProject);
+                cloneProject.setText("Clone shadow project");
+                menuItems.add(cloneProject);
+            }
+
+            contextMenu.getItems().addAll(menuItems);
         }
-
-        if (hasShadow) {
-            MenuItem cloneProject = createMenuItem(GLToolButtons.MAIN_CLONE_PROJECT, this::cloneShadowProject);
-            cloneProject.setText("Clone shadow project");
-            menuItems.add(cloneProject);
-        }
-
-        contextMenu.getItems().addAll(menuItems);
         return contextMenu;
     }
 
