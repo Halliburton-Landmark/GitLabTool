@@ -6,6 +6,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -32,7 +33,8 @@ public class Main {
         logger.debug("==================== application started");
         _consoleService.addMessage(ProjectPropertiesUtil.getProjectName().toUpperCase() +
                                    " version: " + ProjectPropertiesUtil.getProjectVersion() +
-                                   " (" + ProjectPropertiesUtil.getCommitHash() + ")", MessageType.SIMPLE);
+                                   " (" + ProjectPropertiesUtil.getBuildTimestamp() + " "
+                                    + ProjectPropertiesUtil.getCommitHash() + ") ", MessageType.SIMPLE);
         detectProxy();
         ui.run(args);
     }
