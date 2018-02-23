@@ -3,7 +3,6 @@ package com.lgc.gitlabtool.git.ui.javafx.controllers;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
@@ -23,10 +22,10 @@ import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.ProgressListener;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StateService;
-import com.lgc.gitlabtool.git.ui.javafx.GLTAlert;
 import com.lgc.gitlabtool.git.ui.javafx.StatusDialog;
 import com.lgc.gitlabtool.git.ui.javafx.controllers.listcells.ProjectListCell;
 import com.lgc.gitlabtool.git.ui.javafx.controllers.listcells.StashListCell;
+import com.lgc.gitlabtool.git.util.GLTAlertUtils;
 
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -35,9 +34,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
@@ -147,7 +144,8 @@ public class StashWindowController extends AbstractStateListener {
 
     @FXML
     public void onDropStashAction(ActionEvent event) {
-        boolean isContinue = requesConfirmationOperation();
+        boolean isContinue = GLTAlertUtils.requesConfirmationOperation(TITLE_DROP_STASH,
+                HEADER_MESSAGE_DROP_STASH, CONTENT_MESSAGE_DROP_STASH);
         if (!isContinue) {
             return;
         }
@@ -201,14 +199,6 @@ public class StashWindowController extends AbstractStateListener {
         Map<Project, Boolean> results = _gitService.stashDrop(selectedStash);
         List<Project> changedProjects = getSuccessfulProjects(results);
         updateContentOfLists(changedProjects);
-    }
-
-    private boolean requesConfirmationOperation() {
-        GLTAlert alert = new GLTAlert(AlertType.CONFIRMATION, TITLE_DROP_STASH, HEADER_MESSAGE_DROP_STASH, CONTENT_MESSAGE_DROP_STASH);
-        alert.clearDefaultButtons();
-        alert.addButtons(ButtonType.YES, ButtonType.NO);
-        Optional<ButtonType> result = alert.showAndWait();
-        return !(result.orElse(ButtonType.NO) == ButtonType.NO);
     }
 
     private void updateProjectList() {

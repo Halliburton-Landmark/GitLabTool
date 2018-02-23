@@ -14,7 +14,7 @@ public enum ViewKey {
 
     MODULAR_CONTAINER("modularContainer", "fxml/ModularContainer.fxml"),
     CLONING_GROUPS_WINDOW("cloningGroupsWindow", "fxml/CloningGroupsWindow.fxml"),
-    CHECKOUT_BRANCH_WINDOW("checkoutBranchWindow", "fxml/CheckoutBranchWindow.fxml"),
+    BRANCHES_WINDOW("branchesWindow", "fxml/BranchesWindow.fxml"),
     SERVER_INPUT_WINDOW("serverInputWindow", "fxml/ServerInputWindow.fxml"),
     EDIT_PROJECT_PROPERTIES("editProjectProperties", "fxml/EditProjectPropertiesWindow.fxml"),
     GIT_STAGING_WINDOW("gitStagingWindow", "fxml/GitStagingWindow.fxml"),

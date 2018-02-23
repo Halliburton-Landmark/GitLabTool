@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.*?>
 <GridPane hgap="10.0" maxHeight="Infinity" maxWidth="Infinity" vgap="10.0" xmlns="http://javafx.com/javafx/8"
           xmlns:fx="http://javafx.com/fxml/1"
-          fx:controller="com.lgc.gitlabtool.git.ui.javafx.controllers.CheckoutBranchWindowController">
+          fx:controller="com.lgc.gitlabtool.git.ui.javafx.controllers.BranchesWindowController">
     <columnConstraints>
         <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="120.0"/>
         <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0"/>
@@ -57,6 +57,7 @@
     <HBox alignment="TOP_RIGHT" maxHeight="50.0" prefHeight="100.0" prefWidth="200.0" spacing="20.0"
           GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="3">
         <Button fx:id="checkoutButton" mnemonicParsing="false" onAction="#onCheckoutButton" text="Checkout"/>
+        <Button fx:id="deleteButton" disable="true" mnemonicParsing="false" text="Delete" onAction="#deleteAction"/>
         <Button mnemonicParsing="false" onAction="#onClose" text="Close"/>
     </HBox>
 </GridPane>

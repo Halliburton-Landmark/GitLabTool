@@ -23,10 +23,6 @@ import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.lgc.gitlabtool.git.util.OpenTerminalUtil;
-import javafx.scene.Scene;
-import javafx.scene.effect.Effect;
-import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -53,26 +49,27 @@ import com.lgc.gitlabtool.git.ui.ViewKey;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 import com.lgc.gitlabtool.git.ui.javafx.AlertWithCheckBox;
 import com.lgc.gitlabtool.git.ui.javafx.ChangesCheckDialog;
-import com.lgc.gitlabtool.git.ui.javafx.CloneProgressDialog;
 import com.lgc.gitlabtool.git.ui.javafx.CreateNewBranchDialog;
 import com.lgc.gitlabtool.git.ui.javafx.CreateProjectDialog;
 import com.lgc.gitlabtool.git.ui.javafx.GLTAlert;
 import com.lgc.gitlabtool.git.ui.javafx.GLTScene;
 import com.lgc.gitlabtool.git.ui.javafx.GLTTheme;
 import com.lgc.gitlabtool.git.ui.javafx.JavaFXUI;
-import com.lgc.gitlabtool.git.ui.javafx.ProgressDialog;
-import com.lgc.gitlabtool.git.ui.javafx.PullProgressDialog;
 import com.lgc.gitlabtool.git.ui.javafx.StatusDialog;
 import com.lgc.gitlabtool.git.ui.javafx.WorkIndicatorDialog;
 import com.lgc.gitlabtool.git.ui.javafx.comparators.ProjectListComparator;
 import com.lgc.gitlabtool.git.ui.javafx.controllers.listcells.ProjectListCell;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.PushProgressListener;
+import com.lgc.gitlabtool.git.ui.javafx.progressdialog.CloneProgressDialog;
+import com.lgc.gitlabtool.git.ui.javafx.progressdialog.ProgressDialog;
+import com.lgc.gitlabtool.git.ui.javafx.progressdialog.PullProgressDialog;
 import com.lgc.gitlabtool.git.ui.mainmenu.MainMenuManager;
 import com.lgc.gitlabtool.git.ui.selection.ListViewKey;
 import com.lgc.gitlabtool.git.ui.selection.SelectionsProvider;
 import com.lgc.gitlabtool.git.ui.toolbar.GLToolButtons;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarManager;
+import com.lgc.gitlabtool.git.util.OpenTerminalUtil;
 import com.lgc.gitlabtool.git.util.ScreenUtil;
 import com.lgc.gitlabtool.git.util.ShutDownUtil;
 import com.lgc.gitlabtool.git.util.UserGuideUtil;
@@ -93,6 +90,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
@@ -113,6 +111,7 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToolBar;
 import javafx.scene.control.Tooltip;
 import javafx.scene.effect.ColorAdjust;
+import javafx.scene.effect.Effect;
 import javafx.scene.effect.GaussianBlur;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -188,11 +187,11 @@ public class ModularController implements UpdateProgressListener {
     private static final String REVERT_FINISH_MESSAGE = "Revert operation finished.";
     public static final String NO_ANY_PROJECT_FOR_OPERATION = "There isn't any proper project selected for %s operation";
 
-    private static final String CHECKOUT_BRANCH_TITLE = "Checkout branch";
+    private static final String BRANCHES_TITLE = "Branches";
     private static final String NEW_BRANCH_CREATION = "new branch creation";
     private static final String PULL_OPERATION_NAME = "pull";
     private static final String PUSH_OPERATION_NAME = "push";
-    private static final String CHECKOUT_BEANCH_OPERATION_NAME = "checkout branch";
+    private static final String BRANCES_OPERATION_NAME = "operation with branches";
     private static final String STASH_OPERATION_NAME = "stash";
 
     private static final String SELECT_ALL_IMAGE_URL = "icons/select_all_20x20.png";
@@ -441,7 +440,7 @@ public class ModularController implements UpdateProgressListener {
             _toolbarManager.getButtonById(GLToolButtons.SELECT_GROUP_BUTTON.getId()).setOnAction(this::loadGroup);
         } else if (windowId.equals(ViewKey.PROJECTS_WINDOW.getKey())) {
             _toolbarManager.getButtonById(GLToolButtons.CHANGE_GROUP_BUTTON.getId()).setOnAction(this::loadGroupWindow);
-            _toolbarManager.getButtonById(GLToolButtons.CHECKOUT_BRANCH_BUTTON.getId()).setOnAction(this::showCheckoutBranchWindow);
+            _toolbarManager.getButtonById(GLToolButtons.BRANCHES_BUTTON.getId()).setOnAction(this::showBranchesWindow);
             _toolbarManager.getButtonById(GLToolButtons.CLONE_PROJECT_BUTTON.getId()).setOnAction(this::cloneShadowProject);
             _toolbarManager.getButtonById(GLToolButtons.NEW_BRANCH_BUTTON.getId()).setOnAction(this::onNewBranchButton);
             _toolbarManager.getButtonById(GLToolButtons.CREATE_PROJECT_BUTTON.getId()).setOnAction(this::createProjectButton);
@@ -464,7 +463,7 @@ public class ModularController implements UpdateProgressListener {
             _mainMenuManager.getButtonById(GLToolButtons.MAIN_PUSH).setOnAction(this::onPushAction);
             _mainMenuManager.getButtonById(GLToolButtons.MAIN_PULL).setOnAction(this::onPullAction);
             _mainMenuManager.getButtonById(GLToolButtons.MAIN_REVERT).setOnAction(this::onRevertChanges);
-            _mainMenuManager.getButtonById(GLToolButtons.MAIN_CHECKOUT_BRANCH).setOnAction(this::showCheckoutBranchWindow);
+            _mainMenuManager.getButtonById(GLToolButtons.MAIN_BRANCHES).setOnAction(this::showBranchesWindow);
             _mainMenuManager.getButtonById(GLToolButtons.MAIN_STASH).setOnAction(this::showStashWindow);
         }
 
@@ -874,26 +873,26 @@ public class ModularController implements UpdateProgressListener {
     //region PROJECT-VIEW ACTIONS
     @FXML
     @SuppressWarnings("unused")
-    private void showCheckoutBranchWindow(ActionEvent event) {
+    private void showBranchesWindow(ActionEvent event) {
         try {
             List<Project> projects = projectListView.getSelectionModel().getSelectedItems();
             projects = _projectService.getCorrectProjects(projects);
             if (projects.isEmpty()) {
-                String message = String.format(NO_ANY_PROJECT_FOR_OPERATION, CHECKOUT_BEANCH_OPERATION_NAME);
+                String message = String.format(NO_ANY_PROJECT_FOR_OPERATION, BRANCES_OPERATION_NAME);
                 _consoleService.addMessage(message, MessageType.ERROR);
                 return;
             }
 
-            URL checkoutBranchWindowUrl = getClass().getClassLoader().getResource(ViewKey.CHECKOUT_BRANCH_WINDOW.getPath());
-            FXMLLoader loader = new FXMLLoader(checkoutBranchWindowUrl);
+            URL branchesWindowUrl = getClass().getClassLoader().getResource(ViewKey.BRANCHES_WINDOW.getPath());
+            FXMLLoader loader = new FXMLLoader(branchesWindowUrl);
             Parent root = loader.load();
 
-            CheckoutBranchWindowController checkoutWindowController  = loader.getController();
+            BranchesWindowController branchesWindowController  = loader.getController();
 
             Stage stage = new Stage();
             stage.setScene(new GLTScene(root));
             stage.getIcons().add(_appIcon);
-            stage.setTitle(CHECKOUT_BRANCH_TITLE);
+            stage.setTitle(BRANCHES_TITLE);
             stage.initModality(Modality.APPLICATION_MODAL);
 
             /* Set size and position */
@@ -908,7 +907,7 @@ public class ModularController implements UpdateProgressListener {
             stage.setMinWidth(dialogWidth / 2);
             stage.setMinHeight(dialogHeight / 2);
 
-            checkoutWindowController.beforeShowing(projects, stage);
+            branchesWindowController.beforeShowing(projects, stage);
             stage.show();
         } catch (IOException e) {
             _logger.error("Could not load fxml resource", e);
@@ -1340,15 +1339,15 @@ public class ModularController implements UpdateProgressListener {
                 Menu subMenuGit = new Menu("Git");
 
                 MenuItem itemCreateBranch = createMenuItem(GLToolButtons.MAIN_CREATE_BRANCH, this::onNewBranchButton);
-                MenuItem itemCheckoutBranch = createMenuItem(GLToolButtons.MAIN_CHECKOUT_BRANCH, this::showCheckoutBranchWindow);
+                MenuItem itemBranches = createMenuItem(GLToolButtons.MAIN_BRANCHES, this::showBranchesWindow);
                 MenuItem itemStaging = createMenuItem(GLToolButtons.MAIN_STAGING, this::openGitStaging);
                 MenuItem itemPull = createMenuItem(GLToolButtons.MAIN_PULL, this::onPullAction);
                 MenuItem itemPush = createMenuItem(GLToolButtons.MAIN_PUSH, this::onPushAction);
                 MenuItem itemRevert = createMenuItem(GLToolButtons.MAIN_REVERT, this::onRevertChanges);
                 MenuItem itemStash = createMenuItem(GLToolButtons.MAIN_STASH, this::showStashWindow);
 
-                subMenuGit.getItems().addAll(itemCreateBranch, itemCheckoutBranch,
-                        itemStaging, itemPull, itemPush, itemRevert, itemStash);
+                subMenuGit.getItems().addAll(itemCreateBranch, itemBranches, itemStaging,
+                        itemPull, itemPush, itemRevert, itemStash);
 
                 MenuItem itemEditProjectProp = createMenuItem(GLToolButtons.MAIN_EDIT_PROJECT_PROPERTIES,
                         this::showEditProjectPropertiesWindow);
@@ -1455,7 +1454,7 @@ public class ModularController implements UpdateProgressListener {
     private void setToolbarDisableProperty(BooleanBinding bindingForShadow, BooleanBinding bindingForCloned) {
         _toolbarManager.getButtonById(GLToolButtons.CLONE_PROJECT_BUTTON.getId()).disableProperty().bind(bindingForCloned);
         _toolbarManager.getButtonById(GLToolButtons.NEW_BRANCH_BUTTON.getId()).disableProperty().bind(bindingForShadow);
-        _toolbarManager.getButtonById(GLToolButtons.CHECKOUT_BRANCH_BUTTON.getId()).disableProperty().bind(bindingForShadow);
+        _toolbarManager.getButtonById(GLToolButtons.BRANCHES_BUTTON.getId()).disableProperty().bind(bindingForShadow);
         _toolbarManager.getButtonById(GLToolButtons.STAGING_BUTTON.getId()).disableProperty().bind(bindingForShadow);
         _toolbarManager.getButtonById(GLToolButtons.PUSH_BUTTON.getId()).disableProperty().bind(bindingForShadow);
         _toolbarManager.getButtonById(GLToolButtons.EDIT_PROJECT_PROPERTIES_BUTTON.getId()).disableProperty().bind(bindingForShadow);
@@ -1466,7 +1465,7 @@ public class ModularController implements UpdateProgressListener {
     private void setMainMenuDisableProperty(BooleanBinding bindingForShadow, BooleanBinding bindingForCloned) {
         _mainMenuManager.getButtonById(GLToolButtons.MAIN_CLONE_PROJECT).disableProperty().bind(bindingForCloned);
         _mainMenuManager.getButtonById(GLToolButtons.MAIN_STAGING).disableProperty().bind(bindingForShadow);
-        _mainMenuManager.getButtonById(GLToolButtons.MAIN_CHECKOUT_BRANCH).disableProperty().bind(bindingForShadow);
+        _mainMenuManager.getButtonById(GLToolButtons.MAIN_BRANCHES).disableProperty().bind(bindingForShadow);
         _mainMenuManager.getButtonById(GLToolButtons.MAIN_CREATE_BRANCH).disableProperty().bind(bindingForShadow);
         _mainMenuManager.getButtonById(GLToolButtons.MAIN_PUSH).disableProperty().bind(bindingForShadow);
         _mainMenuManager.getButtonById(GLToolButtons.MAIN_PULL).disableProperty().bind(bindingForShadow);
