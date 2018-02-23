@@ -1,6 +1,7 @@
 package com.lgc.gitlabtool.git.services;
 
 import com.lgc.gitlabtool.git.preferences.ApplicationPreferences;
+import com.lgc.gitlabtool.git.preferences.PreferencesNodes;
 import com.lgc.gitlabtool.git.ui.javafx.GLTTheme;
 import javafx.scene.Scene;
 import javafx.scene.effect.ColorAdjust;
@@ -12,8 +13,6 @@ import org.apache.logging.log4j.Logger;
 import java.net.URL;
 
 public class ThemeServiceImpl implements ThemeService {
-
-    private static final String THEME_PREFS_KEY = "glt_theme";
 
     /**
      * This is the main node of ApplicationPreferences.
@@ -27,7 +26,7 @@ public class ThemeServiceImpl implements ThemeService {
 
     ThemeServiceImpl(ApplicationPreferences preferences) {
         themePrefs = preferences;
-        String currentThemeKey = getThemePrefs().get(THEME_PREFS_KEY, GLTTheme.LIGHT_THEME.getKey());
+        String currentThemeKey = getThemePrefs().get(PreferencesNodes.THEME_PREFS_NODE, GLTTheme.LIGHT_THEME.getKey());
         currentGLTThemes = GLTTheme.getThemeByKey(currentThemeKey);
     }
 
@@ -53,7 +52,7 @@ public class ThemeServiceImpl implements ThemeService {
 
     public void setTheme(String themeName) {
         currentGLTThemes = GLTTheme.getThemeByKey(themeName);
-        getThemePrefs().put(THEME_PREFS_KEY, currentGLTThemes.getKey());
+        getThemePrefs().put(PreferencesNodes.THEME_PREFS_NODE, currentGLTThemes.getKey());
     }
 
     @Override
@@ -92,6 +91,6 @@ public class ThemeServiceImpl implements ThemeService {
      * @return theme preferences node
      */
     private ApplicationPreferences getThemePrefs() {
-        return themePrefs.node(THEME_PREFS_KEY);
+        return themePrefs.node(PreferencesNodes.THEME_PREFS_NODE);
     }
 }

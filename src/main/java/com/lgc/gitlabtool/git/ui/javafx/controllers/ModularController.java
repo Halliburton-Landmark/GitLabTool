@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.lgc.gitlabtool.git.preferences.ApplicationPreferences;
+import com.lgc.gitlabtool.git.preferences.PreferencesNodes;
 import com.lgc.gitlabtool.git.util.OpenTerminalUtil;
 import javafx.scene.Scene;
 import javafx.scene.effect.Effect;
@@ -192,7 +193,6 @@ public class ModularController implements UpdateProgressListener {
     private static final String SELECT_ALL_IMAGE_URL = "icons/select_all_20x20.png";
     private static final String REFRESH_PROJECTS_IMAGE_URL = "icons/toolbar/refresh_projects_20x20.png";
     private static final String FILTER_SHADOW_PROJECTS_IMAGE_URL = "icons/toolbar/filter_shadow_projects_20x20.png";
-    private static final String DIVIDER_PROPERTY_NODE = "modular_controller_dividers";
     private static final String PREF_NAME_HIDE_SHADOWS = "is_hide_shadows";
     ////endregion
     /*
@@ -1179,7 +1179,7 @@ public class ModularController implements UpdateProgressListener {
      */
     private ApplicationPreferences getPreferences() {
         return ((ApplicationPreferences) ServiceProvider.getInstance()
-                    .getService(ApplicationPreferences.class)).node(DIVIDER_PROPERTY_NODE);
+                    .getService(ApplicationPreferences.class)).node(PreferencesNodes.DIVIDER_PROPERTY_NODE);
     }
 
     /**

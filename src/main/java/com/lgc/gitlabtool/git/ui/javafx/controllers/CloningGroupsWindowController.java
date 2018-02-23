@@ -6,6 +6,7 @@ import java.nio.file.Paths;
 import java.util.List;
 
 import com.lgc.gitlabtool.git.preferences.ApplicationPreferences;
+import com.lgc.gitlabtool.git.preferences.PreferencesNodes;
 import org.apache.commons.lang.StringUtils;
 
 import com.lgc.gitlabtool.git.entities.Group;
@@ -58,7 +59,7 @@ public class CloningGroupsWindowController {
 
     private ApplicationPreferences getPrefs() {
         return ((ApplicationPreferences) ServiceProvider.getInstance()
-                .getService(ApplicationPreferences.class)).node("cloning_group_prefs");
+                .getService(ApplicationPreferences.class)).node(PreferencesNodes.CLONING_GROUP_NODE);
     }
 
     @FXML

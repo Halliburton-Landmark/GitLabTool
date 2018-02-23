@@ -8,14 +8,19 @@ import java.io.*;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
+/**
+ * Application preferences for GitlabTool application
+ *
+ * @see Preferences
+ *
+ * @author Igor Khlaponin
+ */
 public class ApplicationPreferences implements Service {
 
     private static final Logger _logger = LogManager.getLogger(ApplicationPreferences.class);
 
-    private static final String GLT_PREFERENCES_NODE = "gitlab_tool_application_preferences";
-
     /**
-     * Parent root node for all application. It contains all of the preferences nodes
+     * Parent root node for the whole application. It contains all of the preferences nodes
      * and couldn't be changed
      */
     private final Preferences parentPrefs;
@@ -26,21 +31,21 @@ public class ApplicationPreferences implements Service {
     private Preferences currentNode;
 
     public ApplicationPreferences() {
-        parentPrefs = Preferences.userRoot().node(GLT_PREFERENCES_NODE);
+        parentPrefs = Preferences.userRoot().node(PreferencesNodes.GLT_PREFERENCES_NODE);
         currentNode = parentPrefs;
     }
 
-    private void setUpDefauls() {
-        // TODO
-        // 1. set up OS
-        // 2. set up UI preferences from ModularController
-        // 3. set up terminal preferences
-    }
-
-
+    /**
+     * Restores default settings
+     */
     public void restoreDefaults() {
-        // TODO
-        // do some restore steps
+        try {
+            for (String name : parentPrefs.childrenNames()) {
+                parentPrefs.node(name).removeNode();
+            }
+        } catch (BackingStoreException e) {
+            _logger.error("Could not restore defaults: " + e.getMessage());
+        }
     }
 
 
@@ -116,9 +121,15 @@ public class ApplicationPreferences implements Service {
         return getCurrentNode().absolutePath();
     }
 
+    /**
+     * Set the current node for preferences
+     *
+     * @param pathName - name of current node or a path for it
+     * @return this instance of {@link ApplicationPreferences}
+     */
     public ApplicationPreferences node(String pathName) {
         try {
-            this.currentNode = parentPrefs.node(pathName);
+            currentNode = parentPrefs.node(pathName);
             return this;
         } catch (IllegalArgumentException iae) {
             _logger.error("Consecutive slashes in path");
@@ -152,6 +163,13 @@ public class ApplicationPreferences implements Service {
         }
     }
 
+    /**
+     * Returns the object from the preferences
+     *
+     * @param key - key with which the specified value is to be associated
+     * @param def - the default value that should be used if preferences don't contain such key
+     * @return the object from preferences
+     */
     public Object getObject(String key, Object def) {
         // TODO: split to the parts according to the store size
         byte[] bytes = getCurrentNode().getByteArray(key, null);
