@@ -144,7 +144,7 @@ public class StashWindowController extends AbstractStateListener {
 
     @FXML
     public void onDropStashAction(ActionEvent event) {
-        boolean isContinue = GLTAlertUtils.requesConfirmationOperation(TITLE_DROP_STASH,
+        boolean isContinue = GLTAlertUtils.requestConfirmationOperation(TITLE_DROP_STASH,
                 HEADER_MESSAGE_DROP_STASH, CONTENT_MESSAGE_DROP_STASH);
         if (!isContinue) {
             return;

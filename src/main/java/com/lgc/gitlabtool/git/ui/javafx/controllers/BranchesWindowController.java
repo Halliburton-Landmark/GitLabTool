@@ -142,7 +142,7 @@ public class BranchesWindowController extends AbstractStateListener {
     public void deleteAction() {
         List<Project> selectedProjects = currentProjectsListView.getItems();
         Branch selectedBranch = branchesListView.getSelectionModel().getSelectedItem();
-        boolean isYesButtonPressed = GLTAlertUtils.requesConfirmationOperation(DELETE_BRANCHE_TITLE,
+        boolean isYesButtonPressed = GLTAlertUtils.requestConfirmationOperation(DELETE_BRANCHE_TITLE,
                 "The " + selectedBranch.getBranchName() + " branch will be deleted from " + selectedProjects.size() + " project(s).",
                 "Are you sure you want to do this?");
         if (!isYesButtonPressed) {

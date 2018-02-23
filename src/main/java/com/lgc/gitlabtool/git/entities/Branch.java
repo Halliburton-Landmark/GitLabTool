@@ -89,7 +89,7 @@ public class Branch {
     /**
      * Compares name of current branch with the branch name.
      *
-     * @param branch the branch name
+     * @param branchName the branch name
      * @return <code>true</code> if names are equals, otherwise <code>false</code>.
      */
     public boolean compareBranchesNames(String branchName) {
