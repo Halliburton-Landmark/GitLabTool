@@ -49,7 +49,6 @@ import com.lgc.gitlabtool.git.ui.ViewKey;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 import com.lgc.gitlabtool.git.ui.javafx.AlertWithCheckBox;
 import com.lgc.gitlabtool.git.ui.javafx.ChangesCheckDialog;
-import com.lgc.gitlabtool.git.ui.javafx.CreateNewBranchDialog;
 import com.lgc.gitlabtool.git.ui.javafx.CreateProjectDialog;
 import com.lgc.gitlabtool.git.ui.javafx.GLTAlert;
 import com.lgc.gitlabtool.git.ui.javafx.GLTScene;
@@ -188,7 +187,6 @@ public class ModularController implements UpdateProgressListener {
     public static final String NO_ANY_PROJECT_FOR_OPERATION = "There isn't any proper project selected for %s operation";
 
     private static final String BRANCHES_TITLE = "Branches";
-    private static final String NEW_BRANCH_CREATION = "new branch creation";
     private static final String PULL_OPERATION_NAME = "pull";
     private static final String PUSH_OPERATION_NAME = "push";
     private static final String BRANCES_OPERATION_NAME = "operation with branches";
@@ -442,7 +440,6 @@ public class ModularController implements UpdateProgressListener {
             _toolbarManager.getButtonById(GLToolButtons.CHANGE_GROUP_BUTTON.getId()).setOnAction(this::loadGroupWindow);
             _toolbarManager.getButtonById(GLToolButtons.BRANCHES_BUTTON.getId()).setOnAction(this::showBranchesWindow);
             _toolbarManager.getButtonById(GLToolButtons.CLONE_PROJECT_BUTTON.getId()).setOnAction(this::cloneShadowProject);
-            _toolbarManager.getButtonById(GLToolButtons.NEW_BRANCH_BUTTON.getId()).setOnAction(this::onNewBranchButton);
             _toolbarManager.getButtonById(GLToolButtons.CREATE_PROJECT_BUTTON.getId()).setOnAction(this::createProjectButton);
             _toolbarManager.getButtonById(GLToolButtons.STAGING_BUTTON.getId()).setOnAction(this::openGitStaging);
             _toolbarManager.getButtonById(GLToolButtons.PUSH_BUTTON.getId()).setOnAction(this::onPushAction);
@@ -458,7 +455,6 @@ public class ModularController implements UpdateProgressListener {
             _mainMenuManager.getButtonById(GLToolButtons.GROUP_WINDOW_CLONE_GROUP).setOnAction(this::onCloneGroups);
         } else if (windowId.equals(ViewKey.PROJECTS_WINDOW.getKey())) {
             _mainMenuManager.getButtonById(GLToolButtons.MAIN_CLONE_PROJECT).setOnAction(this::cloneShadowProject);
-            _mainMenuManager.getButtonById(GLToolButtons.MAIN_CREATE_BRANCH).setOnAction(this::onNewBranchButton);
             _mainMenuManager.getButtonById(GLToolButtons.MAIN_STAGING).setOnAction(this::openGitStaging);
             _mainMenuManager.getButtonById(GLToolButtons.MAIN_PUSH).setOnAction(this::onPushAction);
             _mainMenuManager.getButtonById(GLToolButtons.MAIN_PULL).setOnAction(this::onPullAction);
@@ -980,18 +976,6 @@ public class ModularController implements UpdateProgressListener {
 
     @FXML
     @SuppressWarnings("unused")
-    private void onNewBranchButton(ActionEvent actionEvent) {
-        List<Project> clonedProjectsWithoutConflicts = getCorrectCurrentProjects();
-        if (!clonedProjectsWithoutConflicts.isEmpty()) {
-            CreateNewBranchDialog dialog = new CreateNewBranchDialog(clonedProjectsWithoutConflicts);
-            dialog.showAndWait();
-        } else {
-            _consoleService.addMessage(String.format(NO_ANY_PROJECT_FOR_OPERATION, NEW_BRANCH_CREATION), MessageType.ERROR);
-        }
-    }
-
-    @FXML
-    @SuppressWarnings("unused")
     private void createProjectButton(ActionEvent actionEvent) {
         CreateProjectDialog dialog = new CreateProjectDialog(_currentGroup, null);
         dialog.showAndWait();
@@ -1338,7 +1322,6 @@ public class ModularController implements UpdateProgressListener {
 
                 Menu subMenuGit = new Menu("Git");
 
-                MenuItem itemCreateBranch = createMenuItem(GLToolButtons.MAIN_CREATE_BRANCH, this::onNewBranchButton);
                 MenuItem itemBranches = createMenuItem(GLToolButtons.MAIN_BRANCHES, this::showBranchesWindow);
                 MenuItem itemStaging = createMenuItem(GLToolButtons.MAIN_STAGING, this::openGitStaging);
                 MenuItem itemPull = createMenuItem(GLToolButtons.MAIN_PULL, this::onPullAction);
@@ -1346,8 +1329,7 @@ public class ModularController implements UpdateProgressListener {
                 MenuItem itemRevert = createMenuItem(GLToolButtons.MAIN_REVERT, this::onRevertChanges);
                 MenuItem itemStash = createMenuItem(GLToolButtons.MAIN_STASH, this::showStashWindow);
 
-                subMenuGit.getItems().addAll(itemCreateBranch, itemBranches, itemStaging,
-                        itemPull, itemPush, itemRevert, itemStash);
+                subMenuGit.getItems().addAll(itemBranches, itemStaging, itemPull, itemPush, itemRevert, itemStash);
 
                 MenuItem itemEditProjectProp = createMenuItem(GLToolButtons.MAIN_EDIT_PROJECT_PROPERTIES,
                         this::showEditProjectPropertiesWindow);
@@ -1453,7 +1435,6 @@ public class ModularController implements UpdateProgressListener {
 
     private void setToolbarDisableProperty(BooleanBinding bindingForShadow, BooleanBinding bindingForCloned) {
         _toolbarManager.getButtonById(GLToolButtons.CLONE_PROJECT_BUTTON.getId()).disableProperty().bind(bindingForCloned);
-        _toolbarManager.getButtonById(GLToolButtons.NEW_BRANCH_BUTTON.getId()).disableProperty().bind(bindingForShadow);
         _toolbarManager.getButtonById(GLToolButtons.BRANCHES_BUTTON.getId()).disableProperty().bind(bindingForShadow);
         _toolbarManager.getButtonById(GLToolButtons.STAGING_BUTTON.getId()).disableProperty().bind(bindingForShadow);
         _toolbarManager.getButtonById(GLToolButtons.PUSH_BUTTON.getId()).disableProperty().bind(bindingForShadow);
@@ -1466,7 +1447,6 @@ public class ModularController implements UpdateProgressListener {
         _mainMenuManager.getButtonById(GLToolButtons.MAIN_CLONE_PROJECT).disableProperty().bind(bindingForCloned);
         _mainMenuManager.getButtonById(GLToolButtons.MAIN_STAGING).disableProperty().bind(bindingForShadow);
         _mainMenuManager.getButtonById(GLToolButtons.MAIN_BRANCHES).disableProperty().bind(bindingForShadow);
-        _mainMenuManager.getButtonById(GLToolButtons.MAIN_CREATE_BRANCH).disableProperty().bind(bindingForShadow);
         _mainMenuManager.getButtonById(GLToolButtons.MAIN_PUSH).disableProperty().bind(bindingForShadow);
         _mainMenuManager.getButtonById(GLToolButtons.MAIN_PULL).disableProperty().bind(bindingForShadow);
         _mainMenuManager.getButtonById(GLToolButtons.MAIN_REVERT).disableProperty().bind(bindingForShadow);

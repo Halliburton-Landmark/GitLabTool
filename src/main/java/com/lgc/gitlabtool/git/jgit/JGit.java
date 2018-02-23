@@ -85,6 +85,8 @@ public class JGit {
     private static final String CANCEL_CLONE_MESSAGE = "Cloning process was canceled.";
     private static final String ORIGIN_PREFIX = "origin/";
     private static final String WRONG_PARAMETERS = "Wrong parameters for obtaining branches.";
+    private static final String PUSH_START_MESSAGE = "Push operation is started.";
+    private static final String PUSH_FINISH_MESSAGE = "Push operation is finished.";
     private static final int NOT_FOUND = -1;
 
     private final BackgroundService _backgroundService;
@@ -773,26 +775,31 @@ public class JGit {
         if (projects == null || projects.isEmpty() || progressListener == null) {
             throw new IllegalArgumentException("Incorrect data: projects is " + projects);
         }
-        progressListener.onStart();
         try {
+            progressListener.onStart(PUSH_START_MESSAGE);
             Map<Project, JGitStatus> statuses = new HashMap<>();
+            long step = 100 / projects.size();
+            AtomicLong progress = new AtomicLong(0);
             for (Project project : projects) {
+                JGitStatus pushStatus = JGitStatus.FAILED;
+                progress.addAndGet(step);
+                progressListener.onStart(project);
                 if (project == null || !project.isCloned()) {
-                    progressListener.onError(project);
-                    statuses.put(null, JGitStatus.FAILED);
+                    progressListener.onError(progress.get(), project, pushStatus);
+                    statuses.put(null, pushStatus);
                     continue;
                 }
-                JGitStatus pushStatus = push(project);
+                pushStatus = push(project);
                 if (pushStatus.equals(JGitStatus.FAILED)) {
-                    progressListener.onError(project);
+                    progressListener.onError(progress.get(), project, pushStatus);
                 } else {
-                    progressListener.onSuccess(project);
+                    progressListener.onSuccess(progress.get(), project, pushStatus);
                 }
                 statuses.put(project, pushStatus);
             }
             return statuses;
         } finally {
-            progressListener.onFinish();
+            progressListener.onFinish(PUSH_FINISH_MESSAGE);
         }
     }
 
