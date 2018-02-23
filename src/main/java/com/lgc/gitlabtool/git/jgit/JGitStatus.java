@@ -166,6 +166,23 @@ public enum JGitStatus {
             return "Branch currently checked out";
         }
 
+    },
+
+    /**
+     * Operation failed for other reason. The cause of the failure needed to get from git.
+     */
+    REJECTED_OTHER_REASON {
+        @Override
+        public boolean isSuccessful() {
+            return false;
+        }
+    },
+
+    OK {
+        @Override
+        public boolean isSuccessful() {
+            return true;
+        }
     };
 
     /**

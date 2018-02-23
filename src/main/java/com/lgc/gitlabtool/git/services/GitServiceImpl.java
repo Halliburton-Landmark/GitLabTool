@@ -41,17 +41,17 @@ public class GitServiceImpl implements GitService {
 
     private static final Logger _logger = LogManager.getLogger(GitServiceImpl.class);
     private static final String CHECKOUT_BRANCH_FINISHED_MESSAGE = "Checkout branch operation is finished.";
+    private static final String DELETE_BRANCH_STARTED = "Delete branch operation is started.";
+    private static final String DELETE_BRANCH_FINISHED = "Delete branch operation is finished.";
     private static final String GROUP_STASH_ID = "[GS%s] ";
 
     private static JGit _git;
     private static StateService _stateService;
-    private static ConsoleService _consoleService;
     private static ChangedFilesUtils _changedFilesUtils;
 
-    public GitServiceImpl(StateService stateService, ConsoleService consoleService, JGit jGit, ChangedFilesUtils changedFilesUtils) {
+    public GitServiceImpl(StateService stateService, JGit jGit, ChangedFilesUtils changedFilesUtils) {
         _git = jGit;
         _stateService = stateService;
-        _consoleService = consoleService;
         _changedFilesUtils = changedFilesUtils;
     }
 
@@ -66,8 +66,7 @@ public class GitServiceImpl implements GitService {
 
     @Override
     public Map<Project, JGitStatus> checkoutBranch(List<Project> projects, Branch branch, ProgressListener progress) {
-        boolean isRemote = branch.getBranchType().equals(BranchType.REMOTE);
-        return checkoutBranch(projects, branch.getBranchName(), isRemote, progress);
+        return checkoutBranch(projects, branch.getBranchName(), branch.isRemote(), progress);
     }
 
     @Override
@@ -154,6 +153,7 @@ public class GitServiceImpl implements GitService {
         if(progressListener == null){
             progressListener = EmptyProgressListener.get();
         }
+        _stateService.stateON(ApplicationState.PUSH); // state must be off in the progressListener by a finish action
         return _git.push(projects, progressListener);
     }
 
@@ -408,6 +408,50 @@ public class GitServiceImpl implements GitService {
             _stateService.stateOFF(ApplicationState.STASH);
         }
         return resultOperations;
+    }
+
+    @Override
+    public Map<Project, Boolean> deleteBranch(List<Project> projects,
+                                              Branch deletedBranch,
+                                              ProgressListener progressListener) {
+        Map<Project, Boolean> statuses = new ConcurrentHashMap<>();
+        try {
+            progressListener.onStart(DELETE_BRANCH_STARTED);
+            if (projects == null || projects.isEmpty() || deletedBranch == null) {
+                _logger.error("Error during to delete branch. Incorrect projects or branch.");
+                return statuses;
+            }
+            long step = 100 / projects.size();
+            AtomicLong progress = new AtomicLong(0);
+            _stateService.stateON(ApplicationState.DELETE_BRANCH);
+            projects.parallelStream()
+                    .filter(Objects::nonNull)
+                    .forEach(project -> deleteBranchAndUpdateProgress(project, deletedBranch, statuses, progressListener, progress, step));
+        } finally {
+            // ApplicationState.DELETE_BRANCH state should turn off in the progressListener by the finish action
+            progressListener.onFinish(DELETE_BRANCH_FINISHED);
+        }
+        return statuses;
+    }
+
+    private void deleteBranchAndUpdateProgress(Project project, Branch deletedBranch,
+                                               Map<Project, Boolean> statuses,
+                                               ProgressListener progressListener,
+                                               AtomicLong progress, long step) {
+        progressListener.onStart(project);
+        String branchName = deletedBranch.getBranchName();
+        Map<JGitStatus, String> mapResult = _git.deleteBranch(project, branchName, deletedBranch.isRemote());
+        for (Entry<JGitStatus, String> result : mapResult.entrySet()) {
+            boolean isSuccessful = result.getKey().isSuccessful();
+            statuses.put(project, isSuccessful);
+            progress.addAndGet(step);
+
+            if (isSuccessful) {
+                progressListener.onSuccess(progress.get(), project, result.getValue());
+            } else {
+                progressListener.onError(progress.get(), project, result.getValue());
+            }
+        }
     }
 
     private void createStash(Map<Project, Boolean> results, Project project,

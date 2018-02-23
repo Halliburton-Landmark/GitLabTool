@@ -36,29 +36,32 @@ public class PushProgressListener implements ProgressListener {
 
     @Override
     public void onSuccess(Object... t) {
-        if(t[0] instanceof Project) {
-            String message = "Pushing the " + ((Project)t[0]).getName() + " project is successful!";
+        if(t[1] instanceof Project) {
+            String message = "Pushing the " + ((Project)t[1]).getName() + " project is successful!";
             _consoleService.addMessage(message, MessageType.SUCCESS);
         }
     }
 
     @Override
     public void onError(Object... t) {
-        if(t[0] instanceof Project) {
-            String message = "Failed pushing the " + ((Project)t[0]).getName() + " project!";
+        if(t[1] instanceof Project) {
+            String message = "Failed pushing the " + ((Project)t[1]).getName() + " project!";
             _consoleService.addMessage(message, MessageType.ERROR);
         }
     }
 
     @Override
     public void onStart(Object... t) {
-        _consoleService.addMessage("Push projects is started...", MessageType.SIMPLE);
-        _stateService.stateON(ApplicationState.PUSH);
+        if (t[0] instanceof String) {
+            _consoleService.addMessage((String) t[0], MessageType.SIMPLE);
+        }
     }
 
     @Override
     public void onFinish(Object... t) {
+        if (t[0] instanceof String) {
+            _consoleService.addMessage((String) t[0], MessageType.SIMPLE);
+        }
         _stateService.stateOFF(ApplicationState.PUSH);
-        _consoleService.addMessage("Push projects is finished!", MessageType.SIMPLE);
     }
 }

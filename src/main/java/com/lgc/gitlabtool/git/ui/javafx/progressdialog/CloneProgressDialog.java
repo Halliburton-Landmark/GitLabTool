@@ -1,9 +1,10 @@
-package com.lgc.gitlabtool.git.ui.javafx;
+package com.lgc.gitlabtool.git.ui.javafx.progressdialog;
 
 import com.lgc.gitlabtool.git.entities.MessageType;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
+import com.lgc.gitlabtool.git.ui.javafx.progressdialog.ProgressDialog.CancelButtonStatus;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;

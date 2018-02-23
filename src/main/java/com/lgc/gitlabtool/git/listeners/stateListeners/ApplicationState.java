@@ -103,6 +103,13 @@ public enum ApplicationState {
         public String toString() {
             return "Stashing";
         }
+    },
+
+    DELETE_BRANCH {
+        @Override
+        public String toString() {
+            return "Deleting branch";
+        }
     };
 
     public String getState() {
