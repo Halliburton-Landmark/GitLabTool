@@ -37,6 +37,7 @@ public class ApplicationPreferences implements Service {
 
     /**
      * Restores default settings
+     * TODO will be used in Settings UI
      */
     public void restoreDefaults() {
         try {
