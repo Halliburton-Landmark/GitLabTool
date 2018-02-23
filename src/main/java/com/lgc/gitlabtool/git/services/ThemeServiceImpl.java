@@ -15,6 +15,10 @@ public class ThemeServiceImpl implements ThemeService {
 
     private static final String THEME_PREFS_KEY = "glt_theme";
 
+    /**
+     * This is the main node of ApplicationPreferences.
+     * You mustn't use it to change prefs. Use {@link #getThemePrefs()} instead
+     */
     private ApplicationPreferences themePrefs;
     private GLTTheme currentGLTThemes;
     private static final Double LIGHTING_COEFFICIENT_FOR_DARK_THEMES = +0.65;
@@ -22,9 +26,8 @@ public class ThemeServiceImpl implements ThemeService {
     private static final Logger _logger = LogManager.getLogger(ThemeService.class);
 
     ThemeServiceImpl(ApplicationPreferences preferences) {
-        themePrefs = preferences.node(THEME_PREFS_KEY);
-
-        String currentThemeKey = themePrefs.get(THEME_PREFS_KEY, GLTTheme.LIGHT_THEME.getKey());
+        themePrefs = preferences;
+        String currentThemeKey = getThemePrefs().get(THEME_PREFS_KEY, GLTTheme.LIGHT_THEME.getKey());
         currentGLTThemes = GLTTheme.getThemeByKey(currentThemeKey);
     }
 
@@ -50,7 +53,7 @@ public class ThemeServiceImpl implements ThemeService {
 
     public void setTheme(String themeName) {
         currentGLTThemes = GLTTheme.getThemeByKey(themeName);
-        themePrefs.put(THEME_PREFS_KEY, currentGLTThemes.getKey());
+        getThemePrefs().put(THEME_PREFS_KEY, currentGLTThemes.getKey());
     }
 
     @Override
@@ -81,5 +84,14 @@ public class ThemeServiceImpl implements ThemeService {
     @Override
     public Double getLightningCoefficient() {
         return LIGHTING_COEFFICIENT_FOR_DARK_THEMES;
+    }
+
+    /**
+     * Returns the theme preferences node of Application preferences
+     *
+     * @return theme preferences node
+     */
+    private ApplicationPreferences getThemePrefs() {
+        return themePrefs.node(THEME_PREFS_KEY);
     }
 }

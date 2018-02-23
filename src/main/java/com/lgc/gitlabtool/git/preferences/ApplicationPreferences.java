@@ -14,17 +14,21 @@ public class ApplicationPreferences implements Service {
 
     private static final String GLT_PREFERENCES_NODE = "gitlab_tool_application_preferences";
 
+    /**
+     * Parent root node for all application. It contains all of the preferences nodes
+     * and couldn't be changed
+     */
     private final Preferences parentPrefs;
 
-    private String currentNode = GLT_PREFERENCES_NODE;
+    /**
+     * Current node. Changes each time we call {@link #node(String)} method
+     */
+    private Preferences currentNode;
 
     public ApplicationPreferences() {
         parentPrefs = Preferences.userRoot().node(GLT_PREFERENCES_NODE);
+        currentNode = parentPrefs;
     }
-
-    // TODO
-    // Think about splitting preferences on the nodes
-
 
     private void setUpDefauls() {
         // TODO
@@ -104,20 +108,32 @@ public class ApplicationPreferences implements Service {
         return getCurrentNode().getByteArray(key, def);
     }
 
-    public ApplicationPreferences node(String pathName) {
-//        parentPrefs.node(pathName);
-        setCurrentNode(pathName);
-        return this;
+    public String[] keys() throws BackingStoreException {
+        return getCurrentNode().keys();
     }
 
-    private void setCurrentNode(String node) {
-        this.currentNode = node;
+    public String absolutePath() {
+        return getCurrentNode().absolutePath();
+    }
+
+    public ApplicationPreferences node(String pathName) {
+        try {
+            this.currentNode = parentPrefs.node(pathName);
+            return this;
+        } catch (IllegalArgumentException iae) {
+            _logger.error("Consecutive slashes in path");
+            return null;
+        } catch (IllegalStateException ise) {
+            _logger.error("Node has been removed with the removeNode() method");
+            return null;
+        } catch (NullPointerException npe) {
+            _logger.error("Key is null");
+            return null;
+        }
     }
 
     private Preferences getCurrentNode() {
-        return currentNode.equals(GLT_PREFERENCES_NODE)
-                ? parentPrefs
-                : parentPrefs.node(currentNode);
+        return currentNode;
     }
 
     /**
@@ -170,11 +186,4 @@ public class ApplicationPreferences implements Service {
         }
     }
 
-    public String[] keys() throws BackingStoreException {
-        return getCurrentNode().keys();
-    }
-
-    public String absolutePath() {
-        return getCurrentNode().absolutePath();
-    }
 }

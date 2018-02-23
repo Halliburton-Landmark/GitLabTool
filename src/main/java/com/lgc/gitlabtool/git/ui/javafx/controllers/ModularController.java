@@ -21,7 +21,6 @@ import com.lgc.gitlabtool.git.preferences.ApplicationPreferences;
 import com.lgc.gitlabtool.git.util.OpenTerminalUtil;
 import javafx.scene.Scene;
 import javafx.scene.effect.Effect;
-import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -326,7 +325,6 @@ public class ModularController implements UpdateProgressListener {
      *
      ***********************************************************************************************/
 
-    private ApplicationPreferences preferences;
     private Group _currentGroup;
     private String _currentView;
     private ProjectList _projectsList;
@@ -342,8 +340,6 @@ public class ModularController implements UpdateProgressListener {
     @FXML
     @SuppressWarnings("ConstantConditions")
     private void initialize() {
-        preferences = getPreferences();
-
         _stateService.addStateListener(ApplicationState.CLONE, new GroupsWindowStateListener());
 
         userId.setText(_loginService.getCurrentUser().getName());
@@ -676,19 +672,19 @@ public class ModularController implements UpdateProgressListener {
 
     private void setupProjectsDividerPosition(String groupTitle) {
 
-        if (preferences != null) {
+        if (getPreferences() != null) {
             String key = String.valueOf(groupTitle.hashCode());
-            double splitPaneDivider = preferences.getDouble(key, 0.3);
+            double splitPaneDivider = getPreferences().getDouble(key, 0.3);
             dividerMainPane.setDividerPositions(splitPaneDivider);
         }
 
         dividerMainPane.getDividers().get(0).positionProperty().addListener(
                 (observable, oldValue, newValue) -> {
-                    if (preferences != null && Objects.equals(_currentView, ViewKey.PROJECTS_WINDOW.getKey())) {
+                    if (getPreferences() != null && Objects.equals(_currentView, ViewKey.PROJECTS_WINDOW.getKey())) {
                         String key = String.valueOf(groupTitle.hashCode());
                         Double value = roundTo3(newValue.doubleValue());
 
-                        preferences.putDouble(key, value);
+                        getPreferences().putDouble(key, value);
                     }
                 });
     }
@@ -1103,7 +1099,7 @@ public class ModularController implements UpdateProgressListener {
     @FXML
     @SuppressWarnings({"unchecked", "unused"})
     private void onShowHideShadowProjects(ActionEvent actionEvent) {
-        preferences.putBoolean(PREF_NAME_HIDE_SHADOWS, filterShadowProjects.isSelected());
+        getPreferences().putBoolean(PREF_NAME_HIDE_SHADOWS, filterShadowProjects.isSelected());
         hideShadowsAction();
     }
 
@@ -1176,21 +1172,14 @@ public class ModularController implements UpdateProgressListener {
         return bigDecimal.doubleValue();
     }
 
-    // Gets preferences by key, could return null (used for divider position)
+    /**
+     * Gets preferences by key, could return null (used for divider position)
+     *
+     * @return application preferences node
+     */
     private ApplicationPreferences getPreferences() {
-        try {
-            return ((ApplicationPreferences) ServiceProvider.getInstance()
+        return ((ApplicationPreferences) ServiceProvider.getInstance()
                     .getService(ApplicationPreferences.class)).node(DIVIDER_PROPERTY_NODE);
-        } catch (IllegalArgumentException iae) {
-            _logger.error("Consecutive slashes in path");
-            return null;
-        } catch (IllegalStateException ise) {
-            _logger.error("Node has been removed with the removeNode() method");
-            return null;
-        } catch (NullPointerException npe) {
-            _logger.error("Key is null");
-            return null;
-        }
     }
 
     /**
@@ -1220,8 +1209,8 @@ public class ModularController implements UpdateProgressListener {
 
     private void hideShadowsAction() {
         Platform.runLater(() -> {
-            if (preferences != null) {
-                Boolean isHide = preferences.getBoolean(PREF_NAME_HIDE_SHADOWS, false);
+            if (getPreferences() != null) {
+                Boolean isHide = getPreferences().getBoolean(PREF_NAME_HIDE_SHADOWS, false);
                 filterShadowProjects.setSelected(isHide);
                 if (isHide) {
                     ObservableList<Project> obsList = FXCollections.observableArrayList(_projectsList.getClonedProjects());

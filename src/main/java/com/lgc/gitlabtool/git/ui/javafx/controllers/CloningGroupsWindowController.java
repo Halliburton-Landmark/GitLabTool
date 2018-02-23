@@ -34,9 +34,6 @@ import javafx.util.Callback;
 public class CloningGroupsWindowController {
     private static final String FOLDER_CHOOSER_DIALOG = "Destination folder";
 
-    // Uncomment if you want to log something
-    // private static final Logger logger = LogManager.getLogger(CloningGroupsWindowController.class);
-
     private final LoginService _loginService = ServiceProvider.getInstance().getService(LoginService.class);
 
     private final GroupsUserService _groupsService = ServiceProvider.getInstance()
@@ -57,10 +54,12 @@ public class CloningGroupsWindowController {
     @FXML
     private Button browseButton;
 
-    private final ApplicationPreferences _prefs = ((ApplicationPreferences) ServiceProvider.getInstance()
-            .getService(ApplicationPreferences.class)).node("cloning_group_prefs");
-
     private static final String PREF_NAME = "path_to_group";
+
+    private ApplicationPreferences getPrefs() {
+        return ((ApplicationPreferences) ServiceProvider.getInstance()
+                .getService(ApplicationPreferences.class)).node("cloning_group_prefs");
+    }
 
     @FXML
     public void initialize() {
@@ -71,15 +70,10 @@ public class CloningGroupsWindowController {
         projectsList.setItems(myObservableList);
 
         folderPath.textProperty().addListener((observable, oldValue, newValue) -> filterForOkButton());
-        projectsList.setOnMouseClicked(new EventHandler<Event>() {
-            @Override
-            public void handle(Event event) {
-                filterForOkButton();
-            };
-        });
+        projectsList.setOnMouseClicked((EventHandler<Event>) event -> filterForOkButton());
         setStyleAndDisableForIncorrectData();
 
-        String propertyValue = _prefs.get(PREF_NAME, StringUtils.EMPTY);
+        String propertyValue = getPrefs().get(PREF_NAME, StringUtils.EMPTY);
         if (propertyValue != null) {
             folderPath.setText(propertyValue);
         }
@@ -97,7 +91,7 @@ public class CloningGroupsWindowController {
         File selectedDirectory = chooser.showDialog(stage);
         if (selectedDirectory != null) {
             String path = selectedDirectory.getCanonicalPath();
-            _prefs.put(PREF_NAME, path);
+            getPrefs().put(PREF_NAME, path);
             folderPath.setText(path);
         }
     }
