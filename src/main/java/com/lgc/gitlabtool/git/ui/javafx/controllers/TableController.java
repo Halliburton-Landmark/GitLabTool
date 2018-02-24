@@ -9,6 +9,8 @@ import com.lgc.gitlabtool.git.ui.javafx.controllers.listview.ListViewMgrProvider
 import com.lgc.gitlabtool.git.ui.javafx.controllers.listview.ProjectListView;
 import com.lgc.gitlabtool.git.ui.table.Commit;
 import com.lgc.gitlabtool.git.ui.table.CommitHistoryTableView;
+import com.lgc.gitlabtool.git.ui.table.CustomDate;
+import com.lgc.gitlabtool.git.ui.table.SortedByDate;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -17,9 +19,12 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
+ * This class represent controller for commit history table
+ *
  * Created by Oleksandr Kozlov on 03.02.2018.
  */
 public class TableController {
@@ -37,13 +42,13 @@ public class TableController {
     private TableColumn<Commit, String> authorColumn;
 
     @FXML
-    private TableColumn<Commit, String> authoredDateColumn;
+    private TableColumn<Commit, CustomDate> authoredDateColumn;
 
     @FXML
     private TableColumn<Commit, String> committerColumn;
 
     @FXML
-    private TableColumn<Commit, String> dateColumn;
+    private TableColumn<Commit, CustomDate> dateColumn;
 
     @FXML
     private TableColumn<Commit, String> projectColumn;
@@ -66,6 +71,7 @@ public class TableController {
                     List<Commit> commits = _gitService.getAllCommits(project, nameBranch);
                     data.addAll(commits);
                 }
+                Collections.sort(data, new SortedByDate());
                 historyTable.setItems(data);
                 historyTable.setVisible(true);
             } else {
@@ -97,14 +103,14 @@ public class TableController {
         PropertyValueFactory<Commit, String> authorProperty
                 = new PropertyValueFactory<Commit, String>("author");
 
-        PropertyValueFactory<Commit, String> authoredDateProperty
-                = new PropertyValueFactory<Commit, String>("authoredDate");
+        PropertyValueFactory<Commit, CustomDate> authoredDateProperty
+                = new PropertyValueFactory<Commit, CustomDate>("authoredDate");
 
         PropertyValueFactory<Commit, String> committerProperty
                 = new PropertyValueFactory<Commit, String>("committer");
 
-        PropertyValueFactory<Commit, String> dateProperty
-                = new PropertyValueFactory<Commit, String>("date");
+        PropertyValueFactory<Commit, CustomDate> dateProperty
+                = new PropertyValueFactory<Commit, CustomDate>("date");
 
         PropertyValueFactory<Commit, String> projectProperty
                 = new PropertyValueFactory<Commit, String>("project");
@@ -124,7 +130,9 @@ public class TableController {
 
     public void initListeners() {
         projectListView = (ProjectListView) listViewMgrProvider.getFeature().getListView(ProjectListView.class);
-        projectListView.getSelectionModel().getSelectedItems().addListener(listChangeListener);
+        if (projectListView != null) {
+            projectListView.getSelectionModel().getSelectedItems().addListener(listChangeListener);
+        }
 
         listViewMgrProvider.getFeature().addChangeActiveViewListener(activeViewChangeListener);
     }

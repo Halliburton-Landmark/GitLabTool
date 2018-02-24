@@ -1,10 +1,10 @@
 package com.lgc.gitlabtool.git.ui.javafx.controllers.listview;
 
-import javafx.scene.control.Control;
-
 import java.util.List;
 
 /**
+ * This interface represent manager for javafx components.
+ *
  * Created by Oleksandr Kozlov on 2/19/2018.
  */
 public interface ComponentMgr<T> {

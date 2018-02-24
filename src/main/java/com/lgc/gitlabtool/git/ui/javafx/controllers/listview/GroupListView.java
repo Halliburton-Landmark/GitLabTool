@@ -7,6 +7,8 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.MultipleSelectionModel;
 
 /**
+ * This class represent Group view list
+ *
  * Created by Oleksandr Kozlov on 2/20/2018.
  */
 public class GroupListView<T extends Group> extends ListView {

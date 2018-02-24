@@ -1,6 +1,10 @@
 package com.lgc.gitlabtool.git.ui.table;
 
+import java.util.Date;
+
 /**
+ * This pojo class keeps data about commit.
+ *
  * Created by Oleksandr Kozlov on 03.02.2018.
  */
 public class Commit {
@@ -8,14 +12,14 @@ public class Commit {
     private String hash;
     private String message;
     private String author;
-    private String authoredDate;
+    private Date authoredDate;
     private String committer;
-    private String date;
+    private Date date;
     private String project;
 
     public Commit() {}
 
-    public Commit(String hash, String message, String author, String authoredDate, String committer, String date, String project) {
+    public Commit(String hash, String message, String author, Date authoredDate, String committer, Date date, String project) {
         this.hash = hash;
         this.message = message;
         this.author = author;
@@ -49,11 +53,11 @@ public class Commit {
         this.author = author;
     }
 
-    public String getAuthoredDate() {
-        return authoredDate;
+    public CustomDate getAuthoredDate() {
+        return new CustomDate(authoredDate.getTime());
     }
 
-    public void setAuthoredDate(String authoredDate) {
+    public void setAuthoredDate(Date authoredDate) {
         this.authoredDate = authoredDate;
     }
 
@@ -65,11 +69,11 @@ public class Commit {
         this.committer = committer;
     }
 
-    public String getDate() {
-        return date;
+    public CustomDate getDate() {
+        return new CustomDate(date.getTime());
     }
 
-    public void setDate(String date) {
+    public void setDate(Date date) {
         this.date = date;
     }
 

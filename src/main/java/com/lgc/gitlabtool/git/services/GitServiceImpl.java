@@ -1,6 +1,7 @@
 package com.lgc.gitlabtool.git.services;
 
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Map.Entry;
@@ -260,9 +261,9 @@ public class GitServiceImpl implements GitService {
             commit.setProject(project.getName());
             commit.setMessage(revCommit.getFullMessage());
             commit.setAuthor(revCommit.getAuthorIdent().getName());
-            commit.setAuthoredDate(DateFormat.getInstance().format(revCommit.getCommitterIdent().getWhen()));
+            commit.setAuthoredDate(revCommit.getCommitterIdent().getWhen());
             commit.setCommitter(revCommit.getCommitterIdent().getName());
-            commit.setDate(DateFormat.getInstance().format(revCommit.getCommitterIdent().getWhen()));
+            commit.setDate(revCommit.getCommitterIdent().getWhen());
             commits.add(commit);
         }
         return commits;

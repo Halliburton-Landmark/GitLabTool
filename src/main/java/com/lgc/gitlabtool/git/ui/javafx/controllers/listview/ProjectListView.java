@@ -5,6 +5,8 @@ import javafx.collections.ObservableList;
 import javafx.scene.control.ListView;
 
 /**
+ * This class represent Project view list
+ *
  * Created by Oleksandr Kozlov on 2/19/2018.
  */
 public class ProjectListView<T extends Project> extends ListView {
