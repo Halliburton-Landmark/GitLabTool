@@ -1184,15 +1184,20 @@ public class JGit {
     }
 
     /**
-     * This method return all commits for currently selected branch
+     * This method return all commits for currently selected project
      *
-     * @param project
-     * @param branchName
-     * @return list of commits
+     * @param project the project
+     * @param branchName the branch name
+     * @return list of commits for currently selected project
      */
     public Iterable<RevCommit> getAllCommits(Project project, String branchName) {
-        if (project == null) {
-            return Collections.EMPTY_LIST;
+        if (project == null || branchName == null) {
+            logger.error(WRONG_PARAMETERS);
+            return Collections.emptyList();
+        }
+        if (!project.isCloned()) {
+            logger.error(project.getName() + ERROR_MSG_NOT_CLONED);
+            return Collections.emptyList();
         }
         try (Git git = getGit(project.getPath())) {
             try (Repository repo = git.getRepository()) {

@@ -177,11 +177,11 @@ public interface GitService extends Service {
    public String getTrackingBranch(Project project);
 
     /**
-     * This method return all commits for currently selected branch
+     * This method return all commits for currently selected project
      *
-     * @param project
-     * @param branchName
-     * @return list of commits
+     * @param project the project
+     * @param branchName the branch
+     * @return list of all commits for currently selected project
      */
     public List<Commit> getAllCommits(Project project, String branchName);
 

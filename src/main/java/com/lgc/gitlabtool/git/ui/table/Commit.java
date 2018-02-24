@@ -17,8 +17,22 @@ public class Commit {
     private Date date;
     private String project;
 
+    /**
+     * Constructor
+     */
     public Commit() {}
 
+    /**
+     * Constructor
+     *
+     * @param hash
+     * @param message
+     * @param author
+     * @param authoredDate
+     * @param committer
+     * @param date
+     * @param project
+     */
     public Commit(String hash, String message, String author, Date authoredDate, String committer, Date date, String project) {
         this.hash = hash;
         this.message = message;
@@ -29,6 +43,11 @@ public class Commit {
         this.project = project;
     }
 
+    /**
+     * Gets the hash of the commit
+     *
+     * @return hash of the commit
+     */
     public String getHash() {
         return hash;
     }
@@ -37,6 +56,11 @@ public class Commit {
         this.hash = hash;
     }
 
+    /**
+     * Gets the message of the commit
+     *
+     * @return the message of the commit
+     */
     public String getMessage() {
         return message;
     }
@@ -45,6 +69,11 @@ public class Commit {
         this.message = message;
     }
 
+    /**
+     * Gets the author of the commit
+     *
+     * @return the author of the commit
+     */
     public String getAuthor() {
         return author;
     }
@@ -53,6 +82,11 @@ public class Commit {
         this.author = author;
     }
 
+    /**
+     * Gets the authored date of the commit
+     *
+     * @return the authored date of the commit
+     */
     public CustomDate getAuthoredDate() {
         return new CustomDate(authoredDate.getTime());
     }
@@ -61,6 +95,11 @@ public class Commit {
         this.authoredDate = authoredDate;
     }
 
+    /**
+     * Gets the committer of the commit
+     *
+     * @return the committer of the commit
+     */
     public String getCommitter() {
         return committer;
     }
@@ -69,6 +108,11 @@ public class Commit {
         this.committer = committer;
     }
 
+    /**
+     * Gets the date of the commit
+     *
+     * @return the date of the commit
+     */
     public CustomDate getDate() {
         return new CustomDate(date.getTime());
     }
@@ -77,6 +121,11 @@ public class Commit {
         this.date = date;
     }
 
+    /**
+     * Gets the project
+     *
+     * @return the project
+     */
     public String getProject() {
         return project;
     }
