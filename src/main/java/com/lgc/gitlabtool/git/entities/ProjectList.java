@@ -54,6 +54,16 @@ public class ProjectList {
     }
 
     /**
+     * Gets current group
+     *
+     * @return current loaded group. Also, can be <code>null</code>.
+     * If current group is <code>null</code> then a group isn't loaded (an user is on the group window).
+     */
+    public Group getCurrentGroup() {
+        return _currentGroup;
+    }
+
+    /**
      * Gets project list of current group.
      *
      * @return a unmodifiable list of project or <code>null</code> if projects weren't loaded.
