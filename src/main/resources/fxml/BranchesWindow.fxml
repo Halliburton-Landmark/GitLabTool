@@ -59,6 +59,7 @@
             <RadioButton mnemonicParsing="false" onAction="#onUpdateList" text="Remote + Local" toggleGroup="$branchesFilter" />
         </VBox>
         <CheckBox fx:id="commonMatchingCheckBox" mnemonicParsing="false" onAction="#onUpdateList" text="Only common" />
+        <CheckBox fx:id="switchOnLocal" contentDisplay="TOP" disable="true" mnemonicParsing="false" onAction="#onUpdateList" prefHeight="36.0" prefWidth="145.0" selected="true" text="Switch on a local &#10;branch (if it exists)" />
     </VBox>
     <HBox alignment="TOP_RIGHT" maxHeight="50.0" prefHeight="100.0" prefWidth="200.0" spacing="20.0" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="3">
         <Button fx:id="checkoutButton" mnemonicParsing="false" onAction="#onCheckoutButton" text="Checkout" />

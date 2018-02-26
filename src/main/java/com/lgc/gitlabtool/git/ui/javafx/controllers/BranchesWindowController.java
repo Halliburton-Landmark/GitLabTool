@@ -97,6 +97,9 @@ public class BranchesWindowController extends AbstractStateListener {
     @FXML
     private Button newBranchButton;
 
+    @FXML
+    private CheckBox switchOnLocal;
+
     private static final StateService _stateService = ServiceProvider.getInstance().getService(StateService.class);
     private static final ConsoleService _consoleService = ServiceProvider.getInstance().getService(ConsoleService.class);
     private static final BackgroundService _backgroundService = ServiceProvider.getInstance().getService(BackgroundService.class);
@@ -120,7 +123,7 @@ public class BranchesWindowController extends AbstractStateListener {
     @FXML
     public void initialize() {
         searchField.textProperty().addListener((observable, oldValue, newValue) -> filterPlantList(oldValue, newValue));
-        disableSwitchButton(null);
+        disableCheckoutButton(null);
     }
 
     void beforeShowing(List<Project> projects, Stage stage) {
@@ -386,21 +389,25 @@ public class BranchesWindowController extends AbstractStateListener {
                 Branch branch = newValue;
                 filteringProjectsListView(Arrays.asList(branch));
 
-                disableSwitchButton(branch);
+                disableCheckoutButton(branch);
             }
         });
     }
 
-    private void disableSwitchButton(Object currentBranch) {
-        ObservableValue<Boolean> disableProperty;
+    private void disableCheckoutButton(Branch currentBranch) {
+        ObservableValue<Boolean> disableButttonProperty;
+        ObservableValue<Boolean> disableSwichChechboxProperty;
         if (currentBranch == null) {
-            disableProperty = branchesListView.getSelectionModel().selectedItemProperty().isNull();
+            disableButttonProperty = branchesListView.getSelectionModel().selectedItemProperty().isNull();
+            disableSwichChechboxProperty = disableButttonProperty;
         } else {
-            boolean isDisable = isSelectedBranchCurrentForAllProjects((Branch)currentBranch);
-            disableProperty = new SimpleBooleanProperty(isDisable);
+            boolean isDisable = isSelectedBranchCurrentForAllProjects(currentBranch);
+            disableButttonProperty = new SimpleBooleanProperty(isDisable);
+            disableSwichChechboxProperty = new SimpleBooleanProperty(currentBranch.isRemote());
         }
-        checkoutButton.disableProperty().bind(disableProperty);
-        deleteButton.disableProperty().bind(disableProperty);
+        checkoutButton.disableProperty().bind(disableButttonProperty);
+        deleteButton.disableProperty().bind(disableButttonProperty);
+        switchOnLocal.disableProperty().bind(disableSwichChechboxProperty);
     }
 
     private boolean isSelectedBranchCurrentForAllProjects(Branch currentBranch) {
@@ -464,7 +471,7 @@ public class BranchesWindowController extends AbstractStateListener {
                             currentProjectsListView.setItems(FXCollections.observableArrayList(getProjectsByIds()));
                             onUpdateList();
                         }
-                        disableSwitchButton(branch);
+                        disableCheckoutButton(branch);
                     }
                 });
             });
