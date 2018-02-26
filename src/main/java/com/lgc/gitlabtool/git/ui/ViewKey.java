@@ -18,7 +18,8 @@ public enum ViewKey {
     SERVER_INPUT_WINDOW("serverInputWindow", "fxml/ServerInputWindow.fxml"),
     EDIT_PROJECT_PROPERTIES("editProjectProperties", "fxml/EditProjectPropertiesWindow.fxml"),
     GIT_STAGING_WINDOW("gitStagingWindow", "fxml/GitStagingWindow.fxml"),
-    STASH_WINDOW("stashWindow", "fxml/StashWindow.fxml");
+    STASH_WINDOW("stashWindow", "fxml/StashWindow.fxml"),
+    SETTINGS_WINDOW("settingsWindow", "fxml/SettingsWindow.fxml");
 
     private final String key;
     private final String path;
@@ -42,7 +43,7 @@ public enum ViewKey {
     }
 
 
-    private ViewKey(final String selectedKey, final String selectedPath) {
+    ViewKey(final String selectedKey, final String selectedPath) {
         this.key = selectedKey;
         this.path = selectedPath;
     }

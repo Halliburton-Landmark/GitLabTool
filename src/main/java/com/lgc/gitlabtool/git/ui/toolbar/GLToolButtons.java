@@ -47,6 +47,14 @@ public enum GLToolButtons {
             MainMenuInfo.HELP,
             GLToolConstants.ICON_SIZE_16),
 
+    GENERAL_SETTINGS(GLToolConstants.ALL_WINDOW_KEY,
+            "all_window_settings",
+            "icons/mainmenu/settings_16x16.png",
+            "Settings",
+            null,
+            MainMenuInfo.FILE,
+            GLToolConstants.ICON_SIZE_16),
+
     CLONE_GROUP_BUTTON(GLToolConstants.GROUPS_WINDOW_KEY,
             "group_cloneGroup",
             "icons/toolbar/clone_20x20.png",

@@ -463,6 +463,7 @@ public class ModularController implements UpdateProgressListener {
         userGuide.setAccelerator(new KeyCodeCombination(KeyCode.F1));
         _mainMenuManager.getButtonById(GLToolButtons.GENERAL_EXIT).setOnAction(this::exit);
         _mainMenuManager.getButtonById(GLToolButtons.GENERAL_ABOUT).setOnAction(this::showAboutPopup);
+        _mainMenuManager.getButtonById(GLToolButtons.GENERAL_SETTINGS).setOnAction(this::showSettingsPanel);
 
     }
 
@@ -1138,6 +1139,20 @@ public class ModularController implements UpdateProgressListener {
     private void openUserGuide(ActionEvent actionEvent){
         UserGuideUtil.openUserGuide();
     }
+
+    @FXML
+    private void showSettingsPanel(ActionEvent actionEvent) {
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(
+                    getClass().getClassLoader().getResource(ViewKey.SETTINGS_WINDOW.getPath()));
+            Parent parent = fxmlLoader.load();
+            SettingsWindowController controller = new SettingsWindowController();
+            controller.loadSettingsWindow(parent);
+        } catch(IOException e) {
+            _logger.error("Could not open settings panel: " + e.getMessage());
+        }
+    }
+
     //endregion
     /*
      *
