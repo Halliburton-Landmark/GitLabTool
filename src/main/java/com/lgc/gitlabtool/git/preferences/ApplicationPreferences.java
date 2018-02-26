@@ -30,6 +30,11 @@ public class ApplicationPreferences implements Service {
      */
     private Preferences currentNode;
 
+    /**
+     * Max byte count is 3/4 max string length (according to the {@link Preferences} documentation).
+     */
+    static private final int pieceLength = (3*Preferences.MAX_VALUE_LENGTH) / 4;
+
     public ApplicationPreferences() {
         parentPrefs = Preferences.userRoot().node(PreferencesNodes.GLT_PREFERENCES_NODE);
         currentNode = parentPrefs;
@@ -41,9 +46,7 @@ public class ApplicationPreferences implements Service {
      */
     public void restoreDefaults() {
         try {
-            for (String name : parentPrefs.childrenNames()) {
-                parentPrefs.node(name).removeNode();
-            }
+            parentPrefs.clear();
         } catch (BackingStoreException e) {
             _logger.error("Could not restore defaults: " + e.getMessage());
         }
@@ -157,10 +160,10 @@ public class ApplicationPreferences implements Service {
      * @param object - the object to be stored as a preference. Should implement {@link Serializable} interface
      */
     public void putObject(String key, Object object) {
-        // TODO: split to the parts according to the store size
         byte[] bytes = object2Bytes(object);
         if (bytes != null) {
-            getCurrentNode().putByteArray(key, bytes);
+            byte[][] pieces = breakIntoPieces(bytes);
+            writePieces(getCurrentNode(), key, pieces);
         }
     }
 
@@ -172,14 +175,10 @@ public class ApplicationPreferences implements Service {
      * @return the object from preferences
      */
     public Object getObject(String key, Object def) {
-        // TODO: split to the parts according to the store size
-        byte[] bytes = getCurrentNode().getByteArray(key, null);
-        if (bytes != null) {
-            Object obj = bytes2Object(bytes);
-            return obj != null ? obj : def;
-        } else {
-            return def;
-        }
+        byte[][] pieces = readPieces(getCurrentNode(), key);
+        byte[] bytes = combinePieces(pieces);
+        Object obj = bytes2Object(bytes);
+        return obj != null ? obj : def;
     }
 
     private static byte[] object2Bytes(Object object) {
@@ -195,13 +194,79 @@ public class ApplicationPreferences implements Service {
     }
 
     private static Object bytes2Object(byte[] bytes) {
+        String errorMessage = "Couldn't convert byte array to object: ";
+        if (bytes == null) {
+            throw new IllegalArgumentException(errorMessage + "bytes array cannot be null");
+        }
         try {
             ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
             ObjectInputStream ois = new ObjectInputStream(bais);
             return ois.readObject();
         } catch(IOException | ClassNotFoundException e) {
-            _logger.error("Couldn't convert byte array to object: " + e.getMessage());
+            _logger.error(errorMessage + e.getMessage());
             return null;
+        }
+    }
+
+    private static byte[][] breakIntoPieces(byte[] bytes) {
+        if (bytes == null) {
+            throw new IllegalArgumentException("Wrong arguments! bytes array cannot be null");
+        }
+        int numPieces = (bytes.length + pieceLength - 1) / pieceLength;
+        byte pieces[][] = new byte[numPieces][];
+        for (int i=0; i<numPieces; ++i) {
+            int startByte = i * pieceLength;
+            int endByte = startByte + pieceLength;
+            if (endByte > bytes.length) endByte = bytes.length;
+            int length = endByte - startByte;
+            pieces[i] = new byte[length];
+            System.arraycopy(bytes, startByte, pieces[i], 0, length);
+        }
+        return pieces;
+    }
+
+    private static byte[] combinePieces(byte[][] pieces) {
+        if (pieces == null) {
+            throw new IllegalArgumentException("Cannot combine preference pieces: bytes array cannot be null");
+        }
+        int length = 0;
+        for (int i=0; i<pieces.length; ++i) {
+            length += pieces[i].length;
+        }
+        byte bytes[] = new byte[length];
+        int cursor = 0;
+        for (int i=0; i<pieces.length; ++i) {
+            System.arraycopy(pieces[i], 0, bytes, cursor, pieces[i].length);
+            cursor += pieces[i].length;
+        }
+        return bytes;
+    }
+
+    private static byte[][] readPieces(Preferences prefs, String key) {
+        try {
+            Preferences node = prefs.node(key);
+            String keys[] = node.keys();
+            int numPieces = keys.length;
+            byte pieces[][] = new byte[numPieces][];
+            for (int i=0; i<numPieces; ++i) {
+                pieces[i] = node.getByteArray(""+i, null);
+            }
+            return pieces;
+        } catch (BackingStoreException e) {
+            _logger.error("Couldn't read peaces: " + e.getMessage());
+            return null;
+        }
+    }
+
+    private static void writePieces(Preferences prefs, String key, byte[][] pieces) {
+        try {
+            Preferences currentNode = prefs.node(key);
+            currentNode.clear();
+            for (int i=0; i<pieces.length; ++i) {
+                currentNode.putByteArray(""+i, pieces[i]);
+            }
+        } catch(BackingStoreException e) {
+            _logger.error("Couldn't write peaces as a child nodes: " + e.getMessage());
         }
     }
 
