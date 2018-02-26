@@ -220,7 +220,7 @@ public class CreateNewBranchDialog extends GLTDialog<String> {
             // we do not show checkout statuses here
             // because we show the statuses of branches creation
             // In the same time we could see that branch is changed on the projects list panel
-            Map<Project, JGitStatus> result = _gitService.checkoutBranch(projects, (String) branchName, false, null);
+            Map<Project, JGitStatus> result = _gitService.checkoutBranch(projects, (String) branchName, false, false, null);
             changedProjects = result.entrySet().stream()
                                                .filter(entry -> entry.getValue() == JGitStatus.SUCCESSFUL)
                                                .map(Map.Entry::getKey)

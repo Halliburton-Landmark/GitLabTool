@@ -39,11 +39,13 @@ public interface GitService extends Service {
      *
      * @param projects projects that need to be checked out
      * @param branch selected branch
+     * @param switchOnLocal if <code>true</code> and checked branch is remote, then a current branch
+     *                      will checkout on its local copy, otherwise a current branch won't checkout.
      * @param progress the listener for obtaining data on the process of performing the operation
      *
      * @return map with projects and theirs checkout statuses
      */
-    Map<Project, JGitStatus> checkoutBranch(List<Project> projects, Branch branch, ProgressListener progress);
+    Map<Project, JGitStatus> checkoutBranch(List<Project> projects, Branch branch, boolean switchOnLocal, ProgressListener progress);
 
     /**
      * Checkouts projects to selected branch
@@ -51,10 +53,13 @@ public interface GitService extends Service {
      * @param projects projects that need to be checked out
      * @param branchName name of the branch
      * @param isRemote <code>true</code> if the branch has {@link BranchType#REMOTE}
+     * @param switchOnLocal if <code>true</code> and checked branch is remote, then a current branch
+     *                      will checkout on its local copy, otherwise a current branch won't checkout.
      * @param progress the listener for obtaining data on the process of performing the operation
      * @return map with projects and theirs checkout statuses
      */
-    Map<Project, JGitStatus> checkoutBranch(List<Project> projects, String branchName, boolean isRemote, ProgressListener progress);
+    Map<Project, JGitStatus> checkoutBranch(List<Project> projects, String branchName,
+            boolean isRemote, boolean switchOnLocal, ProgressListener progress);
 
     /**
      * Gets projects that have uncommited changes

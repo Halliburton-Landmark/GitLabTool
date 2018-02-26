@@ -929,12 +929,13 @@ public class JGit {
      * @param nameBranch      the name of the branch to which to checkout
      * @param isRemoteBranch  if value is <true> to checkout branch for it, a new local branch
                               with the same name will be created, if <false> checkout existing branch.
-     *
+     * @param switchOnLocal   if <code>true</code> and checked branch is remote, then a current branch
+     *                        will checkout on its local copy, otherwise a current branch won't checkout.
      * @return JGitStatus: SUCCESSFUL - if a new branch was created,
      *                     FAILED - if the branch could not be created,
      *                     CONFLICTS - if the branch has unsaved changes that can lead to conflicts.
      */
-    public JGitStatus checkoutBranch(Project project, String nameBranch, boolean isRemoteBranch) {
+    public JGitStatus checkoutBranch(Project project, String nameBranch, boolean isRemoteBranch, boolean switchOnLocal) {
         if (project == null || nameBranch == null || nameBranch.isEmpty()) {
             throw new IllegalArgumentException(
                     "Incorrect data: project is " + project + ", nameBranch is " + nameBranch);
@@ -953,8 +954,12 @@ public class JGit {
             return JGitStatus.BRANCH_DOES_NOT_EXIST;
         }
         if (isContaints && isRemoteBranch) {
-            logger.error("Failed " + prefixErrorMessage + JGitStatus.BRANCH_ALREADY_EXISTS);
-            return JGitStatus.BRANCH_ALREADY_EXISTS;
+            if (switchOnLocal) {
+                isRemoteBranch = false;
+            } else {
+                logger.error("Failed " + prefixErrorMessage + JGitStatus.BRANCH_ALREADY_EXISTS);
+                return JGitStatus.BRANCH_ALREADY_EXISTS;
+            }
         }
         try (Git git = getGit(project.getPath())) {
             if (isCurrentBranch(git, nameBranchWithoutAlias)) {

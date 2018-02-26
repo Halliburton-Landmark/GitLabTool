@@ -65,17 +65,19 @@ public class GitServiceImpl implements GitService {
     }
 
     @Override
-    public Map<Project, JGitStatus> checkoutBranch(List<Project> projects, Branch branch, ProgressListener progress) {
-        return checkoutBranch(projects, branch.getBranchName(), branch.isRemote(), progress);
+    public Map<Project, JGitStatus> checkoutBranch(List<Project> projects, Branch branch,
+                                                   boolean switchOnLocal, ProgressListener progress) {
+        return checkoutBranch(projects, branch.getBranchName(), branch.isRemote(), switchOnLocal, progress);
     }
 
     @Override
-    public Map<Project, JGitStatus> checkoutBranch(List<Project> projects, String branchName, boolean isRemote,
-                                             ProgressListener progress) {
+    public Map<Project, JGitStatus> checkoutBranch(List<Project> projects, String branchName,
+                                                   boolean isRemote, boolean switchOnLocal,
+                                                   ProgressListener progress) {
         if (progress == null) {
             progress = EmptyProgressListener.get();
         }
-        return runCheckoutBranchAction(projects, branchName, isRemote, progress);
+        return runCheckoutBranchAction(projects, branchName, isRemote, switchOnLocal, progress);
     }
 
     @Override
@@ -473,6 +475,7 @@ public class GitServiceImpl implements GitService {
     private Map<Project, JGitStatus> runCheckoutBranchAction(List<Project> projects,
                                                      String branchName,
                                                      boolean isRemote,
+                                                     boolean switchOnLocal,
                                                      ProgressListener progress) {
         final Map<Project, JGitStatus> checkoutStatuses = new ConcurrentHashMap<>();
         try {
@@ -480,7 +483,8 @@ public class GitServiceImpl implements GitService {
             final long step = 100 / projects.size();
             final AtomicLong percentages = new AtomicLong(0);
             projects.parallelStream()
-                    .forEach(project -> checkoutBranch(checkoutStatuses, project, branchName, isRemote, progress, percentages, step));
+                    .forEach(project -> checkoutBranch(checkoutStatuses, project, branchName,
+                            isRemote, switchOnLocal, progress, percentages, step));
         } finally {
             progress.onFinish(CHECKOUT_BRANCH_FINISHED_MESSAGE);
             if (_stateService.isActiveState(ApplicationState.CHECKOUT_BRANCH)) {
@@ -491,13 +495,13 @@ public class GitServiceImpl implements GitService {
     }
 
     private void checkoutBranch(Map<Project, JGitStatus> checkoutStatuses, Project project,
-                                String branchName, boolean isRemote,
+                                String branchName, boolean isRemote, boolean switchOnLocal,
                                 ProgressListener progress,
                                 AtomicLong percentages, long step) {
         try {
             progress.onStart(project);
             percentages.addAndGet(step);
-            JGitStatus status = _git.checkoutBranch(project, branchName, isRemote);
+            JGitStatus status = _git.checkoutBranch(project, branchName, isRemote, switchOnLocal);
             if (status == JGitStatus.SUCCESSFUL) {
                 progress.onSuccess(percentages.get(), project, status);
             } else {

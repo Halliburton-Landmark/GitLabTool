@@ -39,6 +39,7 @@ import com.lgc.gitlabtool.git.util.GLTAlertUtils;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -49,6 +50,7 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -123,7 +125,7 @@ public class BranchesWindowController extends AbstractStateListener {
     @FXML
     public void initialize() {
         searchField.textProperty().addListener((observable, oldValue, newValue) -> filterPlantList(oldValue, newValue));
-        disableCheckoutButton(null);
+        disableButttons(null);
     }
 
     void beforeShowing(List<Project> projects, Stage stage) {
@@ -243,7 +245,7 @@ public class BranchesWindowController extends AbstractStateListener {
     private void checkoutBranch(Object selectedBranch, List<Project> projects, ProgressDialog progressDialog) {
         OperationProgressListener switchProgressListener =
                 new OperationProgressListener(progressDialog, ApplicationState.CHECKOUT_BRANCH);
-        _gitService.checkoutBranch(projects, (Branch) selectedBranch, switchProgressListener);
+        _gitService.checkoutBranch(projects, (Branch) selectedBranch, switchOnLocal.isSelected(), switchProgressListener);
     }
 
     private void launchCheckoutBranchConfirmation(List<Project> changedProjects,
@@ -258,32 +260,28 @@ public class BranchesWindowController extends AbstractStateListener {
     }
 
     public void onUpdateList() {
-        RadioButton selecteRB = (RadioButton) branchesFilter.getSelectedToggle();
-        String branchTypeText = selecteRB.getText();
-
         Boolean isCommonMatching = commonMatchingCheckBox.isSelected();
-
-        BranchType branchType;
-        switch (branchTypeText) {
-            case "Remote":
-                branchType = BranchType.REMOTE;
-                break;
-            case "Local":
-                branchType = BranchType.LOCAL;
-                break;
-            case "Remote + Local":
-                branchType = BranchType.ALL;
-                break;
-            default:
-                branchType = BranchType.LOCAL;
-        }
+        RadioButton selecteRB = (RadioButton) branchesFilter.getSelectedToggle();
+        BranchType branchType = getBranchTypeByTextButton(selecteRB.getText());
 
         _allBranches = getBranches(getProjectsByIds(), branchType, isCommonMatching);
         branchesListView.getSelectionModel().clearSelection();
         branchesListView.setItems(FXCollections.observableArrayList(_allBranches));
 
         searchField.setText(StringUtils.EMPTY);
+        switchOnLocal.setVisible(branchType != BranchType.LOCAL);
         currentProjectsListView.setItems(FXCollections.observableArrayList(getProjectsByIds()));
+    }
+
+    private BranchType getBranchTypeByTextButton(String textButton) {
+        switch (textButton) {
+            case "Remote":
+                return BranchType.REMOTE;
+            case "Remote + Local":
+                return BranchType.ALL;
+            default:
+                return BranchType.LOCAL;
+        }
     }
 
     private void filterPlantList(String oldValue, String newValue) {
@@ -388,11 +386,22 @@ public class BranchesWindowController extends AbstractStateListener {
             if (newValue != null) {
                 filteringProjectsListView(Arrays.asList(newValue));
             }
-            disableCheckoutButton(newValue);
+            disableButttons(newValue);
+        });
+
+        branchesFilter.selectedToggleProperty().addListener(new ChangeListener<Toggle>() {
+            @Override
+            public void changed(ObservableValue<? extends Toggle> observableValue, Toggle oldValue, Toggle newValue) {
+                if (newValue instanceof RadioButton) {
+                    RadioButton button = (RadioButton) newValue;
+                    BranchType selectedType = getBranchTypeByTextButton(button.getText());
+                    switchOnLocal.setVisible(selectedType != BranchType.LOCAL);
+                }
+            }
         });
     }
 
-    private void disableCheckoutButton(Branch currentBranch) {
+    private void disableButttons(Branch currentBranch) {
         ObservableValue<Boolean> disableButttonProperty = branchesListView.getSelectionModel().selectedItemProperty().isNull();
         ObservableValue<Boolean> disableSwichChechboxProperty = disableButttonProperty;
         if (currentBranch != null) {
@@ -466,7 +475,7 @@ public class BranchesWindowController extends AbstractStateListener {
                             currentProjectsListView.setItems(FXCollections.observableArrayList(getProjectsByIds()));
                             onUpdateList();
                         }
-                        disableCheckoutButton(branch);
+                        disableButttons(branch);
                     }
                 });
             });
