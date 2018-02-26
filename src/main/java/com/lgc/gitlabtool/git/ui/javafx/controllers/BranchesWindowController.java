@@ -386,21 +386,16 @@ public class BranchesWindowController extends AbstractStateListener {
 
         branchesListView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
-                Branch branch = newValue;
-                filteringProjectsListView(Arrays.asList(branch));
-
-                disableCheckoutButton(branch);
+                filteringProjectsListView(Arrays.asList(newValue));
             }
+            disableCheckoutButton(newValue);
         });
     }
 
     private void disableCheckoutButton(Branch currentBranch) {
-        ObservableValue<Boolean> disableButttonProperty;
-        ObservableValue<Boolean> disableSwichChechboxProperty;
-        if (currentBranch == null) {
-            disableButttonProperty = branchesListView.getSelectionModel().selectedItemProperty().isNull();
-            disableSwichChechboxProperty = disableButttonProperty;
-        } else {
+        ObservableValue<Boolean> disableButttonProperty = branchesListView.getSelectionModel().selectedItemProperty().isNull();
+        ObservableValue<Boolean> disableSwichChechboxProperty = disableButttonProperty;
+        if (currentBranch != null) {
             boolean isDisable = isSelectedBranchCurrentForAllProjects(currentBranch);
             disableButttonProperty = new SimpleBooleanProperty(isDisable);
             disableSwichChechboxProperty = new SimpleBooleanProperty(currentBranch.isRemote());
