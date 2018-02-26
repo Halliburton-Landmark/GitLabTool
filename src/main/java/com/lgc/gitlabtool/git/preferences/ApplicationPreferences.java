@@ -137,14 +137,12 @@ public class ApplicationPreferences implements Service {
             return this;
         } catch (IllegalArgumentException iae) {
             _logger.error("Consecutive slashes in path");
-            return null;
         } catch (IllegalStateException ise) {
             _logger.error("Node has been removed with the removeNode() method");
-            return null;
         } catch (NullPointerException npe) {
             _logger.error("Key is null");
-            return null;
         }
+        return null;
     }
 
     private Preferences getCurrentNode() {
