@@ -398,7 +398,7 @@ public class BranchesWindowController extends AbstractStateListener {
         if (currentBranch != null) {
             boolean isDisable = isSelectedBranchCurrentForAllProjects(currentBranch);
             disableButttonProperty = new SimpleBooleanProperty(isDisable);
-            disableSwichChechboxProperty = new SimpleBooleanProperty(currentBranch.isRemote());
+            disableSwichChechboxProperty = new SimpleBooleanProperty(!currentBranch.isRemote());
         }
         checkoutButton.disableProperty().bind(disableButttonProperty);
         deleteButton.disableProperty().bind(disableButttonProperty);
