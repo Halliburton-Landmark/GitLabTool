@@ -2,7 +2,9 @@ package com.lgc.gitlabtool.git.entities;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import com.google.gson.annotations.SerializedName;
 import com.lgc.gitlabtool.git.util.PathUtilities;
@@ -35,6 +37,12 @@ public class Group {
     private String _path;
 
     /**
+     * The full path of the group. Including parent group.
+     **/
+    @SerializedName("full_path")
+    private String _fullPath;
+
+    /**
      * Projects in group
      **/
     @SerializedName("projects")
@@ -44,6 +52,7 @@ public class Group {
 
     private boolean _isCloned;
 
+    private final List<Group> _subGroups = new ArrayList<>();
 
     public Group(){}
 
@@ -78,6 +87,15 @@ public class Group {
         if (PathUtilities.isExistsAndDirectory(pathToGroup)) {
             _pathToClonedGroup = path;
         }
+    }
+
+    /**
+     * Gets full path of group. It contains parent group
+     *
+     * @return
+     */
+    public String getFullPath() {
+        return _fullPath;
     }
 
     /**
@@ -158,5 +176,9 @@ public class Group {
             return false;
         }
         return true;
+    }
+
+    public List<Group> getSubGroups() {
+        return _subGroups;
     }
 }

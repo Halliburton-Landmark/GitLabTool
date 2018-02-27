@@ -7,7 +7,7 @@ import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.User;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 
-public interface GroupsUserService extends Service {
+public interface GroupsService extends Service {
 
     /**
      * Gets user's groups
@@ -56,5 +56,20 @@ public interface GroupsUserService extends Service {
     * @return status and message operation.
     */
     Map<Boolean, String> removeGroup(Group group, boolean isRemoveFromLocalDisk);
+
+    /**
+     *
+     *
+     * @param groupsFromGitLab
+     */
+    void getAllGroups(List<Group> groupsFromGitLab);
+
+    /**
+     *
+     *
+     * @param groups
+     * @return
+     */
+    List<Group> getOnlyMainGroups(List<Group> groups);
 
 }

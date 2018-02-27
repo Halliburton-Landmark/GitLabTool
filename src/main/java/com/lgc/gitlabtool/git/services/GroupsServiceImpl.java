@@ -3,6 +3,7 @@ package com.lgc.gitlabtool.git.services;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -14,6 +15,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.google.gson.reflect.TypeToken;
+import com.google.inject.internal.util.Objects;
 import com.lgc.gitlabtool.git.connections.RESTConnector;
 import com.lgc.gitlabtool.git.connections.token.CurrentUser;
 import com.lgc.gitlabtool.git.entities.Group;
@@ -26,9 +28,9 @@ import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 import com.lgc.gitlabtool.git.util.JSONParser;
 import com.lgc.gitlabtool.git.util.PathUtilities;
 
-public class GroupsUserServiceImpl implements GroupsUserService {
+public class GroupsServiceImpl implements GroupsService {
 
-    private static final Logger logger = LogManager.getLogger(GroupsUserServiceImpl.class);
+    private static final Logger logger = LogManager.getLogger(GroupsServiceImpl.class);
 
     private RESTConnector _connector;
 
@@ -45,7 +47,7 @@ public class GroupsUserServiceImpl implements GroupsUserService {
     private static ConsoleService _consoleService;
     private static JGit _jGit;
 
-    public GroupsUserServiceImpl(RESTConnector connector,
+    public GroupsServiceImpl(RESTConnector connector,
                                  ClonedGroupsService clonedGroupsService,
                                  ProjectService projectService,
                                  StateService stateService,
@@ -283,5 +285,32 @@ public class GroupsUserServiceImpl implements GroupsUserService {
 
     private List<Group> getLoadedGroups() {
         return _clonedGroupsService.loadClonedGroups();
+    }
+
+    @Override
+    public void getAllGroups(List<Group> groupsFromGitLab) {
+        for (int i = 0; i < groupsFromGitLab.size(); i++) {
+            String path = groupsFromGitLab.get(i).getFullPath();
+            if (path.contains("/")) {
+                String newString = path.substring(0, path.lastIndexOf("/"));
+                for (int j = 0; j < groupsFromGitLab.size(); j++) {
+                    String fullPath = groupsFromGitLab.get(j).getFullPath();
+                    if (Objects.equal(newString, fullPath)) {
+                        groupsFromGitLab.get(j).getSubGroups().add(groupsFromGitLab.get(i));
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    public List<Group> getOnlyMainGroups(List<Group> groups) {
+        List<Group> mainGroup = new ArrayList<>();
+        for (Group group : groups) {
+            if (Objects.equal(group.getName(), group.getFullPath())) {
+                mainGroup.add(group);
+            }
+        }
+        return mainGroup;
     }
 }

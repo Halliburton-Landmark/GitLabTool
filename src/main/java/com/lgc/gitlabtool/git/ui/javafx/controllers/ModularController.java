@@ -38,7 +38,7 @@ import com.lgc.gitlabtool.git.services.BackgroundService;
 import com.lgc.gitlabtool.git.services.ClonedGroupsService;
 import com.lgc.gitlabtool.git.services.ConsoleService;
 import com.lgc.gitlabtool.git.services.GitService;
-import com.lgc.gitlabtool.git.services.GroupsUserService;
+import com.lgc.gitlabtool.git.services.GroupsService;
 import com.lgc.gitlabtool.git.services.LoginService;
 import com.lgc.gitlabtool.git.services.PomXMLService;
 import com.lgc.gitlabtool.git.services.ProjectService;
@@ -214,8 +214,8 @@ public class ModularController implements UpdateProgressListener {
     private static final ConsoleService _consoleService = ServiceProvider.getInstance()
             .getService(ConsoleService.class);
 
-    private static final GroupsUserService _groupService = ServiceProvider.getInstance()
-            .getService(GroupsUserService.class);
+    private static final GroupsService _groupService = ServiceProvider.getInstance()
+            .getService(GroupsService.class);
 
     private static final StateService _stateService = ServiceProvider.getInstance()
             .getService(StateService.class);
@@ -762,7 +762,7 @@ public class ModularController implements UpdateProgressListener {
             stage.getIcons().add(appIcon);
 
              /* Set sizing and position */
-            double dialogWidth = 500;
+            double dialogWidth = 600;
             double dialogHeight = 400;
 
             ScreenUtil.adaptForMultiScreens(stage, dialogWidth, dialogHeight);

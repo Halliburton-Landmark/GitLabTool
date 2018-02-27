@@ -10,7 +10,7 @@ import org.apache.commons.lang.StringUtils;
 
 import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
-import com.lgc.gitlabtool.git.services.GroupsUserService;
+import com.lgc.gitlabtool.git.services.GroupsService;
 import com.lgc.gitlabtool.git.services.LoginService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
@@ -23,6 +23,7 @@ import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
@@ -39,8 +40,8 @@ public class CloningGroupsWindowController {
 
     private final LoginService _loginService = ServiceProvider.getInstance().getService(LoginService.class);
 
-    private final GroupsUserService _groupsService = ServiceProvider.getInstance()
-            .getService(GroupsUserService.class);
+    private final GroupsService _groupsService = ServiceProvider.getInstance()
+            .getService(GroupsService.class);
 
     @FXML
     private TextField folderPath;
@@ -57,14 +58,20 @@ public class CloningGroupsWindowController {
     @FXML
     private Button browseButton;
 
+    @FXML
+    private CheckBox showSubGroups;
+
     private final Preferences _prefs = Preferences.userRoot().node(CloningGroupsWindowController.class.getName());
     private static final String PREF_NAME = "path_to_group";
+    private List<Group> _allGroups;
+
 
     @FXML
     public void initialize() {
-        List<Group> userGroups = (List<Group>) _groupsService.getGroups(_loginService.getCurrentUser());
-        ObservableList<Group> myObservableList = FXCollections.observableList(userGroups);
+        _allGroups = (List<Group>) _groupsService.getGroups(_loginService.getCurrentUser());
+        _groupsService.getAllGroups(_allGroups);
 
+        ObservableList<Group> myObservableList = FXCollections.observableList(_allGroups);
         configureListView(projectsList);
         projectsList.setItems(myObservableList);
 
@@ -136,7 +143,8 @@ public class CloningGroupsWindowController {
                     protected void updateItem(Group item, boolean bln) {
                         super.updateItem(item, bln);
                         if (item != null) {
-                            String itemText = item.getName() + " (@" + item.getPath() + ") ";
+                            String itemText = item.getFullPath() + " [subgroups: " + item.getSubGroups().size() + "]";
+                            //String itemText = item.getFullPath() + " (@" + item.getPath() + ") ";
                             setText(itemText);
                         }
                     }
