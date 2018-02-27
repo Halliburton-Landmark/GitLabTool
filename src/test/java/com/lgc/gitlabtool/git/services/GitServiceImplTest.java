@@ -161,9 +161,9 @@ public class GitServiceImplTest {
         String branchName = "foo";
         boolean isRemote = false;
         ProgressListener progressListener = null;
-        when(_jGit.checkoutBranch(_stubProject, branchName, isRemote, true)).thenReturn(JGitStatus.SUCCESSFUL);
+        when(_jGit.checkoutBranch(_stubProject, branchName, isRemote)).thenReturn(JGitStatus.SUCCESSFUL);
 
-        Map<Project, JGitStatus> statuses = _gitService.checkoutBranch(list, branchName, isRemote, true, progressListener);
+        Map<Project, JGitStatus> statuses = _gitService.checkoutBranch(list, branchName, isRemote, progressListener);
 
         assertEquals(1, statuses.size());
     }
@@ -176,10 +176,10 @@ public class GitServiceImplTest {
         String branchName = "foo";
         boolean isRemote = false;
         ProgressListener progressListener = null;
-        when(_jGit.checkoutBranch(_stubProject, branchName, isRemote, false)).thenReturn(JGitStatus.SUCCESSFUL);
+        when(_jGit.checkoutBranch(_stubProject, branchName, isRemote)).thenReturn(JGitStatus.SUCCESSFUL);
         when(_stateService.isActiveState(ApplicationState.CHECKOUT_BRANCH)).thenReturn(true);
 
-        _gitService.checkoutBranch(list, branchName, isRemote, false, progressListener);
+        _gitService.checkoutBranch(list, branchName, isRemote, progressListener);
 
         verify(_stateService, times(1)).stateON(ApplicationState.CHECKOUT_BRANCH);
         verify(_stateService, times(1)).stateOFF(ApplicationState.CHECKOUT_BRANCH);
@@ -193,10 +193,10 @@ public class GitServiceImplTest {
         String branchName = "foo";
         boolean isRemote = false;
         ProgressListener progressListener = null;
-        when(_jGit.checkoutBranch(_stubProject, branchName, isRemote, true)).thenThrow(NullPointerException.class);
+        when(_jGit.checkoutBranch(_stubProject, branchName, isRemote)).thenThrow(NullPointerException.class);
         when(_stateService.isActiveState(ApplicationState.CHECKOUT_BRANCH)).thenReturn(true);
 
-        _gitService.checkoutBranch(list, branchName, isRemote, true, progressListener);
+        _gitService.checkoutBranch(list, branchName, isRemote, progressListener);
 
         verify(_stateService, times(1)).stateON(ApplicationState.CHECKOUT_BRANCH);
         verify(_stateService, times(1)).stateOFF(ApplicationState.CHECKOUT_BRANCH);
