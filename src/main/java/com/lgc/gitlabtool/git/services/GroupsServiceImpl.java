@@ -3,13 +3,13 @@ package com.lgc.gitlabtool.git.services;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -288,29 +288,29 @@ public class GroupsServiceImpl implements GroupsService {
     }
 
     @Override
-    public void getAllGroups(List<Group> groupsFromGitLab) {
-        for (int i = 0; i < groupsFromGitLab.size(); i++) {
-            String path = groupsFromGitLab.get(i).getFullPath();
-            if (path.contains("/")) {
-                String newString = path.substring(0, path.lastIndexOf("/"));
-                for (int j = 0; j < groupsFromGitLab.size(); j++) {
-                    String fullPath = groupsFromGitLab.get(j).getFullPath();
-                    if (Objects.equal(newString, fullPath)) {
-                        groupsFromGitLab.get(j).getSubGroups().add(groupsFromGitLab.get(i));
-                    }
+    public void setGroupsTheirSubGroups(List<Group> groupsFromGitLab) {
+        for (Group group : groupsFromGitLab) {
+            Integer parentId = group.getParentId();
+            if (parentId != null) {
+                Optional<Group> optGroup = foundGroupByParentId(groupsFromGitLab, parentId);
+                if (optGroup.isPresent()) {
+                    List<Group> subGroups = optGroup.get().getSubGroups();
+                    subGroups.add(group);
                 }
             }
         }
     }
 
+    private Optional<Group> foundGroupByParentId(List<Group> groups, Integer parentId) {
+        return groups.stream()
+                     .filter(group -> Objects.equal(group.getId(), parentId))
+                     .findFirst();
+    }
+
     @Override
     public List<Group> getOnlyMainGroups(List<Group> groups) {
-        List<Group> mainGroup = new ArrayList<>();
-        for (Group group : groups) {
-            if (Objects.equal(group.getName(), group.getFullPath())) {
-                mainGroup.add(group);
-            }
-        }
-        return mainGroup;
+        return groups.stream()
+                     .filter(group -> group.getParentId() == null)
+                     .collect(Collectors.toList());
     }
 }

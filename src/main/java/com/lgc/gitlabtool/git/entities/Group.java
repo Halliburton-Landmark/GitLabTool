@@ -25,16 +25,16 @@ public class Group {
     private int _id;
 
     /**
+     * The id of a parentgroup
+     **/
+    @SerializedName("parent_id")
+    private Integer _parentId;
+
+    /**
      * The name of the group
      **/
     @SerializedName("name")
     private String _name;
-
-    /**
-     * The path of the group
-     **/
-    @SerializedName("path")
-    private String _path;
 
     /**
      * The full path of the group. Including parent group.
@@ -99,6 +99,15 @@ public class Group {
     }
 
     /**
+     * Get id of parent group
+     *
+     * @return parent id
+     */
+    public Integer getParentId() {
+        return _parentId;
+    }
+
+    /**
      * Gets path to the cloned group
      *
      * @return path to the group
@@ -115,10 +124,6 @@ public class Group {
         return _name;
     }
 
-    public String getPath() {
-        return _path;
-    }
-
 
     public Collection<Project> getProjects() {
         return _projects;
@@ -132,7 +137,6 @@ public class Group {
         result = prime * result + ((_pathToClonedGroup == null) ? 0 : _pathToClonedGroup.hashCode());
         result = prime * result + _id;
         result = prime * result + ((_name == null) ? 0 : _name.hashCode());
-        result = prime * result + ((_path == null) ? 0 : _path.hashCode());
         return result;
     }
 
@@ -166,13 +170,6 @@ public class Group {
                 return false;
             }
         } else if (!_name.equals(other._name)) {
-            return false;
-        }
-        if (_path == null) {
-            if (other._path != null) {
-                return false;
-            }
-        } else if (!_path.equals(other._path)) {
             return false;
         }
         return true;

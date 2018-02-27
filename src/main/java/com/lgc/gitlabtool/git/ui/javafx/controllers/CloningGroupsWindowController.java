@@ -65,13 +65,12 @@ public class CloningGroupsWindowController {
     private static final String PREF_NAME = "path_to_group";
     private List<Group> _allGroups;
 
-
     @FXML
     public void initialize() {
         _allGroups = (List<Group>) _groupsService.getGroups(_loginService.getCurrentUser());
-        _groupsService.getAllGroups(_allGroups);
+        _groupsService.setGroupsTheirSubGroups(_allGroups);
 
-        ObservableList<Group> myObservableList = FXCollections.observableList(_allGroups);
+        ObservableList<Group> myObservableList = FXCollections.observableList(_groupsService.getOnlyMainGroups(_allGroups));
         configureListView(projectsList);
         projectsList.setItems(myObservableList);
 
@@ -144,7 +143,6 @@ public class CloningGroupsWindowController {
                         super.updateItem(item, bln);
                         if (item != null) {
                             String itemText = item.getFullPath() + " [subgroups: " + item.getSubGroups().size() + "]";
-                            //String itemText = item.getFullPath() + " (@" + item.getPath() + ") ";
                             setText(itemText);
                         }
                     }

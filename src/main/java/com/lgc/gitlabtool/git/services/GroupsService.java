@@ -62,7 +62,7 @@ public interface GroupsService extends Service {
      *
      * @param groupsFromGitLab
      */
-    void getAllGroups(List<Group> groupsFromGitLab);
+    void setGroupsTheirSubGroups(List<Group> groupsFromGitLab);
 
     /**
      *
