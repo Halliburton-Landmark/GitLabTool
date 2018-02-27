@@ -275,12 +275,12 @@ public class BranchesWindowController extends AbstractStateListener {
 
     private BranchType getBranchTypeByTextButton(String textButton) {
         switch (textButton) {
-            case "Remote":
-                return BranchType.REMOTE;
-            case "Remote + Local":
-                return BranchType.ALL;
-            default:
-                return BranchType.LOCAL;
+        case "Remote":
+            return BranchType.REMOTE;
+        case "Remote + Local":
+            return BranchType.ALL;
+        default:
+            return BranchType.LOCAL;
         }
     }
 

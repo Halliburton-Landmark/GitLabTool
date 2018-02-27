@@ -163,7 +163,7 @@ public class GitServiceImplTest {
         ProgressListener progressListener = null;
         when(_jGit.checkoutBranch(_stubProject, branchName, isRemote, true)).thenReturn(JGitStatus.SUCCESSFUL);
 
-        Map<Project, JGitStatus> statuses = _gitService.checkoutBranch(list, branchName, isRemote, false, progressListener);
+        Map<Project, JGitStatus> statuses = _gitService.checkoutBranch(list, branchName, isRemote, true, progressListener);
 
         assertEquals(1, statuses.size());
     }
@@ -176,7 +176,7 @@ public class GitServiceImplTest {
         String branchName = "foo";
         boolean isRemote = false;
         ProgressListener progressListener = null;
-        when(_jGit.checkoutBranch(_stubProject, branchName, isRemote, true)).thenReturn(JGitStatus.SUCCESSFUL);
+        when(_jGit.checkoutBranch(_stubProject, branchName, isRemote, false)).thenReturn(JGitStatus.SUCCESSFUL);
         when(_stateService.isActiveState(ApplicationState.CHECKOUT_BRANCH)).thenReturn(true);
 
         _gitService.checkoutBranch(list, branchName, isRemote, false, progressListener);
