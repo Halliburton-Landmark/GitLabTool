@@ -180,9 +180,8 @@ public class ApplicationPreferences implements Service {
     }
 
     private static byte[] object2Bytes(Object object) {
-        try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ObjectOutputStream oos = new ObjectOutputStream(baos);
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                ObjectOutputStream oos = new ObjectOutputStream(baos)) {
             oos.writeObject(object);
             return baos.toByteArray();
         } catch (IOException e) {
@@ -196,9 +195,7 @@ public class ApplicationPreferences implements Service {
         if (bytes == null) {
             throw new IllegalArgumentException(errorMessage + "bytes array cannot be null");
         }
-        try {
-            ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-            ObjectInputStream ois = new ObjectInputStream(bais);
+        try (ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bytes))) {
             return ois.readObject();
         } catch(IOException | ClassNotFoundException e) {
             _logger.error(errorMessage + e.getMessage());
