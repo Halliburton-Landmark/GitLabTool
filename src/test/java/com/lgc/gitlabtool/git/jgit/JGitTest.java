@@ -703,9 +703,6 @@ public class JGitTest {
                 JGitStatus.BRANCH_CURRENTLY_CHECKED_OUT);
 
         listCommandMock = getListCommandMock(refMock);
-        when(refMock.getName()).thenReturn(Constants.R_HEADS + NAME_BRANCH);
-        Assert.assertEquals(getJGitMock(gitMock).checkoutBranch(getProject(true), NAME_BRANCH, true),
-                JGitStatus.BRANCH_ALREADY_EXISTS);
 
         when(refMock.getName()).thenReturn(Constants.R_HEADS + NAME_BRANCH);
 
