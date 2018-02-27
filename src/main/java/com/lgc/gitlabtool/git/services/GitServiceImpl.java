@@ -70,8 +70,8 @@ public class GitServiceImpl implements GitService {
     }
 
     @Override
-    public Map<Project, JGitStatus> checkoutBranch(List<Project> projects, String branchName,
-                                                   boolean isRemote, ProgressListener progress) {
+    public Map<Project, JGitStatus> checkoutBranch(List<Project> projects, String branchName, boolean isRemote,
+                                                   ProgressListener progress) {
         if (progress == null) {
             progress = EmptyProgressListener.get();
         }
@@ -470,8 +470,10 @@ public class GitServiceImpl implements GitService {
         results.put(project, resultOperation);
     }
 
-    private Map<Project, JGitStatus> runCheckoutBranchAction(List<Project> projects, String branchName,
-                                                             boolean isRemote, ProgressListener progress) {
+    private Map<Project, JGitStatus> runCheckoutBranchAction(List<Project> projects,
+                                                             String branchName,
+                                                             boolean isRemote,
+                                                             ProgressListener progress) {
         final Map<Project, JGitStatus> checkoutStatuses = new ConcurrentHashMap<>();
         try {
             _stateService.stateON(ApplicationState.CHECKOUT_BRANCH);
