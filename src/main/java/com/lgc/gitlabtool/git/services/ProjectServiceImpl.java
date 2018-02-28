@@ -120,16 +120,21 @@ public class ProjectServiceImpl implements ProjectService {
             _stateService.stateOFF(ApplicationState.LOAD_PROJECTS);
             return projects;
         }
-        // Rewrite it
         PROGRESS_LOADING = 0;
         _consoleService.addMessage("Getting statuses and types of projects...", MessageType.SIMPLE);
         projects.parallelStream()
                 .peek(pr -> updateProgressIndicator(++PROGRESS_LOADING, projects.size()))
-                .filter(project -> projectsName.contains(project.getName()))
+                .filter(project -> isProjectCloned(project, group.getPath()))
                 .forEach((project) -> updateDataProject(project, group.getPath()));
         _consoleService.addMessage(successMessage, MessageType.SUCCESS);
         _stateService.stateOFF(ApplicationState.LOAD_PROJECTS);
-        return null;
+        return projects;
+    }
+
+    private boolean isProjectCloned(Project project, String groupPath) {
+        String localPath = groupPath + File.separator + project.getName();
+        System.out.println(PathUtilities.isExistsAndDirectory(Paths.get(localPath)));
+        return PathUtilities.isExistsAndDirectory(Paths.get(localPath));
     }
 
     @Override
