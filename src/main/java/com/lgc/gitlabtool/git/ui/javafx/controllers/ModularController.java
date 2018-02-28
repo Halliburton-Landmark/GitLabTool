@@ -974,7 +974,7 @@ public class ModularController implements UpdateProgressListener {
         String path = _currentGroup.getPath();
 
         CloneProgressDialog progressDialog = new CloneProgressDialog();
-        progressDialog.setStartAction(() -> startClone(shadowProjects, path, progressDialog));
+        progressDialog.setStartAction(() -> startClone(shadowProjects, path.substring(0, path.lastIndexOf(_currentGroup.getName())-1), progressDialog));
         progressDialog.showDialog();
     }
 

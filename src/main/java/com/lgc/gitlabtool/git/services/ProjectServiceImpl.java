@@ -133,7 +133,6 @@ public class ProjectServiceImpl implements ProjectService {
 
     private boolean isProjectCloned(Project project, String groupPath) {
         String localPath = groupPath + File.separator + project.getName();
-        System.out.println(PathUtilities.isExistsAndDirectory(Paths.get(localPath)));
         return PathUtilities.isExistsAndDirectory(Paths.get(localPath));
     }
 
