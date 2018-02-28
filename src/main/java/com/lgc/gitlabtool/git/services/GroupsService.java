@@ -1,5 +1,6 @@
 package com.lgc.gitlabtool.git.services;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -16,7 +17,7 @@ public interface GroupsService extends Service {
      * @return List of groups for user <br>
      * null, if an error occurred during the request
      */
-    Object getGroups(User user);
+    Collection<Group> getGroups(User user);
 
     /**
      * Clones list of user's groups and adds their to the ClonedGroups class.
@@ -56,13 +57,6 @@ public interface GroupsService extends Service {
     * @return status and message operation.
     */
     Map<Boolean, String> removeGroup(Group group, boolean isRemoveFromLocalDisk);
-
-    /**
-     *
-     *
-     * @param groupsFromGitLab
-     */
-    void setGroupsTheirSubGroups(List<Group> groupsFromGitLab);
 
     /**
      *

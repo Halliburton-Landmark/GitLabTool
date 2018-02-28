@@ -1484,7 +1484,7 @@ public class JGitTest {
                 return true;
             };
         };
-        projectCorrect.setPathToClonedProject(".path");
+        projectCorrect.setPath(".path");
         projectCorrect.setClonedStatus(true);
         return projectCorrect;
     }
@@ -1764,7 +1764,7 @@ public class JGitTest {
         for (int i = 0; i < countProject; i++) {
             Project pr = new Project();
             pr.setClonedStatus(true);
-            pr.setPathToClonedProject(".");
+            pr.setPath(".");
             projects.add(pr);
         }
         return projects;

@@ -29,8 +29,12 @@ public class Project implements Serializable {
 
     @SerializedName("name")
     private String _name;
+
+    @SerializedName("path_with_namespace")
+    private String _pathWithNamespace;
+
     /** Path to the cloned project **/
-    private String _pathToClonedProject;
+    private String _path;
     private boolean _isCloned;
     private ProjectType _type;
     private ProjectStatus _projectStatus = new ProjectStatus();
@@ -80,7 +84,7 @@ public class Project implements Serializable {
      * Sets path to the cloned project
      * @param path to the project
      */
-    public void setPathToClonedProject(String path) {
+    public void setPath(String path) {
         if (path == null || path.isEmpty()) {
             throw new IllegalArgumentException("ERROR: Incorrect data. Value is null.");
         }
@@ -88,7 +92,7 @@ public class Project implements Serializable {
         if (checkPath(pathToProject)) {
             // TODO project must have /.git() folder.
             // The implementation of the method will be in the JGit class
-            _pathToClonedProject = path;
+            _path = path;
         }
     }
 
@@ -97,11 +101,31 @@ public class Project implements Serializable {
     }
 
     /**
+     * Gets path with namespace (path includes all parent groups)
+     *
+     * @return path
+     */
+    public String getPathWithNamespace() {
+        return _pathWithNamespace;
+    }
+
+    /**
+     * Gets project name with folders excluding main group.
+     *
+     * ! Recommend using this method instead of getName()
+     *
+     * @return name
+     */
+    public String getNameWithFolders() {
+        return _pathWithNamespace.substring(_pathWithNamespace.indexOf("/") + 1, _pathWithNamespace.length());
+    }
+
+    /**
      * Gets path to the cloned project
      * @return path to the cloned project
      */
     public String getPath() {
-        return _pathToClonedProject;
+        return _path;
     }
 
     public int getId() {
@@ -109,7 +133,7 @@ public class Project implements Serializable {
     }
 
     public String getName() {
-        return _name;
+        return getNameWithFolders(); // TODO: temporary solution;
     }
 
     public String getHttpUrlToRepo() {
@@ -141,7 +165,7 @@ public class Project implements Serializable {
         final int prime = 31;
         int result = 1;
         result = prime * result + (_isCloned ? 1231 : 1237);
-        result = prime * result + ((_pathToClonedProject == null) ? 0 : _pathToClonedProject.hashCode());
+        result = prime * result + ((_path == null) ? 0 : _path.hashCode());
         result = prime * result + _id;
         result = prime * result + ((_name == null) ? 0 : _name.hashCode());
         return result;
@@ -162,11 +186,11 @@ public class Project implements Serializable {
         if (_isCloned != other._isCloned) {
             return false;
         }
-        if (_pathToClonedProject == null) {
-            if (other._pathToClonedProject != null) {
+        if (_path == null) {
+            if (other._path != null) {
                 return false;
             }
-        } else if (!_pathToClonedProject.equals(other._pathToClonedProject)) {
+        } else if (!_path.equals(other._path)) {
             return false;
         }
         if (_id != other._id) {

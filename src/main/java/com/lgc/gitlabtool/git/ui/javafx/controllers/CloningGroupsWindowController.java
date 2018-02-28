@@ -3,6 +3,7 @@ package com.lgc.gitlabtool.git.ui.javafx.controllers;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.List;
 import java.util.prefs.Preferences;
 
@@ -63,14 +64,13 @@ public class CloningGroupsWindowController {
 
     private final Preferences _prefs = Preferences.userRoot().node(CloningGroupsWindowController.class.getName());
     private static final String PREF_NAME = "path_to_group";
-    private List<Group> _allGroups;
+    private Collection<Group> _allGroups;
 
     @FXML
     public void initialize() {
-        _allGroups = (List<Group>) _groupsService.getGroups(_loginService.getCurrentUser());
-        _groupsService.setGroupsTheirSubGroups(_allGroups);
-
-        ObservableList<Group> myObservableList = FXCollections.observableList(_groupsService.getOnlyMainGroups(_allGroups));
+        _allGroups = _groupsService.getGroups(_loginService.getCurrentUser());
+        List<Group> mainGroups = _groupsService.getOnlyMainGroups((List<Group>)_allGroups);
+        ObservableList<Group> myObservableList = FXCollections.observableList(mainGroups);
         configureListView(projectsList);
         projectsList.setItems(myObservableList);
 

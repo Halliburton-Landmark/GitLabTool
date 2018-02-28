@@ -4,6 +4,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import com.google.gson.annotations.SerializedName;
@@ -48,11 +49,11 @@ public class Group {
     @SerializedName("projects")
     private transient Collection<Project> _projects;
 
-    private String _pathToClonedGroup;
+    private String _path;
 
     private boolean _isCloned;
 
-    private final List<Group> _subGroups = new ArrayList<>();
+    private transient final List<Group> _subGroups = new ArrayList<>();
 
     public Group(){}
 
@@ -79,20 +80,20 @@ public class Group {
      *
      * @param path to the group
      */
-    public void setPathToClonedGroup(String path) {
+    public void setPath(String path) {
         if (path == null || path.isEmpty()) {
             throw new IllegalArgumentException("Invalid value passed");
         }
         Path pathToGroup = Paths.get(path);
         if (PathUtilities.isExistsAndDirectory(pathToGroup)) {
-            _pathToClonedGroup = path;
+            _path = path;
         }
     }
 
     /**
-     * Gets full path of group. It contains parent group
+     * Gets full GitLab path of group ("name of parent group (if it has) / a name of current group").
      *
-     * @return
+     * @return full path
      */
     public String getFullPath() {
         return _fullPath;
@@ -108,12 +109,32 @@ public class Group {
     }
 
     /**
+     * Adds subgroup to the current group
+     *
+     * @param subGroup the subgroup of the current group
+     */
+    public void addSubGroup(Group subGroup) {
+        if (subGroup != null) {
+            _subGroups.add(subGroup);
+        }
+    }
+
+    /**
+     * Gets list of subgroups
+     *
+     * @return unmodifiable list
+     */
+    public List<Group> getSubGroups() {
+        return Collections.unmodifiableList(_subGroups);
+    }
+
+    /**
      * Gets path to the cloned group
      *
      * @return path to the group
      */
-    public String getPathToClonedGroup() {
-        return _pathToClonedGroup;
+    public String getPath() {
+        return _path;
     }
 
     public int getId() {
@@ -134,7 +155,7 @@ public class Group {
         final int prime = 31;
         int result = 1;
         result = prime * result + (_isCloned ? 1231 : 1237);
-        result = prime * result + ((_pathToClonedGroup == null) ? 0 : _pathToClonedGroup.hashCode());
+        result = prime * result + ((_path == null) ? 0 : _path.hashCode());
         result = prime * result + _id;
         result = prime * result + ((_name == null) ? 0 : _name.hashCode());
         return result;
@@ -155,11 +176,11 @@ public class Group {
         if (_isCloned != other._isCloned) {
             return false;
         }
-        if (_pathToClonedGroup == null) {
-            if (other._pathToClonedGroup != null) {
+        if (_path == null) {
+            if (other._path != null) {
                 return false;
             }
-        } else if (!_pathToClonedGroup.equals(other._pathToClonedGroup)) {
+        } else if (!_path.equals(other._path)) {
             return false;
         }
         if (_id != other._id) {
@@ -175,7 +196,4 @@ public class Group {
         return true;
     }
 
-    public List<Group> getSubGroups() {
-        return _subGroups;
-    }
 }

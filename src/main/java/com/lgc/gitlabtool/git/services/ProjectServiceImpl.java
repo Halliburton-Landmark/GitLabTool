@@ -104,7 +104,7 @@ public class ProjectServiceImpl implements ProjectService {
             return Collections.emptyList();
         }
         String successMessage = "The projects of " + group.getName() + PREFIX_SUCCESSFUL_LOAD;
-        Path path = Paths.get(group.getPathToClonedGroup());
+        Path path = Paths.get(group.getPath());
         Collection<String> projectsName = PathUtilities.getFolders(path);
         if (projectsName.isEmpty()) {
             _consoleService.addMessage(successMessage, MessageType.SUCCESS);
@@ -117,7 +117,7 @@ public class ProjectServiceImpl implements ProjectService {
         projects.parallelStream()
                 .peek(pr -> updateProgressIndicator(++PROGRESS_LOADING, projects.size()))
                 .filter(project -> projectsName.contains(project.getName()))
-                .forEach((project) -> updateDataProject(project, group.getPathToClonedGroup()));
+                .forEach((project) -> updateDataProject(project, group.getPath()));
         _consoleService.addMessage(successMessage, MessageType.SUCCESS);
         _stateService.stateOFF(ApplicationState.LOAD_PROJECTS);
         return projects;
@@ -146,7 +146,7 @@ public class ProjectServiceImpl implements ProjectService {
         } else {
             _consoleService.addMessage(CREATE_REMOTE_PROJECT_SUCCESS_MESSAGE, MessageType.SUCCESS);
         }
-        createLocalProject(project, group.getPathToClonedGroup(), projectType, progressListener);
+        createLocalProject(project, group.getPath(), projectType, progressListener);
     }
 
     @Override
@@ -321,7 +321,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     private void updateDataProject(Project project, String pathGroup) {
         _logger.debug(String.format(LOADING_PROJECT_MESSAGE_TEMPLATE, "Start", project.getName()));
-        project.setPathToClonedProject(pathGroup + File.separator + project.getName());
+        project.setPath(pathGroup + File.separator + project.getName());
         updateProjectTypeAndStatus(project);
         _logger.debug(String.format(LOADING_PROJECT_MESSAGE_TEMPLATE, "Finish", project.getName()));
     }

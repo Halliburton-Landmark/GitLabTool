@@ -625,7 +625,7 @@ public class ModularController implements UpdateProgressListener {
 
         _projectService.addUpdateProgressListener(this);
 
-        String groupTitle = group.getName() + " [" + group.getPathToClonedGroup() + "]";
+        String groupTitle = group.getName() + " [" + group.getPath() + "]";
         groupPath.setText(HEADER_GROUP_TITLE + groupTitle);
 
         mainPanelBackground.setEffect(new GaussianBlur());
@@ -967,7 +967,7 @@ public class ModularController implements UpdateProgressListener {
             _consoleService.addMessage("Shadow projects for cloning have not been selected!", MessageType.ERROR);
             return;
         }
-        String path = _currentGroup.getPathToClonedGroup();
+        String path = _currentGroup.getPath();
 
         CloneProgressDialog progressDialog = new CloneProgressDialog();
         progressDialog.setStartAction(() -> startClone(shadowProjects, path, progressDialog));
@@ -1092,7 +1092,7 @@ public class ModularController implements UpdateProgressListener {
 
     private void onOpenGroupFolder(List<Group> items) {
         items.parallelStream()
-                .map(Group::getPathToClonedGroup)
+                .map(Group::getPath)
                 .forEach(this::openFolder);
     }
 
@@ -1482,7 +1482,7 @@ public class ModularController implements UpdateProgressListener {
             return;
         }
         StringBuffer infoAboutGroups = new StringBuffer();
-        groups.forEach(group -> infoAboutGroups.append(group.getName()).append(" (").append(group.getPathToClonedGroup()).append(");"));
+        groups.forEach(group -> infoAboutGroups.append(group.getName()).append(" (").append(group.getPath()).append(");"));
         _logger.warn(FAILED_HEADER_MESSAGE_LOAD_GROUP + FAILED_CONTENT_MESSAGE_LOAD_GROUP + infoAboutGroups);
 
         String namesAndPathsGroups = infoAboutGroups.toString().replace(";", ";\n\r");
@@ -1652,7 +1652,7 @@ public class ModularController implements UpdateProgressListener {
             Label groupNameLabel = new Label(item.getName());
             groupNameLabel.setFont(Font.font(Font.getDefault().getFamily(), 14));
 
-            String localPath = item.getPathToClonedGroup();
+            String localPath = item.getPath();
             Label localPathLabel = new Label(localPath);
 
             VBox vboxItem = new VBox(groupNameLabel, localPathLabel);
