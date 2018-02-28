@@ -846,7 +846,15 @@ public class ModularController implements UpdateProgressListener {
     @SuppressWarnings("unused")
     private void loadGroup(ActionEvent actionEvent) {
         Group selectedGroup = groupListView.getSelectionModel().getSelectedItem();
+
+        Group updatedGroup = _groupService.getGroupById(selectedGroup.getId());
+        //_clonedGroupsService.removeGroups(groups)
+        // here update group before loading
         loadGroup(selectedGroup);
+    }
+
+    private void updateGroupListView() {
+
     }
 
     private void openInTerminal(ActionEvent actionEvent) {

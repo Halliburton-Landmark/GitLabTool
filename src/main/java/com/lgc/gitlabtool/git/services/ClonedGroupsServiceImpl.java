@@ -60,14 +60,14 @@ public class ClonedGroupsServiceImpl implements ClonedGroupsService {
     @Override
     public List<Group> loadClonedGroups() {
         String username = _loginService.getCurrentUser().getUsername();
-        List<Group> groups = _storageService.loadStorage(URLManager.trimServerURL(_loginService.getServerURL()),
-                username);
+        String serverURL = URLManager.trimServerURL(_loginService.getServerURL());
+        List<Group> groups = _storageService.loadStorage(serverURL, username);
 
         _notExistGroups = groups.stream()
                                 .filter(group -> isNotExistsAndDirectory(group))
                                 .collect(Collectors.toList());
-
         groups.removeAll(_notExistGroups);
+
         _clonedGroupsProvider.setClonedGroups(groups);
         updateClonedGroupsInXML();
         return getClonedGroups();
@@ -105,6 +105,12 @@ public class ClonedGroupsServiceImpl implements ClonedGroupsService {
             return true;
         }
         return !PathUtilities.isExistsAndDirectory(Paths.get(path));
+    }
+
+    @Override
+    public void updateClonedGroup(Group group) {
+        // TODO Auto-generated method stub
+
     }
 
 }
