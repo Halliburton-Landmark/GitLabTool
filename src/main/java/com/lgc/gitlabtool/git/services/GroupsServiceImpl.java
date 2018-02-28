@@ -265,7 +265,7 @@ public class GroupsServiceImpl implements GroupService {
 
     private Optional<Group> findGroupByName(Collection<Group> groups, String nameGroup) {
         return groups.stream()
-                     .filter(group -> group.getFullPath().equals(nameGroup))
+                     .filter(group -> group.getName().equals(nameGroup))
                      .findFirst();
     }
 
