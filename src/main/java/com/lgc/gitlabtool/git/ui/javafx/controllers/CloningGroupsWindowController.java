@@ -11,7 +11,7 @@ import org.apache.commons.lang.StringUtils;
 
 import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
-import com.lgc.gitlabtool.git.services.GroupsService;
+import com.lgc.gitlabtool.git.services.GroupService;
 import com.lgc.gitlabtool.git.services.LoginService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
@@ -41,8 +41,8 @@ public class CloningGroupsWindowController {
 
     private final LoginService _loginService = ServiceProvider.getInstance().getService(LoginService.class);
 
-    private final GroupsService _groupsService = ServiceProvider.getInstance()
-            .getService(GroupsService.class);
+    private final GroupService _groupsService = ServiceProvider.getInstance()
+            .getService(GroupService.class);
 
     @FXML
     private TextField folderPath;

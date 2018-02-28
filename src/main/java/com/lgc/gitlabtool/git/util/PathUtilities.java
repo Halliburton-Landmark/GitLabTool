@@ -99,12 +99,12 @@ public class PathUtilities {
      * Creates path on the local disk.
      *
      * @param path the path for creating
-     * @param ifFolder <true> if we create folder, <false> if we create file.
+     * @param isFolder <true> if we create folder, <false> if we create file.
      * @return status of operation
      */
-    public static boolean createPath(Path path, boolean ifFolder) {
+    public static boolean createPath(Path path, boolean isFolder) {
         try {
-            if (ifFolder) {
+            if (isFolder) {
                 Files.createDirectories(path);
                 return true;
             }

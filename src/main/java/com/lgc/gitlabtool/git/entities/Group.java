@@ -3,7 +3,6 @@ package com.lgc.gitlabtool.git.entities;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -42,12 +41,6 @@ public class Group {
      **/
     @SerializedName("full_path")
     private String _fullPath;
-
-    /**
-     * Projects in group
-     **/
-    @SerializedName("projects")
-    private transient Collection<Project> _projects;
 
     private String _path;
 
@@ -143,11 +136,6 @@ public class Group {
 
     public String getName() {
         return _name;
-    }
-
-
-    public Collection<Project> getProjects() {
-        return _projects;
     }
 
     @Override

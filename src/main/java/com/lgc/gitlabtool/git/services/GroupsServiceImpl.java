@@ -3,7 +3,6 @@ package com.lgc.gitlabtool.git.services;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -29,7 +28,7 @@ import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 import com.lgc.gitlabtool.git.util.JSONParser;
 import com.lgc.gitlabtool.git.util.PathUtilities;
 
-public class GroupsServiceImpl implements GroupsService {
+public class GroupsServiceImpl implements GroupService {
 
     private static final Logger logger = LogManager.getLogger(GroupsServiceImpl.class);
 
@@ -78,21 +77,6 @@ public class GroupsServiceImpl implements GroupsService {
             return parsedGroups;
         }
 
-        return null;
-    }
-
-    @Override
-    public Group getGroupById(int idGroup) {
-        privateTokenValue = CurrentUser.getInstance().getOAuth2TokenValue();
-        privateTokenKey = CurrentUser.getInstance().getPrivateTokenKey();
-        if (privateTokenValue != null) {
-            String sendString = "/groups/" + idGroup;
-            HashMap<String, String> header = new HashMap<>();
-            header.put(privateTokenKey, privateTokenValue);
-
-            Object uparsedGroup = getConnector().sendGet(sendString, null, header).getBody();
-            return JSONParser.parseToObject(uparsedGroup, Group.class);
-        }
         return null;
     }
 
@@ -157,6 +141,33 @@ public class GroupsServiceImpl implements GroupsService {
                      .collect(Collectors.toList());
     }
 
+    @Override
+    public Group reloadGroup(Group group) {
+        Optional<Group> optLoadedGroup = getGroupById(group.getId());
+        if (optLoadedGroup.isPresent()) {
+            Group loadedGroup = optLoadedGroup.get();
+            loadedGroup.setPath(group.getPath());
+            loadedGroup.setClonedStatus(true);
+            return loadedGroup;
+        }
+        _consoleService.addMessage("Failed reload group", MessageType.ERROR);
+        return group;
+    }
+
+    private Optional<Group> getGroupById(int idGroup) {
+        Collection<Group> groups = getGroups(CurrentUser.getInstance().getCurrentUser());
+        if (groups == null || groups.isEmpty()) {
+            return null;
+        }
+        return findGroupById(groups, idGroup);
+    }
+
+    private Optional<Group> findGroupById(Collection<Group> groups, int idGroup) {
+        return groups.stream()
+                     .filter(group -> group.getId() == idGroup)
+                     .findFirst();
+    }
+
     private RESTConnector getConnector() {
         return _connector;
     }
@@ -206,11 +217,7 @@ public class GroupsServiceImpl implements GroupsService {
             _consoleService.addMessage(GROUP_DOESNT_EXIST_MESSAGE, MessageType.ERROR);
             return null;
         }
-        Group foundGroup = getGroupById(optFoundGroup.get().getId());
-        if (foundGroup == null) {
-            _consoleService.addMessage(ERROR_GETTING_GROUP_MESSAGE, MessageType.ERROR);
-            return null;
-        }
+        Group foundGroup = optFoundGroup.get();
         foundGroup.setPath(groupPath.toString());
         foundGroup.setClonedStatus(true);
         _clonedGroupsService.addGroups(Arrays.asList(foundGroup));
@@ -258,7 +265,7 @@ public class GroupsServiceImpl implements GroupsService {
 
     private Optional<Group> findGroupByName(Collection<Group> groups, String nameGroup) {
         return groups.stream()
-                     .filter(group -> group.getName().equals(nameGroup))
+                     .filter(group -> group.getFullPath().equals(nameGroup))
                      .findFirst();
     }
 
@@ -296,54 +303,16 @@ public class GroupsServiceImpl implements GroupsService {
     }
 
     private void cloneGroup(Group cloneGroup, String destinationPath, OperationProgressListener progressListener) {
-        List<Group> groupWithItsSubGroups = new ArrayList<>();
-        groupWithItsSubGroups.add(cloneGroup);
-        groupWithItsSubGroups.addAll(cloneGroup.getSubGroups());
-
-        boolean isNothingGot = true;
-        Collection<Project> allProjects = new ArrayList<>();
-        for (Group group : groupWithItsSubGroups) {
-            Collection<Project> groupProjects = _projectService.getProjects(group); // get sub-groups too
-            if (groupProjects == null) {
-                String errorMessage = "Error getting project from the GitLab for " + group.getFullPath();
-                progressListener.onError(errorMessage);
-            } else {
-                isNothingGot = false;
-                allProjects.addAll(groupProjects);
-
-                group.setClonedStatus(true);
-                createLocalGroupPath(group, destinationPath);
-            }
-        }
-        // Finish cloning if you couldn't get projects from anything group
-        if (isNothingGot) {
+        Collection<Project> allProjects = _projectService.getProjects(cloneGroup);
+        if (allProjects.isEmpty()) {
             progressListener.onFinish("Clone is finished. Could not get projects for the " + cloneGroup.getFullPath());
             return;
         }
-        cloneGroupProjects(cloneGroup, allProjects, destinationPath, progressListener);
-    }
-
-    private void cloneGroupProjects(Group cloneGroup, Collection<Project> allProjects,
-                                    String destinationPath, OperationProgressListener progressListener) {
-        String mainGroupPath = destinationPath + File.separator + cloneGroup.getName();
-        boolean resultCreation = PathUtilities.isExistsAndDirectory(Paths.get(mainGroupPath));
-        if (allProjects.isEmpty()) {
-            String message = resultCreation ? "Group successfuly created!" : "Failed creation of group";
-            if (resultCreation) {
-                progressListener.onSuccess(null, 1, message);
-            } else {
-                progressListener.onError(1, message);
-            }
-            progressListener.onFinish((Object)null);
-        } else {
-            _jGit.clone(allProjects, destinationPath, progressListener);
-        }
+        String pathMainGroup = destinationPath + File.separator + cloneGroup.getName();
+        PathUtilities.createPath(Paths.get(pathMainGroup), true);
+        _jGit.clone(allProjects, destinationPath, progressListener);
+        cloneGroup.setClonedStatus(true);
+        cloneGroup.setPath(pathMainGroup);
         _clonedGroupsService.addGroups(Arrays.asList(cloneGroup));
-    }
-
-    private void createLocalGroupPath(Group group, String destinationPath) {
-        String localGroupPath = destinationPath + SEPARATOR + group.getFullPath();
-        PathUtilities.createPath(Paths.get(localGroupPath), true);
-        group.setPath(localGroupPath);
     }
 }

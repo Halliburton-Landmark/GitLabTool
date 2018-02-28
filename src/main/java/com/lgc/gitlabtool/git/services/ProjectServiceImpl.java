@@ -3,6 +3,7 @@ package com.lgc.gitlabtool.git.services;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -81,13 +82,21 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public Collection<Project> getProjects(Group group) {
         _consoleService.addMessage("Sending a request to receive a list of projects from GitLab.", MessageType.SIMPLE);
-        Map<String, String> header = getCurrentPrivateToken();
-        if (!header.isEmpty()) {
-            String sendString = "/groups/" + group.getId() + "/projects?per_page=" + MAX_PROJECTS_COUNT_ON_THE_PAGE;
-            return getProjectsForAllPages(sendString, header);
+        List<Group> groupWithItsSubGroups = new ArrayList<>(Arrays.asList(group));
+        groupWithItsSubGroups.addAll(group.getSubGroups());
+
+        Collection<Project> allProjects = new ArrayList<>();
+        for (Group currentGroup : groupWithItsSubGroups) {
+            Map<String, String> header = getCurrentPrivateToken();
+            if (header.isEmpty()) {
+                _consoleService.addMessage("Error getting projects from the GitLab", MessageType.ERROR);
+            } else {
+                String sendString = "/groups/" + currentGroup.getId() + "/projects?per_page=" + MAX_PROJECTS_COUNT_ON_THE_PAGE;
+                Collection<Project> groupProjects = getProjectsForAllPages(sendString, header);
+                allProjects.addAll(groupProjects);
+            }
         }
-        _consoleService.addMessage("Error getting projects from the GitLab.", MessageType.ERROR);
-        return Collections.emptyList();
+        return allProjects;
     }
 
     @Override
@@ -111,7 +120,7 @@ public class ProjectServiceImpl implements ProjectService {
             _stateService.stateOFF(ApplicationState.LOAD_PROJECTS);
             return projects;
         }
-
+        // Rewrite it
         PROGRESS_LOADING = 0;
         _consoleService.addMessage("Getting statuses and types of projects...", MessageType.SIMPLE);
         projects.parallelStream()
@@ -120,7 +129,7 @@ public class ProjectServiceImpl implements ProjectService {
                 .forEach((project) -> updateDataProject(project, group.getPath()));
         _consoleService.addMessage(successMessage, MessageType.SUCCESS);
         _stateService.stateOFF(ApplicationState.LOAD_PROJECTS);
-        return projects;
+        return null;
     }
 
     @Override

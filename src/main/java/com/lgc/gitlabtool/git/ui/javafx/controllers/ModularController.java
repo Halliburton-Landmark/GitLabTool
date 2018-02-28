@@ -38,7 +38,7 @@ import com.lgc.gitlabtool.git.services.BackgroundService;
 import com.lgc.gitlabtool.git.services.ClonedGroupsService;
 import com.lgc.gitlabtool.git.services.ConsoleService;
 import com.lgc.gitlabtool.git.services.GitService;
-import com.lgc.gitlabtool.git.services.GroupsService;
+import com.lgc.gitlabtool.git.services.GroupService;
 import com.lgc.gitlabtool.git.services.LoginService;
 import com.lgc.gitlabtool.git.services.PomXMLService;
 import com.lgc.gitlabtool.git.services.ProjectService;
@@ -214,8 +214,8 @@ public class ModularController implements UpdateProgressListener {
     private static final ConsoleService _consoleService = ServiceProvider.getInstance()
             .getService(ConsoleService.class);
 
-    private static final GroupsService _groupService = ServiceProvider.getInstance()
-            .getService(GroupsService.class);
+    private static final GroupService _groupService = ServiceProvider.getInstance()
+            .getService(GroupService.class);
 
     private static final StateService _stateService = ServiceProvider.getInstance()
             .getService(StateService.class);
@@ -846,10 +846,6 @@ public class ModularController implements UpdateProgressListener {
     @SuppressWarnings("unused")
     private void loadGroup(ActionEvent actionEvent) {
         Group selectedGroup = groupListView.getSelectionModel().getSelectedItem();
-
-        Group updatedGroup = _groupService.getGroupById(selectedGroup.getId());
-        //_clonedGroupsService.removeGroups(groups)
-        // here update group before loading
         loadGroup(selectedGroup);
     }
 

@@ -32,13 +32,6 @@ public interface ClonedGroupsService extends Service {
     void addGroups(List<Group> groups);
 
     /**
-     * Get new data
-     *
-     * @param group
-     */
-    void updateClonedGroup(Group group);
-
-    /**
      * Removes new cloned groups to the current list and updates the XML file.
      */
     boolean removeGroups(List<Group> groups);

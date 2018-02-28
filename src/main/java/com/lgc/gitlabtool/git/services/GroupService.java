@@ -8,7 +8,7 @@ import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.User;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 
-public interface GroupsService extends Service {
+public interface GroupService extends Service {
 
     /**
      * Gets user's groups
@@ -29,14 +29,6 @@ public interface GroupsService extends Service {
      *                         in the ProgressListener::onFinish method.
      */
     void cloneGroups(List<Group> groups, String destinationPath, OperationProgressListener progressListener);
-
-    /**
-     * Gets group by id
-     *
-     * @param idGroup Id of group
-     * @return Group
-     */
-    Group getGroupById(int idGroup);
 
     /**
      * Imports a group from the local repository. Gets all data about a group from the GitLab.
@@ -65,5 +57,12 @@ public interface GroupsService extends Service {
      * @return
      */
     List<Group> getOnlyMainGroups(List<Group> groups);
+
+    /**
+     *
+     *
+     * @return
+     */
+    Group reloadGroup(Group group);
 
 }

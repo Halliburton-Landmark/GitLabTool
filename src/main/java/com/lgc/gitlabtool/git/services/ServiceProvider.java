@@ -45,7 +45,7 @@ public class ServiceProvider {
         _services = new HashMap<>();
         _services.put(LoginService.class, loginService);
         _services.put(ClonedGroupsService.class, programPropertiesService);
-        _services.put(GroupsService.class, new GroupsServiceImpl(restConnector,
+        _services.put(GroupService.class, new GroupsServiceImpl(restConnector,
                 programPropertiesService, projectService, stateService, consoleService, jGit));
 
         _services.put(ProjectService.class, projectService);
