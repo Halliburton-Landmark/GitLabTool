@@ -110,17 +110,6 @@ public class Project implements Serializable {
     }
 
     /**
-     * Gets project name with folders excluding main group.
-     *
-     * ! Recommend using this method instead of getName()
-     *
-     * @return name
-     */
-    public String getNameWithFolders() {
-        return _pathWithNamespace.substring(_pathWithNamespace.indexOf("/") + 1, _pathWithNamespace.length());
-    }
-
-    /**
      * Gets path to the cloned project
      * @return path to the cloned project
      */
@@ -132,8 +121,16 @@ public class Project implements Serializable {
         return _id;
     }
 
+    /**
+     * Gets project name with parent folders (excluding a main group).
+     *
+     * @return project name
+     */
     public String getName() {
-        return getNameWithFolders(); // TODO: temporary solution;
+        if (_pathWithNamespace != null) {
+            return _pathWithNamespace.substring(_pathWithNamespace.indexOf("/") + 1, _pathWithNamespace.length());
+        }
+        return _name;
     }
 
     public String getHttpUrlToRepo() {
