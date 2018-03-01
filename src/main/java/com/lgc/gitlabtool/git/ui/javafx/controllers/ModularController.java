@@ -20,6 +20,7 @@ import java.util.stream.Stream;
 import com.lgc.gitlabtool.git.preferences.ApplicationPreferences;
 import com.lgc.gitlabtool.git.preferences.PreferencesNodes;
 import com.lgc.gitlabtool.git.util.OpenTerminalUtil;
+import javafx.beans.value.ChangeListener;
 import javafx.scene.Scene;
 import javafx.scene.effect.Effect;
 import org.apache.logging.log4j.LogManager;
@@ -318,7 +319,6 @@ public class ModularController implements UpdateProgressListener {
 
     private static final int PROJECTS_TOOLBAR_PADDING = 1;
 
-    private static String css_path = "css/modular_light_style.css";
     //endregion
     /*
      *
@@ -330,6 +330,7 @@ public class ModularController implements UpdateProgressListener {
     private String _currentView;
     private ProjectList _projectsList;
     private StateListener _modularStateListener;
+    private ChangeListener<Number> dividerListener;
 
     /***********************************************************************************************
      *
@@ -607,6 +608,13 @@ public class ModularController implements UpdateProgressListener {
         toolbar.getItems().clear();
         menuBar.getMenus().clear();
 
+        if (dividerListener != null
+                && dividerMainPane.getDividers().size() > 0
+                && dividerMainPane.getDividers().get(0) != null) {
+            SplitPane.Divider divider = dividerMainPane.getDividers().get(0);
+            divider.positionProperty().removeListener(dividerListener);
+        }
+
         toolbar.getItems().addAll(projectsWindowToolbarItems);
         menuBar.getMenus().addAll(projectsWindowMainMenuItems);
 
@@ -671,21 +679,26 @@ public class ModularController implements UpdateProgressListener {
 
     private void setupProjectsDividerPosition(String groupTitle) {
 
-        if (getPreferences() != null) {
+        ApplicationPreferences preferences = getPreferences();
+
+        if (preferences != null) {
             String key = String.valueOf(groupTitle.hashCode());
-            double splitPaneDivider = getPreferences().getDouble(key, 0.3);
+            double splitPaneDivider = preferences.getDouble(key, 0.3);
             dividerMainPane.setDividerPositions(splitPaneDivider);
         }
 
-        dividerMainPane.getDividers().get(0).positionProperty().addListener(
-                (observable, oldValue, newValue) -> {
-                    if (getPreferences() != null && Objects.equals(_currentView, ViewKey.PROJECTS_WINDOW.getKey())) {
-                        String key = String.valueOf(groupTitle.hashCode());
-                        Double value = roundTo3(newValue.doubleValue());
+        dividerListener = (observable, oldValue, newValue) -> {
+            if (preferences != null && Objects.equals(_currentView, ViewKey.PROJECTS_WINDOW.getKey())) {
+                String key = String.valueOf(groupTitle.hashCode());
+                Double value = roundTo3(newValue.doubleValue());
+                preferences.putDouble(key, value);
+            }
+        };
 
-                        getPreferences().putDouble(key, value);
-                    }
-                });
+        if(dividerMainPane.getDividers().size() > 0 && dividerMainPane.getDividers().get(0) != null){
+            SplitPane.Divider divider = dividerMainPane.getDividers().get(0);
+            divider.positionProperty().addListener(dividerListener);
+        }
     }
 
     private void addProjectsWindowListener() {
