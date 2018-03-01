@@ -120,7 +120,7 @@ public class BranchesWindowController extends AbstractStateListener {
     @FXML
     public void initialize() {
         searchField.textProperty().addListener((observable, oldValue, newValue) -> filterPlantList(oldValue, newValue));
-        disableButttons(null);
+        disableButtons(null);
     }
 
     void beforeShowing(List<Project> projects, Stage stage) {
@@ -385,12 +385,12 @@ public class BranchesWindowController extends AbstractStateListener {
             if (newValue != null) {
                 filteringProjectsListView(Arrays.asList(newValue));
             }
-            disableButttons(newValue);
+            disableButtons(newValue);
         });
 
     }
 
-    private void disableButttons(Branch currentBranch) {
+    private void disableButtons(Branch currentBranch) {
         ObservableValue<Boolean> disableButttonProperty = branchesListView.getSelectionModel().selectedItemProperty().isNull();
         if (currentBranch != null) {
             boolean isDisable = isSelectedBranchCurrentForAllProjects(currentBranch);
@@ -401,10 +401,8 @@ public class BranchesWindowController extends AbstractStateListener {
     }
 
     private boolean isSelectedBranchCurrentForAllProjects(Branch currentBranch) {
-        return !currentProjectsListView.getItems().parallelStream()
-                                                  .filter(project -> !currentBranch.compareBranchesNames(project.getProjectStatus().getCurrentBranch()))
-                                                  .findFirst()
-                                                  .isPresent();
+        return currentProjectsListView.getItems().parallelStream()
+                                                  .allMatch(project -> currentBranch.compareBranchesNames(project.getProjectStatus().getCurrentBranch()));
     }
 
     private class BranchListCell extends ListCell<Branch> {
@@ -461,7 +459,7 @@ public class BranchesWindowController extends AbstractStateListener {
                             currentProjectsListView.setItems(FXCollections.observableArrayList(getProjectsByIds()));
                             onUpdateList();
                         }
-                        disableButttons(branch);
+                        disableButtons(branch);
                     }
                 });
             });
