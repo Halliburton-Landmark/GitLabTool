@@ -120,7 +120,7 @@ public class BranchesWindowController extends AbstractStateListener {
     @FXML
     public void initialize() {
         searchField.textProperty().addListener((observable, oldValue, newValue) -> filterPlantList(oldValue, newValue));
-        disableSwitchButton(null);
+        disableButtons(null);
     }
 
     void beforeShowing(List<Project> projects, Stage stage) {
@@ -385,27 +385,24 @@ public class BranchesWindowController extends AbstractStateListener {
             if (newValue != null) {
                 filteringProjectsListView(Arrays.asList(newValue));
             }
-            disableSwitchButton(newValue);
+            disableButtons(newValue);
         });
+
     }
 
-    private void disableSwitchButton(Object currentBranch) {
-        ObservableValue<Boolean> disableProperty;
-        if (currentBranch == null) {
-            disableProperty = branchesListView.getSelectionModel().selectedItemProperty().isNull();
-        } else {
-            boolean isDisable = isSelectedBranchCurrentForAllProjects((Branch)currentBranch);
-            disableProperty = new SimpleBooleanProperty(isDisable);
+    private void disableButtons(Branch currentBranch) {
+        ObservableValue<Boolean> disableButttonProperty = branchesListView.getSelectionModel().selectedItemProperty().isNull();
+        if (currentBranch != null) {
+            boolean isDisable = isSelectedBranchCurrentForAllProjects(currentBranch);
+            disableButttonProperty = new SimpleBooleanProperty(isDisable);
         }
-        checkoutButton.disableProperty().bind(disableProperty);
-        deleteButton.disableProperty().bind(disableProperty);
+        checkoutButton.disableProperty().bind(disableButttonProperty);
+        deleteButton.disableProperty().bind(disableButttonProperty);
     }
 
     private boolean isSelectedBranchCurrentForAllProjects(Branch currentBranch) {
-        return !currentProjectsListView.getItems().parallelStream()
-                                                  .filter(project -> !currentBranch.compareBranchesNames(project.getProjectStatus().getCurrentBranch()))
-                                                  .findFirst()
-                                                  .isPresent();
+        return currentProjectsListView.getItems().parallelStream()
+                                                  .allMatch(project -> currentBranch.compareBranchesNames(project.getProjectStatus().getCurrentBranch()));
     }
 
     private class BranchListCell extends ListCell<Branch> {
@@ -462,7 +459,7 @@ public class BranchesWindowController extends AbstractStateListener {
                             currentProjectsListView.setItems(FXCollections.observableArrayList(getProjectsByIds()));
                             onUpdateList();
                         }
-                        disableSwitchButton(branch);
+                        disableButtons(branch);
                     }
                 });
             });

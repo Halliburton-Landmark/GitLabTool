@@ -929,7 +929,6 @@ public class JGit {
      * @param nameBranch      the name of the branch to which to checkout
      * @param isRemoteBranch  if value is <true> to checkout branch for it, a new local branch
                               with the same name will be created, if <false> checkout existing branch.
-     *
      * @return JGitStatus: SUCCESSFUL - if a new branch was created,
      *                     FAILED - if the branch could not be created,
      *                     CONFLICTS - if the branch has unsaved changes that can lead to conflicts.
@@ -953,8 +952,7 @@ public class JGit {
             return JGitStatus.BRANCH_DOES_NOT_EXIST;
         }
         if (isContaints && isRemoteBranch) {
-            logger.error("Failed " + prefixErrorMessage + JGitStatus.BRANCH_ALREADY_EXISTS);
-            return JGitStatus.BRANCH_ALREADY_EXISTS;
+            isRemoteBranch = false;
         }
         try (Git git = getGit(project.getPath())) {
             if (isCurrentBranch(git, nameBranchWithoutAlias)) {
