@@ -10,18 +10,18 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.lgc.gitlabtool.git.preferences.ApplicationPreferences;
-import com.lgc.gitlabtool.git.preferences.PreferencesNodes;
-import com.lgc.gitlabtool.git.util.OpenTerminalUtil;
-import javafx.scene.Scene;
-import javafx.scene.effect.Effect;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -33,6 +33,8 @@ import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.listeners.stateListeners.StateListener;
 import com.lgc.gitlabtool.git.listeners.updateProgressListener.UpdateProgressListener;
+import com.lgc.gitlabtool.git.preferences.ApplicationPreferences;
+import com.lgc.gitlabtool.git.preferences.PreferencesNodes;
 import com.lgc.gitlabtool.git.services.BackgroundService;
 import com.lgc.gitlabtool.git.services.ClonedGroupsService;
 import com.lgc.gitlabtool.git.services.ConsoleService;
@@ -749,7 +751,7 @@ public class ModularController implements UpdateProgressListener {
             stage.getIcons().add(appIcon);
 
              /* Set sizing and position */
-            double dialogWidth = 500;
+            double dialogWidth = 600;
             double dialogHeight = 400;
 
             ScreenUtil.adaptForMultiScreens(stage, dialogWidth, dialogHeight);
