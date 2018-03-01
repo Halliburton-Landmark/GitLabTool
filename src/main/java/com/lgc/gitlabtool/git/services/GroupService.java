@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.lgc.gitlabtool.git.entities.Group;
+import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.User;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 
@@ -20,15 +21,16 @@ public interface GroupService extends Service {
     Collection<Group> getGroups(User user);
 
     /**
-     * Clones list of user's groups and adds their to the ClonedGroups class.
+     * Clones list of user's group and adds their to the ClonedGroups class.
      *
-     * @param groups           List of groups for cloning
+     * @param group            selected group
+     * @param projects         selected projects for cloning. If it is <code>null</code> clone all projects in group
      * @param destinationPath  Local path of workspace
      * @param progressListener Listener for obtaining data on the process of performing the operation.
      *                         We must call StateService::stateOFF for this state
      *                         in the ProgressListener::onFinish method.
      */
-    void cloneGroups(List<Group> groups, String destinationPath, OperationProgressListener progressListener);
+    void cloneGroup(Group group, List<Project> projects, String destinationPath, OperationProgressListener progressListener);
 
     /**
      * Imports a group from the local repository. Gets all data about a group from the GitLab.

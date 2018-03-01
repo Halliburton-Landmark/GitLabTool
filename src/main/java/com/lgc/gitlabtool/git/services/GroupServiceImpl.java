@@ -79,8 +79,8 @@ public class GroupServiceImpl implements GroupService {
     }
 
     @Override
-    public void cloneGroups(List<Group> groups, String destinationPath, OperationProgressListener progressListener) {
-        if (groups == null || destinationPath == null) {
+    public void cloneGroup(Group group, List<Project> projects, String destinationPath, OperationProgressListener progressListener) {
+        if (group == null || destinationPath == null) {
             throw new IllegalArgumentException("Invalid parameters.");
         }
         // we must call StateService::stateOFF for this state in the ProgressListener::onFinish method
@@ -94,7 +94,12 @@ public class GroupServiceImpl implements GroupService {
             progressListener.onFinish(null, false);
             return;
         }
-        groups.forEach((group) -> cloneGroup(group, destinationPath, progressListener));
+
+        if (projects == null) {
+            cloneGroup(group, destinationPath, progressListener);
+        } else {
+            cloneGroupProjects(group, projects, destinationPath, progressListener);
+        }
     }
 
     @Override
@@ -306,11 +311,15 @@ public class GroupServiceImpl implements GroupService {
             progressListener.onFinish("Clone is finished. Could not get projects for the " + cloneGroup.getFullPath());
             return;
         }
-        String pathMainGroup = destinationPath + File.separator + cloneGroup.getName();
+        cloneGroupProjects(cloneGroup, allProjects, destinationPath, progressListener);
+    }
+
+    private void cloneGroupProjects(Group group, Collection<Project> projects, String path, OperationProgressListener progressListener) {
+        String pathMainGroup = path + File.separator + group.getName();
         PathUtilities.createPath(Paths.get(pathMainGroup), true);
-        _jGit.clone(allProjects, destinationPath, progressListener);
-        cloneGroup.setClonedStatus(true);
-        cloneGroup.setPath(pathMainGroup);
-        _clonedGroupsService.addGroups(Arrays.asList(cloneGroup));
+        _jGit.clone(projects, path, progressListener);
+        group.setClonedStatus(true);
+        group.setPath(pathMainGroup);
+        _clonedGroupsService.addGroups(Arrays.asList(group));
     }
 }

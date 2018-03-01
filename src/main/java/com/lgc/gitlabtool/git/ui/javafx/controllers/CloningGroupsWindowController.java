@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 
+import com.google.inject.internal.util.Objects;
 import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
@@ -31,6 +32,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MultipleSelectionModel;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextField;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
@@ -70,6 +72,7 @@ public class CloningGroupsWindowController {
     private static final String PROJECTS_CLONE_LABEL = "Please select projects for cloning";
 
     private List<Group> _mainGroups;
+    private Object _selectedGroup;
     private int _selectedGroupIndex = -1;
 
     private ApplicationPreferences getPrefs() {
@@ -117,23 +120,20 @@ public class CloningGroupsWindowController {
     }
 
     @FXML
-    public void onNextAction() throws Exception {
-        updatePanelForProjects();
-//        Stage stage = (Stage) nextButton.getScene().getWindow();
-//        stage.close();
-//
-//        String destinationPath = folderPath.getText();
-//        List<Group> selectedGroups = projectsList.getSelectionModel().getSelectedItems();
-//
-//        CloneProgressDialog progressDialog = new CloneProgressDialog();
-//        progressDialog.setStartAction(() -> startClone(destinationPath, selectedGroups, progressDialog));
-//        progressDialog.showDialog();
-    }
+    public void onNextAction() {
+        if (Objects.equal(cloneLabel.getText(), PROJECTS_CLONE_LABEL)) {
+            ((Stage) nextButton.getScene().getWindow()).close(); // hide clone dialog
+            List<Project> projects = dataListView.getSelectionModel().getSelectedItems();
+            String path = folderPath.getText();
+            Group group = (Group) _selectedGroup;
 
-    private boolean startClone(String destinationPath, List<Group> selectedGroups, CloneProgressDialog progressDialog) {
-        _groupsService.cloneGroups(selectedGroups, destinationPath,
-                new OperationProgressListener(progressDialog, ApplicationState.CLONE));
-        return true;
+            CloneProgressDialog progressDialog = new CloneProgressDialog();
+            OperationProgressListener progress = new OperationProgressListener(progressDialog, ApplicationState.CLONE);
+            progressDialog.setStartAction(() -> _groupsService.cloneGroup(group, projects, path, progress));
+            progressDialog.showDialog();
+        } else {
+            updatePanelForProjects();
+        }
     }
 
     @FXML
@@ -159,7 +159,7 @@ public class CloningGroupsWindowController {
                                 itemText = group.getName() + " (@" + group.getFullPath() + ")";
                             } else {
                                 Project project = (Project) item;
-                                itemText = project.getName() + " (" + project.getHttpUrlToRepo() + ")";
+                                itemText = project.getName();
                             }
                             setText(itemText);
                         } else {
@@ -205,6 +205,7 @@ public class CloningGroupsWindowController {
         cloneLabel.setText(GROUP_CLONE_LABEL);
         clearListView();
         dataListView.setItems(FXCollections.observableList(new ArrayList<>(_mainGroups)));
+        dataListView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         if (_selectedGroupIndex != -1) {
             dataListView.getSelectionModel().select(_selectedGroupIndex);
             filterForOkButton();
@@ -216,11 +217,12 @@ public class CloningGroupsWindowController {
         nextButton.setText("Clone");
         cloneLabel.setText(PROJECTS_CLONE_LABEL);
         MultipleSelectionModel<Object> selectionModel = dataListView.getSelectionModel();
-        Object selectedGroup = selectionModel.getSelectedItem();
+        _selectedGroup = selectionModel.getSelectedItem();
         _selectedGroupIndex = selectionModel.getSelectedIndex();
         clearListView();
-        Collection<Project> loadedProjects = _projectService.getProjects((Group) selectedGroup);
+        Collection<Project> loadedProjects = _projectService.getProjects((Group) _selectedGroup);
         dataListView.setItems(FXCollections.observableList((List<Project>) loadedProjects));
+        dataListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         filterForOkButton();
     }
 

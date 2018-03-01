@@ -745,17 +745,15 @@ public class ModularController implements UpdateProgressListener {
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.initStyle(StageStyle.DECORATED);
             stage.setTitle(CLONE_WINDOW_TITLE);
-            //stage.setResizable(false);
             stage.setScene(new GLTScene(root));
             stage.getIcons().add(appIcon);
 
              /* Set sizing and position */
             double dialogWidth = 400;
-            double dialogHeight = 400;
+            double dialogHeight = 500;
             ScreenUtil.adaptForMultiScreens(stage, dialogWidth, dialogHeight);
             stage.setMinHeight(dialogHeight);
             stage.setMinWidth(dialogWidth);
-            stage.setWidth(550);
             stage.show();
         } catch (IOException e) {
             _logger.error("Could not load fxml resource: " + e.getMessage());
