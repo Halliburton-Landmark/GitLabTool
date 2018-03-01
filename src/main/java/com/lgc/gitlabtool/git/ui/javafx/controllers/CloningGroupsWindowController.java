@@ -4,8 +4,9 @@ import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.prefs.Preferences;
 
+import com.lgc.gitlabtool.git.preferences.ApplicationPreferences;
+import com.lgc.gitlabtool.git.preferences.PreferencesNodes;
 import org.apache.commons.lang.StringUtils;
 
 import com.lgc.gitlabtool.git.entities.Group;
@@ -34,9 +35,6 @@ import javafx.util.Callback;
 public class CloningGroupsWindowController {
     private static final String FOLDER_CHOOSER_DIALOG = "Destination folder";
 
-    // Uncomment if you want to log something
-    // private static final Logger logger = LogManager.getLogger(CloningGroupsWindowController.class);
-
     private final LoginService _loginService = ServiceProvider.getInstance().getService(LoginService.class);
 
     private final GroupsUserService _groupsService = ServiceProvider.getInstance()
@@ -57,8 +55,12 @@ public class CloningGroupsWindowController {
     @FXML
     private Button browseButton;
 
-    private final Preferences _prefs = Preferences.userRoot().node(CloningGroupsWindowController.class.getName());
     private static final String PREF_NAME = "path_to_group";
+
+    private ApplicationPreferences getPrefs() {
+        return ((ApplicationPreferences) ServiceProvider.getInstance()
+                .getService(ApplicationPreferences.class)).node(PreferencesNodes.CLONING_GROUP_NODE);
+    }
 
     @FXML
     public void initialize() {
@@ -69,15 +71,10 @@ public class CloningGroupsWindowController {
         projectsList.setItems(myObservableList);
 
         folderPath.textProperty().addListener((observable, oldValue, newValue) -> filterForOkButton());
-        projectsList.setOnMouseClicked(new EventHandler<Event>() {
-            @Override
-            public void handle(Event event) {
-                filterForOkButton();
-            };
-        });
+        projectsList.setOnMouseClicked((EventHandler<Event>) event -> filterForOkButton());
         setStyleAndDisableForIncorrectData();
 
-        String propertyValue = _prefs.get(PREF_NAME, StringUtils.EMPTY);
+        String propertyValue = getPrefs().get(PREF_NAME, StringUtils.EMPTY);
         if (propertyValue != null) {
             folderPath.setText(propertyValue);
         }
@@ -95,7 +92,7 @@ public class CloningGroupsWindowController {
         File selectedDirectory = chooser.showDialog(stage);
         if (selectedDirectory != null) {
             String path = selectedDirectory.getCanonicalPath();
-            _prefs.put(PREF_NAME, path);
+            getPrefs().put(PREF_NAME, path);
             folderPath.setText(path);
         }
     }

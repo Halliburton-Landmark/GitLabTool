@@ -18,13 +18,13 @@ public class GLTAlertUtils {
      * Request confirmation for operation.
      *
      * @param title - the title of the window
-     * @param headerText - header of the message
+     * @param header - header of the message
      * @param content - message that should be shown
      *
      * @return <code>true</code> if user confirmed operation (a user pressed "Yes" button), otherwise <code>false</code>
      */
-    public static boolean requesConfirmationOperation(String title, String header, String context) {
-        GLTAlert alert = new GLTAlert(AlertType.CONFIRMATION, title, header, context);
+    public static boolean requestConfirmationOperation(String title, String header, String content) {
+        GLTAlert alert = new GLTAlert(AlertType.CONFIRMATION, title, header, content);
         alert.clearDefaultButtons();
         alert.addButtons(ButtonType.YES, ButtonType.NO);
 
