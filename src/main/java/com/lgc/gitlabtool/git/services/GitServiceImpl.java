@@ -71,7 +71,7 @@ public class GitServiceImpl implements GitService {
 
     @Override
     public Map<Project, JGitStatus> checkoutBranch(List<Project> projects, String branchName, boolean isRemote,
-                                             ProgressListener progress) {
+                                                   ProgressListener progress) {
         if (progress == null) {
             progress = EmptyProgressListener.get();
         }
@@ -470,9 +470,9 @@ public class GitServiceImpl implements GitService {
     }
 
     private Map<Project, JGitStatus> runCheckoutBranchAction(List<Project> projects,
-                                                     String branchName,
-                                                     boolean isRemote,
-                                                     ProgressListener progress) {
+                                                             String branchName,
+                                                             boolean isRemote,
+                                                             ProgressListener progress) {
         final Map<Project, JGitStatus> checkoutStatuses = new ConcurrentHashMap<>();
         try {
             _stateService.stateON(ApplicationState.CHECKOUT_BRANCH);
