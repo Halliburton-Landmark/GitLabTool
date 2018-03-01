@@ -1,5 +1,7 @@
 package com.lgc.gitlabtool.git.services;
 
+import com.lgc.gitlabtool.git.preferences.ApplicationPreferences;
+import com.lgc.gitlabtool.git.preferences.PreferencesNodes;
 import com.lgc.gitlabtool.git.ui.javafx.GLTTheme;
 import javafx.scene.Scene;
 import javafx.scene.effect.ColorAdjust;
@@ -9,22 +11,22 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.net.URL;
-import java.util.prefs.Preferences;
 
 public class ThemeServiceImpl implements ThemeService {
 
-    private static final String THEME_PREFS_KEY = "glt_theme";
-
-    private Preferences themePrefs;
+    /**
+     * This is the main node of ApplicationPreferences.
+     * You mustn't use it to change prefs. Use {@link #getThemePrefs()} instead
+     */
+    private ApplicationPreferences themePrefs;
     private GLTTheme currentGLTThemes;
     private static final Double LIGHTING_COEFFICIENT_FOR_DARK_THEMES = +0.65;
 
     private static final Logger _logger = LogManager.getLogger(ThemeService.class);
 
-    ThemeServiceImpl() {
-        themePrefs = Preferences.userRoot().node(THEME_PREFS_KEY);
-
-        String currentThemeKey = themePrefs.get(THEME_PREFS_KEY, GLTTheme.LIGHT_THEME.getKey());
+    ThemeServiceImpl(ApplicationPreferences preferences) {
+        themePrefs = preferences;
+        String currentThemeKey = getThemePrefs().get(PreferencesNodes.THEME_PREFS_NODE, GLTTheme.LIGHT_THEME.getKey());
         currentGLTThemes = GLTTheme.getThemeByKey(currentThemeKey);
     }
 
@@ -50,7 +52,7 @@ public class ThemeServiceImpl implements ThemeService {
 
     public void setTheme(String themeName) {
         currentGLTThemes = GLTTheme.getThemeByKey(themeName);
-        themePrefs.put(THEME_PREFS_KEY, currentGLTThemes.getKey());
+        getThemePrefs().put(PreferencesNodes.THEME_PREFS_NODE, currentGLTThemes.getKey());
     }
 
     @Override
@@ -81,5 +83,14 @@ public class ThemeServiceImpl implements ThemeService {
     @Override
     public Double getLightningCoefficient() {
         return LIGHTING_COEFFICIENT_FOR_DARK_THEMES;
+    }
+
+    /**
+     * Returns the theme preferences node of Application preferences
+     *
+     * @return theme preferences node
+     */
+    private ApplicationPreferences getThemePrefs() {
+        return themePrefs.node(PreferencesNodes.THEME_PREFS_NODE);
     }
 }

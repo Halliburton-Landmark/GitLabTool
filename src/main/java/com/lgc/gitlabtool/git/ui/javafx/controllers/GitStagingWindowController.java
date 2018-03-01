@@ -221,7 +221,7 @@ public class GitStagingWindowController extends AbstractStateListener {
             replaceWithHEAD.setOnAction(new EventHandler<ActionEvent>() {
                 @Override
                 public void handle(ActionEvent event) {
-                    boolean isYes = GLTAlertUtils.requesConfirmationOperation(REPLACE_FILES_TITLE,
+                    boolean isYes = GLTAlertUtils.requestConfirmationOperation(REPLACE_FILES_TITLE,
                             "You want to replace " + filesForReplace.size() + " file(s) with HEAD revision.",
                             CONFIRMATION_OPERATION);
                     if (isYes) {
@@ -243,7 +243,7 @@ public class GitStagingWindowController extends AbstractStateListener {
             delete.setOnAction(new EventHandler<ActionEvent>() {
                 @Override
                 public void handle(ActionEvent event) {
-                    boolean isYes = GLTAlertUtils.requesConfirmationOperation(DELETE_FILES_TITLE,
+                    boolean isYes = GLTAlertUtils.requestConfirmationOperation(DELETE_FILES_TITLE,
                             "You want to delete " + selectedUntrackedFiles.size() + " untracked file(s).",
                             CONFIRMATION_OPERATION);
                     if (isYes) {

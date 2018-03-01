@@ -2,9 +2,17 @@ package com.lgc.gitlabtool.git.util;
 
 import java.io.IOException;
 
+import com.lgc.gitlabtool.git.preferences.ApplicationPreferences;
+import com.lgc.gitlabtool.git.preferences.PreferencesNodes;
+import com.lgc.gitlabtool.git.services.ServiceProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+/**
+ * Provides possibility to open terminal from GitlabTool application depend on OS
+ *
+ * @author Igor Khlaponin
+ */
 public class OpenTerminalUtil {
     /**
      * Template for Windows command prompt
@@ -21,6 +29,13 @@ public class OpenTerminalUtil {
 
     private static final Logger _logger = LogManager.getLogger(OpenTerminalUtil.class);
 
+    private static ApplicationPreferences preferences = ServiceProvider.getInstance()
+            .getService(ApplicationPreferences.class);
+
+    private static ApplicationPreferences getPreferences() {
+        return preferences.node(PreferencesNodes.OPEN_TERMINAL_NODE);
+    }
+
     /**
      * Opens a terminal in the specified folder despite of the operation system
      *
@@ -28,11 +43,15 @@ public class OpenTerminalUtil {
      */
     public static void openInTerminal(String path) {
         try {
-            String command = getCommandForCurrentOS(path);
+            String command = getCommand(path);
             Runtime.getRuntime().exec(command);
         } catch (IOException e) {
             _logger.error("Could not open terminal: " + e.getMessage());
         }
+    }
+
+    private static String getCommand(String path) {
+        return getPreferences().get(PreferencesNodes.OPEN_TERMINAL_NODE, getCommandForCurrentOS(path));
     }
 
     private static String getCommandForCurrentOS(String path) {

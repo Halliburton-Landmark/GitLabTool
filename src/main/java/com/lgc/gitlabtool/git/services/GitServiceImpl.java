@@ -84,10 +84,9 @@ public class GitServiceImpl implements GitService {
             throw new IllegalArgumentException("Wrong parameters for obtaining branches.");
         }
 
-        List<Project> changedProjects = projects.parallelStream()
+        return projects.parallelStream()
                 .filter(this::projectHasChanges)
                 .collect(Collectors.toList());
-        return changedProjects;
     }
 
     @Override
@@ -118,7 +117,7 @@ public class GitServiceImpl implements GitService {
             _stateService.stateON(ApplicationState.CREATE_BRANCH);
             Map<Project, JGitStatus> statuses = new ConcurrentHashMap<>();
             projects.parallelStream()
-                    .filter(prj -> prj.isCloned())
+                    .filter(Project::isCloned)
                     .forEach((project) -> statuses.put(project, _git.createBranch(project, branchName, startPoint, force)));
             return statuses;
         } finally {
@@ -300,9 +299,9 @@ public class GitServiceImpl implements GitService {
 
     @Override
     public List<ChangedFile> resetChangedFiles(Map<Project, List<ChangedFile>> files) {
-        List<ChangedFile> resetedFiles = new ArrayList<>();
+        List<ChangedFile> resetFiles = new ArrayList<>();
         if (files == null || files.isEmpty()) {
-            return resetedFiles;
+            return resetFiles;
         }
         _stateService.stateON(ApplicationState.RESET);
         try {
@@ -312,13 +311,13 @@ public class GitServiceImpl implements GitService {
                 if (project != null && project.isCloned() && !changedFiles.isEmpty()) {
                     List<String> fileNames = _changedFilesUtils.getFileNames(changedFiles);
                     List<String> result = _git.resetChangedFiles(fileNames, project);
-                    resetedFiles.addAll(_changedFilesUtils.getChangedFiles(result, project, changedFiles));
+                    resetFiles.addAll(_changedFilesUtils.getChangedFiles(result, project, changedFiles));
                 }
             }
         } finally {
             _stateService.stateOFF(ApplicationState.RESET);
         }
-        return resetedFiles;
+        return resetFiles;
     }
 
     @Override
@@ -402,7 +401,7 @@ public class GitServiceImpl implements GitService {
             } else {
                 List<SingleProjectStash> group = ((GroupStash) stashItem).getGroup();
                 group.parallelStream()
-                     .filter(stash -> stash != null)
+                     .filter(Objects::nonNull)
                      .forEach(stash -> dropStash(resultOperations, stash));
             }
         } finally {
@@ -616,7 +615,7 @@ public class GitServiceImpl implements GitService {
                 List<SingleProjectStash> group = ((GroupStash) stashItem).getGroup();
                 progressListener.onStart(group.size());
                 group.parallelStream()
-                     .filter(stash -> stash != null)
+                     .filter(Objects::nonNull)
                      .forEach(stash -> _git.stashApply(stash, progressListener));
             }
         } finally {

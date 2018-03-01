@@ -10,19 +10,18 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.lgc.gitlabtool.git.preferences.ApplicationPreferences;
+import com.lgc.gitlabtool.git.preferences.PreferencesNodes;
+import com.lgc.gitlabtool.git.util.OpenTerminalUtil;
+import javafx.scene.Scene;
+import javafx.scene.effect.Effect;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -195,7 +194,6 @@ public class ModularController implements UpdateProgressListener {
     private static final String SELECT_ALL_IMAGE_URL = "icons/select_all_20x20.png";
     private static final String REFRESH_PROJECTS_IMAGE_URL = "icons/toolbar/refresh_projects_20x20.png";
     private static final String FILTER_SHADOW_PROJECTS_IMAGE_URL = "icons/toolbar/filter_shadow_projects_20x20.png";
-    private static final String DIVIDER_PROPERTY_NODE = "MainWindowController_Dividers";
     private static final String PREF_NAME_HIDE_SHADOWS = "is_hide_shadows";
     ////endregion
     /*
@@ -328,7 +326,6 @@ public class ModularController implements UpdateProgressListener {
      *
      ***********************************************************************************************/
 
-    private Preferences preferences;
     private Group _currentGroup;
     private String _currentView;
     private ProjectList _projectsList;
@@ -344,8 +341,6 @@ public class ModularController implements UpdateProgressListener {
     @FXML
     @SuppressWarnings("ConstantConditions")
     private void initialize() {
-        preferences = getPreferences(DIVIDER_PROPERTY_NODE);
-
         _stateService.addStateListener(ApplicationState.CLONE, new GroupsWindowStateListener());
 
         userId.setText(_loginService.getCurrentUser().getName());
@@ -563,14 +558,6 @@ public class ModularController implements UpdateProgressListener {
 
     }
 
-    public static String getCss_path() {
-        return css_path;
-    }
-
-    public static void setCss_path(String css_path) {
-        ModularController.css_path = css_path;
-    }
-
     private void initializeThemesMenu() {
         String themeMenuTitle = GLToolButtons.MainMenuInfo.THEMES.getName();
 
@@ -684,19 +671,19 @@ public class ModularController implements UpdateProgressListener {
 
     private void setupProjectsDividerPosition(String groupTitle) {
 
-        if (preferences != null) {
+        if (getPreferences() != null) {
             String key = String.valueOf(groupTitle.hashCode());
-            double splitPaneDivider = preferences.getDouble(key, 0.3);
+            double splitPaneDivider = getPreferences().getDouble(key, 0.3);
             dividerMainPane.setDividerPositions(splitPaneDivider);
         }
 
         dividerMainPane.getDividers().get(0).positionProperty().addListener(
                 (observable, oldValue, newValue) -> {
-                    if (preferences != null && Objects.equals(_currentView, ViewKey.PROJECTS_WINDOW.getKey())) {
+                    if (getPreferences() != null && Objects.equals(_currentView, ViewKey.PROJECTS_WINDOW.getKey())) {
                         String key = String.valueOf(groupTitle.hashCode());
                         Double value = roundTo3(newValue.doubleValue());
 
-                        preferences.putDouble(key, value);
+                        getPreferences().putDouble(key, value);
                     }
                 });
     }
@@ -1099,7 +1086,7 @@ public class ModularController implements UpdateProgressListener {
     @FXML
     @SuppressWarnings({"unchecked", "unused"})
     private void onShowHideShadowProjects(ActionEvent actionEvent) {
-        preferences.putBoolean(PREF_NAME_HIDE_SHADOWS, filterShadowProjects.isSelected());
+        getPreferences().putBoolean(PREF_NAME_HIDE_SHADOWS, filterShadowProjects.isSelected());
         hideShadowsAction();
     }
 
@@ -1172,20 +1159,14 @@ public class ModularController implements UpdateProgressListener {
         return bigDecimal.doubleValue();
     }
 
-    // Gets preferences by key, could return null (used for divider position)
-    private Preferences getPreferences(String key) {
-        try {
-            return Preferences.userRoot().node(key);
-        } catch (IllegalArgumentException iae) {
-            _logger.error("Consecutive slashes in path");
-            return null;
-        } catch (IllegalStateException ise) {
-            _logger.error("Node has been removed with the removeNode() method");
-            return null;
-        } catch (NullPointerException npe) {
-            _logger.error("Key is null");
-            return null;
-        }
+    /**
+     * Gets preferences by key, could return null (used for divider position)
+     *
+     * @return application preferences node
+     */
+    private ApplicationPreferences getPreferences() {
+        return ((ApplicationPreferences) ServiceProvider.getInstance()
+                    .getService(ApplicationPreferences.class)).node(PreferencesNodes.DIVIDER_PROPERTY_NODE);
     }
 
     /**
@@ -1216,8 +1197,8 @@ public class ModularController implements UpdateProgressListener {
 
     private void hideShadowsAction() {
         Platform.runLater(() -> {
-            if (preferences != null) {
-                Boolean isHide = preferences.getBoolean(PREF_NAME_HIDE_SHADOWS, false);
+            if (getPreferences() != null) {
+                Boolean isHide = getPreferences().getBoolean(PREF_NAME_HIDE_SHADOWS, false);
                 filterShadowProjects.setSelected(isHide);
                 if (isHide) {
                     ObservableList<Project> obsList = FXCollections.observableArrayList(_projectsList.getClonedProjects());
@@ -1411,7 +1392,7 @@ public class ModularController implements UpdateProgressListener {
         return Bindings.createBooleanBinding(() ->
                         getCurrentProjects().stream()
                                 .filter(Objects::nonNull)
-                                .allMatch(project -> !project.isCloned()),
+                                .noneMatch(Project::isCloned),
                 Stream.of(projectListView.getSelectionModel()).map(SelectionModel::selectedItemProperty).toArray(Observable[]::new));
     }
 
@@ -1732,10 +1713,10 @@ public class ModularController implements UpdateProgressListener {
 
         @Override
         public void handle(WindowEvent event) {
-            List<ApplicationState> activeAtates = _stateService.getActiveStates();
-            if (!activeAtates.isEmpty() && activeAtates.contains(ApplicationState.STASH)) {
+            List<ApplicationState> activeStates = _stateService.getActiveStates();
+            if (!activeStates.isEmpty() && activeStates.contains(ApplicationState.STASH)) {
                 event.consume();
-                JavaFXUI.showWarningAlertForActiveStates(activeAtates);
+                JavaFXUI.showWarningAlertForActiveStates(activeStates);
                 return;
             }
             _stashWindowController.dispose();
