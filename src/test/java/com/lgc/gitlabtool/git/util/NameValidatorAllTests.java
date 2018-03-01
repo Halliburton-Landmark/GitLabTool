@@ -14,7 +14,6 @@ public class NameValidatorAllTests {
      * Name can contain only letters, digits, '_', '.', dash, space. It must start with letter, digit or '_'.
      * Path can contain only letters, digits, '_', '-' and '.'. Cannot start with '-' or end in '.', '.git' or '.atom'.
      *
-     * @param projectName the name of project for validation
      * @return <code>true</code> if project name is valid or <code>false</code> otherwise
      */
     @Test

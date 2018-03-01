@@ -35,9 +35,23 @@ public class ApplicationPreferences implements Service {
      */
     static private final int pieceLength = (3*Preferences.MAX_VALUE_LENGTH) / 4;
 
+    /**
+     * Creates the instance of the ApplicationPreferences
+     */
     public ApplicationPreferences() {
         parentPrefs = Preferences.userRoot().node(PreferencesNodes.GLT_PREFERENCES_NODE);
         currentNode = parentPrefs;
+    }
+
+    /**
+     * Creates the instance of the ApplicationPreferences based on the parent {@link Preferences}<br>
+     * Important: This constructor can be used only for tests
+     *
+     * @param parentPrefs - preferences parent node
+     */
+    ApplicationPreferences(Preferences parentPrefs) {
+        this.parentPrefs = parentPrefs;
+        currentNode = this.parentPrefs;
     }
 
     /**
@@ -149,6 +163,7 @@ public class ApplicationPreferences implements Service {
         return currentNode;
     }
 
+    // Uncomment if you need to store the object as a preference
     /**
      * Stores the object as a preference
      *
@@ -156,7 +171,7 @@ public class ApplicationPreferences implements Service {
      *
      * @param key - key with which the specified value is to be associated
      * @param object - the object to be stored as a preference. Should implement {@link Serializable} interface
-     */
+     *//*
     public void putObject(String key, Object object) {
         byte[] bytes = object2Bytes(object);
         if (bytes != null) {
@@ -165,13 +180,13 @@ public class ApplicationPreferences implements Service {
         }
     }
 
-    /**
+    *//**
      * Returns the object from the preferences
      *
      * @param key - key with which the specified value is to be associated
      * @param def - the default value that should be used if preferences don't contain such key
      * @return the object from preferences
-     */
+     *//*
     public Object getObject(String key, Object def) {
         byte[][] pieces = readPieces(getCurrentNode(), key);
         byte[] bytes = combinePieces(pieces);
@@ -263,6 +278,6 @@ public class ApplicationPreferences implements Service {
         } catch(BackingStoreException e) {
             _logger.error("Couldn't write peaces as a child nodes: " + e.getMessage());
         }
-    }
+    }*/
 
 }
