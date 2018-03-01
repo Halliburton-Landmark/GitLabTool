@@ -3,7 +3,7 @@ package com.lgc.gitlabtool.git.preferences;
 /**
  * Contains nodes names for the ApplicationPreferences
  *
- * The preferences tree will look something like this:
+ * The preferences tree will have the following structure:
  * <code>
  *      gitlab_tool_application_preferences <br>
  *          | <br>

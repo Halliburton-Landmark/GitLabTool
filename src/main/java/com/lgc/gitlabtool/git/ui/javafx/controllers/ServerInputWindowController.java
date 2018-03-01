@@ -3,26 +3,25 @@ package com.lgc.gitlabtool.git.ui.javafx.controllers;
 import java.io.IOException;
 import java.util.List;
 
-import com.lgc.gitlabtool.git.services.ThemeService;
-import com.lgc.gitlabtool.git.ui.javafx.GLTScene;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.lgc.gitlabtool.git.services.NetworkService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
+import com.lgc.gitlabtool.git.services.StorageService;
+import com.lgc.gitlabtool.git.services.ThemeService;
+import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
+import com.lgc.gitlabtool.git.ui.javafx.GLTScene;
 import com.lgc.gitlabtool.git.util.ScreenUtil;
 import com.lgc.gitlabtool.git.util.URLManager;
 import com.lgc.gitlabtool.git.xml.Server;
-import com.lgc.gitlabtool.git.services.NetworkService;
-import com.lgc.gitlabtool.git.services.StorageService;
-import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 import com.lgc.gitlabtool.git.xml.Servers;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Cursor;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
@@ -68,7 +67,7 @@ public class ServerInputWindowController {
     private void initialize() {
         message.setVisible(false);
 
-        api.getItems().addAll("v3");
+        api.getItems().addAll("v4");
         api.setValue(api.getItems().get(0));
     }
 

@@ -383,11 +383,9 @@ public class BranchesWindowController extends AbstractStateListener {
 
         branchesListView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
-                Branch branch = newValue;
-                filteringProjectsListView(Arrays.asList(branch));
-
-                disableSwitchButton(branch);
+                filteringProjectsListView(Arrays.asList(newValue));
             }
+            disableSwitchButton(newValue);
         });
     }
 
