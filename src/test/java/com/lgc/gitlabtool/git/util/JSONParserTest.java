@@ -50,8 +50,7 @@ public class JSONParserTest {
     private Group getTestingGroup() {
         Group group = new Group();
         group.setClonedStatus(true);
-        group.setPath("."); //TODO
-
+        group.setPath(".");
         return group;
     }
 

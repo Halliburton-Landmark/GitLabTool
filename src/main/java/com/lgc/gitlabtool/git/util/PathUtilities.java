@@ -99,7 +99,7 @@ public class PathUtilities {
      * Creates path on the local disk.
      *
      * @param path the path for creating
-     * @param isFolder <true> if we create folder, <false> if we create file.
+     * @param isFolder if <code>true</code> - a folder will be create, <code>false</code> - a file will be create.
      * @return status of operation
      */
     public static boolean createPath(Path path, boolean isFolder) {

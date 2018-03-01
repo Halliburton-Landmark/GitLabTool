@@ -762,7 +762,7 @@ public class ModularController implements UpdateProgressListener {
             stage.getIcons().add(appIcon);
 
              /* Set sizing and position */
-            double dialogWidth = 600;
+            double dialogWidth = 500;
             double dialogHeight = 400;
 
             ScreenUtil.adaptForMultiScreens(stage, dialogWidth, dialogHeight);
@@ -847,10 +847,6 @@ public class ModularController implements UpdateProgressListener {
     private void loadGroup(ActionEvent actionEvent) {
         Group selectedGroup = groupListView.getSelectionModel().getSelectedItem();
         loadGroup(selectedGroup);
-    }
-
-    private void updateGroupListView() {
-
     }
 
     private void openInTerminal(ActionEvent actionEvent) {
@@ -974,7 +970,7 @@ public class ModularController implements UpdateProgressListener {
         String path = _currentGroup.getPath();
 
         CloneProgressDialog progressDialog = new CloneProgressDialog();
-        progressDialog.setStartAction(() -> startClone(shadowProjects, path.substring(0, path.lastIndexOf(_currentGroup.getName())-1), progressDialog));
+        progressDialog.setStartAction(() -> startClone(shadowProjects, path, progressDialog));
         progressDialog.showDialog();
     }
 
@@ -1212,6 +1208,7 @@ public class ModularController implements UpdateProgressListener {
     }
 
     private boolean startClone(List<Project> shadowProjects, String path, CloneProgressDialog progressDialog) {
+        path = path.substring(0, path.lastIndexOf(_currentGroup.getName())-1);
         _projectService.clone(shadowProjects, path,
                 new OperationProgressListener(progressDialog, ApplicationState.CLONE, null));
         return true;

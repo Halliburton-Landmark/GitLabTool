@@ -28,9 +28,9 @@ import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 import com.lgc.gitlabtool.git.util.JSONParser;
 import com.lgc.gitlabtool.git.util.PathUtilities;
 
-public class GroupsServiceImpl implements GroupService {
+public class GroupServiceImpl implements GroupService {
 
-    private static final Logger logger = LogManager.getLogger(GroupsServiceImpl.class);
+    private static final Logger logger = LogManager.getLogger(GroupServiceImpl.class);
 
     private RESTConnector _connector;
 
@@ -39,17 +39,15 @@ public class GroupsServiceImpl implements GroupService {
 
     private static final String GROUP_ALREADY_LOADED_MESSAGE = "The group with this path is already loaded.";
     private static final String GROUP_DOESNT_EXIST_MESSAGE = "This group does not exist.";
-    private static final String ERROR_GETTING_GROUP_MESSAGE = "Error getting group from GitLab.";
 
     private static ClonedGroupsService _clonedGroupsService;
     private static ProjectService _projectService;
     private static StateService _stateService;
     private static ConsoleService _consoleService;
-    private static final String SEPARATOR = File.separator;
 
     private static JGit _jGit;
 
-    public GroupsServiceImpl(RESTConnector connector,
+    public GroupServiceImpl(RESTConnector connector,
                                  ClonedGroupsService clonedGroupsService,
                                  ProjectService projectService,
                                  StateService stateService,
@@ -150,7 +148,7 @@ public class GroupsServiceImpl implements GroupService {
             loadedGroup.setClonedStatus(true);
             return loadedGroup;
         }
-        _consoleService.addMessage("Failed reload group", MessageType.ERROR);
+        _consoleService.addMessage("Failed reload group: " + group.getName(), MessageType.ERROR);
         return group;
     }
 

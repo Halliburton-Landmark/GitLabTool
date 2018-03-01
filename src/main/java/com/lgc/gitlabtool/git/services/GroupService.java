@@ -51,17 +51,21 @@ public interface GroupService extends Service {
     Map<Boolean, String> removeGroup(Group group, boolean isRemoveFromLocalDisk);
 
     /**
+     * Gets only main group (it is groups which doesn't have parent group)
      *
+     * @param groups the list of all groups
      *
-     * @param groups
-     * @return
+     * @return a list of main group
      */
     List<Group> getOnlyMainGroups(List<Group> groups);
 
     /**
+     * Reloads group. Sends request to GitLab. Sets to loaded group:
+     *    - sub groups (which was got from the GitLab),
+     *    - a clone status and a path from an old group (which was passed as a parameter).
      *
-     *
-     * @return
+     * @param group the group which need to reload. Object doesn't changed
+     * @return loaded group (new object).
      */
     Group reloadGroup(Group group);
 

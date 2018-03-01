@@ -142,7 +142,7 @@ public class CloningGroupsWindowController {
                     protected void updateItem(Group item, boolean bln) {
                         super.updateItem(item, bln);
                         if (item != null) {
-                            String itemText = item.getFullPath() + " [subgroups: " + item.getSubGroups().size() + "]";
+                            String itemText = item.getName() + " (@" + item.getFullPath() + ")";
                             setText(itemText);
                         }
                     }
