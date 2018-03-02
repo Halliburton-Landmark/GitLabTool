@@ -1,10 +1,8 @@
 package com.lgc.gitlabtool.git.ui.javafx.controllers.listview;
 
 import com.lgc.gitlabtool.git.entities.Group;
-import com.lgc.gitlabtool.git.entities.Project;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ListView;
-import javafx.scene.control.MultipleSelectionModel;
 
 /**
  * This class represent Group view list
