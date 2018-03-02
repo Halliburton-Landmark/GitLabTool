@@ -139,6 +139,7 @@ public class TableController {
 
     private void configTable() {
         historyTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        historyTable.setFixedCellSize(35);
     }
 
 }
