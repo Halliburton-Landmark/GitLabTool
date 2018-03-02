@@ -72,6 +72,7 @@ public class TableController {
                     data.addAll(commits);
                 }
                 Collections.sort(data, new SortedByDate());
+                historyTable.refresh();
                 historyTable.setItems(data);
                 historyTable.setVisible(true);
             } else {

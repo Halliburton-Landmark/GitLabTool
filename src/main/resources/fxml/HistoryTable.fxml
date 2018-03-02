@@ -4,6 +4,7 @@
 <?import javafx.scene.layout.*?>
 <?import com.lgc.gitlabtool.git.ui.table.CommitHistoryTableView?>
 
+<?import com.lgc.gitlabtool.git.ui.table.FormattedTableCellFactory?>
 <AnchorPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.lgc.gitlabtool.git.ui.javafx.controllers.TableController"
@@ -19,31 +20,60 @@
                 <TableColumn
                         fx:id="dateColumn"
                         prefWidth="120"
-                        text="Date"/>
+                        text="Date">
+                    <cellFactory>
+                        <FormattedTableCellFactory/>
+                    </cellFactory>
+                </TableColumn>
                 <TableColumn
                         fx:id="projectColumn"
                         prefWidth="120"
-                        text="Project"/>
+                        text="Project">
+                    <cellFactory>
+                        <FormattedTableCellFactory/>
+                    </cellFactory>
+                </TableColumn>
                 <TableColumn
                     fx:id="messageColumn"
-                    prefWidth="400"
-                    text="Message"/>
+                    prefWidth="500"
+                    text="Message">
+                    <cellFactory>
+                        <FormattedTableCellFactory/>
+                    </cellFactory>
+                </TableColumn>
                 <TableColumn
                     fx:id="authorColumn"
                     prefWidth="140"
-                    text="Author"/>
+                    text="Author">
+                    <cellFactory>
+                        <FormattedTableCellFactory/>
+                    </cellFactory>
+                </TableColumn>
+
                 <TableColumn
                     fx:id="authoredDateColumn"
                     prefWidth="120"
-                    text="Authored date"/>
+                    text="Authored date">
+                    <cellFactory>
+                        <FormattedTableCellFactory/>
+                    </cellFactory>
+                </TableColumn>
                 <TableColumn
                     fx:id="committerColumn"
                     prefWidth="120"
-                    text="Committer"/>
+                    text="Committer">
+                    <cellFactory>
+                        <FormattedTableCellFactory/>
+                    </cellFactory>
+                </TableColumn>
                 <TableColumn
                         fx:id="hashColumn"
                         prefWidth="100"
-                        text="Hash"/>
+                        text="Hash">
+                    <cellFactory>
+                        <FormattedTableCellFactory/>
+                    </cellFactory>
+                </TableColumn>
             </columns>
             </CommitHistoryTableView>
     </children>
