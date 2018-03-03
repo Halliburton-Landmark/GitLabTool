@@ -1019,13 +1019,13 @@ public class JGit {
     }
 
     private boolean clone(Project project, String localPath) {
-        String path = localPath + File.separator + project.getName();
+        String path = localPath + File.separator + project.getPathWithNamespace();
         if (!clone(project.getHttpUrlToRepo(), path)) {
             PathUtilities.deletePath(Paths.get(path));
             return false;
         }
         project.setClonedStatus(true);
-        project.setPathToClonedProject(path);
+        project.setPath(path);
         return true;
     }
 

@@ -646,7 +646,7 @@ public class GitServiceImplTest {
         Project project = new Project();
         project.setClonedStatus(true);
         project.setProjectStatus(new ProjectStatus());
-        project.setPathToClonedProject(".");
+        project.setPath(".");
         return project;
     }
 
@@ -654,7 +654,7 @@ public class GitServiceImplTest {
         Project project = new Project();
         project.setClonedStatus(true);
         project.setProjectStatus(new ProjectStatus());
-        project.setPathToClonedProject(path);
+        project.setPath(path);
         return project;
     }
 

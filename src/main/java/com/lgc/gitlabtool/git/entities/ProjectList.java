@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
+import com.lgc.gitlabtool.git.services.GroupService;
 import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StateService;
@@ -19,6 +20,7 @@ import com.lgc.gitlabtool.git.services.StateService;
  */
 public class ProjectList {
 
+    private static final GroupService _groupService = ServiceProvider.getInstance().getService(GroupService.class);
     private static final ProjectService _projectService = ServiceProvider.getInstance().getService(ProjectService.class);
     private static final StateService _stateService = ServiceProvider.getInstance().getService(StateService.class);
 
@@ -49,7 +51,8 @@ public class ProjectList {
 
     private ProjectList() {
         if (_currentGroup != null) {
-            setProjects((List<Project>) _projectService.loadProjects(_currentGroup));
+            List<Project> loadedProjects = loadProjects();
+            _projects = loadedProjects;
         }
     }
 
@@ -151,10 +154,7 @@ public class ProjectList {
     }
 
     private List<Project> loadProjects() {
+        _currentGroup = _groupService.reloadGroup(_currentGroup);
         return (List<Project>) _projectService.loadProjects(_currentGroup);
-    }
-
-    private void setProjects(List<Project> projects) {
-        _projects = projects;
     }
 }
