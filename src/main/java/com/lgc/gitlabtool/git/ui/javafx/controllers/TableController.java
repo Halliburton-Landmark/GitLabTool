@@ -3,6 +3,7 @@ package com.lgc.gitlabtool.git.ui.javafx.controllers;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
+import com.lgc.gitlabtool.git.services.ThemeService;
 import com.lgc.gitlabtool.git.ui.ViewKey;
 import com.lgc.gitlabtool.git.ui.javafx.controllers.listview.ActiveViewChangeListener;
 import com.lgc.gitlabtool.git.ui.javafx.controllers.listview.ListViewMgrProvider;
@@ -15,9 +16,10 @@ import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
 
 import java.util.Collections;
 import java.util.List;
@@ -53,12 +55,20 @@ public class TableController {
     @FXML
     private TableColumn<Commit, String> projectColumn;
 
+    @FXML
+    private ToolBar toolbar;
+
     private static final GitService _gitService = ServiceProvider.getInstance()
             .getService(GitService.class);
 
     private static final ListViewMgrProvider listViewMgrProvider = ListViewMgrProvider.getInstance();
 
     private ProjectListView projectListView;
+
+    private static final ThemeService _themeService = (ThemeService) ServiceProvider.getInstance()
+            .getService(ThemeService.class);
+
+    private static final String HISTORY_IMAGE_URL = "icons/history_20x20.png";
 
     private ListChangeListener<Project> listChangeListener = new ListChangeListener<Project>() {
         @Override
@@ -75,8 +85,10 @@ public class TableController {
                 historyTable.refresh();
                 historyTable.setItems(data);
                 historyTable.setVisible(true);
+                toolbar.setVisible(true);
             } else {
                 historyTable.setVisible(false);
+                toolbar.setVisible(false);
             }
         }
     };
@@ -84,10 +96,9 @@ public class TableController {
     private ActiveViewChangeListener activeViewChangeListener = new ActiveViewChangeListener() {
         @Override
         public void onChanged(String activeView) {
-            if (activeView.equals(ViewKey.GROUPS_WINDOW.getKey())) {
+            if (activeView.equals(ViewKey.GROUPS_WINDOW.getKey()) || activeView.equals(ViewKey.PROJECTS_WINDOW.getKey())) {
                 historyTable.setVisible(false);
-            } else if (activeView.equals(ViewKey.PROJECTS_WINDOW.getKey())) {
-                historyTable.setVisible(false);
+                toolbar.setVisible(false);
             }
         }
     };
@@ -127,6 +138,8 @@ public class TableController {
         configTable();
 
         initListeners();
+
+        initToolbar();
     }
 
     public void initListeners() {
@@ -141,6 +154,20 @@ public class TableController {
     private void configTable() {
         historyTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         historyTable.setFixedCellSize(35);
+    }
+
+    private void initToolbar() {
+        if (toolbar == null) {
+            return;
+        }
+//        ImageView imageViewSelectAll = _themeService.getStyledImageView(HISTORY_IMAGE_URL);
+        Button button = new Button();
+//        button.setGraphic(imageViewSelectAll);
+
+        HBox buttonBar = new HBox();
+        buttonBar.setPrefHeight(20);
+        buttonBar.getChildren().add(button);
+        toolbar.getItems().addAll(buttonBar);
     }
 
 }
