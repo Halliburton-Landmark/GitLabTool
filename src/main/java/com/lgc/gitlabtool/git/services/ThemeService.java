@@ -1,6 +1,7 @@
 package com.lgc.gitlabtool.git.services;
 
 import com.lgc.gitlabtool.git.ui.javafx.GLTTheme;
+import com.lgc.gitlabtool.git.ui.javafx.listeners.ThemeChangeListener;
 import javafx.scene.Scene;
 import javafx.scene.image.ImageView;
 
@@ -39,4 +40,17 @@ public interface ThemeService extends Service {
      * @return lightning coefficient
      */
     Double getLightningCoefficient();
+
+    /**
+     *
+     * @param listener
+     */
+    public void addThemeChangeListener(ThemeChangeListener listener);
+
+    /**
+     *
+     * @param listener
+     */
+    public void removeThemeChangeListener(ThemeChangeListener listener);
+
 }

@@ -5,9 +5,11 @@ import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.ThemeService;
 import com.lgc.gitlabtool.git.ui.ViewKey;
+import com.lgc.gitlabtool.git.ui.javafx.GLTTheme;
 import com.lgc.gitlabtool.git.ui.javafx.controllers.listview.ActiveViewChangeListener;
 import com.lgc.gitlabtool.git.ui.javafx.controllers.listview.ListViewMgrProvider;
 import com.lgc.gitlabtool.git.ui.javafx.controllers.listview.ProjectListView;
+import com.lgc.gitlabtool.git.ui.javafx.listeners.ThemeChangeListener;
 import com.lgc.gitlabtool.git.ui.table.Commit;
 import com.lgc.gitlabtool.git.ui.table.CommitHistoryTableView;
 import com.lgc.gitlabtool.git.ui.table.CustomDate;
@@ -20,6 +22,8 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.effect.ColorAdjust;
+import javafx.scene.effect.Effect;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 
@@ -73,6 +77,13 @@ public class TableController {
     private ToggleButton toggleButton;
 
     private static final String HISTORY_IMAGE_URL = "icons/history_20x20.png";
+
+    private ThemeChangeListener themeChangeListener = new ThemeChangeListener() {
+        @Override
+        public void onChanged(String themeName) {
+            toggleButton.getGraphic().setEffect(getLightEffect());
+        }
+    };
 
     private EventHandler<ActionEvent> toggleChangeAction = new EventHandler<ActionEvent>() {
         @Override
@@ -167,6 +178,8 @@ public class TableController {
         }
 
         listViewMgrProvider.getFeature().addChangeActiveViewListener(activeViewChangeListener);
+
+        _themeService.addThemeChangeListener(themeChangeListener);
     }
 
     private void configTable() {
@@ -188,6 +201,14 @@ public class TableController {
         buttonBar.setPrefHeight(20);
         buttonBar.getChildren().add(toggleButton);
         toolbar.getItems().addAll(buttonBar);
+    }
+
+    private Effect getLightEffect(){
+        boolean isDarkTheme = _themeService.getCurrentTheme().equals(GLTTheme.DARK_THEME);
+        ColorAdjust colorAdjust = new ColorAdjust();
+        colorAdjust.setBrightness(_themeService.getLightningCoefficient());
+
+        return isDarkTheme ? colorAdjust : null;
     }
 
 }

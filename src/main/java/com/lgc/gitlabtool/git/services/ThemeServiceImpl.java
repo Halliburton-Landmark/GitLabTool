@@ -1,6 +1,7 @@
 package com.lgc.gitlabtool.git.services;
 
 import com.lgc.gitlabtool.git.ui.javafx.GLTTheme;
+import com.lgc.gitlabtool.git.ui.javafx.listeners.ThemeChangeListener;
 import javafx.scene.Scene;
 import javafx.scene.effect.ColorAdjust;
 import javafx.scene.image.Image;
@@ -9,6 +10,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.prefs.Preferences;
 
 public class ThemeServiceImpl implements ThemeService {
@@ -18,6 +21,8 @@ public class ThemeServiceImpl implements ThemeService {
     private Preferences themePrefs;
     private GLTTheme currentGLTThemes;
     private static final Double LIGHTING_COEFFICIENT_FOR_DARK_THEMES = +0.65;
+
+    private List<ThemeChangeListener> themeChangeListeners = new ArrayList<ThemeChangeListener>();
 
     private static final Logger _logger = LogManager.getLogger(ThemeService.class);
 
@@ -51,6 +56,7 @@ public class ThemeServiceImpl implements ThemeService {
     public void setTheme(String themeName) {
         currentGLTThemes = GLTTheme.getThemeByKey(themeName);
         themePrefs.put(THEME_PREFS_KEY, currentGLTThemes.getKey());
+        notifyThemeChangeEvent(themeName);
     }
 
     @Override
@@ -81,5 +87,21 @@ public class ThemeServiceImpl implements ThemeService {
     @Override
     public Double getLightningCoefficient() {
         return LIGHTING_COEFFICIENT_FOR_DARK_THEMES;
+    }
+
+    @Override
+    public void addThemeChangeListener(ThemeChangeListener listener) {
+        themeChangeListeners.add(listener);
+    }
+
+    @Override
+    public void removeThemeChangeListener(ThemeChangeListener listener) {
+        themeChangeListeners.remove(listener);
+    }
+
+    private void notifyThemeChangeEvent(String themeName) {
+        for(ThemeChangeListener listener : themeChangeListeners) {
+            listener.onChanged(themeName);
+        }
     }
 }
