@@ -15,6 +15,8 @@ import com.lgc.gitlabtool.git.ui.table.SortedByDate;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -61,14 +63,27 @@ public class TableController {
     private static final GitService _gitService = ServiceProvider.getInstance()
             .getService(GitService.class);
 
+    private static final ThemeService _themeService = (ThemeService) ServiceProvider.getInstance()
+        .getService(ThemeService.class);
+
     private static final ListViewMgrProvider listViewMgrProvider = ListViewMgrProvider.getInstance();
 
     private ProjectListView projectListView;
 
-    private static final ThemeService _themeService = (ThemeService) ServiceProvider.getInstance()
-            .getService(ThemeService.class);
+    private ToggleButton toggleButton;
 
     private static final String HISTORY_IMAGE_URL = "icons/history_20x20.png";
+
+    private EventHandler<ActionEvent> toggleChangeAction = new EventHandler<ActionEvent>() {
+        @Override
+        public void handle(ActionEvent event) {
+            if (toggleButton.isSelected()) {
+                historyTable.setVisible(true);
+            } else {
+                historyTable.setVisible(false);
+            }
+        }
+    };
 
     private ListChangeListener<Project> listChangeListener = new ListChangeListener<Project>() {
         @Override
@@ -81,11 +96,13 @@ public class TableController {
                     List<Commit> commits = _gitService.getAllCommits(project, nameBranch);
                     data.addAll(commits);
                 }
+                toolbar.setVisible(true);
                 Collections.sort(data, new SortedByDate());
                 historyTable.refresh();
                 historyTable.setItems(data);
-                historyTable.setVisible(true);
-                toolbar.setVisible(true);
+                if ( toggleButton.isSelected() ) {
+                    historyTable.setVisible(true);
+                }
             } else {
                 historyTable.setVisible(false);
                 toolbar.setVisible(false);
@@ -99,6 +116,7 @@ public class TableController {
             if (activeView.equals(ViewKey.GROUPS_WINDOW.getKey()) || activeView.equals(ViewKey.PROJECTS_WINDOW.getKey())) {
                 historyTable.setVisible(false);
                 toolbar.setVisible(false);
+                toggleButton.setSelected(false);
             }
         }
     };
@@ -137,9 +155,9 @@ public class TableController {
 
         configTable();
 
-        initListeners();
-
         initToolbar();
+
+        initListeners();
     }
 
     public void initListeners() {
@@ -160,13 +178,15 @@ public class TableController {
         if (toolbar == null) {
             return;
         }
-//        ImageView imageViewSelectAll = _themeService.getStyledImageView(HISTORY_IMAGE_URL);
-        Button button = new Button();
-//        button.setGraphic(imageViewSelectAll);
+        ImageView imageViewSelectAll = _themeService.getStyledImageView(HISTORY_IMAGE_URL);
+        toggleButton = new ToggleButton();
+        toggleButton.setGraphic(imageViewSelectAll);
+        toggleButton.setTooltip(new Tooltip("Show history"));
+        toggleButton.setOnAction(toggleChangeAction);
 
         HBox buttonBar = new HBox();
         buttonBar.setPrefHeight(20);
-        buttonBar.getChildren().add(button);
+        buttonBar.getChildren().add(toggleButton);
         toolbar.getItems().addAll(buttonBar);
     }
 
