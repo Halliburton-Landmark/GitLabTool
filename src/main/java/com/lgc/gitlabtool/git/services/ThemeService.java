@@ -42,12 +42,14 @@ public interface ThemeService extends Service {
     Double getLightningCoefficient();
 
     /**
+     * This method add {@link ThemeChangeListener}
      *
      * @param listener
      */
     public void addThemeChangeListener(ThemeChangeListener listener);
 
     /**
+     * This method remove {@link ThemeChangeListener}
      *
      * @param listener
      */
