@@ -1,4 +1,4 @@
-image: strazhkoe/ubuntu-java8-maven
+image: strazhkoe/ubuntu-java9-maven
 build:
  script:
  - "mvn install -B"
