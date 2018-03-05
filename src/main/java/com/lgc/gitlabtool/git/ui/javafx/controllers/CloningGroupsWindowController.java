@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
@@ -24,6 +25,8 @@ import com.lgc.gitlabtool.git.ui.javafx.progressdialog.CloneProgressDialog;
 import com.lgc.gitlabtool.git.util.PathUtilities;
 
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.collections.transformation.SortedList;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -68,6 +71,8 @@ public class CloningGroupsWindowController {
     private Label cloneLabel;
 
     private static final String PREF_NAME = "path_to_group";
+    private static final String NEXT_BUTTON_TEXT = "Next";
+    private static final String CLONE_BUTTON_TEXT = "Clone";
     private static final String GROUP_CLONE_LABEL = "Please select groups for cloning";
     private static final String PROJECTS_CLONE_LABEL = "Please select projects for cloning";
 
@@ -86,9 +91,21 @@ public class CloningGroupsWindowController {
         _mainGroups = _groupsService.getOnlyMainGroups((List<Group>) allGroups);
         updatePanelForGroups();
 
-        configureListView(dataListView);
-        folderPath.textProperty().addListener((observable, oldValue, newValue) -> filterForOkButton());
+        dataListView.setCellFactory(new Callback<ListView<Object>, ListCell<Object>>() {
+            @Override
+            public ListCell<Object> call(ListView<Object> p) {
+
+                return new ListCell<Object>() {
+                    @Override
+                    protected void updateItem(Object item, boolean bln) {
+                        super.updateItem(item, bln);
+                        setText(item == null ? StringUtils.EMPTY : getTextListItem(item));
+                    }
+                };
+            }
+        });
         dataListView.setOnMouseClicked((EventHandler<Event>) event -> filterForOkButton());
+        folderPath.textProperty().addListener((observable, oldValue, newValue) -> filterForOkButton());
         setStyleAndDisableForIncorrectData();
 
         String propertyValue = getPrefs().get(PREF_NAME, StringUtils.EMPTY);
@@ -99,7 +116,6 @@ public class CloningGroupsWindowController {
 
     @FXML
     public void onBrowseButton() throws Exception {
-
         Stage stage = (Stage) browseButton.getScene().getWindow();
 
         DirectoryChooser chooser = new DirectoryChooser();
@@ -140,35 +156,6 @@ public class CloningGroupsWindowController {
         stage.close();
     }
 
-    private void configureListView(ListView listView) {
-        // config displayable string
-        listView.setCellFactory(new Callback<ListView<Object>, ListCell<Object>>() {
-            @Override
-            public ListCell<Object> call(ListView<Object> p) {
-
-                return new ListCell<Object>() {
-                    @Override
-                    protected void updateItem(Object item, boolean bln) {
-                        super.updateItem(item, bln);
-                        if (item != null) {
-                            String itemText;
-                            if (item instanceof Group) {
-                                Group group = (Group) item;
-                                itemText = group.getName() + " (@" + group.getFullPath() + ")";
-                            } else {
-                                Project project = (Project) item;
-                                itemText = project.getName();
-                            }
-                            setText(itemText);
-                        } else {
-                            setText("");
-                        }
-                    }
-                };
-            }
-        });
-    }
-
     private void filterForOkButton() {
         if (isIncorrectPath()) {
             setStyleAndDisableForIncorrectData();
@@ -198,35 +185,69 @@ public class CloningGroupsWindowController {
 
 
     private void updatePanelForGroups() {
-        backButton.setDisable(true);
-        nextButton.setText("Next");
-        cloneLabel.setText(GROUP_CLONE_LABEL);
-        clearListView();
+        updatePanelForNextStep(true, NEXT_BUTTON_TEXT, GROUP_CLONE_LABEL);
+        configureGroupListView();
+        filterForOkButton();
+    }
+
+    private void updatePanelForNextStep(boolean isBackDisable, String nextButtonText, String cloneLabelText) {
+        backButton.setDisable(isBackDisable);
+        nextButton.setText(nextButtonText);
+        cloneLabel.setText(cloneLabelText);
+    }
+
+    private void updatePanelForProjects() {
+        updatePanelForNextStep(false, CLONE_BUTTON_TEXT, PROJECTS_CLONE_LABEL);
+        setSelectedGroup(dataListView.getSelectionModel());
+        configureProjectListView();
+        filterForOkButton();
+    }
+
+    private void clearDataListView() {
+        dataListView.getSelectionModel().clearSelection();
+        dataListView.getItems().clear();
+        dataListView.refresh();
+    }
+
+    private void configureGroupListView() {
+        clearDataListView();
         dataListView.setItems(FXCollections.observableList(new ArrayList<>(_mainGroups)));
         dataListView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         if (_selectedGroupIndex != -1) {
             dataListView.getSelectionModel().select(_selectedGroupIndex);
-            filterForOkButton();
         }
     }
 
-    private void updatePanelForProjects() {
-        backButton.setDisable(false);
-        nextButton.setText("Clone");
-        cloneLabel.setText(PROJECTS_CLONE_LABEL);
-        MultipleSelectionModel<Object> selectionModel = dataListView.getSelectionModel();
-        _selectedGroup = selectionModel.getSelectedItem();
-        _selectedGroupIndex = selectionModel.getSelectedIndex();
-        clearListView();
+    private void configureProjectListView() {
+        clearDataListView();
         Collection<Project> loadedProjects = _projectService.getProjects((Group) _selectedGroup);
-        dataListView.setItems(FXCollections.observableList((List<Project>) loadedProjects));
+        ObservableList<Project> observableList = FXCollections.observableList((List<Project>) loadedProjects);
+        SortedList<Project> sortedList = new SortedList<>(observableList);
+        sortedList.setComparator(new Comparator<Project>(){
+            @Override
+            public int compare(Project arg0, Project arg1) {
+                return arg0.getName().compareToIgnoreCase(arg1.getName());
+            }
+        });
+        dataListView.setItems(sortedList);
         dataListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        filterForOkButton();
     }
 
-    private void clearListView() {
-        dataListView.getSelectionModel().clearSelection();
-        dataListView.getItems().clear();
-        dataListView.refresh();
+    private void setSelectedGroup(MultipleSelectionModel<Object> selectionModel) {
+        if (selectionModel != null) {
+            _selectedGroup = selectionModel.getSelectedItem();
+            _selectedGroupIndex = selectionModel.getSelectedIndex();
+        }
+    }
+
+    private String getTextListItem(Object item) {
+        String itemText;
+        if (item instanceof Group) {
+            Group group = (Group) item;
+            itemText = group.getName() + " (@" + group.getFullPath() + ")";
+        } else {
+            itemText = ((Project) item).getName();
+        }
+        return itemText;
     }
 }
