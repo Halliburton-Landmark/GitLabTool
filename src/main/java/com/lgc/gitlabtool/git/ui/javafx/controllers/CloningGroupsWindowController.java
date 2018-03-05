@@ -20,6 +20,7 @@ import com.lgc.gitlabtool.git.services.GroupService;
 import com.lgc.gitlabtool.git.services.LoginService;
 import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
+import com.lgc.gitlabtool.git.services.ThemeService;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 import com.lgc.gitlabtool.git.ui.javafx.progressdialog.CloneProgressDialog;
 import com.lgc.gitlabtool.git.util.PathUtilities;
@@ -37,6 +38,9 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.MultipleSelectionModel;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.Tooltip;
+import javafx.scene.image.ImageView;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import javafx.util.Callback;
@@ -48,6 +52,7 @@ public class CloningGroupsWindowController {
     private final LoginService _loginService = ServiceProvider.getInstance().getService(LoginService.class);
     private final GroupService _groupsService = ServiceProvider.getInstance().getService(GroupService.class);
     private final ProjectService _projectService = ServiceProvider.getInstance().getService(ProjectService.class);
+    private final ThemeService _themeService = ServiceProvider.getInstance().getService(ThemeService.class);
 
     @FXML
     private TextField folderPath;
@@ -70,11 +75,15 @@ public class CloningGroupsWindowController {
     @FXML
     private Label cloneLabel;
 
+    @FXML
+    private ToggleButton selectAllButton;
+
     private static final String PREF_NAME = "path_to_group";
     private static final String NEXT_BUTTON_TEXT = "Next";
     private static final String CLONE_BUTTON_TEXT = "Clone";
     private static final String GROUP_CLONE_LABEL = "Please select groups for cloning";
     private static final String PROJECTS_CLONE_LABEL = "Please select projects for cloning";
+    private static final String SELECT_ALL_IMAGE_URL = "icons/select_all_20x20.png";
 
     private List<Group> _mainGroups;
     private Object _selectedGroup;
@@ -87,9 +96,14 @@ public class CloningGroupsWindowController {
 
     @FXML
     public void initialize() {
+        ImageView imageViewSelectAll = _themeService.getStyledImageView(SELECT_ALL_IMAGE_URL);
+        selectAllButton.setTooltip(new Tooltip("Select all projects"));
+        selectAllButton.setGraphic(imageViewSelectAll);
+
         Collection<Group> allGroups = _groupsService.getGroups(_loginService.getCurrentUser());
         _mainGroups = _groupsService.getOnlyMainGroups((List<Group>) allGroups);
         updatePanelForGroups();
+
 
         dataListView.setCellFactory(new Callback<ListView<Object>, ListCell<Object>>() {
             @Override
@@ -156,6 +170,15 @@ public class CloningGroupsWindowController {
         stage.close();
     }
 
+    @FXML
+    public void onSelectAllButton() {
+        if (selectAllButton.isSelected()) {
+            dataListView.getSelectionModel().selectAll();
+        } else {
+            dataListView.getSelectionModel().clearSelection();
+        }
+    }
+
     private void filterForOkButton() {
         if (isIncorrectPath()) {
             setStyleAndDisableForIncorrectData();
@@ -185,8 +208,17 @@ public class CloningGroupsWindowController {
 
 
     private void updatePanelForGroups() {
+        updateSelectAllButton(false);
         updatePanelForNextStep(true, NEXT_BUTTON_TEXT, GROUP_CLONE_LABEL);
         configureGroupListView();
+        filterForOkButton();
+    }
+
+    private void updatePanelForProjects() {
+        updateSelectAllButton(true);
+        updatePanelForNextStep(false, CLONE_BUTTON_TEXT, PROJECTS_CLONE_LABEL);
+        setSelectedGroup(dataListView.getSelectionModel());
+        configureProjectListView();
         filterForOkButton();
     }
 
@@ -196,17 +228,15 @@ public class CloningGroupsWindowController {
         cloneLabel.setText(cloneLabelText);
     }
 
-    private void updatePanelForProjects() {
-        updatePanelForNextStep(false, CLONE_BUTTON_TEXT, PROJECTS_CLONE_LABEL);
-        setSelectedGroup(dataListView.getSelectionModel());
-        configureProjectListView();
-        filterForOkButton();
-    }
-
     private void clearDataListView() {
         dataListView.getSelectionModel().clearSelection();
-        dataListView.getItems().clear();
+        dataListView.setItems(FXCollections.observableList(new ArrayList<>()));
         dataListView.refresh();
+    }
+
+    private void updateSelectAllButton(boolean isVisible) {
+        selectAllButton.setVisible(isVisible);
+        selectAllButton.setSelected(false);
     }
 
     private void configureGroupListView() {
