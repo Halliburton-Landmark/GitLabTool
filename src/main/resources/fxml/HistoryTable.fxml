@@ -23,7 +23,8 @@
             <columns>
                 <TableColumn
                         fx:id="dateColumn"
-                        prefWidth="120"
+                        minWidth="105"
+                        maxWidth="125"
                         text="Date">
                     <cellFactory>
                         <FormattedTableCellFactory/>
@@ -31,7 +32,8 @@
                 </TableColumn>
                 <TableColumn
                         fx:id="projectColumn"
-                        prefWidth="120"
+                        minWidth="200"
+                        maxWidth="250"
                         text="Project">
                     <cellFactory>
                         <FormattedTableCellFactory/>
@@ -39,7 +41,8 @@
                 </TableColumn>
                 <TableColumn
                     fx:id="messageColumn"
-                    prefWidth="500"
+                    minWidth="300"
+                    maxWidth="350"
                     text="Message">
                     <cellFactory>
                         <FormattedTableCellFactory/>
@@ -47,16 +50,17 @@
                 </TableColumn>
                 <TableColumn
                     fx:id="authorColumn"
-                    prefWidth="140"
+                    minWidth="100"
+                    maxWidth="120"
                     text="Author">
                     <cellFactory>
                         <FormattedTableCellFactory/>
                     </cellFactory>
                 </TableColumn>
-
                 <TableColumn
                     fx:id="authoredDateColumn"
-                    prefWidth="120"
+                    minWidth="105"
+                    maxWidth="125"
                     text="Authored date">
                     <cellFactory>
                         <FormattedTableCellFactory/>
@@ -64,7 +68,8 @@
                 </TableColumn>
                 <TableColumn
                     fx:id="committerColumn"
-                    prefWidth="120"
+                    minWidth="100"
+                    maxWidth="120"
                     text="Committer">
                     <cellFactory>
                         <FormattedTableCellFactory/>
