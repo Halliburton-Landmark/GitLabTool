@@ -8,6 +8,7 @@ import java.util.Map;
 
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.ThemeService;
+import javafx.scene.control.ToggleButton;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -30,6 +31,8 @@ public class ToolbarManager {
     private static final String CHANGE_GROUP_BUTTON_ID = "changeGroupButton";
 
     private Map<String, Boolean> enableMap = new HashMap<>();
+
+    private Map<String, List<Node>> itemsMap = new HashMap<>();
 
     private static ToolbarManager instance = null;
 
@@ -62,15 +65,29 @@ public class ToolbarManager {
      */
     public List<Node> createToolbarItems(String windowId) {
 
+        List<Node> list = itemsMap.get(windowId);
+        if (list != null) {
+            return list;
+        }
+
         items = new ArrayList<>();
         for (GLToolButtons button : GLToolButtons.values()) {
             if (button.getViewKey().equals(windowId)) {
-                Button btn = createButton(button.getId(), button.getIconUrl(), button.getText(), button.getTooltip());
-                if (btn != null && button.getIconSize() == GLToolButtons.GLToolConstants.ICON_SIZE_20) {
-                    items.add(btn);
+                if (button.isToggled()) {
+                    ToggleButton btn = createToggleButton(button.getId(), button.getIconUrl(), button.getText(), button.getTooltip());
+                    if (btn != null && button.getIconSize() == GLToolButtons.GLToolConstants.ICON_SIZE_20) {
+                        items.add(btn);
+                    }
+                } else {
+                    Button btn = createButton(button.getId(), button.getIconUrl(), button.getText(), button.getTooltip());
+                    if (btn != null && button.getIconSize() == GLToolButtons.GLToolConstants.ICON_SIZE_20) {
+                        items.add(btn);
+                    }
                 }
             }
         }
+
+        itemsMap.put(windowId, items);
 
         return items;
     }
@@ -92,6 +109,22 @@ public class ToolbarManager {
                 .findFirst() //first match
                 .map(node -> (Button) node) //cast to button
                 .orElseGet(Button::new); //result or new Button
+    }
+
+    /**
+     * Returns toolbar item by its identifier
+     *
+     * @param itemId Id for toolbar item
+     * @return Existing toolbar item with chosen id
+     */
+    public Node getItemById(String windowId, String itemId) {
+
+        List<Node> list = itemsMap.get(windowId);
+
+        return list.stream()
+                .filter(x -> x.getId().equals(itemId)) //match by Id
+                .findFirst() //first match
+                .get(); //result
     }
 
     /**
@@ -126,6 +159,14 @@ public class ToolbarManager {
                         button.setDisable(enableMap.get(button.getId()));
                     }
                 });
+    }
+
+    public List<Node> getAllButtonsForView(String windowId) {
+        List<Node> list = itemsMap.get(windowId);
+        if (list != null) {
+            return list;
+        }
+        return null;
     }
 
     /**
@@ -163,6 +204,17 @@ public class ToolbarManager {
         Button button = new Button(btnText, view);
         button.setTooltip(new Tooltip(tooltipText));
         button.setId(buttonId);
+
+        return button;
+    }
+
+    private ToggleButton createToggleButton(String buttonId, String imgPath, String btnText, String tooltipText) {
+        ImageView view = _themeService.getStyledImageView(imgPath);
+
+        ToggleButton button = new ToggleButton(btnText, view);
+        button.setTooltip(new Tooltip(tooltipText));
+        button.setId(buttonId);
+        button.setGraphic(view);
 
         return button;
     }

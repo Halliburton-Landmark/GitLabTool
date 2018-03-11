@@ -21,7 +21,7 @@ public enum GLToolButtons {
             "Exit",
             null,
             MainMenuInfo.FILE,
-            GLToolConstants.ICON_SIZE_16),
+            GLToolConstants.ICON_SIZE_16, false),
 
     GROUP_WINDOW_CLONE_GROUP(GLToolConstants.GROUPS_WINDOW_KEY,
             "group_window_group_clone",
@@ -29,7 +29,7 @@ public enum GLToolButtons {
             "Clone",
             null,
             MainMenuInfo.GIT,
-            GLToolConstants.ICON_SIZE_16),
+            GLToolConstants.ICON_SIZE_16, false),
 
     GENERAL_USER_GUIDE(GLToolConstants.ALL_WINDOW_KEY,
             "all_window_help_user_guide",
@@ -37,7 +37,7 @@ public enum GLToolButtons {
             "User guide",
             null,
             MainMenuInfo.HELP,
-            GLToolConstants.ICON_SIZE_16),
+            GLToolConstants.ICON_SIZE_16, false),
 
     GENERAL_ABOUT(GLToolConstants.ALL_WINDOW_KEY,
             "all_window_help_about",
@@ -45,7 +45,7 @@ public enum GLToolButtons {
             "About",
             null,
             MainMenuInfo.HELP,
-            GLToolConstants.ICON_SIZE_16),
+            GLToolConstants.ICON_SIZE_16, false),
 
     CLONE_GROUP_BUTTON(GLToolConstants.GROUPS_WINDOW_KEY,
             "group_cloneGroup",
@@ -53,7 +53,7 @@ public enum GLToolButtons {
             "Clone group",
             "Clone group",
             null,
-            GLToolConstants.ICON_SIZE_20),
+            GLToolConstants.ICON_SIZE_20, false),
 
     REMOVE_GROUP_BUTTON(GLToolConstants.GROUPS_WINDOW_KEY,
             "group_removeGroup",
@@ -61,7 +61,7 @@ public enum GLToolButtons {
             "Remove group",
             "Remove selected group",
             null,
-            GLToolConstants.ICON_SIZE_20),
+            GLToolConstants.ICON_SIZE_20, false),
 
     IMPORT_GROUP_BUTTON(GLToolConstants.GROUPS_WINDOW_KEY,
             "group_importGroup",
@@ -69,7 +69,7 @@ public enum GLToolButtons {
             "Import group",
             "Import group from disk",
             null,
-            GLToolConstants.ICON_SIZE_20),
+            GLToolConstants.ICON_SIZE_20, false),
 
     SELECT_GROUP_BUTTON(GLToolConstants.GROUPS_WINDOW_KEY,
             "group_selectGroup",
@@ -77,7 +77,7 @@ public enum GLToolButtons {
             "Load group",
             "Load selected group",
             null,
-            GLToolConstants.ICON_SIZE_20),
+            GLToolConstants.ICON_SIZE_20, false),
 
     CHANGE_GROUP_BUTTON(GLToolConstants.PROJECTS_WINDOW_KEY,
             "change_group",
@@ -85,7 +85,7 @@ public enum GLToolButtons {
             "Change group",
             "Change group",
             null,
-            GLToolConstants.ICON_SIZE_20),
+            GLToolConstants.ICON_SIZE_20, false),
 
     CLONE_PROJECT_BUTTON(GLToolConstants.PROJECTS_WINDOW_KEY,
             "project_clone",
@@ -93,7 +93,7 @@ public enum GLToolButtons {
             "Clone",
             "Clone shadow project",
             null,
-            GLToolConstants.ICON_SIZE_20),
+            GLToolConstants.ICON_SIZE_20, false),
 
     CREATE_PROJECT_BUTTON(GLToolConstants.PROJECTS_WINDOW_KEY,
             "create_project_button",
@@ -101,7 +101,7 @@ public enum GLToolButtons {
             "Create project",
             "Create new project",
             null,
-            GLToolConstants.ICON_SIZE_20),
+            GLToolConstants.ICON_SIZE_20, false),
 
     NEW_BRANCH_BUTTON(GLToolConstants.PROJECTS_WINDOW_KEY,
             "branch_newBranch",
@@ -109,7 +109,7 @@ public enum GLToolButtons {
             "New branch",
             "Create new branch",
             null,
-            GLToolConstants.ICON_SIZE_20),
+            GLToolConstants.ICON_SIZE_20, false),
 
     CHECKOUT_BRANCH_BUTTON(GLToolConstants.PROJECTS_WINDOW_KEY,
             "branch_checkoutBranch",
@@ -117,7 +117,7 @@ public enum GLToolButtons {
             "Checkout",
             "Checkout to another branch",
             null,
-            GLToolConstants.ICON_SIZE_20),
+            GLToolConstants.ICON_SIZE_20, false),
 
     STAGING_BUTTON(GLToolConstants.PROJECTS_WINDOW_KEY,
             "git staging",
@@ -125,7 +125,7 @@ public enum GLToolButtons {
             "Staging",
             "Show Git Staging dialog",
             null,
-            GLToolConstants.ICON_SIZE_20),
+            GLToolConstants.ICON_SIZE_20, false),
 
     PUSH_BUTTON(GLToolConstants.PROJECTS_WINDOW_KEY,
             "push",
@@ -133,7 +133,7 @@ public enum GLToolButtons {
             "Push",
             "Show push dialog",
             null,
-            GLToolConstants.ICON_SIZE_20),
+            GLToolConstants.ICON_SIZE_20, false),
 
     EDIT_PROJECT_PROPERTIES_BUTTON(GLToolConstants.PROJECTS_WINDOW_KEY,
             "edit_project_propecties",
@@ -141,7 +141,7 @@ public enum GLToolButtons {
             "Edit project properties",
             "Edit project properties",
             null,
-            GLToolConstants.ICON_SIZE_20),
+            GLToolConstants.ICON_SIZE_20, false),
 
     MAIN_EDIT_PROJECT_PROPERTIES(GLToolConstants.PROJECTS_WINDOW_KEY,
             "main_edit_project_propecties",
@@ -149,7 +149,7 @@ public enum GLToolButtons {
             "Edit project properties",
             "Edit project properties",
             null,
-            GLToolConstants.ICON_SIZE_16),
+            GLToolConstants.ICON_SIZE_16, false),
 
     PULL_BUTTON(GLToolConstants.PROJECTS_WINDOW_KEY,
             "pull",
@@ -157,7 +157,7 @@ public enum GLToolButtons {
             "Pull",
             "Pull projects",
             null,
-            GLToolConstants.ICON_SIZE_20),
+            GLToolConstants.ICON_SIZE_20, false),
 
     REVERT_CHANGES(GLToolConstants.PROJECTS_WINDOW_KEY,
             "revert",
@@ -165,7 +165,7 @@ public enum GLToolButtons {
             "Revert",
             "Revert changes",
             null,
-            GLToolConstants.ICON_SIZE_20),
+            GLToolConstants.ICON_SIZE_20, false),
 
     STASH(GLToolConstants.PROJECTS_WINDOW_KEY,
             "stash",
@@ -173,7 +173,7 @@ public enum GLToolButtons {
             "Stash",
             "Stash",
             null,
-            GLToolConstants.ICON_SIZE_20),
+            GLToolConstants.ICON_SIZE_20, false),
 
     MAIN_CLONE_PROJECT(GLToolConstants.PROJECTS_WINDOW_KEY,
             "main_git_clone_project",
@@ -181,7 +181,7 @@ public enum GLToolButtons {
             "Clone",
             null,
             MainMenuInfo.GIT,
-            GLToolConstants.ICON_SIZE_16),
+            GLToolConstants.ICON_SIZE_16, false),
 
     MAIN_CREATE_BRANCH(GLToolConstants.PROJECTS_WINDOW_KEY,
             "main_git_create_branch",
@@ -189,7 +189,7 @@ public enum GLToolButtons {
             "New branch",
             null,
             MainMenuInfo.GIT,
-            GLToolConstants.ICON_SIZE_16),
+            GLToolConstants.ICON_SIZE_16, false),
 
     MAIN_CHECKOUT_BRANCH(GLToolConstants.PROJECTS_WINDOW_KEY,
             "main_git_checkout_branch",
@@ -197,7 +197,7 @@ public enum GLToolButtons {
             "Checkout",
             null,
             MainMenuInfo.GIT,
-            GLToolConstants.ICON_SIZE_16),
+            GLToolConstants.ICON_SIZE_16, false),
 
     MAIN_STAGING(GLToolConstants.PROJECTS_WINDOW_KEY,
             "main_git_staging",
@@ -205,7 +205,7 @@ public enum GLToolButtons {
             "Staging",
             null,
             MainMenuInfo.GIT,
-            GLToolConstants.ICON_SIZE_16),
+            GLToolConstants.ICON_SIZE_16, false),
 
     MAIN_PUSH(GLToolConstants.PROJECTS_WINDOW_KEY,
             "main_git_push",
@@ -213,7 +213,7 @@ public enum GLToolButtons {
             "Push",
             null,
             MainMenuInfo.GIT,
-            GLToolConstants.ICON_SIZE_16),
+            GLToolConstants.ICON_SIZE_16, false),
 
     MAIN_PULL(GLToolConstants.PROJECTS_WINDOW_KEY,
             "main_git_pull",
@@ -221,7 +221,7 @@ public enum GLToolButtons {
             "Pull",
             null,
             MainMenuInfo.GIT,
-            GLToolConstants.ICON_SIZE_16),
+            GLToolConstants.ICON_SIZE_16, false),
 
     MAIN_REVERT(GLToolConstants.PROJECTS_WINDOW_KEY,
             "main_git_revert",
@@ -229,7 +229,7 @@ public enum GLToolButtons {
             "Revert",
             null,
             MainMenuInfo.GIT,
-            GLToolConstants.ICON_SIZE_16),
+            GLToolConstants.ICON_SIZE_16, false),
 
     MAIN_STASH(GLToolConstants.PROJECTS_WINDOW_KEY,
             "main_git_stash",
@@ -237,7 +237,15 @@ public enum GLToolButtons {
             "Stash",
             null,
             MainMenuInfo.GIT,
-            GLToolConstants.ICON_SIZE_16);
+            GLToolConstants.ICON_SIZE_16, false),
+
+    SHOW_PROJECT_HISTORY(GLToolConstants.COMMON_VIEW_KEY,
+            "history",
+            "icons/history_20x20.png",
+            null,
+            "Show history",
+            null,
+            GLToolConstants.ICON_SIZE_20, true);
 
     private final String viewKey;
     private final String id;
@@ -246,8 +254,9 @@ public enum GLToolButtons {
     private final String tooltip;
     private final MainMenuInfo mainMenuInfo;
     private final int iconSize;
+    private final boolean isToggled;
 
-    GLToolButtons(final String windowId, final String buttonId, final String buttonIconUrl, final String buttonText, final String buttonTooltip, final MainMenuInfo mainMenuInfo, final int iconSize) {
+    GLToolButtons(final String windowId, final String buttonId, final String buttonIconUrl, final String buttonText, final String buttonTooltip, final MainMenuInfo mainMenuInfo, final int iconSize, boolean isToggled) {
         this.viewKey = windowId;
         this.id = buttonId;
         this.text = buttonText;
@@ -255,6 +264,7 @@ public enum GLToolButtons {
         this.tooltip = buttonTooltip;
         this.mainMenuInfo = mainMenuInfo;
         this.iconSize = iconSize;
+        this.isToggled = isToggled;
     }
 
     /**
@@ -320,10 +330,20 @@ public enum GLToolButtons {
         return iconSize;
     }
 
+    /**
+     * Check if is toggled button type
+     *
+     * @return true if is toggled button type, otherwise false
+     */
+    public boolean isToggled() {
+        return isToggled;
+    }
+
     public static class GLToolConstants {
         public final static String GROUPS_WINDOW_KEY = ViewKey.GROUPS_WINDOW.getKey();
         public final static String PROJECTS_WINDOW_KEY = ViewKey.PROJECTS_WINDOW.getKey();
         public final static String ALL_WINDOW_KEY = ViewKey.ALL_WINDOWS.getKey();
+        public final static String COMMON_VIEW_KEY = ViewKey.COMMON_VIEW.getKey();
 
         public final static int ICON_SIZE_16 = 16;
         public final static int ICON_SIZE_20 = 20;

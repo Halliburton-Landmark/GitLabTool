@@ -14,18 +14,19 @@ import com.lgc.gitlabtool.git.ui.table.Commit;
 import com.lgc.gitlabtool.git.ui.table.CommitHistoryTableView;
 import com.lgc.gitlabtool.git.ui.table.CustomDate;
 import com.lgc.gitlabtool.git.ui.table.SortedByDate;
+import com.lgc.gitlabtool.git.ui.toolbar.GLToolButtons;
+import com.lgc.gitlabtool.git.ui.toolbar.ToolbarManager;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.effect.ColorAdjust;
 import javafx.scene.effect.Effect;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.HBox;
 
 import java.util.Collections;
 import java.util.List;
@@ -61,8 +62,7 @@ public class TableController {
     @FXML
     private TableColumn<Commit, String> projectColumn;
 
-    @FXML
-    private ToolBar toolbar;
+    private static final ToolbarManager _toolbarManager = ToolbarManager.getInstance();
 
     private static final GitService _gitService = ServiceProvider.getInstance()
             .getService(GitService.class);
@@ -75,8 +75,6 @@ public class TableController {
     private ProjectListView projectListView;
 
     private ToggleButton toggleButton;
-
-    private static final String HISTORY_IMAGE_URL = "icons/history_20x20.png";
 
     private ThemeChangeListener themeChangeListener = new ThemeChangeListener() {
         @Override
@@ -107,7 +105,6 @@ public class TableController {
                     List<Commit> commits = _gitService.getAllCommits(project, nameBranch);
                     data.addAll(commits);
                 }
-                toolbar.setVisible(true);
                 Collections.sort(data, new SortedByDate());
                 historyTable.refresh();
                 historyTable.setItems(data);
@@ -116,7 +113,6 @@ public class TableController {
                 }
             } else {
                 historyTable.setVisible(false);
-                toolbar.setVisible(false);
             }
         }
     };
@@ -126,8 +122,17 @@ public class TableController {
         public void onChanged(String activeView) {
             if (activeView.equals(ViewKey.GROUPS_WINDOW.getKey()) || activeView.equals(ViewKey.PROJECTS_WINDOW.getKey())) {
                 historyTable.setVisible(false);
-                toolbar.setVisible(false);
-                toggleButton.setSelected(false);
+
+                if (activeView.equals(ViewKey.PROJECTS_WINDOW.getKey()) && toggleButton == null) {
+                    List<Node> list = _toolbarManager.getAllButtonsForView(ViewKey.COMMON_VIEW.getKey());
+                    for(Node node : list) {
+                        if ((node instanceof ToggleButton) && node.getId().equals(GLToolButtons.SHOW_PROJECT_HISTORY.getId())) {
+                            toggleButton = (ToggleButton) node;
+                            toggleButton.setOnAction(toggleChangeAction);
+                            toggleButton.setSelected(false);
+                        }
+                    }
+                }
             }
         }
     };
@@ -166,8 +171,6 @@ public class TableController {
 
         configTable();
 
-        initToolbar();
-
         initListeners();
     }
 
@@ -185,22 +188,6 @@ public class TableController {
     private void configTable() {
         historyTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         historyTable.setFixedCellSize(35);
-    }
-
-    private void initToolbar() {
-        if (toolbar == null) {
-            return;
-        }
-        ImageView imageViewSelectAll = _themeService.getStyledImageView(HISTORY_IMAGE_URL);
-        toggleButton = new ToggleButton();
-        toggleButton.setGraphic(imageViewSelectAll);
-        toggleButton.setTooltip(new Tooltip("Show history"));
-        toggleButton.setOnAction(toggleChangeAction);
-
-        HBox buttonBar = new HBox();
-        buttonBar.setPrefHeight(20);
-        buttonBar.getChildren().add(toggleButton);
-        toolbar.getItems().addAll(buttonBar);
     }
 
     private Effect getLightEffect(){

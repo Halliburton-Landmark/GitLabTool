@@ -16,9 +16,7 @@
 <?import javafx.scene.text.TextFlow?>
 <?import javafx.stage.Screen?>
 <?import com.lgc.gitlabtool.git.ui.javafx.StatusBar?>
-<?import com.lgc.gitlabtool.git.ui.table.CommitHistoryTableView?>
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.layout.Pane?>
 <AnchorPane prefHeight="${screen.visualBounds.maxY / 1.5}"
             prefWidth="${screen.visualBounds.maxX / 1.5}" xmlns="http://javafx.com/javafx/8"
             xmlns:fx="http://javafx.com/fxml/1"
@@ -71,7 +69,7 @@
                     <center>
                         <SplitPane fx:id="dividerMainPane" dividerPositions="0.30">
                             <AnchorPane fx:id="listPane" BorderPane.alignment="CENTER"/>
-                            <fx:include source="HistoryTable.fxml" fx:id="historyTable"/>
+                            <fx:include source="CommonToolBar.fxml" fx:id="commonToolBar"/>
                         </SplitPane>
                     </center>
                 </BorderPane>

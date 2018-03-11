@@ -5,15 +5,10 @@
 <?import com.lgc.gitlabtool.git.ui.table.CommitHistoryTableView?>
 
 <?import com.lgc.gitlabtool.git.ui.table.FormattedTableCellFactory?>
-<BorderPane xmlns="http://javafx.com/javafx"
+<AnchorPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.lgc.gitlabtool.git.ui.javafx.controllers.TableController"
             >
-    <top>
-        <ToolBar fx:id="toolbar">
-        </ToolBar>
-    </top>
-    <center>
             <CommitHistoryTableView
                 fx:id="historyTable"
                 editable="true"
@@ -33,7 +28,7 @@
                 <TableColumn
                         fx:id="projectColumn"
                         minWidth="200"
-                        maxWidth="250"
+                        maxWidth="350"
                         text="Project">
                     <cellFactory>
                         <FormattedTableCellFactory/>
@@ -42,7 +37,7 @@
                 <TableColumn
                     fx:id="messageColumn"
                     minWidth="300"
-                    maxWidth="350"
+                    maxWidth="450"
                     text="Message">
                     <cellFactory>
                         <FormattedTableCellFactory/>
@@ -69,7 +64,7 @@
                 <TableColumn
                     fx:id="committerColumn"
                     minWidth="100"
-                    maxWidth="120"
+                    maxWidth="200"
                     text="Committer">
                     <cellFactory>
                         <FormattedTableCellFactory/>
@@ -85,5 +80,4 @@
                 </TableColumn>
             </columns>
             </CommitHistoryTableView>
-    </center>
-</BorderPane>
+</AnchorPane>
