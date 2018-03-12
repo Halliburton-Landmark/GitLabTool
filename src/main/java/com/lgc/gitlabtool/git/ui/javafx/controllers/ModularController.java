@@ -611,12 +611,7 @@ public class ModularController implements UpdateProgressListener {
         toolbar.getItems().clear();
         menuBar.getMenus().clear();
 
-        if (dividerListener != null
-                && dividerMainPane.getDividers().size() > 0
-                && dividerMainPane.getDividers().get(0) != null) {
-            SplitPane.Divider divider = dividerMainPane.getDividers().get(0);
-            divider.positionProperty().removeListener(dividerListener);
-        }
+        removeDividerChangeListener(dividerListener);
 
         toolbar.getItems().addAll(projectsWindowToolbarItems);
         menuBar.getMenus().addAll(projectsWindowMainMenuItems);
@@ -669,12 +664,7 @@ public class ModularController implements UpdateProgressListener {
         toolbar.getItems().clear();
         menuBar.getMenus().clear();
 
-        if (groupsDividerListener != null
-                && dividerMainPane.getDividers().size() > 0
-                && dividerMainPane.getDividers().get(0) != null) {
-            SplitPane.Divider divider = dividerMainPane.getDividers().get(0);
-            divider.positionProperty().removeListener(groupsDividerListener);
-        }
+        removeDividerChangeListener(groupsDividerListener);
 
         toolbar.getItems().addAll(groupsWindowToolbarItems);
         menuBar.getMenus().addAll(groupsWindowMainMenuItems);
@@ -707,6 +697,15 @@ public class ModularController implements UpdateProgressListener {
         if(dividerMainPane.getDividers().size() > 0 && dividerMainPane.getDividers().get(0) != null){
             SplitPane.Divider divider = dividerMainPane.getDividers().get(0);
             divider.positionProperty().addListener(groupsDividerListener);
+        }
+    }
+
+    private void removeDividerChangeListener(ChangeListener<Number> changeListener){
+        if (changeListener != null
+                && dividerMainPane.getDividers().size() > 0
+                && dividerMainPane.getDividers().get(0) != null) {
+            SplitPane.Divider divider = dividerMainPane.getDividers().get(0);
+            divider.positionProperty().removeListener(changeListener);
         }
     }
 
