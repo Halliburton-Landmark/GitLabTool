@@ -39,6 +39,17 @@ public class PathUtilities {
      * @param path path on disk
      * @return <true> - it exist and regular file, otherwise - <false>.
      */
+    public static boolean isExistsAndRegularFile(String path) {
+        boolean result = isExistsAndRegularFile(Paths.get(path));
+        return result;
+    }
+
+    /**
+     * Checks path is exist and it is regular file.
+     *
+     * @param path path on disk
+     * @return <true> - it exist and regular file, otherwise - <false>.
+     */
     public static boolean isExistsAndRegularFile(Path path) {
         return path != null && Files.exists(path) && Files.isRegularFile(path);
     }

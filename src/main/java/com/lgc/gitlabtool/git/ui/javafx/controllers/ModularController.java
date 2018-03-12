@@ -10,18 +10,18 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.lgc.gitlabtool.git.preferences.ApplicationPreferences;
-import com.lgc.gitlabtool.git.preferences.PreferencesNodes;
-import com.lgc.gitlabtool.git.util.OpenTerminalUtil;
-import javafx.scene.Scene;
-import javafx.scene.effect.Effect;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -33,6 +33,8 @@ import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.listeners.stateListeners.StateListener;
 import com.lgc.gitlabtool.git.listeners.updateProgressListener.UpdateProgressListener;
+import com.lgc.gitlabtool.git.preferences.ApplicationPreferences;
+import com.lgc.gitlabtool.git.preferences.PreferencesNodes;
 import com.lgc.gitlabtool.git.services.BackgroundService;
 import com.lgc.gitlabtool.git.services.ClonedGroupsService;
 import com.lgc.gitlabtool.git.services.ConsoleService;
@@ -68,6 +70,7 @@ import com.lgc.gitlabtool.git.ui.selection.SelectionsProvider;
 import com.lgc.gitlabtool.git.ui.toolbar.GLToolButtons;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarManager;
 import com.lgc.gitlabtool.git.util.OpenTerminalUtil;
+import com.lgc.gitlabtool.git.util.PathUtilities;
 import com.lgc.gitlabtool.git.util.ScreenUtil;
 import com.lgc.gitlabtool.git.util.ShutDownUtil;
 import com.lgc.gitlabtool.git.util.UserGuideUtil;
@@ -1404,6 +1407,15 @@ public class ModularController implements UpdateProgressListener {
                 Stream.of(projectListView.getSelectionModel()).map(SelectionModel::selectedItemProperty).toArray(Observable[]::new));
     }
 
+    private BooleanBinding booleanBindingForEditProperties() {
+        return Bindings.createBooleanBinding(() ->
+                        getCurrentProjects().stream()
+                                .filter(Objects::nonNull)
+                                .filter(Project::isCloned)
+                                .allMatch(project -> !PathUtilities.isExistsAndRegularFile(project.getPath() + "/pom.xml")),
+                Stream.of(projectListView.getSelectionModel()).map(SelectionModel::selectedItemProperty).toArray(Observable[]::new));
+    }
+
     private void setDisablePropertyForButtons() {
         BooleanBinding booleanBindingDefault = projectListView.getSelectionModel().selectedItemProperty().isNull();
         // We lock git operation (all except "clone") if shadow projects was selected.
@@ -1413,6 +1425,11 @@ public class ModularController implements UpdateProgressListener {
 
         setToolbarDisableProperty(booleanBindingForShadow, booleanBindingForCloned);
         setMainMenuDisableProperty(booleanBindingForShadow, booleanBindingForCloned);
+
+        BooleanBinding booleanBindingForEditProperties = booleanBindingForEditProperties().or(booleanBindingDefault);
+
+        _toolbarManager.getButtonById(GLToolButtons.EDIT_PROJECT_PROPERTIES_BUTTON.getId())
+                       .disableProperty().bind(booleanBindingForEditProperties);
     }
 
     private void setToolbarDisableProperty(BooleanBinding bindingForShadow, BooleanBinding bindingForCloned) {
@@ -1420,7 +1437,6 @@ public class ModularController implements UpdateProgressListener {
         _toolbarManager.getButtonById(GLToolButtons.BRANCHES_BUTTON.getId()).disableProperty().bind(bindingForShadow);
         _toolbarManager.getButtonById(GLToolButtons.STAGING_BUTTON.getId()).disableProperty().bind(bindingForShadow);
         _toolbarManager.getButtonById(GLToolButtons.PUSH_BUTTON.getId()).disableProperty().bind(bindingForShadow);
-        _toolbarManager.getButtonById(GLToolButtons.EDIT_PROJECT_PROPERTIES_BUTTON.getId()).disableProperty().bind(bindingForShadow);
         _toolbarManager.getButtonById(GLToolButtons.PULL_BUTTON.getId()).disableProperty().bind(bindingForShadow);
         _toolbarManager.getButtonById(GLToolButtons.REVERT_CHANGES.getId()).disableProperty().bind(bindingForShadow);
     }
