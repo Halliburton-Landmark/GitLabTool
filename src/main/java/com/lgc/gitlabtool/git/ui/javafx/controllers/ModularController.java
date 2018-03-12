@@ -1018,13 +1018,7 @@ public class ModularController implements UpdateProgressListener {
     @SuppressWarnings("unused")
     private void showEditProjectPropertiesWindow(ActionEvent event) {
         try {
-
-            URL editProjectPropertiesWindowUrl = getClass().getClassLoader().getResource(ViewKey.EDIT_PROJECT_PROPERTIES.getPath());
-            FXMLLoader loader = new FXMLLoader(editProjectPropertiesWindowUrl);
-            Parent root = loader.load();
-
-            EditProjectPropertiesController controller = loader.getController();
-
+            List<Project> selectedProjects = new ArrayList<>(getCurrentProjects());
             List<Project> unavailableProjects = getUnavailableProjectsForEditingPom(getCurrentProjects());
             if (!unavailableProjects.isEmpty()) {
                 String failedProjectsNames = unavailableProjects.stream()
@@ -1032,8 +1026,17 @@ public class ModularController implements UpdateProgressListener {
                         .collect(Collectors.toList())
                         .toString();
                 _consoleService.addMessage(EDIT_POM_SELECTION_WARNING + failedProjectsNames, MessageType.ERROR);
-                return;
+                if (unavailableProjects.size() != selectedProjects.size()) {
+                    selectedProjects.removeAll(unavailableProjects);
+                } else {
+                    return;
+                }
             }
+
+            URL editProjectPropertiesWindowUrl = getClass().getClassLoader().getResource(ViewKey.EDIT_PROJECT_PROPERTIES.getPath());
+            FXMLLoader loader = new FXMLLoader(editProjectPropertiesWindowUrl);
+            Parent root = loader.load();
+            EditProjectPropertiesController controller = loader.getController();
 
             Stage stage = new Stage();
             stage.setScene(new GLTScene(root));
@@ -1053,7 +1056,7 @@ public class ModularController implements UpdateProgressListener {
             stage.setMinWidth(dialogWidth / 2);
             stage.setMinHeight(dialogHeight / 2);
 
-            controller.beforeStart(getIdSelectedProjects(), stage);
+            controller.beforeStart(_projectService.getIdsProjects(selectedProjects), stage);
             stage.show();
         } catch (IOException e) {
             _logger.error("Could not load fxml resource", e);
@@ -1420,8 +1423,8 @@ public class ModularController implements UpdateProgressListener {
         setToolbarDisableProperty(booleanBindingForShadow, booleanBindingForCloned);
         setMainMenuDisableProperty(booleanBindingForShadow, booleanBindingForCloned);
 
-        BooleanBinding editProperties = booleanBindingForEditProperties();
-        _mainMenuManager.getButtonById(GLToolButtons.MAIN_EDIT_PROJECT_PROPERTIES).disableProperty().bind(editProperties);
+        BooleanBinding bindingForEdit = booleanBindingForEditProperties();
+        _mainMenuManager.getButtonById(GLToolButtons.MAIN_EDIT_PROJECT_PROPERTIES).disableProperty().bind(bindingForEdit);
     }
 
     private void setToolbarDisableProperty(BooleanBinding bindingForShadow, BooleanBinding bindingForCloned) {
@@ -1455,7 +1458,8 @@ public class ModularController implements UpdateProgressListener {
     }
 
     private boolean hasNotProjectPomFile(Project project) {
-        return !PathUtilities.isExistsAndRegularFile(project.getPath() + DSGProjectType.STRUCTURE_OF_POM_FILE);
+        String pomFilePath = project.getPath() + File.separator + DSGProjectType.STRUCTURE_OF_POM_FILE;
+        return !PathUtilities.isExistsAndRegularFile(pomFilePath);
     }
 
     //endregion
