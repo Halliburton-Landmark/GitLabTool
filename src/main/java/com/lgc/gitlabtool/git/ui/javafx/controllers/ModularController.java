@@ -35,6 +35,7 @@ import com.lgc.gitlabtool.git.listeners.stateListeners.StateListener;
 import com.lgc.gitlabtool.git.listeners.updateProgressListener.UpdateProgressListener;
 import com.lgc.gitlabtool.git.preferences.ApplicationPreferences;
 import com.lgc.gitlabtool.git.preferences.PreferencesNodes;
+import com.lgc.gitlabtool.git.project.nature.projecttype.DSGProjectType;
 import com.lgc.gitlabtool.git.services.BackgroundService;
 import com.lgc.gitlabtool.git.services.ClonedGroupsService;
 import com.lgc.gitlabtool.git.services.ConsoleService;
@@ -458,7 +459,8 @@ public class ModularController implements UpdateProgressListener {
             _mainMenuManager.getButtonById(GLToolButtons.MAIN_BRANCHES).setOnAction(this::showBranchesWindow);
             _mainMenuManager.getButtonById(GLToolButtons.MAIN_STASH).setOnAction(this::showStashWindow);
             _mainMenuManager.getButtonById(GLToolButtons.MAIN_CREATE_PROJECT).setOnAction(this::createProjectButton);
-            _mainMenuManager.getButtonById(GLToolButtons.MAIN_EDIT_PROJECT_PROPERTIES).setOnAction(this::showEditProjectPropertiesWindow);
+            _mainMenuManager.getButtonById(GLToolButtons.MAIN_EDIT_PROJECT_PROPERTIES).setOnAction(
+                    this::showEditProjectPropertiesWindow);
         }
 
         MenuItem userGuide = _mainMenuManager.getButtonById(GLToolButtons.GENERAL_USER_GUIDE);
@@ -1306,15 +1308,18 @@ public class ModularController implements UpdateProgressListener {
                 MenuItem openInTerminal = createMenuItem(GLToolButtons.OPEN_IN_TERMINAL, this::openInTerminal);
 
                 Menu subMenuGit = new Menu("Git");
+
                 MenuItem itemBranches = createMenuItem(GLToolButtons.MAIN_BRANCHES, this::showBranchesWindow);
                 MenuItem itemStaging = createMenuItem(GLToolButtons.MAIN_STAGING, this::openGitStaging);
                 MenuItem itemPull = createMenuItem(GLToolButtons.MAIN_PULL, this::onPullAction);
                 MenuItem itemPush = createMenuItem(GLToolButtons.MAIN_PUSH, this::onPushAction);
                 MenuItem itemRevert = createMenuItem(GLToolButtons.MAIN_REVERT, this::onRevertChanges);
                 MenuItem itemStash = createMenuItem(GLToolButtons.MAIN_STASH, this::showStashWindow);
+
                 subMenuGit.getItems().addAll(itemBranches, itemStaging, itemPull, itemPush, itemRevert, itemStash);
 
-                MenuItem itemEditProjectProp = createMenuItem(GLToolButtons.MAIN_EDIT_PROJECT_PROPERTIES, this::showEditProjectPropertiesWindow);
+                MenuItem itemEditProjectProp = createMenuItem(GLToolButtons.MAIN_EDIT_PROJECT_PROPERTIES,
+                        this::showEditProjectPropertiesWindow);
                 itemEditProjectProp.disableProperty().bind(booleanBindingForEditProperties());
 
                 menuItems.add(openFolder);
@@ -1443,11 +1448,16 @@ public class ModularController implements UpdateProgressListener {
                         getCurrentProjects().stream()
                                             .filter(Objects::nonNull)
                                             .filter(Project::isCloned)
-                                            .allMatch(project -> !PathUtilities.isExistsAndRegularFile
-                                                    (project.getPath() + "/pom.xml")),
-                Stream.of(projectListView.getSelectionModel()).map(SelectionModel::selectedItemProperty).
-                toArray(Observable[]::new)).or(projectListView.getSelectionModel().selectedItemProperty().isNull());
+                                            .allMatch(this::hasNotProjectPomFile),
+                        Stream.of(projectListView.getSelectionModel()).map(SelectionModel::selectedItemProperty)
+                                                                      .toArray(Observable[]::new))
+                .or(projectListView.getSelectionModel().selectedItemProperty().isNull());
     }
+
+    private boolean hasNotProjectPomFile(Project project) {
+        return !PathUtilities.isExistsAndRegularFile(project.getPath() + DSGProjectType.STRUCTURE_OF_POM_FILE);
+    }
+
     //endregion
     /*
      *
