@@ -438,12 +438,10 @@ public class ModularController implements UpdateProgressListener {
             _toolbarManager.getButtonById(GLToolButtons.CHANGE_GROUP_BUTTON.getId()).setOnAction(this::loadGroupWindow);
             _toolbarManager.getButtonById(GLToolButtons.BRANCHES_BUTTON.getId()).setOnAction(this::showBranchesWindow);
             _toolbarManager.getButtonById(GLToolButtons.CLONE_PROJECT_BUTTON.getId()).setOnAction(this::cloneShadowProject);
-            _toolbarManager.getButtonById(GLToolButtons.CREATE_PROJECT_BUTTON.getId()).setOnAction(this::createProjectButton);
             _toolbarManager.getButtonById(GLToolButtons.STAGING_BUTTON.getId()).setOnAction(this::openGitStaging);
             _toolbarManager.getButtonById(GLToolButtons.PUSH_BUTTON.getId()).setOnAction(this::onPushAction);
             _toolbarManager.getButtonById(GLToolButtons.PULL_BUTTON.getId()).setOnAction(this::onPullAction);
             _toolbarManager.getButtonById(GLToolButtons.REVERT_CHANGES.getId()).setOnAction(this::onRevertChanges);
-            _toolbarManager.getButtonById(GLToolButtons.EDIT_PROJECT_PROPERTIES_BUTTON.getId()).setOnAction(this::showEditProjectPropertiesWindow);
             _toolbarManager.getButtonById(GLToolButtons.STASH.getId()).setOnAction(this::showStashWindow);
         }
     }
@@ -459,6 +457,8 @@ public class ModularController implements UpdateProgressListener {
             _mainMenuManager.getButtonById(GLToolButtons.MAIN_REVERT).setOnAction(this::onRevertChanges);
             _mainMenuManager.getButtonById(GLToolButtons.MAIN_BRANCHES).setOnAction(this::showBranchesWindow);
             _mainMenuManager.getButtonById(GLToolButtons.MAIN_STASH).setOnAction(this::showStashWindow);
+            _mainMenuManager.getButtonById(GLToolButtons.MAIN_CREATE_PROJECT).setOnAction(this::createProjectButton);
+            _mainMenuManager.getButtonById(GLToolButtons.MAIN_EDIT_PROJECT_PROPERTIES).setOnAction(this::showEditProjectPropertiesWindow);
         }
 
         MenuItem userGuide = _mainMenuManager.getButtonById(GLToolButtons.GENERAL_USER_GUIDE);
@@ -1306,18 +1306,16 @@ public class ModularController implements UpdateProgressListener {
                 MenuItem openInTerminal = createMenuItem(GLToolButtons.OPEN_IN_TERMINAL, this::openInTerminal);
 
                 Menu subMenuGit = new Menu("Git");
-
                 MenuItem itemBranches = createMenuItem(GLToolButtons.MAIN_BRANCHES, this::showBranchesWindow);
                 MenuItem itemStaging = createMenuItem(GLToolButtons.MAIN_STAGING, this::openGitStaging);
                 MenuItem itemPull = createMenuItem(GLToolButtons.MAIN_PULL, this::onPullAction);
                 MenuItem itemPush = createMenuItem(GLToolButtons.MAIN_PUSH, this::onPushAction);
                 MenuItem itemRevert = createMenuItem(GLToolButtons.MAIN_REVERT, this::onRevertChanges);
                 MenuItem itemStash = createMenuItem(GLToolButtons.MAIN_STASH, this::showStashWindow);
-
                 subMenuGit.getItems().addAll(itemBranches, itemStaging, itemPull, itemPush, itemRevert, itemStash);
 
-                MenuItem itemEditProjectProp = createMenuItem(GLToolButtons.MAIN_EDIT_PROJECT_PROPERTIES,
-                        this::showEditProjectPropertiesWindow);
+                MenuItem itemEditProjectProp = createMenuItem(GLToolButtons.MAIN_EDIT_PROJECT_PROPERTIES, this::showEditProjectPropertiesWindow);
+                itemEditProjectProp.disableProperty().bind(booleanBindingForEditProperties());
 
                 menuItems.add(openFolder);
                 if (projectListView.getSelectionModel().getSelectedItems().size() == 1) {
@@ -1407,15 +1405,6 @@ public class ModularController implements UpdateProgressListener {
                 Stream.of(projectListView.getSelectionModel()).map(SelectionModel::selectedItemProperty).toArray(Observable[]::new));
     }
 
-    private BooleanBinding booleanBindingForEditProperties() {
-        return Bindings.createBooleanBinding(() ->
-                        getCurrentProjects().stream()
-                                .filter(Objects::nonNull)
-                                .filter(Project::isCloned)
-                                .allMatch(project -> !PathUtilities.isExistsAndRegularFile(project.getPath() + "/pom.xml")),
-                Stream.of(projectListView.getSelectionModel()).map(SelectionModel::selectedItemProperty).toArray(Observable[]::new));
-    }
-
     private void setDisablePropertyForButtons() {
         BooleanBinding booleanBindingDefault = projectListView.getSelectionModel().selectedItemProperty().isNull();
         // We lock git operation (all except "clone") if shadow projects was selected.
@@ -1426,10 +1415,8 @@ public class ModularController implements UpdateProgressListener {
         setToolbarDisableProperty(booleanBindingForShadow, booleanBindingForCloned);
         setMainMenuDisableProperty(booleanBindingForShadow, booleanBindingForCloned);
 
-        BooleanBinding booleanBindingForEditProperties = booleanBindingForEditProperties().or(booleanBindingDefault);
-
-        _toolbarManager.getButtonById(GLToolButtons.EDIT_PROJECT_PROPERTIES_BUTTON.getId())
-                       .disableProperty().bind(booleanBindingForEditProperties);
+        BooleanBinding editProperties = booleanBindingForEditProperties();
+        _mainMenuManager.getButtonById(GLToolButtons.MAIN_EDIT_PROJECT_PROPERTIES).disableProperty().bind(editProperties);
     }
 
     private void setToolbarDisableProperty(BooleanBinding bindingForShadow, BooleanBinding bindingForCloned) {
@@ -1449,6 +1436,17 @@ public class ModularController implements UpdateProgressListener {
         _mainMenuManager.getButtonById(GLToolButtons.MAIN_PULL).disableProperty().bind(bindingForShadow);
         _mainMenuManager.getButtonById(GLToolButtons.MAIN_REVERT).disableProperty().bind(bindingForShadow);
 
+    }
+
+    private BooleanBinding booleanBindingForEditProperties() {
+        return Bindings.createBooleanBinding(() ->
+                        getCurrentProjects().stream()
+                                            .filter(Objects::nonNull)
+                                            .filter(Project::isCloned)
+                                            .allMatch(project -> !PathUtilities.isExistsAndRegularFile
+                                                    (project.getPath() + "/pom.xml")),
+                Stream.of(projectListView.getSelectionModel()).map(SelectionModel::selectedItemProperty).
+                toArray(Observable[]::new)).or(projectListView.getSelectionModel().selectedItemProperty().isNull());
     }
     //endregion
     /*
