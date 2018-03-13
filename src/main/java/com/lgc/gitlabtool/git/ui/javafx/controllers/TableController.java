@@ -88,7 +88,8 @@ public class TableController {
     private EventHandler<ActionEvent> toggleChangeAction = new EventHandler<ActionEvent>() {
         @Override
         public void handle(ActionEvent event) {
-            if (toggleButton.isSelected()) {
+            List<Project> projectsList = projectListView.getSelectionModel().getSelectedItems();
+            if (toggleButton.isSelected() && !projectsList.isEmpty()) {
                 historyTable.setVisible(true);
             } else {
                 historyTable.setVisible(false);
