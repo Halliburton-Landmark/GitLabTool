@@ -5,7 +5,6 @@
 
 /* GENERAL */
 .root{
-    -fx-font-size: 12;
     -fx-font-family: "Trebuchet MS", "Geneva", "sans-serif";
     -fx-text-fill: foreground-text;
     -fx-base: #e7e7e7;
@@ -87,6 +86,42 @@
 }
 
 
+/* VIEW TOOLBAR */
+#viewToolbar {
+    -fx-background-color: #e7e7e7;
+    -fx-border-color:
+        linear-gradient(to bottom, rgba(90, 90, 90, 0.2), transparent),
+        linear-gradient(to top, rgba(90, 90, 90, 0.2), transparent);
+    -fx-border-style: solid;
+    -fx-border-width: 5 0 0 0, 0 0 5 0;
+}
+
+#viewToolbarHBox *.button {
+    -fx-background-color: transparent, transparent, transparent, transparent;
+    -fx-background-radius: 15, 15, 15;
+}
+
+#viewToolbarHBox *.button:hover{
+    -fx-background-color: #a2bbd8;
+}
+
+#viewToolbarHBox *.button:armed {
+    -fx-background-color: #7dade0;
+}
+
+#viewToolbarHBox *.toggle-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 15, 15, 15;
+}
+
+#viewToolbarHBox *.toggle-button:hover {
+    -fx-background-color: #a2bbd8;
+}
+
+#viewToolbarHBox *.toggle-button:selected {
+    -fx-background-color: #7dade0;
+}
+
 
 /* TOP SLIM PANEL */
 #top_slim_panel {
@@ -118,13 +153,13 @@
 .context-menu {
     -fx-border-color: rgb(128, 122, 122);
     -fx-border-width: 1;
-        
+
     -fx-background-color: #ebebeb;
     -fx-background-insets: 0, 1, 2;
     -fx-background-radius: 0 6 6 6, 0 5 5 5, 0 4 4 4;
     -fx-padding: 4 1 4 1;
   }
-  
+
   .menu-item .label {
     -fx-text-fill: foreground-text;
   }
@@ -132,7 +167,7 @@
   .menu-item {
     -fx-padding: 6 6 6 6;
   }
-  
+
 
 
 /* LOADING SPINNER */
@@ -259,41 +294,6 @@
     -fx-background-color: #d3d3d3;
   }
 
-.table-view{
-    -fx-background-color: transparent;
-}
- 
-.table-view:focused{
-    -fx-background-color: transparent;
-}
- 
-.table-view .column-header-background{
-    -fx-background-color: #e7e7e7;
-}
- 
-.table-view .column-header-background .label{
-    -fx-text-fill: foreground-text;
-}
- 
-.table-view .column-header {
-    -fx-background-color: transparent;
-}
- 
-.table-view .table-cell{
-    -fx-text-fill: foreground-text;
-}
- 
-.table-row-cell{
-    -fx-background-color: #f7f7f7;
-}
- 
-.table-row-cell:odd{
-    -fx-background-color: rgb(240, 240, 240);
-}
- 
-.table-row-cell:selected {
-    -fx-background-color: rgb(210, 210, 210);
-}
 
 
 

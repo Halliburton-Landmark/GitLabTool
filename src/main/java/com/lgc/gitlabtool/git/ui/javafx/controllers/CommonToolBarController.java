@@ -23,13 +23,15 @@ import java.util.List;
 public class CommonToolBarController {
 
     @FXML
-    private ToolBar toolbar;
+    private ToolBar viewToolbar;
 
     private List<Node> toolbarItems;
 
     private static final ToolbarManager _toolbarManager = ToolbarManager.getInstance();
 
     private static final ListViewMgrProvider listViewMgrProvider = ListViewMgrProvider.getInstance();
+
+    private static final String toolbarHBoxId = "viewToolbarHBox";
 
     private ActiveViewChangeListener activeViewChangeListener = new ActiveViewChangeListener() {
         @Override
@@ -58,6 +60,7 @@ public class CommonToolBarController {
 
         HBox buttonBar = new HBox();
         buttonBar.setPrefHeight(20);
+        buttonBar.setId(toolbarHBoxId);
         for(Node item : toolbarItems) {
             item.setVisible(false);
             if (item instanceof ToggleButton) {
@@ -68,8 +71,8 @@ public class CommonToolBarController {
             buttonBar.getChildren().add(item);
         }
 
-        toolbar.getItems().clear();
-        toolbar.getItems().addAll(buttonBar);
+        viewToolbar.getItems().clear();
+        viewToolbar.getItems().addAll(buttonBar);
     }
 
 }
