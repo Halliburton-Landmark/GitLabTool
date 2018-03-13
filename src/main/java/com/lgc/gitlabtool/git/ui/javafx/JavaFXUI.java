@@ -10,6 +10,7 @@ import org.apache.logging.log4j.Logger;
 import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.ProjectList;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
+import com.lgc.gitlabtool.git.services.BackgroundService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.UserInterface;
@@ -48,6 +49,7 @@ public class JavaFXUI extends Application implements UserInterface {
     private static final String EXIT_BUTTON_NAME = "Exit";
 
     private static final StateService _stateService = ServiceProvider.getInstance().getService(StateService.class);
+    private static final BackgroundService _backgroundService = ServiceProvider.getInstance().getService(BackgroundService.class);
 
     private Image appIcon;
     private Stage mainStage;
@@ -81,11 +83,15 @@ public class JavaFXUI extends Application implements UserInterface {
             @Override
             public void changed(ObservableValue<? extends Boolean> booleanProperty, Boolean oldValue, Boolean newValue) {
                 if (newValue) {
-                    ProjectList projectList = ProjectList.get(null);
-                    Group group = projectList.getCurrentGroup();
-                    if (group != null) {
-                        projectList.updateProjectStatuses();
-                    }
+                    _backgroundService.runInBackgroundThread(this::updateProjectStatuses);
+                }
+            }
+
+            private void updateProjectStatuses() {
+                ProjectList projectList = ProjectList.get(null);
+                Group group = projectList.getCurrentGroup();
+                if (group != null) {
+                    projectList.updateProjectStatuses();
                 }
             }
         });
