@@ -5,7 +5,6 @@
 
 /* GENERAL */
 .root{
-    -fx-font-size: 12;
     -fx-font-family: "Trebuchet MS", "Geneva", "sans-serif";
     -fx-text-fill: foreground-text;
     -fx-base: #272727;
@@ -13,7 +12,7 @@
 
     -fx-focus-color: transparent;
     -fx-accent: #1d497e;
-    
+
 }
 
 
@@ -91,6 +90,45 @@
     -fx-background-color: #243242;
 }
 
+/* VIEW TOOLBAR */
+#viewToolbar {
+    -fx-background-color: #222222;
+    -fx-border-color:
+        linear-gradient(to bottom, rgba(0, 0, 0, 0.3), transparent),
+        linear-gradient(to top, rgba(0, 0, 0, 0.3), transparent);
+    -fx-border-style: solid;
+    -fx-border-width: 5 0 0 0, 0 0 5 0;
+}
+
+#viewToolbarHBox *.button {
+    -fx-background-color: transparent, transparent, transparent, transparent;
+    -fx-background-radius: 15, 15, 15;
+}
+
+#viewToolbarHBox *.button:hover{
+    -fx-background-color: #213853;
+}
+
+#viewToolbarHBox *.button:armed {
+    -fx-background-color: #243242;
+}
+
+#viewToolbarHBox *.button:armed {
+    -fx-background-color: #243242;
+}
+
+#viewToolbarHBox *.toggle-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 15, 15, 15;
+}
+
+#viewToolbarHBox *.toggle-button:hover {
+    -fx-background-color: #213853;
+}
+
+#viewToolbarHBox *.toggle-button:selected {
+    -fx-background-color: #243242;
+}
 
 
 /* TOP SLIM PANEL */

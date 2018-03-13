@@ -8,7 +8,7 @@
             fx:controller="com.lgc.gitlabtool.git.ui.javafx.controllers.CommonToolBarController"
             prefHeight="400.0" prefWidth="600.0">
         <top>
-                <ToolBar fx:id="toolbar">
+                <ToolBar fx:id="viewToolbar">
                 </ToolBar>
         </top>
         <center>
