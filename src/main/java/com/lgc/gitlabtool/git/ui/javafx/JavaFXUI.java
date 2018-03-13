@@ -4,11 +4,11 @@ import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 
+import com.lgc.gitlabtool.git.services.ThemeService;
+import com.lgc.gitlabtool.git.util.ShutDownUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.lgc.gitlabtool.git.entities.Group;
-import com.lgc.gitlabtool.git.entities.ProjectList;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StateService;
@@ -17,15 +17,13 @@ import com.lgc.gitlabtool.git.ui.ViewKey;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
 import com.lgc.gitlabtool.git.util.ProjectPropertiesUtil;
 import com.lgc.gitlabtool.git.util.ScreenUtil;
-import com.lgc.gitlabtool.git.util.ShutDownUtil;
 
 import javafx.application.Application;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
@@ -77,18 +75,6 @@ public class JavaFXUI extends Application implements UserInterface {
         primaryStage.setScene(new GLTScene(root));
         primaryStage.getIcons().add(appIcon);
         primaryStage.setOnCloseRequest(confirmCloseEventHandler);
-        primaryStage.focusedProperty().addListener(new ChangeListener<Boolean>() {
-            @Override
-            public void changed(ObservableValue<? extends Boolean> booleanProperty, Boolean oldValue, Boolean newValue) {
-                if (newValue) {
-                    ProjectList projectList = ProjectList.get(null);
-                    Group group = projectList.getCurrentGroup();
-                    if (group != null) {
-                        projectList.updateProjectStatuses();
-                    }
-                }
-            }
-        });
 
         /* Set sizing and position */
         Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
