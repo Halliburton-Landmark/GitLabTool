@@ -111,14 +111,6 @@ public enum GLToolButtons {
             null,
             GLToolConstants.ICON_SIZE_20),
 
-    CREATE_PROJECT_BUTTON(GLToolConstants.PROJECTS_WINDOW_KEY,
-            "create_project_button",
-            "icons/toolbar/create_project_20x20.png",
-            "Create project",
-            "Create new project",
-            null,
-            GLToolConstants.ICON_SIZE_20),
-
     BRANCHES_BUTTON(GLToolConstants.PROJECTS_WINDOW_KEY,
             "branches",
             "icons/toolbar/branches_20x20.png",
@@ -142,22 +134,6 @@ public enum GLToolButtons {
             "Show push dialog",
             null,
             GLToolConstants.ICON_SIZE_20),
-
-    EDIT_PROJECT_PROPERTIES_BUTTON(GLToolConstants.PROJECTS_WINDOW_KEY,
-            "edit_project_propecties",
-            "icons/toolbar/edit_properties_20x20.png",
-            "Edit project properties",
-            "Edit project properties",
-            null,
-            GLToolConstants.ICON_SIZE_20),
-
-    MAIN_EDIT_PROJECT_PROPERTIES(GLToolConstants.PROJECTS_WINDOW_KEY,
-            "main_edit_project_propecties",
-            "icons/mainmenu/edit_properties_16x16.png",
-            "Edit project properties",
-            "Edit project properties",
-            null,
-            GLToolConstants.ICON_SIZE_16),
 
     PULL_BUTTON(GLToolConstants.PROJECTS_WINDOW_KEY,
             "pull",
@@ -253,6 +229,22 @@ public enum GLToolButtons {
             "Stash",
             null,
             MainMenuInfo.GIT,
+            GLToolConstants.ICON_SIZE_16),
+
+    MAIN_CREATE_PROJECT(GLToolConstants.PROJECTS_WINDOW_KEY,
+            "main_project_create_project",
+            "icons/mainmenu/create_project_16x16.png",
+            "Create project",
+            "Create new project",
+            MainMenuInfo.PROJECT,
+            GLToolConstants.ICON_SIZE_16),
+
+    MAIN_EDIT_PROJECT_PROPERTIES(GLToolConstants.PROJECTS_WINDOW_KEY,
+            "main_project_edit_project_propecties",
+            "icons/mainmenu/edit_properties_16x16.png",
+            "Edit project properties",
+            "Edit project properties",
+            MainMenuInfo.PROJECT,
             GLToolConstants.ICON_SIZE_16);
 
     private final String viewKey;
@@ -347,9 +339,10 @@ public enum GLToolButtons {
 
     public enum MainMenuInfo {
         FILE("File", 1),
-        GIT("Git", 2),
-        THEMES("Themes", 3),
-        HELP("Help", 4);
+        PROJECT("Project", 2),
+        GIT("Git", 3),
+        THEMES("Themes", 4),
+        HELP("Help", 5);
 
         private final String name;
         private final int order;

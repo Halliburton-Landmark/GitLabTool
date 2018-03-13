@@ -26,8 +26,8 @@ public class PathUtilities {
     /**
      * Checks path is exist and it is directory.
      *
-     * @param path path on disk
-     * @return <true> - it exist and directory, otherwise - <false>.
+     * @param path the local path
+     * @return <code>true</code> if a path exists and it is folder, otherwise <code>false</code>.
      */
     public static boolean isExistsAndDirectory(Path path) {
         return path != null && Files.exists(path) && Files.isDirectory(path);
@@ -36,8 +36,21 @@ public class PathUtilities {
     /**
      * Checks path is exist and it is regular file.
      *
-     * @param path path on disk
-     * @return <true> - it exist and regular file, otherwise - <false>.
+     * @param path the local path
+     * @return <code>true</code> if a path exists and it is regular file, otherwise <code>false</code>.
+     */
+    public static boolean isExistsAndRegularFile(String path) {
+        if (path == null) {
+            return false;
+        }
+        return isExistsAndRegularFile(Paths.get(path));
+    }
+
+    /**
+     * Checks path is exist and it is regular file.
+     *
+     * @param path the local path
+     * @return <code>true</code> if a path exists and it is regular file, otherwise <code>false</code>.
      */
     public static boolean isExistsAndRegularFile(Path path) {
         return path != null && Files.exists(path) && Files.isRegularFile(path);

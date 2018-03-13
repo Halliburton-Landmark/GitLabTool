@@ -10,18 +10,18 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.lgc.gitlabtool.git.preferences.ApplicationPreferences;
-import com.lgc.gitlabtool.git.preferences.PreferencesNodes;
-import com.lgc.gitlabtool.git.util.OpenTerminalUtil;
-import javafx.scene.Scene;
-import javafx.scene.effect.Effect;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -33,6 +33,9 @@ import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.listeners.stateListeners.StateListener;
 import com.lgc.gitlabtool.git.listeners.updateProgressListener.UpdateProgressListener;
+import com.lgc.gitlabtool.git.preferences.ApplicationPreferences;
+import com.lgc.gitlabtool.git.preferences.PreferencesNodes;
+import com.lgc.gitlabtool.git.project.nature.projecttype.DSGProjectType;
 import com.lgc.gitlabtool.git.services.BackgroundService;
 import com.lgc.gitlabtool.git.services.ClonedGroupsService;
 import com.lgc.gitlabtool.git.services.ConsoleService;
@@ -68,6 +71,7 @@ import com.lgc.gitlabtool.git.ui.selection.SelectionsProvider;
 import com.lgc.gitlabtool.git.ui.toolbar.GLToolButtons;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarManager;
 import com.lgc.gitlabtool.git.util.OpenTerminalUtil;
+import com.lgc.gitlabtool.git.util.PathUtilities;
 import com.lgc.gitlabtool.git.util.ScreenUtil;
 import com.lgc.gitlabtool.git.util.ShutDownUtil;
 import com.lgc.gitlabtool.git.util.UserGuideUtil;
@@ -435,12 +439,10 @@ public class ModularController implements UpdateProgressListener {
             _toolbarManager.getButtonById(GLToolButtons.CHANGE_GROUP_BUTTON.getId()).setOnAction(this::loadGroupWindow);
             _toolbarManager.getButtonById(GLToolButtons.BRANCHES_BUTTON.getId()).setOnAction(this::showBranchesWindow);
             _toolbarManager.getButtonById(GLToolButtons.CLONE_PROJECT_BUTTON.getId()).setOnAction(this::cloneShadowProject);
-            _toolbarManager.getButtonById(GLToolButtons.CREATE_PROJECT_BUTTON.getId()).setOnAction(this::createProjectButton);
             _toolbarManager.getButtonById(GLToolButtons.STAGING_BUTTON.getId()).setOnAction(this::openGitStaging);
             _toolbarManager.getButtonById(GLToolButtons.PUSH_BUTTON.getId()).setOnAction(this::onPushAction);
             _toolbarManager.getButtonById(GLToolButtons.PULL_BUTTON.getId()).setOnAction(this::onPullAction);
             _toolbarManager.getButtonById(GLToolButtons.REVERT_CHANGES.getId()).setOnAction(this::onRevertChanges);
-            _toolbarManager.getButtonById(GLToolButtons.EDIT_PROJECT_PROPERTIES_BUTTON.getId()).setOnAction(this::showEditProjectPropertiesWindow);
             _toolbarManager.getButtonById(GLToolButtons.STASH.getId()).setOnAction(this::showStashWindow);
         }
     }
@@ -456,6 +458,9 @@ public class ModularController implements UpdateProgressListener {
             _mainMenuManager.getButtonById(GLToolButtons.MAIN_REVERT).setOnAction(this::onRevertChanges);
             _mainMenuManager.getButtonById(GLToolButtons.MAIN_BRANCHES).setOnAction(this::showBranchesWindow);
             _mainMenuManager.getButtonById(GLToolButtons.MAIN_STASH).setOnAction(this::showStashWindow);
+            _mainMenuManager.getButtonById(GLToolButtons.MAIN_CREATE_PROJECT).setOnAction(this::createProjectButton);
+            _mainMenuManager.getButtonById(GLToolButtons.MAIN_EDIT_PROJECT_PROPERTIES).setOnAction(
+                    this::showEditProjectPropertiesWindow);
         }
 
         MenuItem userGuide = _mainMenuManager.getButtonById(GLToolButtons.GENERAL_USER_GUIDE);
@@ -1013,13 +1018,7 @@ public class ModularController implements UpdateProgressListener {
     @SuppressWarnings("unused")
     private void showEditProjectPropertiesWindow(ActionEvent event) {
         try {
-
-            URL editProjectPropertiesWindowUrl = getClass().getClassLoader().getResource(ViewKey.EDIT_PROJECT_PROPERTIES.getPath());
-            FXMLLoader loader = new FXMLLoader(editProjectPropertiesWindowUrl);
-            Parent root = loader.load();
-
-            EditProjectPropertiesController controller = loader.getController();
-
+            List<Project> selectedProjects = new ArrayList<>(getCurrentProjects());
             List<Project> unavailableProjects = getUnavailableProjectsForEditingPom(getCurrentProjects());
             if (!unavailableProjects.isEmpty()) {
                 String failedProjectsNames = unavailableProjects.stream()
@@ -1027,8 +1026,17 @@ public class ModularController implements UpdateProgressListener {
                         .collect(Collectors.toList())
                         .toString();
                 _consoleService.addMessage(EDIT_POM_SELECTION_WARNING + failedProjectsNames, MessageType.ERROR);
-                return;
+                if (unavailableProjects.size() != selectedProjects.size()) {
+                    selectedProjects.removeAll(unavailableProjects);
+                } else {
+                    return;
+                }
             }
+
+            URL editProjectPropertiesWindowUrl = getClass().getClassLoader().getResource(ViewKey.EDIT_PROJECT_PROPERTIES.getPath());
+            FXMLLoader loader = new FXMLLoader(editProjectPropertiesWindowUrl);
+            Parent root = loader.load();
+            EditProjectPropertiesController controller = loader.getController();
 
             Stage stage = new Stage();
             stage.setScene(new GLTScene(root));
@@ -1048,7 +1056,7 @@ public class ModularController implements UpdateProgressListener {
             stage.setMinWidth(dialogWidth / 2);
             stage.setMinHeight(dialogHeight / 2);
 
-            controller.beforeStart(getIdSelectedProjects(), stage);
+            controller.beforeStart(_projectService.getIdsProjects(selectedProjects), stage);
             stage.show();
         } catch (IOException e) {
             _logger.error("Could not load fxml resource", e);
@@ -1315,6 +1323,7 @@ public class ModularController implements UpdateProgressListener {
 
                 MenuItem itemEditProjectProp = createMenuItem(GLToolButtons.MAIN_EDIT_PROJECT_PROPERTIES,
                         this::showEditProjectPropertiesWindow);
+                itemEditProjectProp.disableProperty().bind(booleanBindingForEditProperties());
 
                 menuItems.add(openFolder);
                 if (projectListView.getSelectionModel().getSelectedItems().size() == 1) {
@@ -1413,6 +1422,9 @@ public class ModularController implements UpdateProgressListener {
 
         setToolbarDisableProperty(booleanBindingForShadow, booleanBindingForCloned);
         setMainMenuDisableProperty(booleanBindingForShadow, booleanBindingForCloned);
+
+        BooleanBinding bindingForEdit = booleanBindingForEditProperties();
+        _mainMenuManager.getButtonById(GLToolButtons.MAIN_EDIT_PROJECT_PROPERTIES).disableProperty().bind(bindingForEdit);
     }
 
     private void setToolbarDisableProperty(BooleanBinding bindingForShadow, BooleanBinding bindingForCloned) {
@@ -1420,7 +1432,6 @@ public class ModularController implements UpdateProgressListener {
         _toolbarManager.getButtonById(GLToolButtons.BRANCHES_BUTTON.getId()).disableProperty().bind(bindingForShadow);
         _toolbarManager.getButtonById(GLToolButtons.STAGING_BUTTON.getId()).disableProperty().bind(bindingForShadow);
         _toolbarManager.getButtonById(GLToolButtons.PUSH_BUTTON.getId()).disableProperty().bind(bindingForShadow);
-        _toolbarManager.getButtonById(GLToolButtons.EDIT_PROJECT_PROPERTIES_BUTTON.getId()).disableProperty().bind(bindingForShadow);
         _toolbarManager.getButtonById(GLToolButtons.PULL_BUTTON.getId()).disableProperty().bind(bindingForShadow);
         _toolbarManager.getButtonById(GLToolButtons.REVERT_CHANGES.getId()).disableProperty().bind(bindingForShadow);
     }
@@ -1434,6 +1445,23 @@ public class ModularController implements UpdateProgressListener {
         _mainMenuManager.getButtonById(GLToolButtons.MAIN_REVERT).disableProperty().bind(bindingForShadow);
 
     }
+
+    private BooleanBinding booleanBindingForEditProperties() {
+        return Bindings.createBooleanBinding(() ->
+                        getCurrentProjects().stream()
+                                            .filter(Objects::nonNull)
+                                            .filter(Project::isCloned)
+                                            .allMatch(this::hasNotProjectPomFile),
+                        Stream.of(projectListView.getSelectionModel()).map(SelectionModel::selectedItemProperty)
+                                                                      .toArray(Observable[]::new))
+                .or(projectListView.getSelectionModel().selectedItemProperty().isNull());
+    }
+
+    private boolean hasNotProjectPomFile(Project project) {
+        String pomFilePath = project.getPath() + File.separator + DSGProjectType.STRUCTURE_OF_POM_FILE;
+        return !PathUtilities.isExistsAndRegularFile(pomFilePath);
+    }
+
     //endregion
     /*
      *
