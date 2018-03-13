@@ -5,14 +5,19 @@ import com.lgc.gitlabtool.git.ui.javafx.controllers.listview.ActiveViewChangeLis
 import com.lgc.gitlabtool.git.ui.javafx.controllers.listview.ListViewMgrProvider;
 import com.lgc.gitlabtool.git.ui.toolbar.GLToolButtons;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarManager;
+import com.lgc.gitlabtool.git.util.ThemeUtil;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToolBar;
 import javafx.scene.layout.HBox;
 
 import java.util.List;
 
 /**
+ * This class represents toolbar controller for additional buttons.
+ *
  * Created by Oleksandr Kozlov on 10.03.2018.
  */
 public class CommonToolBarController {
@@ -55,6 +60,11 @@ public class CommonToolBarController {
         buttonBar.setPrefHeight(20);
         for(Node item : toolbarItems) {
             item.setVisible(false);
+            if (item instanceof ToggleButton) {
+                ((ToggleButton)item).getGraphic().setEffect(ThemeUtil.getLightEffect());
+            } else if (item instanceof Button) {
+                ((Button)item).getGraphic().setEffect(ThemeUtil.getLightEffect());
+            }
             buttonBar.getChildren().add(item);
         }
 

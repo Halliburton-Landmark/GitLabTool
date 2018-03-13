@@ -16,6 +16,7 @@ import com.lgc.gitlabtool.git.ui.table.CustomDate;
 import com.lgc.gitlabtool.git.ui.table.SortedByDate;
 import com.lgc.gitlabtool.git.ui.toolbar.GLToolButtons;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarManager;
+import com.lgc.gitlabtool.git.util.ThemeUtil;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -76,10 +77,14 @@ public class TableController {
 
     private ToggleButton toggleButton;
 
+    private String _activeView;
+
     private ThemeChangeListener themeChangeListener = new ThemeChangeListener() {
         @Override
         public void onChanged(String themeName) {
-            toggleButton.getGraphic().setEffect(getLightEffect());
+            if (_activeView != null && toggleButton != null && _activeView.equals(ViewKey.PROJECTS_WINDOW.getKey())) {
+                toggleButton.getGraphic().setEffect(ThemeUtil.getLightEffect());
+            }
         }
     };
 
@@ -120,6 +125,7 @@ public class TableController {
     private ActiveViewChangeListener activeViewChangeListener = new ActiveViewChangeListener() {
         @Override
         public void onChanged(String activeView) {
+            _activeView = activeView;
             if (activeView.equals(ViewKey.GROUPS_WINDOW.getKey()) || activeView.equals(ViewKey.PROJECTS_WINDOW.getKey())) {
                 historyTable.setVisible(false);
 
@@ -188,14 +194,6 @@ public class TableController {
     private void configTable() {
         historyTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         historyTable.setFixedCellSize(35);
-    }
-
-    private Effect getLightEffect(){
-        boolean isDarkTheme = _themeService.getCurrentTheme().equals(GLTTheme.DARK_THEME);
-        ColorAdjust colorAdjust = new ColorAdjust();
-        colorAdjust.setBrightness(_themeService.getLightningCoefficient());
-
-        return isDarkTheme ? colorAdjust : null;
     }
 
 }
