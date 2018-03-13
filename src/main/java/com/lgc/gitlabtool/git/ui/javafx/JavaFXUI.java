@@ -83,7 +83,15 @@ public class JavaFXUI extends Application implements UserInterface {
             @Override
             public void changed(ObservableValue<? extends Boolean> booleanProperty, Boolean oldValue, Boolean newValue) {
                 if (newValue) {
-                    _backgroundService.runInBackgroundThread(() -> updateProjectStatuses());
+                    _backgroundService.runInBackgroundThread(this::updateProjectStatuses);
+                }
+            }
+
+            private void updateProjectStatuses() {
+                ProjectList projectList = ProjectList.get(null);
+                Group group = projectList.getCurrentGroup();
+                if (group != null) {
+                    projectList.updateProjectStatuses();
                 }
             }
         });
@@ -98,14 +106,6 @@ public class JavaFXUI extends Application implements UserInterface {
         primaryStage.setMinHeight(primaryScreenBounds.getMaxY() / 3);
 
         primaryStage.show();
-    }
-
-    private void updateProjectStatuses() {
-        ProjectList projectList = ProjectList.get(null);
-        Group group = projectList.getCurrentGroup();
-        if (group != null) {
-            projectList.updateProjectStatuses();
-        }
     }
 
     private final EventHandler<WindowEvent> confirmCloseEventHandler = event -> {
