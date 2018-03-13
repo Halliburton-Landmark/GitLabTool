@@ -5,7 +5,6 @@ import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.ThemeService;
 import com.lgc.gitlabtool.git.ui.ViewKey;
-import com.lgc.gitlabtool.git.ui.javafx.GLTTheme;
 import com.lgc.gitlabtool.git.ui.javafx.controllers.listview.ActiveViewChangeListener;
 import com.lgc.gitlabtool.git.ui.javafx.controllers.listview.ListViewMgrProvider;
 import com.lgc.gitlabtool.git.ui.javafx.controllers.listview.ProjectListView;
@@ -26,8 +25,6 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.effect.ColorAdjust;
-import javafx.scene.effect.Effect;
 
 import java.util.Collections;
 import java.util.List;
