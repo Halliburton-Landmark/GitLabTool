@@ -37,8 +37,10 @@ public class CommonToolBarController {
         @Override
         public void onChanged(String activeView) {
             if (activeView.equals(ViewKey.GROUPS_WINDOW.getKey())) {
+                viewToolbar.setVisible(false);
                 _toolbarManager.getItemById(ViewKey.COMMON_VIEW.getKey(),GLToolButtons.SHOW_PROJECT_HISTORY.getId()).setVisible(false);
             } else if (activeView.equals(ViewKey.PROJECTS_WINDOW.getKey())) {
+                viewToolbar.setVisible(true);
                 _toolbarManager.getItemById(ViewKey.COMMON_VIEW.getKey(),GLToolButtons.SHOW_PROJECT_HISTORY.getId()).setVisible(true);
             }
         }
@@ -71,6 +73,7 @@ public class CommonToolBarController {
             buttonBar.getChildren().add(item);
         }
 
+        viewToolbar.setVisible(false);
         viewToolbar.getItems().clear();
         viewToolbar.getItems().addAll(buttonBar);
     }
