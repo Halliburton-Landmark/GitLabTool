@@ -360,6 +360,7 @@ public class GitStagingWindowController extends AbstractStateListener {
     private List<Project> getProjects(Collection<ChangedFile> files) {
         return files.stream()
                     .map(ChangedFile::getProject)
+                    .distinct()
                     .collect(Collectors.toList());
     }
 
