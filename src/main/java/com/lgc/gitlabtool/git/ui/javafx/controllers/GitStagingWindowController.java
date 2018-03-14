@@ -8,7 +8,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
@@ -359,10 +358,10 @@ public class GitStagingWindowController extends AbstractStateListener {
     }
 
     private List<Project> getProjects(Collection<ChangedFile> files) {
-        Set<Project> projects = files.stream()
-                                     .map(ChangedFile::getProject)
-                                     .collect(Collectors.toSet());
-        return new ArrayList<>(projects);
+        return files.stream()
+                    .map(ChangedFile::getProject)
+                    .distinct()
+                    .collect(Collectors.toList());
     }
 
     private void commitChanges(List<Project> projects, boolean isPushChanges) {
