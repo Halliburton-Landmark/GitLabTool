@@ -3,6 +3,7 @@ package com.lgc.gitlabtool.git.services;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -23,6 +25,7 @@ import com.lgc.gitlabtool.git.connections.token.CurrentUser;
 import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.MessageType;
 import com.lgc.gitlabtool.git.entities.Project;
+import com.lgc.gitlabtool.git.entities.ProjectStatus;
 import com.lgc.gitlabtool.git.jgit.JGit;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.listeners.updateProgressListener.UpdateProgressListener;
@@ -46,6 +49,8 @@ public class ProjectServiceImpl implements ProjectService {
     private static final String CREATE_STRUCTURES_TYPE_FAILED_MESSAGE = "Failed creating structure of type!";
     private static final String PROJECT_ALREADY_EXISTS_MESSAGE = "Project with this name already exists!";
     private static final String LOADING_PROJECT_MESSAGE_TEMPLATE = "%s loading of %s project";
+    private static final String COULD_NOT_SUBMIT_OPERATION_MESSAGE = "Operation could not be submitted for %s project. "
+            + "It is not cloned or has conflicts";
 
     private static final Logger _logger = LogManager.getLogger(ProjectServiceImpl.class);
     private static final CurrentUser _currentUser = CurrentUser.getInstance();
@@ -77,13 +82,21 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public Collection<Project> getProjects(Group group) {
         _consoleService.addMessage("Sending a request to receive a list of projects from GitLab.", MessageType.SIMPLE);
-        Map<String, String> header = getCurrentPrivateToken();
-        if (!header.isEmpty()) {
-            String sendString = "/groups/" + group.getId() + "/projects?per_page=" + MAX_PROJECTS_COUNT_ON_THE_PAGE;
-            return getProjectsForAllPages(sendString, header);
+        List<Group> groupWithItsSubGroups = new ArrayList<>(Arrays.asList(group));
+        groupWithItsSubGroups.addAll(group.getSubGroups());
+
+        Collection<Project> allProjects = new ArrayList<>();
+        for (Group currentGroup : groupWithItsSubGroups) {
+            Map<String, String> header = getCurrentPrivateToken();
+            if (header.isEmpty()) {
+                _consoleService.addMessage("Error getting projects from the GitLab", MessageType.ERROR);
+            } else {
+                String sendString = "/groups/" + currentGroup.getId() + "/projects?per_page=" + MAX_PROJECTS_COUNT_ON_THE_PAGE;
+                Collection<Project> groupProjects = getProjectsForAllPages(sendString, header);
+                allProjects.addAll(groupProjects);
+            }
         }
-        _consoleService.addMessage("Error getting projects from the GitLab.", MessageType.ERROR);
-        return Collections.emptyList();
+        return allProjects;
     }
 
     @Override
@@ -100,23 +113,27 @@ public class ProjectServiceImpl implements ProjectService {
             return Collections.emptyList();
         }
         String successMessage = "The projects of " + group.getName() + PREFIX_SUCCESSFUL_LOAD;
-        Path path = Paths.get(group.getPathToClonedGroup());
+        Path path = Paths.get(group.getPath());
         Collection<String> projectsName = PathUtilities.getFolders(path);
         if (projectsName.isEmpty()) {
             _consoleService.addMessage(successMessage, MessageType.SUCCESS);
             _stateService.stateOFF(ApplicationState.LOAD_PROJECTS);
             return projects;
         }
-
         PROGRESS_LOADING = 0;
         _consoleService.addMessage("Getting statuses and types of projects...", MessageType.SIMPLE);
         projects.parallelStream()
                 .peek(pr -> updateProgressIndicator(++PROGRESS_LOADING, projects.size()))
-                .filter(project -> projectsName.contains(project.getName()))
-                .forEach((project) -> updateDataProject(project, group.getPathToClonedGroup()));
+                .filter(project -> isProjectCloned(project, group.getPath()))
+                .forEach((project) -> updateDataProject(project, group.getPath()));
         _consoleService.addMessage(successMessage, MessageType.SUCCESS);
         _stateService.stateOFF(ApplicationState.LOAD_PROJECTS);
         return projects;
+    }
+
+    private boolean isProjectCloned(Project project, String groupPath) {
+        String localPath = groupPath + File.separator + project.getName();
+        return PathUtilities.isExistsAndDirectory(Paths.get(localPath));
     }
 
     @Override
@@ -142,7 +159,7 @@ public class ProjectServiceImpl implements ProjectService {
         } else {
             _consoleService.addMessage(CREATE_REMOTE_PROJECT_SUCCESS_MESSAGE, MessageType.SUCCESS);
         }
-        createLocalProject(project, group.getPathToClonedGroup(), projectType, progressListener);
+        createLocalProject(project, group.getPath(), projectType, progressListener);
     }
 
     @Override
@@ -162,6 +179,88 @@ public class ProjectServiceImpl implements ProjectService {
             return;
         }
         project.setProjectStatus(_gitService.getProjectStatus(project));
+    }
+
+    @Override
+    public void updateProjectTypeAndStatus(Project project) {
+        if (project == null) {
+            return;
+        }
+        project.setProjectType(_projectTypeService.getProjectType(project));
+        updateProjectStatus(project);
+        project.setClonedStatus(true);
+    }
+
+    @Override
+    public void clone(List<Project> projects, String destinationPath, ProgressListener progressListener) {
+        if (projects == null || destinationPath == null || progressListener == null) {
+            throw new IllegalArgumentException("Invalid parameters.");
+        }
+        // we must call stateOFF for this state in the progressListener.onFinish method
+        _stateService.stateON(ApplicationState.CLONE);
+        cloneWithoutState(projects, destinationPath, progressListener);
+    }
+
+    @Override
+    public boolean hasShadow(List<Project> projects) {
+        return projects.stream()
+                .filter(proj -> !proj.isCloned())
+                .count() > 0;
+    }
+
+    @Override
+    public boolean hasCloned(List<Project> projects) {
+        return projects.stream()
+                .filter(Project::isCloned)
+                .count() > 0;
+    }
+
+    @Override
+    public void addUpdateProgressListener(UpdateProgressListener listener) {
+        if (listener != null) {
+            _listeners.add(listener);
+        }
+    }
+
+    @Override
+    public void removeUpdateProgressListener(UpdateProgressListener listener) {
+        if (listener != null) {
+            _listeners.remove(listener);
+        }
+    }
+
+    @Override
+    public List<Integer> getIdsProjects(List<Project> projects) {
+        if (projects == null || projects.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return projects.parallelStream()
+                       .map(Project::getId)
+                       .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Project> getCorrectProjects(List<Project> projects) {
+        if (projects == null || projects.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return projects.stream()
+                       .filter(this::projectIsClonedAndWithoutConflicts)
+                       .collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean projectIsClonedAndWithoutConflicts(Project project) {
+        if (project == null) {
+            return false;
+        }
+        ProjectStatus projectStatus = project.getProjectStatus();
+        boolean result = project.isCloned() && !projectStatus.hasConflicts();
+        if (!result) {
+            _consoleService.addMessage(String.format(COULD_NOT_SUBMIT_OPERATION_MESSAGE, project.getName()),
+                    MessageType.ERROR);
+        }
+        return result;
     }
 
     private Map<String, String> getCurrentPrivateToken() {
@@ -235,19 +334,9 @@ public class ProjectServiceImpl implements ProjectService {
 
     private void updateDataProject(Project project, String pathGroup) {
         _logger.debug(String.format(LOADING_PROJECT_MESSAGE_TEMPLATE, "Start", project.getName()));
-        project.setPathToClonedProject(pathGroup + File.separator + project.getName());
+        project.setPath(pathGroup + File.separator + project.getName());
         updateProjectTypeAndStatus(project);
         _logger.debug(String.format(LOADING_PROJECT_MESSAGE_TEMPLATE, "Finish", project.getName()));
-    }
-
-    @Override
-    public void updateProjectTypeAndStatus(Project project) {
-        if (project == null) {
-            return;
-        }
-        project.setProjectType(_projectTypeService.getProjectType(project));
-        updateProjectStatus(project);
-        project.setClonedStatus(true);
     }
 
     private Project createRemoteProject(Group group, String name, ProgressListener progressListener) {
@@ -332,16 +421,6 @@ public class ProjectServiceImpl implements ProjectService {
         progressListener.onFinish(isCreatedStructure ? createdProject : null, fineshedMessage);
     }
 
-    @Override
-    public void clone(List<Project> projects, String destinationPath, ProgressListener progressListener) {
-        if (projects == null || destinationPath == null || progressListener == null) {
-            throw new IllegalArgumentException("Invalid parameters.");
-        }
-        // we must call stateOFF for this state in the progressListener.onFinish method
-        _stateService.stateON(ApplicationState.CLONE);
-        cloneWithoutState(projects, destinationPath, progressListener);
-    }
-
     private void cloneWithoutState(List<Project> projects, String destinationPath, ProgressListener progressListener) {
         Path path = Paths.get(destinationPath);
         if (!PathUtilities.isExistsAndDirectory(path)) {
@@ -352,34 +431,6 @@ public class ProjectServiceImpl implements ProjectService {
             return;
         }
         _git.clone(projects, destinationPath, progressListener);
-    }
-
-    @Override
-    public boolean hasShadow(List<Project> projects) {
-        return projects.stream()
-                .filter(proj -> !proj.isCloned())
-                .count() > 0;
-    }
-
-    @Override
-    public boolean hasCloned(List<Project> projects) {
-        return projects.stream()
-                .filter(Project::isCloned)
-                .count() > 0;
-    }
-
-    @Override
-    public void addUpdateProgressListener(UpdateProgressListener listener) {
-        if (listener != null) {
-            _listeners.add(listener);
-        }
-    }
-
-    @Override
-    public void removeUpdateProgressListener(UpdateProgressListener listener) {
-        if (listener != null) {
-            _listeners.remove(listener);
-        }
     }
 
     private void notifyListenersAboutChangesProgress(String message) {

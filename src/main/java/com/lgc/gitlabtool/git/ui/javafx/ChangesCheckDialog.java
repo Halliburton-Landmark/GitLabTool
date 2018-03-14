@@ -7,6 +7,7 @@ import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 import com.lgc.gitlabtool.git.entities.Project;
+import com.lgc.gitlabtool.git.entities.ProjectList;
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
@@ -49,6 +50,12 @@ public class ChangesCheckDialog extends GLTAlert {
 
     private Map<Project, JGitStatus> revertChanges(List<Project> changedProjects) {
         Map<Project, JGitStatus> revertStatuses = _gitService.revertChanges(changedProjects);
+        List<Project> successRevert = revertStatuses.entrySet()
+                                                    .stream()
+                                                    .filter(entry -> entry.getValue() == JGitStatus.SUCCESSFUL)
+                                                    .map(Map.Entry::getKey)
+                                                    .collect(Collectors.toList());
+        ProjectList.get(null).updateProjectStatuses(successRevert);
 
         showStatusDialog(changedProjects, revertStatuses,
                 SUCCESSFUL_DISCARD_HEADER_MESSAGE,

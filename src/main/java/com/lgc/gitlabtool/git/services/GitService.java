@@ -7,6 +7,7 @@ import java.util.Set;
 
 import com.lgc.gitlabtool.git.ui.table.Commit;
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.Status;
 
 import com.lgc.gitlabtool.git.entities.Branch;
 import com.lgc.gitlabtool.git.entities.Project;
@@ -271,4 +272,15 @@ public interface GitService extends Service {
     * @return a map of operation statuses
     */
    Map<Project, Boolean> stashDrop(Stash stash);
+
+   /**
+    * Deletes branch from projects
+    *
+    * @param  projects the cloned projects
+    * @param  deletedBranch the branch which will be deleted
+    * @param  progressListener the listener for obtaining data on the process of performing the operation
+    * @return a map of operation statuses by each project.
+    *         <code>true</code> if a branch was successfully deleted from a project, otherwise <code>false</code>.
+    */
+   Map<Project, Boolean> deleteBranch(List<Project> projects, Branch deletedBranch, ProgressListener progressListener);
 }

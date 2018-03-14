@@ -7,18 +7,21 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.lgc.gitlabtool.git.services.*;
-import com.lgc.gitlabtool.git.ui.javafx.GLTScene;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.lgc.gitlabtool.git.entities.MessageType;
 import com.lgc.gitlabtool.git.entities.Project;
-import com.lgc.gitlabtool.git.entities.ProjectList;
 import com.lgc.gitlabtool.git.jgit.ChangedFile;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
+import com.lgc.gitlabtool.git.services.ConsoleService;
+import com.lgc.gitlabtool.git.services.GitService;
+import com.lgc.gitlabtool.git.services.ProjectService;
+import com.lgc.gitlabtool.git.services.ServiceProvider;
+import com.lgc.gitlabtool.git.services.StateService;
 import com.lgc.gitlabtool.git.ui.ViewKey;
 import com.lgc.gitlabtool.git.ui.icon.AppIconHolder;
+import com.lgc.gitlabtool.git.ui.javafx.GLTScene;
 import com.lgc.gitlabtool.git.ui.javafx.JavaFXUI;
 import com.lgc.gitlabtool.git.ui.selection.SelectionsProvider;
 import com.lgc.gitlabtool.git.util.ScreenUtil;
@@ -46,12 +49,10 @@ public class WindowLoader {
     private static final String PROJECTS_DOES_NOT_HAVE_CHANGED_FILE = "Selected projects doesn't have new or conflicting files";
     private static final String GIT_STAGING_OPERATION_NAME = "Git Staging";
 
-    private static final ConsoleService _consoleService = ServiceProvider.getInstance()
-            .getService(ConsoleService.class);
-
+    private static final ConsoleService _consoleService = ServiceProvider.getInstance().getService(ConsoleService.class);
     private static final GitService _gitService = ServiceProvider.getInstance().getService(GitService.class);
-
     private static final StateService _stateService = ServiceProvider.getInstance().getService(StateService.class);
+    private static final ProjectService _projectService = ServiceProvider.getInstance().getService(ProjectService.class);
 
     public static WindowLoader get() {
         if (_windowLoader == null) {
@@ -91,7 +92,7 @@ public class WindowLoader {
             Parent root = loader.load();
 
             GitStagingWindowController gitStagingWindowController = loader.getController();
-            gitStagingWindowController.beforeShowing(ProjectList.getIdsProjects(selectedProjects), files);
+            gitStagingWindowController.beforeShowing(_projectService.getIdsProjects(selectedProjects), files);
 
             Scene scene = new GLTScene(root);
             Stage stage = new Stage();

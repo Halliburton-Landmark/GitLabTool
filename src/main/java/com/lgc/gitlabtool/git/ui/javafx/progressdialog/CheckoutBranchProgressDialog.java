@@ -1,4 +1,4 @@
-package com.lgc.gitlabtool.git.ui.javafx;
+package com.lgc.gitlabtool.git.ui.javafx.progressdialog;
 
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 

@@ -1,13 +1,13 @@
 package com.lgc.gitlabtool.git.util;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import static junit.framework.TestCase.assertEquals;
 
 import java.util.Arrays;
 import java.util.List;
 
-import static junit.framework.TestCase.assertEquals;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 @RunWith(Parameterized.class)
 public class URLManagerTest {
@@ -32,13 +32,13 @@ public class URLManagerTest {
         return Arrays.asList(new Object[][] {
                 {"http://gitlab.com", true},
                 {"https://gitlab.com", true},
-                {"http://gitlab.com/api/v3", true},
-                {"https://gitlab.com/api/v3", true},
-                {"gitlab.com/api/v3", true},
+                {"http://gitlab.com/api/v4", true},
+                {"https://gitlab.com/api/v4", true},
+                {"gitlab.com/api/v4", true},
                 {"gitlab.com", true},
-                {"https://gitlab.com/api/v3/", true},
+                {"https://gitlab.com/api/v4/", true},
                 {"https://gitlab.com/", true},
-                {"gitlab.com/api/v3/", true},
+                {"gitlab.com/api/v4/", true},
                 {"gitlab.com/", true},
 
                 {"http:/gitlab.com", false},

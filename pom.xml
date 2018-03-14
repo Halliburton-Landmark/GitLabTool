@@ -20,6 +20,8 @@
         <log4j.version>2.8.2</log4j.version>
         <maven.plugins.version>3.0.0</maven.plugins.version>
         <junit.version>4.12</junit.version>
+        <maven.build.timestamp.format>MM/dd/yy</maven.build.timestamp.format>
+        <buildTimestamp>${maven.build.timestamp}</buildTimestamp>
     </properties>
 
     <dependencies>

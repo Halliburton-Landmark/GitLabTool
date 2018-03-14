@@ -60,7 +60,7 @@ public class GLTAlert extends Alert {
      *
      * @param title - the title of the window
      * @param headerText - header of the message
-     * @param content - message that should be shown
+     * @param contentText - message that should be shown
      */
     public GLTAlert(String title, String headerText, String contentText) {
         this(DEFAULT_TYPE, title, headerText, contentText);
@@ -73,7 +73,7 @@ public class GLTAlert extends Alert {
      * @param alertType - the type of dialog
      * @param title - the title of the window
      * @param headerText - header of the message
-     * @param content - message that should be shown
+     * @param contentText - message that should be shown
     */
    public GLTAlert(AlertType alertType, String title, String headerText, String contentText) {
        super(alertType);

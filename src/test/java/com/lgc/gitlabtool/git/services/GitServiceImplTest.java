@@ -29,8 +29,10 @@ import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import com.lgc.gitlabtool.git.entities.Branch;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.ProjectStatus;
+import com.lgc.gitlabtool.git.jgit.BranchType;
 import com.lgc.gitlabtool.git.jgit.ChangedFile;
 import com.lgc.gitlabtool.git.jgit.ChangedFileStatus;
 import com.lgc.gitlabtool.git.jgit.ChangedFileType;
@@ -48,17 +50,15 @@ public class GitServiceImplTest {
     private Project _stubProject;
 
     private StateService _stateService;
-    private ConsoleService _consoleService;
     private JGit _jGit;
     private ChangedFilesUtils _changedFilesUtilsMock;
 
     @Before
     public void init() {
         _stateService = Mockito.mock(StateService.class);
-        _consoleService = Mockito.mock(ConsoleService.class);
         _jGit = Mockito.mock(JGit.class);
         _changedFilesUtilsMock = Mockito.mock(ChangedFilesUtils.class);
-        _gitService = new GitServiceImpl(_stateService, _consoleService, _jGit, _changedFilesUtilsMock);
+        _gitService = new GitServiceImpl(_stateService, _jGit, _changedFilesUtilsMock);
     }
 
     @After
@@ -511,8 +511,84 @@ public class GitServiceImplTest {
          assertTrue(progressListener.isSuccessfully());
     }
 
+    @Test
+    public void deleteBranchNullProjects() {
+        Branch branch = new Branch("test", BranchType.LOCAL);
+
+        Map<Project, Boolean> result = _gitService.deleteBranch(null, branch, EmptyProgressListener.get());
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void deleteBranchEmptyProjects() {
+        Branch branch = new Branch("test", BranchType.LOCAL);
+
+        Map<Project, Boolean> result = _gitService.deleteBranch(new ArrayList<>(), branch, EmptyProgressListener.get());
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void deleteBranchNullBranch() {
+        List<Project> projects = Arrays.asList(new Project());
+
+        Map<Project, Boolean> result = _gitService.deleteBranch(projects, null, EmptyProgressListener.get());
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void deleteBranchFailedResult() {
+        Project project = getClonedProject();
+        List<Project> projects = Arrays.asList(project);
+        Branch branch = new Branch("test", BranchType.LOCAL);
+        Map<JGitStatus, String> jGitMapResult = new HashMap<>();
+        jGitMapResult.put(JGitStatus.FAILED, "Failed");
+        when(_jGit.deleteBranch(eq(project), Mockito.anyString(), eq(false))).thenReturn(jGitMapResult);
+
+        Map<Project, Boolean> result = _gitService.deleteBranch(projects, branch, new DeleteBranchListener());
+
+        assertFalse(result.isEmpty());
+        assertFalse(result.get(project));
+        assertEquals(result.size(), projects.size());
+    }
+
+    @Test
+    public void deleteBranchSucccessffulResult() {
+        Project project = getClonedProject();
+        List<Project> projects = Arrays.asList(project);
+        Branch branch = new Branch("test", BranchType.LOCAL);
+        Map<JGitStatus, String> jGitMapResult = new HashMap<>();
+        jGitMapResult.put(JGitStatus.SUCCESSFUL, "Successful");
+        when(_jGit.deleteBranch(eq(project), Mockito.anyString(), eq(false))).thenReturn(jGitMapResult);
+
+        Map<Project, Boolean> result = _gitService.deleteBranch(projects, branch, new DeleteBranchListener());
+
+        assertFalse(result.isEmpty());
+        assertTrue(result.get(project));
+        assertEquals(result.size(), projects.size());
+    }
 
     /*********************************************************************************************************/
+
+    class DeleteBranchListener implements ProgressListener {
+
+        @Override
+        public void onSuccess(Object... t) {}
+
+        @Override
+        public void onError(Object... t) {}
+
+        @Override
+        public void onStart(Object... t) {}
+
+        @Override
+        public void onFinish(Object... t) {
+            _stateService.stateOFF(ApplicationState.DELETE_BRANCH);
+        }
+
+    }
 
     class StashApplyListener implements ProgressListener {
 
@@ -570,7 +646,7 @@ public class GitServiceImplTest {
         Project project = new Project();
         project.setClonedStatus(true);
         project.setProjectStatus(new ProjectStatus());
-        project.setPathToClonedProject(".");
+        project.setPath(".");
         return project;
     }
 
@@ -578,7 +654,7 @@ public class GitServiceImplTest {
         Project project = new Project();
         project.setClonedStatus(true);
         project.setProjectStatus(new ProjectStatus());
-        project.setPathToClonedProject(path);
+        project.setPath(path);
         return project;
     }
 

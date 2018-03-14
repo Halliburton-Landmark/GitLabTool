@@ -20,7 +20,7 @@ public class GroupStash implements Stash {
     /**
      * Constructor for creating object.
      *
-     * @param message the message for current group.
+     * @param groupMessage the message for current group.
      */
     public GroupStash(String groupMessage) {
         _message = groupMessage;

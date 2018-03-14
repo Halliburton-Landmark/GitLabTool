@@ -25,7 +25,7 @@ public class ProjectTypeServiceImplTest {
                 return true;
             }
         };
-        projectCorrect.setPathToClonedProject("/path");
+        projectCorrect.setPath("/path");
         projectCorrect.setClonedStatus(true);
         return projectCorrect;
     }

@@ -8,7 +8,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
@@ -25,7 +24,6 @@ import com.lgc.gitlabtool.git.services.BackgroundService;
 import com.lgc.gitlabtool.git.services.GitService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StateService;
-import com.lgc.gitlabtool.git.ui.javafx.GLTAlert;
 import com.lgc.gitlabtool.git.ui.javafx.StatusDialog;
 import com.lgc.gitlabtool.git.ui.javafx.comparators.ChangedFileStatusComparator;
 import com.lgc.gitlabtool.git.ui.javafx.comparators.DefaultTypeComparator;
@@ -33,6 +31,7 @@ import com.lgc.gitlabtool.git.ui.javafx.comparators.ExtensionsTypeComparator;
 import com.lgc.gitlabtool.git.ui.javafx.comparators.ProjectsTypeComparator;
 import com.lgc.gitlabtool.git.ui.javafx.controllers.listcells.FilesListCell;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.CommitPushProgressListener;
+import com.lgc.gitlabtool.git.util.GLTAlertUtils;
 import com.lgc.gitlabtool.git.util.PathUtilities;
 
 import javafx.application.Platform;
@@ -46,7 +45,6 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
@@ -223,7 +221,7 @@ public class GitStagingWindowController extends AbstractStateListener {
             replaceWithHEAD.setOnAction(new EventHandler<ActionEvent>() {
                 @Override
                 public void handle(ActionEvent event) {
-                    boolean isYes = requesConfirmationOperation(REPLACE_FILES_TITLE,
+                    boolean isYes = GLTAlertUtils.requestConfirmationOperation(REPLACE_FILES_TITLE,
                             "You want to replace " + filesForReplace.size() + " file(s) with HEAD revision.",
                             CONFIRMATION_OPERATION);
                     if (isYes) {
@@ -245,7 +243,7 @@ public class GitStagingWindowController extends AbstractStateListener {
             delete.setOnAction(new EventHandler<ActionEvent>() {
                 @Override
                 public void handle(ActionEvent event) {
-                    boolean isYes = requesConfirmationOperation(DELETE_FILES_TITLE,
+                    boolean isYes = GLTAlertUtils.requestConfirmationOperation(DELETE_FILES_TITLE,
                             "You want to delete " + selectedUntrackedFiles.size() + " untracked file(s).",
                             CONFIRMATION_OPERATION);
                     if (isYes) {
@@ -256,15 +254,6 @@ public class GitStagingWindowController extends AbstractStateListener {
             });
             menuItems.add(delete);
         }
-    }
-
-    private boolean requesConfirmationOperation(String title, String header, String context) {
-        GLTAlert alert = new GLTAlert(title, header, context);
-        alert.clearDefaultButtons();
-        alert.addButtons(ButtonType.YES, ButtonType.NO);
-
-        Optional<ButtonType> result = alert.showAndWait();
-        return !(result.orElse(ButtonType.NO) == ButtonType.NO);
     }
 
     private void deleteChangedFile(ChangedFile changedFile) {

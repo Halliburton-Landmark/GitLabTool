@@ -14,8 +14,8 @@ import com.lgc.gitlabtool.git.services.ProgressListener;
 import com.lgc.gitlabtool.git.services.ProjectService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.StateService;
-import com.lgc.gitlabtool.git.ui.javafx.ProgressDialog;
 import com.lgc.gitlabtool.git.ui.javafx.StatusDialog;
+import com.lgc.gitlabtool.git.ui.javafx.progressdialog.ProgressDialog;
 import com.lgc.gitlabtool.git.util.NullCheckUtil;
 
 import javafx.application.Platform;
@@ -80,6 +80,11 @@ public class OperationProgressListener implements ProgressListener {
             _progressDialog.addMessageToConcole(message, MessageType.SUCCESS);
             _logger.info(_applicationState + ": " + message);
         }
+        if (t.length >= 3 && t[1] instanceof Project && t[2] instanceof String) {
+            String message = ((Project) t[1]).getName() + ": " + t[2];
+            _progressDialog.addMessageToConcole(message, MessageType.SUCCESS);
+            _logger.error(_applicationState + ": " + message);
+        }
     }
 
     /**
@@ -101,6 +106,12 @@ public class OperationProgressListener implements ProgressListener {
             _logger.error(_applicationState + ": " + message);
         }
         if (t.length >= 3 && t[1] instanceof Project && t[2] instanceof JGitStatus) {
+            String message = ((Project) t[1]).getName() + ": " + t[2];
+            _progressDialog.addMessageToConcole(message, MessageType.ERROR);
+            _logger.error(_applicationState + ": " + message);
+        }
+
+        if (t.length >= 3 && t[1] instanceof Project && t[2] instanceof String) {
             String message = ((Project) t[1]).getName() + ": " + t[2];
             _progressDialog.addMessageToConcole(message, MessageType.ERROR);
             _logger.error(_applicationState + ": " + message);

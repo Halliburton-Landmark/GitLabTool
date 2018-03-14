@@ -3,18 +3,20 @@ package com.lgc.gitlabtool.git.ui.javafx.controllers;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.List;
-import java.util.prefs.Preferences;
 
 import org.apache.commons.lang.StringUtils;
 
 import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
-import com.lgc.gitlabtool.git.services.GroupsUserService;
+import com.lgc.gitlabtool.git.preferences.ApplicationPreferences;
+import com.lgc.gitlabtool.git.preferences.PreferencesNodes;
+import com.lgc.gitlabtool.git.services.GroupService;
 import com.lgc.gitlabtool.git.services.LoginService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
-import com.lgc.gitlabtool.git.ui.javafx.CloneProgressDialog;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
+import com.lgc.gitlabtool.git.ui.javafx.progressdialog.CloneProgressDialog;
 import com.lgc.gitlabtool.git.util.PathUtilities;
 
 import javafx.collections.FXCollections;
@@ -34,13 +36,10 @@ import javafx.util.Callback;
 public class CloningGroupsWindowController {
     private static final String FOLDER_CHOOSER_DIALOG = "Destination folder";
 
-    // Uncomment if you want to log something
-    // private static final Logger logger = LogManager.getLogger(CloningGroupsWindowController.class);
-
     private final LoginService _loginService = ServiceProvider.getInstance().getService(LoginService.class);
 
-    private final GroupsUserService _groupsService = ServiceProvider.getInstance()
-            .getService(GroupsUserService.class);
+    private final GroupService _groupsService = ServiceProvider.getInstance()
+            .getService(GroupService.class);
 
     @FXML
     private TextField folderPath;
@@ -57,27 +56,28 @@ public class CloningGroupsWindowController {
     @FXML
     private Button browseButton;
 
-    private final Preferences _prefs = Preferences.userRoot().node(CloningGroupsWindowController.class.getName());
     private static final String PREF_NAME = "path_to_group";
+
+    private Collection<Group> _allGroups;
+
+    private ApplicationPreferences getPrefs() {
+        return ((ApplicationPreferences) ServiceProvider.getInstance()
+                .getService(ApplicationPreferences.class)).node(PreferencesNodes.CLONING_GROUP_NODE);
+    }
 
     @FXML
     public void initialize() {
-        List<Group> userGroups = (List<Group>) _groupsService.getGroups(_loginService.getCurrentUser());
-        ObservableList<Group> myObservableList = FXCollections.observableList(userGroups);
-
+        _allGroups = _groupsService.getGroups(_loginService.getCurrentUser());
+        List<Group> mainGroups = _groupsService.getOnlyMainGroups((List<Group>)_allGroups);
+        ObservableList<Group> myObservableList = FXCollections.observableList(mainGroups);
         configureListView(projectsList);
         projectsList.setItems(myObservableList);
 
         folderPath.textProperty().addListener((observable, oldValue, newValue) -> filterForOkButton());
-        projectsList.setOnMouseClicked(new EventHandler<Event>() {
-            @Override
-            public void handle(Event event) {
-                filterForOkButton();
-            };
-        });
+        projectsList.setOnMouseClicked((EventHandler<Event>) event -> filterForOkButton());
         setStyleAndDisableForIncorrectData();
 
-        String propertyValue = _prefs.get(PREF_NAME, StringUtils.EMPTY);
+        String propertyValue = getPrefs().get(PREF_NAME, StringUtils.EMPTY);
         if (propertyValue != null) {
             folderPath.setText(propertyValue);
         }
@@ -85,17 +85,15 @@ public class CloningGroupsWindowController {
 
     @FXML
     public void onBrowseButton() throws Exception {
-        Stage stage = (Stage) browseButton.getScene().getWindow();
-        browseButton.getScene().getStylesheets()
-                .add(getClass().getClassLoader().getResource("css/modular_dark_style.css").toExternalForm());
 
+        Stage stage = (Stage) browseButton.getScene().getWindow();
 
         DirectoryChooser chooser = new DirectoryChooser();
         chooser.setTitle(FOLDER_CHOOSER_DIALOG);
         File selectedDirectory = chooser.showDialog(stage);
         if (selectedDirectory != null) {
             String path = selectedDirectory.getCanonicalPath();
-            _prefs.put(PREF_NAME, path);
+            getPrefs().put(PREF_NAME, path);
             folderPath.setText(path);
         }
     }
@@ -136,7 +134,7 @@ public class CloningGroupsWindowController {
                     protected void updateItem(Group item, boolean bln) {
                         super.updateItem(item, bln);
                         if (item != null) {
-                            String itemText = item.getName() + " (@" + item.getPath() + ") ";
+                            String itemText = item.getName() + " (@" + item.getFullPath() + ")";
                             setText(itemText);
                         }
                     }

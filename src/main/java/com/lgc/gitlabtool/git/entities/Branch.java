@@ -54,6 +54,15 @@ public class Branch {
     }
 
     /**
+     * Checks whether the current branch is remote.
+     *
+     * @return <code>true</code> if the branch is remote, otherwise <code>false</code>
+     */
+    public boolean isRemote() {
+        return getBranchType() == BranchType.REMOTE;
+    }
+
+    /**
      * Sets type of branch
      *
      * @param bType type of branch
@@ -78,18 +87,16 @@ public class Branch {
     }
 
     /**
-     * Compares project current branch with the branch.
+     * Compares name of current branch with the branch name.
      *
-     * @param project the cloned project
-     * @param branch  the branch
-     *
-     * @return <code>true</code> if branches is equals, otherwise <code>false</code>.
+     * @param branchName the branch name
+     * @return <code>true</code> if names are equals, otherwise <code>false</code>.
      */
-    public static boolean compareBranches(Project project, Branch branch) {
-        if (project == null || !project.isCloned() || branch == null) {
+    public boolean compareBranchesNames(String branchName) {
+        if (branchName == null) {
             return false;
         }
-        return Objects.equals(project.getProjectStatus().getCurrentBranch(), branch.getBranchName());
+        return Objects.equals(this.getBranchName(), branchName);
     }
 
     /* (non-Javadoc)

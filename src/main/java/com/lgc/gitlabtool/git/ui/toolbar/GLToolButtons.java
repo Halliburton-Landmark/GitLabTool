@@ -63,6 +63,14 @@ public enum GLToolButtons {
             null,
             GLToolConstants.ICON_SIZE_20, false),
 
+    REMOVE_GROUP(GLToolConstants.GROUPS_WINDOW_KEY,
+            "group_removeGroup",
+            "icons/mainmenu/remove_16x16.png",
+            "Remove group",
+            "Remove selected group",
+            null,
+            GLToolConstants.ICON_SIZE_16, false),
+
     IMPORT_GROUP_BUTTON(GLToolConstants.GROUPS_WINDOW_KEY,
             "group_importGroup",
             "icons/toolbar/import_20x20.png",
@@ -78,6 +86,14 @@ public enum GLToolButtons {
             "Load selected group",
             null,
             GLToolConstants.ICON_SIZE_20, false),
+
+    LOAD_GROUP(GLToolConstants.GROUPS_WINDOW_KEY,
+            "load_selected_group",
+            "icons/mainmenu/load_group_16x16.png",
+            "Load group",
+            "Load selected group",
+            null,
+            GLToolConstants.ICON_SIZE_16, false),
 
     CHANGE_GROUP_BUTTON(GLToolConstants.PROJECTS_WINDOW_KEY,
             "change_group",
@@ -116,6 +132,14 @@ public enum GLToolButtons {
             "icons/toolbar/checkout_20x20.png",
             "Checkout",
             "Checkout to another branch",
+            null,
+            GLToolConstants.ICON_SIZE_20, false),
+
+    BRANCHES_BUTTON(GLToolConstants.PROJECTS_WINDOW_KEY,
+            "branches",
+            "icons/toolbar/branches_20x20.png",
+            "Branches",
+            "Operations with branches",
             null,
             GLToolConstants.ICON_SIZE_20, false),
 
@@ -175,6 +199,22 @@ public enum GLToolButtons {
             null,
             GLToolConstants.ICON_SIZE_20, false),
 
+    OPEN_FOLDER(GLToolConstants.GROUPS_WINDOW_KEY,
+            "open_folder",
+            "icons/mainmenu/folder_16x16.png",
+            "Show in folder",
+            "Show in system explorer",
+            null,
+            GLToolConstants.ICON_SIZE_16),
+
+    OPEN_IN_TERMINAL(GLToolConstants.PROJECTS_WINDOW_KEY,
+            "open_in_terminal",
+            "icons/mb3/open_terminal_16x16.png",
+            "Open in Terminal",
+            "Open in Terminal",
+            null,
+            GLToolConstants.ICON_SIZE_16),
+
     MAIN_CLONE_PROJECT(GLToolConstants.PROJECTS_WINDOW_KEY,
             "main_git_clone_project",
             "icons/mainmenu/clone_16x16.png",
@@ -195,6 +235,10 @@ public enum GLToolButtons {
             "main_git_checkout_branch",
             "icons/mainmenu/checkoutbranch_16x16.png",
             "Checkout",
+    MAIN_BRANCHES(GLToolConstants.PROJECTS_WINDOW_KEY,
+            "main_git_branches",
+            "icons/mainmenu/branches_16x16.png",
+            "Branches",
             null,
             MainMenuInfo.GIT,
             GLToolConstants.ICON_SIZE_16, false),
@@ -237,6 +281,22 @@ public enum GLToolButtons {
             "Stash",
             null,
             MainMenuInfo.GIT,
+            GLToolConstants.ICON_SIZE_16),
+
+    MAIN_CREATE_PROJECT(GLToolConstants.PROJECTS_WINDOW_KEY,
+            "main_project_create_project",
+            "icons/mainmenu/create_project_16x16.png",
+            "Create project",
+            "Create new project",
+            MainMenuInfo.PROJECT,
+            GLToolConstants.ICON_SIZE_16),
+
+    MAIN_EDIT_PROJECT_PROPERTIES(GLToolConstants.PROJECTS_WINDOW_KEY,
+            "main_project_edit_project_propecties",
+            "icons/mainmenu/edit_properties_16x16.png",
+            "Edit project properties",
+            "Edit project properties",
+            MainMenuInfo.PROJECT,
             GLToolConstants.ICON_SIZE_16, false),
 
     SHOW_PROJECT_HISTORY(GLToolConstants.COMMON_VIEW_KEY,
@@ -351,9 +411,10 @@ public enum GLToolButtons {
 
     public enum MainMenuInfo {
         FILE("File", 1),
-        GIT("Git", 2),
-        THEMES("Themes", 3),
-        HELP("Help", 4);
+        PROJECT("Project", 2),
+        GIT("Git", 3),
+        THEMES("Themes", 4),
+        HELP("Help", 5);
 
         private final String name;
         private final int order;
