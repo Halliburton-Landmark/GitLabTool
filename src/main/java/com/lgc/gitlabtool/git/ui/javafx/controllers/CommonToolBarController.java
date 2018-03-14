@@ -14,6 +14,7 @@ import javafx.scene.control.ToolBar;
 import javafx.scene.layout.HBox;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * This class represents toolbar controller for additional buttons.
@@ -37,12 +38,11 @@ public class CommonToolBarController {
         @Override
         public void onChanged(String activeView) {
             if (activeView.equals(ViewKey.GROUPS_WINDOW.getKey())) {
-                viewToolbar.setVisible(false);
                 _toolbarManager.getItemById(ViewKey.COMMON_VIEW.getKey(),GLToolButtons.SHOW_PROJECT_HISTORY.getId()).setVisible(false);
             } else if (activeView.equals(ViewKey.PROJECTS_WINDOW.getKey())) {
-                viewToolbar.setVisible(true);
                 _toolbarManager.getItemById(ViewKey.COMMON_VIEW.getKey(),GLToolButtons.SHOW_PROJECT_HISTORY.getId()).setVisible(true);
             }
+            viewToolbar.setVisible(checkItemsVisibility());
         }
     };
 
@@ -64,7 +64,6 @@ public class CommonToolBarController {
         buttonBar.setPrefHeight(20);
         buttonBar.setId(toolbarHBoxId);
         for(Node item : toolbarItems) {
-            item.setVisible(false);
             if (item instanceof ToggleButton) {
                 ((ToggleButton)item).getGraphic().setEffect(ThemeUtil.getLightEffect());
             } else if (item instanceof Button) {
@@ -73,9 +72,13 @@ public class CommonToolBarController {
             buttonBar.getChildren().add(item);
         }
 
-        viewToolbar.setVisible(false);
         viewToolbar.getItems().clear();
         viewToolbar.getItems().addAll(buttonBar);
+    }
+
+    private boolean checkItemsVisibility() {
+        Optional<Node> optional = toolbarItems.stream().filter(item -> item.isVisible()).findFirst();
+        return optional.isPresent();
     }
 
 }
