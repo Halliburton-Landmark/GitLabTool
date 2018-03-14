@@ -59,7 +59,6 @@ public class ThemeServiceImpl implements ThemeService {
     public void setTheme(String themeName) {
         currentGLTThemes = GLTTheme.getThemeByKey(themeName);
         getThemePrefs().put(PreferencesNodes.THEME_PREFS_NODE, currentGLTThemes.getKey());
-        themePrefs.put(THEME_PREFS_KEY, currentGLTThemes.getKey());
         notifyThemeChangeEvent(themeName);
     }
 
