@@ -26,8 +26,8 @@ public class PathUtilities {
     /**
      * Checks path is exist and it is directory.
      *
-     * @param path path on disk
-     * @return <true> - it exist and directory, otherwise - <false>.
+     * @param path the local path
+     * @return <code>true</code> if a path exists and it is folder, otherwise <code>false</code>.
      */
     public static boolean isExistsAndDirectory(Path path) {
         return path != null && Files.exists(path) && Files.isDirectory(path);
@@ -36,8 +36,21 @@ public class PathUtilities {
     /**
      * Checks path is exist and it is regular file.
      *
-     * @param path path on disk
-     * @return <true> - it exist and regular file, otherwise - <false>.
+     * @param path the local path
+     * @return <code>true</code> if a path exists and it is regular file, otherwise <code>false</code>.
+     */
+    public static boolean isExistsAndRegularFile(String path) {
+        if (path == null) {
+            return false;
+        }
+        return isExistsAndRegularFile(Paths.get(path));
+    }
+
+    /**
+     * Checks path is exist and it is regular file.
+     *
+     * @param path the local path
+     * @return <code>true</code> if a path exists and it is regular file, otherwise <code>false</code>.
      */
     public static boolean isExistsAndRegularFile(Path path) {
         return path != null && Files.exists(path) && Files.isRegularFile(path);
@@ -99,12 +112,12 @@ public class PathUtilities {
      * Creates path on the local disk.
      *
      * @param path the path for creating
-     * @param ifFolder <true> if we create folder, <false> if we create file.
+     * @param isFolder if <code>true</code> - a folder will be create, <code>false</code> - a file will be create.
      * @return status of operation
      */
-    public static boolean createPath(Path path, boolean ifFolder) {
+    public static boolean createPath(Path path, boolean isFolder) {
         try {
-            if (ifFolder) {
+            if (isFolder) {
                 Files.createDirectories(path);
                 return true;
             }

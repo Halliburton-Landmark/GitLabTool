@@ -100,7 +100,7 @@ public class ClonedGroupsServiceImpl implements ClonedGroupsService {
     }
 
     private boolean isNotExistsAndDirectory(Group group) {
-        String path = group.getPathToClonedGroup();
+        String path = group.getPath();
         if (path == null) {
             return true;
         }

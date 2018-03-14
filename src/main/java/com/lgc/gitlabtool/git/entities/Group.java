@@ -2,7 +2,9 @@ package com.lgc.gitlabtool.git.entities;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import com.google.gson.annotations.SerializedName;
 import com.lgc.gitlabtool.git.util.PathUtilities;
@@ -23,27 +25,28 @@ public class Group {
     private int _id;
 
     /**
+     * The id of a parentgroup
+     **/
+    @SerializedName("parent_id")
+    private Integer _parentId;
+
+    /**
      * The name of the group
      **/
     @SerializedName("name")
     private String _name;
 
     /**
-     * The path of the group
+     * The full path of the group. Including parent group.
      **/
-    @SerializedName("path")
+    @SerializedName("full_path")
+    private String _fullPath;
+
     private String _path;
-
-    /**
-     * Projects in group
-     **/
-    @SerializedName("projects")
-    private transient Collection<Project> _projects;
-
-    private String _pathToClonedGroup;
 
     private boolean _isCloned;
 
+    private transient final List<Group> _subGroups = new ArrayList<>();
 
     public Group(){}
 
@@ -70,14 +73,52 @@ public class Group {
      *
      * @param path to the group
      */
-    public void setPathToClonedGroup(String path) {
+    public void setPath(String path) {
         if (path == null || path.isEmpty()) {
             throw new IllegalArgumentException("Invalid value passed");
         }
         Path pathToGroup = Paths.get(path);
         if (PathUtilities.isExistsAndDirectory(pathToGroup)) {
-            _pathToClonedGroup = path;
+            _path = path;
         }
+    }
+
+    /**
+     * Gets full GitLab path of group ("name of parent group (if it has) / a name of current group").
+     *
+     * @return full path
+     */
+    public String getFullPath() {
+        return _fullPath;
+    }
+
+    /**
+     * Get id of parent group
+     *
+     * @return parent id
+     */
+    public Integer getParentId() {
+        return _parentId;
+    }
+
+    /**
+     * Adds subgroup to the current group
+     *
+     * @param subGroup the subgroup of the current group
+     */
+    public void addSubGroup(Group subGroup) {
+        if (subGroup != null) {
+            _subGroups.add(subGroup);
+        }
+    }
+
+    /**
+     * Gets list of subgroups
+     *
+     * @return unmodifiable list
+     */
+    public List<Group> getSubGroups() {
+        return Collections.unmodifiableList(_subGroups);
     }
 
     /**
@@ -85,8 +126,8 @@ public class Group {
      *
      * @return path to the group
      */
-    public String getPathToClonedGroup() {
-        return _pathToClonedGroup;
+    public String getPath() {
+        return _path;
     }
 
     public int getId() {
@@ -97,24 +138,14 @@ public class Group {
         return _name;
     }
 
-    public String getPath() {
-        return _path;
-    }
-
-
-    public Collection<Project> getProjects() {
-        return _projects;
-    }
-
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
         result = prime * result + (_isCloned ? 1231 : 1237);
-        result = prime * result + ((_pathToClonedGroup == null) ? 0 : _pathToClonedGroup.hashCode());
+        result = prime * result + ((_path == null) ? 0 : _path.hashCode());
         result = prime * result + _id;
         result = prime * result + ((_name == null) ? 0 : _name.hashCode());
-        result = prime * result + ((_path == null) ? 0 : _path.hashCode());
         return result;
     }
 
@@ -133,11 +164,11 @@ public class Group {
         if (_isCloned != other._isCloned) {
             return false;
         }
-        if (_pathToClonedGroup == null) {
-            if (other._pathToClonedGroup != null) {
+        if (_path == null) {
+            if (other._path != null) {
                 return false;
             }
-        } else if (!_pathToClonedGroup.equals(other._pathToClonedGroup)) {
+        } else if (!_path.equals(other._path)) {
             return false;
         }
         if (_id != other._id) {
@@ -150,13 +181,7 @@ public class Group {
         } else if (!_name.equals(other._name)) {
             return false;
         }
-        if (_path == null) {
-            if (other._path != null) {
-                return false;
-            }
-        } else if (!_path.equals(other._path)) {
-            return false;
-        }
         return true;
     }
+
 }
