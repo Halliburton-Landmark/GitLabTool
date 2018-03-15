@@ -405,21 +405,15 @@ public class GitStagingWindowController extends AbstractStateListener {
         if (statuses == null || statuses.isEmpty()) {
             return;
         }
-        String info = "Successfully: %s project(s)\nFailed: %s project(s)";
+        String info = "Successfully: %s project(s)";
         String dialogTitle = isPushChanges ? STATUS_PUSH_DIALOG_TITLE : STATUS_COMMIT_DIALOG_TITLE;
         String dialogHeader = isPushChanges ? STATUS_PUSH_DIALOG_HEADER : STATUS_COMMIT_DIALOG_HEADER;
-
-        long countSuccess = statuses.entrySet().stream()
-                                               .map(Map.Entry::getValue)
-                                               .filter(status -> status.equals(JGitStatus.SUCCESSFUL))
-                                               .count();
 
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
                 StatusDialog statusDialog = new StatusDialog(dialogTitle, dialogHeader);
-                statusDialog.showMessage(statuses, countProjects, info, String.valueOf(countSuccess),
-                        String.valueOf(countProjects - countSuccess));
+                statusDialog.showMessage(statuses, countProjects, info);
                 statusDialog.showAndWait();
             }
         });

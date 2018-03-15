@@ -404,8 +404,7 @@ public class ProjectServiceImpl implements ProjectService {
             _git.addUntrackedFilesToIndex(structures, createdProject);
         }
         // make first commit to GitLab repository
-        _git.commitAndPush(projects, "Created new project", true, null, null, null, null,
-                EmptyProgressListener.get());
+        _git.commitAndPush(projects, "Created new project", null, null, null, null, EmptyProgressListener.get());
 
         if (!isCreatedStructure) {
             PathUtilities.deletePath(Paths.get(createdProject.getPath()));
