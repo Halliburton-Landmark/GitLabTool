@@ -67,10 +67,20 @@ public class ListViewMgr implements ComponentMgr<ListView> {
         return lv;
     }
 
+    /**
+     * This method add {@link ActiveViewChangeListener}
+     *
+     * @param listener
+     */
     public void addChangeActiveViewListener(ActiveViewChangeListener listener) {
         activeViewChangeListener.add(listener);
     }
 
+    /**
+     * This method remove {@link ActiveViewChangeListener}
+     *
+     * @param listener
+     */
     public void removeChangeActiveViewListener(ActiveViewChangeListener listener) {
         activeViewChangeListener.remove(listener);
     }

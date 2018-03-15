@@ -9,12 +9,32 @@ import java.util.List;
  */
 public interface ComponentMgr<T> {
 
-        public void add(T component);
+    /**
+     * This method add component
+     *
+     * @param component
+     */
+    public void add(T component);
 
-        public void remove(T component);
+    /**
+     * This method remove component
+     *
+     * @param component
+     */
+    public void remove(T component);
 
-        public int getComponentCount();
+    /**
+     * This method return component count
+     *
+     * @return component count
+     */
+    public int getComponentCount();
 
-        public List<T> getComponents();
+    /**
+     * This method return components
+     *
+     * @return list of components
+     */
+    public List<T> getComponents();
 
 }
