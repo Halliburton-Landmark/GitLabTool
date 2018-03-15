@@ -87,6 +87,8 @@ public class JGit {
     private static final String WRONG_PARAMETERS = "Wrong parameters for obtaining branches.";
     private static final String PUSH_START_MESSAGE = "Push operation is started.";
     private static final String PUSH_FINISH_MESSAGE = "Push operation is finished.";
+    private static final String COMMIT_ACTION_NAME = "commit";
+    private static final String COMMIT_AND_PUSH_ACTION_NAME = "commit and push";
     private static final int NOT_FOUND = -1;
 
     private final BackgroundService _backgroundService;
@@ -619,8 +621,6 @@ public class JGit {
      *
      * @param projects       projects for commit
      * @param message        a message for commit. The commit message can not be {null}.
-     * @param setAll         if set to true the commit command automatically stages files that have been
-     *                       modified and deleted, but new files not known by the repository are not affected.
      * @param nameCommitter  the name committer for this commit.
      * @param emailCommitter the email committer for this commit.
      * @param nameAuthor     the name author for this commit.
@@ -632,7 +632,7 @@ public class JGit {
      *
      * @return map with projects and theirs statuses
      */
-    public Map<Project, JGitStatus> commit (List<Project> projects, String message, boolean setAll,
+    public Map<Project, JGitStatus> commit (List<Project> projects, String message,
                               String nameCommitter, String emailCommitter,
                               String nameAuthor, String emailAuthor,
                               ProgressListener progressListener) {
@@ -640,32 +640,15 @@ public class JGit {
         if (projects == null || message == null || projects.isEmpty() || message.isEmpty()) {
             throw new IllegalArgumentException("Incorrect data: projects is " + projects + ", message is " + message);
         }
-        int aStepInProgress = 100 / projects.size();
-        int currentProgress = 0;
-        for (Project pr : projects) {
-            currentProgress += aStepInProgress;
-            if (pr == null) {
-                statuses.put(pr, JGitStatus.FAILED);
-                continue;
-            }
-            if (!pr.isCloned()) {
-                statuses.put(pr, JGitStatus.FAILED);
-                String errMessage = pr.getName() + ERROR_MSG_NOT_CLONED;
-                logger.debug(errMessage);
-                continue;
-            }
-            if(commitProject(pr, message, setAll, nameCommitter, emailCommitter,
-                      nameAuthor, emailAuthor).equals(JGitStatus.FAILED)) {
-                statuses.put(pr, JGitStatus.FAILED);
-                String errMessage = "Failed to commit " + pr.getName() + " project";
-                logger.debug(errMessage);
-                continue;
-            }
-            progressListener.onSuccess(currentProgress);
-            statuses.put(pr, JGitStatus.SUCCESSFUL);
-            logger.debug("Commit for the projects is " + JGitStatus.SUCCESSFUL);
+        long step = 100 / projects.size();
+        AtomicLong progress = new AtomicLong(0);
+        try {
+            projects.parallelStream()
+                    .forEach(project -> commitProject(project, progressListener, message, nameCommitter,
+                            emailCommitter, nameAuthor, emailAuthor, progress, step, statuses));
+        } finally {
+            progressListener.onFinish();
         }
-        progressListener.onFinish();
         return statuses;
     }
 
@@ -675,8 +658,6 @@ public class JGit {
      *
      * @param project       a project for commit
      * @param message        a message for commit. The commit message can not be {null}.
-     * @param setAll         if set to true the commit command automatically stages files that have been
-     *                       modified and deleted, but new files not known by the repository are not affected.
      * @param nameCommitter  the name committer for this commit.
      * @param emailCommitter the email committer for this commit.
      * @param nameAuthor     the name author for this commit.
@@ -687,7 +668,7 @@ public class JGit {
      *
      * @return status SUCCESSFUL is if committed successfully, otherwise is FAILED.
      */
-    public JGitStatus commitProject (Project project, String message, boolean setAll,
+    public JGitStatus commitProject (Project project, String message,
                                String nameCommitter, String emailCommitter,
                                String nameAuthor, String emailAuthor) {
         if (project == null) {
@@ -696,7 +677,11 @@ public class JGit {
         try (Git git = getGit(project.getPath())){
             PersonIdent author = getPersonIdent(nameAuthor, emailAuthor);
             PersonIdent comitter = getPersonIdent(nameCommitter, emailCommitter);
-            git.commit().setAll(setAll).setMessage(message).setAuthor(author).setCommitter(comitter).call();
+            git.commit()
+               .setMessage(message)
+               .setAuthor(author)
+               .setCommitter(comitter)
+               .call();
             logger.debug("Commit for the " + project.getName() + " project is " + JGitStatus.SUCCESSFUL);
             return JGitStatus.SUCCESSFUL;
         } catch (IOException | GitAPIException e) {
@@ -710,8 +695,6 @@ public class JGit {
      *
      * @param projects       projects for commit and push
      * @param message        a message for commit. The commit message can not be {null}.
-     * @param setAll         if set to true the commit command automatically stages files that have been
-     *                       modified and deleted, but new files not known by the repository are not affected.
      * @param nameCommitter  the name committer for this commit.
      * @param emailCommitter the email committer for this commit.
      * @param nameAuthor     the name author for this commit.
@@ -723,7 +706,7 @@ public class JGit {
      *
      * @return statuses of operation
      */
-    public Map<Project, JGitStatus> commitAndPush (List<Project> projects, String message, boolean setAll,
+    public Map<Project, JGitStatus> commitAndPush (List<Project> projects, String message,
                                                    String nameCommitter, String emailCommitter,
                                                    String nameAuthor, String emailAuthor,
                                                    ProgressListener progressListener) {
@@ -731,33 +714,15 @@ public class JGit {
         if (message == null || projects == null || projects.isEmpty() || message.isEmpty()) {
             throw new IllegalArgumentException("Incorrect data: projects is " + projects + ", message is " + message);
         }
-        int aStepInProgress = 100 / projects.size();
-        int currentProgress = 0;
-        for (Project pr : projects) {
-            currentProgress += aStepInProgress;
-            if (pr == null) {
-                statuses.put(pr, JGitStatus.FAILED);
-                continue;
-            }
-            if (!pr.isCloned()) {
-                progressListener.onError(currentProgress);
-                String errMessage = pr.getName() + ERROR_MSG_NOT_CLONED;
-                statuses.put(pr, JGitStatus.FAILED);
-                logger.debug(errMessage);
-                continue;
-            }
-            if(commitAndPush(pr, message, setAll, nameCommitter, emailCommitter, nameAuthor, emailAuthor)
-                    .equals(JGitStatus.FAILED)) {
-                String errorMsg = "Failed to commit and push " + pr.getName() + " project";
-                progressListener.onError(currentProgress);
-                statuses.put(pr, JGitStatus.FAILED);
-                logger.error(errorMsg);
-                continue;
-            }
-            progressListener.onSuccess(currentProgress);
-            statuses.put(pr, JGitStatus.SUCCESSFUL);
+        long step = 100 / projects.size();
+        AtomicLong progress = new AtomicLong(0);
+        try {
+            projects.parallelStream()
+                    .forEach(project -> commitAndPush(project, progressListener, message, nameCommitter,
+                            emailCommitter, nameAuthor, emailAuthor, progress, step, statuses));
+        } finally {
+            progressListener.onFinish();
         }
-        progressListener.onFinish();
         return statuses;
     }
 
@@ -1067,16 +1032,6 @@ public class JGit {
         return CurrentUser.getInstance().getCurrentUser();
     }
 
-    private JGitStatus commitAndPush(Project project, String message, boolean setAll, String nameCommitter,
-            String emailCommitter, String nameAuthor, String emailAuthor) {
-        if (commitProject(project, message, setAll, nameCommitter, emailCommitter, nameAuthor, emailAuthor)
-                .equals(JGitStatus.FAILED)) {
-            logger.debug("Commit and Push " + JGitStatus.FAILED + " (Project: " + project.getName() + ")");
-            return JGitStatus.FAILED;
-        }
-        return push(project);
-    }
-
     private JGitStatus push(Project project) {
         try (Git git = getGit(project.getPath())) {
             git.push().call();
@@ -1236,4 +1191,50 @@ public class JGit {
         return new BranchConfig(config, branchName);
     }
 
+    private void commitProject(Project project, ProgressListener progressListener, String message,
+            String nameCommitter, String emailCommitter, String nameAuthor, String emailAuthor,
+            AtomicLong progress, long step, Map<Project, JGitStatus> statuses) {
+        progress.addAndGet(step);
+        if (invalidProjectForGitOperation(project)) {
+            progressListener.onError(progress.get(), "Failed commit operation: invalid project.");
+            statuses.put(project, JGitStatus.FAILED);
+            return;
+        }
+        JGitStatus commitResult = commitProject(project, message, nameCommitter, emailCommitter, nameAuthor, emailAuthor);
+        updateProgress(project, commitResult, COMMIT_ACTION_NAME, progressListener, progress);
+        statuses.put(project, commitResult);
+    }
+
+    private void commitAndPush(Project project, ProgressListener progressListener, String message, String nameCommitter,
+            String emailCommitter, String nameAuthor, String emailAuthor, AtomicLong progress, long step,
+            Map<Project, JGitStatus> statuses) {
+        progress.addAndGet(step);
+        if (invalidProjectForGitOperation(project)) {
+            progressListener.onError(progress.get(), "Failed commit and push: invalid project.");
+            statuses.put(project, JGitStatus.FAILED);
+            return;
+        }
+        JGitStatus resultOperation = commitProject(project, message, nameCommitter, emailCommitter, nameAuthor,
+                emailAuthor);
+        if (resultOperation == JGitStatus.FAILED) {
+            progressListener.onError(progress.get(), "Failed to commit and push for " + project.getName());
+        } else {
+            resultOperation = push(project);
+            updateProgress(project, resultOperation, COMMIT_AND_PUSH_ACTION_NAME, progressListener, progress);
+        }
+        statuses.put(project, resultOperation);
+    }
+
+    private void updateProgress(Project project, JGitStatus resultOperation, String operaionName,
+            ProgressListener progressListener, AtomicLong progress) {
+        if (resultOperation == JGitStatus.FAILED) {
+            progressListener.onError(progress.get(), "Failed " + operaionName + " for " + project.getName());
+        } else {
+            progressListener.onSuccess(progress.get(), "Success " + operaionName + " for " + project.getName());
+        }
+    }
+
+    private boolean invalidProjectForGitOperation(Project project) { // with the exception of the cloning operation
+        return project == null || !project.isCloned();
+    }
 }

@@ -28,11 +28,19 @@ public class CommitPushProgressListener implements ProgressListener {
         if (t[0] instanceof Integer) {
             showProgress(t[0]);
         }
+        if (t[1] instanceof String) {
+            _logger.info(t[1]);
+        }
     }
 
     @Override
     public void onError(Object... t) {
-        showProgress(t[0]);
+        if (t[0] instanceof Integer) {
+            showProgress(t[0]);
+        }
+        if (t[1] instanceof String) {
+            _logger.error(t[1]);
+        }
     }
 
     private void showProgress(Object object) {
