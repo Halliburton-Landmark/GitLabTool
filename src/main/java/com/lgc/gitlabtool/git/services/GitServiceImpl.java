@@ -252,7 +252,7 @@ public class GitServiceImpl implements GitService {
     public List<Commit> getAllCommits(Project project, String branchName) {
         Iterable<RevCommit> revCommits = _git.getAllCommits(project, branchName);
         if (revCommits == null) {
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
         Iterator<RevCommit> iterator = revCommits.iterator();
         List<Commit> commits = new ArrayList<>();

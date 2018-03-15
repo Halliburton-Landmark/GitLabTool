@@ -7,6 +7,11 @@ package com.lgc.gitlabtool.git.ui.javafx.controllers.listview;
  */
 public interface ActiveViewChangeListener {
 
+    /**
+     * This method invoked on group or project view activation
+     *
+     * @param activeView
+     */
     public void onChanged(String activeView);
 
 }

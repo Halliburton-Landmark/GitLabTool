@@ -1257,7 +1257,7 @@ public class JGit {
         } catch (IOException | GitAPIException e) {
             logger.error("Could not get commits for selected branch " + e.getMessage());
         }
-        return Collections.EMPTY_LIST;
+        return Collections.emptyList();
     }
 
     protected BranchConfig getBranchConfig(Config config, String branchName) {
