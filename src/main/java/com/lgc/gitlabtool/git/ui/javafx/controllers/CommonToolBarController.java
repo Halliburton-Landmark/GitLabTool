@@ -1,11 +1,12 @@
 package com.lgc.gitlabtool.git.ui.javafx.controllers;
 
+import com.lgc.gitlabtool.git.services.ServiceProvider;
+import com.lgc.gitlabtool.git.services.ThemeService;
 import com.lgc.gitlabtool.git.ui.ViewKey;
 import com.lgc.gitlabtool.git.ui.javafx.controllers.listview.ActiveViewChangeListener;
 import com.lgc.gitlabtool.git.ui.javafx.controllers.listview.ListViewMgrProvider;
 import com.lgc.gitlabtool.git.ui.toolbar.GLToolButtons;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarManager;
-import com.lgc.gitlabtool.git.util.ThemeUtil;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -31,6 +32,9 @@ public class CommonToolBarController {
     private static final ToolbarManager _toolbarManager = ToolbarManager.getInstance();
 
     private static final ListViewMgrProvider listViewMgrProvider = ListViewMgrProvider.getInstance();
+
+    private static final ThemeService _themeService = (ThemeService) ServiceProvider.getInstance()
+        .getService(ThemeService.class);
 
     private static final String toolbarHBoxId = "viewToolbarHBox";
 
@@ -65,9 +69,9 @@ public class CommonToolBarController {
         buttonBar.setId(toolbarHBoxId);
         for(Node item : toolbarItems) {
             if (item instanceof ToggleButton) {
-                ((ToggleButton)item).getGraphic().setEffect(ThemeUtil.getLightEffect());
+                ((ToggleButton)item).getGraphic().setEffect(_themeService.getLightEffect());
             } else if (item instanceof Button) {
-                ((Button)item).getGraphic().setEffect(ThemeUtil.getLightEffect());
+                ((Button)item).getGraphic().setEffect(_themeService.getLightEffect());
             }
             buttonBar.getChildren().add(item);
         }

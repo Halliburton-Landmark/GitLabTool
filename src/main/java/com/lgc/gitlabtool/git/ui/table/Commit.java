@@ -17,22 +17,8 @@ public class Commit {
     private Date date;
     private String project;
 
-    /**
-     * Constructor
-     */
     public Commit() {}
 
-    /**
-     * Constructor
-     *
-     * @param hash
-     * @param message
-     * @param author
-     * @param authoredDate
-     * @param committer
-     * @param date
-     * @param project
-     */
     public Commit(String hash, String message, String author, Date authoredDate, String committer, Date date, String project) {
         this.hash = hash;
         this.message = message;

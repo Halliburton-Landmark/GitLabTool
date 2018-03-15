@@ -15,7 +15,6 @@ import com.lgc.gitlabtool.git.ui.table.CustomDate;
 import com.lgc.gitlabtool.git.ui.table.SortedByDate;
 import com.lgc.gitlabtool.git.ui.toolbar.GLToolButtons;
 import com.lgc.gitlabtool.git.ui.toolbar.ToolbarManager;
-import com.lgc.gitlabtool.git.util.ThemeUtil;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -80,7 +79,7 @@ public class TableController {
         @Override
         public void onChanged(String themeName) {
             if (_activeView != null && toggleButton != null && _activeView.equals(ViewKey.PROJECTS_WINDOW.getKey())) {
-                toggleButton.getGraphic().setEffect(ThemeUtil.getLightEffect());
+                toggleButton.getGraphic().setEffect(_themeService.getLightEffect());
             }
         }
     };

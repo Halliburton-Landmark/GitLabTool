@@ -6,6 +6,7 @@ import com.lgc.gitlabtool.git.ui.javafx.GLTTheme;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.ThemeChangeListener;
 import javafx.scene.Scene;
 import javafx.scene.effect.ColorAdjust;
+import javafx.scene.effect.Effect;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import org.apache.logging.log4j.LogManager;
@@ -109,6 +110,14 @@ public class ThemeServiceImpl implements ThemeService {
     @Override
     public void removeThemeChangeListener(ThemeChangeListener listener) {
         themeChangeListeners.remove(listener);
+    }
+
+    @Override
+    public Effect getLightEffect() {
+        boolean isDarkTheme = getCurrentTheme().equals(GLTTheme.DARK_THEME);
+        ColorAdjust colorAdjust = new ColorAdjust();
+        colorAdjust.setBrightness(getLightningCoefficient());
+        return isDarkTheme ? colorAdjust : null;
     }
 
     private void notifyThemeChangeEvent(String themeName) {
