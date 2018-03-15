@@ -355,11 +355,13 @@ public class ProjectServiceImpl implements ProjectService {
         return null;
     }
 
-    private void createLocalProject(Project project, String path, ProjectType projectType, ProgressListener progressListener) {
+    private void createLocalProject(Project project, String fullGroupPath, ProjectType projectType, ProgressListener progressListener) {
         List<Project> projects = Arrays.asList(project);
         progressListener.onStart("Cloning of created project");
+        Path path = Paths.get(fullGroupPath);
+        path = path.getParent();
 
-        cloneWithoutState(projects, path, new ProgressListener() {
+        cloneWithoutState(projects, path.toString(), new ProgressListener() {
             @Override
             public void onSuccess(Object... t) {
                 Set<String> structures = projectType.getStructures();
