@@ -23,7 +23,7 @@
             <DefaultRolloverStrategy max="10">
                 <Delete basePath="${filepath}" maxDepth="2">
                     <IfFileName glob="${filepath}/GitlabTool_full.*.log" />
-                    <IfLastModified age="10d" />
+                    <IfLastModified age="30d" />
                 </Delete>
             </DefaultRolloverStrategy>
         </RollingFile>
@@ -37,10 +37,10 @@
                 <SizeBasedTriggeringPolicy size="200 KB" />
                 <TimeBasedTriggeringPolicy />
             </Policies>
-            <DefaultRolloverStrategy max="5">
+            <DefaultRolloverStrategy max="10">
                 <Delete basePath="${filepath}" maxDepth="2">
                     <IfFileName glob="${filepath}/GitlabTool_errors.*.log" />
-                    <IfLastModified age="10d" />
+                    <IfLastModified age="30d" />
                 </Delete>
             </DefaultRolloverStrategy>
         </RollingFile>
