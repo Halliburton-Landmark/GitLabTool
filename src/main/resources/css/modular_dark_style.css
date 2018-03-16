@@ -12,7 +12,7 @@
 
     -fx-focus-color: transparent;
     -fx-accent: #1d497e;
-    
+
 }
 
 
@@ -90,6 +90,45 @@
     -fx-background-color: #243242;
 }
 
+/* VIEW TOOLBAR */
+#viewToolbar {
+    -fx-background-color: #222222;
+    -fx-border-color:
+        linear-gradient(to bottom, rgba(0, 0, 0, 0.3), transparent),
+        linear-gradient(to top, rgba(0, 0, 0, 0.3), transparent);
+    -fx-border-style: solid;
+    -fx-border-width: 5 0 0 0, 0 0 5 0;
+}
+
+#viewToolbarHBox *.button {
+    -fx-background-color: transparent, transparent, transparent, transparent;
+    -fx-background-radius: 15, 15, 15;
+}
+
+#viewToolbarHBox *.button:hover{
+    -fx-background-color: #213853;
+}
+
+#viewToolbarHBox *.button:armed {
+    -fx-background-color: #243242;
+}
+
+#viewToolbarHBox *.button:armed {
+    -fx-background-color: #243242;
+}
+
+#viewToolbarHBox *.toggle-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 15, 15, 15;
+}
+
+#viewToolbarHBox *.toggle-button:hover {
+    -fx-background-color: #213853;
+}
+
+#viewToolbarHBox *.toggle-button:selected {
+    -fx-background-color: #243242;
+}
 
 
 /* TOP SLIM PANEL */
@@ -270,6 +309,41 @@
     -fx-background-color: #4e4e4e;
   }
 
+.table-view{
+   -fx-background-color: transparent;
+}
+
+.table-view:focused{
+    -fx-background-color: transparent;
+}
+
+.table-view .column-header-background{
+    -fx-background-color: #353434;
+}
+
+.table-view .column-header-background .label{
+    -fx-text-fill: foreground-text;
+}
+
+.table-view .column-header {
+    -fx-background-color: transparent;
+}
+
+.table-view .table-cell{
+    -fx-text-fill: foreground-text;
+}
+
+.table-row-cell{
+    -fx-background-color: #222222;
+}
+
+.table-row-cell:odd{
+    -fx-background-color: #272727;
+}
+
+.table-row-cell:selected {
+    -fx-background-color: #4e4e4e;
+}
 
 
 /* USING ID */

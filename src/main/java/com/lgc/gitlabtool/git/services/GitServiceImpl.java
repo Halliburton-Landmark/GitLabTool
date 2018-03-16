@@ -1,22 +1,15 @@
 package com.lgc.gitlabtool.git.services;
 
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
+import com.lgc.gitlabtool.git.ui.table.Commit;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.jgit.api.Status;
@@ -36,6 +29,7 @@ import com.lgc.gitlabtool.git.jgit.stash.SingleProjectStash;
 import com.lgc.gitlabtool.git.jgit.stash.Stash;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
+import org.eclipse.jgit.revwalk.RevCommit;
 
 public class GitServiceImpl implements GitService {
 
@@ -252,6 +246,29 @@ public class GitServiceImpl implements GitService {
     @Override
     public String getTrackingBranch(Project project) {
         return _git.getTrackingBranch(project);
+    }
+
+    @Override
+    public List<Commit> getAllCommits(Project project, String branchName) {
+        Iterable<RevCommit> revCommits = _git.getAllCommits(project, branchName);
+        if (revCommits == null) {
+            return Collections.emptyList();
+        }
+        Iterator<RevCommit> iterator = revCommits.iterator();
+        List<Commit> commits = new ArrayList<>();
+        while(iterator.hasNext()) {
+            Commit commit = new Commit();
+            RevCommit revCommit = iterator.next();
+            commit.setHash(revCommit.getId().getName());
+            commit.setProject(project.getName());
+            commit.setMessage(revCommit.getFullMessage());
+            commit.setAuthor(revCommit.getAuthorIdent().getName());
+            commit.setAuthoredDate(revCommit.getCommitterIdent().getWhen());
+            commit.setCommitter(revCommit.getCommitterIdent().getName());
+            commit.setDate(revCommit.getCommitterIdent().getWhen());
+            commits.add(commit);
+        }
+        return commits;
     }
 
     @Override

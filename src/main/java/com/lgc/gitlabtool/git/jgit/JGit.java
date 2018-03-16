@@ -37,6 +37,7 @@ import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.JGitInternalException;
 import org.eclipse.jgit.api.errors.NotMergedException;
 import org.eclipse.jgit.api.errors.TransportException;
+import org.eclipse.jgit.api.errors.*;
 import org.eclipse.jgit.dircache.DirCache;
 import org.eclipse.jgit.dircache.DirCacheCheckout;
 import org.eclipse.jgit.errors.CorruptObjectException;
@@ -1185,6 +1186,33 @@ public class JGit {
             logger.error("Could not get tracking branch " + e.getMessage());
         }
         return trackingBranch;
+    }
+
+    /**
+     * This method return all commits for currently selected project
+     *
+     * @param project the project
+     * @param branchName the branch name
+     * @return list of commits for currently selected project
+     */
+    public Iterable<RevCommit> getAllCommits(Project project, String branchName) {
+        if (project == null || branchName == null) {
+            logger.error(WRONG_PARAMETERS);
+            return Collections.emptyList();
+        }
+        if (!project.isCloned()) {
+            logger.error(project.getName() + ERROR_MSG_NOT_CLONED);
+            return Collections.emptyList();
+        }
+        try (Git git = getGit(project.getPath())) {
+            try (Repository repo = git.getRepository()) {
+                Iterable<RevCommit> commits = git.log().add(repo.resolve(branchName)).call();
+                return commits;
+            }
+        } catch (IOException | GitAPIException e) {
+            logger.error("Could not get commits for selected branch " + e.getMessage());
+        }
+        return Collections.emptyList();
     }
 
     protected BranchConfig getBranchConfig(Config config, String branchName) {
