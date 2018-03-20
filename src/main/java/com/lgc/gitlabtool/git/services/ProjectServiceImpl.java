@@ -82,8 +82,8 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public Collection<Project> getProjects(Group group) {
         _consoleService.addMessage("Sending a request to receive a list of projects from GitLab.", MessageType.SIMPLE);
-        List<Group> groupWithItsSubGroups = new ArrayList<>(Arrays.asList(group));
-        groupWithItsSubGroups.addAll(group.getSubGroups());
+        List<Group> groupWithItsSubGroups = new ArrayList<>();
+        addAllSubGroupsToList(Arrays.asList(group), groupWithItsSubGroups);
 
         Collection<Project> allProjects = new ArrayList<>();
         for (Group currentGroup : groupWithItsSubGroups) {
@@ -97,6 +97,16 @@ public class ProjectServiceImpl implements ProjectService {
             }
         }
         return allProjects;
+    }
+
+    private void addAllSubGroupsToList(List<Group> subgroups, List<Group> allGroups) {
+        if (subgroups == null || subgroups.isEmpty()) {
+            return;
+        }
+        for (Group group : subgroups) {
+            allGroups.add(group);
+            addAllSubGroupsToList(group.getSubGroups(), allGroups);
+        }
     }
 
     @Override
