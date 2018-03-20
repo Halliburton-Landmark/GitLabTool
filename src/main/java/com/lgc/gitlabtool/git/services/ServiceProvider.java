@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.lgc.gitlabtool.git.connections.RESTConnector;
 import com.lgc.gitlabtool.git.connections.RESTConnectorFactory;
+import com.lgc.gitlabtool.git.connections.token.CurrentUser;
 import com.lgc.gitlabtool.git.jgit.ChangedFilesUtils;
 import com.lgc.gitlabtool.git.jgit.JGit;
 import com.lgc.gitlabtool.git.preferences.ApplicationPreferences;
@@ -32,14 +33,15 @@ public class ServiceProvider {
         ApplicationPreferences applicationPreferences = new ApplicationPreferences();
         JGit jGit = new JGit(backgroundService);
         RESTConnector restConnector = RESTConnectorFactory.getInstance().getRESTConnector();
-        LoginService loginService = new LoginServiceImpl(restConnector, backgroundService);
+        JSONParserService jsonParserService = new JSONParserServiceImpl();
+        LoginService loginService = new LoginServiceImpl(restConnector, backgroundService, jsonParserService);
         StorageService storageService = new StorageServiceImpl();
         ProjectTypeService projectTypeService = new ProjectTypeServiceImpl();
         StateService stateService = new StateServiceImpl();
         ConsoleService consoleService = new ConsoleServiceImpl();
         GitService gitService = new GitServiceImpl(stateService, jGit, new ChangedFilesUtils());
         ProjectService projectService = new ProjectServiceImpl(restConnector, projectTypeService,
-                stateService, consoleService, gitService, jGit);
+                stateService, consoleService, gitService, jsonParserService, CurrentUser.getInstance(), jGit);
         ClonedGroupsService programPropertiesService = new ClonedGroupsServiceImpl(storageService, loginService);
         PomXmlEditService pomXmlEditService = new PomXMLEditServiceImpl();
         ThemeService themeService = new ThemeServiceImpl(applicationPreferences);
@@ -47,9 +49,8 @@ public class ServiceProvider {
         _services = new HashMap<>();
         _services.put(LoginService.class, loginService);
         _services.put(ClonedGroupsService.class, programPropertiesService);
-        _services.put(GroupService.class, new GroupServiceImpl(restConnector,
-                programPropertiesService, projectService, stateService, consoleService, jGit));
-
+        _services.put(GroupService.class, new GroupServiceImpl(restConnector, programPropertiesService,
+                projectService, stateService, consoleService, jsonParserService, jGit));
         _services.put(ProjectService.class, projectService);
         _services.put(StorageService.class, storageService);
         _services.put(ReplacementService.class, new ReplacementServiceImpl());
@@ -62,6 +63,7 @@ public class ServiceProvider {
         _services.put(ThemeService.class, themeService);
         _services.put(BackgroundService.class, backgroundService);
         _services.put(ApplicationPreferences.class, applicationPreferences);
+        _services.put(JSONParserService.class, jsonParserService);
     }
 
     public void stop() {

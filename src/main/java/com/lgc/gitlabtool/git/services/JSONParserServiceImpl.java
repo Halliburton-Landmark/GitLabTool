@@ -1,4 +1,4 @@
-package com.lgc.gitlabtool.git.util;
+package com.lgc.gitlabtool.git.services;
 
 import java.lang.reflect.Type;
 import java.util.Collection;
@@ -14,26 +14,24 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.lgc.gitlabtool.git.project.nature.projecttype.ProjectType;
+import com.lgc.gitlabtool.git.util.ProjectTypeAdapter;
 
-public class JSONParser {
+public class JSONParserServiceImpl implements JSONParserService {
 
-    private static final Logger logger = LogManager.getLogger(JSONParser.class);
-    private static final GsonBuilder _gsonBuilder = new GsonBuilder();
-    private static  Gson _gson;
-    private static final Type _mapType = new TypeToken<Map<String, Object>>() {}.getType();
+    private final Logger logger = LogManager.getLogger(JSONParserServiceImpl.class);
+    private final GsonBuilder _gsonBuilder;
+    private final Gson _gson;
+    private final Type _mapType;
 
-    static {
+    public JSONParserServiceImpl() {
+        _gsonBuilder = new GsonBuilder();
         _gsonBuilder.registerTypeAdapter(ProjectType.class, new ProjectTypeAdapter());
         _gson = _gsonBuilder.create();
+        _mapType = new TypeToken<Map<String, Object>>(){}.getType();
     }
 
-    /**
-     * Parses from json to map
-     *
-     * @param json data
-     * @return Map<String, Object> or null, if json equals null
-     */
-    public static Map<String, Object> parseToMap(String json) {
+    @Override
+    public Map<String, Object> parseToMap(String json) {
         if (json != null) {
             try {
                 return _gson.fromJson(json, _mapType);
@@ -44,41 +42,24 @@ public class JSONParser {
         return null;
     }
 
-    /**
-     * Parses from map to json
-     *
-     * @param data map with data
-     * @return json or null, if map equals null
-     */
-    public static String parseMapToJson(Map<String, Object> data) {
+    @Override
+    public String parseMapToJson(Map<String, Object> data) {
         if (data != null) {
             return _gson.toJson(data);
         }
         return StringUtils.EMPTY;
     }
 
-    /**
-     * Parses from object to json
-     *
-     * @param obj object that will be parsed to json
-     * @return json or null if invalid data
-     */
-    public static String parseObjectToJson(Object obj) {
+    @Override
+    public String parseObjectToJson(Object obj) {
         if (obj != null) {
             return _gson.toJson(obj);
         }
         return null;
     }
 
-    /**
-     * Parses from json to object of T class
-     *
-     * @param json string of json with data object
-     * @param classObject type object
-     *
-     * @return T object or null, if transferred incorrect data
-     */
-    public static <T> T parseToObject(Object json, Class<T> classObject) {
+    @Override
+    public <T> T parseToObject(Object json, Class<T> classObject) {
         if (classObject != null && json != null) {
             try {
                 return _gson.fromJson((String) json, classObject);
@@ -89,15 +70,8 @@ public class JSONParser {
         return null;
     }
 
-    /**
-     * Parses from json to collection of object's T class
-     *
-     * @param json string of json with data objects
-     * @param typeClass type of objects collection
-     *
-     * @return collection of object's T class or null, if transferred incorrect data
-     */
-    public static <T> Collection<T> parseToCollectionObjects(Object json, Type typeClass) {
+    @Override
+    public <T> Collection<T> parseToCollectionObjects(Object json, Type typeClass) {
         if (typeClass != null && json != null) {
             try {
                 return _gson.fromJson((String) json, typeClass);
