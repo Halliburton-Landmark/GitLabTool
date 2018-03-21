@@ -33,6 +33,10 @@ public class ProjectList {
     private static List<Project> _projects = new ArrayList<>();
     private static ProjectList _instance;
 
+    static {
+        _instance = new ProjectList();
+    }
+
     /**
      * Gets instance of ProjectList.
      *
@@ -41,19 +45,12 @@ public class ProjectList {
      * @return instance
      */
     public static ProjectList get(Group group) {
-        if (!_isLockCreating) {
+        if (!_isLockCreating && group != null) {
             _isLockCreating = true;
             _currentGroup = group;
-            _instance = new ProjectList();
+            _projects = loadProjects();
         }
         return _instance;
-    }
-
-    private ProjectList() {
-        if (_currentGroup != null) {
-            List<Project> loadedProjects = loadProjects();
-            _projects = loadedProjects;
-        }
     }
 
     /**
@@ -153,7 +150,7 @@ public class ProjectList {
         _projectService.updateProjectStatuses(_projects);
     }
 
-    private List<Project> loadProjects() {
+    private static List<Project> loadProjects() {
         _currentGroup = _groupService.reloadGroup(_currentGroup);
         return (List<Project>) _projectService.loadProjects(_currentGroup);
     }
