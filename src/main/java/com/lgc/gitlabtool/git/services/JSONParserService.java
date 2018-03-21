@@ -4,6 +4,14 @@ import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.Map;
 
+/**
+ * Service for working with json.
+ * It allows to parse json to an object, a map or a collection and vice versa.
+ *
+ * Note: It has moved from the old JSONParseUtil class.
+ *
+ * @author Lyudmila Lyska
+ */
 public interface JSONParserService extends Service {
 
     /**
