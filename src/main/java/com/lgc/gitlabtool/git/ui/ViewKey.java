@@ -12,13 +12,13 @@ public enum ViewKey {
     PROJECTS_WINDOW("mainWindow", null),
     ALL_WINDOWS("allWindows", null),
 
-    MODULAR_CONTAINER("modularContainer", "fxml/ModularContainer.fxml"),
-    CLONING_GROUPS_WINDOW("cloningGroupsWindow", "fxml/CloningGroupsWindow.fxml"),
-    BRANCHES_WINDOW("branchesWindow", "fxml/BranchesWindow.fxml"),
-    SERVER_INPUT_WINDOW("serverInputWindow", "fxml/ServerInputWindow.fxml"),
-    EDIT_PROJECT_PROPERTIES("editProjectProperties", "fxml/EditProjectPropertiesWindow.fxml"),
-    GIT_STAGING_WINDOW("gitStagingWindow", "fxml/GitStagingWindow.fxml"),
-    STASH_WINDOW("stashWindow", "fxml/StashWindow.fxml");
+    MODULAR_CONTAINER("modularContainer", "/fxml/ModularContainer.fxml"),
+    CLONING_GROUPS_WINDOW("cloningGroupsWindow", "/fxml/CloningGroupsWindow.fxml"),
+    BRANCHES_WINDOW("branchesWindow", "/fxml/BranchesWindow.fxml"),
+    SERVER_INPUT_WINDOW("serverInputWindow", "/fxml/ServerInputWindow.fxml"),
+    EDIT_PROJECT_PROPERTIES("editProjectProperties", "/fxml/EditProjectPropertiesWindow.fxml"),
+    GIT_STAGING_WINDOW("gitStagingWindow", "/fxml/GitStagingWindow.fxml"),
+    STASH_WINDOW("stashWindow", "/fxml/StashWindow.fxml");
 
     private final String key;
     private final String path;

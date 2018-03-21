@@ -53,7 +53,7 @@ public class ServiceProvider {
         _services.put(ProjectService.class, projectService);
         _services.put(StorageService.class, storageService);
         _services.put(ReplacementService.class, new ReplacementServiceImpl());
-        _services.put(PomXMLService.class, new PomXMLServiceImpl(consoleService, stateService, pomXmlEditService));
+//        _services.put(PomXMLService.class, new PomXMLServiceImpl(consoleService, stateService, pomXmlEditService));
         _services.put(ProjectTypeService.class, projectTypeService);
         _services.put(NetworkService.class, new NetworkServiceImpl(backgroundService));
         _services.put(GitService.class, gitService);

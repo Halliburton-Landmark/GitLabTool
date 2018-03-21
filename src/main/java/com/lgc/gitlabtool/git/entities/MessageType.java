@@ -2,7 +2,7 @@ package com.lgc.gitlabtool.git.entities;
 
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.ThemeService;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.lgc.gitlabtool.git.jgit.JGitStatus;
 

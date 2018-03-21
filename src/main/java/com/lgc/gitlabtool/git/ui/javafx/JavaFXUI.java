@@ -37,7 +37,7 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
 public class JavaFXUI extends Application implements UserInterface {
-    private static final Logger logger = LogManager.getLogger(LoginDialog.class);
+    private static final Logger logger = LogManager.getLogger(JavaFXUI.class);
 
     private static final String TITLE_STATE_WARNING = "Error Exiting";
     private static final String HEADER_CONFIRMATION_MESSAGE = "Confirm exit";

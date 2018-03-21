@@ -3,7 +3,7 @@ package com.lgc.gitlabtool.git.ui.javafx.controllers.listcells;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
 import com.lgc.gitlabtool.git.services.ThemeService;
 import javafx.scene.control.Label;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.jgit.ChangedFile;

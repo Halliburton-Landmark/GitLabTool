@@ -9,14 +9,15 @@ import javafx.scene.image.ImageView;
  * @author Pavlo Pidhorniy
  */
 public class AppIconHolder {
-    private static final String APP_ICON_URL = "icons/gitlab.png";
+    private static final String APP_ICON_URL = "/icons/gitlab.png";
     private static AppIconHolder instance = null;
 
     private static Image appIconImage;
     private static ImageView appIconImageView;
 
     private AppIconHolder() {
-        appIconImage = new Image(getClass().getClassLoader().getResource(APP_ICON_URL).toExternalForm());
+        appIconImage = new Image(getClass().
+                getResourceAsStream(APP_ICON_URL));
         appIconImageView = new ImageView(appIconImage);
     }
 
