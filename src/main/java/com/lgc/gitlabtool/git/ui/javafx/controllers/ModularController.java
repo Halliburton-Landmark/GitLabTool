@@ -22,16 +22,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.lgc.gitlabtool.git.ui.javafx.controllers.listview.GroupListView;
-import com.lgc.gitlabtool.git.ui.javafx.controllers.listview.ListViewMgr;
-import com.lgc.gitlabtool.git.ui.javafx.controllers.listview.ListViewMgrProvider;
-import com.lgc.gitlabtool.git.ui.javafx.controllers.listview.ProjectListView;
-import javafx.scene.Scene;
-import javafx.scene.effect.Effect;
-import com.lgc.gitlabtool.git.preferences.ApplicationPreferences;
-import com.lgc.gitlabtool.git.preferences.PreferencesNodes;
-import com.lgc.gitlabtool.git.util.OpenTerminalUtil;
-import javafx.beans.value.ChangeListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -70,6 +60,10 @@ import com.lgc.gitlabtool.git.ui.javafx.StatusDialog;
 import com.lgc.gitlabtool.git.ui.javafx.WorkIndicatorDialog;
 import com.lgc.gitlabtool.git.ui.javafx.comparators.ProjectListComparator;
 import com.lgc.gitlabtool.git.ui.javafx.controllers.listcells.ProjectListCell;
+import com.lgc.gitlabtool.git.ui.javafx.controllers.listview.GroupListView;
+import com.lgc.gitlabtool.git.ui.javafx.controllers.listview.ListViewMgr;
+import com.lgc.gitlabtool.git.ui.javafx.controllers.listview.ListViewMgrProvider;
+import com.lgc.gitlabtool.git.ui.javafx.controllers.listview.ProjectListView;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.PushProgressListener;
 import com.lgc.gitlabtool.git.ui.javafx.progressdialog.CloneProgressDialog;
@@ -90,6 +84,7 @@ import javafx.application.Platform;
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -123,6 +118,7 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToolBar;
 import javafx.scene.control.Tooltip;
 import javafx.scene.effect.ColorAdjust;
+import javafx.scene.effect.Effect;
 import javafx.scene.effect.GaussianBlur;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -179,7 +175,7 @@ public class ModularController implements UpdateProgressListener {
     private static final String FAILED_HEADER_MESSAGE_LOAD_GROUP = "Failed loading cloned groups. ";
     private static final String FAILED_CONTENT_MESSAGE_LOAD_GROUP
             = "These groups may have been moved to another folder or deleted from disc: ";
-    private static final Double DEFAULT_GROUPS_DIVIDER = 0.3;
+
     //endregion
     /*
      *

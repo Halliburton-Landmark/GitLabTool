@@ -25,7 +25,6 @@ import com.lgc.gitlabtool.git.entities.User;
 import com.lgc.gitlabtool.git.jgit.JGit;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.ui.javafx.listeners.OperationProgressListener;
-import com.lgc.gitlabtool.git.util.JSONParser;
 import com.lgc.gitlabtool.git.util.PathUtilities;
 
 public class GroupServiceImpl implements GroupService {
@@ -44,20 +43,22 @@ public class GroupServiceImpl implements GroupService {
     private static ProjectService _projectService;
     private static StateService _stateService;
     private static ConsoleService _consoleService;
-
+    private static JSONParserService _jsonParserService;
     private static JGit _jGit;
 
     public GroupServiceImpl(RESTConnector connector,
-                                 ClonedGroupsService clonedGroupsService,
-                                 ProjectService projectService,
-                                 StateService stateService,
-                                 ConsoleService consoleService,
-                                 JGit jGit) {
+                            ClonedGroupsService clonedGroupsService,
+                            ProjectService projectService,
+                            StateService stateService,
+                            ConsoleService consoleService,
+                            JSONParserService jsonParserService,
+                            JGit jGit) {
         setConnector(connector);
         setClonedGroupsService(clonedGroupsService);
         setProjectService(projectService);
         setStateService(stateService);
         setConsoleService(consoleService);
+        setJSONParserService(jsonParserService);
         setJGit(jGit);
     }
 
@@ -69,7 +70,7 @@ public class GroupServiceImpl implements GroupService {
             HashMap<String, String> header = new HashMap<>();
             header.put(privateTokenKey, privateTokenValue);
             Object userProjects = getConnector().sendGet("/groups", null, header).getBody();
-            Collection<Group> parsedGroups = JSONParser.parseToCollectionObjects(
+            Collection<Group> parsedGroups = _jsonParserService.parseToCollectionObjects(
                     userProjects, new TypeToken<List<Group>>() {}.getType());
             setGroupsTheirSubGroups((List<Group>)parsedGroups);
             return parsedGroups;
@@ -195,6 +196,12 @@ public class GroupServiceImpl implements GroupService {
     private void setConsoleService(ConsoleService consoleService) {
         if (consoleService != null) {
             _consoleService = consoleService;
+        }
+    }
+
+    private void setJSONParserService(JSONParserService jsonParserService) {
+        if (jsonParserService != null) {
+            _jsonParserService = jsonParserService;
         }
     }
 

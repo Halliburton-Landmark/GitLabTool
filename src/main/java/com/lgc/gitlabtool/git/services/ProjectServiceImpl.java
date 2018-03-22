@@ -30,7 +30,6 @@ import com.lgc.gitlabtool.git.jgit.JGit;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.listeners.updateProgressListener.UpdateProgressListener;
 import com.lgc.gitlabtool.git.project.nature.projecttype.ProjectType;
-import com.lgc.gitlabtool.git.util.JSONParser;
 import com.lgc.gitlabtool.git.util.PathUtilities;
 
 public class ProjectServiceImpl implements ProjectService {
@@ -53,14 +52,14 @@ public class ProjectServiceImpl implements ProjectService {
             + "It is not cloned or has conflicts";
 
     private static final Logger _logger = LogManager.getLogger(ProjectServiceImpl.class);
-    private static final CurrentUser _currentUser = CurrentUser.getInstance();
+    private static CurrentUser _currentUser;
     private static JGit _git;
-
     private static ProjectTypeService _projectTypeService;
     private static StateService _stateService;
     private static RESTConnector _connector;
     private ConsoleService _consoleService;
     private GitService _gitService;
+    private JSONParserService _jsonParserService;
 
     private final Set<UpdateProgressListener> _listeners = new HashSet<>();
     private static int PROGRESS_LOADING = 0;
@@ -70,17 +69,24 @@ public class ProjectServiceImpl implements ProjectService {
                               StateService stateService,
                               ConsoleService consoleService,
                               GitService gitService,
+                              JSONParserService jsonParserService,
+                              CurrentUser currentUser,
                               JGit git) {
         setConnector(connector);
         setProjectTypeService(projectTypeService);
         setStateService(stateService);
         setConsoleService(consoleService);
         setGitService(gitService);
+        setCurrentUser(currentUser);
+        setJSONParserService(jsonParserService);
         setJGit(git);
     }
 
     @Override
     public Collection<Project> getProjects(Group group) {
+        if (group == null) {
+            throw new IllegalArgumentException("Group can't be null.");
+        }
         _consoleService.addMessage("Sending a request to receive a list of projects from GitLab.", MessageType.SIMPLE);
         List<Group> groupWithItsSubGroups = new ArrayList<>();
         addAllSubGroupsToList(Arrays.asList(group), groupWithItsSubGroups);
@@ -93,6 +99,9 @@ public class ProjectServiceImpl implements ProjectService {
             } else {
                 String sendString = "/groups/" + currentGroup.getId() + "/projects?per_page=" + MAX_PROJECTS_COUNT_ON_THE_PAGE;
                 Collection<Project> groupProjects = getProjectsForAllPages(sendString, header);
+                if (groupProjects == null) {
+                    return null;
+                }
                 allProjects.addAll(groupProjects);
             }
         }
@@ -100,7 +109,7 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     private void addAllSubGroupsToList(List<Group> subgroups, List<Group> allGroups) {
-        if (subgroups == null || subgroups.isEmpty()) {
+        if (subgroups.isEmpty()) {
             return;
         }
         for (Group group : subgroups) {
@@ -291,15 +300,15 @@ public class ProjectServiceImpl implements ProjectService {
             return null;
         }
         Object jsonProjects = httpResponse.getBody();
-        Collection<Project> projects = JSONParser.parseToCollectionObjects(jsonProjects,
-                new TypeToken<List<Project>>() {}.getType());
+        Collection<Project> projects = new ArrayList<>(_jsonParserService.parseToCollectionObjects(jsonProjects,
+                new TypeToken<List<Project>>() {}.getType()));
 
         int countOfPages = getCountOfPages(httpResponse);
         for (int i = 2; i <= countOfPages; i++) {
             String nextPageString = requestString + "&page=" + i;
             Object nextPageJSONProjects = getConnector().sendGet(nextPageString, null, header).getBody();
-            Collection<Project> nextPageProjects = JSONParser.parseToCollectionObjects(nextPageJSONProjects,
-                    new TypeToken<List<Project>>() {}.getType());
+            Collection<Project> nextPageProjects = new ArrayList<>(_jsonParserService.parseToCollectionObjects(nextPageJSONProjects,
+                    new TypeToken<List<Project>>() {}.getType()));
             projects.addAll(nextPageProjects);
         }
 
@@ -360,7 +369,7 @@ public class ProjectServiceImpl implements ProjectService {
             _logger.info(startCreatingMessage);
             progressListener.onStart(startCreatingMessage);
             Object obj = getConnector().sendPost("/projects", param, header).getBody();
-            return JSONParser.parseToObject(obj, Project.class);
+            return _jsonParserService.parseToObject(obj, Project.class);
         }
         return null;
     }
@@ -462,6 +471,17 @@ public class ProjectServiceImpl implements ProjectService {
         }
     }
 
+    private void setCurrentUser(CurrentUser currentUser) {
+        if (currentUser != null) {
+            _currentUser = currentUser;
+        }
+    }
+
+    private void setJSONParserService(JSONParserService jsonParserService) {
+        if (jsonParserService != null) {
+            _jsonParserService = jsonParserService;
+        }
+    }
 
     private boolean isProjectExists(Collection<Project> projects , String nameProject) {
         return projects.stream()

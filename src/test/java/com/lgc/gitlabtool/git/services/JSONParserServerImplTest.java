@@ -1,6 +1,7 @@
-package com.lgc.gitlabtool.git.util;
+package com.lgc.gitlabtool.git.services;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -19,7 +20,7 @@ import com.lgc.gitlabtool.git.entities.Group;
  *
  * @author Lyudmila Lyska
  */
-public class JSONParserTest {
+public class JSONParserServerImplTest {
 
     private static final String groupJson = "{\"id\":1348279,\"name\":\"apitest_group\",\"path\":\"apitest_group\","
             + "\"description\":\"\",\"visibility_level\":20,\"ldap_cn\":null,\"ldap_access\":null,"
@@ -57,86 +58,91 @@ public class JSONParserTest {
     @Test
     public void parseToMapCorrectDataTest() {
 
-        Map<String, Object> map = JSONParser.parseToMap(groupJson);
+        Map<String, Object> map = getJSONParserServer().parseToMap(groupJson);
 
         Assert.assertNotNull(map);
         Assert.assertNotNull(map.get("projects"));
         Assert.assertEquals("apitest_group", map.get("name"));
         Assert.assertEquals(1348279, ((Double) map.get("id")).intValue());
 
-        Assert.assertTrue(JSONParser.parseToMap("{}").isEmpty());
-        Assert.assertTrue(JSONParser.parseToMap("[]").isEmpty());
+        Assert.assertTrue(getJSONParserServer().parseToMap("{}").isEmpty());
+        Assert.assertTrue(getJSONParserServer().parseToMap("[]").isEmpty());
     }
 
     @Test
     public void parseToMapIncorrectDataTest() {
-        Assert.assertNull(JSONParser.parseToMap(""));
-        Assert.assertNull(JSONParser.parseToMap("8mdf 99485jg"));
-        Assert.assertNull(JSONParser.parseToMap(null));
+        Assert.assertNull(getJSONParserServer().parseToMap(""));
+        Assert.assertNull(getJSONParserServer().parseToMap("8mdf 99485jg"));
+        Assert.assertNull(getJSONParserServer().parseToMap(null));
     }
 
     @Test
     public void parseToJsonFromMapCorrectDataTest() {
-        String result = JSONParser.parseMapToJson(getGroupMap());
+        String result = getJSONParserServer().parseMapToJson(getGroupMap());
         Assert.assertNotNull(result);
         Assert.assertTrue(result.contains("\"path\":\"apitest_group\""));
-        Assert.assertNotNull(JSONParser.parseMapToJson(Collections.emptyMap()));
+        Assert.assertNotNull(getJSONParserServer().parseMapToJson(Collections.emptyMap()));
     }
 
     @Test
     public void parseToJsonFromMapIncorrectDataTest() {
-        Assert.assertTrue(JSONParser.parseMapToJson(null).isEmpty());
+        Assert.assertTrue(getJSONParserServer().parseMapToJson(null).isEmpty());
     }
 
     @Test
     public void parseToJsonFromObjectCorrectDataTest() {
-        String result = JSONParser.parseObjectToJson(getTestingGroup());
+        String result = getJSONParserServer().parseObjectToJson(getTestingGroup());
         Assert.assertNotNull(result);
         Assert.assertTrue(result.contains("\"_isCloned\":true"));
     }
 
     @Test
     public void parseToJsonFromObjectIncorrectDataTest() {
-        String result = JSONParser.parseObjectToJson(null);
+        String result = getJSONParserServer().parseObjectToJson(null);
         Assert.assertNull(result);
     }
 
     @Test
     public void parseToObjectCorrectDataTest() {
-        Group gr = JSONParser.parseToObject(groupJson, Group.class);
+        Group gr = getJSONParserServer().parseToObject(groupJson, Group.class);
         Assert.assertNotNull(gr);
         Assert.assertEquals(1348279, gr.getId());
 
-        Assert.assertNotNull(JSONParser.parseToObject("{}", Group.class));
+        Assert.assertNotNull(getJSONParserServer().parseToObject("{}", Group.class));
     }
 
     @Test
     public void parseToObjectIncorrectDataTest() {
-        Assert.assertNull(JSONParser.parseToObject(null, Group.class));
-        Assert.assertNull(JSONParser.parseToObject(null, null));
-        Assert.assertNull(JSONParser.parseToObject(groupJson, null));
-        Assert.assertNull(JSONParser.parseToObject("756hghf dfu yhs", Group.class));
-        Assert.assertNull(JSONParser.parseToObject("[]", Group.class));
+        Assert.assertNull(getJSONParserServer().parseToObject(null, Group.class));
+        Assert.assertNull(getJSONParserServer().parseToObject(null, null));
+        Assert.assertNull(getJSONParserServer().parseToObject(groupJson, null));
+        Assert.assertNull(getJSONParserServer().parseToObject("756hghf dfu yhs", Group.class));
+        Assert.assertNull(getJSONParserServer().parseToObject("[]", Group.class));
     }
 
     @Test
     public void parseToCollectionCorrectDataTest() {
-        Collection<Group> grs = JSONParser.parseToCollectionObjects(groupsJson, typeListGroups);
+        Collection<Group> grs = getJSONParserServer().parseToCollectionObjects(groupsJson, typeListGroups);
 
         Assert.assertNotNull(grs);
         Assert.assertEquals(2, grs.size());
 
-        grs = JSONParser.parseToCollectionObjects("[]", typeListGroups);
+        grs = getJSONParserServer().parseToCollectionObjects("[]", typeListGroups);
         Assert.assertTrue(grs.isEmpty());
     }
 
     @Test
     public void parseToCollectionIncorrectDataTest() {
-        List emptyList = Collections.emptyList();
-        Assert.assertEquals(JSONParser.parseToCollectionObjects(null, typeListGroups), emptyList);
-        Assert.assertEquals(JSONParser.parseToCollectionObjects(groupsJson, null), emptyList);
-        Assert.assertEquals(JSONParser.parseToCollectionObjects(null, null), emptyList);
-        Assert.assertEquals(JSONParser.parseToCollectionObjects("76437 jhj 31", typeListGroups), emptyList);
-        Assert.assertEquals(JSONParser.parseToCollectionObjects("{}", typeListGroups), emptyList);
+        List<Object> emptyList = new ArrayList<>();
+
+        Assert.assertEquals(getJSONParserServer().parseToCollectionObjects(null, typeListGroups), emptyList);
+        Assert.assertEquals(getJSONParserServer().parseToCollectionObjects(groupsJson, null), emptyList);
+        Assert.assertEquals(getJSONParserServer().parseToCollectionObjects(null, null), emptyList);
+        Assert.assertEquals(getJSONParserServer().parseToCollectionObjects("76437 jhj 31", typeListGroups), emptyList);
+        Assert.assertEquals(getJSONParserServer().parseToCollectionObjects("{}", typeListGroups), emptyList);
+    }
+
+    private JSONParserService getJSONParserServer() {
+        return new JSONParserServiceImpl();
     }
 }

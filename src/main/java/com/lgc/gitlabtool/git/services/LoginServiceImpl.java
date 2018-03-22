@@ -13,16 +13,17 @@ import com.lgc.gitlabtool.git.connections.token.CurrentUser;
 import com.lgc.gitlabtool.git.connections.token.Token;
 import com.lgc.gitlabtool.git.entities.User;
 import com.lgc.gitlabtool.git.ui.javafx.dto.DialogDTO;
-import com.lgc.gitlabtool.git.util.JSONParser;
 
 public class LoginServiceImpl implements LoginService {
 
     private RESTConnector _connector;
     private CurrentUser _currentUser;
-    private BackgroundService _backgroundService;
+    private final BackgroundService _backgroundService;
+    private JSONParserService _jsonParserServer;
 
-    public LoginServiceImpl(RESTConnector connector, BackgroundService backgroundService) {
+    public LoginServiceImpl(RESTConnector connector, BackgroundService backgroundService, JSONParserService jsonParserServer) {
         setConnector(connector);
+        setJSONParserServer(jsonParserServer);
         this._backgroundService = backgroundService;
     }
 
@@ -38,7 +39,7 @@ public class LoginServiceImpl implements LoginService {
             HttpResponseHolder responseHolder = getConnector().sendPost("/oauth/token", params, null);
             Object tokenJson = responseHolder != null ? responseHolder.getBody() : null;
             if (isResponseCodeValid(responseHolder, tokenJson)) {
-                Token accessToken = JSONParser.parseToObject(tokenJson, Token.class);
+                Token accessToken = _jsonParserServer.parseToObject(tokenJson, Token.class);
                 if (accessToken != null) {
                     HashMap<String, String> secureHeader = new HashMap<>();
                     secureHeader.put("Authorization", accessToken.getTokenWithType());
@@ -46,7 +47,7 @@ public class LoginServiceImpl implements LoginService {
                     HttpResponseHolder userInfoResponseHolder = getConnector().sendGet("/user", null, secureHeader);
                     Object userJson2 = userInfoResponseHolder != null ? userInfoResponseHolder.getBody() : null;
                     if (isResponseCodeValid(userInfoResponseHolder, userJson2)) {
-                        User newUser = JSONParser.parseToObject(userJson2, User.class);
+                        User newUser = _jsonParserServer.parseToObject(userJson2, User.class);
                         _currentUser = CurrentUser.getInstance();
                         _currentUser.setCurrentUser(newUser);
                         _currentUser.setOAuth2TokenValue(accessToken.getTokenWithType());
@@ -64,7 +65,7 @@ public class LoginServiceImpl implements LoginService {
     public User getCurrentUser() {
         return _currentUser.getCurrentUser();
     }
-    
+
     private boolean isResponseCodeValid(HttpResponseHolder responseHolder, Object userJson) {
         return !(responseHolder.getResponseCode() == HttpStatus.SC_REQUEST_TIMEOUT
                 || responseHolder.getResponseCode() == 0 || userJson == null);
@@ -76,6 +77,12 @@ public class LoginServiceImpl implements LoginService {
 
     private void setConnector(RESTConnector connector) {
         _connector = connector;
+    }
+
+    private void setJSONParserServer(JSONParserService jsonParserServer) {
+        if (jsonParserServer != null) {
+            _jsonParserServer = jsonParserServer;
+        }
     }
 
     @Override
