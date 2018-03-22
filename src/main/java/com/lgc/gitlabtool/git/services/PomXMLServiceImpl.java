@@ -533,7 +533,7 @@ public class PomXMLServiceImpl implements PomXMLService {
 
         Path pomPath = Paths.get(pathToProject + File.separator + POM_NAME);
 
-        return PathUtilities.isExistsAndRegularFile(pomPath);
+        return PathUtilities.get().isExistsAndRegularFile(pomPath);
     }
 
     private boolean isValidString(String value) {

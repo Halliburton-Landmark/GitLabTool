@@ -78,7 +78,7 @@ public class Group {
             throw new IllegalArgumentException("Invalid value passed");
         }
         Path pathToGroup = Paths.get(path);
-        if (PathUtilities.isExistsAndDirectory(pathToGroup)) {
+        if (PathUtilities.get().isExistsAndDirectory(pathToGroup)) {
             _path = path;
         }
     }

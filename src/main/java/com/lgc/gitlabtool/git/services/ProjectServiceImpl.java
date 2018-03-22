@@ -60,6 +60,7 @@ public class ProjectServiceImpl implements ProjectService {
     private ConsoleService _consoleService;
     private GitService _gitService;
     private JSONParserService _jsonParserService;
+    private PathUtilities _pathUtilities;
 
     private final Set<UpdateProgressListener> _listeners = new HashSet<>();
     private static int PROGRESS_LOADING = 0;
@@ -71,6 +72,7 @@ public class ProjectServiceImpl implements ProjectService {
                               GitService gitService,
                               JSONParserService jsonParserService,
                               CurrentUser currentUser,
+                              PathUtilities pathUtilities,
                               JGit git) {
         setConnector(connector);
         setProjectTypeService(projectTypeService);
@@ -79,6 +81,7 @@ public class ProjectServiceImpl implements ProjectService {
         setGitService(gitService);
         setCurrentUser(currentUser);
         setJSONParserService(jsonParserService);
+        setPathUtilities(pathUtilities);
         setJGit(git);
     }
 
@@ -120,6 +123,9 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public Collection<Project> loadProjects(Group group) {
+        if (group == null || !group.isCloned()) {
+            throw new IllegalArgumentException("Group can't be null and should be cloned");
+        }
         _stateService.stateON(ApplicationState.LOAD_PROJECTS);
         Collection<Project> projects = getProjects(group);
         if (projects == null) {
@@ -133,7 +139,7 @@ public class ProjectServiceImpl implements ProjectService {
         }
         String successMessage = "The projects of " + group.getName() + PREFIX_SUCCESSFUL_LOAD;
         Path path = Paths.get(group.getPath());
-        Collection<String> projectsName = PathUtilities.getFolders(path);
+        Collection<String> projectsName = _pathUtilities.getFolders(path);
         if (projectsName.isEmpty()) {
             _consoleService.addMessage(successMessage, MessageType.SUCCESS);
             _stateService.stateOFF(ApplicationState.LOAD_PROJECTS);
@@ -152,7 +158,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     private boolean isProjectCloned(Project project, String groupPath) {
         String localPath = groupPath + File.separator + project.getName();
-        return PathUtilities.isExistsAndDirectory(Paths.get(localPath));
+        return _pathUtilities.isExistsAndDirectory(Paths.get(localPath));
     }
 
     @Override
@@ -162,17 +168,20 @@ public class ProjectServiceImpl implements ProjectService {
         }
         Collection<Project> projects = getProjects(group);
         if (projects == null) {
+            progressListener.onError();
             progressListener.onFinish(null, CREATE_PROJECT_ERROR);
             return;
         }
         boolean isExists = isProjectExists(projects, name);
         if (isExists) {
+            progressListener.onError();
             progressListener.onFinish(null, PROJECT_ALREADY_EXISTS_MESSAGE);
             return;
         }
         _consoleService.addMessage("Started creating project in the " + group.getName() + " group.", MessageType.SIMPLE);
         Project project = createRemoteProject(group, name, progressListener);
         if (project == null) {
+            progressListener.onError();
             progressListener.onFinish(project, CREATE_REMOTE_PROJECT_FAILED_MESSAGE);
             return;
         } else {
@@ -182,22 +191,25 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public void updateProjectStatuses(List<Project> projects) {
+    public boolean updateProjectStatuses(List<Project> projects) {
         if (projects == null || projects.isEmpty()) {
-            return;
+            return false;
         }
         _stateService.stateON(ApplicationState.UPDATE_PROJECT_STATUSES);
-        projects.parallelStream().filter(Project::isCloned)
+        projects.parallelStream().filter(Objects::nonNull)
+                                 .filter(Project::isCloned)
                                  .forEach(this::updateProjectStatus);
         _stateService.stateOFF(ApplicationState.UPDATE_PROJECT_STATUSES);
+        return true;
     }
 
     @Override
-    public void updateProjectStatus(Project project) {
+    public boolean updateProjectStatus(Project project) {
         if (project == null || project.getPath() == null) {
-            return;
+            return false;
         }
         project.setProjectStatus(_gitService.getProjectStatus(project));
+        return true;
     }
 
     @Override
@@ -389,6 +401,7 @@ public class ProjectServiceImpl implements ProjectService {
             }
             @Override
             public void onError(Object... t) {
+                progressListener.onError();
                 progressListener.onFinish((Object)null, "Failed creating the " + project.getName() + " project!");
             }
             @Override
@@ -409,7 +422,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     private boolean createStructure(Project project, String structure) {
         Path path = Paths.get(project.getPath() + File.separator + structure);
-        return PathUtilities.createPath(path, false);
+        return _pathUtilities.createPath(path, false);
     }
 
     private void commitAndPushStructuresType(List<Project> projects, Set<String> structures,
@@ -428,7 +441,7 @@ public class ProjectServiceImpl implements ProjectService {
         _git.commitAndPush(projects, "Created new project", null, null, null, null, EmptyProgressListener.get());
 
         if (!isCreatedStructure) {
-            PathUtilities.deletePath(Paths.get(createdProject.getPath()));
+            _pathUtilities.deletePath(Paths.get(createdProject.getPath()));
         }
         progressListener.onSuccess();
         String createLocalProjectMessage = isCreatedStructure ? CREATE_LOCAL_PROJECT_SUCCESS_MESSAGE
@@ -443,7 +456,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     private void cloneWithoutState(List<Project> projects, String destinationPath, ProgressListener progressListener) {
         Path path = Paths.get(destinationPath);
-        if (!PathUtilities.isExistsAndDirectory(path)) {
+        if (!_pathUtilities.isExistsAndDirectory(path)) {
             String errorMessage = path.toAbsolutePath() + " path is not exist or it is not a directory.";
             _logger.error(errorMessage);
             progressListener.onError(null, errorMessage);
@@ -480,6 +493,12 @@ public class ProjectServiceImpl implements ProjectService {
     private void setJSONParserService(JSONParserService jsonParserService) {
         if (jsonParserService != null) {
             _jsonParserService = jsonParserService;
+        }
+    }
+
+    private void setPathUtilities(PathUtilities pathUtilities) {
+        if (pathUtilities != null) {
+            _pathUtilities = pathUtilities;
         }
     }
 

@@ -22,14 +22,26 @@ public class PathUtilities {
 
     private static final Logger logger = LogManager.getLogger(PathUtilities.class);
     public static final String PATH_NOT_EXISTS_OR_NOT_DIRECTORY = "The transmitted path does not exist or is not a directory.";
+    private static PathUtilities _instance;
 
+    /**
+     * Gets instance of {@link PathUtilities}
+     *
+     * @return instance
+     */
+    public static PathUtilities get() {
+        if (_instance == null) {
+            _instance = new PathUtilities();
+        }
+        return _instance;
+    }
     /**
      * Checks path is exist and it is directory.
      *
      * @param path the local path
      * @return <code>true</code> if a path exists and it is folder, otherwise <code>false</code>.
      */
-    public static boolean isExistsAndDirectory(Path path) {
+    public boolean isExistsAndDirectory(Path path) {
         return path != null && Files.exists(path) && Files.isDirectory(path);
     }
 
@@ -39,7 +51,7 @@ public class PathUtilities {
      * @param path the local path
      * @return <code>true</code> if a path exists and it is regular file, otherwise <code>false</code>.
      */
-    public static boolean isExistsAndRegularFile(String path) {
+    public boolean isExistsAndRegularFile(String path) {
         if (path == null) {
             return false;
         }
@@ -52,7 +64,7 @@ public class PathUtilities {
      * @param path the local path
      * @return <code>true</code> if a path exists and it is regular file, otherwise <code>false</code>.
      */
-    public static boolean isExistsAndRegularFile(Path path) {
+    public boolean isExistsAndRegularFile(Path path) {
         return path != null && Files.exists(path) && Files.isRegularFile(path);
     }
 
@@ -62,7 +74,7 @@ public class PathUtilities {
      * @param path path on disk
      * @return names of found folders
      */
-    public static Collection<String> getFolders(Path path) {
+    public Collection<String> getFolders(Path path) {
         if (!isExistsAndDirectory(path)) {
             return Collections.emptyList();
         }
@@ -81,7 +93,7 @@ public class PathUtilities {
      * @param  path the path on the local disk
      * @return true - if it was deleted successful, otherwise - false.
      */
-    public static boolean deletePath(Path path) {
+    public boolean deletePath(Path path) {
         if (!Files.exists(path)) {
             return false;
         }
@@ -100,7 +112,7 @@ public class PathUtilities {
      * @param  string the path on the local disk
      * @return true - if it was deleted successful, otherwise - false.
      */
-    public static boolean deletePath(String string) {
+    public boolean deletePath(String string) {
         if (string == null) {
             return false;
         }
@@ -115,7 +127,7 @@ public class PathUtilities {
      * @param isFolder if <code>true</code> - a folder will be create, <code>false</code> - a file will be create.
      * @return status of operation
      */
-    public static boolean createPath(Path path, boolean isFolder) {
+    public boolean createPath(Path path, boolean isFolder) {
         try {
             if (isFolder) {
                 Files.createDirectories(path);

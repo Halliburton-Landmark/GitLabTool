@@ -6,9 +6,11 @@ import java.util.Map;
 import com.lgc.gitlabtool.git.connections.RESTConnector;
 import com.lgc.gitlabtool.git.connections.RESTConnectorFactory;
 import com.lgc.gitlabtool.git.connections.token.CurrentUser;
+import com.lgc.gitlabtool.git.entities.ClonedGroups;
 import com.lgc.gitlabtool.git.jgit.ChangedFilesUtils;
 import com.lgc.gitlabtool.git.jgit.JGit;
 import com.lgc.gitlabtool.git.preferences.ApplicationPreferences;
+import com.lgc.gitlabtool.git.util.PathUtilities;
 
 public class ServiceProvider {
 
@@ -40,17 +42,19 @@ public class ServiceProvider {
         StateService stateService = new StateServiceImpl();
         ConsoleService consoleService = new ConsoleServiceImpl();
         GitService gitService = new GitServiceImpl(stateService, jGit, new ChangedFilesUtils());
-        ProjectService projectService = new ProjectServiceImpl(restConnector, projectTypeService,
-                stateService, consoleService, gitService, jsonParserService, CurrentUser.getInstance(), jGit);
-        ClonedGroupsService programPropertiesService = new ClonedGroupsServiceImpl(storageService, loginService);
+        ProjectService projectService = new ProjectServiceImpl(restConnector, projectTypeService, stateService,
+                consoleService, gitService, jsonParserService, CurrentUser.getInstance(), PathUtilities.get(), jGit);
+        ClonedGroupsService programPropertiesService = new ClonedGroupsServiceImpl(storageService, loginService,
+                PathUtilities.get(), ClonedGroups.getInstance());
         PomXmlEditService pomXmlEditService = new PomXMLEditServiceImpl();
         ThemeService themeService = new ThemeServiceImpl(applicationPreferences);
+        GroupService groupService = new GroupServiceImpl(restConnector, programPropertiesService,
+                projectService, stateService, consoleService, jsonParserService, PathUtilities.get(), jGit);
 
         _services = new HashMap<>();
         _services.put(LoginService.class, loginService);
         _services.put(ClonedGroupsService.class, programPropertiesService);
-        _services.put(GroupService.class, new GroupServiceImpl(restConnector, programPropertiesService,
-                projectService, stateService, consoleService, jsonParserService, jGit));
+        _services.put(GroupService.class, groupService);
         _services.put(ProjectService.class, projectService);
         _services.put(StorageService.class, storageService);
         _services.put(ReplacementService.class, new ReplacementServiceImpl());

@@ -97,7 +97,7 @@ public class Project implements Serializable {
     }
 
     protected boolean checkPath(Path pathToProject) {
-        return PathUtilities.isExistsAndDirectory(pathToProject);
+        return PathUtilities.get().isExistsAndDirectory(pathToProject);
     }
 
     /**

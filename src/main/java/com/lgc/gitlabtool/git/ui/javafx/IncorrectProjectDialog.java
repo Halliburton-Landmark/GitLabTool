@@ -75,7 +75,7 @@ public class IncorrectProjectDialog extends GLTAlert {
             _logger.info("Deleting projects from the local disk...");
             // delete folders with incorrect projects from the local disc
             long count = inccorectProjects.stream()
-                                          .filter(project -> PathUtilities.deletePath(project.getPath()))
+                                          .filter(project -> PathUtilities.get().deletePath(project.getPath()))
                                           .count();
 
             titleMessage = "Delete status dialog";

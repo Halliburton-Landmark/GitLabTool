@@ -258,7 +258,7 @@ public class GitStagingWindowController extends AbstractStateListener {
 
     private void deleteChangedFile(ChangedFile changedFile) {
         String path = changedFile.getProject().getPath() + File.separator + changedFile.getFileName();
-        PathUtilities.deletePath(path);
+        PathUtilities.get().deletePath(path);
     }
 
     private Collection<ChangedFile> getUntrackedFiles(Collection<ChangedFile> files) {

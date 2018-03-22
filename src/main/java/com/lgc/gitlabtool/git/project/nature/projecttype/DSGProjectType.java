@@ -31,7 +31,7 @@ public class DSGProjectType extends ProjectTypeImpl {
 
     @Override
     protected boolean isPathCorrespondsToType(Path path) {
-        return PathUtilities.isExistsAndRegularFile(path);
+        return PathUtilities.get().isExistsAndRegularFile(path);
     }
 
 }

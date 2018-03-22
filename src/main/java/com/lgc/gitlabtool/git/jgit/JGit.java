@@ -37,7 +37,6 @@ import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.JGitInternalException;
 import org.eclipse.jgit.api.errors.NotMergedException;
 import org.eclipse.jgit.api.errors.TransportException;
-import org.eclipse.jgit.api.errors.*;
 import org.eclipse.jgit.dircache.DirCache;
 import org.eclipse.jgit.dircache.DirCacheCheckout;
 import org.eclipse.jgit.errors.CorruptObjectException;
@@ -987,7 +986,7 @@ public class JGit {
     private boolean clone(Project project, String localPath) {
         String path = localPath + File.separator + project.getPathWithNamespace();
         if (!clone(project.getHttpUrlToRepo(), path)) {
-            PathUtilities.deletePath(Paths.get(path));
+            PathUtilities.get().deletePath(Paths.get(path));
             return false;
         }
         project.setClonedStatus(true);

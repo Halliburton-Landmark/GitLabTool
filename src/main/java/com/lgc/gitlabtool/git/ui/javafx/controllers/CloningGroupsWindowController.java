@@ -162,7 +162,7 @@ public class CloningGroupsWindowController {
             return true;
         }
         Path path = Paths.get(text);
-        return !PathUtilities.isExistsAndDirectory(path);
+        return !PathUtilities.get().isExistsAndDirectory(path);
     }
 
     private void setStyleAndDisableForIncorrectData() {

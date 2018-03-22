@@ -1520,7 +1520,7 @@ public class ModularController implements UpdateProgressListener {
 
     private boolean hasNotProjectPomFile(Project project) {
         String pomFilePath = project.getPath() + File.separator + DSGProjectType.STRUCTURE_OF_POM_FILE;
-        return !PathUtilities.isExistsAndRegularFile(pomFilePath);
+        return !PathUtilities.get().isExistsAndRegularFile(pomFilePath);
     }
 
     //endregion

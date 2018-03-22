@@ -13,17 +13,24 @@ import com.lgc.gitlabtool.git.util.URLManager;
 
 public class ClonedGroupsServiceImpl implements ClonedGroupsService {
 
-    private final ClonedGroups _clonedGroupsProvider = ClonedGroups.getInstance();
-
     private List<Group> _notExistGroups;
-
     private StorageService _storageService;
-
     private LoginService _loginService;
+    private PathUtilities _pathUtilities;
+    private ClonedGroups _clonedGroupsProvider;
 
-    public ClonedGroupsServiceImpl(StorageService storageService, LoginService loginService) {
+    public ClonedGroupsServiceImpl(StorageService storageService, LoginService loginService,
+                                   PathUtilities pathUtilities, ClonedGroups clonedGroupsProvider) {
         setStorageService(storageService);
         setLoginService(loginService);
+        setPathUtilities(pathUtilities);
+        setClonedGroups(clonedGroupsProvider);
+    }
+
+    private void setClonedGroups(ClonedGroups clonedGroupsProvider) {
+        if (clonedGroupsProvider != null) {
+            _clonedGroupsProvider = clonedGroupsProvider;
+        }
     }
 
     private void setLoginService(LoginService loginService) {
@@ -35,6 +42,12 @@ public class ClonedGroupsServiceImpl implements ClonedGroupsService {
     private void setStorageService(StorageService storageService) {
         if (storageService != null) {
             _storageService = storageService;
+        }
+    }
+
+    private void setPathUtilities(PathUtilities pathUtilities) {
+        if (pathUtilities != null) {
+            _pathUtilities = pathUtilities;
         }
     }
 
@@ -104,7 +117,7 @@ public class ClonedGroupsServiceImpl implements ClonedGroupsService {
         if (path == null) {
             return true;
         }
-        return !PathUtilities.isExistsAndDirectory(Paths.get(path));
+        return !_pathUtilities.isExistsAndDirectory(Paths.get(path));
     }
 
 }

@@ -44,6 +44,7 @@ public class GroupServiceImpl implements GroupService {
     private static StateService _stateService;
     private static ConsoleService _consoleService;
     private static JSONParserService _jsonParserService;
+    private PathUtilities _pathUtilities;
     private static JGit _jGit;
 
     public GroupServiceImpl(RESTConnector connector,
@@ -52,6 +53,7 @@ public class GroupServiceImpl implements GroupService {
                             StateService stateService,
                             ConsoleService consoleService,
                             JSONParserService jsonParserService,
+                            PathUtilities pathUtilities,
                             JGit jGit) {
         setConnector(connector);
         setClonedGroupsService(clonedGroupsService);
@@ -59,6 +61,7 @@ public class GroupServiceImpl implements GroupService {
         setStateService(stateService);
         setConsoleService(consoleService);
         setJSONParserService(jsonParserService);
+        setPathUtilities(pathUtilities);
         setJGit(jGit);
     }
 
@@ -88,7 +91,7 @@ public class GroupServiceImpl implements GroupService {
         _stateService.stateON(ApplicationState.CLONE);
 
         Path path = Paths.get(destinationPath);
-        if (!PathUtilities.isExistsAndDirectory(path)) {
+        if (!_pathUtilities.isExistsAndDirectory(path)) {
             String errorMessage = path.toAbsolutePath() + " path is not exist or it is not a directory.";
             logger.error(errorMessage);
             progressListener.onError(null, errorMessage);
@@ -105,7 +108,7 @@ public class GroupServiceImpl implements GroupService {
             return null;
         }
         Path path = Paths.get(groupPath);
-        if (!PathUtilities.isExistsAndDirectory(path)) {
+        if (!_pathUtilities.isExistsAndDirectory(path)) {
             _consoleService.addMessage("Path doesn't exist or it is not directory", MessageType.ERROR);
             return null;
         }
@@ -205,6 +208,12 @@ public class GroupServiceImpl implements GroupService {
         }
     }
 
+    private void setPathUtilities(PathUtilities pathUtilities) {
+        if (pathUtilities != null) {
+            _pathUtilities = pathUtilities;
+        }
+    }
+
     private void setJGit(JGit jGit) {
         if (jGit != null) {
             _jGit = jGit;
@@ -239,14 +248,14 @@ public class GroupServiceImpl implements GroupService {
             return result;
         }
         Path path = Paths.get(pathToClonedGroup);
-        if (!PathUtilities.isExistsAndDirectory(path)) {
+        if (!_pathUtilities.isExistsAndDirectory(path)) {
             message = "Error removing. The specified path does not exist or is not a directory.";
             _consoleService.addMessage(message, MessageType.ERROR);
             result.put(false, message);
             return result;
         }
 
-        boolean deleteResult = PathUtilities.deletePath(path);
+        boolean deleteResult = _pathUtilities.deletePath(path);
         if (deleteResult) {
             message = "The group was successfully deleted from " + path.toString();
             _consoleService.addMessage(message, MessageType.SUCCESS);
@@ -314,7 +323,7 @@ public class GroupServiceImpl implements GroupService {
             return;
         }
         String pathMainGroup = destinationPath + File.separator + cloneGroup.getName();
-        PathUtilities.createPath(Paths.get(pathMainGroup), true);
+        _pathUtilities.createPath(Paths.get(pathMainGroup), true);
         _jGit.clone(allProjects, destinationPath, progressListener);
         cloneGroup.setClonedStatus(true);
         cloneGroup.setPath(pathMainGroup);
