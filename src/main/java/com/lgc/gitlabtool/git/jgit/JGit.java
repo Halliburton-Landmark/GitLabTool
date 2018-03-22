@@ -37,7 +37,6 @@ import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.JGitInternalException;
 import org.eclipse.jgit.api.errors.NotMergedException;
 import org.eclipse.jgit.api.errors.TransportException;
-import org.eclipse.jgit.api.errors.*;
 import org.eclipse.jgit.dircache.DirCache;
 import org.eclipse.jgit.dircache.DirCacheCheckout;
 import org.eclipse.jgit.errors.CorruptObjectException;
@@ -1001,7 +1000,7 @@ public class JGit {
             result.close();
            return true;
         } catch (JGitInternalException e) {
-            logger.error("Cloning process of group was cancelled!");
+            logger.error("Cloning error: " + e.getMessage());
         } catch (GitAPIException e) {
             logger.error("Clone error " + linkClone + " : " + e.getMessage());
         }
