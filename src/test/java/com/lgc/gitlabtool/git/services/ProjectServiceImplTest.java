@@ -417,12 +417,30 @@ public class ProjectServiceImplTest {
                 _consoleService, _gitService, _jsonParserService, _currentUser, _pathUtilities, _jGit) {
             @Override
             public Collection<Project> getProjects(Group group) {
-                return null;
+                return Arrays.asList(new Project(), getProjectWithName("test name"));
             }
         };
         CreateProjectTestListener progressListener = new CreateProjectTestListener();
 
-        _projectService.createProject(getClonedGroup(), "name", new UnknownProjectType(), progressListener);
+        _projectService.createProject(getClonedGroup(), "test name", new UnknownProjectType(), progressListener);
+
+        assertFalse(progressListener.isSuccessfulOperation());
+    }
+
+    @Test
+    public void createProjectInvalidToken() {
+        when(_currentUser.getOAuth2TokenValue()).thenReturn(null);
+        when(_currentUser.getPrivateTokenKey()).thenReturn(null);
+        _projectService = new ProjectServiceImpl(_connector, _projectTypeService, _stateService,
+                _consoleService, _gitService, _jsonParserService, _currentUser, _pathUtilities, _jGit) {
+            @Override
+            public Collection<Project> getProjects(Group group) {
+                return Arrays.asList(new Project(), getProjectWithName("test name"));
+            }
+        };
+        CreateProjectTestListener progressListener = new CreateProjectTestListener();
+
+        _projectService.createProject(getClonedGroup(), "new test name", new UnknownProjectType(), progressListener);
 
         assertFalse(progressListener.isSuccessfulOperation());
     }
@@ -476,6 +494,20 @@ public class ProjectServiceImplTest {
         project.setClonedStatus(true);
         ProjectStatus projectStatus = getProjectStatus(false, true);
         project.setProjectStatus(projectStatus);
+        return project;
+    }
+
+
+    private Project getProjectWithName(String name) {
+        Project project = mock(Project.class);
+        try {
+            Class<?> gotClass = Class.forName(Project.class.getName());
+            Object instance = gotClass.newInstance();
+            setProjectFieldValue(instance, "_name", name);
+            project = (Project) instance;
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+            System.err.println("Failed setting private id field in Project.class: " + e.getMessage());
+        }
         return project;
     }
 
