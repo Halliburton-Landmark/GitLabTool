@@ -5,6 +5,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -164,7 +165,7 @@ public class ProjectServiceImplTest {
 
     @Test
     public void getProjectsErrorFromGitLab() {
-        HttpResponseHolder httpResponseHolderMock = getHttpResponseHolder(false, "1");
+        HttpResponseHolder httpResponseHolderMock = getHttpResponseHolder(false, "1", "test_json");
         when(_currentUser.getOAuth2TokenValue()).thenReturn("testTokenValue");
         when(_currentUser.getPrivateTokenKey()).thenReturn("testTokenKey");
         when(_connector.sendGet(anyString(), eq(null), anyMap())).thenReturn(httpResponseHolderMock);
@@ -179,7 +180,7 @@ public class ProjectServiceImplTest {
         int countSubGroup = 5;
         Group testedGroup = getGroupWithSubGroup(countSubGroup);
         // mock of answers from the GitLab
-        HttpResponseHolder httpResponseHolderMock = getHttpResponseHolder(true, "1");
+        HttpResponseHolder httpResponseHolderMock = getHttpResponseHolder(true, "1", "test_json");
         when(_currentUser.getOAuth2TokenValue()).thenReturn("testTokenValue");
         when(_currentUser.getPrivateTokenKey()).thenReturn("testTokenKey");
         when(_connector.sendGet(anyString(), eq(null), anyMap())).thenReturn(httpResponseHolderMock);
@@ -198,7 +199,7 @@ public class ProjectServiceImplTest {
         Group testedGroup = getGroupWithSubGroup(countSubGroup);
         // mock of answers from the GitLab
         int countProjectPages = 3;
-        HttpResponseHolder httpResponseHolderMock = getHttpResponseHolder(true, "" + countProjectPages);
+        HttpResponseHolder httpResponseHolderMock = getHttpResponseHolder(true, "" + countProjectPages, "test_json");
         when(_currentUser.getOAuth2TokenValue()).thenReturn("testTokenValue");
         when(_currentUser.getPrivateTokenKey()).thenReturn("testTokenKey");
         when(_connector.sendGet(anyString(), eq(null), anyMap())).thenReturn(httpResponseHolderMock);
@@ -397,6 +398,7 @@ public class ProjectServiceImplTest {
 
     @Test
     public void createProjectErrorFromGitLab() {
+        CreateProjectTestListener progressListener = new CreateProjectTestListener();
         _projectService = new ProjectServiceImpl(_connector, _projectTypeService, _stateService,
                 _consoleService, _gitService, _jsonParserService, _currentUser, _pathUtilities, _jGit) {
             @Override
@@ -404,7 +406,6 @@ public class ProjectServiceImplTest {
                 return null;
             }
         };
-        CreateProjectTestListener progressListener = new CreateProjectTestListener();
 
         _projectService.createProject(getClonedGroup(), "name", new UnknownProjectType(), progressListener);
 
@@ -413,6 +414,7 @@ public class ProjectServiceImplTest {
 
     @Test
     public void createProjectProjectExist() {
+        CreateProjectTestListener progressListener = new CreateProjectTestListener();
         _projectService = new ProjectServiceImpl(_connector, _projectTypeService, _stateService,
                 _consoleService, _gitService, _jsonParserService, _currentUser, _pathUtilities, _jGit) {
             @Override
@@ -420,7 +422,6 @@ public class ProjectServiceImplTest {
                 return Arrays.asList(new Project(), getProjectWithName("test name"));
             }
         };
-        CreateProjectTestListener progressListener = new CreateProjectTestListener();
 
         _projectService.createProject(getClonedGroup(), "test name", new UnknownProjectType(), progressListener);
 
@@ -429,6 +430,7 @@ public class ProjectServiceImplTest {
 
     @Test
     public void createProjectInvalidToken() {
+        CreateProjectTestListener progressListener = new CreateProjectTestListener();
         when(_currentUser.getOAuth2TokenValue()).thenReturn(null);
         when(_currentUser.getPrivateTokenKey()).thenReturn(null);
         _projectService = new ProjectServiceImpl(_connector, _projectTypeService, _stateService,
@@ -438,11 +440,200 @@ public class ProjectServiceImplTest {
                 return Arrays.asList(new Project(), getProjectWithName("test name"));
             }
         };
-        CreateProjectTestListener progressListener = new CreateProjectTestListener();
 
         _projectService.createProject(getClonedGroup(), "new test name", new UnknownProjectType(), progressListener);
 
         assertFalse(progressListener.isSuccessfulOperation());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void createProjectErrorCreatingRemote() {
+        CreateProjectTestListener progressListener = new CreateProjectTestListener();
+        HttpResponseHolder httpResponseHolderMock = getHttpResponseHolder(false, "1", null);
+        when(_currentUser.getOAuth2TokenValue()).thenReturn("testTokenValue");
+        when(_currentUser.getPrivateTokenKey()).thenReturn("testTokenKey");
+        when(_connector.sendPost(anyString(), anyMap(), anyMap())).thenReturn(httpResponseHolderMock);
+        when(_jsonParserService.parseToObject(eq(null), any(Class.class))).thenReturn(null);
+        _projectService = new ProjectServiceImpl(_connector, _projectTypeService, _stateService,
+                _consoleService, _gitService, _jsonParserService, _currentUser, _pathUtilities, _jGit) {
+            @Override
+            public Collection<Project> getProjects(Group group) {
+                return Arrays.asList(new Project(), getProjectWithName("test name"));
+            }
+        };
+
+        _projectService.createProject(getClonedGroup(), "new test name", new UnknownProjectType(), progressListener);
+
+        assertFalse(progressListener.isSuccessfulOperation());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void createProjectErrorCreatingLocal() {
+        CreateProjectTestListener progressListener = new CreateProjectTestListener();
+        HttpResponseHolder httpResponseHolderMock = getHttpResponseHolder(true, "1", "test_json");
+        when(_currentUser.getOAuth2TokenValue()).thenReturn("testTokenValue");
+        when(_currentUser.getPrivateTokenKey()).thenReturn("testTokenKey");
+        when(_connector.sendPost(anyString(), anyMap(), anyMap())).thenReturn(httpResponseHolderMock);
+        when(_jsonParserService.parseToObject(anyString(), any(Class.class))).thenReturn(getProjectWithName("new test name"));
+        when(_pathUtilities.isExistsAndDirectory(any(Path.class))).thenReturn(false);
+        _projectService = new ProjectServiceImpl(_connector, _projectTypeService, _stateService,
+                _consoleService, _gitService, _jsonParserService, _currentUser, _pathUtilities, _jGit) {
+            @Override
+            public Collection<Project> getProjects(Group group) {
+                return Arrays.asList(new Project(), getProjectWithName("test name"));
+            }
+        };
+
+        _projectService.createProject(getClonedGroup(), "new test name", new UnknownProjectType(), progressListener);
+
+        assertFalse(progressListener.isSuccessfulOperation());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void createProjectCloneToLocalFailed() {
+        List<Project> projects = Arrays.asList(new Project(), getProjectWithName("test name"));
+        CreateProjectTestListener progressListener = new CreateProjectTestListener();
+        HttpResponseHolder httpResponseHolderMock = getHttpResponseHolder(true, "1", "test_json");
+        when(_currentUser.getOAuth2TokenValue()).thenReturn("testTokenValue");
+        when(_currentUser.getPrivateTokenKey()).thenReturn("testTokenKey");
+        when(_connector.sendPost(anyString(), anyMap(), anyMap())).thenReturn(httpResponseHolderMock);
+        when(_jsonParserService.parseToObject(anyString(), any(Class.class))).thenReturn(getProjectWithName("new test name"));
+        when(_pathUtilities.isExistsAndDirectory(any(Path.class))).thenReturn(true);
+
+        Mockito.doAnswer(new Answer<Object>() {
+            @Override
+            public Object answer(InvocationOnMock invocation) {
+                ProgressListener progressListener = (ProgressListener) invocation.getArguments()[2];
+                progressListener.onError();
+                progressListener.onFinish();
+                return null;
+            }
+        }).when(_jGit).clone(Mockito.anyList(), anyString(), any(ProgressListener.class));
+
+        _projectService = new ProjectServiceImpl(_connector, _projectTypeService, _stateService,
+                _consoleService, _gitService, _jsonParserService, _currentUser, _pathUtilities, _jGit) {
+            @Override
+            public Collection<Project> getProjects(Group group) {
+                return projects;
+            }
+        };
+
+        _projectService.createProject(getClonedGroup(), "new test name", new UnknownProjectType(), progressListener);
+
+        assertFalse(progressListener.isSuccessfulOperation());
+    }
+
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void createProjectCreateWithoutStructuresType() {
+        List<Project> projects = Arrays.asList(new Project(), getProjectWithName("test name"));
+        CreateProjectTestListener progressListener = new CreateProjectTestListener();
+        HttpResponseHolder httpResponseHolderMock = getHttpResponseHolder(true, "1", "test_json");
+        when(_currentUser.getOAuth2TokenValue()).thenReturn("testTokenValue");
+        when(_currentUser.getPrivateTokenKey()).thenReturn("testTokenKey");
+        when(_connector.sendPost(anyString(), anyMap(), anyMap())).thenReturn(httpResponseHolderMock);
+        when(_jsonParserService.parseToObject(anyString(), any(Class.class))).thenReturn(getProjectWithName("new test name"));
+        when(_pathUtilities.isExistsAndDirectory(any(Path.class))).thenReturn(true);
+        Mockito.doAnswer(new Answer<Object>() {
+            @Override
+            public Object answer(InvocationOnMock invocation) {
+                System.err.println();
+                ProgressListener progressListener = (ProgressListener) invocation.getArguments()[2];
+                progressListener.onSuccess();
+                return null;
+            }
+        }).when(_jGit).clone(anyList(), anyString(), any(ProgressListener.class));
+
+        _projectService = new ProjectServiceImpl(_connector, _projectTypeService, _stateService,
+                _consoleService, _gitService, _jsonParserService, _currentUser, _pathUtilities, _jGit) {
+            @Override
+            public Collection<Project> getProjects(Group group) {
+                return projects;
+            }
+        };
+        when(_jGit.commitAndPush(anyList(), anyString(), eq(null), eq(null), eq(null), eq(null), eq(EmptyProgressListener.get()))).thenReturn(null);
+
+        _projectService.createProject(getClonedGroup(), "new test name", new UnknownProjectType(), progressListener);
+
+        assertTrue(progressListener.isSuccessfulOperation());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void createProjectCreateStructuresTypeSuccess() {
+        List<Project> projects = Arrays.asList(new Project(), getProjectWithName("test name"));
+        CreateProjectTestListener progressListener = new CreateProjectTestListener();
+        HttpResponseHolder httpResponseHolderMock = getHttpResponseHolder(true, "1", "test_json");
+        when(_currentUser.getOAuth2TokenValue()).thenReturn("testTokenValue");
+        when(_currentUser.getPrivateTokenKey()).thenReturn("testTokenKey");
+        when(_connector.sendPost(anyString(), anyMap(), anyMap())).thenReturn(httpResponseHolderMock);
+        when(_jsonParserService.parseToObject(anyString(), any(Class.class))).thenReturn(getProjectWithName("new test name"));
+        when(_pathUtilities.isExistsAndDirectory(any(Path.class))).thenReturn(true);
+        when(_pathUtilities.createPath(any(Path.class), eq(false))).thenReturn(true);
+        when(_jGit.addUntrackedFilesToIndex(Mockito.anyCollection(), any(Project.class))).thenReturn(null);
+        when(_jGit.commitAndPush(anyList(), anyString(), eq(null), eq(null), eq(null), eq(null), eq(EmptyProgressListener.get()))).thenReturn(null);
+        Mockito.doAnswer(new Answer<Object>() {
+            @Override
+            public Object answer(InvocationOnMock invocation) {
+                ProgressListener progressListener = (ProgressListener) invocation.getArguments()[2];
+                progressListener.onSuccess();
+                return null;
+            }
+        }).when(_jGit).clone(anyList(), anyString(), any(ProgressListener.class));
+
+        _projectService = new ProjectServiceImpl(_connector, _projectTypeService, _stateService,
+                _consoleService, _gitService, _jsonParserService, _currentUser, _pathUtilities, _jGit) {
+            @Override
+            public Collection<Project> getProjects(Group group) {
+                return projects;
+            }
+        };
+
+        _projectService.createProject(getClonedGroup(), "new test name", new DSGProjectType(), progressListener);
+
+        assertTrue(progressListener.isSuccessfulOperation());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void createProjectCreateStructuresTypeFailed() {
+        List<Project> projects = Arrays.asList(new Project(), getProjectWithName("test name"));
+        Project project = getProjectWithName("new test name");
+        project.setPath(".");
+        CreateProjectTestListener progressListener = new CreateProjectTestListener();
+        HttpResponseHolder httpResponseHolderMock = getHttpResponseHolder(true, "1", "test_json");
+        when(_currentUser.getOAuth2TokenValue()).thenReturn("testTokenValue");
+        when(_currentUser.getPrivateTokenKey()).thenReturn("testTokenKey");
+        when(_connector.sendPost(anyString(), anyMap(), anyMap())).thenReturn(httpResponseHolderMock);
+        when(_jsonParserService.parseToObject(anyString(), any(Class.class))).thenReturn(project);
+        when(_pathUtilities.isExistsAndDirectory(any(Path.class))).thenReturn(true);
+        when(_pathUtilities.createPath(any(Path.class), eq(false))).thenReturn(false);
+        when(_pathUtilities.deletePath(any(Path.class))).thenReturn(true);
+        when(_jGit.addUntrackedFilesToIndex(Mockito.anyCollection(), any(Project.class))).thenReturn(null);
+        when(_jGit.commitAndPush(anyList(), anyString(), eq(null), eq(null), eq(null), eq(null), eq(EmptyProgressListener.get()))).thenReturn(null);
+        Mockito.doAnswer(new Answer<Object>() {
+            @Override
+            public Object answer(InvocationOnMock invocation) {
+                ProgressListener progressListener = (ProgressListener) invocation.getArguments()[2];
+                progressListener.onSuccess();
+                return null;
+            }
+        }).when(_jGit).clone(anyList(), anyString(), any(ProgressListener.class));
+        _projectService = new ProjectServiceImpl(_connector, _projectTypeService, _stateService,
+                _consoleService, _gitService, _jsonParserService, _currentUser, _pathUtilities, _jGit) {
+            @Override
+            public Collection<Project> getProjects(Group group) {
+                return projects;
+            }
+        };
+
+        _projectService.createProject(getClonedGroup(), "new test name", new DSGProjectType(), progressListener);
+
+        assertTrue(progressListener.isSuccessfulOperation());
     }
 
     /*********************************************************************************************/
@@ -541,10 +732,10 @@ public class ProjectServiceImplTest {
                 new HashSet<>(), new HashSet<>(), new HashSet<>(), new HashSet<>(), new HashSet<>(), new HashSet<>());
     }
 
-    private HttpResponseHolder getHttpResponseHolder(boolean isSuccess, String countPages) {
+    private HttpResponseHolder getHttpResponseHolder(boolean isSuccess, String countPages, String body) {
         HttpResponseHolder httpResponseHolderMock = mock(HttpResponseHolder.class);
         when(httpResponseHolderMock.getResponseCode()).thenReturn(isSuccess ? 200 : 101);
-        when(httpResponseHolderMock.getBody()).thenReturn("test_json");
+        when(httpResponseHolderMock.getBody()).thenReturn(body);
         Map<String, List<String>> prefereces = new HashMap<>();
         prefereces.put("X-Total-Pages", Arrays.asList(countPages));
         when(httpResponseHolderMock.getHeaderLines()).thenReturn(prefereces);

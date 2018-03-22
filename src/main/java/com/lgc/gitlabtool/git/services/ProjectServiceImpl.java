@@ -380,7 +380,8 @@ public class ProjectServiceImpl implements ProjectService {
             String startCreatingMessage = "Creating remote project...";
             _logger.info(startCreatingMessage);
             progressListener.onStart(startCreatingMessage);
-            Object obj = getConnector().sendPost("/projects", param, header).getBody();
+            HttpResponseHolder httpResponseHolder = getConnector().sendPost("/projects", param, header);
+            Object obj = httpResponseHolder.getBody();
             return _jsonParserService.parseToObject(obj, Project.class);
         }
         return null;
@@ -390,7 +391,7 @@ public class ProjectServiceImpl implements ProjectService {
         List<Project> projects = Arrays.asList(project);
         progressListener.onStart("Cloning of created project");
         Path path = Paths.get(fullGroupPath);
-        path = path.getParent();
+        path = path.getParent() == null ? path : path.getParent();
 
         cloneWithoutState(projects, path.toString(), new ProgressListener() {
             @Override
