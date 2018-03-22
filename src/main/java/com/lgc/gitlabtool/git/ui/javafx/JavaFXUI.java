@@ -7,8 +7,6 @@ import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.lgc.gitlabtool.git.entities.Group;
-import com.lgc.gitlabtool.git.entities.ProjectList;
 import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.services.BackgroundService;
 import com.lgc.gitlabtool.git.services.ServiceProvider;
@@ -21,8 +19,6 @@ import com.lgc.gitlabtool.git.util.ScreenUtil;
 import com.lgc.gitlabtool.git.util.ShutDownUtil;
 
 import javafx.application.Application;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Rectangle2D;
@@ -79,22 +75,6 @@ public class JavaFXUI extends Application implements UserInterface {
         primaryStage.setScene(new GLTScene(root));
         primaryStage.getIcons().add(appIcon);
         primaryStage.setOnCloseRequest(confirmCloseEventHandler);
-        primaryStage.focusedProperty().addListener(new ChangeListener<Boolean>() {
-            @Override
-            public void changed(ObservableValue<? extends Boolean> booleanProperty, Boolean oldValue, Boolean newValue) {
-                if (newValue) {
-                    _backgroundService.runInBackgroundThread(this::updateProjectStatuses);
-                }
-            }
-
-            private void updateProjectStatuses() {
-                ProjectList projectList = ProjectList.get(null);
-                Group group = projectList.getCurrentGroup();
-                if (group != null) {
-                    projectList.updateProjectStatuses();
-                }
-            }
-        });
 
         /* Set sizing and position */
         Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
