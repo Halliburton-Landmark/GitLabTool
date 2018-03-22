@@ -100,7 +100,7 @@ public class TableController {
         @Override
         public void onChanged(Change<? extends Project> projects) {
             List<Project> projectsList = projectListView.getSelectionModel().getSelectedItems();
-            if ( !projectsList.isEmpty() ) {
+            if ( !projectsList.isEmpty() && toggleButton.isSelected() ) {
                 ObservableList<Commit> data = FXCollections.observableArrayList();
                 for(Project project : projectsList) {
                     String nameBranch = _gitService.getCurrentBranchName(project);
