@@ -152,14 +152,7 @@ public class ModularController implements UpdateProgressListener {
     private static final String HEADER_GROUP_TITLE = "Current group: ";
     private static final String ABOUT_POPUP_TITLE = "About";
     private static final Image _appIcon = AppIconHolder.getInstance().getAppIcoImage();
-    private static final String ABOUT_POPUP_CONTENT = "Contacts: \r\nYurii Pitomets (yurii.pitomets2@halliburton.com)" +
-            "\r\n" +
-            "\r\nDevelopers:" +
-            "\r\nYevhen Strazhko (Yevhen.Strazhko@halliburton.com)" +
-            "\r\nLiudmyla Lyska (Liudmyla.Lyska@halliburton.com)" +
-            "\r\nPavlo Pidhornyi (Pavlo.Pidhornyi@halliburton.com)" +
-            "\r\nIhor Khlaponin (Ihor.Khlaponin@halliburton.com)" +
-            "\r\nOleksandr Kozlov (Oleksandr.Kozlov@halliburton.com)";
+    private static final String ABOUT_POPUP_CONTENT = "Contacts: Yurii Pitomets (yurii.pitomets2@halliburton.com)";
     private static final String ABOUT_POPUP_HEADER =
             getProjectNameWithVersion() + " (" + getBuildTimestamp() + " " + getCommitHash() + "), powered by Luxoft";
 
