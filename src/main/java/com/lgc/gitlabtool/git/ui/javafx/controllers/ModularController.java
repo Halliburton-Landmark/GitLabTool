@@ -648,7 +648,6 @@ public class ModularController implements UpdateProgressListener {
 
         _workIndicatorDialog = new WorkIndicatorDialog(stage, WORK_INDICATOR_START_MESSAGE);
         Runnable selectGroup = () -> {
-            ProjectList.get(null).reset();
             _projectsList = ProjectList.get(_currentGroup);
             resetLoadingProgress();
             if (_projectsList.getProjects() == null) {
@@ -892,6 +891,7 @@ public class ModularController implements UpdateProgressListener {
     @FXML
     @SuppressWarnings("unused")
     private void loadGroupWindow(ActionEvent actionEvent) {
+        ProjectList.get(null).reset();
         Platform.runLater(this::loadGroupWindow);
     }
 
@@ -1638,6 +1638,7 @@ public class ModularController implements UpdateProgressListener {
 
     private void exit() {
         List<ApplicationState> activeStates = _stateService.getActiveStates();
+        activeStates.remove(ApplicationState.UPDATE_PROJECT_STATUSES);
         if (activeStates.isEmpty()) {
             ShutDownUtil.shutdown();
             Platform.exit();

@@ -110,6 +110,7 @@ public class JavaFXUI extends Application implements UserInterface {
 
     private final EventHandler<WindowEvent> confirmCloseEventHandler = event -> {
         List<ApplicationState> activeStates = _stateService.getActiveStates();
+        activeStates.remove(ApplicationState.UPDATE_PROJECT_STATUSES);
         if(!activeStates.isEmpty()) {
             event.consume();
             showWarningAlertForActiveStates(activeStates);
