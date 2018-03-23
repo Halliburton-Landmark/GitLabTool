@@ -443,7 +443,57 @@
 
                             <div class="col-md-12 align-left">
                                 <h4 id="line4_11">Stash changes - <a href="#top">#back to top</a></h4>
-                                <p>Some text</p>
+                                <img src="user_guide_files/images/stash_button.png" alt="Stash button" class="img-responsive img-thumbnail">
+                                <p>
+                                    Stash button is always available on the Project toolbar. If user presses it
+                                    without selecting any projects in the list then the Stash window will be opened
+                                    for all cloned projects:
+                                    <img src="user_guide_files/images/stash_changes.png" alt="Stash changes window" class="img-responsive img-thumbnail">
+                                    If user selected some projects in the project list then the Stash window will be opened for selected projects
+                                    <img src="user_guide_files/images/stash_changes_for_selected_projects.png" alt="Stash changes for selected projects" class="img-responsive img-thumbnail">
+                                    The Stash window is unavailable for projects which weren't cloned or projects with conflicts.
+                                </p>
+                                <h5>Create stash</h5>
+                                <p>
+                                    <img src="user_guide_files/images/create_stash.png" alt="Create stash" class="img-responsive img-thumbnail">
+                                    A stash will be created for all projects which are shown in the list in the right
+                                    side of the window.<br>
+                                    If “Include untracked files” checkbox is selected then new files in projects will
+                                    be stashed, otherwise only changed files will be stashed.<br>
+                                    A stash message cannot be empty.
+                                    <img src="user_guide_files/images/stash_message.png" alt="Stash message" class="img-responsive img-thumbnail">
+                                    After stashing of all the changes, the projects will be reset on HEAD revision and
+                                    created stash will be available in the stash list
+                                </p>
+                                <h5>Stash list</h5>
+                                <p>
+                                    <img src="user_guide_files/images/stash_list.png" alt="Stash list" class="img-responsive img-thumbnail">
+                                    <ol>
+                                        <li><img src="user_guide_files/images/stash_item.png"> <strong>Single stash.</strong>
+                                            A stash that was created for one project (using the GitLab Tool or any another tool).
+                                            <img src="user_guide_files/images/single_stash.png" alt="Single stash" class="img-responsive img-thumbnail">
+                                        </li>
+                                        <li><img src="user_guide_files/images/stash_group_item.png"> <strong>Group stash.</strong>
+                                            A stash that was created for few projects (only using the GitLab Tool).
+                                            All projects for which stash was created are displayed in the list in the
+                                            right side of the window. <br>
+                                            An example of creating of group stash is described in Create Stash part
+                                            <img src="user_guide_files/images/group_stash.png" alt="group stash" class="img-responsive img-thumbnail">
+                                        </li>
+                                    </ol>
+                                </p>
+                                <h5>Apply stash</h5>
+                                <p>
+                                    <img src="user_guide_files/images/apply_stash.png" alt="Apply stash" class="img-responsive img-thumbnail">
+                                    The stash will be applied to the displayed projects in the list in the right side of the window<br>
+                                    After applying the stash it is not removed from the stash list. A user can use drop button to delete it
+                                    <img src="user_guide_files/images/apply_stash_result.png" alt="Apply stash result" class="img-responsive img-thumbnail">
+                                </p>
+                                <h5>Drop stash</h5>
+                                <p>
+                                    <img src="user_guide_files/images/drop_stash.png" alt="Drop stash" class="img-responsive img-thumbnail">
+                                    After confirming the operation, the stash is removed from the list permanently
+                                </p>
                             </div>
 
                             <div class="col-md-12 align-left">
