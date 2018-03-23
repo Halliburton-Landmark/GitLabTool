@@ -103,10 +103,10 @@ public class Project implements Serializable {
     /**
      * Gets name with namespace (path includes all parent groups)
      *
-     * @return path
+     * @return path can be null if we wasn't get it from the GitLab
      */
     public String getNameWithNamespace() {
-        return _nameWithNamespace.replace(" ", "");
+        return _nameWithNamespace != null ? _nameWithNamespace.replace(" ", "") : null;
     }
 
     /**
