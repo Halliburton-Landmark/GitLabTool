@@ -3,16 +3,16 @@ package com.lgc.gitlabtool.git.ui.javafx.controllers.listcells;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.lgc.gitlabtool.git.services.ServiceProvider;
-import com.lgc.gitlabtool.git.services.ThemeService;
-import javafx.scene.control.Label;
 import org.apache.commons.lang.StringUtils;
 
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.ProjectStatus;
+import com.lgc.gitlabtool.git.services.ServiceProvider;
+import com.lgc.gitlabtool.git.services.ThemeService;
 
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
@@ -60,7 +60,7 @@ public class ProjectListCell extends ListCell<Project> {
             Label currentBranchTextView = getCurrentBrantProjectText(item);
 
             String tooltipText = item.isCloned() ?
-                    item.getName() + " " + currentBranchTextView.getText() : SHADOW_PROJECT_TOOLTIP;
+                    item.getNameWithNamespace() + " " + currentBranchTextView.getText() : SHADOW_PROJECT_TOOLTIP;
             Tooltip.install(projectNameTextView, new Tooltip(tooltipText));
 
             HBox hBoxItem = new HBox(imageView, projectNameTextView, currentBranchTextView);

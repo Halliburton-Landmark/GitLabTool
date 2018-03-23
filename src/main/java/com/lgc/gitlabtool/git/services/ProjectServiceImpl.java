@@ -151,7 +151,7 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     private boolean isProjectCloned(Project project, String groupPath) {
-        String localPath = groupPath + File.separator + project.getName();
+        String localPath = getProjectPath(project, groupPath);
         return PathUtilities.isExistsAndDirectory(Paths.get(localPath));
     }
 
@@ -351,11 +351,20 @@ public class ProjectServiceImpl implements ProjectService {
         notifyListenersAboutChangesProgress(message);
     }
 
-    private void updateDataProject(Project project, String pathGroup) {
+    private void updateDataProject(Project project, String groupPath) {
         _logger.debug(String.format(LOADING_PROJECT_MESSAGE_TEMPLATE, "Start", project.getName()));
-        project.setPath(pathGroup + File.separator + project.getName());
+        String projectPath = getProjectPath(project, groupPath);
+        project.setPath(projectPath);
         updateProjectTypeAndStatus(project);
         _logger.debug(String.format(LOADING_PROJECT_MESSAGE_TEMPLATE, "Finish", project.getName()));
+    }
+
+    private String getProjectPath(Project project, String groupPath) {
+        Path fullGroupPath = Paths.get(groupPath);
+        if (fullGroupPath.getParent() != null) {
+            fullGroupPath = fullGroupPath.getParent();
+        }
+        return fullGroupPath + File.separator + project.getNameWithNamespace();
     }
 
     private Project createRemoteProject(Group group, String name, ProgressListener progressListener) {

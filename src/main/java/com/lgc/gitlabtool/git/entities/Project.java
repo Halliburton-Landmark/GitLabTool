@@ -30,8 +30,8 @@ public class Project implements Serializable {
     @SerializedName("name")
     private String _name;
 
-    @SerializedName("path_with_namespace")
-    private String _pathWithNamespace;
+    @SerializedName("name_with_namespace")
+    private String _nameWithNamespace;
 
     /** Path to the cloned project **/
     private String _path;
@@ -101,12 +101,12 @@ public class Project implements Serializable {
     }
 
     /**
-     * Gets path with namespace (path includes all parent groups)
+     * Gets name with namespace (path includes all parent groups)
      *
      * @return path
      */
-    public String getPathWithNamespace() {
-        return _pathWithNamespace;
+    public String getNameWithNamespace() {
+        return _nameWithNamespace.replace(" ", "");
     }
 
     /**
@@ -127,8 +127,8 @@ public class Project implements Serializable {
      * @return project name
      */
     public String getName() {
-        if (_pathWithNamespace != null) {
-            return _pathWithNamespace.substring(_pathWithNamespace.indexOf("/") + 1, _pathWithNamespace.length());
+        if (getNameWithNamespace() != null) {
+            return getNameWithNamespace().substring(getNameWithNamespace().indexOf("/") + 1, getNameWithNamespace().length());
         }
         return _name;
     }
