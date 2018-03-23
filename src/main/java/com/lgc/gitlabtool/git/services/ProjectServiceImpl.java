@@ -213,13 +213,14 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public void updateProjectTypeAndStatus(Project project) {
+    public boolean updateProjectTypeAndStatus(Project project) {
         if (project == null) {
-            return;
+            return false;
         }
         project.setProjectType(_projectTypeService.getProjectType(project));
         updateProjectStatus(project);
         project.setClonedStatus(true);
+        return true;
     }
 
     @Override
@@ -234,16 +235,24 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public boolean hasShadow(List<Project> projects) {
+        if (projects == null) {
+            return false;
+        }
         return projects.stream()
-                .filter(proj -> !proj.isCloned())
-                .count() > 0;
+                       .filter(Objects::nonNull)
+                       .filter(Project::isCloned)
+                       .count() > 0;
     }
 
     @Override
     public boolean hasCloned(List<Project> projects) {
+        if (projects == null) {
+            return false;
+        }
         return projects.stream()
-                .filter(Project::isCloned)
-                .count() > 0;
+                       .filter(Objects::nonNull)
+                       .filter(Project::isCloned)
+                       .count() > 0;
     }
 
     @Override

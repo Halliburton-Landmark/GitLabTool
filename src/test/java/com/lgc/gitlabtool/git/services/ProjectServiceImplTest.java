@@ -38,6 +38,7 @@ import com.lgc.gitlabtool.git.entities.Group;
 import com.lgc.gitlabtool.git.entities.Project;
 import com.lgc.gitlabtool.git.entities.ProjectStatus;
 import com.lgc.gitlabtool.git.jgit.JGit;
+import com.lgc.gitlabtool.git.listeners.stateListeners.ApplicationState;
 import com.lgc.gitlabtool.git.project.nature.projecttype.DSGProjectType;
 import com.lgc.gitlabtool.git.project.nature.projecttype.UnknownProjectType;
 import com.lgc.gitlabtool.git.util.PathUtilities;
@@ -262,14 +263,7 @@ public class ProjectServiceImplTest {
         when(_pathUtilities.getFolders(any(Path.class))).thenReturn(clonedProjects);
         when(_pathUtilities.isExistsAndDirectory(any(Path.class))).thenReturn(true);
         when(_projectTypeService.getProjectType(any(Project.class))).thenReturn(new DSGProjectType());
-        Mockito.doAnswer(new Answer<Object>() {
-            @Override
-            public Object answer(InvocationOnMock invocation) {
-                Project project = (Project) invocation.getArguments()[0];
-                project.setProjectStatus(getProjectStatus(true, false));
-                return null;
-            }
-        }).when(_gitService).getProjectStatus(any());
+        gitServiceGetProjectStatusMock();
         _projectService = getProjectServiceGetProjectMock(projectsFromGitLab);
 
         Collection<Project> result = _projectService.loadProjects(getClonedGroup());
@@ -283,6 +277,13 @@ public class ProjectServiceImplTest {
         assertTrue(resultProject.getProjectStatus().hasChanges());
         assertTrue(resultProject.getProjectType() instanceof DSGProjectType);
         assertFalse(resultProject.getProjectStatus().getCurrentBranch().isEmpty());
+    }
+
+    @Test
+    public void updateProjectTypeAndStatusNullProject() {
+        boolean result = _projectService.updateProjectTypeAndStatus(null);
+
+        assertFalse(result);
     }
 
     @Test
@@ -316,14 +317,7 @@ public class ProjectServiceImplTest {
     @Test
     public void updateProjectStatusesSuccess() {
         List<Project> projects = Arrays.asList(getClonedProject(), getClonedProject(), null);
-        Mockito.doAnswer(new Answer<Object>() {
-            @Override
-            public Object answer(InvocationOnMock invocation) {
-                Project project = (Project) invocation.getArguments()[0];
-                project.setProjectStatus(getProjectStatus(true, false));
-                return null;
-            }
-        }).when(_gitService).getProjectStatus(any());
+        gitServiceGetProjectStatusMock();
 
         boolean result = _projectService.updateProjectStatuses(projects);
 
@@ -379,8 +373,8 @@ public class ProjectServiceImplTest {
 
     @Test
     public void createProjectInvalidToken() {
-        CreateProjectTestListener progressListener = new CreateProjectTestListener();
         setTokenValue(false);
+        CreateProjectTestListener progressListener = new CreateProjectTestListener();
         _projectService = getProjectServiceGetProjectMock(Arrays.asList(new Project(), getProjectWithName("test name")));
 
         _projectService.createProject(getClonedGroup(), "new test name", new UnknownProjectType(), progressListener);
@@ -492,6 +486,97 @@ public class ProjectServiceImplTest {
         assertTrue(progressListener.isSuccessfulOperation());
     }
 
+    @Test
+    public void hasShadowNullList() {
+        boolean result = _projectService.hasShadow(null);
+
+        assertFalse(result);
+    }
+
+    @Test
+    public void hasShadowEmptyList() {
+        boolean result = _projectService.hasShadow(new ArrayList<>());
+
+        assertFalse(result);
+    }
+
+    @Test
+    public void hasShadowSuccess() {
+        List<Project> projects = new ArrayList<>();
+        projects.add(getClonedProject());
+        projects.add(null);
+        projects.add(new Project());
+
+        boolean result = _projectService.hasShadow(projects);
+
+        assertTrue(result);
+    }
+
+
+    @Test
+    public void hasClonedNullList() {
+        boolean result = _projectService.hasCloned(null);
+
+        assertFalse(result);
+    }
+
+    @Test
+    public void hasClonedEmptyList() {
+        boolean result = _projectService.hasCloned(new ArrayList<>());
+
+        assertFalse(result);
+    }
+
+    @Test
+    public void hasClonedSuccess() {
+        List<Project> projects = new ArrayList<>();
+        projects.add(getClonedProject());
+        projects.add(null);
+        projects.add(new Project());
+
+        boolean result = _projectService.hasCloned(projects);
+
+        assertTrue(result);
+    }
+
+    @Test(expected=IllegalArgumentException.class)
+    public void cloneNullProject() {
+        _projectService.clone(null, "path", EmptyProgressListener.get());
+    }
+
+    @Test(expected=IllegalArgumentException.class)
+    public void cloneNullPath() {
+        _projectService.clone(new ArrayList<>(), null, EmptyProgressListener.get());
+    }
+
+    @Test(expected=IllegalArgumentException.class)
+    public void cloneNullProgressListener() {
+        _projectService.clone(new ArrayList<>(), "path", null);
+    }
+
+    @Test
+    public void cloneFailed() {
+        CloneTestListener progressListener = new CloneTestListener();
+        Mockito.doNothing().when(_stateService).stateON(ApplicationState.CLONE);
+        when(_pathUtilities.isExistsAndDirectory(any(Path.class))).thenReturn(false);
+
+        _projectService.clone(Arrays.asList(new Project()), ".", progressListener);
+
+        assertFalse(progressListener.isSuccessfulOperation());
+    }
+
+    @Test
+    public void cloneSuccess() {
+        CloneTestListener progressListener = new CloneTestListener();
+        Mockito.doNothing().when(_stateService).stateON(ApplicationState.CLONE);
+        when(_pathUtilities.isExistsAndDirectory(any(Path.class))).thenReturn(true);
+        jGitCloneMock(true);
+
+        _projectService.clone(Arrays.asList(new Project()), ".", progressListener);
+
+        assertTrue(progressListener.isSuccessfulOperation());
+    }
+
     /*********************************************************************************************/
 
     private void jGitCloneMock(boolean isSuccess) {
@@ -508,6 +593,17 @@ public class ProjectServiceImplTest {
                 return null;
             }
         }).when(_jGit).clone(anyList(), anyString(), any(ProgressListener.class));
+    }
+
+    private void gitServiceGetProjectStatusMock() {
+        Mockito.doAnswer(new Answer<Object>() {
+            @Override
+            public Object answer(InvocationOnMock invocation) {
+                Project project = (Project) invocation.getArguments()[0];
+                project.setProjectStatus(getProjectStatus(true, false));
+                return null;
+            }
+        }).when(_gitService).getProjectStatus(any());
     }
 
     private ProjectService getProjectServiceGetProjectMock(List<Project> projects) {
@@ -636,6 +732,36 @@ public class ProjectServiceImplTest {
 
 
     private class CreateProjectTestListener implements ProgressListener {
+
+        private boolean _isSuccessfulOperation;
+
+        @Override
+        public void onSuccess(Object... t) {
+            _isSuccessfulOperation = true;
+        }
+
+        @Override
+        public void onError(Object... t) {
+            _isSuccessfulOperation = false;
+        }
+
+        @Override
+        public void onStart(Object... t) {
+
+        }
+
+        @Override
+        public void onFinish(Object... t) {
+
+        }
+
+        public boolean isSuccessfulOperation() {
+            return _isSuccessfulOperation;
+        }
+    }
+
+
+    private class CloneTestListener implements ProgressListener {
 
         private boolean _isSuccessfulOperation;
 

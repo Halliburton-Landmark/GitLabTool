@@ -74,8 +74,9 @@ public interface ProjectService extends UpdateProgressGenerator, Service {
     /**
      * Gets and sets ProjectType, ProjectStatus and isCloned field to a project
      * @param project the project
+     * @return <code>true</code> if project status and type are updated successfully, otherwise <code>false</code>
      */
-    void updateProjectTypeAndStatus(Project project);
+    boolean updateProjectTypeAndStatus(Project project);
 
     /**
      * Updates project statuses.
