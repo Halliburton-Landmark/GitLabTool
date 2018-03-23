@@ -141,7 +141,7 @@ class RESTConnectorImpl implements RESTConnector {
 
     @Override
     public void setUrlMainPart(String urlMainPart) {
-        if (urlMainPart != null && URLManager.isURLValid(urlMainPart)) {
+        if (urlMainPart != null && URLManager.get().isURLValid(urlMainPart)) {
             this._urlMainPart = urlMainPart;
         }
     }

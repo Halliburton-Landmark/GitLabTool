@@ -11,6 +11,7 @@ import com.lgc.gitlabtool.git.jgit.ChangedFilesUtils;
 import com.lgc.gitlabtool.git.jgit.JGit;
 import com.lgc.gitlabtool.git.preferences.ApplicationPreferences;
 import com.lgc.gitlabtool.git.util.PathUtilities;
+import com.lgc.gitlabtool.git.util.URLManager;
 
 public class ServiceProvider {
 
@@ -45,7 +46,7 @@ public class ServiceProvider {
         ProjectService projectService = new ProjectServiceImpl(restConnector, projectTypeService, stateService,
                 consoleService, gitService, jsonParserService, CurrentUser.getInstance(), PathUtilities.get(), jGit);
         ClonedGroupsService programPropertiesService = new ClonedGroupsServiceImpl(storageService, loginService,
-                PathUtilities.get(), ClonedGroups.getInstance());
+                PathUtilities.get(), ClonedGroups.getInstance(), URLManager.get());
         PomXmlEditService pomXmlEditService = new PomXMLEditServiceImpl();
         ThemeService themeService = new ThemeServiceImpl(applicationPreferences);
         GroupService groupService = new GroupServiceImpl(restConnector, programPropertiesService,

@@ -129,7 +129,7 @@ public class ServerInputWindowController {
     }
 
     private void updateServersList() {
-        String inputServerName = URLManager.trimServerURL(serverTextField.getText());
+        String inputServerName = URLManager.get().trimServerURL(serverTextField.getText());
         List<Server> servers = storageService.loadServers().getServers();
         int index = 0;
         if (inputServerName != null && !inputServerName.equals("")) {
@@ -145,11 +145,11 @@ public class ServerInputWindowController {
     }
 
     private boolean isInputValid(String inputURL) {
-        return URLManager.isURLValid(inputURL);
+        return URLManager.get().isURLValid(inputURL);
     }
 
     private boolean isServerAlreadyExists(String inputURL) {
-        String url = URLManager.trimServerURL(inputURL);
+        String url = URLManager.get().trimServerURL(inputURL);
         List<Server> servers = storageService.loadServers().getServers();
         return servers.contains(new Server(url, api.getValue()));
     }

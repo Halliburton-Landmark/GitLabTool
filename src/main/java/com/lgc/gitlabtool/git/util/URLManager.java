@@ -6,13 +6,22 @@ public class URLManager {
     public static final String HTTPS = "https://";
     public static final String HTTP = "http://";
 
+    private static URLManager _instance;
+
+    public static URLManager get() {
+        if (_instance == null) {
+            _instance = new URLManager();
+        }
+        return _instance;
+    }
+
     /**
      * Trims the URL - cuts the "http://" or "https://" prefixes and "/api/v3" suffix
      *
      * @param url - server URL
      * @return trimmed URL (URL main part)
      */
-    public static String trimServerURL(String url) {
+    public String trimServerURL(String url) {
         if (!url.contains("/")) {
             return url;
         }
@@ -34,7 +43,7 @@ public class URLManager {
      * @param urlMainPart - main part of URL
      * @return modified URL
      */
-    public static String completeServerURL(String urlMainPart) {
+    public String completeServerURL(String urlMainPart) {
         return HTTPS + urlMainPart + URL_SUFFIX;
     }
 
@@ -44,7 +53,7 @@ public class URLManager {
      * @param urlMainPart - main part of URL
      * @return modified URL
      */
-    public static String shortServerURL(String urlMainPart) {
+    public String shortServerURL(String urlMainPart) {
         return HTTPS + urlMainPart;
     }
 
@@ -57,7 +66,7 @@ public class URLManager {
      * @param url for checking
      * @return <code>true</code> if <code>url</code> matches regexp and <code>false</code> if not
      */
-    public static boolean isURLValid(String url) {
+    public boolean isURLValid(String url) {
         String regexp = "(" + HTTP + "|" + HTTPS + ")?([a-z0-9]*\\.?[a-z0-9]+)+(" + URL_SUFFIX + ")?" + "/?";
         return url.matches(regexp);
     }

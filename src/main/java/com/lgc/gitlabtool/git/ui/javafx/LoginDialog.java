@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.lgc.gitlabtool.git.util.ShutDownUtil;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -19,6 +18,7 @@ import com.lgc.gitlabtool.git.services.ThemeService;
 import com.lgc.gitlabtool.git.ui.ViewKey;
 import com.lgc.gitlabtool.git.ui.javafx.controllers.ServerInputWindowController;
 import com.lgc.gitlabtool.git.ui.javafx.dto.DialogDTO;
+import com.lgc.gitlabtool.git.util.ShutDownUtil;
 import com.lgc.gitlabtool.git.util.URLManager;
 import com.lgc.gitlabtool.git.util.UserGuideUtil;
 import com.lgc.gitlabtool.git.xml.Server;
@@ -162,7 +162,7 @@ class LoginDialog extends Dialog<DialogDTO> {
 
         GridPane.setHalignment(infoButton, HPos.LEFT);
         infoButton.setTooltip(new Tooltip("Get info"));
-        infoButton.setOnAction((event) -> UserGuideUtil.openUserGuide()); 
+        infoButton.setOnAction((event) -> UserGuideUtil.openUserGuide());
     }
 
     private ObservableList<String> getBoxOptions() {
@@ -206,8 +206,8 @@ class LoginDialog extends Dialog<DialogDTO> {
                 logger.info(MESSAGE_WAITING);
                 showMessage(MESSAGE_WAITING, MessageType.SUCCESS);
                 disableSignInButton(true);
-                String serverURL = URLManager.completeServerURL(comboBox.getValue());
-                String shortServerURL = URLManager.shortServerURL(comboBox.getValue());
+                String serverURL = URLManager.get().completeServerURL(comboBox.getValue());
+                String shortServerURL = URLManager.get().shortServerURL(comboBox.getValue());
                 DialogDTO dto = new DialogDTO(userTextField.getText(), passwordField.getText(), serverURL, shortServerURL);
                 _loginService.login(dto, this::doAfterLogin);
             } else {

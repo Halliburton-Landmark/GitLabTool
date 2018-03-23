@@ -1,5 +1,6 @@
 package com.lgc.gitlabtool.git.entities;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlRootElement;
@@ -19,9 +20,7 @@ import com.lgc.gitlabtool.git.xml.XMLAdapter;
 public class ClonedGroups {
 
     private static ClonedGroups _instance;
-
-    private List<Group> _groups;
-
+    private List<Group> _groups = new ArrayList<>();
 
     /**
      * Gets instance's the class

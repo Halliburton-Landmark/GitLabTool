@@ -18,37 +18,16 @@ public class ClonedGroupsServiceImpl implements ClonedGroupsService {
     private LoginService _loginService;
     private PathUtilities _pathUtilities;
     private ClonedGroups _clonedGroupsProvider;
+    private URLManager _urlManager;
 
     public ClonedGroupsServiceImpl(StorageService storageService, LoginService loginService,
-                                   PathUtilities pathUtilities, ClonedGroups clonedGroupsProvider) {
+                                   PathUtilities pathUtilities, ClonedGroups clonedGroupsProvider,
+                                   URLManager urlManager) {
         setStorageService(storageService);
         setLoginService(loginService);
         setPathUtilities(pathUtilities);
         setClonedGroups(clonedGroupsProvider);
-    }
-
-    private void setClonedGroups(ClonedGroups clonedGroupsProvider) {
-        if (clonedGroupsProvider != null) {
-            _clonedGroupsProvider = clonedGroupsProvider;
-        }
-    }
-
-    private void setLoginService(LoginService loginService) {
-        if (loginService != null) {
-            _loginService = loginService;
-        }
-    }
-
-    private void setStorageService(StorageService storageService) {
-        if (storageService != null) {
-            _storageService = storageService;
-        }
-    }
-
-    private void setPathUtilities(PathUtilities pathUtilities) {
-        if (pathUtilities != null) {
-            _pathUtilities = pathUtilities;
-        }
+        setURLManager(urlManager);
     }
 
     @Override
@@ -73,8 +52,8 @@ public class ClonedGroupsServiceImpl implements ClonedGroupsService {
     @Override
     public List<Group> loadClonedGroups() {
         String username = _loginService.getCurrentUser().getUsername();
-        List<Group> groups = _storageService.loadStorage(URLManager.trimServerURL(_loginService.getServerURL()),
-                username);
+        String server = _urlManager.trimServerURL(_loginService.getServerURL());
+        List<Group> groups = _storageService.loadStorage(server, username);
 
         _notExistGroups = groups.stream()
                                 .filter(group -> isNotExistsAndDirectory(group))
@@ -109,7 +88,8 @@ public class ClonedGroupsServiceImpl implements ClonedGroupsService {
 
     private void updateClonedGroupsInXML() {
         String username = _loginService.getCurrentUser().getUsername();
-        _storageService.updateStorage(URLManager.trimServerURL(_loginService.getServerURL()), username);
+        String server = _urlManager.trimServerURL(_loginService.getServerURL());
+        _storageService.updateStorage(server, username);
     }
 
     private boolean isNotExistsAndDirectory(Group group) {
@@ -118,6 +98,36 @@ public class ClonedGroupsServiceImpl implements ClonedGroupsService {
             return true;
         }
         return !_pathUtilities.isExistsAndDirectory(Paths.get(path));
+    }
+
+    private void setClonedGroups(ClonedGroups clonedGroupsProvider) {
+        if (clonedGroupsProvider != null) {
+            _clonedGroupsProvider = clonedGroupsProvider;
+        }
+    }
+
+    private void setLoginService(LoginService loginService) {
+        if (loginService != null) {
+            _loginService = loginService;
+        }
+    }
+
+    private void setStorageService(StorageService storageService) {
+        if (storageService != null) {
+            _storageService = storageService;
+        }
+    }
+
+    private void setPathUtilities(PathUtilities pathUtilities) {
+        if (pathUtilities != null) {
+            _pathUtilities = pathUtilities;
+        }
+    }
+
+    private void setURLManager(URLManager urlManager) {
+        if (urlManager != null) {
+            _urlManager = urlManager;
+        }
     }
 
 }
