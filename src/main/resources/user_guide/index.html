@@ -15,7 +15,7 @@
     <meta name="author" content="">
     <meta name="keywords" content="">
 
-    <title>Gitlab Tool User guide</title>
+    <title>User guide - Gitlab Tool</title>
 
     <link rel="shortcut icon" href="user_guide_files/images/favicon.ico" type="image/x-icon">
 
@@ -51,9 +51,8 @@
                 <div class="row">
                     <div class="col-md-12">
                         <div class="big-title text-center">
-                            <h1>Gitlab tool user guide</h1>
-                            <p class="lead">v.0.0.3
-                                <br>Powered by Luxoft</p>
+                            <h1>User's guide</h1>
+                            <p class="lead">Version 0.0.3</p>
                         </div>
                         <!-- end title -->
                     </div>
@@ -71,21 +70,20 @@
                 <div class="col-md-3">
                     <nav class="docs-sidebar" data-spy="affix" data-offset-top="300" data-offset-bottom="200" role="navigation">
                         <ul class="nav">
-                            <li><a href="#line1">Getting Started</a></li>
-                            <!--<li><a href="#line2">Requirements</a></li>-->
-                            <li><a href="#line2">Login in</a></li>
+                            <li><a href="#line1">Get  started</a></li>
+                            <li><a href="#line2">Login in to GitLab</a></li>
                             <li><a href="#line3">Main window</a>
                                 <ul class="nav">
-                                    <li><a href="#line3_1">Groups cloning</a></li>
-                                    <li><a href="#line3_2">Groups import</a></li>
-                                    <li><a href="#line3_3">Groups removing</a></li>
-                                    <li><a href="#line3_4">Groups loading</a></li>
+                                    <li><a href="#line3_1">Clone a group of projects</a></li>
+                                    <li><a href="#line3_2">Import a group</a></li>
+                                    <li><a href="#line3_3">Remove a group</a></li>
+                                    <li><a href="#line3_4">Open a group</a></li>
                                 </ul>
                             </li>
                             <li><a href="#line4">Projects window</a>
                                 <ul class="nav">
                                     <li><a href="#line4_1">Project list</a></li>
-                                    <li><a href="#line4_2">History</a></li>
+                                    <li><a href="#line4_2">Project history</a></li>
                                     <li><a href="#line4_3">Console</a></li>
                                     <li><a href="#line4_4">Context menu</a></li>
                                     <li><a href="#line4_5">Clone projects</a></li>
@@ -98,9 +96,8 @@
                                     <li><a href="#line4_12">Edit project properties</a></li>
                                 </ul>
                             </li>
-                            <li><a href="#line5">Contacts</a></li>
                         </ul>
-                    </nav >
+                    </nav>
                 </div>
                 <div class="col-md-9">
 
@@ -108,7 +105,7 @@
 
                         <div class="row">
                             <div class="col-md-12 left-align">
-                                <h2 class="dark-text">Getting Started <a href="#top">#back to top</a><hr></h2>
+                                <h2 class="dark-text">Get started <a href="#top">#back to top</a><hr></h2>
                             </div>
                             <!-- end col -->
                         </div>
@@ -116,31 +113,34 @@
 
                         <div class="row">
                             <div class="col-md-12">
-                                <p>Gitlab Tool is an incredible application that provides different git operations for
-                                multiple projects in a group.<br>
+							    <p>If you're working with Git in development, then you've probably seen a lot of command line and scripting. 
+								While using the command line is a simple and effective way of working, 
+								there are some much better tools out there to make working with Git easy.
+								</p>
+                                <p>Gitlab Tool has some great features that make working with Git and GitLab easy, streamlining the way that you work with your project or multiple projects.
+								Using GitLab tool simplifies how you interact with your Git repositories so you can focus on coding.<br>
                                 This guide will show you how to use this tool for different tasks</p>
 
                                 <h4>Requirements</h4>
 
-                                <p>Gitlab Tool supports next operation systems:</p>
+                                <p>Gitlab Tool works on different operation systems:</p>
                                 <ol>
                                     <li>Windows 7, 8, 8.1, 10</li>
                                     <li>GTK Linux (RHEL 6 or higher)</li>
                                 </ol>
-                                <p>Also, you need the following software to be installed on your computer to use Gitlab Tool</p>
+                                <p>Also, the following software needs to be installed on your computer:</p>
                                 <ol>
-                                    <li>JRE v1.8.0u45 or higher</li>
-                                    <li>Git client</li>
+                                    <li><a href="http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html">JRE</a> 1.8.0u45 or higher</li>
+                                    <li><a href="https://git-scm.com/downloads">Git client</a></li>
                                 </ol>
 
                                 <h4>Start application</h4>
 
                                 <p>There are two ways to launch the application:</p>
                                 <ol>
-                                    <li>Double click on jar file (if JRE is already installed, application will be
-                                        launched automatically)</li>
-                                    <li>Open the terminal (or console for Windows OS) and run next lines</li>
-                                    <pre class="brush: html; highlight: [2,4]">
+                                    <li>Double click on jar file GitlabTool-full.jar</li>
+                                    <li>Open the terminal (or console for Windows OS) and enter following commands:</li>
+                                    <pre class="brush: html;">
                                         $ cd path-to-gitlab-tool-location
                                         $ java -jar GitlabTool-full.jar
                                     </pre>
@@ -158,7 +158,7 @@
 
                         <div class="row">
                             <div class="col-md-12 left-align">
-                                <h2 class="dark-text">Login in <a href="#top">#back to top</a><hr></h2>
+                                <h2 class="dark-text">Login in to GitLab <a href="#top">#back to top</a><hr></h2>
                             </div>
                             <!-- end col -->
                         </div>
@@ -167,28 +167,22 @@
 
                         <!--<h4>Upload via WordPress Admin</h4>-->
 
-                        <p>Input your credentials, choose the Gitlab© server and press Sign in button. After that the
-                            message about login in will be shown. If login in is successful, the Clone group window
-                            will be shown. If login in is failed, the message about it will be shown.<br><br>
+                        <p>Enter your credentials, choose any available Gitlab© server and press Sign in button. If entered credentials are correct, the Main window will be shown. If credentials don't match, corresponding message will be shown in message area.<br><br>
                         After the first successful login in the username and last chosen server will be saved in the user home dir<br>
-                        <code>C:\Users\user-name\.GitlabTool</code> for Windows, <code>//home/.GitlabTool</code> for *nix</p>
-                        <p>Also, the application logs will be stored there.
-                            On the next application launches the last chosen server and username will be shown on the login window.</p>
+                        <code>C:\Users\user-name\.GitlabTool</code> for Windows, and <code>/home/*username*/.GitlabTool</code> for *nix. Your password is never saved for security reasons.</p>                        
+                        <p>The application logs will be saved in .GitLabTools folder as well.</p>						
 
                         <h4>Choose the server</h4>
-                        <p>There are three types of Gitlab servers available by default:
+                        <p>There are three Gitlab servers available by default:
                             <ol>
                                 <li>git.openearth.community</li>
                                 <li>gitlab.lgc.com</li>
                                 <li>gitlab.com</li>
                             </ol>
                         </p>
-                        <p>User could choose another Gitlab© server. Select ‘Other…’ item from drop-down server menu.
-                            The Server selection window will be shown.</p>
+                        <p>You can add another Gitlab server by selecting option 'Other' from 'Service' drop-down.</p>
                         <img src="user_guide_files/images/server_selection.png" alt="Server selection" class="img-responsive img-thumbnail">
-                        <p>Input the server link, choose API version (v4 is available for now) and press the OK button.
-                            If server link is incorrect, the message about it will be shown. If everything is OK,
-                            new item will be added in drop-down server menu.</p>
+                        <p>Enter a server url, choose GitLab API version and press the OK button. If server link is incorrect, the message about it will be shown. If everything is OK, new item will be added in 'Service' drop-down.</p>
 
                     </section>
                     <!-- end section -->
@@ -203,69 +197,38 @@
                         </div>
                         <!-- end row -->
                         <div class="row">
-                            <p>After successful login in the Main application window will be shown.<br>
-                                At the top of the window we have the main menu, the toolbar and user’s name. On the left
-                                side of the window we have the list of cloned groups (empty by default).
-                                Group list part could be extended.
-
-                                <img src="user_guide_files/images/main_window.png" alt="Main window" class="img-responsive img-thumbnail">
-                            </p>
+                            <p>After successful login in, the Main application window will be shown. At the top of the window there is a the main menu and the toolbar. On the left side of the window - Groups explorer (empty by default).</p>
+                            <img src="user_guide_files/images/main_window.png" alt="Main window" class="img-responsive img-thumbnail">
                             <!--<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">-->
                             <div class="col-md-12 align-left">
-                                <h4 id="line3_1">Groups cloning - <a href="#top">#back to top</a></h4>
-                                <p>Press Clone group button on the toolbar (or Git → Clone on the main menu) →
-                                    the Cloning window will be shown.
-
-                                    <img src="user_guide_files/images/cloning_dialog.png" alt="cloning dialog" class="img-responsive img-thumbnail">
+                                <h4 id="line3_1">Clone a group of projects - <a href="#top">#back to top</a></h4>
+                                <p>Press Clone group button on the toolbar (or Git → Clone on the main menu) → the Clone window will be shown with the list of groups you have access in selected Gitlab server.</p>
+                                <img src="user_guide_files/images/cloning_dialog.png" alt="cloning dialog" class="img-responsive img-thumbnail">                                
+                                <p>Select a group and destination folder and press OK button. If destination folder input field has invalid value, it will be highlighted with red color. 
+                                   If entered value is valid you will see clone progress in a separate dialog.
                                 </p>
-                                <p>
-                                    Select the group and destination folder and press OK button. If destination folder
-                                    wrong, the destination folder field will be highlighted with red color.<br>
-                                    After that the clone progress will be shown in separate window.
-
-                                    <img src="user_guide_files/images/cloning_progress.png" alt="cloning progress" class="img-responsive img-thumbnail">
-                                </p>
-                                <p>
-                                    Clone process could be canceled. In this case only already cloned project of the
-                                    group will be available in the project list.<br>
-                                    After finishing the clone process the status dialog with information about cloning
-                                    will be shown. Press OK button to close Progress dialog. After that, cloned group
-                                    will be available in the group list.
-                                </p>
+								<img src="user_guide_files/images/cloning_progress.png" alt="cloning progress" class="img-responsive img-thumbnail">
+                                <p>Clone operation can be canceled at any time. However, it can take some time to cancel a process and projects that already cloned will be available inside a group.<br></p>
                             </div>
 
                             <!--<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">-->
                             <div class="col-md-12 align-left">
-                                <h4 id="line3_2">Groups import - <a href="#top">#back to top</a></h4>
-                                <p>
-                                    If group already stored on the disk, it could be imported to Gitlab Tool.<br>
-                                    Press Import group button on the toolbar and select the folder with existing group on
-                                    the disk. After that, select Ok button. Group will be added to the group list.
-                                </p>
+                                <h4 id="line3_2">Import a group- <a href="#top">#back to top</a></h4>
+                                <p>If group already cloned in the file system using other software, it stil can be imported into Gitlab Tool. Press Import group button on the toolbar and select the folder with existing group on the file system.</p>
                             </div>
 
                             <!--<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">-->
                             <div class="col-md-12 align-left">
-                                <h4 id="line3_3">Groups removing - <a href="#top">#back to top</a></h4>
-                                <p>
-                                    Each group could be deleted from the group list. Select the group and press
-                                    Remove group button → Remove group window will be shown.<br>
-
-                                    <img src="user_guide_files/images/remove_group.png" alt="removing group" class="img-responsive img-thumbnail">
-                                </p>
-                                <p>
-                                    User could delete group only from Gitlab Tool or both: from Gitlab Tool and the disk
-                                    (toggle ‘remove group from a local disk’ for it and press ‘Yes’)
-                                </p>
+                                <h4 id="line3_3">Remove a group - <a href="#top">#back to top</a></h4>
+                                <p>Each group can be removed from the GitLab tool. Select the group that needs to be removed and press Remove group button on the toolbar.</p>
+								<img src="user_guide_files/images/remove_group.png" alt="removing group" class="img-responsive img-thumbnail"/>
+                                <p>You can delete a group from Gitlab Tool or both: from Gitlab Tool and the file system. Note that it will not delete a group from the server, it will affect only you local computer.</p>
                             </div>
 
                             <!--<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">-->
                             <div class="col-md-12 align-left">
-                                <h4 id="line3_4">Groups loading - <a href="#top">#back to top</a></h4>
-                                <p>Select group and press Load group button or just double click on group item to load
-                                    the list of group’s projects. You can use MB3 item also.
-                                </p>
-                                <p>After that, Projects window will be shown.</p>
+                                <h4 id="line3_4">Load a group - <a href="#top">#back to top</a></h4>
+                                <p>Select group and press Load group button or just double click on group name to load and display list of available projects. The projects window should come up.</p>
                             </div>
                         </div>
 
@@ -283,188 +246,128 @@
                         <!-- end row -->
 
                         <div class="row">
-                            <p>The Projects window contains a set of features that provides a possibility to make different
-                                operations for multiple projects in a separate group<br>
-
-                                <img src="user_guide_files/images/projects_window.png" alt="Projects window" class="img-responsive img-thumbnail">
-                            </p>
-                            <p>
-                                At the top of the window we have the main menu, the toolbar and the information bar.
-                                Information bar contains the name of current group and path for it and, also, the user name.
-                            </p>
+                            <p>The Projects window contains a set of features that allows to perform different operations for multiple projects at once.</p>
+							<img src="user_guide_files/images/projects_window.png" alt="Projects window" class="img-responsive img-thumbnail">
+                            <p>At the top of the window there is the main menu, the toolbar and the information bar. Information bar contains the name of current group, path and logged-in user information.</p>
 
                             <div class="col-md-12 align-left">
                                 <h4 id="line4_1">Projects list - <a href="#top">#back to top</a></h4>
-                                <p>On the left side of the window we have projects list with its own toolbar,
-                                    that consists of three buttons:
+                                <p>On the left side of the window there is a projects list with its own toolbar, that has different buttons:
                                     <ol>
                                         <li><img src="user_guide_files/images/select_all_projects.png"> - Select/Deselect all projects</li>
                                         <li><img src="user_guide_files/images/refresh_projects.png"> - Refresh projects</li>
                                         <li><img src="user_guide_files/images/show_shadow_projects.png"> - Show/Hide shadow projects</li>
                                     </ol>
-                                <p>
-                                    Shadow projects aren’t cloned yet and marked with
-                                    <img src="user_guide_files/images/shadow_projects.png"> sign. They could be cloned later.
-                                    Gitlab tool does not support any action with shadow projects except cloning
-                                </p>
-
-                                <p>
-                                    Each item of the project list consists of three parts: a sign of the project type on the
-                                    left part, current branch in square brackets on the right part and project name between them.
-                                </p>
+                                <p>Shadow projects are projects that is not cloned yet and they marked with  <img src="user_guide_files/images/shadow_projects.png"> sign. They can be cloned later.</p>
+                                <p>Each project in project list has of three parts: the project type icon, current branch in square brackets on the right part and project name in between.</p>
                             </div>
 
                             <div class="col-md-12 align-left">
-                                <h4 id="line4_2">History - <a href="#top">#back to top</a></h4>
-                                <p>
-                                    The Gitlab Tool provides functionality for viewing git history. Press the Show History
-                                    button to display the related table. It is updated according to project selection in
-                                    the project list. It may be sorted by any column<br>
-
-                                    <img src="user_guide_files/images/history.png" alt="Projects window" class="img-responsive img-thumbnail">
-                                </p>
+                                <h4 id="line4_2">Project history - <a href="#top">#back to top</a></h4>
+                                <p>The Gitlab Tool allows you to see commits history for selected set of prejects. Press the Show History button to display history revisions. The list dynamically updats everytime selected projects have changed.
+                                    Order of the revisions may change by clicking on 'Date' column.</p>
+								<img src="user_guide_files/images/history.png" alt="Projects window" class="img-responsive img-thumbnail">
                             </div>
 
                             <div class="col-md-12 align-left">
                                 <h4 id="line4_3">Console - <a href="#top">#back to top</a></h4>
-                                <p>There is a console part at the bottom of the window.
-                                    It shows all necessary information about all actions in Gitlab Tool.<br>
-                                    First line of the console shows a current version and a number of build.
-
-                                    <img src="user_guide_files/images/console.png" alt="Console" class="img-responsive img-thumbnail">
+                                <p>There is a console available at the bottom of the window. It display all necessary information about all actions in Gitlab Tool.<br>
+                                    First line of the console shows a current version and a build number.
                                 </p>
-                                <p>
-                                    Below the console you can see the status bar. In shows if any operation is processed
-                                    at the moment.
-                                </p>
+								<img src="user_guide_files/images/console.png" alt="Console" class="img-responsive img-thumbnail">
+                                <p>Below the console you can see the status bar. In shows if any operation is processed at the moment.</p>
                             </div>
 
                             <div class="col-md-12 align-left">
                                 <h4 id="line4_4">Context menu - <a href="#top">#back to top</a></h4>
-                                <p>Almost all operations can be reached from the context menu. Just try it yourself</p>
+                                <p>Almost all operations are dublicated in context menu accessible by MB3.</p>
                                 <img src="user_guide_files/images/mb3_menu.png" alt="Context menu" class="img-responsive img-thumbnail">
                             </div>
 
                             <div class="col-md-12 align-left">
                                 <h4 id="line4_5">Clone projects - <a href="#top">#back to top</a></h4>
-                                <p>
-                                    Shadow project could be cloned by Gitlab Tool.<br>
-                                    Select shadow project (or set of shadow projects) and press Clone button
-                                    on the toolbar (or Git → Clone on the main menu or MB3 → Clone on the project item).
-                                    After that the clone progress dialog will be shown (Image 5). If clone process
-                                    successful, cloned projects will be shown on the project list as normal object.
-                                    There is a set of Git options available now for this object.
-                                </p>
+                                <p>Shadow project could be cloned using Gitlab Tool as well. Select shadow project (or set of shadow projects) and press Clone button
+                                    on the toolbar (or Git → Clone on the main menu or MB3 → Clone on the project item). After that the clone progress dialog will be shown (Image 5). If clone process
+                                    successful, cloned projects type will be changed and it will be displayed as normal project with a set of Git options available for it.</p>
                             </div>
 
                             <div class="col-md-12 align-left">
                                 <h4 id="line4_6">Branches window - <a href="#top">#back to top</a></h4>
-                                <p>This feature allows you to make following operations with branches:</p>
+                                <p>This feature allows you to perform following operations with branches:</p>
                                 <ol>
                                     <li>Create a new branch</li>
                                     <li>Checkout existing branch</li>
                                     <li>Remove existing branch</li>
                                 </ol>
-                                <p>
-                                    Also, you can select a type of branches that should be displayed: Local,
-                                    Remote or both of them.<br>
-                                    The “Only common” checkbox adds a filter for a list of branches that shows
-                                    branches that contain in all selected projects only
+                                <p>Also, you can select a type of branches that should be displayed: Local, Remote or both of them. The “Only common” checkbox adds a filter for a list of branches that shows
+                                    branches that contain in all selected projects.
                                 </p>
                                 <p>
-                                    <strong>Note:</strong> List of projects shows projects that contain selected branch
+                                    <strong>Note:</strong> List of projects on the left side of the windows will be changed according to branch availability.
                                 </p>
                                 <img src="user_guide_files/images/branches_window.png" alt="Branches window" class="img-responsive img-thumbnail">
                             </div>
 
                             <div class="col-md-12 align-left">
                                 <h4 id="line4_7">Staging window - <a href="#top">#back to top</a></h4>
-                                <p>
-                                    The Staging window is used to work with changed files in projects
-                                    <img src="user_guide_files/images/staging_button_on_toolbar.png" alt="staging button on toolbar" class="img-responsive img-thumbnail">
-                                </p>
+                                <p>The Staging window replicates 'git staging' functionality and used to work with changed files in projects.</p>
+								<img src="user_guide_files/images/staging_button_on_toolbar.png" alt="staging button on toolbar" class="img-responsive img-thumbnail">
                                 <p>
                                     Using the Staging window you can:
-                                    <ol>
-                                        <li>Delete new files
-                                            <img src="user_guide_files/images/delete_new_files.png" alt="Delete new files" class="img-responsive img-thumbnail">
-                                        </li>
-                                        <li>Replace with HEAD revision changed files
-                                            <img src="user_guide_files/images/replace_with_head.png" alt="Replace with head" class="img-responsive img-thumbnail">
-                                        </li>
-                                        <li>Add files to index and commit them
-                                            <img src="user_guide_files/images/add_files_to_staging.png" alt="Add files to indes" class="img-responsive img-thumbnail">
-                                        </li>
-                                    </ol>
+                                    <p>1. Delete new files</p>
+                                    <img src="user_guide_files/images/delete_new_files.png" alt="Delete new files" class="img-responsive img-thumbnail"/>
+                                    <p>2. Replace with HEAD revision changed files</p>
+                                    <img src="user_guide_files/images/replace_with_head.png" alt="Replace with head" class="img-responsive img-thumbnail"/>
+                                    <p>3. Add files to index and commit them</p>
+                                    <img src="user_guide_files/images/add_files_to_staging.png" alt="Add files to indes" class="img-responsive img-thumbnail"/>
                                 </p>
                                 <p>
                                     You can sort unstaged files:
-                                    <ol>
-                                        <li>Alphabetically
-                                            <img src="user_guide_files/images/sorting_alphabet.png" alt="Alphabetical sorting" class="img-responsive img-thumbnail">
-                                        </li>
-                                        <li>By project
-                                            <img src="user_guide_files/images/sorting_project.png" alt="Sorting by project" class="img-responsive img-thumbnail">
-                                        </li>
-                                        <li>By extension
-                                            <img src="user_guide_files/images/sorting_extension.png" alt="Sorting by extension" class="img-responsive img-thumbnail">
-                                        </li>
-                                        <li>By file status (new, changed, deleted, etc.)
-                                            <img src="user_guide_files/images/sorting_file_status.png" alt="Sorting by file status" class="img-responsive img-thumbnail">
-                                        </li>
-                                    </ol>
+                                    <p>1.Alphabetically</p>
+                                    <img src="user_guide_files/images/sorting_alphabet.png" alt="Alphabetical sorting" class="img-responsive img-thumbnail">
+                                    <p>2.By project</p>
+                                    <img src="user_guide_files/images/sorting_project.png" alt="Sorting by project" class="img-responsive img-thumbnail">
+                                    <p>3.By extension</p>
+                                    <img src="user_guide_files/images/sorting_extension.png" alt="Sorting by extension" class="img-responsive img-thumbnail">
+                                    <p>4.By file status (new, changed, deleted, etc.)</p>
+                                    <img src="user_guide_files/images/sorting_file_status.png" alt="Sorting by file status" class="img-responsive img-thumbnail">
                                 </p>
-                                <p>
-                                    For a quick searching of unstaged files you can use a filter
-                                    <img src="user_guide_files/images/searching_filter.png" alt="Searching filter" class="img-responsive img-thumbnail">
-                                </p>
-
+                                <p>For a quick file search of unstaged files you can use a filter.</p>
+								<img src="user_guide_files/images/searching_filter.png" alt="Searching filter" class="img-responsive img-thumbnail">
                             </div>
 
                             <div class="col-md-12 align-left">
                                 <h4 id="line4_8">Push to server - <a href="#top">#back to top</a></h4>
-                                <p>Select the project (or a set of projects) and press Push button on the toolbar
-                                    (or Git → Push on the main menu). After that, all selected projects will be pushed
-                                    to upstream and status dialog with results of pushing will be shown.</p>
+                                <p>Select the project (or a set of projects) and press Push button on the toolbar. After that, all commits for selected projects will be pushed to upstream.</p>
                             </div>
 
                             <div class="col-md-12 align-left">
                                 <h4 id="line4_9">Pull from server - <a href="#top">#back to top</a></h4>
-                                <p>Select the project (or a set of projects) and press Pull button on the toolbar
-                                    (or Git → Pull on the main menu). After that, the Pull progress dialog will be
-                                    shown and then Status dialog about pull results.</p>
+                                <p>Select the project (or a set of projects) and press Pull button on the toolbar (or Git → Pull on the main menu). After that, all selected projects.</p>
                             </div>
 
                             <div class="col-md-12 align-left">
                                 <h4 id="line4_10">Revert changes - <a href="#top">#back to top</a></h4>
-                                <p>You can revert committed changes using "Revert" button</p>
+                                <p>You can revert committed changes using "Revert" button.</p>
                                 <img src="user_guide_files/images/revert_changes.png" alt="Revert changes" class="img-responsive img-thumbnail">
                             </div>
 
                             <div class="col-md-12 align-left">
                                 <h4 id="line4_11">Stash changes - <a href="#top">#back to top</a></h4>
                                 <img src="user_guide_files/images/stash_button.png" alt="Stash button" class="img-responsive img-thumbnail">
-                                <p>
-                                    Stash button is always available on the Project toolbar. If user presses it
-                                    without selecting any projects in the list then the Stash window will be opened
-                                    for all cloned projects:
-                                    <img src="user_guide_files/images/stash_changes.png" alt="Stash changes window" class="img-responsive img-thumbnail">
-                                    If user selected some projects in the project list then the Stash window will be opened for selected projects
-                                    <img src="user_guide_files/images/stash_changes_for_selected_projects.png" alt="Stash changes for selected projects" class="img-responsive img-thumbnail">
-                                    The Stash window is unavailable for projects which weren't cloned or projects with conflicts.
-                                </p>
+                                <p>Stash button is always available on the Project toolbar. If user presses it without selecting any projects in the list then the Stash window will be opened for all available projects in projects list:</p>
+								<img src="user_guide_files/images/stash_changes_for_selected_projects.png" alt="Stash changes for selected projects" class="img-responsive img-thumbnail">                                
+                                <p>If user selected some projects in the project list then the Stash window will be opened for selected projects.<p/>
+                                <img src="user_guide_files/images/stash_changes.png" alt="Stash changes window" class="img-responsive img-thumbnail">
+                                <p>The Stash window is unavailable for projects which weren't cloned or have conflicts.</p>
                                 <h5>Create stash</h5>
-                                <p>
-                                    <img src="user_guide_files/images/create_stash.png" alt="Create stash" class="img-responsive img-thumbnail">
-                                    A stash will be created for all projects which are shown in the list in the right
-                                    side of the window.<br>
+								<img src="user_guide_files/images/create_stash.png" alt="Create stash" class="img-responsive img-thumbnail">
+                                <p>A stash will be created for all projects which are shown in the list in the right the window.<br>
                                     If “Include untracked files” checkbox is selected then new files in projects will
-                                    be stashed, otherwise only changed files will be stashed.<br>
-                                    A stash message cannot be empty.
-                                    <img src="user_guide_files/images/stash_message.png" alt="Stash message" class="img-responsive img-thumbnail">
-                                    After stashing of all the changes, the projects will be reset on HEAD revision and
-                                    created stash will be available in the stash list
-                                </p>
+                                    be stashed, otherwise only changed files will be stashed. A stash message cannot be empty.
+								</p>
+                                <img src="user_guide_files/images/stash_message.png" alt="Stash message" class="img-responsive img-thumbnail">
+								<p>After stashing of all the changes, the projects will be reset on HEAD revision and created stash will be available in the stash list.</p>
                                 <h5>Stash list</h5>
                                 <p>
                                     <img src="user_guide_files/images/stash_list.png" alt="Stash list" class="img-responsive img-thumbnail">
@@ -483,72 +386,30 @@
                                     </ol>
                                 </p>
                                 <h5>Apply stash</h5>
-                                <p>
-                                    <img src="user_guide_files/images/apply_stash.png" alt="Apply stash" class="img-responsive img-thumbnail">
-                                    The stash will be applied to the displayed projects in the list in the right side of the window<br>
-                                    After applying the stash it is not removed from the stash list. A user can use drop button to delete it
-                                    <img src="user_guide_files/images/apply_stash_result.png" alt="Apply stash result" class="img-responsive img-thumbnail">
-                                </p>
+								<img src="user_guide_files/images/apply_stash.png" alt="Apply stash" class="img-responsive img-thumbnail">
+                                <p>The stash will be applied to the displayed projects in the list in the right side of the window.
+                                    After applying the stash it is not removed from the stash list. A user can use drop button to delete it.</p>
+								<img src="user_guide_files/images/apply_stash_result.png" alt="Apply stash result" class="img-responsive img-thumbnail">
                                 <h5>Drop stash</h5>
-                                <p>
-                                    <img src="user_guide_files/images/drop_stash.png" alt="Drop stash" class="img-responsive img-thumbnail">
-                                    After confirming the operation, the stash is removed from the list permanently
-                                </p>
+								<img src="user_guide_files/images/drop_stash.png" alt="Drop stash" class="img-responsive img-thumbnail">
+                                <p>After confirming the operation, the stash is removed from the list permanently.</p>
                             </div>
 
                             <div class="col-md-12 align-left">
                                 <h4 id="line4_12">Edit project properties - <a href="#top">#back to top</a></h4>
                                 <p>This feature allows you to make changes in pom.xml files. This window contains 3 tabs:
-                                    “Add repository”, “Edit repository” and “Remove repository”.
-                                    Also, you can check values of “Release name” and “Eclipse release” properties
-                                    for selected projects.</p>
+                                    “Add repository”, “Edit repository” and “Remove repository”. Also, you can check values of “Release name” and “Eclipse release” properties for selected projects.</p>
                                 <p>
                                     During editing you can find two additional checkboxes:
                                     <ol>
-                                        <li><strong>Commit immediately</strong> - makes commit with your changes
-                                            (if this option is unchecked – changes will apply locally without commit).</li>
-                                        <li><strong>Only common repositories</strong> - adds a filter for a list of
-                                            repositories that shows repositories that contain in all selected projects only</li>
+                                        <li><strong>Commit immediately</strong> - makes commit with your changes (if this option is unchecked – changes will apply locally without commit).</li>
+                                        <li><strong>Only common repositories</strong> - adds a filter for a list of repositories that shows repositories that contain in all selected projects only</li>
                                     </ol>
                                     <strong>Note:</strong> List of projects shows projects that contain selected repository.
                                 </p>
                                 <img src="user_guide_files/images/edit_projects_properties.png" alt="Edit projects properties" class="img-responsive img-thumbnail">
                             </div>
                         </div>
-
-                    </section>
-                    <!-- end section -->
-
-                    <section id="line5" class="section">
-
-                        <div class="row">
-                            <div class="col-md-12 left-align">
-                                <h2 class="dark-text">Contacts <a href="#top">#back to top</a><hr></h2>
-                            </div>
-                            <!-- end col -->
-                        </div>
-                        <!-- end row -->
-
-                        <div class="row">
-
-                            <div class="col-md-12">
-                                <p>
-                                    If you have any question, please contact to Yurii Pitomets
-                                    (yurii.pitomets2@halliburton.com)
-
-                                    <img src="user_guide_files/images/about.png" alt="About" class="img-responsive img-thumbnail">
-                                </p>
-                                <p>Developers:</p>
-                                <ul type="disc">
-                                    <li>Yevhen Strazhko (Yevhen.Strazhko@halliburton.com)</li>
-                                    <li>Liudmyla Lyska (Liudmyla.Lyska@halliburton.com)</li>
-                                    <li>Pavlo Pidhornyi (Pavlo.Pidhornyi@halliburton.com)</li>
-                                    <li>Ihor Khlaponin (Ihor.Khlaponin@halliburton.com)</li>
-                                    <li>Oleksandr Kozlov (Oleksandr.Kozlov@halliburton.com)</li>
-                                </ul>
-                            </div>
-                        </div>
-                        <!-- end row -->
 
                     </section>
                     <!-- end section -->
