@@ -22,6 +22,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.lgc.gitlabtool.git.ui.javafx.handlers.StashEventHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -138,7 +139,6 @@ import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import javafx.stage.WindowEvent;
 
 public class ModularController implements UpdateProgressListener {
     private static final Logger _logger = LogManager.getLogger(ModularController.class);
@@ -202,9 +202,6 @@ public class ModularController implements UpdateProgressListener {
     private static final String BRANCES_OPERATION_NAME = "operation with branches";
     private static final String STASH_OPERATION_NAME = "stash";
 
-    private static final String SELECT_ALL_IMAGE_URL = "icons/select_all_20x20.png";
-    private static final String REFRESH_PROJECTS_IMAGE_URL = "icons/toolbar/refresh_projects_20x20.png";
-    private static final String FILTER_SHADOW_PROJECTS_IMAGE_URL = "icons/toolbar/filter_shadow_projects_20x20.png";
     private static final String PREF_NAME_HIDE_SHADOWS = "is_hide_shadows";
     private static final String PREF_NAME_GROUPS_DIVIDERS = "groups_divider";
     ////endregion
@@ -422,26 +419,14 @@ public class ModularController implements UpdateProgressListener {
         AnchorPane.setLeftAnchor(projectsToolbar, 0.0);
         AnchorPane.setRightAnchor(projectsToolbar, 0.0);
 
-        ImageView imageViewRefreshProjects = _themeService.getStyledImageView(REFRESH_PROJECTS_IMAGE_URL);
-        ImageView imageViewSelectAll = _themeService.getStyledImageView(SELECT_ALL_IMAGE_URL);
-        ImageView imageViewFilterShadow = _themeService.getStyledImageView(FILTER_SHADOW_PROJECTS_IMAGE_URL);
-
-        selectAllButton = new ToggleButton();
-        selectAllButton.setTooltip(new Tooltip("Select all projects"));
-        selectAllButton.setGraphic(imageViewSelectAll);
+        projectsToolbarItems = _toolbarManager.createToolbarItems(ViewKey.PROJECTS_VIEW.getKey());
+        selectAllButton = (ToggleButton) _toolbarManager.getItemById(ViewKey.PROJECTS_VIEW.getKey(),GLToolButtons.SELECT_ALL_PROJECTS.getId());
         selectAllButton.setOnAction(this::onSelectAll);
-
-        refreshProjectsButton = new Button();
-        refreshProjectsButton.setTooltip(new Tooltip("Refresh projects"));
-        refreshProjectsButton.setGraphic(imageViewRefreshProjects);
+        refreshProjectsButton = (Button) _toolbarManager.getItemById(ViewKey.PROJECTS_VIEW.getKey(),GLToolButtons.REFRESH_PROJECTS.getId());
         refreshProjectsButton.setOnAction(this::refreshLoadProjects);
-
-        filterShadowProjects = new ToggleButton();
-        filterShadowProjects.setTooltip(new Tooltip("Show/Hide shadow projects"));
-        filterShadowProjects.setGraphic(imageViewFilterShadow);
+        filterShadowProjects = (ToggleButton) _toolbarManager.getItemById(ViewKey.PROJECTS_VIEW.getKey(),GLToolButtons.FILTER_PROJECTS.getId());
         filterShadowProjects.setOnAction(this::onShowHideShadowProjects);
 
-        projectsToolbarItems = new ArrayList<>(Arrays.asList(selectAllButton, refreshProjectsButton, filterShadowProjects));
         projectsToolbar.getChildren().clear();
         projectsToolbar.getChildren().addAll(projectsToolbarItems);
         projectsToolbar.setPadding(new Insets(PROJECTS_TOOLBAR_PADDING,0,PROJECTS_TOOLBAR_PADDING,0));
@@ -1793,26 +1778,7 @@ public class ModularController implements UpdateProgressListener {
         }
     }
 
-    class StashEventHandler implements EventHandler<WindowEvent> {
 
-        private final StashWindowController _stashWindowController;
-
-        public StashEventHandler(StashWindowController stashWindowController) {
-            _stashWindowController = stashWindowController;
-        }
-
-        @Override
-        public void handle(WindowEvent event) {
-            List<ApplicationState> activeStates = _stateService.getActiveStates();
-            if (!activeStates.isEmpty() && activeStates.contains(ApplicationState.STASH)) {
-                event.consume();
-                JavaFXUI.showWarningAlertForActiveStates(activeStates);
-                return;
-            }
-            _stashWindowController.dispose();
-        }
-
-    }
 
     //endregion
     /*

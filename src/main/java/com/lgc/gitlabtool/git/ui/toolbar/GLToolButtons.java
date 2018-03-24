@@ -283,7 +283,35 @@ public enum GLToolButtons {
             "Show history",
             null,
             GLToolConstants.ICON_SIZE_20,
+            true),
+
+    SELECT_ALL_PROJECTS(GLToolConstants.PROJECTS_VIEW_KEY,
+            "Select all projects",
+            "icons/select_all_20x20.png",
+            null,
+            "Select all projects",
+            null,
+            GLToolConstants.ICON_SIZE_20,
+            true),
+
+    REFRESH_PROJECTS(GLToolConstants.PROJECTS_VIEW_KEY,
+            "Refresh projects",
+            "icons/toolbar/refresh_projects_20x20.png",
+            null,
+            "Refresh projects",
+            null,
+            GLToolConstants.ICON_SIZE_20,
+            false),
+
+    FILTER_PROJECTS(GLToolConstants.PROJECTS_VIEW_KEY,
+            "Show/Hide shadow projects",
+            "icons/toolbar/filter_shadow_projects_20x20.png",
+            null,
+            "Show/Hide shadow projects",
+            null,
+            GLToolConstants.ICON_SIZE_20,
             true);
+
 
     private final String viewKey;
     private final String id;
@@ -382,6 +410,7 @@ public enum GLToolButtons {
         public final static String PROJECTS_WINDOW_KEY = ViewKey.PROJECTS_WINDOW.getKey();
         public final static String ALL_WINDOW_KEY = ViewKey.ALL_WINDOWS.getKey();
         public final static String COMMON_VIEW_KEY = ViewKey.COMMON_VIEW.getKey();
+        public final static String PROJECTS_VIEW_KEY = ViewKey.PROJECTS_VIEW.getKey();
 
         public final static int ICON_SIZE_16 = 16;
         public final static int ICON_SIZE_20 = 20;

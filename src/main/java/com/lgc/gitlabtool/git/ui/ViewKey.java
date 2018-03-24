@@ -12,6 +12,7 @@ public enum ViewKey {
     PROJECTS_WINDOW("mainWindow", null),
     ALL_WINDOWS("allWindows", null),
     COMMON_VIEW("commonView", null),
+    PROJECTS_VIEW("projectsView", null),
 
     MODULAR_CONTAINER("modularContainer", "fxml/ModularContainer.fxml"),
     CLONING_GROUPS_WINDOW("cloningGroupsWindow", "fxml/CloningGroupsWindow.fxml"),
