@@ -14,10 +14,10 @@ public class UserGuideUtil {
      * User guide path.
      * According to realization, this file should be stored in target folder near the GitlabTool-full.jar file
      */
-    private static final String USER_GUIDE_URL = "user_guide.htm";
+    private static final String USER_GUIDE_URL = "index.html";
 
     /**
-     * Opens the user_guide.htm file from the target folder
+     * Opens the index.htm file from the target folder
      */
     public static void openUserGuide() {
         String location = UserGuideUtil.class.getProtectionDomain().getCodeSource().getLocation().getPath();
