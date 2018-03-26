@@ -1,6 +1,7 @@
 package com.lgc.gitlabtool.git.services;
 
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -13,7 +14,7 @@ import com.lgc.gitlabtool.git.util.URLManager;
 
 public class ClonedGroupsServiceImpl implements ClonedGroupsService {
 
-    private List<Group> _notExistGroups;
+    private List<Group> _notExistGroups = new ArrayList<>();
     private StorageService _storageService;
     private LoginService _loginService;
     private PathUtilities _pathUtilities;
@@ -55,11 +56,12 @@ public class ClonedGroupsServiceImpl implements ClonedGroupsService {
         String server = _urlManager.trimServerURL(_loginService.getServerURL());
         List<Group> groups = _storageService.loadStorage(server, username);
 
-        _notExistGroups = groups.stream()
-                                .filter(group -> isNotExistsAndDirectory(group))
-                                .collect(Collectors.toList());
-
-        groups.removeAll(_notExistGroups);
+        if (!groups.isEmpty()) {
+            _notExistGroups = groups.stream()
+                                    .filter(group -> isNotExistsAndDirectory(group))
+                                    .collect(Collectors.toList());
+            groups.removeAll(_notExistGroups);
+        }
         _clonedGroupsProvider.setClonedGroups(groups);
         updateClonedGroupsInXML();
         return getClonedGroups();
